@@ -1,6 +1,6 @@
 # Pake
 
-> 用 Rust 来打包你的 App，底层使用 tauri，当前支持微信读书，有更多想法，欢迎提issue。
+> 用 Rust 来打包你的 App，底层使用 Tauri，当前支持微信读书，有更多想法，欢迎提 Issue。
 
 ## 下载地址
 
