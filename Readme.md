@@ -8,8 +8,7 @@
 
 ## 展示效果
 
-![](https://cdn.fliggy.com/upic/ffUmdj.png)
-![](https://cdn.fliggy.com/upic/Coi9XW.png)
+![1](https://cdn.fliggy.com/upic/ffUmdj.png)
 
 ## 开发步骤
 
