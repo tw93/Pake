@@ -13,7 +13,8 @@
 ## 开发步骤
 
 ```shell
-//安装依赖
+// 开始前参考 https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-macos 配置环境
+// 安装依赖
 npm i
 
 //本地调试
