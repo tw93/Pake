@@ -1,0 +1,59 @@
+{
+  "package": {
+    "productName": "WeRead",
+    "version": "0.1.0"
+  },
+  "build": {
+    "beforeBuildCommand": "",
+    "beforeDevCommand": "",
+    "devPath": "../dist",
+    "distDir": "../dist"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": true
+    },
+    "bundle": {
+      "icon": ["icons/weRead.icns"],
+      "active": true,
+      "category": "DeveloperTool",
+      "copyright": "",
+      "deb": {
+        "depends": []
+      },
+      "externalBin": [],
+      "identifier": "com.tw93.weRead",
+      "longDescription": "",
+      "macOS": {
+        "entitlements": null,
+        "exceptionDomain": "",
+        "frameworks": [],
+        "providerShortName": null,
+        "signingIdentity": null
+      },
+      "resources": [],
+      "shortDescription": "",
+      "targets": "all",
+      "windows": {
+        "certificateThumbprint": null,
+        "digestAlgorithm": "sha256",
+        "timestampUrl": ""
+      }
+    },
+    "security": {
+      "csp": null
+    },
+    "updater": {
+      "active": false
+    },
+    "windows": [
+      {
+        "fullscreen": false,
+        "height": 728,
+        "resizable": true,
+        "title": "WeRead",
+        "width": 1200
+      }
+    ]
+  }
+}

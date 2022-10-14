@@ -1,0 +1,30 @@
+[package]
+name = "app"
+version = "0.1.0"
+description = "Pake打包工具"
+authors = ["Tw93"]
+license = ""
+repository = ""
+default-run = "app"
+edition = "2021"
+rust-version = "1.61.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "1.0.2", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0.2", features = ["derive"] }
+tauri = { version = "1.0.2", features = ["api-all"] }
+wry = "0.19.0"
+tauri-utils = "1.0.2"
+
+[features]
+# by default Tauri runs in production mode
+# when `tauri dev` runs it is executed with `cargo run --no-default-features` if `devPath` is an URL
+default = [ "custom-protocol" ]
+# this feature is used used for production builds where `devPath` points to the filesystem
+# DO NOT remove this
+custom-protocol = [ "tauri/custom-protocol" ]
