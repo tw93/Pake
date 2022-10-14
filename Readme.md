@@ -4,11 +4,11 @@
 
 ## 下载地址
 
-- 微信读书：<http://tw93.fun/images/app/WeRead.dmg>
+- <https://github.com/tw93/pake/releases>
 
 ## 展示效果
 
-![](https://cdn.fliggy.com/upic/N1coVx.gif)
+![](https://cdn.fliggy.com/upic/Xvw2GX.gif)
 
 ## 开发步骤
 
