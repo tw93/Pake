@@ -54,7 +54,7 @@ fn main() -> wry::Result<()> {
           top: 30px;
         }
 
-        .geist-page {
+        .geist-page nav.dashboard_nav__PRmJv {
           padding-top:10px;
         }
 
