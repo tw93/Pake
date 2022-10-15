@@ -4,8 +4,7 @@
 
 ## 下载地址
 
-- 微信读书：<https://tw93.fun/images/app/WeRead.dmg>
-- Flomo：<https://tw93.fun/images/app/Flomo.dmg>
+- <https://github.com/tw93/pake/releases>
 
 ## 展示效果
 
