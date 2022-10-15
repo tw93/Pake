@@ -38,16 +38,28 @@ fn main() -> wry::Result<()> {
   (function () {
     window.addEventListener('DOMContentLoaded', (event) => {
       const style = document.createElement('style');
-      .c-swiper-container{
-        display:none;
-      }
+      style.innerHTML = `
         .panel.give_me .nav_view {
           top: 154px !important;
         }
+
+        .c-swiper-container,
         .download_entry,
         .lang,
         .copyright {
           display: none !important;
+        }
+
+        .container-with-note #home, .container-with-note #switcher{
+          top: 30px;
+        }
+
+        .geist-page {
+          padding-top:10px;
+        }
+
+        .geist-page .submenu button{
+          margin-top:24px;
         }
 
         #pack-top-dom:active {
@@ -107,7 +119,7 @@ fn main() -> wry::Result<()> {
     };
 
     let _webview = WebViewBuilder::new(window)?
-        .with_url("https://www.duokan.com/pc/")?
+        .with_url("https://vercel.com/")?
         // .with_devtools(true)
         .with_initialization_script(script)
         .with_ipc_handler(handler)

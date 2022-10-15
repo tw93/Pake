@@ -1,6 +1,6 @@
 {
   "package": {
-    "productName": "Flomo",
+    "productName": "Vercel",
     "version": "0.1.0"
   },
   "build": {
@@ -14,7 +14,7 @@
       "all": true
     },
     "bundle": {
-      "icon": ["icons/flomo.icns"],
+      "icon": ["icons/vercel.icns"],
       "active": true,
       "category": "DeveloperTool",
       "copyright": "",
@@ -22,7 +22,7 @@
         "depends": []
       },
       "externalBin": [],
-      "identifier": "com.tw93.flomo",
+      "identifier": "com.tw93.vercel",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -51,7 +51,7 @@
         "fullscreen": false,
         "height": 728,
         "resizable": true,
-        "title": "Flomo",
+        "title": "Vercel",
         "width": 1200
       }
     ]
