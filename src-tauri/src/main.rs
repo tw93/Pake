@@ -107,7 +107,7 @@ fn main() -> wry::Result<()> {
     };
 
     let _webview = WebViewBuilder::new(window)?
-        .with_url("https://weread.qq.com/")?
+        .with_url("https://v.flomoapp.com/mine")?
         // .with_devtools(true)
         .with_initialization_script(script)
         .with_ipc_handler(handler)
