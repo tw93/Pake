@@ -2,7 +2,6 @@
 
 > 用 Rust 来打包你的 App，底层使用 Tauri，当前支持微信读书、Flomo、Vercel，有更多想法，欢迎提 Issue。
 
-下载地址: <https://github.com/tw93/pake/releases>
 
 ## 特征
 
@@ -15,13 +14,19 @@
 
 ### 微信读书
 
+下载地址：<https://tw93.fun/images/app/WeRead.dmg>
+
 ![1](https://cdn.fliggy.com/upic/ffUmdj.png)
 
 ### Flomo
 
+下载地址：<https://tw93.fun/images/app/Flomo.dmg>
+
 ![2](https://cdn.fliggy.com/upic/B49SAc.png)
 
 ### Vercel
+
+下载地址：<https://tw93.fun/images/app/Vercel.dmg>
 
 ![3](https://cdn.fliggy.com/upic/CPVRnY.png)
 
