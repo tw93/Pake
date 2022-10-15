@@ -2,9 +2,7 @@
 
 > 用 Rust 来打包你的 App，底层使用 Tauri，当前支持微信读书、Flomo，有更多想法，欢迎提 Issue。
 
-## 下载
-
-- <https://github.com/tw93/pake/releases>
+下载地址: <https://github.com/tw93/pake/releases>
 
 ## 效果
 
