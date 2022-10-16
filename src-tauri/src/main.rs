@@ -43,10 +43,10 @@ fn main() -> wry::Result<()> {
           top: 154px !important;
         }
 
+        .drawing-board .toolbar .toolbar-action,
         .c-swiper-container,
         .download_entry,
-        .lang,
-        .copyright {
+        .lang, .copyright {
           display: none !important;
         }
 
@@ -119,7 +119,7 @@ fn main() -> wry::Result<()> {
     };
 
     let _webview = WebViewBuilder::new(window)?
-        .with_url("https://vercel.com/")?
+        .with_url("https://witeboard.com/")?
         // .with_devtools(true)
         .with_initialization_script(script)
         .with_ipc_handler(handler)

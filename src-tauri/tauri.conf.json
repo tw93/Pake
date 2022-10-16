@@ -1,7 +1,7 @@
 {
   "package": {
-    "productName": "Vercel",
-    "version": "0.2.0"
+    "productName": "Witeboard",
+    "version": "0.1.0"
   },
   "build": {
     "beforeBuildCommand": "",
@@ -14,7 +14,7 @@
       "all": true
     },
     "bundle": {
-      "icon": ["icons/vercel.icns"],
+      "icon": ["icons/witeboard.icns"],
       "active": true,
       "category": "DeveloperTool",
       "copyright": "",
@@ -22,7 +22,7 @@
         "depends": []
       },
       "externalBin": [],
-      "identifier": "com.tw93.vercel",
+      "identifier": "com.tw93.witeboard",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -51,7 +51,7 @@
         "fullscreen": false,
         "height": 728,
         "resizable": true,
-        "title": "Vercel",
+        "title": "Witeboard",
         "width": 1200
       }
     ]

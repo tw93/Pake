@@ -29,6 +29,11 @@
 
 ![3](https://cdn.fliggy.com/upic/CPVRnY.png)
 
+### Witeboard
+
+下载地址：<https://tw93.fun/images/app/Witeboard.dmg>
+![4](https://gw.alipayobjects.com/zos/k/mq/SCR-20221016-uv9.png)
+
 ## 开发
 
 开始前参考 [tauri](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-macos) 快速配置好环境
