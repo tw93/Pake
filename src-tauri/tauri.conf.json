@@ -1,6 +1,6 @@
 {
   "package": {
-    "productName": "Witeboard",
+    "productName": "WeRead",
     "version": "0.1.0"
   },
   "build": {
@@ -14,7 +14,7 @@
       "all": true
     },
     "bundle": {
-      "icon": ["icons/witeboard.icns"],
+      "icon": ["icons/weRead.icns"],
       "active": true,
       "category": "DeveloperTool",
       "copyright": "",
@@ -22,7 +22,7 @@
         "depends": []
       },
       "externalBin": [],
-      "identifier": "com.tw93.witeboard",
+      "identifier": "com.tw93.weRead",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -51,7 +51,7 @@
         "fullscreen": false,
         "height": 728,
         "resizable": true,
-        "title": "Witeboard",
+        "title": "WeRead",
         "width": 1200
       }
     ]
