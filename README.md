@@ -33,7 +33,7 @@
 
 下载地址：<https://tw93.fun/images/app/Witeboard.dmg>
 
-![4](https://gw.alipayobjects.com/zos/k/z9/SCR-20221016-uv9.png)
+![4](https://cdn.fliggy.com/upic/o5QY4c.png)
 
 ## 开发
 
