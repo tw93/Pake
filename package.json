@@ -1,5 +1,14 @@
 {
   "name": "pake",
+  "description": "用 Rust 来打包你的 App，底层使用 Tauri，当前支持微信读书、Flomo、Vercel",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tw93/pake.git"
+  },
+  "author": {
+    "name": "Tw93",
+    "email": "tw93@qq.com"
+  },
   "scripts": {
     "dev": "TAURI_SKIP_DEVSERVER_CHECK=true npm run tauri dev",
     "build": "TAURI_SKIP_DEVSERVER_CHECK=true npm run tauri build -- --target universal-apple-darwin",
