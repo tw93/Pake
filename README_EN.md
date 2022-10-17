@@ -19,6 +19,8 @@
 3. `command + ↑`：Auto scroll to top of page
 4. `command + ↓`：Auto scroll to bottom of page
 5. `command + r`：Refresh Page
+6. `command + w`：Hide window, not quite
+7. `command + q`：Quite completely
 
 ## Effect
 
