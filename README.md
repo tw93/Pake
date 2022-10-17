@@ -60,20 +60,27 @@ npm run build
 
 1. 修改 `src-tauri` 目录下的 `tauri.conf.json` 中的 productName、icon、title、identifier 这 4 个字段，其中 icon 可以去 [macosicons](https://macosicons.com/#/) 下载并放到 `icons` 目录下即可
 2. 修改 `src-tauri/src` 目录下的 `main.rs` 中的 with_url 字段为你需要打包网页的地址
-3. npm run dev 本地调试看看效果，此外可以打开 `main.rs` 中 123、128 行 devtools 注释进行容器调试
+3. npm run dev 本地调试看看效果，此外可以打开 `main.rs` 中 devtools 两处注释（搜索 `_devtools`）进行容器调试
 4. npm run build 运行即可打包，假如有打开 devtools 模式，记得注释掉
 
 ## 高级
 
-1. 如何改写样式，如去掉原站广告、不想要的模块、甚至重新设计？
-   1. 首先需要打开 devtools 调试模式，找到你需要修改的样式名称，先在 devtools 里面验证效果
-   2. 找到 `main.rs` 中 42 行左右地方，将需要覆盖的样式加上即可，有一些案例你可以模仿
-   3. 正式打包前记得干掉 devtools 注释
+#### 如何改写样式，如去掉原站广告、不想要的模块、甚至重新设计？
 
-2. 如何进行容器内的事件和 Pake 通信，比如说 Web 的拖拽、滚动、特殊点击传递啥的？
-   1. 和上面1案例中准备工作一致
-   2. 参考 `main.rs` 中 114 行左右位置，写好事件监听，然后用 `window.ipc.postMessage`将事件以及参数传递出来
-   3. 然后参考 115 行左右，接收事件，自己处理即可，更多可以参考 tauri 以及 wry 的官方文档
+1. 首先需要打开 devtools 调试模式，找到你需要修改的样式名称，先在 devtools 里面验证效果
+2. 找到 `main.rs` 中样式位置（搜索 `style.innerHTML`），将需要覆盖的样式加上即可，有一些案例你可以模仿
+3. 正式打包前记得干掉 devtools 注释
+
+#### 如何注入 JS 的逻辑，比如实现事件监听，比如说键盘快捷键？
+
+1. 和上面1案例中准备工作一致
+2. 参考 `main.rs` 中事件监听（搜索`document.addEventListener`）,直接编写即可，这里更多是基础前端的技术
+
+#### 如何进行容器内的事件和 Pake 通信，比如说 Web 的拖拽、滚动、特殊点击传递啥的？
+
+1. 和上面1案例中准备工作一致
+2. 参考 `main.rs` 中通信代码（搜索 `postMessage`），写好事件监听，然后用 `window.ipc.postMessage`将事件以及参数传递出来
+3. 然后参考容器接收事件（搜索 `window.drag_window`），自己处理即可，更多可以参考 tauri 以及 wry 的官方文档
 
 ## 最后
 
