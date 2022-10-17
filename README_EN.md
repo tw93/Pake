@@ -1,12 +1,9 @@
 <p align="right"><a href="https://github.com/tw93/Pake">中文</a> | <strong>English</strong></p>
 <p align="center">
-  <img src=https://gw.alipayobjects.com/zos/k/28/logo.png width=138 style="    border-radius: 100%" />
+  <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
   <h1 align="center">Pake</h1>
+  <div align="center">A simple way to package a web page with Rust to create Mac App, using Tauri as the underlying layer, currently supporting WeRead, Flomo, WhatsApp, Vercel, Witeboard.</div>
 </p>
-
-## Overview
-
-A simple way to package a web page with Rust to create Mac App, using Tauri as the underlying layer, currently supporting WeRead, Flomo, WhatsApp, Vercel, Witeboard.
 
 ## Features
 
