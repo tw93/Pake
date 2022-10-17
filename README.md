@@ -1,10 +1,17 @@
-# Pake
+<p align="right"><strong>中文</strong> | <a href="https://github.com/tw93/Pake/blob/master/README_EN.md">English</a></p>
+<p align="center">
+  <img src=https://gw.alipayobjects.com/zos/k/28/logo.png width=138 />
+  <h1 align="center">Pake</h1>
+  <div align="center">很简单的用 Rust 打包网页生成很小的 Mac App</div>
+</p>
 
-> 用 Rust 来打包你的 App，底层使用 Tauri，当前支持微信读书、Flomo、WhatsApp、Vercel、Witeboard，有更多想法，欢迎提 Issue，详细小白开发教程可见底部。
+## 概览
+
+用 Rust 来打包你的 App，底层使用 Tauri，当前支持微信读书、Flomo、WhatsApp、Vercel、Witeboard，有更多想法，欢迎提 Issue，详细小白开发教程可见底部。
 
 ## 特征
 
-🏂 **小**：相比传统的 electron 套壳打包，大小要小将近 50 倍，一般不到 2M  
+🏂 **小**：相比传统的 Electron 套壳打包，大小要小将近 50 倍，一般不到 2M  
 😂 **快**：Pake 的底层使用的 Rust Tauri 框架，性能体验较 JS 框架要轻快不少  
 🩴 **特**：不是单纯打包，实现了通用快捷键的透传、沉浸式的窗口、拖动、打包样式兼容  
 🤱🏻 **玩**：只是一个很简单的小玩具，一个用 Rust 替代之前套壳网页老的思路玩法，友好交流勿喷
@@ -66,10 +73,10 @@ npm run build
 
 ## 打新包
 
-1. 修改 `src-tauri` 目录下的 `tauri.conf.json` 中的 productName、icon、title、identifier 这 4 个字段，其中 icon 可以去 [macosicons](https://macosicons.com/#/) 下载并放到 `icons` 目录下即可
+1. 修改 `src-tauri` 目录下的 `tauri.conf.json` 中的 `productName、icon、title、identifier` 这 4 个字段，其中 icon 可以去 [macosicons](https://macosicons.com/#/) 下载并放到 `icons` 目录下即可
 2. 修改 `src-tauri/src` 目录下的 `main.rs` 中的 with_url 字段为你需要打包网页的地址
-3. npm run dev 本地调试看看效果，此外可以打开 `main.rs` 中 devtools 两处注释（搜索 `_devtools`）进行容器调试
-4. npm run build 运行即可打包，假如有打开 devtools 模式，记得注释掉
+3. `npm run dev` 本地调试看看效果，此外可以打开 `main.rs` 中 devtools 两处注释（搜索 `_devtools`）进行容器调试
+4. `npm run build` 运行即可打包，假如有打开 devtools 模式，记得注释掉
 
 ## 高级
 
