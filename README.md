@@ -1,6 +1,6 @@
 # Pake
 
-> 用 Rust 来打包你的 App，底层使用 Tauri，当前支持微信读书、Flomo、Vercel、Witeboard，有更多想法，欢迎提 Issue。
+> 用 Rust 来打包你的 App，底层使用 Tauri，当前支持微信读书、Flomo、WhatsApp、Vercel、Witeboard，有更多想法，欢迎提 Issue。
 
 ## 特征
 
@@ -23,17 +23,23 @@
 
 ![2](https://cdn.fliggy.com/upic/B49SAc.png)
 
-### Vercel
+### WhatsApp
 
-下载地址：<https://tw93.fun/images/app/Vercel.dmg>
+下载地址：<https://tw93.fun/images/app/WhatsApp.dmg>
 
-![3](https://cdn.fliggy.com/upic/CPVRnY.png)
+![5](https://cdn.fliggy.com/upic/upAJMb.png)
 
 ### Witeboard
 
 下载地址：<https://tw93.fun/images/app/Witeboard.dmg>
 
 ![4](https://cdn.fliggy.com/upic/o5QY4c.png)
+
+### Vercel
+
+下载地址：<https://tw93.fun/images/app/Vercel.dmg>
+
+![3](https://cdn.fliggy.com/upic/CPVRnY.png)
 
 ## 开发
 
