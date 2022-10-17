@@ -1,13 +1,12 @@
 <p align="right"><a href="https://github.com/tw93/Pake">中文</a> | <strong>English</strong></p>
 <p align="center">
-  <img src=https://gw.alipayobjects.com/zos/k/28/logo.png width=138 />
+  <img src=https://gw.alipayobjects.com/zos/k/28/logo.png width=138 style="    border-radius: 100%" />
   <h1 align="center">Pake</h1>
-  <div align="center">A simple way to package a web page with Rust to create Mac App</div>
 </p>
 
 ## Overview
 
-Use Rust to package your App, using Tauri as the underlying layer, currently supporting WeRead, Flomo, WhatsApp, Vercel, Witeboard.
+A simple way to package a web page with Rust to create Mac App, using Tauri as the underlying layer, currently supporting WeRead, Flomo, WhatsApp, Vercel, Witeboard.
 
 ## Features
 
@@ -86,7 +85,7 @@ npm run build
 2. find the location of the style in `main.rs` (search for `style.innerHTML`) and add the style you need to override, there are some examples you can copy.
 3. Remember to remove the devtools comments before packaging.
 
-#### How to inject JS code, e.g. to implement event listeners, e.g. keyboard shortcuts?
+#### How to inject js code, e.g. to implement event listeners, e.g. keyboard shortcuts?
 
 1. Same preparation as in case 1 above.
 2. refer to the event listener in `main.rs` (search for `document.addEventListener`), and write it directly, it's more of a basic front-end technique here.

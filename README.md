@@ -1,13 +1,12 @@
 <p align="right"><strong>中文</strong> | <a href="https://github.com/tw93/Pake/blob/master/README_EN.md">English</a></p>
 <p align="center">
-  <img src=https://gw.alipayobjects.com/zos/k/28/logo.png width=138 />
+  <img src=https://gw.alipayobjects.com/zos/k/28/logo.png width=138 style="    border-radius: 100%"/>
   <h1 align="center">Pake</h1>
-  <div align="center">很简单的用 Rust 打包网页生成很小的 Mac App</div>
 </p>
 
 ## 概览
 
-用 Rust 来打包你的 App，底层使用 Tauri，当前支持微信读书、Flomo、WhatsApp、Vercel、Witeboard，有更多想法，欢迎提 Issue，详细小白开发教程可见底部。
+很简单的用 Rust 打包网页生成很小的 Mac App，底层使用 Tauri，当前支持微信读书、Flomo、WhatsApp、Vercel、Witeboard，有更多想法，欢迎提 Issue，详细小白开发教程可见底部。
 
 ## 特征
 
