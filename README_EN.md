@@ -2,7 +2,7 @@
 <p align="center">
   <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
   <h1 align="center">Pake</h1>
-  <div align="center">A simple way to package a web page with Rust to create Mac App, using Tauri as the underlying layer, currently supporting WeRead, Flomo, WhatsApp, Vercel, Witeboard.</div>
+  <div align="left">A simple way to package a web page with Rust to create Mac App, using Tauri as the underlying layer, supporting WeRead, Flomo, WhatsApp, Vercel, Witeboard.</div>
 </p>
 
 ## Features
