@@ -1,6 +1,6 @@
 # Pake
 
-> 用 Rust 来打包你的 App，底层使用 Tauri，当前支持微信读书、Flomo、WhatsApp、Vercel、Witeboard，有更多想法，欢迎提 Issue。
+> 用 Rust 来打包你的 App，底层使用 Tauri，当前支持微信读书、Flomo、WhatsApp、Vercel、Witeboard，有更多想法，欢迎提 Issue，详细小白开发教程可见底部。
 
 ## 特征
 
