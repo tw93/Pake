@@ -9,37 +9,45 @@
 🩴 **特**：不是单纯打包，实现了通用快捷键的透传、沉浸式的窗口、拖动、打包样式兼容  
 🤱🏻 **玩**：只是一个玩具，或者说一个用 Rust 替代之前老思路的玩法，欢迎交流  
 
+## 快捷键
+
+1. `command + ⬅️`：返回上一个页面
+2. `command + ➡️`：去下一个页面，假如有的话
+3. `command + ⬆️`：自动滚动到页面顶部
+4. `command + ⬇️`：自动滚动到页面底部
+5. `command + r`：刷新页面
+
 ## 效果
 
 ### 微信读书
 
-下载地址：<https://tw93.fun/images/app/WeRead.dmg>
+下载地址：<https://github.com/tw93/Pake/raw/master/download/WeRead.dmg>
 
 ![1](https://cdn.fliggy.com/upic/ffUmdj.png)
 
 ### Flomo
 
-下载地址：<https://tw93.fun/images/app/Flomo.dmg>
+下载地址：<https://github.com/tw93/Pake/raw/master/download/Flomo.dmg>
 
 ![2](https://cdn.fliggy.com/upic/B49SAc.png)
 
-### WhatsApp
-
-下载地址：<https://tw93.fun/images/app/WhatsApp.dmg>
-
-![5](https://cdn.fliggy.com/upic/upAJMb.png)
-
 ### Witeboard
 
-下载地址：<https://tw93.fun/images/app/Witeboard.dmg>
+下载地址：<https://github.com/tw93/Pake/raw/master/download/Witeboard.dmg>
 
-![4](https://cdn.fliggy.com/upic/o5QY4c.png)
+![3](https://cdn.fliggy.com/upic/o5QY4c.png)
+
+### WhatsApp
+
+下载地址：<https://github.com/tw93/Pake/raw/master/download/WhatsApp.dmg>
+
+![4](https://cdn.fliggy.com/upic/upAJMb.png)
 
 ### Vercel
 
-下载地址：<https://tw93.fun/images/app/Vercel.dmg>
+下载地址：<https://github.com/tw93/Pake/raw/master/download/Vercel.dmg>
 
-![3](https://cdn.fliggy.com/upic/CPVRnY.png)
+![5](https://cdn.fliggy.com/upic/CPVRnY.png)
 
 ## 开发
 
