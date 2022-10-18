@@ -21,37 +21,36 @@
 5. `command + r`：刷新页面
 6. `command + w`：隐藏窗口，非退出
 
+此外还支持双击头部进行全屏切换，拖拽头部进行移动窗口，还有其他需求，欢迎提过来。
+
 ## 效果
 
-### 微信读书
-
-下载地址：<https://github.com/tw93/Pake/raw/master/download/WeRead.dmg>
-
-![1](https://cdn.fliggy.com/upic/ffUmdj.png)
-
-### Flomo
-
-下载地址：<https://github.com/tw93/Pake/raw/master/download/Flomo.dmg>
-
-![2](https://cdn.fliggy.com/upic/B49SAc.png)
-
-### Witeboard
-
-下载地址：<https://github.com/tw93/Pake/raw/master/download/Witeboard.dmg>
-
-![3](https://cdn.fliggy.com/upic/o5QY4c.png)
-
-### WhatsApp
-
-下载地址：<https://github.com/tw93/Pake/raw/master/download/WhatsApp.dmg>
-
-![4](https://cdn.fliggy.com/upic/upAJMb.png)
-
-### Vercel
-
-下载地址：<https://github.com/tw93/Pake/raw/master/download/Vercel.dmg>
-
-![5](https://cdn.fliggy.com/upic/CPVRnY.png)
+<table>
+    <tr>
+        <td>WeRead <a href="https://github.com/tw93/Pake/raw/master/download/WeRead.dmg">Download</a></td>
+        <td>Flomo <a href="https://github.com/tw93/Pake/raw/master/download/Flomo.dmg">Download</a></td>
+    </tr>
+    <tr>
+        <td><img src=https://cdn.fliggy.com/upic/ffUmdj.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/B49SAc.png width=600/></td>
+    </tr>
+    <tr>
+        <td>RunCode <a href="https://github.com/tw93/Pake/raw/master/download/RunCode.dmg">Download</a></td>
+        <td>Witeboard <a href="https://github.com/tw93/Pake/raw/master/download/Witeboard.dmg">Download</a></td>
+    </tr>
+    <tr>
+        <td><img src=https://gw.alipayobjects.com/zos/k/qc/SCR-20221018-fmj.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/o5QY4c.png width=600/></td>
+    </tr>
+    <tr>
+        <td>WhatsApp <a href="https://github.com/tw93/Pake/raw/master/download/WhatsApp.dmg">Download</a></td>
+        <td>Vercel <a href="https://github.com/tw93/Pake/raw/master/download/Vercel.dmg">Download</a></td>
+    </tr>
+    <tr>
+        <td><img src=https://cdn.fliggy.com/upic/upAJMb.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/CPVRnY.png width=600/></td>
+    </tr>
+</table>
 
 ## 开发
 
@@ -70,7 +69,7 @@ npm run build
 
 ## 打新包
 
-1. 修改 `src-tauri` 目录下的 `tauri.conf.json` 中的 `productName、icon、title、identifier` 这 4 个字段，其中 icon 可以去 [macosicons](https://macosicons.com/#/) 下载并放到 `icons` 目录下即可
+1. 修改 `src-tauri` 目录下的 `tauri.conf.json` 中的 `productName、icon、title、identifier` 这 4 个字段，其中 icon 可以去 [macosicons](https://macosicons.com/#/) Download并放到 `icons` 目录下即可
 2. 修改 `src-tauri/src` 目录下的 `main.rs` 中的 with_url 字段为你需要打包网页的地址
 3. `npm run dev` 本地调试看看效果，此外可以打开 `main.rs` 中 devtools 两处注释（搜索 `_devtools`）进行容器调试
 4. `npm run build` 运行即可打包，假如有打开 devtools 模式，记得注释掉

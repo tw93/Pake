@@ -21,37 +21,37 @@
 5. `command + r`：Refresh Page
 6. `command + w`：Hide window, not quite
 
+In addition, it supports double clicking the head to switch to full screen, and dragging the head to move the window
+
 ## Effect
 
-### WeRead
 
-Download：<https://github.com/tw93/Pake/raw/master/download/WeRead.dmg>
-
-![1](https://cdn.fliggy.com/upic/ffUmdj.png)
-
-### Flomo
-
-Download：<https://github.com/tw93/Pake/raw/master/download/Flomo.dmg>
-
-![2](https://cdn.fliggy.com/upic/B49SAc.png)
-
-### Witeboard
-
-Download：<https://github.com/tw93/Pake/raw/master/download/Witeboard.dmg>
-
-![3](https://cdn.fliggy.com/upic/o5QY4c.png)
-
-### WhatsApp
-
-Download：<https://github.com/tw93/Pake/raw/master/download/WhatsApp.dmg>
-
-![4](https://cdn.fliggy.com/upic/upAJMb.png)
-
-### Vercel
-
-Download：<https://github.com/tw93/Pake/raw/master/download/Vercel.dmg>
-
-![5](https://cdn.fliggy.com/upic/CPVRnY.png)
+<table>
+    <tr>
+        <td>WeRead <a href="https://github.com/tw93/Pake/raw/master/download/WeRead.dmg">Download</a></td>
+        <td>Flomo <a href="https://github.com/tw93/Pake/raw/master/download/Flomo.dmg">Download</a></td>
+    </tr>
+    <tr>
+        <td><img src=https://cdn.fliggy.com/upic/ffUmdj.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/B49SAc.png width=600/></td>
+    </tr>
+    <tr>
+        <td>RunCode <a href="https://github.com/tw93/Pake/raw/master/download/RunCode.dmg">Download</a></td>
+        <td>Witeboard <a href="https://github.com/tw93/Pake/raw/master/download/Witeboard.dmg">Download</a></td>
+    </tr>
+    <tr>
+        <td><img src=https://gw.alipayobjects.com/zos/k/qc/SCR-20221018-fmj.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/o5QY4c.png width=600/></td>
+    </tr>
+    <tr>
+        <td>WhatsApp <a href="https://github.com/tw93/Pake/raw/master/download/WhatsApp.dmg">Download</a></td>
+        <td>Vercel <a href="https://github.com/tw93/Pake/raw/master/download/Vercel.dmg">Download</a></td>
+    </tr>
+    <tr>
+        <td><img src=https://cdn.fliggy.com/upic/upAJMb.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/CPVRnY.png width=600/></td>
+    </tr>
+</table>
 
 ## Development
 
