@@ -56,7 +56,7 @@ More common apps can be downloaded from [Download](https://github.com/tw93/Pake/
 
 ## Development
 
-Refer to the [tauri documentation](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-macos) to quickly configure your environment before you start
+Refer to the [Tauri documentation](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-macos) to quickly configure your environment before you start, if you want to package Windows or Linux systems, you can refer to [Building](https://tauri.app/v1/guides/building/) Documentation.
 
 ```sh
 // Install Dependencies
