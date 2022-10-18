@@ -1,5 +1,3 @@
-use wry::application::window::Fullscreen;
-
 fn main() -> wry::Result<()> {
     use wry::{
         application::{
@@ -9,7 +7,7 @@ fn main() -> wry::Result<()> {
             keyboard::KeyCode,
             menu::{MenuBar as Menu, MenuItem, MenuItemAttributes, MenuType},
             platform::macos::WindowBuilderExtMacOS,
-            window::{Window, WindowBuilder},
+            window::{Window, WindowBuilder, Fullscreen},
         },
         webview::WebViewBuilder,
     };
@@ -43,6 +41,10 @@ fn main() -> wry::Result<()> {
       style.innerHTML = `
         .panel.give_me .nav_view {
           top: 154px !important;
+        }
+
+        .columns .column #header{
+          padding-top: 30px;
         }
 
         .drawing-board .toolbar .toolbar-action,
@@ -138,11 +140,13 @@ fn main() -> wry::Result<()> {
 
     let handler = move |window: &Window, req: String| {
         if req == "drag_window" {
-            println!("drag_window on");
-            let _ = window.drag_window();
+          let _ =  window.drag_window();
         } else if req == "fullscreen" {
-            println!("fullscreen on");
-            let _ = window.set_fullscreen(Some(Fullscreen::Borderless(None)));
+          if window.fullscreen().is_some() {
+            window.set_fullscreen(None);
+          }else{
+            window.set_fullscreen(Some(Fullscreen::Borderless(None)));
+          }
         }
     };
 

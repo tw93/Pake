@@ -10,6 +10,7 @@
     "email": "tw93@qq.com"
   },
   "scripts": {
+    "start": "npm run dev",
     "dev": "TAURI_SKIP_DEVSERVER_CHECK=true npm run tauri dev",
     "build": "TAURI_SKIP_DEVSERVER_CHECK=true npm run tauri build -- --target universal-apple-darwin",
     "tauri": "tauri"
