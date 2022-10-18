@@ -27,24 +27,24 @@ In addition, it supports double clicking the head to switch to full screen, and 
 
 <table>
     <tr>
-        <td>WeRead <a href="https://github.com/tw93/Pake/raw/master/download/WeRead.dmg">Download</a></td>
-        <td>Flomo <a href="https://github.com/tw93/Pake/raw/master/download/Flomo.dmg">Download</a></td>
+        <td>WeRead <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead.dmg">Download</a></td>
+        <td>Flomo <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Download</a></td>
     </tr>
     <tr>
         <td><img src=https://cdn.fliggy.com/upic/ffUmdj.png width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/B49SAc.png width=600/></td>
     </tr>
     <tr>
-        <td>RunCode <a href="https://github.com/tw93/Pake/raw/master/download/RunCode.dmg">Download</a></td>
-        <td>Witeboard <a href="https://github.com/tw93/Pake/raw/master/download/Witeboard.dmg">Download</a></td>
+        <td>RunCode <a href="https://github.com/tw93/Pake/releases/latest/download/RunCode.dmg">Download</a></td>
+        <td>Witeboard <a href="https://github.com/tw93/Pake/releases/latest/download/Witeboard.dmg">Download</a></td>
     </tr>
     <tr>
         <td><img src=https://gw.alipayobjects.com/zos/k/qc/SCR-20221018-fmj.png width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/o5QY4c.png width=600/></td>
     </tr>
     <tr>
-        <td>ToolsFun <a href="https://github.com/tw93/Pake/raw/master/download/Tools.dmg">Download</a></td>
-        <td>Vercel <a href="https://github.com/tw93/Pake/raw/master/download/Vercel.dmg">Download</a></td>
+        <td>ToolsFun <a href="https://github.com/tw93/Pake/releases/latest/download/Tools.dmg">Download</a></td>
+        <td>Vercel <a href="https://github.com/tw93/Pake/releases/latest/download/Vercel.dmg">Download</a></td>
     </tr>
     <tr>
         <td><img src=https://cdn.fliggy.com/upic/jVCiL0.png width=600/></td>
@@ -52,7 +52,7 @@ In addition, it supports double clicking the head to switch to full screen, and 
     </tr>
 </table>
 
-More common apps can be downloaded from [Download](https://github.com/tw93/Pake/tree/master/download).
+More common apps can be downloaded from [Release](https://github.com/tw93/Pake/releases).
 
 ## Development
 
