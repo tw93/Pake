@@ -1,3 +1,5 @@
+use wry::application::window::Fullscreen;
+
 fn main() -> wry::Result<()> {
     use wry::{
         application::{
@@ -95,6 +97,10 @@ fn main() -> wry::Result<()> {
           window.ipc.postMessage('drag_window');
       })
 
+      domEl.addEventListener('dblclick', (e) => {
+          window.ipc.postMessage('fullscreen');
+      })
+
       document.addEventListener('keyup', function (event) {
         if (event.key == "ArrowUp" && event.metaKey){
           scrollTo(0,0);
@@ -134,6 +140,9 @@ fn main() -> wry::Result<()> {
         if req == "drag_window" {
             println!("drag_window on");
             let _ = window.drag_window();
+        } else if req == "fullscreen" {
+            println!("fullscreen on");
+            let _ = window.set_fullscreen(Some(Fullscreen::Borderless(None)));
         }
     };
 
