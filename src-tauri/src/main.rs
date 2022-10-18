@@ -47,6 +47,11 @@ fn main() -> wry::Result<()> {
           padding-top: 30px;
         }
 
+        #page .main_header {
+          padding-top: 20px;
+        }
+
+        #page #footer-wrapper,
         .drawing-board .toolbar .toolbar-action,
         .c-swiper-container,
         .download_entry,
