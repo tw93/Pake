@@ -47,7 +47,7 @@
         <td>Vercel <a href="https://github.com/tw93/Pake/raw/master/download/Vercel.dmg">Download</a></td>
     </tr>
     <tr>
-        <td><img src=https://gw.alipayobjects.com/zos/k/69/SCR-20221018-np2.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/jVCiL0.png width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/CPVRnY.png width=600/></td>
     </tr>
 </table>
