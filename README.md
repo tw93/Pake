@@ -14,7 +14,7 @@
 
 ## 参数
 
-<img src=https://cdn.fliggy.com/upic/bXM4QB.png width=800>
+<img src=https://gw.alicdn.com/imgextra/i2/O1CN01lfcZOr26pESC2bVVZ_!!6000000007710-0-tps-1658-396.jpg width=800>
 
 ## 快捷键
 
