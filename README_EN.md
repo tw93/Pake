@@ -12,6 +12,10 @@
 🩴 **Special**：Not just packaged, with universal shortcut pass-through, immersive windows, drag-and-drop, packaged style compatibility.  
 🐶 **Toy**：Just a very simple little toy, a way to play with Rust instead of the old idea of shelling the web.
 
+## Parameter
+
+<img src=https://cdn.fliggy.com/upic/pP5zQR.png width=800>
+
 ## Shortcuts
 
 1. `command + ←`：Return to the previous page
