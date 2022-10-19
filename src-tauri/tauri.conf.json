@@ -4,7 +4,10 @@
     "version": "0.1.0"
   },
   "build": {
-    "devPath": "../dist"
+    "devPath": "../dist",
+    "distDir": "../dist",
+    "beforeBuildCommand": "",
+    "beforeDevCommand": ""
   },
   "tauri": {
     "allowlist": {
