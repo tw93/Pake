@@ -132,7 +132,6 @@ fn main() -> wry::Result<()> {
 
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
-        .with_title("WeRead")
         .with_resizable(true)
         .with_titlebar_transparent(true)
         .with_fullsize_content_view(true)
