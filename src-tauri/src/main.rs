@@ -81,7 +81,7 @@ fn main() -> wry::Result<()> {
           background:transparent;
           top:0;
           width:100%;
-          height:30px;
+          height:15px;
           cursor: move;
           cursor: grab;
           cursor: -webkit-grab;
@@ -155,7 +155,7 @@ fn main() -> wry::Result<()> {
     };
 
     let _webview = WebViewBuilder::new(window)?
-        .with_url("https://weread.qq.com/")?
+        .with_url("https://www.wolai.com/")?
         // .with_devtools(true)
         .with_initialization_script(script)
         .with_ipc_handler(handler)
