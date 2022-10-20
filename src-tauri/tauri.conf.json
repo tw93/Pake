@@ -1,6 +1,6 @@
 {
   "package": {
-    "productName": "WeRead",
+    "productName": "wolai",
     "version": "0.1.0"
   },
   "build": {
@@ -14,16 +14,16 @@
       "all": true
     },
     "bundle": {
-      "icon": ["icons/weRead.icns"],
+      "icon": ["icons/wolai.icns"],
       "active": true,
       "category": "DeveloperTool",
-      "copyright": "",
+      "copyright": "Copyright © 2019-2022 上海我云网络科技有限公司",
       "deb": {
         "depends": []
       },
       "externalBin": [],
-      "identifier": "com.tw93.weRead",
-      "longDescription": "",
+      "identifier": "com.wolai.macApp",
+      "longDescription": "用 “我来” 搭建一站式协作平台，团队知识库、仪表台、工作流、内部应用、外部网站与个人云端笔记、待办……开箱即用！",
       "macOS": {
         "entitlements": null,
         "exceptionDomain": "",
@@ -32,7 +32,7 @@
         "signingIdentity": null
       },
       "resources": [],
-      "shortDescription": "",
+      "shortDescription": "不仅仅是未来的云端协作平台与个人笔记",
       "targets": "all",
       "windows": {
         "certificateThumbprint": null,
@@ -51,7 +51,7 @@
         "fullscreen": false,
         "height": 728,
         "resizable": true,
-        "title": "WeRead",
+        "title": "wolai",
         "width": 1200
       }
     ]
