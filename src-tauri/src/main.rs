@@ -115,10 +115,10 @@ fn main() -> wry::Result<()> {
         if (event.key == "ArrowDown" && event.metaKey){
           window.scrollTo(0, document.body.scrollHeight);
         }
-        if (event.key == "ArrowLeft" && event.metaKey){
+        if (event.key == "[" && event.metaKey){
           window.history.go(-1);
         }
-        if (event.key == "ArrowRight" && event.metaKey){
+        if (event.key == "]" && event.metaKey){
           window.history.go(1);
         }
         if (event.key == "r" && event.metaKey){
