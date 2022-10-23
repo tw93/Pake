@@ -59,7 +59,7 @@ fn main() -> wry::Result<()> {
     };
 
     let _webview = WebViewBuilder::new(window)?
-        .with_url("https://hoppscotch.io/")?
+        .with_url("https://weread.qq.com/")?
         // .with_devtools(true)
         .with_initialization_script(include_str!("pake.js"))
         .with_ipc_handler(handler)
