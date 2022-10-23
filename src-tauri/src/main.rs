@@ -126,6 +126,11 @@ fn main() -> wry::Result<()> {
         }
       })
 
+      const pakeLinks = document.links;
+      for (let linkIndex = 0; linkIndex < pakeLinks.length; linkIndex++) {
+        pakeLinks[linkIndex].target = '_self';
+      }
+
     });
   })();
   "#;
@@ -155,7 +160,7 @@ fn main() -> wry::Result<()> {
     };
 
     let _webview = WebViewBuilder::new(window)?
-        .with_url("https://weread.qq.com/")?
+        .with_url("https://hoppscotch.io/")?
         // .with_devtools(true)
         .with_initialization_script(script)
         .with_ipc_handler(handler)
