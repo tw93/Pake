@@ -80,8 +80,8 @@ fn main() -> wry::Result<()> {
           position:fixed;
           background:transparent;
           top:0;
-          width:100%;
-          height:30px;
+          width: 100%;
+          height: 20px;
           cursor: move;
           cursor: grab;
           cursor: -webkit-grab;
