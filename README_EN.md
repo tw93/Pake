@@ -2,7 +2,7 @@
 <p align="center">
   <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
   <h1 align="center">Pake</h1>
-  <div align="left">A simple way to package a web page with Rust to create Mac App, using Tauri as underlying layer, supporting WeRead、Flomo、RunCode、ToolsFun、Witeboard、Vercel、JiKe、RoamResearch, detailed development tutorial can be seen at the bottom.</div>
+  <div align="left">A simple way to package a web page with Rust to create Mac App, using Tauri as underlying layer, supporting WeRead、Flomo、RunCode、ToolsFun、<a href="https://witeboard.com/">Witeboard</a>、Vercel、JiKe、RoamResearch, detailed development tutorial can be seen at the bottom.</div>
 </p>
 
 ## Features
@@ -36,7 +36,7 @@ In addition, it supports double clicking the head to switch to full screen, and 
     </tr>
     <tr>
         <td>RunCode <a href="https://github.com/tw93/Pake/releases/latest/download/RunCode.dmg">Download</a></td>
-        <td>Witeboard <a href="https://github.com/tw93/Pake/releases/latest/download/Witeboard.dmg">Download</a></td>
+        <td><a href="https://witeboard.com/">Witeboard</a> <a href="https://github.com/tw93/Pake/releases/latest/download/Witeboard.dmg">Download</a></td>
     </tr>
     <tr>
         <td><img src=https://gw.alipayobjects.com/zos/k/qc/SCR-20221018-fmj.png width=600/></td>
