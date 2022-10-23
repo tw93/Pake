@@ -44,7 +44,6 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       top:0;
       width: 100%;
       height: 20px;
-      cursor: move;
       cursor: grab;
       cursor: -webkit-grab;
     }
