@@ -14,8 +14,8 @@
 
 ## Shortcuts
 
-1. `command + ←`：Return to the previous page
-2. `command + →`：Go to the next page
+1. `command + [`：Return to the previous page
+2. `command + ]`：Go to the next page
 3. `command + ↑`：Auto scroll to top of page
 4. `command + ↓`：Auto scroll to bottom of page
 5. `command + r`：Refresh Page
