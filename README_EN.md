@@ -71,9 +71,9 @@ npm run build
 
 ## New pack
 
-1. Modify the `tauri.conf.json` in the `src-tauri` directory to include 4 fields `productName, icon, title, identifier`, icon can be selected from the `icons` directory or downloaded from [macOSicons](https://macosicons.com/#/) to match the product.
-2. Change the with_url field in `main.rs` in the `src-tauri/src` directory to the address of the page you want to package.
-3. `npm run dev` for local debugging, and open the devtools comments in `main.rs` (search for `_devtools`) for container debugging, if you have trouble adapting the immersive header, just leave out the `.with_titlebar_transparent(true)` comment.
+1. Modify the `tauri.conf.json` in the `src-tauri` directory to include 5 fields `url, productName, icon, title, identifier`, icon can be selected from the `icons` directory or downloaded from [macOSicons](https://macosicons.com/#/) to match the product.
+2. For window property settings, you can modify the `width/height` of the `windows` property in `tauri.conf.json`, whether it is `fullscreen`, whether it is `resizable`, if you are not good at adapting immersive headers, you can set `transparent` to `true` and you're done.
+3. `npm run dev` for local debugging, and open the devtools comments in `main.rs` (search for `_devtools`) for container debugging.
 4. `npm run build` can be run to package, if you have devtools mode open, remember to comment it out.
 
 ## Advanced
