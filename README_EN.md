@@ -95,6 +95,12 @@ npm run build
 2. refer to the communication code in `pake.js` (search for `postMessage`), write the event listener and then use `window.ipc.postMessage` to pass the event and its parameters.
 3. then refer to the container to receive events (search for `window.drag_window`) and handle them yourself. for more information, refer to tauri and wry's official documentation.
 
+## Contributors
+
+<a href="https://github.com/tw93/pake/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=tw93/pake" />
+</a>
+
 ## Finally
 
 1. I hope that you will enjoy playing with it and let me know if you have any new ideas.
