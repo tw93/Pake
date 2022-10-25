@@ -1,3 +1,6 @@
+use std::fs::File;
+use tauri_utils::config::{Config, WindowConfig};
+
 fn main() -> wry::Result<()> {
     use wry::{
         application::{
@@ -34,15 +37,26 @@ fn main() -> wry::Result<()> {
 
     menu_bar_menu.add_submenu("App", true, first_menu);
 
+    let config_file = File::open("./tauri.conf.json").unwrap();
+    let config: Config = serde_json::from_reader(config_file).unwrap();
+    let WindowConfig {
+        url,
+        width,
+        height,
+        resizable,
+        transparent,
+        ..
+    } = &config.tauri.windows[0];
+
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
-        .with_resizable(true)
-        .with_titlebar_transparent(true)
+        .with_resizable(*resizable)
+        .with_titlebar_transparent(*transparent)
         .with_fullsize_content_view(true)
         .with_titlebar_buttons_hidden(false)
         .with_title_hidden(true)
         .with_menu(menu_bar_menu)
-        .with_inner_size(wry::application::dpi::LogicalSize::new(1200.00, 728.00))
+        .with_inner_size(wry::application::dpi::LogicalSize::new(*width, *height))
         .build(&event_loop)
         .unwrap();
 
@@ -59,7 +73,7 @@ fn main() -> wry::Result<()> {
     };
 
     let _webview = WebViewBuilder::new(window)?
-        .with_url("https://weread.qq.com/")?
+        .with_url(&url.to_string())?
         // .with_devtools(true)
         .with_initialization_script(include_str!("pake.js"))
         .with_ipc_handler(handler)

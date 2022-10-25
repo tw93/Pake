@@ -52,6 +52,8 @@
         "height": 728,
         "resizable": true,
         "title": "WeRead",
+        "transparent": true,
+        "url": "https://weread.qq.com/",
         "width": 1200
       }
     ]
