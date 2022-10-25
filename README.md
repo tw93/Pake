@@ -97,14 +97,9 @@ npm run build
 
 ## 贡献者
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
+<a href="https://github.com/tw93/pake/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=tw93/pake" />
+</a>
 
 ## 最后
 
