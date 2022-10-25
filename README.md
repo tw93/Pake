@@ -95,6 +95,12 @@ npm run build
 2. 参考 `pake.js` 中通信代码（搜索 `postMessage`），写好事件监听，然后用 `window.ipc.postMessage`将事件以及参数传递出来
 3. 然后参考容器接收事件（搜索 `window.drag_window`），自己处理即可，更多可以参考 tauri 以及 wry 的官方文档
 
+## 贡献者
+
+<a href="https://github.com/tw93/pake/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=tw93/pake" />
+</a>
+
 ## 最后
 
 1. 希望大伙玩的过程中有一种学习新技术的喜悦感，如果有新点子欢迎告诉我
