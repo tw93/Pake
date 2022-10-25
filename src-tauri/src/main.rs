@@ -10,7 +10,7 @@ fn main() -> wry::Result<()> {
             keyboard::KeyCode,
             menu::{MenuBar as Menu, MenuItem, MenuItemAttributes, MenuType},
             platform::macos::WindowBuilderExtMacOS,
-            window::{Window, WindowBuilder, Fullscreen},
+            window::{Fullscreen, Window, WindowBuilder},
         },
         webview::WebViewBuilder,
     };
@@ -37,38 +37,41 @@ fn main() -> wry::Result<()> {
 
     menu_bar_menu.add_submenu("App", true, first_menu);
 
-    let config_file = File::open("./tauri.conf.json").unwrap();
-    let config: Config = serde_json::from_reader(config_file).unwrap();
     let WindowConfig {
         url,
         width,
         height,
         resizable,
         transparent,
+        fullscreen,
         ..
-    } = &config.tauri.windows[0];
-
+    } = get_windows_config();
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
-        .with_resizable(*resizable)
-        .with_titlebar_transparent(*transparent)
+        .with_resizable(resizable)
+        .with_titlebar_transparent(transparent)
+        .with_fullscreen(if fullscreen {
+            Some(Fullscreen::Borderless(None))
+        } else {
+            None
+        })
         .with_fullsize_content_view(true)
         .with_titlebar_buttons_hidden(false)
         .with_title_hidden(true)
         .with_menu(menu_bar_menu)
-        .with_inner_size(wry::application::dpi::LogicalSize::new(*width, *height))
+        .with_inner_size(wry::application::dpi::LogicalSize::new(width, height))
         .build(&event_loop)
         .unwrap();
 
     let handler = move |window: &Window, req: String| {
         if req == "drag_window" {
-          let _ =  window.drag_window();
+            let _ = window.drag_window();
         } else if req == "fullscreen" {
-          if window.fullscreen().is_some() {
-            window.set_fullscreen(None);
-          }else{
-            window.set_fullscreen(Some(Fullscreen::Borderless(None)));
-          }
+            if window.fullscreen().is_some() {
+                window.set_fullscreen(None);
+            } else {
+                window.set_fullscreen(Some(Fullscreen::Borderless(None)));
+            }
         }
     };
 
@@ -102,4 +105,11 @@ fn main() -> wry::Result<()> {
             _ => (),
         }
     });
+}
+
+fn get_windows_config() -> WindowConfig {
+    let config_file = File::open("./tauri.conf.json").unwrap();
+    let config: Config = serde_json::from_reader(config_file).unwrap();
+
+    config.tauri.windows[0].clone()
 }
