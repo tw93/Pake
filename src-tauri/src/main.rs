@@ -108,8 +108,8 @@ fn main() -> wry::Result<()> {
 }
 
 fn get_windows_config() -> WindowConfig {
-    let config_file = File::open("./tauri.conf.json").unwrap();
-    let config: Config = serde_json::from_reader(config_file).unwrap();
+    let config_file = include_str!("../tauri.conf.json");
+    let config: Config = serde_json::from_str(config_file).expect("failed to parse windows config");
 
     config.tauri.windows[0].clone()
 }
