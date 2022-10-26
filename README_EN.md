@@ -20,6 +20,9 @@
 4. `command + ↓`：Auto scroll to bottom of page
 5. `command + r`：Refresh Page
 6. `command + w`：Hide window, not quite
+7. `command + -`：ZoomOut Page
+8. `command + =`：ZoomIn Page
+9. `command + 0`：Reset Page zoom 
 
 In addition, it supports double clicking the head to switch to full screen, and dragging the head to move the window
 
