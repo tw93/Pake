@@ -2,12 +2,12 @@
 <p align="center">
   <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
   <h1 align="center">Pake</h1>
-  <div align="left">A simple way to package a web page with Rust to create Mac App, using Tauri as underlying layer, supporting WeRead、Flomo、RunCode、ToolsFun、<a href="https://witeboard.com/">Witeboard</a>、Vercel, detailed development tutorial can be seen at the bottom.</div>
+  <div align="left">A simple way to package a web page with Rust to create Mac App, using Tauri as underlying layer, supporting WeRead、Flomo、RunCode、ToolsFun、Witeboard、Vercel, detailed development tutorial can be seen at the bottom.</div>
 </p>
 
 ## Features
 
-🏂 **Small**：Nearly 50 times smaller than the Electron shell package, less than 3M ([Data](https://static.tw93.fun/img/pakedata.png)).  
+🏂 **Small**：Nearly 40 times smaller than the Electron shell package, less than 3M ([Data](https://static.tw93.fun/img/pakedata.png)).  
 😂 **Fast**：Using the Rust Tauri, the performance experience is much lighter and faster than JS, memory is much smaller.  
 🩴 **Special**：Not just packaged, with universal shortcut pass-through, immersive windows, drag-and-drop, packaged style compatibility.  
 🐶 **Toy**：Just a very simple little toy, a way to play with Rust instead of the old idea of shelling the web.
