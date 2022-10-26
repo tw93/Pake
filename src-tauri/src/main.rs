@@ -1,4 +1,3 @@
-use std::fs::File;
 use tauri_utils::config::{Config, WindowConfig};
 
 fn main() -> wry::Result<()> {
