@@ -12,7 +12,7 @@
   "scripts": {
     "start": "npm run dev",
     "dev": "npm run tauri dev",
-    "build": "npm run tauri build -- --target universal-apple-darwin",
+    "build": "npm run tauri build",
     "tauri": "tauri"
   },
   "license": "MIT",
