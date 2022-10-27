@@ -44,7 +44,7 @@ fn main() -> wry::Result<()> {
         transparent,
         fullscreen,
         ..
-    } = get_windows_config();
+    } = get_windows_config().unwrap_or(WindowConfig::default());
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
         .with_resizable(resizable)
@@ -106,9 +106,9 @@ fn main() -> wry::Result<()> {
     });
 }
 
-fn get_windows_config() -> WindowConfig {
+fn get_windows_config() -> Option<WindowConfig> {
     let config_file = include_str!("../tauri.conf.json");
     let config: Config = serde_json::from_str(config_file).expect("failed to parse windows config");
 
-    config.tauri.windows[0].clone()
+    config.tauri.windows.iter().next().cloned()
 }
