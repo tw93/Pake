@@ -113,18 +113,18 @@ function setDefaultZoom() {
   }
 }
 
+function zoomCommon(callback) {
+    const htmlZoom = window.localStorage.getItem('htmlZoom') || '100%';
+    const html = document.getElementsByTagName('html')[0];
+    const zoom = callback(htmlZoom);
+    html.style.zoom = zoom;
+    window.localStorage.setItem('htmlZoom', zoom);
+}
+
 function zoomIn() {
-  const htmlZoom = window.localStorage.getItem('htmlZoom') || '100%';
-  const html = document.getElementsByTagName('html')[0];
-  const zoom = parseInt(htmlZoom) < 200 ? (parseInt(htmlZoom) + 10 +'%') : '200%';
-  html.style.zoom = zoom;
-  window.localStorage.setItem('htmlZoom', zoom);
+  zoomCommon(htmlZoom => parseInt(htmlZoom) < 200 ? (parseInt(htmlZoom) + 10 +'%') : '200%');
 }
 
 function zoomOut() {
-  const htmlZoom = window.localStorage.getItem('htmlZoom') || '100%';
-  const html = document.getElementsByTagName('html')[0];
-  const zoom = parseInt(htmlZoom) > 30 ? (parseInt(htmlZoom) - 10 +'%') : '30%';
-  html.style.zoom = zoom;
-  window.localStorage.setItem('htmlZoom', zoom);
+  zoomCommon(htmlZoom => parseInt(htmlZoom) > 30 ? (parseInt(htmlZoom) - 10 +'%') : '30%');
 }
