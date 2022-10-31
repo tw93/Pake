@@ -92,8 +92,7 @@ window.addEventListener('DOMContentLoaded', (_event) => {
             zoomIn();
         }
         if (event.key === "0" && event.metaKey){
-            document.getElementsByTagName('html')[0].style.zoom = '100%';
-            window.localStorage.setItem('htmlZoom', '100%');
+            zoomCommon(() => '100%');
         }
     })
 
