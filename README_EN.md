@@ -31,11 +31,11 @@ In addition, it supports double clicking the head to switch to full screen, and 
 <table>
     <tr>
         <td>WeRead <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead.dmg">Download</a></td>
-        <td>Flomo <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Download</a></td>
+        <td>Twitter <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter.dmg">Download</a></td>
     </tr>
     <tr>
         <td><img src=https://cdn.fliggy.com/upic/ffUmdj.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/B49SAc.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/L4HNQ6.png width=600/></td>
     </tr>
     <tr>
         <td>RunCode <a href="https://github.com/tw93/Pake/releases/latest/download/RunCode.dmg">Download</a></td>
@@ -46,11 +46,11 @@ In addition, it supports double clicking the head to switch to full screen, and 
         <td><img src=https://cdn.fliggy.com/upic/o5QY4c.png width=600/></td>
     </tr>
     <tr>
-        <td>ToolsFun <a href="https://github.com/tw93/Pake/releases/latest/download/Tools.dmg">Download</a></td>
+        <td>Flomo <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Download</a></td>
         <td>Vercel <a href="https://github.com/tw93/Pake/releases/latest/download/Vercel.dmg">Download</a></td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/jVCiL0.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/B49SAc.png width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/CPVRnY.png width=600/></td>
     </tr>
 </table>
