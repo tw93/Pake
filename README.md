@@ -2,7 +2,7 @@
 <p align="center">
   <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
   <h1 align="center">Pake</h1>
-  <div align="left">很简单的用 Rust 打包网页生成很小的 Mac App，底层使用 Tauri，支持微信读书、Flomo、RunCode、Witeboard、ToolsFun、Vercel 等，详细小白开发教程可见底部。</div>
+  <div align="left">很简单的用 Rust 打包网页生成很小的 Mac App，底层使用 Tauri，支持微信读书、Twitter、RunCode、Witeboard、Flomo、Vercel 等，详细小白开发教程可见底部。</div>
 </p>
 
 ## 特征
@@ -31,11 +31,11 @@
 <table>
     <tr>
         <td>WeRead <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead.dmg">Download</a></td>
-        <td>Flomo <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Download</a></td>
+        <td>Twitter <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter.dmg">Download</a></td>
     </tr>
     <tr>
         <td><img src=https://cdn.fliggy.com/upic/ffUmdj.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/B49SAc.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/L4HNQ6.png width=600/></td>
     </tr>
     <tr>
         <td>RunCode <a href="https://github.com/tw93/Pake/releases/latest/download/RunCode.dmg">Download</a></td>
@@ -46,11 +46,11 @@
         <td><img src=https://cdn.fliggy.com/upic/o5QY4c.png width=600/></td>
     </tr>
     <tr>
-        <td>ToolsFun <a href="https://github.com/tw93/Pake/releases/latest/download/Tools.dmg">Download</a></td>
+        <td>Flomo <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Download</a></td>
         <td>Vercel <a href="https://github.com/tw93/Pake/releases/latest/download/Vercel.dmg">Download</a></td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/jVCiL0.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/B49SAc.png width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/CPVRnY.png width=600/></td>
     </tr>
 </table>
