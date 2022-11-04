@@ -2,7 +2,7 @@
 <p align="center">
   <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
   <h1 align="center">Pake</h1>
-  <div align="left">A simple way to package a web page with Rust to create Mac App, using Tauri as underlying layer, supporting WeRead、Twitter、RunCode、Flomo、Witeboard、Vercel, detailed development tutorial can be seen at the bottom.</div>
+  <div align="left">A simple way to package a web page with Rust to create Mac App, using Tauri as underlying layer, supporting WeRead、Twitter、YuQue、RunCode、Flomo、Witeboard、Vercel, detailed development tutorial can be seen at the bottom.</div>
 </p>
 
 ## Features
@@ -33,11 +33,11 @@
     </tr>
     <tr>
         <td>Flomo <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Download</a></td>
-        <td>Vercel <a href="https://github.com/tw93/Pake/releases/latest/download/Vercel.dmg">Download</a></td>
+        <td>YuQue <a href="https://github.com/tw93/Pake/releases/latest/download/YuQue.dmg">Download</a></td>
     </tr>
     <tr>
         <td><img src=https://cdn.fliggy.com/upic/B49SAc.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/CPVRnY.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/mv9dvj.png width=600/></td>
     </tr>
 </table>
 
