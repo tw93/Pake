@@ -1,7 +1,6 @@
 window.addEventListener('DOMContentLoaded', (_event) => {
     const style = document.createElement('style');
     style.innerHTML = `
-
     // mini twitter 代码存到 dist 下面，为了防止干扰，需要的时候 copy 过来即可
     .panel.give_me .nav_view {
       top: 154px !important;
@@ -11,7 +10,7 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       padding-top: 30px;
     }
 
-    #page .main_header {
+    #page .main_header, #ReactApp .lark .main-wrapper > div, #ReactApp .lark .sidebar-user-info, .explore-wrapper .yuque-header-wrapper {
       padding-top: 20px;
     }
 
