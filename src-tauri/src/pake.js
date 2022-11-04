@@ -1,6 +1,8 @@
 window.addEventListener('DOMContentLoaded', (_event) => {
     const style = document.createElement('style');
     style.innerHTML = `
+
+    // mini twitter 代码存到 dist 下面，为了防止干扰，需要的时候 copy 过来即可
     .panel.give_me .nav_view {
       top: 154px !important;
     }
@@ -96,10 +98,13 @@ window.addEventListener('DOMContentLoaded', (_event) => {
         }
     })
 
-    const pakeLinks = document.links;
-    for (let linkIndex = 0; linkIndex < pakeLinks.length; linkIndex++) {
-        pakeLinks[linkIndex].target = '_self';
-    }
+    document.addEventListener('click', e => {
+      const origin = e.target.closest('a');
+      const href = origin.href;
+      if (href) {
+        origin.target = "_self"
+      }
+    });
 
 });
 
@@ -127,3 +132,4 @@ function zoomIn() {
 function zoomOut() {
   zoomCommon(htmlZoom => parseInt(htmlZoom) > 30 ? (parseInt(htmlZoom) - 10 +'%') : '30%');
 }
+
