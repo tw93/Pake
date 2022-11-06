@@ -20,8 +20,8 @@
         <td>Twitter <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter.dmg">Download</a></td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/ffUmdj.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/L4HNQ6.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/17dC9I.jpg width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/mc41xq.jpg width=600/></td>
     </tr>
     <tr>
         <td>YouTube <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Download</a></td>
@@ -36,16 +36,16 @@
         <td>Witeboard <a href="https://github.com/tw93/Pake/releases/latest/download/Witeboard.dmg">Download</a></td>
     </tr>
     <tr>
-        <td><img src=https://gw.alipayobjects.com/zos/k/qc/SCR-20221018-fmj.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/o5QY4c.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/EB1OYP.jpg width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/CW0p3q.jpg width=600/></td>
     </tr>
     <tr>
         <td>Flomo <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Download</a></td>
         <td>YuQue <a href="https://github.com/tw93/Pake/releases/latest/download/YuQue.dmg">Download</a></td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/B49SAc.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/mv9dvj.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/jg9Eeu.jpg width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/RwmWtV.jpg width=600/></td>
     </tr>
 </table>
 
