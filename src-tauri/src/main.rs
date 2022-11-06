@@ -1,4 +1,17 @@
 use tauri_utils::config::{Config, WindowConfig};
+#[cfg(macos)]
+use wry::{
+    application::{
+        platform::macos::WindowBuilderExtMacOS,
+    }
+};
+
+#[cfg(windows)]
+use wry::{
+    application::{
+        platform::windows::WindowBuilderExtWindows
+    }
+};
 
 fn main() -> wry::Result<()> {
     use wry::{
@@ -8,7 +21,6 @@ fn main() -> wry::Result<()> {
             event_loop::{ControlFlow, EventLoop},
             keyboard::KeyCode,
             menu::{MenuBar as Menu, MenuItem, MenuItemAttributes, MenuType},
-            platform::macos::WindowBuilderExtMacOS,
             window::{Fullscreen, Window, WindowBuilder},
         },
         webview::WebViewBuilder,
@@ -46,21 +58,46 @@ fn main() -> wry::Result<()> {
         ..
     } = get_windows_config().unwrap_or(WindowConfig::default());
     let event_loop = EventLoop::new();
-    let window = WindowBuilder::new()
-        .with_resizable(resizable)
-        .with_titlebar_transparent(transparent)
-        .with_fullscreen(if fullscreen {
-            Some(Fullscreen::Borderless(None))
-        } else {
-            None
-        })
-        .with_fullsize_content_view(true)
-        .with_titlebar_buttons_hidden(false)
-        .with_title_hidden(true)
-        .with_menu(menu_bar_menu)
-        .with_inner_size(wry::application::dpi::LogicalSize::new(width, height))
-        .build(&event_loop)
-        .unwrap();
+
+    #[cfg(windows)]
+    let init_window = || {
+        let window = WindowBuilder::new()
+            .with_resizable(resizable)
+            .with_transparent(transparent)
+            .with_fullscreen(if fullscreen {
+                Some(Fullscreen::Borderless(None))
+            } else {
+                None
+            })
+            .with_decorations(false)
+            .with_title("")
+            .with_inner_size(wry::application::dpi::LogicalSize::new(width, height))
+            .build(&event_loop)
+            .unwrap();
+        window
+    };
+
+    #[cfg(macos)]
+    let init_window = || {
+        let window = WindowBuilder::new()
+            .with_resizable(resizable)
+            .with_titlebar_transparent(transparent)
+            .with_fullscreen(if fullscreen {
+                Some(Fullscreen::Borderless(None))
+            } else {
+                None
+            })
+            .with_fullsize_content_view(true)
+            .with_titlebar_buttons_hidden(false)
+            .with_title_hidden(true)
+            .with_menu(menu_bar_menu)
+            .with_inner_size(wry::application::dpi::LogicalSize::new(width, height))
+            .build(&event_loop)
+            .unwrap();
+        window
+    };
+
+    let window = init_window();
 
     let handler = move |window: &Window, req: String| {
         if req == "drag_window" {
