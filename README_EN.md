@@ -2,7 +2,7 @@
 <p align="center">
   <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
   <h1 align="center">Pake</h1>
-  <div align="left">A simple way to package a web page with Rust to create Mac App, using Tauri as underlying layer, supporting WeRead、Twitter、YuQue、RunCode、Flomo、Witeboard、Vercel, detailed development tutorial can be seen at the bottom.</div>
+  <div align="left">A simple way to package a web page with Rust to create Mac App, using Tauri as underlying layer, supporting WeRead、Twitter、YuQue、RunCode、Flomo、Witeboard、Vercel、V2EX, detailed development tutorial can be seen at the bottom.</div>
 </p>
 
 ## Features

@@ -2,7 +2,7 @@
 <p align="center">
   <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
   <h1 align="center">Pake</h1>
-  <div align="left">很简单的用 Rust 打包网页生成很小的 Mac App，底层使用 Tauri，支持微信读书、Twitter、语雀、RunCode、Witeboard、Flomo、Vercel 等，详细小白开发教程可见底部。</div>
+  <div align="left">很简单的用 Rust 打包网页生成很小的 Mac App，底层使用 Tauri，支持微信读书、Twitter、语雀、RunCode、Witeboard、Flomo、Vercel、V2EX 等，详细小白开发教程可见底部。</div>
 </p>
 
 ## 特征
