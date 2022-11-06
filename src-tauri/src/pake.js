@@ -27,6 +27,7 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     #Main > div.box:nth-child(8) > div
     #Wrapper > div.sep20,
     #Main > div.box:nth-child(8),
+    #masthead-ad,
     #Rightbar > div:nth-child(6) > div.sidebar_compliance {
       display: none !important;
     }
@@ -73,6 +74,7 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       height: 20px;
       cursor: grab;
       cursor: -webkit-grab;
+      z-index: 90000;
     }
   `;
   document.head.append(style);
