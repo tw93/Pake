@@ -2,7 +2,7 @@
 <p align="center">
   <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
   <h1 align="center">Pake</h1>
-  <div align="left">很简单的用 Rust 打包网页生成很小的 Mac App，底层使用 Tauri，支持微信读书、Twitter、语雀、RunCode、Witeboard、Flomo、Vercel、V2EX 等，详细小白开发教程可见底部。</div>
+  <div align="left">很简单的用 Rust 打包网页生成很小的 Mac App，底层使用 Tauri，支持微信读书、Twitter、Youtube、Reference、RunCode、Witeboard、Flomo、语雀、Vercel、V2EX 等，详细小白开发教程可见底部。</div>
 </p>
 
 ## 特征
@@ -24,8 +24,16 @@
         <td><img src=https://cdn.fliggy.com/upic/L4HNQ6.png width=600/></td>
     </tr>
     <tr>
+        <td>YouTube <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Download</a></td>
+        <td>Reference <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Download</a></td>
+    </tr>
+    <tr>
+        <td><img src=https://cdn.fliggy.com/upic/Buaegm.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/KFsZIY.png width=600/></td>
+    </tr>
+    <tr>
         <td>RunCode <a href="https://github.com/tw93/Pake/releases/latest/download/RunCode.dmg">Download</a></td>
-        <td><a href="https://witeboard.com/">Witeboard</a> <a href="https://github.com/tw93/Pake/releases/latest/download/Witeboard.dmg">Download</a></td>
+        <td>Witeboard <a href="https://github.com/tw93/Pake/releases/latest/download/Witeboard.dmg">Download</a></td>
     </tr>
     <tr>
         <td><img src=https://gw.alipayobjects.com/zos/k/qc/SCR-20221018-fmj.png width=600/></td>
