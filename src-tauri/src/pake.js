@@ -26,8 +26,17 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     #Rightbar > div.box:nth-child(4),
     #Main > div.box:nth-child(8) > div
     #Wrapper > div.sep20,
-    #Main > div.box:nth-child(8) {
+    #Main > div.box:nth-child(8),
+    #Rightbar > div:nth-child(6) > div.sidebar_compliance {
       display: none !important;
+    }
+
+    ytd-masthead>#container.style-scope.ytd-masthead {
+      padding-top: 12px !important;
+    }
+
+    .wrap.h1body-exist.max-container > div.menu-tocs > div.menu-btn{
+      top: 28px;
     }
 
     #Wrapper{
