@@ -1,7 +1,8 @@
 window.addEventListener('DOMContentLoaded', (_event) => {
-    const style = document.createElement('style');
-    style.innerHTML = `
+  const style = document.createElement('style');
+  style.innerHTML = `
     // mini twitter 代码存到 dist 下面，为了防止干扰，需要的时候 copy 过来即可
+
     .panel.give_me .nav_view {
       top: 154px !important;
     }
@@ -18,8 +19,24 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     .drawing-board .toolbar .toolbar-action,
     .c-swiper-container,
     .download_entry,
-    .lang, .copyright {
+    .lang, .copyright,
+    .wwads-cn, .adsbygoogle,
+    #Bottom > div.content > div.inner,
+    #Rightbar .sep20:nth-of-type(5),
+    #Rightbar > div.box:nth-child(4),
+    #Main > div.box:nth-child(8) > div
+    #Wrapper > div.sep20,
+    #Main > div.box:nth-child(8) {
       display: none !important;
+    }
+
+    #Wrapper{
+      background-color: #F8F8F8 !important;
+      background-image:none !important;
+    }
+
+    #Top {
+      border-bottom: none;
     }
 
     .container-with-note #home, .container-with-note #switcher{
@@ -49,62 +66,61 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       cursor: -webkit-grab;
     }
   `;
-    document.head.append(style);
-    const topDom = document.createElement("div");
-    topDom.id = "pack-top-dom"
-    document.body.appendChild(topDom);
+  document.head.append(style);
+  const topDom = document.createElement('div');
+  topDom.id = 'pack-top-dom';
+  document.body.appendChild(topDom);
 
-    const domEl = document.getElementById('pack-top-dom');
+  const domEl = document.getElementById('pack-top-dom');
 
-    domEl.addEventListener('mousedown', (e) => {
-        if (e.buttons === 1 && e.detail !== 2) {
-            window.ipc.postMessage('drag_window');
-        }
-    })
+  domEl.addEventListener('mousedown', (e) => {
+    if (e.buttons === 1 && e.detail !== 2) {
+      window.ipc.postMessage('drag_window');
+    }
+  });
 
-    domEl.addEventListener('touchstart', (e) => {
-        window.ipc.postMessage('drag_window');
-    })
+  domEl.addEventListener('touchstart', (e) => {
+    window.ipc.postMessage('drag_window');
+  });
 
-    domEl.addEventListener('dblclick', (e) => {
-        window.ipc.postMessage('fullscreen');
-    })
+  domEl.addEventListener('dblclick', (e) => {
+    window.ipc.postMessage('fullscreen');
+  });
 
-    document.addEventListener('keyup', function (event) {
-        if (event.key === "ArrowUp" && event.metaKey){
-            scrollTo(0,0);
-        }
-        if (event.key === "ArrowDown" && event.metaKey){
-            window.scrollTo(0, document.body.scrollHeight);
-        }
-        if (event.key === "[" && event.metaKey){
-            window.history.go(-1);
-        }
-        if (event.key === "]" && event.metaKey){
-            window.history.go(1);
-        }
-        if (event.key === "r" && event.metaKey){
-            window.location.reload();
-        }
-        if (event.key === "-" && event.metaKey){
-            zoomOut();
-        }
-        if (event.key === "=" && event.metaKey){
-            zoomIn();
-        }
-        if (event.key === "0" && event.metaKey){
-            zoomCommon(() => '100%');
-        }
-    })
+  document.addEventListener('keyup', function (event) {
+    if (event.key === 'ArrowUp' && event.metaKey) {
+      scrollTo(0, 0);
+    }
+    if (event.key === 'ArrowDown' && event.metaKey) {
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+    if (event.key === '[' && event.metaKey) {
+      window.history.go(-1);
+    }
+    if (event.key === ']' && event.metaKey) {
+      window.history.go(1);
+    }
+    if (event.key === 'r' && event.metaKey) {
+      window.location.reload();
+    }
+    if (event.key === '-' && event.metaKey) {
+      zoomOut();
+    }
+    if (event.key === '=' && event.metaKey) {
+      zoomIn();
+    }
+    if (event.key === '0' && event.metaKey) {
+      zoomCommon(() => '100%');
+    }
+  });
 
-    document.addEventListener('click', e => {
-      const origin = e.target.closest('a');
-      const href = origin.href;
-      if (href) {
-        origin.target = "_self"
-      }
-    });
-
+  document.addEventListener('click', (e) => {
+    const origin = e.target.closest('a');
+    const href = origin.href;
+    if (href) {
+      origin.target = '_self';
+    }
+  });
 });
 
 setDefaultZoom();
@@ -117,18 +133,21 @@ function setDefaultZoom() {
 }
 
 function zoomCommon(callback) {
-    const htmlZoom = window.localStorage.getItem('htmlZoom') || '100%';
-    const html = document.getElementsByTagName('html')[0];
-    const zoom = callback(htmlZoom);
-    html.style.zoom = zoom;
-    window.localStorage.setItem('htmlZoom', zoom);
+  const htmlZoom = window.localStorage.getItem('htmlZoom') || '100%';
+  const html = document.getElementsByTagName('html')[0];
+  const zoom = callback(htmlZoom);
+  html.style.zoom = zoom;
+  window.localStorage.setItem('htmlZoom', zoom);
 }
 
 function zoomIn() {
-  zoomCommon(htmlZoom => parseInt(htmlZoom) < 200 ? (parseInt(htmlZoom) + 10 +'%') : '200%');
+  zoomCommon((htmlZoom) =>
+    parseInt(htmlZoom) < 200 ? parseInt(htmlZoom) + 10 + '%' : '200%',
+  );
 }
 
 function zoomOut() {
-  zoomCommon(htmlZoom => parseInt(htmlZoom) > 30 ? (parseInt(htmlZoom) - 10 +'%') : '30%');
+  zoomCommon((htmlZoom) =>
+    parseInt(htmlZoom) > 30 ? parseInt(htmlZoom) - 10 + '%' : '30%',
+  );
 }
-
