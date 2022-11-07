@@ -108,8 +108,9 @@ npm run build
 
 ## Contributors
 
-<!-- readme: collaborators,contributors -start -->
-<!-- readme: collaborators,contributors -end -->
+<!-- readme: contributors -start -->
+
+<!-- readme: contributors -end -->
 
 ## Support
 
