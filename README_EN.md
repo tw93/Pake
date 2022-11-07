@@ -91,20 +91,15 @@ npm run build
 
 #### How do I rewrite the style, e.g. to remove ads from the original site, or even redesign it?
 
-1. first open devtools debug mode, find the name of the style you want to change and verify the effect in devtools first.
-2. find the location of the style in `pake.js` with `style.innerHTML` and add the style you need to override, there are some examples you can copy.
-3. Remember to remove the devtools comments before packaging.
+First open devtools debug mode, find the name of the style you want to change and verify the effect in devtools first, find the location of the style in `pake.js` with `style.innerHTML` and add the style you need to override, there are some examples you can copy. Remember to remove the devtools comments before packaging.
 
 #### How to inject js code, e.g. to implement event listeners, e.g. keyboard shortcuts?
 
-1. Same preparation as in case 1 above.
-2. refer to the event listener in `pake.js` with `document.addEventListener`, and write it directly, it's more of a basic front-end technique here.
+Refer to the event listener in `pake.js` with `document.addEventListener`, and write it directly, it's more of a basic front-end technique here.
 
 #### How to communicate with Pake about events in containers, such as dragging and dropping, scrolling, special clicks on the Web, etc.?
 
-1. the same preparation as in 1 above.
-2. refer to the communication code in `pake.js` with `postMessage`, write the event listener and then use `window.ipc.postMessage` to pass the event and its parameters.
-3. then refer to the container to receive events `window.drag_window` and handle them yourself, for more information, refer to tauri and wry's official documentation.
+Refer to the communication code in `pake.js` with `postMessage`, write the event listener and then use `window.ipc.postMessage` to pass the event and its parameters, then refer to the container to receive events `window.drag_window` and handle them yourself, for more information, refer to tauri and wry's official documentation.
 
 ## Contributors
 
