@@ -101,12 +101,6 @@ Refer to the event listener in `pake.js` with `document.addEventListener`, and w
 
 Refer to the communication code in `pake.js` with `postMessage`, write the event listener and then use `window.ipc.postMessage` to pass the event and its parameters, then refer to the container to receive events `window.drag_window` and handle them yourself, for more information, refer to tauri and wry's official documentation.
 
-## Contributors
-
-<!-- readme: contributors -start -->
-
-<!-- readme: contributors -end -->
-
 ## Support
 
 - I have two cats, one is called TangYuan, and one is called Coke, If you think Pake makes your life better, you can give my cats <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">feed canned food 🥩🍤</a>.
