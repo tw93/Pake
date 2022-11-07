@@ -108,9 +108,8 @@ npm run build
 
 ## 贡献者
 
-<a href="https://github.com/tw93/pake/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=tw93/pake" />
-</a>
+<!-- readme: contributors -start -->
+<!-- readme: contributors -end -->
 
 ## 支持
 
