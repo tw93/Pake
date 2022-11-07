@@ -108,42 +108,42 @@ npm run build
 <tr>
     <td align="center">
         <a href="https://github.com/tw93">
-            <img src="https://avatars.githubusercontent.com/u/8736212?v=4" width="100;" alt="tw93"/>
+            <img src="https://avatars.githubusercontent.com/u/8736212?v=4" width="90;" alt="tw93"/>
             <br />
             <sub><b>Tw93</b></sub>
         </a>
     </td>
     <td align="center">
         <a href="https://github.com/liby">
-            <img src="https://avatars.githubusercontent.com/u/38807139?v=4" width="100;" alt="liby"/>
+            <img src="https://avatars.githubusercontent.com/u/38807139?v=4" width="90;" alt="liby"/>
             <br />
             <sub><b>Bryan Lee</b></sub>
         </a>
     </td>
     <td align="center">
         <a href="https://github.com/QingZ11">
-            <img src="https://avatars.githubusercontent.com/u/38887077?v=4" width="100;" alt="QingZ11"/>
+            <img src="https://avatars.githubusercontent.com/u/38887077?v=4" width="90;" alt="QingZ11"/>
             <br />
             <sub><b>Steam</b></sub>
         </a>
     </td>
     <td align="center">
         <a href="https://github.com/2nthony">
-            <img src="https://avatars.githubusercontent.com/u/19513289?v=4" width="100;" alt="2nthony"/>
+            <img src="https://avatars.githubusercontent.com/u/19513289?v=4" width="90;" alt="2nthony"/>
             <br />
             <sub><b>2nthony</b></sub>
         </a>
     </td>
     <td align="center">
         <a href="https://github.com/AielloChan">
-            <img src="https://avatars.githubusercontent.com/u/7900765?v=4" width="100;" alt="AielloChan"/>
+            <img src="https://avatars.githubusercontent.com/u/7900765?v=4" width="90;" alt="AielloChan"/>
             <br />
             <sub><b>Aiello</b></sub>
         </a>
     </td>
     <td align="center">
         <a href="https://github.com/houhoz">
-            <img src="https://avatars.githubusercontent.com/u/19684376?v=4" width="100;" alt="houhoz"/>
+            <img src="https://avatars.githubusercontent.com/u/19684376?v=4" width="90;" alt="houhoz"/>
             <br />
             <sub><b>Hyzhao</b></sub>
         </a>
@@ -151,14 +151,14 @@ npm run build
 <tr>
     <td align="center">
         <a href="https://github.com/liusishan">
-            <img src="https://avatars.githubusercontent.com/u/33129823?v=4" width="100;" alt="liusishan"/>
+            <img src="https://avatars.githubusercontent.com/u/33129823?v=4" width="90;" alt="liusishan"/>
             <br />
             <sub><b>Null</b></sub>
         </a>
     </td>
     <td align="center">
         <a href="https://github.com/piaoyidage">
-            <img src="https://avatars.githubusercontent.com/u/5135405?v=4" width="100;" alt="piaoyidage"/>
+            <img src="https://avatars.githubusercontent.com/u/5135405?v=4" width="90;" alt="piaoyidage"/>
             <br />
             <sub><b>Ranger</b></sub>
         </a>
