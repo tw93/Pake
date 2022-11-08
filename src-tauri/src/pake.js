@@ -1,3 +1,30 @@
+/**
+ * @typedef {string} KeyboardKey `event.key` 的代号，
+ * 见 <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values>
+ */
+
+/**
+ * @typedef {() => void} OnKeyDown 使用者按下 ⌘ [KeyboardKey] 时应该执行的行为
+ */
+
+/**
+ * 以 Meta 键 (⌘) 为首的快捷键清单。
+ *
+ * 每个写在这里的 shortcuts 都会运行 {@link Event.preventDefault}.
+ *
+ * @type {Record<KeyboardKey, OnKeyDown>}
+ */
+const metaKeyShortcuts = {
+  'ArrowUp': () => scrollTo(0, 0),
+  'ArrowDown': () => scrollTo(0, document.body.scrollHeight),
+  '[': () => window.history.back(),
+  ']': () => window.history.forward(),
+  'r': () => window.location.reload(),
+  '-': () => zoomOut(),
+  '=': () => zoomIn(),
+  '0': () => zoomCommon(() => '100%'),
+}
+
 window.addEventListener('DOMContentLoaded', (_event) => {
   const style = document.createElement('style');
   style.innerHTML = `
@@ -99,29 +126,13 @@ window.addEventListener('DOMContentLoaded', (_event) => {
   });
 
   document.addEventListener('keyup', function (event) {
-    if (event.key === 'ArrowUp' && event.metaKey) {
-      scrollTo(0, 0);
-    }
-    if (event.key === 'ArrowDown' && event.metaKey) {
-      window.scrollTo(0, document.body.scrollHeight);
-    }
-    if (event.key === '[' && event.metaKey) {
-      window.history.go(-1);
-    }
-    if (event.key === ']' && event.metaKey) {
-      window.history.go(1);
-    }
-    if (event.key === 'r' && event.metaKey) {
-      window.location.reload();
-    }
-    if (event.key === '-' && event.metaKey) {
-      zoomOut();
-    }
-    if (event.key === '=' && event.metaKey) {
-      zoomIn();
-    }
-    if (event.key === '0' && event.metaKey) {
-      zoomCommon(() => '100%');
+    const preventDefault = (f) => {
+      event.preventDefault();
+      f();
+    };
+
+    if (event.metaKey && event.key in metaKeyShortcuts) {
+      preventDefault(metaKeyShortcuts[event.key]);
     }
   });
 
@@ -143,22 +154,22 @@ function setDefaultZoom() {
   }
 }
 
-function zoomCommon(callback) {
+function zoomCommon(zoomRule) {
   const htmlZoom = window.localStorage.getItem('htmlZoom') || '100%';
   const html = document.getElementsByTagName('html')[0];
-  const zoom = callback(htmlZoom);
+  const zoom = zoomRule(htmlZoom);
   html.style.zoom = zoom;
   window.localStorage.setItem('htmlZoom', zoom);
 }
 
 function zoomIn() {
   zoomCommon((htmlZoom) =>
-    parseInt(htmlZoom) < 200 ? parseInt(htmlZoom) + 10 + '%' : '200%',
+    `${Math.min(parseInt(htmlZoom) + 10, 200)}%`
   );
 }
 
 function zoomOut() {
   zoomCommon((htmlZoom) =>
-    parseInt(htmlZoom) > 30 ? parseInt(htmlZoom) - 10 + '%' : '30%',
+    `${Math.max(parseInt(htmlZoom) - 10, 30)}%`
   );
 }
