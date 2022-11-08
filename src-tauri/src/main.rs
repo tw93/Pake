@@ -74,14 +74,17 @@ fn main() -> wry::Result<()> {
         }
     };
 
-    let _webview = WebViewBuilder::new(window)?
+    let webview = WebViewBuilder::new(window)?
         .with_url(&url.to_string())?
-        // .with_devtools(true)
+        .with_devtools(cfg!(feature = "devtools"))
         .with_initialization_script(include_str!("pake.js"))
         .with_ipc_handler(handler)
         .build()?;
 
-    // _webview.open_devtools();
+    #[cfg(feature = "devtools")] {
+        webview.open_devtools();
+    }
+
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
 
@@ -97,7 +100,7 @@ fn main() -> wry::Result<()> {
                 ..
             } => {
                 if menu_id == close_item.clone().id() {
-                    _webview.window().set_minimized(true);
+                    webview.window().set_minimized(true);
                 }
                 println!("Clicked on {:?}", menu_id);
             }
