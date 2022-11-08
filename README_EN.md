@@ -7,10 +7,10 @@
 
 ## Features
 
-🏂 **Small**：Nearly 40 times smaller than the Electron shell package, less than 3M ([Data](https://static.tw93.fun/img/pakedata.png)).
-😂 **Fast**：Using the Rust Tauri, the performance experience is much lighter and faster than JS, memory is much smaller.
-🩴 **Special**：Not just packaged, with universal shortcut pass-through, immersive windows, drag-and-drop, packaged style compatibility.
-🐶 **Toy**：Just a very simple little toy, a way to play with Rust instead of the old idea of shelling the web
+- 🏂 **Small**：Nearly 40 times smaller than the Electron shell package, less than 3M ([Data](https://static.tw93.fun/img/pakedata.png)).
+- 😂 **Fast**：Using the Rust Tauri, the performance experience is much lighter and faster than JS, memory is much smaller.
+- 🩴 **Special**：Not just packaged, with universal shortcut pass-through, immersive windows, drag-and-drop, packaged style compatibility.
+- 🐶 **Toy**：Just a very simple little toy, a way to play with Rust instead of the old idea of shelling the web.
 
 ## Download
 
@@ -84,14 +84,14 @@ npm run build
 
 1. Modify the `tauri.conf.json` in the `src-tauri` directory to include 5 fields `url, productName, icon, title, identifier`, icon can be selected from the `icons` directory or downloaded from [macOSicons](https://macosicons.com/#/) to match the product.
 2. For window property settings, you can modify the `width/height` of the `windows` property in `tauri.conf.json`, whether it is `fullscreen`, whether it is `resizable`, if you are not good at adapting immersive headers, you can set `transparent` to `true` and you're done.
-3. `npm run dev` for local debugging; `npm run dev:withtool` to  open the devtools for container debugging.
+3. `npm run dev` for local debugging; `npm run dev:debug` to  open the devtools for container debugging.
 4. `npm run build` can be run to package for production.
 
 ## Advanced
 
 #### 1. How do I rewrite the style, e.g. to remove ads from the original site, or even redesign it?
 
-First, open devtools debug mode with `npm run dev:withtool`. After that, find the name of the style you want to change and verify the effect in devtools, and find the location of the style in `pake.js` with `style.innerHTML`. Finally, add the style you need to override, there are some examples you can copy.
+First, open devtools debug mode with `npm run dev:debug`. After that, find the name of the style you want to change and verify the effect in devtools, and find the location of the style in `pake.js` with `style.innerHTML`. Finally, add the style you need to override, there are some examples you can copy.
 
 #### 2. How to inject js code, e.g. to implement event listeners, e.g. keyboard shortcuts?
 
