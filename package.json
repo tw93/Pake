@@ -12,7 +12,7 @@
   "scripts": {
     "start": "npm run dev",
     "dev": "npm run tauri dev",
-    "dev:withtool": "npm run tauri dev -- --features devtools",
+    "dev:debug": "npm run tauri dev -- --features devtools",
     "build": "npm run tauri build -- --target universal-apple-darwin",
     "tauri": "tauri"
   },
