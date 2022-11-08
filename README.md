@@ -7,10 +7,11 @@
 
 ## 特征
 
-🏂 **小**：相比传统的 Electron 套壳打包，大小要小将近 40 倍，一般不到 3M ([数据](https://static.tw93.fun/img/pakedata.png))
-😂 **快**：Pake 的底层使用的 Rust Tauri 框架，性能体验较 JS 框架要轻快不少，内存小很多
-🩴 **特**：不是单纯打包，实现了通用快捷键的透传、沉浸式的窗口、拖动、样式改写简化
-🐶 **玩**：只是一个很简单的小玩具，用 Rust 替代之前套壳网页老的思路玩法，PWA 也很好，友好交流勿喷
+- 🏂 **小**：相比传统的 Electron 套壳打包，大小要小将近 40 倍，一般不到 3M ([数据](https://static.tw93.fun/img/pakedata.png))
+- 😂 **快**：Pake 的底层使用的 Rust Tauri 框架，性能体验较 JS 框架要轻快不少，内存小很多
+- 🩴 **特**：不是单纯打包，实现了通用快捷键的透传、沉浸式的窗口、拖动、样式改写简化
+- 🐶 **玩**：只是一个很简单的小玩具，用 Rust 替代之前套壳网页老的思路玩法，PWA 也很好，友好交流勿喷
+
 
 ## 下载
 
@@ -84,14 +85,14 @@ npm run build
 
 1. 修改 `src-tauri` 目录下的 `tauri.conf.json` 中的 `url、productName、icon、title、identifier` 这 5 个字段，其中 icon 可以从 icons 目录选择一个，也可以去 [macOSicons](https://macosicons.com/#/) 下载符合产品名称的
 2. 关于窗口属性设置，可以在 `tauri.conf.json` 修改 `windows` 属性对应的 `width/height`，是否全屏 `fullscreen`，是否可以调整大小 `resizable`，假如你不好适配沉浸式头部，可以将 `transparent` 设置成 `true` 即可。
-3. `npm run dev` 本地调试看看效果，此外可以打开 `main.rs` 中两处注释 `_devtools` 进行容器调试
-4. `npm run build` 运行即可打包，假如有打开 devtools 模式，记得注释掉
+3. `npm run dev` 本地调试看看效果，此外可以使用 `npm run dev:debug` 进行容器调试
+4. `npm run build` 运行即可打生产包
 
 ## 高级
 
 #### 1. 如何改写样式，如去掉原站广告、不想要的模块、甚至重新设计？
 
-首先需要打开 devtools 调试模式，找到你需要修改的样式名称，先在 devtools 里面验证效果；找到 `pake.js` 中样式位置 `style.innerHTML` ，将需要覆盖的样式加上即可，有一些案例你可以模仿，正式打包前记得干掉 devtools 注释。
+首先需要使用 `npm run dev:debug` 打开 devtools 调试模式，找到你需要修改的样式名称，先在 devtools 里面验证效果；找到 `pake.js` 中样式位置 `style.innerHTML` ，将需要覆盖的样式加上即可，有一些案例你可以模仿。
 
 #### 2. 如何注入 JS 的逻辑，比如实现事件监听，比如说键盘快捷键？
 
