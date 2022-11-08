@@ -12,6 +12,7 @@
 - 🩴 **Special**：Not just packaged, with universal shortcut pass-through, immersive windows, drag-and-drop, packaged style compatibility.
 - 🐶 **Toy**：Just a very simple little toy, a way to play with Rust instead of the old idea of shelling the web.
 
+
 ## Download
 
 <table>
@@ -53,15 +54,15 @@ More common apps can be downloaded from [Release](https://github.com/tw93/Pake/r
 
 ## Shortcuts
 
-1. `command + [`：Return to the previous page
-2. `command + ]`：Go to the next page
-3. `command + ↑`：Auto scroll to top of page
-4. `command + ↓`：Auto scroll to bottom of page
-5. `command + r`：Refresh Page
-6. `command + w`：Hide window, not quite
-7. `command + -`：ZoomOut Page
-8. `command + =`：ZoomIn Page
-9. `command + 0`：Reset Page zoom
+1. <kbd>⌘</kbd> + <kbd>[</kbd>：Return to the previous page
+2. <kbd>⌘</kbd> + <kbd>]</kbd>：Go to the next page
+3. <kbd>⌘</kbd> + <kbd>↑</kbd>：Auto scroll to top of page
+4. <kbd>⌘</kbd> + <kbd>↓</kbd>：Auto scroll to bottom of page
+5. <kbd>⌘</kbd> + <kbd>r</kbd>：Refresh Page
+6. <kbd>⌘</kbd> + <kbd>w</kbd>：Hide window, not quite
+7. <kbd>⌘</kbd> + <kbd>-</kbd>：Zoom out the page
+8. <kbd>⌘</kbd> + <kbd>=</kbd>：Zoom in the Page
+9. <kbd>⌘</kbd> + <kbd>0</kbd>：Reset the page zoom
 
 In addition, it supports double clicking the head to switch to full screen, and dragging the head to move the window
 
