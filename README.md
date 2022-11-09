@@ -2,7 +2,7 @@
 <p align="center">
   <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
   <h1 align="center">Pake</h1>
-  <div align="left">很简单的用 Rust 打包网页生成很小的 Mac App，底层使用 Tauri，支持微信读书、Twitter、Youtube、Reference、RunCode、Witeboard、Flomo、语雀、Vercel、V2EX、工具箱等，详细小白开发教程可见底部。</div>
+  <div align="left">很简单的用 Rust 打包网页生成很小的 Mac App，底层使用 Tauri，支持微信读书、Twitter、Youtube、Reference、RunCode、Google Translate、Witeboard、Flomo、语雀、Vercel、V2EX、工具箱等，详细小白开发教程可见底部。</div>
 </p>
 
 ## 特征
@@ -33,11 +33,11 @@
     </tr>
     <tr>
         <td>RunCode <a href="https://github.com/tw93/Pake/releases/latest/download/RunCode.dmg">Download</a></td>
-        <td>Witeboard <a href="https://github.com/tw93/Pake/releases/latest/download/Witeboard.dmg">Download</a></td>
+        <td>Google Translate <a href="https://github.com/tw93/Pake/releases/latest/download/GoogleTranslate.dmg">Download</a></td>
     </tr>
     <tr>
         <td><img src=https://cdn.fliggy.com/upic/EB1OYP.jpg width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/CW0p3q.jpg width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/EmjUGy.png width=600/></td>
     </tr>
     <tr>
         <td>Flomo <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Download</a></td>

@@ -1,17 +1,9 @@
 /**
  * @typedef {string} KeyboardKey `event.key` 的代号，
  * 见 <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values>
- */
-
-/**
  * @typedef {() => void} OnKeyDown 使用者按下 ⌘ [KeyboardKey] 时应该执行的行为
- */
-
-/**
  * 以 Meta 键 (⌘) 为首的快捷键清单。
- *
  * 每个写在这里的 shortcuts 都会运行 {@link Event.preventDefault}.
- *
  * @type {Record<KeyboardKey, OnKeyDown>}
  */
 const metaKeyShortcuts = {
@@ -28,16 +20,6 @@ const metaKeyShortcuts = {
 window.addEventListener('DOMContentLoaded', (_event) => {
   const style = document.createElement('style');
   style.innerHTML = `
-    // mini twitter 代码存到 dist 下面，为了防止干扰，需要的时候 copy 过来即可
-
-    .panel.give_me .nav_view {
-      top: 154px !important;
-    }
-
-    .columns .column #header{
-      padding-top: 30px;
-    }
-
     #page .main_header, #ReactApp .lark .main-wrapper > div, #ReactApp .lark .sidebar-user-info, .explore-wrapper .yuque-header-wrapper {
       padding-top: 20px;
     }
@@ -57,6 +39,14 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     #masthead-ad,
     #Rightbar > div:nth-child(6) > div.sidebar_compliance {
       display: none !important;
+    }
+
+    .panel.give_me .nav_view {
+      top: 154px !important;
+    }
+
+    .columns .column #header{
+      padding-top: 30px;
     }
 
     ytd-masthead>#container.style-scope.ytd-masthead {
