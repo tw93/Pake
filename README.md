@@ -10,7 +10,7 @@
 🏂 **小**：相比传统的 Electron 套壳打包，大小要小将近 40 倍，一般不到 3M ([数据](https://static.tw93.fun/img/pakedata.png))  
 😂 **快**：Pake 的底层使用的 Rust Tauri 框架，性能体验较 JS 框架要轻快不少，内存小很多  
 🩴 **特**：不是单纯打包，实现了通用快捷键的透传、沉浸式的窗口、拖动、样式改写简化  
-🐶 **玩**：只是一个很简单的小玩具，用 Rust 替代之前套壳网页老的思路玩法，PWA 也很好，友好交流勿喷  
+🐶 **玩**：只是一个很简单的小玩具，用 Rust 替代之前套壳网页老的思路玩法，PWA 也很好，友好交流勿喷
 
 ## 下载
 
@@ -49,7 +49,7 @@
     </tr>
 </table>
 
-更多常用 App 下载可以去 [Release](https://github.com/tw93/Pake/releases) 中看看。
+更多常用 App 下载可以去 [Release](https://github.com/tw93/Pake/releases) 中看看，此外可以去 [Discussions](https://github.com/tw93/Pake/discussions/74) 看 Pake 爱好者的分享。
 
 ## 快捷键
 
