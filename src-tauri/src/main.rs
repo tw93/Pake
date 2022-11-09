@@ -1,17 +1,8 @@
 use tauri_utils::config::{Config, WindowConfig};
 #[cfg(target_os = "macos")]
-use wry::{
-    application::{
-        platform::macos::WindowBuilderExtMacOS,
-    }
-};
-
+use wry::application::platform::macos::WindowBuilderExtMacOS;
 #[cfg(target_os = "windows")]
-use wry::{
-    application::{
-        platform::windows::WindowBuilderExtWindows
-    }
-};
+use wry::application::platform::windows::WindowBuilderExtWindows;
 
 fn main() -> wry::Result<()> {
     use wry::{
@@ -68,29 +59,21 @@ fn main() -> wry::Result<()> {
             None
         })
         .with_inner_size(wry::application::dpi::LogicalSize::new(width, height));
-    #[cfg(windows)]
-    let init_window = || {
-        let window = common_window
-            .with_decorations(false)
-            .with_title("")
-            .build(&event_loop)
-            .unwrap();
-        window
-    };
 
-    #[cfg(macos)]
-    let init_window = || {
-        let window = common_window
-            .with_fullsize_content_view(true)
-            .with_titlebar_buttons_hidden(false)
-            .with_title_hidden(true)
-            .with_menu(menu_bar_menu)
-            .build(&event_loop)
-            .unwrap();
-        window
-    };
-
-    let window = init_window();
+    #[cfg(target_os = "windows")]
+    let window = common_window
+        .with_decorations(false)
+        .with_title("")
+        .build(&event_loop)
+        .unwrap();
+    #[cfg(target_os = "macos")]
+    let window = common_window
+        .with_fullsize_content_view(true)
+        .with_titlebar_buttons_hidden(false)
+        .with_title_hidden(true)
+        .with_menu(menu_bar_menu)
+        .build(&event_loop)
+        .unwrap();
 
     let handler = move |window: &Window, req: String| {
         if req == "drag_window" {
