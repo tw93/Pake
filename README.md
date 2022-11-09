@@ -49,7 +49,7 @@
     </tr>
 </table>
 
-更多常用 App 下载可以去 [Release](https://github.com/tw93/Pake/releases) 中看看，此外可以去 [Discussions](https://github.com/tw93/Pake/discussions/74) 看 Pake 爱好者的分享。
+更多常用 App 下载可以去 [Releases](https://github.com/tw93/Pake/releases) 中看看，此外可以去 [Discussions](https://github.com/tw93/Pake/discussions/74) 看 Pake 爱好者的分享。
 
 ## 快捷键
 
