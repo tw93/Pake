@@ -14,6 +14,7 @@
     "dev": "npm run tauri dev",
     "dev:debug": "npm run tauri dev -- --features devtools",
     "build": "npm run tauri build -- --target universal-apple-darwin",
+    "build:windows": "npm run tauri build -- --target x86_64-pc-windows-msvc",
     "tauri": "tauri"
   },
   "license": "MIT",

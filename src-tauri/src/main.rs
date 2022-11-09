@@ -1,4 +1,8 @@
 use tauri_utils::config::{Config, WindowConfig};
+#[cfg(target_os = "macos")]
+use wry::application::platform::macos::WindowBuilderExtMacOS;
+#[cfg(target_os = "windows")]
+use wry::application::platform::windows::WindowBuilderExtWindows;
 
 fn main() -> wry::Result<()> {
     use wry::{
@@ -8,7 +12,6 @@ fn main() -> wry::Result<()> {
             event_loop::{ControlFlow, EventLoop},
             keyboard::KeyCode,
             menu::{MenuBar as Menu, MenuItem, MenuItemAttributes, MenuType},
-            platform::macos::WindowBuilderExtMacOS,
             window::{Fullscreen, Window, WindowBuilder},
         },
         webview::WebViewBuilder,
@@ -46,19 +49,29 @@ fn main() -> wry::Result<()> {
         ..
     } = get_windows_config().unwrap_or(WindowConfig::default());
     let event_loop = EventLoop::new();
-    let window = WindowBuilder::new()
+
+    let common_window = WindowBuilder::new()
         .with_resizable(resizable)
-        .with_titlebar_transparent(transparent)
+        .with_transparent(transparent)
         .with_fullscreen(if fullscreen {
             Some(Fullscreen::Borderless(None))
         } else {
             None
         })
+        .with_inner_size(wry::application::dpi::LogicalSize::new(width, height));
+
+    #[cfg(target_os = "windows")]
+    let window = common_window
+        .with_decorations(false)
+        .with_title("")
+        .build(&event_loop)
+        .unwrap();
+    #[cfg(target_os = "macos")]
+    let window = common_window
         .with_fullsize_content_view(true)
         .with_titlebar_buttons_hidden(false)
         .with_title_hidden(true)
         .with_menu(menu_bar_menu)
-        .with_inner_size(wry::application::dpi::LogicalSize::new(width, height))
         .build(&event_loop)
         .unwrap();
 
