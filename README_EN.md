@@ -49,7 +49,7 @@
     </tr>
 </table>
 
-More common apps can be downloaded from [Release](https://github.com/tw93/Pake/releases), in addition you can go to [Discussions](https://github.com/tw93/Pake/discussions/74) to see the sharing of Pake fans.
+More common apps can be downloaded from [Releases](https://github.com/tw93/Pake/releases), in addition you can go to [Discussions](https://github.com/tw93/Pake/discussions/74) to see the sharing of Pake fans.
 
 ## Shortcuts
 
