@@ -1,3 +1,5 @@
+// @ts-check
+
 /**
  * @typedef {string} KeyboardKey `event.key` 的代号，
  * 见 <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values>
@@ -117,11 +119,11 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     }
   });
 
-  domEl.addEventListener('touchstart', (e) => {
+  domEl.addEventListener('touchstart', () => {
     window.ipc.postMessage('drag_window');
   });
 
-  domEl.addEventListener('dblclick', (e) => {
+  domEl.addEventListener('dblclick', () => {
     window.ipc.postMessage('fullscreen');
   });
 
@@ -154,6 +156,9 @@ function setDefaultZoom() {
   }
 }
 
+/**
+ * @param {(htmlZoom: string) => string} [zoomRule]
+ */
 function zoomCommon(zoomRule) {
   const htmlZoom = window.localStorage.getItem('htmlZoom') || '100%';
   const html = document.getElementsByTagName('html')[0];
