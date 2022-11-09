@@ -52,7 +52,6 @@ fn main() -> wry::Result<()> {
 
     let common_window = WindowBuilder::new()
         .with_resizable(resizable)
-        .with_transparent(transparent)
         .with_fullscreen(if fullscreen {
             Some(Fullscreen::Borderless(None))
         } else {
@@ -70,6 +69,7 @@ fn main() -> wry::Result<()> {
     let window = common_window
         .with_fullsize_content_view(true)
         .with_titlebar_buttons_hidden(false)
+        .with_titlebar_transparent(transparent)
         .with_title_hidden(true)
         .with_menu(menu_bar_menu)
         .build(&event_loop)
