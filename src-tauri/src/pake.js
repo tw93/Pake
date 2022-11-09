@@ -22,10 +22,6 @@ const metaKeyShortcuts = {
 window.addEventListener('DOMContentLoaded', (_event) => {
   const style = document.createElement('style');
   style.innerHTML = `
-    #page .main_header, #ReactApp .lark .main-wrapper > div, #ReactApp .lark .sidebar-user-info, .explore-wrapper .yuque-header-wrapper {
-      padding-top: 20px;
-    }
-
     #page #footer-wrapper,
     .drawing-board .toolbar .toolbar-action,
     .c-swiper-container,
@@ -41,6 +37,10 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     #masthead-ad,
     #Rightbar > div:nth-child(6) > div.sidebar_compliance {
       display: none !important;
+    }
+
+    #page .main_header {
+      padding-top: 20px;
     }
 
     .panel.give_me .nav_view {
