@@ -45,7 +45,7 @@
     </tr>
     <tr>
         <td><img src=https://cdn.fliggy.com/upic/jg9Eeu.jpg width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/RwmWtV.jpg width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/02SZQl.png width=600/></td>
     </tr>
 </table>
 
