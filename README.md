@@ -2,7 +2,7 @@
 <p align="center">
   <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
   <h1 align="center">Pake</h1>
-  <div align="left">很简单用 Rust 打包网页生成很小的 Mac App，支持 微信读书、Twitter、Youtube、Flomo、Reference、RunCode、Google Translate、语雀、Witeboard、Vercel、V2EX、开发工具箱等，也可去<a href=https://github.com/tw93/Pake/discussions>讨论区</a>看看有没有好东西。</div>
+  <div align="left">很简单用 Rust 打包网页生成很小的 Mac App，支持 微信读书、Twitter、Youtube、Flomo、Reference、RunCode、Google Translate、语雀、Witeboard、Vercel、V2EX、开发工具箱等，欢迎去 <a href=https://github.com/tw93/Pake/discussions>讨论区</a> 交流分享。</div>
 </p>
 
 ## 特征
