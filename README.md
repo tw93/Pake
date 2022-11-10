@@ -2,8 +2,7 @@
 <p align="center">
   <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
   <h1 align="center">Pake</h1>
-  <div align="left">很简单的用 Rust 打包网页生成很小的 Mac App，底层使用 Tauri，详细小白开发教程可见底部，也欢迎去 <a href=https://github.com/tw93/Pake/discussions>讨论区</a> 看看有没有感兴趣的东西。</div>
-  <div align="left">当前支持微信读书、Twitter、Youtube、Reference、RunCode、Google Translate、Witeboard、Flomo、语雀、Vercel、V2EX、开发工具箱等。</div>
+  <div align="left">用 Rust 打包网页生成很小的 Mac App，支持微信读书、Twitter、Youtube、Google Translate、Reference、RunCode、Witeboard、Flomo、语雀、Vercel、V2EX、开发工具箱等，开发教程可见底部，可去<a href=https://github.com/tw93/Pake/discussions>讨论区</a>看看有没有好东西。</div>
 </p>
 
 ## 特征
@@ -11,7 +10,7 @@
 🏂 **小**：相比传统的 Electron 套壳打包，要小将近 40 倍，不到 3M ([数据](https://static.tw93.fun/img/pakedata.png))  
 😂 **快**：Pake 的底层使用的 Rust Tauri 框架，性能体验较 JS 框架要轻快不少，内存小很多  
 🩴 **特**：不是单纯打包，实现了快捷键的透传、沉浸式的窗口、拖动、样式改写、去广告、产品的极简风格定制  
-🐶 **玩**：只是一个很简单的小玩具，用 Rust 替代之前套壳网页老的思路玩法，PWA 也很好，友好交流勿喷
+🐶 **玩**：只是一个很简单的小玩具，用 Rust Tauri 替代之前套壳网页老的思路玩法，PWA 其实也很好
 
 ## 下载
 
