@@ -2,7 +2,7 @@
 <p align="center">
   <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
   <h1 align="center">Pake</h1>
-  <div align="left">A simple way to package a web page to Mac App, supporting WeRead、Twitter、Youtube、Google Translate、Reference、Flomo、YuQue、Witeboard、RunCode、Vercel、V2EX、DevTools, development tutorial can be seen at the bottom, welcome to <a href=https://github.com/tw93/Pake/discussions>Discussions</a> to see if there have anything you interesting.</div>
+  <div align="left">A simple way to package a web page to Mac App, supporting WeRead、Twitter、Youtube、Reference、Flomo、YuQue、Google Translate、Witeboard、RunCode、Vercel、V2EX、DevTools, development tutorial can be seen at the bottom, welcome to <a href=https://github.com/tw93/Pake/discussions>Discussions</a> to see if there have anything you interesting.</div>
 </p>
 
 ## Features
