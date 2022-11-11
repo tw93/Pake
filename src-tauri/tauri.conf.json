@@ -22,6 +22,7 @@
         "icons/weRead.icns",
         "icons/icon.ico"
       ],
+      "identifier": "com.tw93.weRead",
       "active": true,
       "category": "DeveloperTool",
       "copyright": "",
@@ -29,7 +30,6 @@
         "depends": []
       },
       "externalBin": [],
-      "identifier": "com.tw93.weRead",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
