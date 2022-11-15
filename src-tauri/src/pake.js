@@ -128,10 +128,11 @@ window.addEventListener('DOMContentLoaded', (_event) => {
 
   document.addEventListener('click', (e) => {
     const origin = e.target.closest('a');
-    const href = origin.href;
-    if (href) {
+    if (origin && origin.href) {
       origin.target = '_self';
+
       //额外处理下 twitter 的外跳，对于其他需要外跳的可以改这里成对应域名
+      const href = origin.href;
       if(location.host === "twitter.com" && href.indexOf("twitter.com")===-1){
         e.preventDefault();
         window.ipc.postMessage(`open_browser:${href}`);
