@@ -93,7 +93,18 @@ a[href='/i/bookmarks'] {
   header[role='banner'] nav[role='navigation']:hover > * > div {
     backdrop-filter: blur(12px) !important;
   }
+  header[role='banner'] nav[role='navigation'] > a {
+    position: relative;
+  }
 
+  header[role='banner'] nav[role='navigation'] > a::before {
+    content: '';
+    position: absolute;
+    top: 0px;
+    right: -40px;
+    bottom: 0px;
+    left: 0px;
+  }
   /* Align account button with floating tweet button */
   [data-testid='SideNav_AccountSwitcher_Button'] {
     bottom: 18px !important;
