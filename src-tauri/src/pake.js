@@ -1,5 +1,3 @@
-// @ts-check
-
 /**
  * @typedef {string} KeyboardKey `event.key` 的代号，
  * 见 <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values>
@@ -133,6 +131,11 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     const href = origin.href;
     if (href) {
       origin.target = '_self';
+      //额外处理下 twitter 的外跳，对于其他需要外跳的可以改这里成对应域名
+      if(location.host === "twitter.com" && href.indexOf("twitter.com")===-1){
+        e.preventDefault();
+        window.ipc.postMessage(`open_browser:${href}`);
+      }
     }
   });
 });
