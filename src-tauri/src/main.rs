@@ -84,6 +84,9 @@ fn main() -> wry::Result<()> {
             } else {
                 window.set_fullscreen(Some(Fullscreen::Borderless(None)));
             }
+        } else if req.starts_with("open_browser"){
+          let href = req.replace("open_browser:", "");
+          webbrowser::open(&href).expect("no browser");
         }
     };
 
