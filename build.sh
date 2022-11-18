@@ -19,7 +19,7 @@ export total=4
 old_name="weread"
 old_zh_name="微信阅读"
 old_url="weread.qq.com"
-package_prefix="com.tw93"
+package_prefix="com-tw93"
 
 if [[ "$OSTYPE" =~ ^linux ]]; then
   echo "==============="
@@ -28,8 +28,7 @@ if [[ "$OSTYPE" =~ ^linux ]]; then
   # for linux, package name may be com.xxx.xxx
   echo "rename package name"
   export desktop_file="src-tauri/assets/${package_prefix}.weread.desktop"
-  mv "src-tauri/assets/weread.desktop" ${desktop_file}
-  sed -i "s/\"productName\": \"weread\"/\"productName\": \"${package_prefix}.weread\"" ${desktop_file}
+  sed -i "s/\"productName\": \"weread\"/\"productName\": \"${package_prefix}-weread\"/g" src-tauri/tauri.conf.json
 fi
 
 if [[ "$OSTYPE" =~ ^darwin ]]; then
@@ -61,8 +60,8 @@ for app_info in "${app_list[@]}"; do
 
   if [[ "$OSTYPE" =~ ^linux ]]; then
     echo "update desktop"
-    old_desktop="src-tauri/assets/${package_prefix}.${old_name}.desktop"
-    new_desktop="src-tauri/assets/${package_prefix}.${old_name}.desktop"
+    old_desktop="src-tauri/assets/${package_prefix}-${old_name}.desktop"
+    new_desktop="src-tauri/assets/${package_prefix}-${package_name}.desktop"
     mv ${old_desktop}  ${new_desktop}
     sed -i "s/${old_zh_name}/${package_zh_name}/g" ${new_desktop}
     sed -i "s/${old_name}/${package_name}/g" ${new_desktop}
