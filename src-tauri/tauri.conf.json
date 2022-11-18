@@ -1,6 +1,6 @@
 {
   "package": {
-    "productName": "weRead",
+    "productName": "com.tw93.weread",
     "version": "0.2.0"
   },
   "tauri": {
@@ -19,11 +19,11 @@
     },
     "bundle": {
       "icon": [
-        "icons/weRead.icns",
+        "icons/weread.icns",
         "icons/icon.ico",
-        "png/weRead_512.png"
+        "png/weread_512.png"
       ],
-      "identifier": "com.tw93.weRead",
+      "identifier": "com.tw93.weread",
       "active": true,
       "category": "DeveloperTool",
       "copyright": "",
@@ -37,7 +37,10 @@
           "libgtk-3-dev",
           "libayatana-appindicator3-dev",
           "librsvg2-dev"
-        ]
+        ],
+        "files": {
+          "/usr/share/applications/com-tw93-weread.desktop": "assets/com-tw93-weread.desktop"
+        }
       },
       "externalBin": [],
       "longDescription": "",
@@ -50,7 +53,7 @@
       },
       "resources": [],
       "shortDescription": "",
-      "targets": "all",
+      "targets": ["deb",  "msi", "dmg"],
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",
