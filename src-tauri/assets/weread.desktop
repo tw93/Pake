@@ -1,9 +1,9 @@
 [Desktop Entry]
 Encoding=UTF-8
 Categories=Office
-Exec=com-tw93-weread
-Icon=com-tw93-weread
-Name=com-tw93-weread
+Exec=weread
+Icon=weread
+Name=weread
 Name[zh_CN]=微信阅读
 StartupNotify=true
 Terminal=false
