@@ -39,7 +39,7 @@
           "librsvg2-dev"
         ],
         "files": {
-          "/usr/share/applications/weread.desktop": "assets/weread.desktop"
+          "/usr/share/applications/com-tw93-weread.desktop": "assets/com-tw93-weread.desktop"
         }
       },
       "externalBin": [],
