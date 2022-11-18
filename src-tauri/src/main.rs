@@ -2,6 +2,10 @@
 #![windows_subsystem = "windows"]
 extern crate image;
 use tauri_utils::config::{Config, WindowConfig};
+#[cfg(target_os = "macos")]
+use wry::application::platform::macos::WindowBuilderExtMacOS;
+#[cfg(target_os = "windows")]
+use wry::application::platform::windows::WindowBuilderExtWindows;
 
 #[cfg(target_os="macos")]
 use wry::{
@@ -46,18 +50,30 @@ fn main() -> wry::Result<()> {
     #[cfg(target_os = "macos")]
     let mut menu_bar_menu = Menu::new();
     #[cfg(target_os = "macos")]
-    let mut first_menu = Menu::new()
-        .add_native_item(MenuItem::Hide)
-        .add_native_item(MenuItem::EnterFullScreen)
-        .add_native_item(MenuItem::Minimize)
-        .add_native_item(MenuItem::Separator)
-        .add_native_item(MenuItem::Copy)
-        .add_native_item(MenuItem::Cut)
-        .add_native_item(MenuItem::Paste)
-        .add_native_item(MenuItem::Undo)
-        .add_native_item(MenuItem::Redo)
-        .add_native_item(MenuItem::SelectAll)
-        .add_native_item(MenuItem::Separator);
+    let mut first_menu = Menu::new();
+    #[cfg(target_os = "macos")]
+    first_menu.add_native_item(MenuItem::Hide);
+    #[cfg(target_os = "macos")]
+    first_menu.add_native_item(MenuItem::EnterFullScreen);
+    #[cfg(target_os = "macos")]
+    first_menu.add_native_item(MenuItem::Minimize);
+    #[cfg(target_os = "macos")]
+    first_menu.add_native_item(MenuItem::Separator);
+    #[cfg(target_os = "macos")]
+    first_menu.add_native_item(MenuItem::Copy);
+    #[cfg(target_os = "macos")]
+    first_menu.add_native_item(MenuItem::Cut);
+    #[cfg(target_os = "macos")]
+    first_menu.add_native_item(MenuItem::Paste);
+    #[cfg(target_os = "macos")]
+    first_menu.add_native_item(MenuItem::Undo);
+    #[cfg(target_os = "macos")]
+    first_menu.add_native_item(MenuItem::Redo);
+    #[cfg(target_os = "macos")]
+    first_menu.add_native_item(MenuItem::SelectAll);
+    #[cfg(target_os = "macos")]
+    first_menu.add_native_item(MenuItem::Separator);
+
     #[cfg(target_os = "macos")]
     let close_item = first_menu.add_item(
         MenuItemAttributes::new("CloseWindow")
@@ -69,12 +85,31 @@ fn main() -> wry::Result<()> {
 
     #[cfg(target_os = "macos")]
     menu_bar_menu.add_submenu("App", true, first_menu);
-
+    #[cfg(target_os = "linux")]
     let WindowConfig {
         url,
         width,
         height,
         resizable,
+        fullscreen,
+        ..
+    } = get_windows_config().unwrap_or(WindowConfig::default());
+    #[cfg(target_os = "windows")]
+    let WindowConfig {
+        url,
+        width,
+        height,
+        resizable,
+        fullscreen,
+        ..
+    } = get_windows_config().unwrap_or(WindowConfig::default());
+    #[cfg(target_os = "macos")]
+    let WindowConfig {
+        url,
+        width,
+        height,
+        resizable,
+        transparent,
         fullscreen,
         ..
     } = get_windows_config().unwrap_or(WindowConfig::default());
