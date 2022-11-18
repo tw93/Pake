@@ -63,8 +63,19 @@
 
 更多常用 App 下载可以去 [Releases](https://github.com/tw93/Pake/releases) 中看看。
 
-## 快捷键
+## 快捷键(Windows/Linux)
 
+1. <kbd>Ctrl</kbd> + <kbd>⬅</kbd>：返回上一个页面
+2. <kbd>Ctrl</kbd> + <kbd>➡</kbd>：去下一个页面
+3. <kbd>Ctrl</kbd> + <kbd>⬆</kbd>：自动滚动到页面顶部
+4. <kbd>Ctrl</kbd> + <kbd>⬇</kbd>：自动滚动到页面底部
+5. <kbd>Ctrl</kbd> + <kbd>r</kbd>：刷新页面
+6. <kbd>Ctrl</kbd> + <kbd>-</kbd>：缩小页面
+7. <kbd>Ctrl</kbd> + <kbd>+</kbd>：放大页面
+8. <kbd>Ctrl</kbd> + <kbd>=</kbd>：放大页面
+9. <kbd>Ctrl</kbd> + <kbd>0</kbd>：重置页面缩放
+
+## 快捷键(Mac)
 1. <kbd>⌘</kbd> + <kbd>[</kbd>：返回上一个页面
 2. <kbd>⌘</kbd> + <kbd>]</kbd>：去下一个页面
 3. <kbd>⌘</kbd> + <kbd>↑</kbd>：自动滚动到页面顶部

@@ -1,22 +1,23 @@
+// at the top of main.rs - that will prevent the console from showing
+#![windows_subsystem = "windows"]
+extern crate image;
 use tauri_utils::config::{Config, WindowConfig};
-#[cfg(target_os = "macos")]
-use wry::application::platform::macos::WindowBuilderExtMacOS;
-#[cfg(target_os = "windows")]
-use wry::application::platform::windows::WindowBuilderExtWindows;
+
+use wry::{
+    application::{
+        accelerator::{Accelerator, SysMods},
+        event::{Event, StartCause, WindowEvent},
+        event_loop::{ControlFlow, EventLoop},
+        keyboard::KeyCode,
+        menu::{MenuBar as Menu, MenuItem, MenuItemAttributes, MenuType},
+        window::{Fullscreen, Window, WindowBuilder, Icon},
+    },
+    webview::WebViewBuilder,
+};
+
 
 fn main() -> wry::Result<()> {
-    use wry::{
-        application::{
-            accelerator::{Accelerator, SysMods},
-            event::{Event, StartCause, WindowEvent},
-            event_loop::{ControlFlow, EventLoop},
-            keyboard::KeyCode,
-            menu::{MenuBar as Menu, MenuItem, MenuItemAttributes, MenuType},
-            window::{Fullscreen, Window, WindowBuilder},
-        },
-        webview::WebViewBuilder,
-    };
-
+    
     let mut menu_bar_menu = Menu::new();
     let mut first_menu = Menu::new();
 
@@ -44,7 +45,6 @@ fn main() -> wry::Result<()> {
         width,
         height,
         resizable,
-        transparent,
         fullscreen,
         ..
     } = get_windows_config().unwrap_or(WindowConfig::default());
@@ -58,13 +58,23 @@ fn main() -> wry::Result<()> {
             None
         })
         .with_inner_size(wry::application::dpi::LogicalSize::new(width, height));
+    let icon_path = concat!(env!("CARGO_MANIFEST_DIR"), "/icons/icon.ico");
+    let icon = load_icon(std::path::Path::new(icon_path));
+
 
     #[cfg(target_os = "windows")]
     let window = common_window
-        .with_decorations(false)
+        .with_decorations(true)
         .with_title("")
+        .with_window_icon(Some(icon))
         .build(&event_loop)
         .unwrap();
+    #[cfg(target_os = "linux")]
+    let window = common_window
+        .with_title("")
+        .build(&event_loop)
+        .with_menu(menu_bar_menu)
+        .unwrap(); 
     #[cfg(target_os = "macos")]
     let window = common_window
         .with_fullsize_content_view(true)
@@ -89,11 +99,27 @@ fn main() -> wry::Result<()> {
           webbrowser::open(&href).expect("no browser");
         }
     };
-
+    #[cfg(target_os = "windows")]
     let webview = WebViewBuilder::new(window)?
         .with_url(&url.to_string())?
         .with_devtools(cfg!(feature = "devtools"))
         .with_initialization_script(include_str!("pake.js"))
+        .with_ipc_handler(handler)
+        .build()?;
+    
+    #[cfg(target_os = "linux")]
+    let webview = WebViewBuilder::new(window)?
+        .with_url(&url.to_string())?
+        .with_devtools(cfg!(feature = "devtools"))
+        .with_initialization_script(include_str!("pake.js"))
+        .with_ipc_handler(handler)
+        .build()?;
+
+    #[cfg(target_os = "macos")]
+    let webview = WebViewBuilder::new(window)?
+        .with_url(&url.to_string())?
+        .with_devtools(cfg!(feature = "devtools"))
+        .with_initialization_script(include_str!("pake-mac.js"))
         .with_ipc_handler(handler)
         .build()?;
 
@@ -131,3 +157,17 @@ fn get_windows_config() -> Option<WindowConfig> {
 
     config.tauri.windows.iter().next().cloned()
 }
+
+
+fn load_icon(path: &std::path::Path) -> Icon {
+    let (icon_rgba, icon_width, icon_height) = {
+      // alternatively, you can embed the icon in the binary through `include_bytes!` macro and use `image::load_from_memory`
+      let image = image::open(path)
+        .expect("Failed to open icon path")
+        .into_rgba8();
+      let (width, height) = image.dimensions();
+      let rgba = image.into_raw();
+      (rgba, width, height)
+    };
+    Icon::from_rgba(icon_rgba, icon_width, icon_height).expect("Failed to open icon")
+  }

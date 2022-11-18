@@ -63,7 +63,20 @@
 
 More common apps can be downloaded from [Releases](https://github.com/tw93/Pake/releases).
 
-## Shortcuts
+
+## Shortcuts(Windows/Linux)
+
+1. <kbd>Ctrl</kbd> + <kbd>⬅</kbd>：Return to the previous page
+2. <kbd>Ctrl</kbd> + <kbd>➡</kbd>：Go to the next page
+3. <kbd>Ctrl</kbd> + <kbd>⬆</kbd>：Auto scroll to top of page
+4. <kbd>Ctrl</kbd> + <kbd>⬇</kbd>：Auto scroll to bottom of page
+5. <kbd>Ctrl</kbd> + <kbd>r</kbd>：Refresh Page
+6. <kbd>Ctrl</kbd> + <kbd>-</kbd>：Zoom out the page
+7. <kbd>Ctrl</kbd> + <kbd>+</kbd>：Zoom in the Page
+8. <kbd>Ctrl</kbd> + <kbd>=</kbd>：Zoom in the Page
+9. <kbd>Ctrl</kbd> + <kbd>0</kbd>：Reset the page zoom
+
+## Shortcuts(Mac)
 
 1. <kbd>⌘</kbd> + <kbd>[</kbd>：Return to the previous page
 2. <kbd>⌘</kbd> + <kbd>]</kbd>：Go to the next page
