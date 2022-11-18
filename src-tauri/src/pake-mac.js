@@ -1,20 +1,19 @@
 /**
  * @typedef {string} KeyboardKey `event.key` 的代号，
  * 见 <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values>
- * @typedef {() => void} OnKeyDown 使用者按下 [CtrlKey] 时应该执行的行为
- * 以 Ctrl 键 为首的快捷键清单。
+ * @typedef {() => void} OnKeyDown 使用者按下 ⌘ [KeyboardKey] 时应该执行的行为
+ * 以 Meta 键 (⌘) 为首的快捷键清单。
  * 每个写在这里的 shortcuts 都会运行 {@link Event.preventDefault}.
  * @type {Record<KeyboardKey, OnKeyDown>}
  */
-const ctrlKeyShortcuts = {
+ const metaKeyShortcuts = {
   'ArrowUp': () => scrollTo(0, 0),
   'ArrowDown': () => scrollTo(0, document.body.scrollHeight),
-  'ArrowLeft': () => window.history.back(),
-  'ArrowRight': () => window.history.forward(),
+  '[': () => window.history.back(),
+  ']': () => window.history.forward(),
   'r': () => window.location.reload(),
   '-': () => zoomOut(),
   '=': () => zoomIn(),
-  '+': () => zoomIn(),
   '0': () => zoomCommon(() => '100%'),
 }
 
@@ -122,8 +121,8 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       f();
     };
 
-    if (event.ctrlKey && event.key in ctrlKeyShortcuts) {
-      preventDefault(ctrlKeyShortcuts[event.key]);
+    if (event.metaKey && event.key in metaKeyShortcuts) {
+      preventDefault(metaKeyShortcuts[event.key]);
     }
   });
 
@@ -173,3 +172,4 @@ function zoomOut() {
     `${Math.max(parseInt(htmlZoom) - 10, 30)}%`
   );
 }
+
