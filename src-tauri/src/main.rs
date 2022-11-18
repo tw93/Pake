@@ -20,11 +20,9 @@ use wry::{
 #[cfg(target_os="windows")]
 use wry::{
     application::{
-        accelerator::{Accelerator, SysMods},
         event::{Event, StartCause, WindowEvent},
         event_loop::{ControlFlow, EventLoop},
-        keyboard::KeyCode,
-        menu::{MenuBar as Menu, MenuItem, MenuItemAttributes, MenuType},
+        menu::{MenuType},
         window::{Fullscreen, Window, WindowBuilder, Icon},
     },
     webview::WebViewBuilder,
@@ -36,7 +34,7 @@ use wry::{
     application::{
         event::{Event, StartCause, WindowEvent},
         event_loop::{ControlFlow, EventLoop},
-        menu::{MenuBar as Menu, MenuItem, MenuType},
+        menu::{MenuType},
         window::{Fullscreen, Window, WindowBuilder},
     },
     webview::WebViewBuilder,
@@ -45,27 +43,31 @@ use wry::{
 
 fn main() -> wry::Result<()> {
     
+    #[cfg(target_os = "macos")]
     let mut menu_bar_menu = Menu::new();
-    let mut first_menu = Menu::new();
-
-    first_menu.add_native_item(MenuItem::Hide);
-    first_menu.add_native_item(MenuItem::EnterFullScreen);
-    first_menu.add_native_item(MenuItem::Minimize);
-    first_menu.add_native_item(MenuItem::Separator);
-    first_menu.add_native_item(MenuItem::Copy);
-    first_menu.add_native_item(MenuItem::Cut);
-    first_menu.add_native_item(MenuItem::Paste);
-    first_menu.add_native_item(MenuItem::Undo);
-    first_menu.add_native_item(MenuItem::Redo);
-    first_menu.add_native_item(MenuItem::SelectAll);
-    first_menu.add_native_item(MenuItem::Separator);
+    #[cfg(target_os = "macos")]
+    let mut first_menu = Menu::new()
+        .add_native_item(MenuItem::Hide)
+        .add_native_item(MenuItem::EnterFullScreen)
+        .add_native_item(MenuItem::Minimize)
+        .add_native_item(MenuItem::Separator)
+        .add_native_item(MenuItem::Copy)
+        .add_native_item(MenuItem::Cut)
+        .add_native_item(MenuItem::Paste)
+        .add_native_item(MenuItem::Undo)
+        .add_native_item(MenuItem::Redo)
+        .add_native_item(MenuItem::SelectAll)
+        .add_native_item(MenuItem::Separator);
     #[cfg(target_os = "macos")]
     let close_item = first_menu.add_item(
         MenuItemAttributes::new("CloseWindow")
             .with_accelerators(&Accelerator::new(SysMods::Cmd, KeyCode::KeyW)),
     );
+
+    #[cfg(target_os = "macos")]
     first_menu.add_native_item(MenuItem::Quit);
 
+    #[cfg(target_os = "macos")]
     menu_bar_menu.add_submenu("App", true, first_menu);
 
     let WindowConfig {
@@ -131,12 +133,13 @@ fn main() -> wry::Result<()> {
         }
     };
     #[cfg(target_os = "windows")]
-    let webview = WebViewBuilder::new(window)?
+    let  webview = WebViewBuilder::new(window)?
         .with_url(&url.to_string())?
         .with_devtools(cfg!(feature = "devtools"))
         .with_initialization_script(include_str!("pake.js"))
         .with_ipc_handler(handler)
         .build()?;
+    
     
     #[cfg(target_os = "linux")]
     let webview = WebViewBuilder::new(window)?
@@ -177,6 +180,7 @@ fn main() -> wry::Result<()> {
                     webview.window().set_minimized(true);
                 }
                 println!("Clicked on {:?}", menu_id);
+                println!("Clicked on {:?}", webview.window().is_visible());
             }
             _ => (),
         }
