@@ -107,6 +107,9 @@ npm run build:windows
 
 // 打包（Linux）
 npm run build:linux
+
+// 一键打包所有项目（Linux/Mac）
+chmod +x build.sh && ./build.sh
 ```
 
 ## 打新包

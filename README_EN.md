@@ -111,6 +111,9 @@ npm run build:windows
 npm run build:linux
 ```
 
+// Package all your projects in one click
+chmod +x build.sh && ./build.sh
+
 ## New pack
 
 1. Modify the `tauri.conf.json` in the `src-tauri` directory to include 4 fields `url, productName, icon, identifier`, icon can be selected from the `icons` directory or downloaded from [macOSicons](https://macosicons.com/#/) to match the product.
