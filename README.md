@@ -99,8 +99,14 @@ npm i
 // 调试
 npm run dev
 
-// 打包
+// 打包(Mac)
 npm run build
+
+// 打包（Windows）
+npm run build:windows
+
+// 打包（Linux）
+npm run build:linux
 ```
 
 ## 打新包

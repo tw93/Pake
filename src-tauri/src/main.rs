@@ -3,6 +3,21 @@
 extern crate image;
 use tauri_utils::config::{Config, WindowConfig};
 
+#[cfg(target_os="macos")]
+use wry::{
+    application::{
+        accelerator::{Accelerator, SysMods},
+        event::{Event, StartCause, WindowEvent},
+        event_loop::{ControlFlow, EventLoop},
+        keyboard::KeyCode,
+        menu::{MenuBar as Menu, MenuItem, MenuItemAttributes, MenuType},
+        window::{Fullscreen, Window, WindowBuilder},
+    },
+    webview::WebViewBuilder,
+};
+
+
+#[cfg(target_os="windows")]
 use wry::{
     application::{
         accelerator::{Accelerator, SysMods},
@@ -11,6 +26,18 @@ use wry::{
         keyboard::KeyCode,
         menu::{MenuBar as Menu, MenuItem, MenuItemAttributes, MenuType},
         window::{Fullscreen, Window, WindowBuilder, Icon},
+    },
+    webview::WebViewBuilder,
+};
+
+
+#[cfg(target_os="linux")]
+use wry::{
+    application::{
+        event::{Event, StartCause, WindowEvent},
+        event_loop::{ControlFlow, EventLoop},
+        menu::{MenuBar as Menu, MenuItem, MenuType},
+        window::{Fullscreen, Window, WindowBuilder},
     },
     webview::WebViewBuilder,
 };
@@ -32,6 +59,7 @@ fn main() -> wry::Result<()> {
     first_menu.add_native_item(MenuItem::Redo);
     first_menu.add_native_item(MenuItem::SelectAll);
     first_menu.add_native_item(MenuItem::Separator);
+    #[cfg(target_os = "macos")]
     let close_item = first_menu.add_item(
         MenuItemAttributes::new("CloseWindow")
             .with_accelerators(&Accelerator::new(SysMods::Cmd, KeyCode::KeyW)),
@@ -58,7 +86,9 @@ fn main() -> wry::Result<()> {
             None
         })
         .with_inner_size(wry::application::dpi::LogicalSize::new(width, height));
+    #[cfg(target_os = "windows")]
     let icon_path = concat!(env!("CARGO_MANIFEST_DIR"), "/icons/icon.ico");
+    #[cfg(target_os = "windows")]
     let icon = load_icon(std::path::Path::new(icon_path));
 
 
@@ -69,12 +99,13 @@ fn main() -> wry::Result<()> {
         .with_window_icon(Some(icon))
         .build(&event_loop)
         .unwrap();
+
     #[cfg(target_os = "linux")]
     let window = common_window
         .with_title("")
         .build(&event_loop)
-        .with_menu(menu_bar_menu)
         .unwrap(); 
+
     #[cfg(target_os = "macos")]
     let window = common_window
         .with_fullsize_content_view(true)
@@ -141,6 +172,7 @@ fn main() -> wry::Result<()> {
                 origin: MenuType::MenuBar,
                 ..
             } => {
+                #[cfg(target_os = "macos")]
                 if menu_id == close_item.clone().id() {
                     webview.window().set_minimized(true);
                 }
@@ -158,7 +190,7 @@ fn get_windows_config() -> Option<WindowConfig> {
     config.tauri.windows.iter().next().cloned()
 }
 
-
+#[cfg(target_os = "windows")]
 fn load_icon(path: &std::path::Path) -> Icon {
     let (icon_rgba, icon_width, icon_height) = {
       // alternatively, you can embed the icon in the binary through `include_bytes!` macro and use `image::load_from_memory`

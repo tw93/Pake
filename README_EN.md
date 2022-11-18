@@ -101,8 +101,14 @@ npm i
 // Local development
 npm run dev
 
-// Pack
+// Pack (Mac)
 npm run build
+
+// Pack (Windows)
+npm run build:windows
+
+// Pack(Linux)
+npm run build:linux
 ```
 
 ## New pack

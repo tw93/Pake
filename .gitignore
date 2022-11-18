@@ -21,6 +21,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.npmrc
 
 package-lock.json
 yarn.lock
