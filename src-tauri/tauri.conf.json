@@ -1,6 +1,6 @@
 {
   "package": {
-    "productName": "WeRead",
+    "productName": "weRead",
     "version": "0.2.0"
   },
   "tauri": {
@@ -20,7 +20,8 @@
     "bundle": {
       "icon": [
         "icons/weRead.icns",
-        "icons/icon.ico"
+        "icons/icon.ico",
+        "png/weRead_512.png"
       ],
       "identifier": "com.tw93.weRead",
       "active": true,
