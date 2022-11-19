@@ -88,6 +88,10 @@
 
 此外还支持双击头部进行全屏切换，拖拽头部进行移动窗口，还有其他需求，欢迎提过来。
 
+## 已知Bug
+- Windows下不能安装到C:\Program File，会直接闪退。建议安装到其他目录，比如D:\Program Files。
+- Linux下暂时不能存cookie，即应用关闭后数据清空，账号自动推出。
+
 ## 开发
 
 开始前参考 [Tauri](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-macos) 快速配置好环境，如果你想打包 Windows、Linux 系统的包，可以参考 [Building](https://tauri.app/v1/guides/building/) 文档
