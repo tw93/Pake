@@ -153,6 +153,13 @@ chmod +x build.sh && ./build.sh
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/Tlntin">
+            <img src="https://avatars.githubusercontent.com/u/28218658?v=4" width="90;" alt="Tlntin"/>
+            <br />
+            <sub><b>Tlntin</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/liby">
             <img src="https://avatars.githubusercontent.com/u/38807139?v=4" width="90;" alt="liby"/>
             <br />
@@ -186,15 +193,15 @@ chmod +x build.sh && ./build.sh
             <br />
             <sub><b>2nthony</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/AielloChan">
             <img src="https://avatars.githubusercontent.com/u/7900765?v=4" width="90;" alt="AielloChan"/>
             <br />
             <sub><b>Aiello</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/houhoz">
             <img src="https://avatars.githubusercontent.com/u/19684376?v=4" width="90;" alt="houhoz"/>
