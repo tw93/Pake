@@ -26,9 +26,9 @@ if __name__ == "__main__":
         image_32 = image.copy().resize((32, 32))
         image_name = os.path.splitext(file)[0]
         image_512_path = os.path.join(png_dir, image_name + "_512.png")
-        image_32_path = os.path.join(png_dir, image_name + "_32.png")
+        image_32_path = os.path.join(png_dir, image_name + "_32.ico")
         image_512.save(image_512_path, "PNG")
-        image_32.save(image_32_path, "PNG")
+        image_32.save(image_32_path, "ICO")
     print("png file write success.")
     print(f"There are {len(os.listdir(png_dir))} png picture in ", png_dir)
 

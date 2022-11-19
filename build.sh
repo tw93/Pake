@@ -56,7 +56,7 @@ for app_info in "${app_list[@]}"; do
   fi
   
   echo "update ico with 32x32 pictue"
-  cp "src-tauri/png/${package_name}_32.png" "src-tauri/icons/icon.ico"
+  cp "src-tauri/png/${package_name}_32.ico" "src-tauri/icons/icon.ico"
 
   if [[ "$OSTYPE" =~ ^linux ]]; then
     echo "update desktop"

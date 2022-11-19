@@ -4,8 +4,6 @@ extern crate image;
 use tauri_utils::config::{Config, WindowConfig};
 #[cfg(target_os = "macos")]
 use wry::application::platform::macos::WindowBuilderExtMacOS;
-#[cfg(target_os = "windows")]
-use wry::application::platform::windows::WindowBuilderExtWindows;
 
 #[cfg(target_os="macos")]
 use wry::{
