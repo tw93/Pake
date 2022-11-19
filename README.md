@@ -63,8 +63,19 @@
 
 更多常用 App 下载可以去 [Releases](https://github.com/tw93/Pake/releases) 中看看。
 
-## 快捷键
+## 快捷键(Windows/Linux)
 
+1. <kbd>Ctrl</kbd> + <kbd>⬅</kbd>：返回上一个页面
+2. <kbd>Ctrl</kbd> + <kbd>➡</kbd>：去下一个页面
+3. <kbd>Ctrl</kbd> + <kbd>⬆</kbd>：自动滚动到页面顶部
+4. <kbd>Ctrl</kbd> + <kbd>⬇</kbd>：自动滚动到页面底部
+5. <kbd>Ctrl</kbd> + <kbd>r</kbd>：刷新页面
+6. <kbd>Ctrl</kbd> + <kbd>-</kbd>：缩小页面
+7. <kbd>Ctrl</kbd> + <kbd>+</kbd>：放大页面
+8. <kbd>Ctrl</kbd> + <kbd>=</kbd>：放大页面
+9. <kbd>Ctrl</kbd> + <kbd>0</kbd>：重置页面缩放
+
+## 快捷键(Mac)
 1. <kbd>⌘</kbd> + <kbd>[</kbd>：返回上一个页面
 2. <kbd>⌘</kbd> + <kbd>]</kbd>：去下一个页面
 3. <kbd>⌘</kbd> + <kbd>↑</kbd>：自动滚动到页面顶部
@@ -77,6 +88,10 @@
 
 此外还支持双击头部进行全屏切换，拖拽头部进行移动窗口，还有其他需求，欢迎提过来。
 
+## 已知Bug
+- Windows下不能安装到C:\Program File，会直接闪退。建议安装到其他目录，比如D:\Program Files。
+- Linux下暂时不能存cookie，即应用关闭后数据清空，账号自动推出。
+
 ## 开发
 
 开始前参考 [Tauri](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-macos) 快速配置好环境，如果你想打包 Windows、Linux 系统的包，可以参考 [Building](https://tauri.app/v1/guides/building/) 文档
@@ -88,8 +103,20 @@ npm i
 // 调试
 npm run dev
 
-// 打包
+// 打包(Mac)
 npm run build
+
+// 打包（Windows）
+npm run build:windows
+
+// 打包（Linux）
+npm run build:linux
+
+// 一键打包所有项目（Linux/Mac）
+chmod +x build.sh && ./build.sh
+
+// 一键打包所有项目（Windows)
+.\build.bat
 ```
 
 ## 打新包

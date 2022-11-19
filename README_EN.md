@@ -63,7 +63,20 @@
 
 More common apps can be downloaded from [Releases](https://github.com/tw93/Pake/releases).
 
-## Shortcuts
+
+## Shortcuts(Windows/Linux)
+
+1. <kbd>Ctrl</kbd> + <kbd>⬅</kbd>：Return to the previous page
+2. <kbd>Ctrl</kbd> + <kbd>➡</kbd>：Go to the next page
+3. <kbd>Ctrl</kbd> + <kbd>⬆</kbd>：Auto scroll to top of page
+4. <kbd>Ctrl</kbd> + <kbd>⬇</kbd>：Auto scroll to bottom of page
+5. <kbd>Ctrl</kbd> + <kbd>r</kbd>：Refresh Page
+6. <kbd>Ctrl</kbd> + <kbd>-</kbd>：Zoom out the page
+7. <kbd>Ctrl</kbd> + <kbd>+</kbd>：Zoom in the Page
+8. <kbd>Ctrl</kbd> + <kbd>=</kbd>：Zoom in the Page
+9. <kbd>Ctrl</kbd> + <kbd>0</kbd>：Reset the page zoom
+
+## Shortcuts(Mac)
 
 1. <kbd>⌘</kbd> + <kbd>[</kbd>：Return to the previous page
 2. <kbd>⌘</kbd> + <kbd>]</kbd>：Go to the next page
@@ -77,6 +90,10 @@ More common apps can be downloaded from [Releases](https://github.com/tw93/Pake/
 
 In addition, it supports double clicking the head to switch to full screen, and dragging the head to move the window
 
+## Bugs
+- It cannot be installed to C:\Program File under Windows, and it will crash directly. It is recommended to install to another directory, such as D:\Program Files.
+- Under Linux, cookies cannot be stored temporarily, that is, the data will be cleared after the application is closed, and the account will be automatically released.
+
 ## Development
 
 Refer to the [Tauri documentation](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-macos) to quickly configure your environment before you start, if you want to package Windows or Linux systems, you can refer to [Building](https://tauri.app/v1/guides/building/) Documentation.
@@ -88,9 +105,24 @@ npm i
 // Local development
 npm run dev
 
-// Pack
+// Pack (Mac)
 npm run build
+
+// Pack (Windows)
+npm run build:windows
+
+// Pack(Linux)
+npm run build:linux
+
+// One-click packaging of all projects (Linux/Mac)
+chmod +x build.sh && ./build.sh
+
+// One-click packaging of all projects (Windows)
+.\build.bat
 ```
+
+// Package all your projects in one click
+chmod +x build.sh && ./build.sh
 
 ## New pack
 
