@@ -14,7 +14,7 @@
     <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank">
       <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
   </div>
-  <div align="left">很简单用 Rust 打包网页生成很小的 Mac App，支持 微信读书、Twitter、Youtube、Flomo、Reference、RunCode、Google Translate、语雀、Witeboard、Vercel、V2EX、开发工具箱等，欢迎去 <a href=https://github.com/tw93/Pake/discussions>讨论区</a> 交流分享。</div>
+  <div align="left">很简单用 Rust 打包网页生成很小的桌面 App，支持 Mac/Windows/Linux 应用，当前已打包微信读书、Twitter、Youtube、Flomo、Reference、RunCode、Google Translate、语雀、Witeboard、Vercel、V2EX、开发工具箱等，欢迎去 <a href=https://github.com/tw93/Pake/discussions>讨论区</a> 交流分享。</div>
 </p>
 
 ## 特征
@@ -63,19 +63,8 @@
 
 更多常用 App 下载可以去 [Releases](https://github.com/tw93/Pake/releases) 中看看。
 
-## 快捷键(Windows/Linux)
-
-1. <kbd>Ctrl</kbd> + <kbd>⬅</kbd>：返回上一个页面
-2. <kbd>Ctrl</kbd> + <kbd>➡</kbd>：去下一个页面
-3. <kbd>Ctrl</kbd> + <kbd>⬆</kbd>：自动滚动到页面顶部
-4. <kbd>Ctrl</kbd> + <kbd>⬇</kbd>：自动滚动到页面底部
-5. <kbd>Ctrl</kbd> + <kbd>r</kbd>：刷新页面
-6. <kbd>Ctrl</kbd> + <kbd>-</kbd>：缩小页面
-7. <kbd>Ctrl</kbd> + <kbd>+</kbd>：放大页面
-8. <kbd>Ctrl</kbd> + <kbd>=</kbd>：放大页面
-9. <kbd>Ctrl</kbd> + <kbd>0</kbd>：重置页面缩放
-
 ## 快捷键(Mac)
+
 1. <kbd>⌘</kbd> + <kbd>[</kbd>：返回上一个页面
 2. <kbd>⌘</kbd> + <kbd>]</kbd>：去下一个页面
 3. <kbd>⌘</kbd> + <kbd>↑</kbd>：自动滚动到页面顶部
@@ -86,15 +75,28 @@
 8. <kbd>⌘</kbd> + <kbd>=</kbd>：放大页面
 9. <kbd>⌘</kbd> + <kbd>0</kbd>：重置页面缩放
 
+## 快捷键(Windows/Linux)
+
+1. <kbd>Ctrl</kbd> + <kbd>←</kbd>：返回上一个页面
+2. <kbd>Ctrl</kbd> + <kbd>→</kbd>：去下一个页面
+3. <kbd>Ctrl</kbd> + <kbd>↑</kbd>：自动滚动到页面顶部
+4. <kbd>Ctrl</kbd> + <kbd>↓</kbd>：自动滚动到页面底部
+5. <kbd>Ctrl</kbd> + <kbd>r</kbd>：刷新页面
+6. <kbd>Ctrl</kbd> + <kbd>-</kbd>：缩小页面
+7. <kbd>Ctrl</kbd> + <kbd>+</kbd>：放大页面
+8. <kbd>Ctrl</kbd> + <kbd>=</kbd>：放大页面
+9. <kbd>Ctrl</kbd> + <kbd>0</kbd>：重置页面缩放
+
 此外还支持双击头部进行全屏切换，拖拽头部进行移动窗口，还有其他需求，欢迎提过来。
 
-## 已知Bug
-- Windows下不能安装到C:\Program File，会直接闪退。建议安装到其他目录，比如D:\Program Files。
-- Linux下暂时不能存cookie，即应用关闭后数据清空，账号自动推出。
+## 待解决问题
+
+- Windows 下不能安装到 C:\Program File，会直接闪退。建议安装到其他目录，比如 D:\Program Files。
+- Linux 下暂时不能存 cookie，即应用关闭后数据清空，账号自动推出。
 
 ## 开发
 
-开始前参考 [Tauri](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-macos) 快速配置好环境，如果你想打包 Windows、Linux 系统的包，可以参考 [Building](https://tauri.app/v1/guides/building/) 文档
+开始前参考 [Tauri](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-macos) 快速配置好环境。
 
 ```sh
 // 安装依赖
@@ -103,26 +105,26 @@ npm i
 // 调试
 npm run dev
 
-// 打包(Mac)
+// 打包 Mac 应用
 npm run build
 
-// 打包（Windows）
+// 打包 Windows 应用
 npm run build:windows
 
-// 打包（Linux）
+// 打包 Linux 应用
 npm run build:linux
 
-// 一键打包所有项目（Linux/Mac）
+// 一键打包所有 Mac/Linux 应用
 chmod +x build.sh && ./build.sh
 
-// 一键打包所有项目（Windows)
+// 一键打包所有 Windows 项目
 .\build.bat
 ```
 
 ## 打新包
 
 1. 修改 `src-tauri` 目录下的 `tauri.conf.json` 中的 `url、productName、icon、identifier` 这 4 个字段，其中 icon 可以从 icons 目录选择一个，也可以去 [macOSicons](https://macosicons.com/#/) 下载符合产品名称的
-2. 关于窗口属性设置，可以在 `tauri.conf.json` 修改 `windows` 属性对应的 `width/height`，是否全屏 `fullscreen`，是否可以调整大小 `resizable`，假如想适配沉浸式头部，可以将 `transparent` 设置成 `true`，找到 Header 元素加一个 `padding-top` 样式即可，不想适配改成 `false` 也行
+2. 关于窗口属性设置，可以在 `tauri.conf.json` 修改 `windows` 属性对应的 `width/height`，是否全屏 `fullscreen`，是否可以调整大小 `resizable`，假如想适配 Mac 沉浸式头部，可以将 `transparent` 设置成 `true`，找到 Header 元素加一个 `padding-top` 样式即可，不想适配改成 `false` 也行
 3. `npm run dev` 本地调试看看效果，此外可以使用 `npm run dev:debug` 进行容器调试
 4. `npm run build` 运行即可打生产包
 
@@ -235,4 +237,4 @@ chmod +x build.sh && ./build.sh
 ## 最后
 
 1. 希望大伙玩的过程中有一种学习新技术的喜悦感，如果有新点子欢迎告诉我
-2. 假如你发现有很适合做成 Mac App 的网页也很欢迎告诉我，我给加到里面来
+2. 假如你发现有很适合做成桌面 App 的网页也很欢迎告诉我，我给加到里面来
