@@ -70,7 +70,7 @@ do
     sed -i '' "s|${old_url}|${url}|g" src-tauri/tauri.conf.json
     sed -i '' "s|${old_name}|${package_name}|g" src-tauri/tauri.conf.json
     echo "update ico with 32x32 pictue"
-    sed -i "s|${old_name}|${package_name}|g" src-tauri/src/main.rs
+    sed -i '' "s|${old_name}|${package_name}|g" src-tauri/src/main.rs
   fi
   
   # echo "update ico with 32x32 pictue"
@@ -101,7 +101,7 @@ do
   fi
 
   if [[ "$OSTYPE" =~ ^darwin ]]; then
-    # mv src-tauri/target/release/bundle/deb/*.deb output/linux
+    mv src-tauri/target/release/bundle/dmg/*.dmg output/macos
     echo ""
   fi
 done < app.csv
