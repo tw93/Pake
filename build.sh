@@ -4,17 +4,30 @@ if [ ! -d "node_modules" ]; then
     npm i
 fi
 
-# 依次填入app名称，链接
-# Fill in the app name and link in turn
-app_list=(
-  "weread 微信阅读  weread.qq.com"
-  "aliyuque 语雀  www.yuque.com"
-  "flomo 浮墨 flomoapp.com"
-  "weread 微信阅读 weread.qq.com"
-)
+
+if [ ! -d "output" ]; then
+    mkdir output
+fi
+
+if [[ "$OSTYPE" =~ ^linux ]]; then
+  if [ ! -d "output/linux" ]; then
+      mkdir output/linux
+  fi
+fi
+
+
+if [[ "$OSTYPE" =~ ^darwin ]]; then
+  if [ ! -d "output/macos" ]; then
+      mkdir output/macos
+  fi
+fi
+
+
+
+
 # total package number
+export total=`sed -n '$=' app.csv`
 export index=1
-export total=4
 
 old_name="weread"
 old_zh_name="微信阅读"
@@ -37,26 +50,31 @@ if [[ "$OSTYPE" =~ ^darwin ]]; then
   echo "==============="
 fi
 
-for app_info in "${app_list[@]}"; do
-  array=($app_info)
-  package_name=${array[0]}
-  package_zh_name=${array[1]}
-  url=${array[2]}
+while read line
+do
+  package_name=$(echo ${line} | cut -d , -f 1)
+  package_zh_name=$(echo ${line} | cut -d , -f 2)
+  url=$(echo ${line} | cut -d , -f 3)
   echo "update package name and url"
   # replace package info
 
   if [[ "$OSTYPE" =~ ^linux ]]; then
     sed -i "s/${old_url}/${url}/g" src-tauri/tauri.conf.json
     sed -i "s/${old_name}/${package_name}/g" src-tauri/tauri.conf.json
+    echo "update ico with 32x32 pictue"
+    sed -i "s/${old_name}/${package_name}/g" src-tauri/src/main.rs
+
   fi
 
   if [[ "$OSTYPE" =~ ^darwin ]]; then
     sed -i '' "s|${old_url}|${url}|g" src-tauri/tauri.conf.json
     sed -i '' "s|${old_name}|${package_name}|g" src-tauri/tauri.conf.json
+    echo "update ico with 32x32 pictue"
+    sed -i "s|${old_name}|${package_name}|g" src-tauri/src/main.rs
   fi
   
-  echo "update ico with 32x32 pictue"
-  cp "src-tauri/png/${package_name}_32.ico" "src-tauri/icons/icon.ico"
+  # echo "update ico with 32x32 pictue"
+  # cp "src-tauri/png/${package_name}_32.ico" "src-tauri/icons/icon.ico"
 
   if [[ "$OSTYPE" =~ ^linux ]]; then
     echo "update desktop"
@@ -77,4 +95,22 @@ for app_info in "${app_list[@]}"; do
   npm run tauri build
   echo "package build success!"
   index=$(($index+1))
-done
+
+  if [[ "$OSTYPE" =~ ^linux ]]; then
+    mv src-tauri/target/release/bundle/deb/*.deb output/linux
+  fi
+
+  if [[ "$OSTYPE" =~ ^darwin ]]; then
+    # mv src-tauri/target/release/bundle/deb/*.deb output/linux
+    echo ""
+  fi
+done < app.csv
+
+echo "build all package success!"
+if [[ "$OSTYPE" =~ ^linux ]]; then
+  echo "result file in output/linux"
+fi
+
+if [[ "$OSTYPE" =~ ^darwin ]]; then
+  echo "result file in output/macos"
+fi
