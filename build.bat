@@ -22,7 +22,7 @@ if not exist output\windows (
 
 :: total package number
 set /A index=1
-set /A total=4
+for /f %%a in (' find /c /v "" ^<"app.csv" ') do set /A total=%%a
 
 set old_name=weread
 set old_zh_name=微信阅读
