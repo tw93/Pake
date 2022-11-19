@@ -66,3 +66,4 @@ for /f "tokens=1-3 delims=," %%i in (app.csv) do (
   @echo off 
 
 )
+echo "output dir is output\windows"

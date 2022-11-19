@@ -113,6 +113,12 @@ npm run build:windows
 
 // Pack(Linux)
 npm run build:linux
+
+// One-click packaging of all projects (Linux/Mac)
+chmod +x build.sh && ./build.sh
+
+// One-click packaging of all projects (Windows)
+.\build.bat
 ```
 
 // Package all your projects in one click
