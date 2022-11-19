@@ -14,7 +14,7 @@
     <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank">
       <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
   </div>
-  <div align="left">A simple way to package a web page to Mac App, supporting WeRead、Twitter、Youtube、Reference、Flomo、YuQue、Google Translate、Witeboard、RunCode、Vercel、V2EX、DevTools, welcome to <a href=https://github.com/tw93/Pake/discussions>Discussions</a> to see if there have anything you interesting.</div>
+  <div align="left">A simple way to package a web page to desktop application, supporting Mac/Windows/Linux, now has packaging WeRead、Twitter、Youtube、Reference、Flomo、YuQue、Google Translate、Witeboard、RunCode、Vercel、V2EX、DevTools, welcome to <a href=https://github.com/tw93/Pake/discussions>Discussions</a> to see if there have anything you interesting.</div>
 </p>
 
 ## Features
@@ -63,20 +63,7 @@
 
 More common apps can be downloaded from [Releases](https://github.com/tw93/Pake/releases).
 
-
-## Shortcuts(Windows/Linux)
-
-1. <kbd>Ctrl</kbd> + <kbd>⬅</kbd>：Return to the previous page
-2. <kbd>Ctrl</kbd> + <kbd>➡</kbd>：Go to the next page
-3. <kbd>Ctrl</kbd> + <kbd>⬆</kbd>：Auto scroll to top of page
-4. <kbd>Ctrl</kbd> + <kbd>⬇</kbd>：Auto scroll to bottom of page
-5. <kbd>Ctrl</kbd> + <kbd>r</kbd>：Refresh Page
-6. <kbd>Ctrl</kbd> + <kbd>-</kbd>：Zoom out the page
-7. <kbd>Ctrl</kbd> + <kbd>+</kbd>：Zoom in the Page
-8. <kbd>Ctrl</kbd> + <kbd>=</kbd>：Zoom in the Page
-9. <kbd>Ctrl</kbd> + <kbd>0</kbd>：Reset the page zoom
-
-## Shortcuts(Mac)
+## Mac Shortcuts
 
 1. <kbd>⌘</kbd> + <kbd>[</kbd>：Return to the previous page
 2. <kbd>⌘</kbd> + <kbd>]</kbd>：Go to the next page
@@ -88,15 +75,28 @@ More common apps can be downloaded from [Releases](https://github.com/tw93/Pake/
 8. <kbd>⌘</kbd> + <kbd>=</kbd>：Zoom in the Page
 9. <kbd>⌘</kbd> + <kbd>0</kbd>：Reset the page zoom
 
+## Windows/Linux Shortcuts
+
+1. <kbd>Ctrl</kbd> + <kbd>←</kbd>：Return to the previous page
+2. <kbd>Ctrl</kbd> + <kbd>→</kbd>：Go to the next page
+3. <kbd>Ctrl</kbd> + <kbd>↑</kbd>：Auto scroll to top of page
+4. <kbd>Ctrl</kbd> + <kbd>↓</kbd>：Auto scroll to bottom of page
+5. <kbd>Ctrl</kbd> + <kbd>r</kbd>：Refresh Page
+6. <kbd>Ctrl</kbd> + <kbd>-</kbd>：Zoom out the page
+7. <kbd>Ctrl</kbd> + <kbd>+</kbd>：Zoom in the Page
+8. <kbd>Ctrl</kbd> + <kbd>=</kbd>：Zoom in the Page
+9. <kbd>Ctrl</kbd> + <kbd>0</kbd>：Reset the page zoom
+
 In addition, it supports double clicking the head to switch to full screen, and dragging the head to move the window
 
-## Bugs
+## Current issues
+
 - It cannot be installed to C:\Program File under Windows, and it will crash directly. It is recommended to install to another directory, such as D:\Program Files.
 - Under Linux, cookies cannot be stored temporarily, that is, the data will be cleared after the application is closed, and the account will be automatically released.
 
 ## Development
 
-Refer to the [Tauri documentation](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-macos) to quickly configure your environment before you start, if you want to package Windows or Linux systems, you can refer to [Building](https://tauri.app/v1/guides/building/) Documentation.
+Refer to the [Tauri documentation](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-macos) to quickly configure your environment before you start.
 
 ```sh
 // Install Dependencies
@@ -105,19 +105,19 @@ npm i
 // Local development
 npm run dev
 
-// Pack (Mac)
+// Pack Mac application
 npm run build
 
-// Pack (Windows)
+// Pack Windows application
 npm run build:windows
 
-// Pack(Linux)
+// Pack Linux application
 npm run build:linux
 
-// One-click packaging of all projects (Linux/Mac)
+// One-click packaging of all Linux/Mac projects
 chmod +x build.sh && ./build.sh
 
-// One-click packaging of all projects (Windows)
+// One-click packaging of all Windows projects
 .\build.bat
 ```
 
@@ -127,7 +127,7 @@ chmod +x build.sh && ./build.sh
 ## New pack
 
 1. Modify the `tauri.conf.json` in the `src-tauri` directory to include 4 fields `url, productName, icon, identifier`, icon can be selected from the `icons` directory or downloaded from [macOSicons](https://macosicons.com/#/) to match the product.
-2. For window property settings, you can modify the `width/height` of the `windows` property in `tauri.conf.json`, whether it is `fullscreen`, whether it is `resizable`, If you want to adapt the immersive header, you can set `transparent` to `true` and then find header element and add the `padding-top` style.
+2. For window property settings, you can modify the `width/height` of the `windows` property in `tauri.conf.json`, whether it is `fullscreen`, whether it is `resizable`, If you want to adapt the immersive header under Mac, you can set `transparent` to `true` and then find header element and add the `padding-top` style.
 3. `npm run dev` for local debugging; `npm run dev:debug` to open the devtools for container debugging.
 4. `npm run build` can be run to package for production.
 
