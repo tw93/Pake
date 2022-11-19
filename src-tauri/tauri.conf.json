@@ -20,6 +20,7 @@
     "bundle": {
       "icon": [
         "icons/weread.icns",
+        "png/weread_256.ico",
         "png/weread_32.ico",
         "png/weread_512.png"
       ],
