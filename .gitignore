@@ -22,6 +22,7 @@ dist-ssr
 *.sln
 *.sw?
 .npmrc
+output
 
 package-lock.json
 yarn.lock
