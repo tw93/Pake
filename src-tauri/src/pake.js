@@ -1,11 +1,25 @@
 /**
  * @typedef {string} KeyboardKey `event.key` 的代号，
  * 见 <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values>
- * @typedef {() => void} OnKeyDown 使用者按下 [CtrlKey] 时应该执行的行为
- * 以 Ctrl 键 为首的快捷键清单。
+ * @typedef {() => void} OnKeyDown 使用者按下 [CtrlKey] 或者 ⌘ [KeyboardKey]时应该执行的行为
+ * 以 Ctrl键或者Meta 键 (⌘) 为首的快捷键清单。
  * 每个写在这里的 shortcuts 都会运行 {@link Event.preventDefault}.
  * @type {Record<KeyboardKey, OnKeyDown>}
  */
+
+ const metaKeyShortcuts = {
+  'ArrowUp': () => scrollTo(0, 0),
+  'ArrowDown': () => scrollTo(0, document.body.scrollHeight),
+  '[': () => window.history.back(),
+  ']': () => window.history.forward(),
+  'r': () => window.location.reload(),
+  '-': () => zoomOut(),
+  '=': () => zoomIn(),
+  '+': () => zoomIn(),
+  '0': () => zoomCommon(() => '100%'),
+}
+
+
 const ctrlKeyShortcuts = {
   'ArrowUp': () => scrollTo(0, 0),
   'ArrowDown': () => scrollTo(0, document.body.scrollHeight),
@@ -121,9 +135,15 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       event.preventDefault();
       f();
     };
-
-    if (event.ctrlKey && event.key in ctrlKeyShortcuts) {
-      preventDefault(ctrlKeyShortcuts[event.key]);
+    if (/windows|linux/i.test(navigator.userAgent)) {
+      if (event.ctrlKey && event.key in ctrlKeyShortcuts) {
+        preventDefault(ctrlKeyShortcuts[event.key]);
+      }
+    }
+    if (/macintosh|mac os x/i.test(navigator.userAgent)) {
+      if (event.metaKey && event.key in metaKeyShortcuts) {
+        preventDefault(ctrlKeyShortcuts[event.key]);
+      }
     }
   });
 
