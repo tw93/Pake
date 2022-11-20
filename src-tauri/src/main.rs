@@ -87,7 +87,7 @@ fn main() -> wry::Result<()> {
         resizable,
         fullscreen,
         ..
-    } = get_windows_config().unwrap_or(WindowConfig::default());
+    } = get_windows_config().unwrap_or_default();
     #[cfg(target_os = "windows")]
     let WindowConfig {
         url,
@@ -96,7 +96,7 @@ fn main() -> wry::Result<()> {
         resizable,
         fullscreen,
         ..
-    } = get_windows_config().unwrap_or(WindowConfig::default());
+    } = get_windows_config().unwrap_or_default();
     #[cfg(target_os = "macos")]
     let WindowConfig {
         url,
