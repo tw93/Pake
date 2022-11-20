@@ -86,4 +86,4 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           components: rustfmt
-      - uses: actions-rust-lang/rustfmt@v1
+      - run: cargo fmt --all -- --color=always --check
