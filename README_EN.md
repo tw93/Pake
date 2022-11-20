@@ -1,27 +1,27 @@
 <p align="left"><a href="https://github.com/tw93/Pake">中文</a> | <strong>English</strong></p>
 <p align="center">
-  <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
-  <h1 align="center">Pake</h1>
-  <div align="center">
+    <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
+<h1 align="center">Pake</h1>
+<div align="center">
     <a href="https://twitter.com/HiTw93" target="_blank">
-      <img alt="twitter" src="https://img.shields.io/twitter/follow/Hitw93?color=%231D9BF0&label=Pake%20%F0%9F%93%A2%20&logo=Twitter&style=flat-square"></a>
+    <img alt="twitter" src="https://img.shields.io/twitter/follow/Hitw93?color=%231D9BF0&label=Pake%20%F0%9F%93%A2%20&logo=Twitter&style=flat-square"></a>
     <a href="https://t.me/miaoyan" target="_blank">
-      <img alt="telegram" src="https://img.shields.io/badge/chat-telegram-blueviolet?style=flat-square&logo=Telegram"></a>
-     <a href="https://github.com/tw93/Pake/releases" target="_blank">
-      <img alt="GitHub downloads" src="https://img.shields.io/github/downloads/tw93/Pake/total.svg?style=flat-square"></a>
+    <img alt="telegram" src="https://img.shields.io/badge/chat-telegram-blueviolet?style=flat-square&logo=Telegram"></a>
+    <a href="https://github.com/tw93/Pake/releases" target="_blank">
+    <img alt="GitHub downloads" src="https://img.shields.io/github/downloads/tw93/Pake/total.svg?style=flat-square"></a>
     <a href="https://github.com/tw93/Pake/commits" target="_blank">
-      <img alt="GitHub commit" src="https://img.shields.io/github/commit-activity/m/tw93/Pake?style=flat-square"></a>
+    <img alt="GitHub commit" src="https://img.shields.io/github/commit-activity/m/tw93/Pake?style=flat-square"></a>
     <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank">
-      <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
-  </div>
-  <div align="left">A simple way to package a web page to desktop application, supporting Mac/Windows/Linux, now has packaging WeRead、Twitter、Youtube、Reference、Flomo、YuQue、Google Translate、Witeboard、RunCode、Vercel、V2EX、DevTools, welcome to <a href=https://github.com/tw93/Pake/discussions>Discussions</a> to see if there have anything you interesting.</div>
+    <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
+</div>
+<div align="left">A simple way to package a web page to desktop application, supporting Mac/Windows/Linux, now has packaging WeRead、Twitter、Youtube、Reference、Flomo、YuQue、Google Translate、Witeboard、RunCode、Vercel、V2EX、DevTools, welcome to <a href=https://github.com/tw93/Pake/discussions>Discussions</a> to see if there have anything you interesting.</div>
 </p>
 
 ## Features
 
-🏂 **Small**：Nearly 40 times smaller than Electron package, less than 3M.  
-😂 **Fast**：Using the Rust Tauri, the performance experience is much lighter and faster than JS, memory is much smaller.  
-🩴 **Special**：Not just packaged, with shortcut pass-through, immersive windows, minimalist customization of products.  
+🏂 **Small**：Nearly 40 times smaller than Electron package, less than 3M.
+😂 **Fast**：Using the Rust Tauri, the performance experience is much lighter and faster than JS, memory is much smaller.
+🩴 **Special**：Not just packaged, with shortcut pass-through, immersive windows, minimalist customization of products.
 🐶 **Toy**：Just a very simple little toy, a way to play with Rust instead of the old idea of shelling the web.
 
 ## Download
@@ -65,26 +65,25 @@ More common apps can be downloaded from [Releases](https://github.com/tw93/Pake/
 
 ## Shortcuts
 
-|Mac|Windows/Linux|Function|
-| ---- | ----- | ---- |
-|<kbd>⌘</kbd> + <kbd>[</kbd>|<kbd>Ctrl</kbd> + <kbd>←</kbd>|Return to the previous page|
-|<kbd>⌘</kbd> + <kbd>]</kbd>|<kbd>Ctrl</kbd> + <kbd>→</kbd>|Go to the next page|
-|<kbd>⌘</kbd> + <kbd>↑</kbd>|<kbd>Ctrl</kbd> + <kbd>↑</kbd>|Auto scroll to top of page|
-|<kbd>⌘</kbd> + <kbd>↓</kbd>|<kbd>Ctrl</kbd> + <kbd>↓</kbd>|Auto scroll to bottom of page|
-|<kbd>⌘</kbd> + <kbd>r</kbd>|<kbd>Ctrl</kbd> + <kbd>r</kbd>|Refresh Page|
-|<kbd>⌘</kbd> + <kbd>w</kbd>||Hide window, not quite|
-|<kbd>⌘</kbd> + <kbd>-</kbd>|<kbd>Ctrl</kbd> + <kbd>-</kbd>|Zoom out the page|
-|<kbd>⌘</kbd> + <kbd>+</kbd>|<kbd>Ctrl</kbd> + <kbd>+</kbd>|Zoom in the page|
-|<kbd>⌘</kbd> + <kbd>=</kbd>|<kbd>Ctrl</kbd> + <kbd>=</kbd>|Zoom in the Page|
-|<kbd>⌘</kbd> + <kbd>0</kbd>|<kbd>Ctrl</kbd> + <kbd>0</kbd>|Reset the page zoom|
-
+| Mac                         | Windows/Linux                  | Function                      |
+| --------------------------- | ------------------------------ | ----------------------------- |
+| <kbd>⌘</kbd> + <kbd>[</kbd> | <kbd>Ctrl</kbd> + <kbd>←</kbd> | Return to the previous page   |
+| <kbd>⌘</kbd> + <kbd>]</kbd> | <kbd>Ctrl</kbd> + <kbd>→</kbd> | Go to the next page           |
+| <kbd>⌘</kbd> + <kbd>↑</kbd> | <kbd>Ctrl</kbd> + <kbd>↑</kbd> | Auto scroll to top of page    |
+| <kbd>⌘</kbd> + <kbd>↓</kbd> | <kbd>Ctrl</kbd> + <kbd>↓</kbd> | Auto scroll to bottom of page |
+| <kbd>⌘</kbd> + <kbd>r</kbd> | <kbd>Ctrl</kbd> + <kbd>r</kbd> | Refresh Page                  |
+| <kbd>⌘</kbd> + <kbd>w</kbd> |                                | Hide window, not quite        |
+| <kbd>⌘</kbd> + <kbd>-</kbd> | <kbd>Ctrl</kbd> + <kbd>-</kbd> | Zoom out the page             |
+| <kbd>⌘</kbd> + <kbd>+</kbd> | <kbd>Ctrl</kbd> + <kbd>+</kbd> | Zoom in the page              |
+| <kbd>⌘</kbd> + <kbd>=</kbd> | <kbd>Ctrl</kbd> + <kbd>=</kbd> | Zoom in the Page              |
+| <kbd>⌘</kbd> + <kbd>0</kbd> | <kbd>Ctrl</kbd> + <kbd>0</kbd> | Reset the page zoom           |
 
 In addition, it supports double clicking the head to switch to full screen, and dragging the head to move the window
 
 ## Precautions
 
-- It cannot be installed to C:\Program File under Windows, and it will crash directly. It is recommended to install to another directory, such as D:\Program Files.
-- Under Linux, cookies cannot be stored temporarily, that is, the data will be cleared after the application is closed, and the account will be automatically released.
+-   It cannot be installed to C:\Program File under Windows, and it will crash directly. It is recommended to install to another directory, such as D:\Program Files.
+-   Under Linux, cookies cannot be stored temporarily, that is, the data will be cleared after the application is closed, and the account will be automatically released.
 
 ## Development
 
@@ -139,9 +138,9 @@ Refer to the communication code in `pake.js` with `postMessage`, write the event
 
 ## Support
 
-- I have two cats, one is called TangYuan, and one is called Coke, If you think Pake makes your life better, you can give my cats <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">feed canned food 🥩🍤</a>.
-- If you like Pake, you can star it in Github. We are more welcome to [recommend Pake](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20A%20simple%20Rust%20packaged%20web%20pages%20to%20generate%20Mac%20App%20tool,%20compared%20to%20traditional%20Electron%20package,%20the%20size%20of%20nearly%2040%20times%20smaller,%20generally%20about%202M,%20the%20underlying%20use%20of%20Tauri,%20performance%20experience%20than%20the%20JS%20framework%20is%20much%20lighter~) to your like-minded friends.
-- You can follow my [Twitter](https://twitter.com/HiTw93) to get the latest news of Pake, or join [Telegram](https://t.me/miaoyan) chat group.
+-   I have two cats, one is called TangYuan, and one is called Coke, If you think Pake makes your life better, you can give my cats <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">feed canned food 🥩🍤</a>.
+-   If you like Pake, you can star it in Github. We are more welcome to [recommend Pake](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20A%20simple%20Rust%20packaged%20web%20pages%20to%20generate%20Mac%20App%20tool,%20compared%20to%20traditional%20Electron%20package,%20the%20size%20of%20nearly%2040%20times%20smaller,%20generally%20about%202M,%20the%20underlying%20use%20of%20Tauri,%20performance%20experience%20than%20the%20JS%20framework%20is%20much%20lighter~) to your like-minded friends.
+-   You can follow my [Twitter](https://twitter.com/HiTw93) to get the latest news of Pake, or join [Telegram](https://t.me/miaoyan) chat group.
 
 ## Finally
 

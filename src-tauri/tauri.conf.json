@@ -54,7 +54,7 @@
       },
       "resources": [],
       "shortDescription": "",
-      "targets": ["deb",  "msi", "dmg"],
+      "targets": ["deb", "msi", "dmg"],
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",

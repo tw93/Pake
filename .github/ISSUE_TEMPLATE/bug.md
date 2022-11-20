@@ -1,9 +1,9 @@
 ---
 name: Bug
 about: 讨论建议咨询请去讨论区 / Please go to discussion for suggestions.
-title: ''
-labels: ''
-assignees: ''
+title: ""
+labels: ""
+assignees: ""
 ---
 
 <!--
