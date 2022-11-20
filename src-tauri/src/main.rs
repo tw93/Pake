@@ -44,7 +44,7 @@ use wry::{
 
 
 fn main() -> wry::Result<()> {
-    
+
     #[cfg(target_os = "macos")]
     let mut menu_bar_menu = Menu::new();
     #[cfg(target_os = "macos")]
@@ -139,7 +139,7 @@ fn main() -> wry::Result<()> {
     let window = common_window
         .with_title("")
         .build(&event_loop)
-        .unwrap(); 
+        .unwrap();
 
     #[cfg(target_os = "macos")]
     let window = common_window
@@ -165,12 +165,13 @@ fn main() -> wry::Result<()> {
           webbrowser::open(&href).expect("no browser");
         }
     };
-    
+
     let webview = WebViewBuilder::new(window)?
         .with_url(&url.to_string())?
         .with_devtools(cfg!(feature = "devtools"))
         .with_initialization_script(include_str!("pake.js"))
         .with_ipc_handler(handler)
+        .with_back_forward_navigation_gestures(true)
         .build()?;
 
 
