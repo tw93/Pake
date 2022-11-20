@@ -65,26 +65,25 @@ More common apps can be downloaded from [Releases](https://github.com/tw93/Pake/
 
 ## Shortcuts
 
-|Mac|Windows/Linux|Function|
-| ---- | ----- | ---- |
-|<kbd>⌘</kbd> + <kbd>[</kbd>|<kbd>Ctrl</kbd> + <kbd>←</kbd>|Return to the previous page|
-|<kbd>⌘</kbd> + <kbd>]</kbd>|<kbd>Ctrl</kbd> + <kbd>→</kbd>|Go to the next page|
-|<kbd>⌘</kbd> + <kbd>↑</kbd>|<kbd>Ctrl</kbd> + <kbd>↑</kbd>|Auto scroll to top of page|
-|<kbd>⌘</kbd> + <kbd>↓</kbd>|<kbd>Ctrl</kbd> + <kbd>↓</kbd>|Auto scroll to bottom of page|
-|<kbd>⌘</kbd> + <kbd>r</kbd>|<kbd>Ctrl</kbd> + <kbd>r</kbd>|Refresh Page|
-|<kbd>⌘</kbd> + <kbd>w</kbd>||Hide window, not quite|
-|<kbd>⌘</kbd> + <kbd>-</kbd>|<kbd>Ctrl</kbd> + <kbd>-</kbd>|Zoom out the page|
-|<kbd>⌘</kbd> + <kbd>+</kbd>|<kbd>Ctrl</kbd> + <kbd>+</kbd>|Zoom in the page|
-|<kbd>⌘</kbd> + <kbd>=</kbd>|<kbd>Ctrl</kbd> + <kbd>=</kbd>|Zoom in the Page|
-|<kbd>⌘</kbd> + <kbd>0</kbd>|<kbd>Ctrl</kbd> + <kbd>0</kbd>|Reset the page zoom|
-
+| Mac                         | Windows/Linux                  | Function                      |
+| --------------------------- | ------------------------------ | ----------------------------- |
+| <kbd>⌘</kbd> + <kbd>[</kbd> | <kbd>Ctrl</kbd> + <kbd>←</kbd> | Return to the previous page   |
+| <kbd>⌘</kbd> + <kbd>]</kbd> | <kbd>Ctrl</kbd> + <kbd>→</kbd> | Go to the next page           |
+| <kbd>⌘</kbd> + <kbd>↑</kbd> | <kbd>Ctrl</kbd> + <kbd>↑</kbd> | Auto scroll to top of page    |
+| <kbd>⌘</kbd> + <kbd>↓</kbd> | <kbd>Ctrl</kbd> + <kbd>↓</kbd> | Auto scroll to bottom of page |
+| <kbd>⌘</kbd> + <kbd>r</kbd> | <kbd>Ctrl</kbd> + <kbd>r</kbd> | Refresh Page                  |
+| <kbd>⌘</kbd> + <kbd>w</kbd> |                                | Hide window, not quite        |
+| <kbd>⌘</kbd> + <kbd>-</kbd> | <kbd>Ctrl</kbd> + <kbd>-</kbd> | Zoom out the page             |
+| <kbd>⌘</kbd> + <kbd>+</kbd> | <kbd>Ctrl</kbd> + <kbd>+</kbd> | Zoom in the page              |
+| <kbd>⌘</kbd> + <kbd>=</kbd> | <kbd>Ctrl</kbd> + <kbd>=</kbd> | Zoom in the Page              |
+| <kbd>⌘</kbd> + <kbd>0</kbd> | <kbd>Ctrl</kbd> + <kbd>0</kbd> | Reset the page zoom           |
 
 In addition, it supports double clicking the head to switch to full screen, and dragging the head to move the window
 
 ## Precautions
 
-- It cannot be installed to C:\Program File under Windows, and it will crash directly. It is recommended to install to another directory, such as D:\Program Files.
-- Under Linux, cookies cannot be stored temporarily, that is, the data will be cleared after the application is closed, and the account will be automatically released.
+-   It cannot be installed to C:\Program File under Windows, and it will crash directly. It is recommended to install to another directory, such as D:\Program Files.
+-   Under Linux, cookies cannot be stored temporarily, that is, the data will be cleared after the application is closed, and the account will be automatically released.
 
 ## Development
 
@@ -139,9 +138,9 @@ Refer to the communication code in `pake.js` with `postMessage`, write the event
 
 ## Support
 
-- I have two cats, one is called TangYuan, and one is called Coke, If you think Pake makes your life better, you can give my cats <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">feed canned food 🥩🍤</a>.
-- If you like Pake, you can star it in Github. We are more welcome to [recommend Pake](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20A%20simple%20Rust%20packaged%20web%20pages%20to%20generate%20Mac%20App%20tool,%20compared%20to%20traditional%20Electron%20package,%20the%20size%20of%20nearly%2040%20times%20smaller,%20generally%20about%202M,%20the%20underlying%20use%20of%20Tauri,%20performance%20experience%20than%20the%20JS%20framework%20is%20much%20lighter~) to your like-minded friends.
-- You can follow my [Twitter](https://twitter.com/HiTw93) to get the latest news of Pake, or join [Telegram](https://t.me/miaoyan) chat group.
+-   I have two cats, one is called TangYuan, and one is called Coke, If you think Pake makes your life better, you can give my cats <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">feed canned food 🥩🍤</a>.
+-   If you like Pake, you can star it in Github. We are more welcome to [recommend Pake](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20A%20simple%20Rust%20packaged%20web%20pages%20to%20generate%20Mac%20App%20tool,%20compared%20to%20traditional%20Electron%20package,%20the%20size%20of%20nearly%2040%20times%20smaller,%20generally%20about%202M,%20the%20underlying%20use%20of%20Tauri,%20performance%20experience%20than%20the%20JS%20framework%20is%20much%20lighter~) to your like-minded friends.
+-   You can follow my [Twitter](https://twitter.com/HiTw93) to get the latest news of Pake, or join [Telegram](https://t.me/miaoyan) chat group.
 
 ## Finally
 

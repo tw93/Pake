@@ -3,22 +3,22 @@ chcp 65001
 
 if not exist node_modules (
   call npm i
-) 
+)
 
 if not exist output (
   mkdir output
-) 
+)
 
 
 if not exist output\windows (
   mkdir output\windows
-) 
+)
 
- echo.
- echo =======================
- echo "build for windows"
- echo =======================
- echo.
+echo.
+echo =======================
+echo "build for windows"
+echo =======================
+echo.
 
 :: total package number
 set /A index=1
@@ -61,7 +61,7 @@ for /f "skip=1 tokens=1-4 delims=," %%i in (app.csv) do (
   echo building package !index!/!total!
   echo package name is !name! !name_zh!
   echo npm run build:windows
-  @echo off 
+  @echo off
   call npm run tauri build -- --target x86_64-pc-windows-msvc
   move src-tauri\target\x86_64-pc-windows-msvc\release\bundle\msi\*.msi output\windows
 
@@ -71,7 +71,7 @@ for /f "skip=1 tokens=1-4 delims=," %%i in (app.csv) do (
   echo.
 
   set /A index=index+1
-  @echo off 
+  @echo off
 
 )
 
