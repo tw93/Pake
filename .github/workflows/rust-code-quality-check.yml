@@ -1,0 +1,89 @@
+name: Check, test and format the Rust part of codebase
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+    working-directory: src-tauri
+
+jobs:
+  cargo-test:
+    name: Test codebase on ${{ matrix.os }} (cargo test)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: rui314/setup-mold@v1
+      - uses: taiki-e/install-action@v1
+        with:
+          tool: cargo-hack,nextest
+      - name: Install dependencies for Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: >
+            libwebkit2gtk-4.0-dev build-essential curl wget libssl-dev
+            libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+          version: 1.0
+      - name: Run unit & integration tests with nextest
+        run: cargo hack --feature-powerset nextest run
+      # - name: Run documentation tests with cargo test
+      #   run: cargo hack --feature-powerset test --doc
+
+  cargo-clippy:
+    name: Check codebase quality (cargo clippy)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: clippy
+      - uses: taiki-e/install-action@cargo-hack
+      - name: Install dependencies for Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: >
+            libwebkit2gtk-4.0-dev build-essential curl wget libssl-dev
+            libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+          version: 1.0
+      - name: Run all-features code quality checks
+        run: cargo hack --feature-powerset --no-dev-deps clippy
+      - name: Run normal code quality check
+        run: cargo clippy
+
+  cargo-fmt:
+    name: Enforce codebase style (cargo fmt)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: rustfmt
+      - run: cargo fmt --all -- --color=always --check
