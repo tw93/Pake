@@ -23,31 +23,39 @@ if not exist output\windows (
 :: total package number
 set /A index=1
 for /f %%a in (' find /c /v "" ^<"app.csv" ') do set /A total=%%a
+:: ignore first header line
+set /A total=total-1
 
 set old_name=weread
+set old_title=WeRead
 set old_zh_name=微信阅读
-set old_url=weread.qq.com
+set old_url=https://weread.qq.com/
 
-for /f "skip=1 tokens=1-3 delims=," %%i in (app.csv) do (
+:: for windows, we need replace package name to title
+.\script\sd.exe "\"productName\": \"weread\"" "\"productName\": \"WeRead\"" src-tauri\tauri.conf.json
+
+for /f "skip=1 tokens=1-4 delims=," %%i in (app.csv) do (
   setlocal enabledelayedexpansion
   set name=%%i
-  set name_zh=%%j
-  set url=%%k
+  set title=%%j
+  set name_zh=%%k
+  set url=%%l
   @echo on
 
   ::echo name is !name! !name_zh!  !url!
   :: replace url
-  .\sd.exe !old_url! !url! src-tauri\tauri.conf.json
-  ::replace pacakge name
-  .\sd.exe !old_name! !name! src-tauri\tauri.conf.json
+  .\script\sd.exe !old_url! !url! src-tauri\tauri.conf.json
+  ::replace  pacakge name
+  .\script\sd.exe !old_title! !title! src-tauri\tauri.conf.json
+  .\script\sd.exe !old_name! !name! src-tauri\tauri.conf.json
   echo update ico with 32x32 pictue
-  echo .\sd.exe !old_name! !name! src-tauri\src\main.rs
-  .\sd.exe !old_name! !name! src-tauri\src\main.rs
+  .\script\sd.exe !old_name! !name! src-tauri\src\main.rs
   ::copy src-tauri\png\!name!_32.ico src-tauri\icons\icon.ico
   echo.
   ::update package info
   set old_zh_name=!name_zh!
   set old_name=!name!
+  set old_title=!title!
   set old_url=!url!
   ::build package
   echo building package !index!/!total!
@@ -66,4 +74,7 @@ for /f "skip=1 tokens=1-3 delims=," %%i in (app.csv) do (
   @echo off 
 
 )
+
+:: for windows, we need replace package name to lower again
+.\script\sd.exe "\"productName\": \"WeRead\"" "\"productName\": \"weread\"" src-tauri\tauri.conf.json
 echo "output dir is output\windows"
