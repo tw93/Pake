@@ -5,7 +5,7 @@ use tauri_utils::config::{Config, WindowConfig};
 #[cfg(target_os = "macos")]
 use wry::application::platform::macos::WindowBuilderExtMacOS;
 
-#[cfg(target_os="macos")]
+#[cfg(target_os = "macos")]
 use wry::{
     application::{
         accelerator::{Accelerator, SysMods},
@@ -18,33 +18,29 @@ use wry::{
     webview::WebViewBuilder,
 };
 
-
-#[cfg(target_os="windows")]
+#[cfg(target_os = "windows")]
 use wry::{
     application::{
         event::{Event, StartCause, WindowEvent},
         event_loop::{ControlFlow, EventLoop},
-        menu::{MenuType},
-        window::{Fullscreen, Window, WindowBuilder, Icon},
+        menu::MenuType,
+        window::{Fullscreen, Icon, Window, WindowBuilder},
     },
     webview::WebViewBuilder,
 };
 
-
-#[cfg(target_os="linux")]
+#[cfg(target_os = "linux")]
 use wry::{
     application::{
         event::{Event, StartCause, WindowEvent},
         event_loop::{ControlFlow, EventLoop},
-        menu::{MenuType},
+        menu::MenuType,
         window::{Fullscreen, Window, WindowBuilder},
     },
     webview::WebViewBuilder,
 };
 
-
 fn main() -> wry::Result<()> {
-
     #[cfg(target_os = "macos")]
     let mut menu_bar_menu = Menu::new();
     #[cfg(target_os = "macos")]
@@ -126,7 +122,6 @@ fn main() -> wry::Result<()> {
     #[cfg(target_os = "windows")]
     let icon = load_icon(std::path::Path::new(icon_path));
 
-
     #[cfg(target_os = "windows")]
     let window = common_window
         .with_decorations(true)
@@ -136,10 +131,7 @@ fn main() -> wry::Result<()> {
         .unwrap();
 
     #[cfg(target_os = "linux")]
-    let window = common_window
-        .with_title("")
-        .build(&event_loop)
-        .unwrap();
+    let window = common_window.with_title("").build(&event_loop).unwrap();
 
     #[cfg(target_os = "macos")]
     let window = common_window
@@ -160,9 +152,9 @@ fn main() -> wry::Result<()> {
             } else {
                 window.set_fullscreen(Some(Fullscreen::Borderless(None)));
             }
-        } else if req.starts_with("open_browser"){
-          let href = req.replace("open_browser:", "");
-          webbrowser::open(&href).expect("no browser");
+        } else if req.starts_with("open_browser") {
+            let href = req.replace("open_browser:", "");
+            webbrowser::open(&href).expect("no browser");
         }
     };
 
@@ -174,8 +166,8 @@ fn main() -> wry::Result<()> {
         .with_back_forward_navigation_gestures(true)
         .build()?;
 
-
-    #[cfg(feature = "devtools")] {
+    #[cfg(feature = "devtools")]
+    {
         webview.open_devtools();
     }
 
@@ -215,13 +207,13 @@ fn get_windows_config() -> Option<WindowConfig> {
 #[cfg(target_os = "windows")]
 fn load_icon(path: &std::path::Path) -> Icon {
     let (icon_rgba, icon_width, icon_height) = {
-      // alternatively, you can embed the icon in the binary through `include_bytes!` macro and use `image::load_from_memory`
-      let image = image::open(path)
-        .expect("Failed to open icon path")
-        .into_rgba8();
-      let (width, height) = image.dimensions();
-      let rgba = image.into_raw();
-      (rgba, width, height)
+        // alternatively, you can embed the icon in the binary through `include_bytes!` macro and use `image::load_from_memory`
+        let image = image::open(path)
+            .expect("Failed to open icon path")
+            .into_rgba8();
+        let (width, height) = image.dimensions();
+        let rgba = image.into_raw();
+        (rgba, width, height)
     };
     Icon::from_rgba(icon_rgba, icon_width, icon_height).expect("Failed to open icon")
-  }
+}
