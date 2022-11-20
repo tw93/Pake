@@ -1,0 +1,6 @@
+{
+  "Exclude": ["Cargo\\.lock$"],
+  "Disable": {
+    "IndentSize": true
+  }
+}
