@@ -63,29 +63,21 @@
 
 More common apps can be downloaded from [Releases](https://github.com/tw93/Pake/releases).
 
-## Mac Shortcuts
+## Shortcuts
 
-1. <kbd>⌘</kbd> + <kbd>[</kbd>：Return to the previous page
-2. <kbd>⌘</kbd> + <kbd>]</kbd>：Go to the next page
-3. <kbd>⌘</kbd> + <kbd>↑</kbd>：Auto scroll to top of page
-4. <kbd>⌘</kbd> + <kbd>↓</kbd>：Auto scroll to bottom of page
-5. <kbd>⌘</kbd> + <kbd>r</kbd>：Refresh Page
-6. <kbd>⌘</kbd> + <kbd>w</kbd>：Hide window, not quite
-7. <kbd>⌘</kbd> + <kbd>-</kbd>：Zoom out the page
-8. <kbd>⌘</kbd> + <kbd>=</kbd>：Zoom in the Page
-9. <kbd>⌘</kbd> + <kbd>0</kbd>：Reset the page zoom
+|Mac|Windows/Linux|Function|
+| ---- | ----- | ---- |
+|<kbd>⌘</kbd> + <kbd>[</kbd>|<kbd>Ctrl</kbd> + <kbd>←</kbd>|Return to the previous page|
+|<kbd>⌘</kbd> + <kbd>]</kbd>|<kbd>Ctrl</kbd> + <kbd>→</kbd>|Go to the next page|
+|<kbd>⌘</kbd> + <kbd>↑</kbd>|<kbd>Ctrl</kbd> + <kbd>↑</kbd>|Auto scroll to top of page|
+|<kbd>⌘</kbd> + <kbd>↓</kbd>|<kbd>Ctrl</kbd> + <kbd>↓</kbd>|Auto scroll to bottom of page|
+|<kbd>⌘</kbd> + <kbd>r</kbd>|<kbd>Ctrl</kbd> + <kbd>r</kbd>|Refresh Page|
+|<kbd>⌘</kbd> + <kbd>w</kbd>||Hide window, not quite|
+|<kbd>⌘</kbd> + <kbd>-</kbd>|<kbd>Ctrl</kbd> + <kbd>-</kbd>|Zoom out the page|
+|<kbd>⌘</kbd> + <kbd>+</kbd>|<kbd>Ctrl</kbd> + <kbd>+</kbd>|Zoom in the page|
+|<kbd>⌘</kbd> + <kbd>=</kbd>|<kbd>Ctrl</kbd> + <kbd>=</kbd>|Zoom in the Page|
+|<kbd>⌘</kbd> + <kbd>0</kbd>|<kbd>Ctrl</kbd> + <kbd>0</kbd>|Reset the page zoom|
 
-## Windows/Linux Shortcuts
-
-1. <kbd>Ctrl</kbd> + <kbd>←</kbd>：Return to the previous page
-2. <kbd>Ctrl</kbd> + <kbd>→</kbd>：Go to the next page
-3. <kbd>Ctrl</kbd> + <kbd>↑</kbd>：Auto scroll to top of page
-4. <kbd>Ctrl</kbd> + <kbd>↓</kbd>：Auto scroll to bottom of page
-5. <kbd>Ctrl</kbd> + <kbd>r</kbd>：Refresh Page
-6. <kbd>Ctrl</kbd> + <kbd>-</kbd>：Zoom out the page
-7. <kbd>Ctrl</kbd> + <kbd>+</kbd>：Zoom in the Page
-8. <kbd>Ctrl</kbd> + <kbd>=</kbd>：Zoom in the Page
-9. <kbd>Ctrl</kbd> + <kbd>0</kbd>：Reset the page zoom
 
 In addition, it supports double clicking the head to switch to full screen, and dragging the head to move the window
 
