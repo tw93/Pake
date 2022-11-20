@@ -4,10 +4,10 @@
 
 ## Branch Management
 
-```txt
-master
- ↑
-dev         <--- Develop/PR
+```mermaid
+graph LR
+    b_dev(dev) --> b_master(master);
+    contributions([Develop / Pull requests]) -.-> b_dev;
 ```
 
 -   `dev` branch
