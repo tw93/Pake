@@ -1,27 +1,27 @@
 <p align="left"><strong>中文</strong> | <a href="https://github.com/tw93/Pake/blob/master/README_EN.md">English</a></p>
 <p align="center">
-  <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
-  <h1 align="center">Pake</h1>
-  <div align="center">
+    <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
+<h1 align="center">Pake</h1>
+<div align="center">
     <a href="https://twitter.com/HiTw93" target="_blank">
-      <img alt="twitter" src="https://img.shields.io/twitter/follow/Hitw93?color=%231D9BF0&label=Pake%20%F0%9F%93%A2%20&logo=Twitter&style=flat-square"></a>
+    <img alt="twitter" src="https://img.shields.io/twitter/follow/Hitw93?color=%231D9BF0&label=Pake%20%F0%9F%93%A2%20&logo=Twitter&style=flat-square"></a>
     <a href="https://t.me/miaoyan" target="_blank">
-      <img alt="telegram" src="https://img.shields.io/badge/chat-telegram-blueviolet?style=flat-square&logo=Telegram"></a>
-     <a href="https://github.com/tw93/Pake/releases" target="_blank">
-      <img alt="GitHub downloads" src="https://img.shields.io/github/downloads/tw93/Pake/total.svg?style=flat-square"></a>
+    <img alt="telegram" src="https://img.shields.io/badge/chat-telegram-blueviolet?style=flat-square&logo=Telegram"></a>
+    <a href="https://github.com/tw93/Pake/releases" target="_blank">
+    <img alt="GitHub downloads" src="https://img.shields.io/github/downloads/tw93/Pake/total.svg?style=flat-square"></a>
     <a href="https://github.com/tw93/Pake/commits" target="_blank">
-      <img alt="GitHub commit" src="https://img.shields.io/github/commit-activity/m/tw93/Pake?style=flat-square"></a>
+    <img alt="GitHub commit" src="https://img.shields.io/github/commit-activity/m/tw93/Pake?style=flat-square"></a>
     <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank">
-      <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
-  </div>
-  <div align="left">很简单用 Rust 打包网页生成很小的桌面 App，支持 Mac/Windows/Linux 应用，当前已打包微信读书、Twitter、Youtube、Flomo、Reference、RunCode、Google Translate、语雀、Witeboard、Vercel、V2EX、开发工具箱等，欢迎去 <a href=https://github.com/tw93/Pake/discussions>讨论区</a> 交流分享。</div>
+    <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
+</div>
+<div align="left">很简单用 Rust 打包网页生成很小的桌面 App，支持 Mac/Windows/Linux 应用，当前已打包微信读书、Twitter、Youtube、Flomo、Reference、RunCode、Google Translate、语雀、Witeboard、Vercel、V2EX、开发工具箱等，欢迎去 <a href=https://github.com/tw93/Pake/discussions>讨论区</a> 交流分享。</div>
 </p>
 
 ## 特征
 
-🏂 **小**：相比传统的 Electron 套壳打包，要小将近 40 倍，不到 3M  
-😂 **快**：Pake 的底层使用的 Rust Tauri 框架，性能体验较 JS 框架要轻快不少，内存小很多  
-🩴 **特**：不是单纯打包，实现了快捷键的透传、沉浸式的窗口、拖动、样式改写、去广告、产品的极简风格定制  
+🏂 **小**：相比传统的 Electron 套壳打包，要小将近 40 倍，不到 3M
+😂 **快**：Pake 的底层使用的 Rust Tauri 框架，性能体验较 JS 框架要轻快不少，内存小很多
+🩴 **特**：不是单纯打包，实现了快捷键的透传、沉浸式的窗口、拖动、样式改写、去广告、产品的极简风格定制
 🐶 **玩**：只是一个很简单的小玩具，用 Rust 替代之前套壳网页打包的老思路，其实 PWA 也很好
 
 ## 下载
@@ -65,25 +65,25 @@
 
 ## 快捷键
 
-|Mac|Windows/Linux|功能|
-| ---- | ----- | ---- |
-|<kbd>⌘</kbd> + <kbd>[</kbd>|<kbd>Ctrl</kbd> + <kbd>←</kbd>|返回上一个页面|
-|<kbd>⌘</kbd> + <kbd>]</kbd>|<kbd>Ctrl</kbd> + <kbd>→</kbd>|去下一个页面|
-|<kbd>⌘</kbd> + <kbd>↑</kbd>|<kbd>Ctrl</kbd> + <kbd>↑</kbd>|自动滚动到页面顶部|
-|<kbd>⌘</kbd> + <kbd>↓</kbd>|<kbd>Ctrl</kbd> + <kbd>↓</kbd>|自动滚动到页面底部|
-|<kbd>⌘</kbd> + <kbd>r</kbd>|<kbd>Ctrl</kbd> + <kbd>r</kbd>|刷新页面|
-|<kbd>⌘</kbd> + <kbd>w</kbd>||隐藏窗口，非退出|
-|<kbd>⌘</kbd> + <kbd>-</kbd>|<kbd>Ctrl</kbd> + <kbd>-</kbd>|缩小页面|
-|<kbd>⌘</kbd> + <kbd>w</kbd>|<kbd>Ctrl</kbd> + <kbd>+</kbd>|放大页面|
-|<kbd>⌘</kbd> + <kbd>=</kbd>|<kbd>Ctrl</kbd> + <kbd>=</kbd>|放大页面|
-|<kbd>⌘</kbd> + <kbd>0</kbd>|<kbd>Ctrl</kbd> + <kbd>0</kbd>|重置页面缩放|
+| Mac                         | Windows/Linux                  | 功能               |
+| --------------------------- | ------------------------------ | ------------------ |
+| <kbd>⌘</kbd> + <kbd>[</kbd> | <kbd>Ctrl</kbd> + <kbd>←</kbd> | 返回上一个页面     |
+| <kbd>⌘</kbd> + <kbd>]</kbd> | <kbd>Ctrl</kbd> + <kbd>→</kbd> | 去下一个页面       |
+| <kbd>⌘</kbd> + <kbd>↑</kbd> | <kbd>Ctrl</kbd> + <kbd>↑</kbd> | 自动滚动到页面顶部 |
+| <kbd>⌘</kbd> + <kbd>↓</kbd> | <kbd>Ctrl</kbd> + <kbd>↓</kbd> | 自动滚动到页面底部 |
+| <kbd>⌘</kbd> + <kbd>r</kbd> | <kbd>Ctrl</kbd> + <kbd>r</kbd> | 刷新页面           |
+| <kbd>⌘</kbd> + <kbd>w</kbd> |                                | 隐藏窗口，非退出   |
+| <kbd>⌘</kbd> + <kbd>-</kbd> | <kbd>Ctrl</kbd> + <kbd>-</kbd> | 缩小页面           |
+| <kbd>⌘</kbd> + <kbd>w</kbd> | <kbd>Ctrl</kbd> + <kbd>+</kbd> | 放大页面           |
+| <kbd>⌘</kbd> + <kbd>=</kbd> | <kbd>Ctrl</kbd> + <kbd>=</kbd> | 放大页面           |
+| <kbd>⌘</kbd> + <kbd>0</kbd> | <kbd>Ctrl</kbd> + <kbd>0</kbd> | 重置页面缩放       |
 
 此外还支持双击头部进行全屏切换，拖拽头部进行移动窗口，还有其他需求，欢迎提过来。
 
 ## 注意点
 
-- Windows 下不能安装到 C:\Program File，会直接闪退。建议安装到其他目录，比如 D:\Program Files。
-- Linux 下暂时不能存 cookie，即应用关闭后数据清空，账号自动推出。
+-   Windows 下不能安装到 C:\Program File，会直接闪退。建议安装到其他目录，比如 D:\Program Files。
+-   Linux 下暂时不能存 cookie，即应用关闭后数据清空，账号自动推出。
 
 ## 开发
 
@@ -221,9 +221,9 @@ chmod +x ./script/build.sh && ./script/build.sh
 
 ## 支持
 
-- 我有两只猫，一只叫汤圆，一只叫可乐，假如觉得 Pake 让你生活更美好，可以给汤圆可乐 <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">喂罐头 🥩🍤</a>。
-- 如果你喜欢 Pake，可以在 Github Star，更欢迎 [推荐](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20%E4%B8%80%E4%B8%AA%E5%BE%88%E7%AE%80%E5%8D%95%E7%9A%84%E7%94%A8%20Rust%20%E6%89%93%E5%8C%85%E7%BD%91%E9%A1%B5%E7%94%9F%E6%88%90%20Mac%20App%20%E7%9A%84%E5%B7%A5%E5%85%B7%EF%BC%8C%E7%9B%B8%E6%AF%94%E4%BC%A0%E7%BB%9F%E7%9A%84%20Electron%20%E5%A5%97%E5%A3%B3%E6%89%93%E5%8C%85%EF%BC%8C%E5%A4%A7%E5%B0%8F%E8%A6%81%E5%B0%8F%E5%B0%86%E8%BF%91%2040%20%E5%80%8D%EF%BC%8C%E4%B8%80%E8%88%AC%202M%20%E5%B7%A6%E5%8F%B3%EF%BC%8C%E5%BA%95%E5%B1%82%E4%BD%BF%E7%94%A8Tauri%20%EF%BC%8C%E6%80%A7%E8%83%BD%E4%BD%93%E9%AA%8C%E8%BE%83%20JS%20%E6%A1%86%E6%9E%B6%E8%A6%81%E8%BD%BB%E5%BF%AB%E4%B8%8D%E5%B0%91%EF%BC%8C%E5%86%85%E5%AD%98%E5%B0%8F%E5%BE%88%E5%A4%9A%EF%BC%8C%E6%94%AF%E6%8C%81%E5%BE%AE%E4%BF%A1%E8%AF%BB%E4%B9%A6%E3%80%81Twitter%E3%80%81Youtube%E3%80%81RunCode%E3%80%81Flomo%E3%80%81%E8%AF%AD%E9%9B%80%E7%AD%89%EF%BC%8C%E5%8F%AF%E4%BB%A5%E5%BE%88%E6%96%B9%E4%BE%BF%E4%BA%8C%E6%AC%A1%E5%BC%80%E5%8F%91~) 给你志同道合的朋友使用。
-- 可以关注我的 [Twitter](https://twitter.com/HiTw93) 获取到最新的 Pake 更新消息，也欢迎加入 [Telegram](https://t.me/miaoyan) 聊天群。
+-   我有两只猫，一只叫汤圆，一只叫可乐，假如觉得 Pake 让你生活更美好，可以给汤圆可乐 <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">喂罐头 🥩🍤</a>。
+-   如果你喜欢 Pake，可以在 Github Star，更欢迎 [推荐](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20%E4%B8%80%E4%B8%AA%E5%BE%88%E7%AE%80%E5%8D%95%E7%9A%84%E7%94%A8%20Rust%20%E6%89%93%E5%8C%85%E7%BD%91%E9%A1%B5%E7%94%9F%E6%88%90%20Mac%20App%20%E7%9A%84%E5%B7%A5%E5%85%B7%EF%BC%8C%E7%9B%B8%E6%AF%94%E4%BC%A0%E7%BB%9F%E7%9A%84%20Electron%20%E5%A5%97%E5%A3%B3%E6%89%93%E5%8C%85%EF%BC%8C%E5%A4%A7%E5%B0%8F%E8%A6%81%E5%B0%8F%E5%B0%86%E8%BF%91%2040%20%E5%80%8D%EF%BC%8C%E4%B8%80%E8%88%AC%202M%20%E5%B7%A6%E5%8F%B3%EF%BC%8C%E5%BA%95%E5%B1%82%E4%BD%BF%E7%94%A8Tauri%20%EF%BC%8C%E6%80%A7%E8%83%BD%E4%BD%93%E9%AA%8C%E8%BE%83%20JS%20%E6%A1%86%E6%9E%B6%E8%A6%81%E8%BD%BB%E5%BF%AB%E4%B8%8D%E5%B0%91%EF%BC%8C%E5%86%85%E5%AD%98%E5%B0%8F%E5%BE%88%E5%A4%9A%EF%BC%8C%E6%94%AF%E6%8C%81%E5%BE%AE%E4%BF%A1%E8%AF%BB%E4%B9%A6%E3%80%81Twitter%E3%80%81Youtube%E3%80%81RunCode%E3%80%81Flomo%E3%80%81%E8%AF%AD%E9%9B%80%E7%AD%89%EF%BC%8C%E5%8F%AF%E4%BB%A5%E5%BE%88%E6%96%B9%E4%BE%BF%E4%BA%8C%E6%AC%A1%E5%BC%80%E5%8F%91~) 给你志同道合的朋友使用。
+-   可以关注我的 [Twitter](https://twitter.com/HiTw93) 获取到最新的 Pake 更新消息，也欢迎加入 [Telegram](https://t.me/miaoyan) 聊天群。
 
 ## 最后
 
