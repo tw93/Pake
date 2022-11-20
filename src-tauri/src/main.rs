@@ -91,7 +91,7 @@ fn main() -> wry::Result<()> {
         resizable,
         fullscreen,
         ..
-    } = get_windows_config().unwrap_or(WindowConfig::default());
+    } = get_windows_config().unwrap_or_default();
     #[cfg(target_os = "windows")]
     let WindowConfig {
         url,
@@ -100,7 +100,7 @@ fn main() -> wry::Result<()> {
         resizable,
         fullscreen,
         ..
-    } = get_windows_config().unwrap_or(WindowConfig::default());
+    } = get_windows_config().unwrap_or_default();
     #[cfg(target_os = "macos")]
     let WindowConfig {
         url,
@@ -110,7 +110,7 @@ fn main() -> wry::Result<()> {
         transparent,
         fullscreen,
         ..
-    } = get_windows_config().unwrap_or(WindowConfig::default());
+    } = get_windows_config().unwrap_or_default();
     let event_loop = EventLoop::new();
 
     let common_window = WindowBuilder::new()
@@ -209,7 +209,7 @@ fn get_windows_config() -> Option<WindowConfig> {
     let config_file = include_str!("../tauri.conf.json");
     let config: Config = serde_json::from_str(config_file).expect("failed to parse windows config");
 
-    config.tauri.windows.iter().next().cloned()
+    config.tauri.windows.first().cloned()
 }
 
 #[cfg(target_os = "windows")]
