@@ -1,0 +1,24 @@
+# http://editorconfig.org
+root = true
+
+[*]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# Use 4 spaces for Python, Rust and Bash files
+[*.{py,rs,sh,md}]
+indent_size = 4
+
+# Makefiles always use tabs for indentation
+[Makefile]
+indent_style = tab
+
+[*.bat]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false

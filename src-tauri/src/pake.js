@@ -7,33 +7,32 @@
  * @type {Record<KeyboardKey, OnKeyDown>}
  */
 
- const metaKeyShortcuts = {
-  'ArrowUp': () => scrollTo(0, 0),
-  'ArrowDown': () => scrollTo(0, document.body.scrollHeight),
-  '[': () => window.history.back(),
-  ']': () => window.history.forward(),
-  'r': () => window.location.reload(),
-  '-': () => zoomOut(),
-  '=': () => zoomIn(),
-  '+': () => zoomIn(),
-  '0': () => zoomCommon(() => '100%'),
-}
-
+const metaKeyShortcuts = {
+  ArrowUp: () => scrollTo(0, 0),
+  ArrowDown: () => scrollTo(0, document.body.scrollHeight),
+  "[": () => window.history.back(),
+  "]": () => window.history.forward(),
+  r: () => window.location.reload(),
+  "-": () => zoomOut(),
+  "=": () => zoomIn(),
+  "+": () => zoomIn(),
+  0: () => zoomCommon(() => "100%"),
+};
 
 const ctrlKeyShortcuts = {
-  'ArrowUp': () => scrollTo(0, 0),
-  'ArrowDown': () => scrollTo(0, document.body.scrollHeight),
-  'ArrowLeft': () => window.history.back(),
-  'ArrowRight': () => window.history.forward(),
-  'r': () => window.location.reload(),
-  '-': () => zoomOut(),
-  '=': () => zoomIn(),
-  '+': () => zoomIn(),
-  '0': () => zoomCommon(() => '100%'),
-}
+  ArrowUp: () => scrollTo(0, 0),
+  ArrowDown: () => scrollTo(0, document.body.scrollHeight),
+  ArrowLeft: () => window.history.back(),
+  ArrowRight: () => window.history.forward(),
+  r: () => window.location.reload(),
+  "-": () => zoomOut(),
+  "=": () => zoomIn(),
+  "+": () => zoomIn(),
+  0: () => zoomCommon(() => "100%"),
+};
 
-window.addEventListener('DOMContentLoaded', (_event) => {
-  const style = document.createElement('style');
+window.addEventListener("DOMContentLoaded", (_event) => {
+  const style = document.createElement("style");
   style.innerHTML = `
     #page #footer-wrapper,
     .drawing-board .toolbar .toolbar-action,
@@ -110,27 +109,27 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     }
   `;
   document.head.append(style);
-  const topDom = document.createElement('div');
-  topDom.id = 'pack-top-dom';
+  const topDom = document.createElement("div");
+  topDom.id = "pack-top-dom";
   document.body.appendChild(topDom);
 
-  const domEl = document.getElementById('pack-top-dom');
+  const domEl = document.getElementById("pack-top-dom");
 
-  domEl.addEventListener('mousedown', (e) => {
+  domEl.addEventListener("mousedown", (e) => {
     if (e.buttons === 1 && e.detail !== 2) {
-      window.ipc.postMessage('drag_window');
+      window.ipc.postMessage("drag_window");
     }
   });
 
-  domEl.addEventListener('touchstart', () => {
-    window.ipc.postMessage('drag_window');
+  domEl.addEventListener("touchstart", () => {
+    window.ipc.postMessage("drag_window");
   });
 
-  domEl.addEventListener('dblclick', () => {
-    window.ipc.postMessage('fullscreen');
+  domEl.addEventListener("dblclick", () => {
+    window.ipc.postMessage("fullscreen");
   });
 
-  document.addEventListener('keyup', function (event) {
+  document.addEventListener("keyup", function (event) {
     const preventDefault = (f) => {
       event.preventDefault();
       f();
@@ -147,14 +146,17 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     }
   });
 
-  document.addEventListener('click', (e) => {
-    const origin = e.target.closest('a');
+  document.addEventListener("click", (e) => {
+    const origin = e.target.closest("a");
     if (origin && origin.href) {
-      origin.target = '_self';
+      origin.target = "_self";
 
       //额外处理下 twitter 的外跳，对于其他需要外跳的可以改这里成对应域名
       const href = origin.href;
-      if(location.host === "twitter.com" && href.indexOf("twitter.com")===-1){
+      if (
+        location.host === "twitter.com" &&
+        href.indexOf("twitter.com") === -1
+      ) {
         e.preventDefault();
         window.ipc.postMessage(`open_browser:${href}`);
       }
@@ -165,9 +167,9 @@ window.addEventListener('DOMContentLoaded', (_event) => {
 setDefaultZoom();
 
 function setDefaultZoom() {
-  const htmlZoom = window.localStorage.getItem('htmlZoom');
+  const htmlZoom = window.localStorage.getItem("htmlZoom");
   if (htmlZoom) {
-    document.getElementsByTagName('html')[0].style.zoom = htmlZoom;
+    document.getElementsByTagName("html")[0].style.zoom = htmlZoom;
   }
 }
 
@@ -175,21 +177,17 @@ function setDefaultZoom() {
  * @param {(htmlZoom: string) => string} [zoomRule]
  */
 function zoomCommon(zoomRule) {
-  const htmlZoom = window.localStorage.getItem('htmlZoom') || '100%';
-  const html = document.getElementsByTagName('html')[0];
+  const htmlZoom = window.localStorage.getItem("htmlZoom") || "100%";
+  const html = document.getElementsByTagName("html")[0];
   const zoom = zoomRule(htmlZoom);
   html.style.zoom = zoom;
-  window.localStorage.setItem('htmlZoom', zoom);
+  window.localStorage.setItem("htmlZoom", zoom);
 }
 
 function zoomIn() {
-  zoomCommon((htmlZoom) =>
-    `${Math.min(parseInt(htmlZoom) + 10, 200)}%`
-  );
+  zoomCommon((htmlZoom) => `${Math.min(parseInt(htmlZoom) + 10, 200)}%`);
 }
 
 function zoomOut() {
-  zoomCommon((htmlZoom) =>
-    `${Math.max(parseInt(htmlZoom) - 10, 30)}%`
-  );
+  zoomCommon((htmlZoom) => `${Math.max(parseInt(htmlZoom) - 10, 30)}%`);
 }
