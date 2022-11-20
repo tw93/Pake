@@ -1,0 +1,23 @@
+name: Check if the codebase matches the EditorConfig rules
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  editorconfig-check:
+    name: Run EditorConfig Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: editorconfig-checker/action-editorconfig-checker@main
+      - run: editorconfig-checker -config .ecrc.json
