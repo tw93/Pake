@@ -153,17 +153,17 @@ chmod +x ./script/build.sh && ./script/build.sh
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/pan93412">
-            <img src="https://avatars.githubusercontent.com/u/28441561?v=4" width="90;" alt="pan93412"/>
-            <br />
-            <sub><b>Pan93412</b></sub>
-        </a>
-    </td>
-    <td align="center">
         <a href="https://github.com/liby">
             <img src="https://avatars.githubusercontent.com/u/38807139?v=4" width="90;" alt="liby"/>
             <br />
             <sub><b>Bryan Lee</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/pan93412">
+            <img src="https://avatars.githubusercontent.com/u/28441561?v=4" width="90;" alt="pan93412"/>
+            <br />
+            <sub><b>Pan93412</b></sub>
         </a>
     </td>
     <td align="center">
