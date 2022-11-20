@@ -1,8 +1,9 @@
-weread,WeRead,weread.qq.com
-twitter,Twitter,twitter.com
-tranlaste,GoogleTranslate,translate.google.com
-youTube,YouTube,youtube.com
-reference,Reference,wangchujiang.com/reference/index.html
-code,Code,riju.codes
-yuque,YuQue,www.yuque.com
-flomo,Flomo,flomoapp.com/mine
+name(Linux/Windows),name(Mac),name_zh,url
+twitter,Twitter,推特,https://twitter.com/
+translate,GoogleTranslate,谷歌翻译,https://translate.google.com/
+youtube,YouTube,YouTube,https://youtube.com
+reference,Reference,Reference,https://wangchujiang.com/reference/index.html
+code,Code,Code,https://riju.codes/
+yuque,YuQue,语雀,https://www.yuque.com/
+flomo,Flomo,浮墨,https://flomoapp.com/mine
+weread,WeRead,微信阅读,https://weread.qq.com/
