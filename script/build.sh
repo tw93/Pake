@@ -38,6 +38,7 @@ if [[ "$OSTYPE" =~ ^linux ]]; then
   echo "Build for Linux"
   echo "==============="
   export sd=${SHELL_FOLDER}/sd-linux-x64
+  chmod +x $sd
   # for linux, package name may be com.xxx.xxx
   echo "rename package name"
   export desktop_file="src-tauri/assets/${package_prefix}.weread.desktop"
@@ -52,6 +53,7 @@ if [[ "$OSTYPE" =~ ^darwin ]]; then
   echo "==============="
 
   export sd=${SHELL_FOLDER}/sd-apple-x64
+  chmod +x $sd
   echo "rename package name"
   $sd "\"productName\": \"weread\"" "\"productName\": \"WeRead\"" src-tauri/tauri.conf.json
 fi
@@ -114,5 +116,7 @@ if [[ "$OSTYPE" =~ ^linux ]]; then
 fi
 
 if [[ "$OSTYPE" =~ ^darwin ]]; then
+  # replace again
+  $sd "\"productName\": \"WeRead\"" "\"productName\": \"weread\"" src-tauri/tauri.conf.json
   echo "result file in output/macos"
 fi
