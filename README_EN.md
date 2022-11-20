@@ -89,7 +89,7 @@ More common apps can be downloaded from [Releases](https://github.com/tw93/Pake/
 
 In addition, it supports double clicking the head to switch to full screen, and dragging the head to move the window
 
-## Current issues
+## Precautions
 
 - It cannot be installed to C:\Program File under Windows, and it will crash directly. It is recommended to install to another directory, such as D:\Program Files.
 - Under Linux, cookies cannot be stored temporarily, that is, the data will be cleared after the application is closed, and the account will be automatically released.
