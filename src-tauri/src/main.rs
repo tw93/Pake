@@ -165,16 +165,7 @@ fn main() -> wry::Result<()> {
           webbrowser::open(&href).expect("no browser");
         }
     };
-    #[cfg(target_os = "windows")]
-    let  webview = WebViewBuilder::new(window)?
-        .with_url(&url.to_string())?
-        .with_devtools(cfg!(feature = "devtools"))
-        .with_initialization_script(include_str!("pake.js"))
-        .with_ipc_handler(handler)
-        .build()?;
     
-    
-    #[cfg(target_os = "linux")]
     let webview = WebViewBuilder::new(window)?
         .with_url(&url.to_string())?
         .with_devtools(cfg!(feature = "devtools"))
@@ -182,13 +173,6 @@ fn main() -> wry::Result<()> {
         .with_ipc_handler(handler)
         .build()?;
 
-    #[cfg(target_os = "macos")]
-    let webview = WebViewBuilder::new(window)?
-        .with_url(&url.to_string())?
-        .with_devtools(cfg!(feature = "devtools"))
-        .with_initialization_script(include_str!("pake-mac.js"))
-        .with_ipc_handler(handler)
-        .build()?;
 
     #[cfg(feature = "devtools")] {
         webview.open_devtools();
