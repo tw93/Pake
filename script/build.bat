@@ -28,7 +28,7 @@ set old_name=weread
 set old_zh_name=微信阅读
 set old_url=weread.qq.com
 
-for /f "tokens=1-3 delims=," %%i in (app.csv) do (
+for /f "skip=1 tokens=1-3 delims=," %%i in (app.csv) do (
   setlocal enabledelayedexpansion
   set name=%%i
   set name_zh=%%j
