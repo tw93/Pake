@@ -118,9 +118,7 @@ fn main() -> wry::Result<()> {
         })
         .with_inner_size(wry::application::dpi::LogicalSize::new(width, height));
     #[cfg(target_os = "windows")]
-    let icon_path = concat!(env!("CARGO_MANIFEST_DIR"), "/png/weread_32.ico");
-    #[cfg(target_os = "windows")]
-    let icon = load_icon(std::path::Path::new(icon_path));
+    let icon = load_icon(std::path::Path::new("png/weread_32.ico"));
 
     #[cfg(target_os = "windows")]
     let window = common_window
