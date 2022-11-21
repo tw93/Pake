@@ -134,8 +134,6 @@ chmod +x ./script/build.sh && ./script/build.sh
 
 ## 打新包
 
-### 自己构建
-
 1. 修改 `src-tauri` 目录下的 `tauri.conf.json` 中的 `url、productName、icon、identifier` 这 4 个字段，其中 icon 可以从 icons 目录选择一个，也可以去 [macOSicons](https://macosicons.com/#/) 下载符合产品名称的
 2. 关于窗口属性设置，可以在 `tauri.conf.json` 修改 `windows` 属性对应的 `width/height`，是否全屏 `fullscreen`，是否可以调整大小 `resizable`，假如想适配 Mac 沉浸式头部，可以将 `transparent` 设置成 `true`，找到 Header 元素加一个 `padding-top` 样式即可，不想适配改成 `false` 也行
 3. `npm run dev` 本地调试看看效果，此外可以使用 `npm run dev:debug` 进行容器调试
