@@ -1,0 +1,74 @@
+[[app]]
+id = "twitter"
+url = "https://twitter.com/"
+# see https://specifications.freedesktop.org/menu-spec/latest/apa.html
+category = "Network"
+
+[app.display_name]
+default = "Twitter"
+zh_CN = "推特"
+zh_TW = "Twitter"
+
+[[app]]
+id = "translate"
+url = "https://translate.google.com/"
+category = "Utility"
+
+[app.display_name]
+default = "Google Translate"
+zh_CN = "谷歌翻译"
+zh_TW = "Google 翻譯"
+
+[[app]]
+id = "youtube"
+url = "https://youtube.com"
+category = "Video"
+
+[app.display_name]
+default = "YouTube"
+zh = "YouTube"
+
+[[app]]
+id = "reference"
+url = "https://wangchujiang.com/reference/index.html"
+category = "Development"
+
+[app.display_name]
+default = "Reference"
+zh = "Reference"
+
+[[app]]
+id = "code"
+url = "https://riju.codes/"
+category = "Development"
+
+[app.display_name]
+default = "Code"
+zh = "Code"
+
+[[app]]
+id = "yuque"
+url = "https://www.yuque.com/"
+category = "Office"
+
+[app.display_name]
+default = "YuQue"
+zh = "语雀"
+
+[[app]]
+id = "flomo"
+url = "https://flomoapp.com/mine"
+category = "Office"
+
+[app.display_name]
+default = "Flomo"
+zh = "浮墨"
+
+[[app]]
+id = "weread"
+url = "https://weread.qq.com/"
+category = "Network"
+
+[app.display_name]
+default = "WeRead"
+zh = "微信阅读"
