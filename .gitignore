@@ -27,3 +27,5 @@ output
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+__pycache__/
