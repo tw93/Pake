@@ -17,15 +17,15 @@ class FileBuilderAbstract(ABC):
 
     Builder 会从 Executor 收到三样参数：
 
-    - ``root``: 项目的根目录，可以理解成 ``README.md`` 和
-      ``package.json`` 所在的目录。届时收到的 root 会放置在
+    -   ``root``: 项目的根目录，可以理解成 ``README.md`` 和
+        ``package.json`` 所在的目录。届时收到的 root 会放置在
         /tmp 缓存文件夹内（每个 app 一个 root）——所以请尽情修改里面的内容。
-    - ``meta``: 这个 app 项目的元数据，是一个 ``AppMeta`` 对象。
-      里面包含软件的代号、分类，以及各地区语言的对应软件名称。
-      详情参阅 ``AppMeta``。
-    - ``platform``: 编译平台的信息，包含目的平台的代称，以及是否是跨平台编译。
-      这个 ``platform`` 可以帮助您“条件生成”文件，比如在 Linux 平台下生成
-      ``.desktop`` 而其他平台不进行生成。
+    -   ``meta``: 这个 app 项目的元数据，是一个 ``AppMeta`` 对象。
+        里面包含软件的代号、分类，以及各地区语言的对应软件名称。
+        详情参阅 ``AppMeta``。
+    -   ``platform``: 编译平台的信息，包含目的平台的代称，以及是否是跨平台编译。
+        这个 ``platform`` 可以帮助您“条件生成”文件，比如在 Linux 平台下生成
+        ``.desktop`` 而其他平台不进行生成。
 
     ``target_path`` 和 ``build`` 作为抽象方法 (abstract method)，
     是必须复写 (override) 的方法。``write`` 除非要进行条件生成，
