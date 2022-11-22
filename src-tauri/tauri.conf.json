@@ -52,7 +52,7 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": [],
+      "resources": ["png/weread_32.ico"],
       "shortDescription": "",
       "targets": ["deb", "msi", "dmg"],
       "windows": {

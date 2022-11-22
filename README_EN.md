@@ -82,7 +82,7 @@ In addition, it supports double clicking the head to switch to full screen, and 
 
 ## Precautions
 
-- It cannot be installed to C:\Program File under Windows, and it will crash directly. It is recommended to install to another directory, such as D:\Program Files.
+- It cannot be installed to C:\Program File under Windows, and it will crash directly. It is recommended to install to other non-administrator directories, such as D:\Program Files (x86) .
 - Under Linux, cookies cannot be stored temporarily, that is, the data will be cleared after the application is closed, and the account will be automatically released.
 
 ## Development

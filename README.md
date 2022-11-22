@@ -74,7 +74,7 @@
 | <kbd>⌘</kbd> + <kbd>r</kbd> | <kbd>Ctrl</kbd> + <kbd>r</kbd> | 刷新页面           |
 | <kbd>⌘</kbd> + <kbd>w</kbd> | <kbd>Ctrl</kbd> + <kbd>w</kbd> | 隐藏窗口，非退出   |
 | <kbd>⌘</kbd> + <kbd>-</kbd> | <kbd>Ctrl</kbd> + <kbd>-</kbd> | 缩小页面           |
-| <kbd>⌘</kbd> + <kbd>w</kbd> | <kbd>Ctrl</kbd> + <kbd>+</kbd> | 放大页面           |
+| <kbd>⌘</kbd> + <kbd>+</kbd> | <kbd>Ctrl</kbd> + <kbd>+</kbd> | 放大页面           |
 | <kbd>⌘</kbd> + <kbd>=</kbd> | <kbd>Ctrl</kbd> + <kbd>=</kbd> | 放大页面           |
 | <kbd>⌘</kbd> + <kbd>0</kbd> | <kbd>Ctrl</kbd> + <kbd>0</kbd> | 重置页面缩放       |
 
@@ -82,8 +82,8 @@
 
 ## 注意点
 
--   Windows 下不能安装到 C:\Program File，会直接闪退。建议安装到其他目录，比如 D:\Program Files。
--   Linux 下暂时不能存 cookie，即应用关闭后数据清空，账号自动推出。
+- Windows 下不能安装到 C:\Program File，会直接闪退。建议安装到其他非管理员权限目录，比如 D:\Program Files (x86) 。
+- Linux 下暂时不能存 cookie，即应用关闭后数据清空，账号自动推出。
 
 ## 使用命令行打包
 
