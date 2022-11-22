@@ -1,7 +1,7 @@
 ## 安装
 
 ```bash
-npm install -g pake
+npm install -g pake-cli
 ```
 
 如果安装失败提示没有权限，请使用 `sudo` 运行。
