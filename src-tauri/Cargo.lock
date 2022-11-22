@@ -64,7 +64,7 @@ dependencies = [
  "tauri-build",
  "tauri-utils",
  "webbrowser",
- "wry 0.23.0",
+ "wry",
 ]
 
 [[package]]
@@ -2983,7 +2983,7 @@ dependencies = [
  "webkit2gtk",
  "webview2-com",
  "windows 0.39.0",
- "wry 0.22.0",
+ "wry",
 ]
 
 [[package]]
@@ -3778,46 +3778,9 @@ dependencies = [
 
 [[package]]
 name = "wry"
-version = "0.22.0"
+version = "0.22.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "923d297b203eae65b095af16c02978b7932be1968012b4da7138390edf34dea5"
-dependencies = [
- "base64",
- "block",
- "cocoa",
- "core-graphics",
- "crossbeam-channel",
- "dunce",
- "gdk",
- "gio",
- "glib",
- "gtk",
- "html5ever",
- "http",
- "kuchiki",
- "libc",
- "log",
- "objc",
- "objc_id",
- "once_cell",
- "serde",
- "serde_json",
- "sha2",
- "soup2",
- "tao",
- "thiserror",
- "url",
- "webkit2gtk",
- "webkit2gtk-sys",
- "webview2-com",
- "windows 0.39.0",
- "windows-implement",
-]
-
-[[package]]
-name = "wry"
-version = "0.23.0"
-source = "git+https://github.com/tauri-apps/wry.git?rev=7c6d64acea4414f7c960b38b80ea9ec3628db2a8#7c6d64acea4414f7c960b38b80ea9ec3628db2a8"
+checksum = "5be1cd2757071a2e764f63d72f3039f15a41cff6127dc52879597a2e037e1ee7"
 dependencies = [
  "base64",
  "block",
