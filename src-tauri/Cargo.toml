@@ -22,7 +22,7 @@ tauri = { version = "1.2.0", features = ["api-all"] }
 image = "0.24.5"
 tauri-utils = "1.2.0"
 webbrowser = "0.8.2"
-wry = "0.22.3"
+wry = "0.22.4"
 
 [features]
 # by default Tauri runs in production mode
