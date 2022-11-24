@@ -44,7 +44,7 @@ if [[ "$OSTYPE" =~ ^linux ]]; then
     echo "rename package name"
     export desktop_file="src-tauri/assets/${package_prefix}.weread.desktop"
     # sed -i "s/\"productName\": \"weread\"/\"productName\": \"${package_prefix}-weread\"/g" src-tauri/tauri.conf.json
-    $sd "\"productName\": \"weread\"" "\"productName\": \"${package_prefix}-weread\"" src-tauri/tauri.conf.json
+    $sd "\"productName\": \"WeRead\"" "\"productName\": \"${package_prefix}-weread\"" src-tauri/tauri.conf.json
 fi
 
 if [[ "$OSTYPE" =~ ^darwin ]]; then
