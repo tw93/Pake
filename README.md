@@ -85,6 +85,26 @@
 - Windows 下不能安装到 C:\Program File，会直接闪退。建议安装到其他非管理员权限目录，比如 D:\Program Files (x86) 。
 - ~~Linux 下暂时不能存 cookie，即应用关闭后数据清空，账号自动推出（已修复）~~。
 
+## 使用命令行打包
+
+Pake 提供了命令行工具，可以更快捷方便地打包。（目前仅支持 MacOS）
+
+### 安装
+
+```bash
+npm install -g pake-cli
+```
+
+如果安装失败提示没有权限，请使用 `sudo` 运行。
+
+### 用法
+
+```bash
+pake [options] url
+```
+
+更多用法可查看[文档](./bin//README.md)。
+
 ## 开发
 
 开始前参考 [Tauri](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-macos) 快速配置好环境。
