@@ -51,7 +51,7 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       display: none !important;
     }
 
-    #page .main_header {
+    #page .main_header, .cb-layout-basic--navbar{
       padding-top: 20px;
     }
 
