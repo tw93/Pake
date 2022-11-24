@@ -61,7 +61,7 @@
     </tr>
 </table>
 
-More common apps can be downloaded from [Releases](https://github.com/tw93/Pake/releases).
+More common apps and Windows/Linux apps can be downloaded from [Releases](https://github.com/tw93/Pake/releases). It cannot be installed to C:\Program File under Windows, and it will crash directly. It is recommended to install to other non-administrator directories, such as D:\Program Files (x86).
 
 ## Shortcuts
 
@@ -79,10 +79,6 @@ More common apps can be downloaded from [Releases](https://github.com/tw93/Pake/
 | <kbd>⌘</kbd> + <kbd>0</kbd> | <kbd>Ctrl</kbd> + <kbd>0</kbd> | Reset the page zoom           |
 
 In addition, it supports double clicking the head to switch to full screen, and dragging the head to move the window
-
-## Precautions
-
-- It cannot be installed to C:\Program File under Windows, and it will crash directly. It is recommended to install to other non-administrator directories, such as D:\Program Files (x86) .
 
 ## Development
 
