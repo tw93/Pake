@@ -1,6 +1,6 @@
 {
   "name": "pake-cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "用 Rust 来打包你的 App，底层使用 Tauri，当前支持微信读书、Flomo、Vercel",
   "bin": {
     "pake": "./cli.js"
@@ -22,7 +22,8 @@
     "build:linux": "npm run tauri build --release",
     "tauri": "tauri",
     "cli": "rollup -c rollup.config.js --watch",
-    "cli:build": "rollup -c rollup.config.js"
+    "cli:build": "rollup -c rollup.config.js",
+    "cli:publish": "npm run cli:build && npm publish"
   },
   "type": "module",
   "exports": "./dist/pake.js",

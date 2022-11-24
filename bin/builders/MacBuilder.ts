@@ -17,7 +17,7 @@ export default class MacBuilder implements IBuilder {
 
     const res = await prompts({
       type: 'confirm',
-      message: 'Detect you have not installed Rust, install it now?',
+      message: 'We detected that you have not installed Rust. Install it now?',
       name: 'value',
     });
 
