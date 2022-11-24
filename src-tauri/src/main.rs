@@ -37,7 +37,7 @@ use wry::{
         menu::MenuType,
         window::{Fullscreen, Window, WindowBuilder},
     },
-    webview::WebViewBuilder,
+    webview::{WebViewBuilder, WebContext},
 };
 
 fn main() -> wry::Result<()> {
@@ -129,7 +129,10 @@ fn main() -> wry::Result<()> {
         .unwrap();
 
     #[cfg(target_os = "linux")]
-    let window = common_window.with_title("").build(&event_loop).unwrap();
+    let window = common_window
+        .with_title("")
+        .build(&event_loop)
+        .unwrap();
 
     #[cfg(target_os = "macos")]
     let window = common_window
@@ -155,10 +158,10 @@ fn main() -> wry::Result<()> {
             webbrowser::open(&href).expect("no browser");
         }
     };
-
     // 用于欺骗有些页面对于浏览器的检测
     let user_agent_string = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15";
 
+    #[cfg(target_os = "macos")]
     let webview = WebViewBuilder::new(window)?
         .with_user_agent(&user_agent_string)
         .with_accept_first_mouse(true)
@@ -166,6 +169,40 @@ fn main() -> wry::Result<()> {
         .with_devtools(cfg!(feature = "devtools"))
         .with_initialization_script(include_str!("pake.js"))
         .with_ipc_handler(handler)
+        .with_back_forward_navigation_gestures(true)
+        .build()?;
+
+    #[cfg(target_os = "windows")]
+    let webview = WebViewBuilder::new(window)?
+        .with_user_agent(&user_agent_string)
+        .with_accept_first_mouse(true)
+        .with_url(&url.to_string())?
+        .with_devtools(cfg!(feature = "devtools"))
+        .with_initialization_script(include_str!("pake.js"))
+        .with_ipc_handler(handler)
+        .with_back_forward_navigation_gestures(true)
+        .build()?;
+    // 自定义cookie文件夹，仅用于Linux
+    // Custom Cookie folder, only for Linux
+    #[cfg(target_os = "linux")]
+    let data_path = std::path::PathBuf::from(
+        concat!("/home/", env!("USER"), "/.config/com-tw93-weread/")
+    );
+    #[cfg(target_os = "linux")]
+    if !std::path::Path::new(&data_path).exists() {
+        std::fs::create_dir(&data_path)?;
+    }
+    #[cfg(target_os = "linux")]
+    let mut web_content = WebContext::new(Some(data_path));
+    #[cfg(target_os = "linux")]
+    let webview = WebViewBuilder::new(window)?
+        .with_user_agent(&user_agent_string)
+        .with_accept_first_mouse(true)
+        .with_url(&url.to_string())?
+        .with_devtools(cfg!(feature = "devtools"))
+        .with_initialization_script(include_str!("pake.js"))
+        .with_ipc_handler(handler)
+        .with_web_context(&mut web_content)
         .with_back_forward_navigation_gestures(true)
         .build()?;
 
