@@ -110,6 +110,7 @@ fn main() -> wry::Result<()> {
     let event_loop = EventLoop::new();
 
     let common_window = WindowBuilder::new()
+        .with_title("")
         .with_resizable(resizable)
         .with_fullscreen(if fullscreen {
             Some(Fullscreen::Borderless(None))
@@ -123,14 +124,12 @@ fn main() -> wry::Result<()> {
     #[cfg(target_os = "windows")]
     let window = common_window
         .with_decorations(true)
-        .with_title("")
         .with_window_icon(Some(icon))
         .build(&event_loop)
         .unwrap();
 
     #[cfg(target_os = "linux")]
     let window = common_window
-        .with_title("")
         .build(&event_loop)
         .unwrap();
 
@@ -158,29 +157,30 @@ fn main() -> wry::Result<()> {
             webbrowser::open(&href).expect("no browser");
         }
     };
-    // 用于欺骗有些页面对于浏览器的检测
-    let user_agent_string = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.79 Safari/537.36";
+
+    // 用于欺骗部分页面对于浏览器的强检测
+    let user_agent_string = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15";
 
     #[cfg(target_os = "macos")]
     let webview = WebViewBuilder::new(window)?
         .with_user_agent(&user_agent_string)
-        .with_accept_first_mouse(true)
+        // .with_accept_first_mouse(true)
         .with_url(&url.to_string())?
         .with_devtools(cfg!(feature = "devtools"))
         .with_initialization_script(include_str!("pake.js"))
         .with_ipc_handler(handler)
-        .with_back_forward_navigation_gestures(true)
+        // .with_back_forward_navigation_gestures(true)
         .build()?;
 
     #[cfg(target_os = "windows")]
     let webview = WebViewBuilder::new(window)?
         .with_user_agent(&user_agent_string)
-        .with_accept_first_mouse(true)
+        // .with_accept_first_mouse(true)
         .with_url(&url.to_string())?
         .with_devtools(cfg!(feature = "devtools"))
         .with_initialization_script(include_str!("pake.js"))
         .with_ipc_handler(handler)
-        .with_back_forward_navigation_gestures(true)
+        // .with_back_forward_navigation_gestures(true)
         .build()?;
     // 自定义cookie文件夹，仅用于Linux
     // Custom Cookie folder, only for Linux
@@ -197,13 +197,13 @@ fn main() -> wry::Result<()> {
     #[cfg(target_os = "linux")]
     let webview = WebViewBuilder::new(window)?
         .with_user_agent(&user_agent_string)
-        .with_accept_first_mouse(true)
+        // .with_accept_first_mouse(true)
         .with_url(&url.to_string())?
         .with_devtools(cfg!(feature = "devtools"))
         .with_initialization_script(include_str!("pake.js"))
         .with_ipc_handler(handler)
         .with_web_context(&mut web_content)
-        .with_back_forward_navigation_gestures(true)
+        // .with_back_forward_navigation_gestures(true)
         .build()?;
 
     #[cfg(feature = "devtools")]
