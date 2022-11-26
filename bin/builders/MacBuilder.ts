@@ -5,7 +5,7 @@ import { checkRustInstalled, installRust } from '@/helpers/rust.js';
 import { PakeAppOptions } from '@/types.js';
 import { IBuilder } from './base.js';
 import { shellExec } from '@/utils/shell.js';
-// @ts-ignore 加上resolveJsonModule rollup会打包报错
+// @ts-expect-error 加上resolveJsonModule rollup会打包报错
 import tauriConf from '../../src-tauri/tauri.conf.json';
 import { fileURLToPath } from 'url';
 import log from 'loglevel';
