@@ -37,7 +37,7 @@ use wry::{
         menu::MenuType,
         window::{Fullscreen, Window, WindowBuilder},
     },
-    webview::{WebViewBuilder, WebContext},
+    webview::{WebContext, WebViewBuilder},
 };
 
 fn main() -> wry::Result<()> {
@@ -129,9 +129,7 @@ fn main() -> wry::Result<()> {
         .unwrap();
 
     #[cfg(target_os = "linux")]
-    let window = common_window
-        .build(&event_loop)
-        .unwrap();
+    let window = common_window.build(&event_loop).unwrap();
 
     #[cfg(target_os = "macos")]
     let window = common_window
@@ -163,7 +161,7 @@ fn main() -> wry::Result<()> {
 
     #[cfg(target_os = "macos")]
     let webview = WebViewBuilder::new(window)?
-        .with_user_agent(&user_agent_string)
+        .with_user_agent(user_agent_string)
         .with_accept_first_mouse(true)
         .with_url(&url.to_string())?
         .with_devtools(cfg!(feature = "devtools"))
@@ -174,7 +172,7 @@ fn main() -> wry::Result<()> {
 
     #[cfg(target_os = "windows")]
     let webview = WebViewBuilder::new(window)?
-        .with_user_agent(&user_agent_string)
+        .with_user_agent(user_agent_string)
         .with_accept_first_mouse(true)
         .with_url(&url.to_string())?
         .with_devtools(cfg!(feature = "devtools"))
@@ -185,9 +183,8 @@ fn main() -> wry::Result<()> {
     // 自定义cookie文件夹，仅用于Linux
     // Custom Cookie folder, only for Linux
     #[cfg(target_os = "linux")]
-    let data_path = std::path::PathBuf::from(
-        concat!("/home/", env!("USER"), "/.config/com-tw93-weread/")
-    );
+    let data_path =
+        std::path::PathBuf::from(concat!("/home/", env!("USER"), "/.config/com-tw93-weread/"));
     #[cfg(target_os = "linux")]
     if !std::path::Path::new(&data_path).exists() {
         std::fs::create_dir(&data_path)?;
@@ -196,7 +193,7 @@ fn main() -> wry::Result<()> {
     let mut web_content = WebContext::new(Some(data_path));
     #[cfg(target_os = "linux")]
     let webview = WebViewBuilder::new(window)?
-        .with_user_agent(&user_agent_string)
+        .with_user_agent(user_agent_string)
         .with_accept_first_mouse(true)
         .with_url(&url.to_string())?
         .with_devtools(cfg!(feature = "devtools"))
