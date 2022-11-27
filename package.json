@@ -1,7 +1,7 @@
 {
   "name": "pake-cli",
   "version": "0.0.5",
-  "description": "用 Rust 来打包你的 App，底层使用 Tauri，当前支持微信读书、Flomo、Vercel",
+  "description": "🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App 🤱🏻 A simple way to make any web page a desktop application using Rust.",
   "bin": {
     "pake": "./cli.js"
   },
