@@ -68,7 +68,7 @@
 <kbd>
   <img src="https://cdn.fliggy.com/upic/cOC1lF.gif" width="100%">
 </kbd>
-<br/>
+<br/><br/>
 
 **Pake 提供了命令行工具，可以更快捷方便地一键打包**，具体使用可见 [文档](./bin/README.md)
 
