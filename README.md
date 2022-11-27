@@ -66,7 +66,7 @@
 ## 使用命令行打包
 
 <kbd>
-  <img src="https://cdn.fliggy.com/upic/GqZ0UU.gif" width="100%">
+  <img src="https://cdn.fliggy.com/upic/cOC1lF.gif" width="100%">
 </kbd>
 
 **Pake 提供了命令行工具，可以更快捷方便地一键打包**，具体使用可见 [文档](./bin/README.md)
