@@ -63,14 +63,14 @@
 
 更多常用 App 下载以及 Windows/Linux 的包可以去 [Releases](https://github.com/tw93/Pake/releases) 中看看。Windows 下不能安装到 `C:\Program File`，会直接闪退，建议安装到其他非管理员权限目录，比如 `D:\Program Files (x86)` 。
 
-## 使用命令行打包
+## 命令行打包
 
 <kbd>
   <img src="https://cdn.fliggy.com/upic/cOC1lF.gif" width="100%">
 </kbd>
 <br/><br/>
 
-**Pake 提供了命令行工具，可以更快捷方便地一键打包**，具体使用可见 [文档](./bin/README.md)
+**Pake 提供了命令行工具，可以更快捷方便地一键自定义打包**，具体使用可见 [文档](./bin/README.md)
 
 ```bash
 // 使用 npm 进行安装
