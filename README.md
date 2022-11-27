@@ -150,6 +150,8 @@ chmod +x ./script/build.sh && ./script/build.sh
 
 ## 贡献者
 
+Pake 的发展离不开这些 Hacker 们，给贡献了大量的能力，也欢迎关注他们 ❤️。
+
 <!-- readme: contributors -start -->
 <table>
 <tr>
