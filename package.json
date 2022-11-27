@@ -26,6 +26,8 @@
     "build": "npm run tauri build -- --target universal-apple-darwin",
     "build:windows": "npm run tauri build -- --target x86_64-pc-windows-msvc",
     "build:linux": "npm run tauri build --release",
+    "build:all-unix":"chmod +x ./script/build.sh && ./script/build.sh",
+    "build:all-windows": ".\\script\\build.bat",
     "tauri": "tauri",
     "cli": "rollup -c rollup.config.js --watch",
     "cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
