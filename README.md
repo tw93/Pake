@@ -65,23 +65,19 @@
 
 ## 使用命令行打包
 
-Pake 提供了命令行工具，可以更快捷方便地打包。（目前仅支持 MacOS）
+<kbd>
+  <img src="https://cdn.fliggy.com/upic/GqZ0UU.gif" width="100%">
+</kbd>
 
-### 安装
+Pake 提供了命令行工具，可以更快捷方便地打包，目前仅验证 MacOS，更多用法可查看[文档](./bin/README.md)
 
 ```bash
+// 使用 npm 进行安装
 npm install -g pake-cli
-```
 
-如果安装失败提示没有权限，请使用 `sudo` 运行。
-
-### 用法
-
-```bash
+// 命令使用
 pake [options] url
 ```
-
-更多用法可查看[文档](./bin//README.md)。
 
 ## 快捷键
 
