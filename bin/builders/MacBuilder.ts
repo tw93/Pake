@@ -55,7 +55,7 @@ export default class MacBuilder implements IBuilder {
     await fs.writeFile(configJsonPath, Buffer.from(JSON.stringify(tauriConf), 'utf-8'));
 
     const code = await shellExec(`cd ${npmDirectory} && npm run build`);
-    const dmgName = `${name}_${'0.2.0'}_universal.dmg`;
+    const dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
     const appPath = this.getBuildedAppPath(npmDirectory, dmgName);
     await fs.copyFile(appPath, path.resolve(`${name}_universal.dmg`));
   }
