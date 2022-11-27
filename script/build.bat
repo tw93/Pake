@@ -64,7 +64,15 @@ for /f "skip=1 tokens=1-4 delims=," %%i in (app.csv) do (
   @echo off
   call npm run tauri build -- --target x86_64-pc-windows-msvc
   move src-tauri\target\x86_64-pc-windows-msvc\release\bundle\msi\*.msi output\windows
-
+  ::rm cache
+  del /q /f /s src-tauri\target\x86_64-pc-windows-msvc\release\*.exe
+  del /q /f /s src-tauri\target\x86_64-pc-windows-msvc\release\resources\*.ico
+  del /q /f /s src-tauri\target\x86_64-pc-windows-msvc\release\png\*.ico
+  del /q /f /s src-tauri\target\x86_64-pc-windows-msvc\release\wix\*.*
+  del /q /f /s src-tauri\target\x86_64-pc-windows-msvc\release\app.*
+  rd /s /q src-tauri\target\x86_64-pc-windows-msvc\release\resources
+  rd /s /q src-tauri\target\x86_64-pc-windows-msvc\release\png
+  rd /s /q src-tauri\target\x86_64-pc-windows-msvc\release\wix
   @echo on
   echo package build success!
   echo.
@@ -76,5 +84,5 @@ for /f "skip=1 tokens=1-4 delims=," %%i in (app.csv) do (
 )
 
 :: for windows, we need replace package name to lower again
-.\script\sd.exe "\"productName\": \"WeRead\"" "\"productName\": \"weread\"" src-tauri\tauri.conf.json
+:: .\script\sd.exe "\"productName\": \"WeRead\"" "\"productName\": \"weread\"" src-tauri\tauri.conf.json
 echo "output dir is output\windows"
