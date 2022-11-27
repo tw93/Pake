@@ -116,12 +116,6 @@ npm run build:windows
 
 // 打包 Linux 应用
 npm run build:linux
-
-// 一键打包所有 Mac/Linux 应用
-chmod +x ./script/build.sh && ./script/build.sh
-
-// 一键打包所有 Windows 项目
-.\script\build.bat
 ```
 
 ## 打新包
@@ -131,7 +125,7 @@ chmod +x ./script/build.sh && ./script/build.sh
 3. `npm run dev` 本地调试看看效果，此外可以使用 `npm run dev:debug` 进行容器调试
 4. `npm run build` 运行即可打生产包
 
-## 高级
+## 高级用法
 
 #### 1. 如何改写样式，如去掉原站广告、不想要的模块、甚至重新设计？
 
