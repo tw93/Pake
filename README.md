@@ -69,7 +69,7 @@
   <img src="https://cdn.fliggy.com/upic/GqZ0UU.gif" width="100%">
 </kbd>
 
-Pake 提供了命令行工具，可以更快捷方便地打包，目前仅验证 MacOS，更多用法可查看[文档](./bin/README.md)
+**Pake 提供了命令行工具，可以更快捷方便地一键打包**，具体使用可见 [文档](./bin/README.md)
 
 ```bash
 // 使用 npm 进行安装
