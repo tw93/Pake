@@ -1,6 +1,6 @@
 {
   "name": "pake-cli",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "用 Rust 来打包你的 App，底层使用 Tauri，当前支持微信读书、Flomo、Vercel",
   "bin": {
     "pake": "./cli.js"
