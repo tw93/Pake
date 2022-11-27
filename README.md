@@ -14,7 +14,7 @@
     <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank">
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
-<div align="left">很简单用 Rust 打包网页生成很小的桌面 App，支持 Mac/Windows/Linux 应用，常用包可见下载区，也欢迎去 <a href=https://github.com/tw93/Pake/discussions>讨论区</a> 交流分享。</div>
+<div align="left">很简单的用 Rust 打包网页生成很小的桌面 App，支持 Mac/Windows/Linux，常用包下载/命令行一键打包/定制开发可见文档，也欢迎去 <a href=https://github.com/tw93/Pake/discussions>讨论区</a> 交流。</div>
 </p>
 
 ## 特征
