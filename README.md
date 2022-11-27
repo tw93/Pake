@@ -148,7 +148,7 @@ chmod +x ./script/build.sh && ./script/build.sh
 
 参考 `pake.js` 中通信代码 `postMessage`，写好事件监听，然后用 `window.ipc.postMessage` 将事件以及参数传递出来，然后参考容器接收事件 `window.drag_window`，自己处理即可，更多可以参考 tauri 以及 wry 的官方文档。
 
-## 贡献者
+## 开发者
 
 Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢迎关注他们 ❤️
 
