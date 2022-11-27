@@ -14,7 +14,7 @@
     <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank">
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
-<div align="left">A simple way to package a web page to desktop application, supporting Mac/Windows/Linux, now has packaging WeRead、Twitter、Youtube、Reference、Flomo、YuQue、Google Translate、Witeboard、RunCode、Vercel、V2EX、DevTools, welcome to <a href=https://github.com/tw93/Pake/discussions>Discussions</a> to see if there have anything you interesting.</div>
+<div align="left">A simple way to package a web page to desktop application, supporting Mac / Windows / Linux, app download、command line one-click packaging、custom development can be found in the following documents, welcome to <a href=https://github.com/tw93/Pake/discussions>Discussions</a> to see if there have anything you interesting.</div>
 </p>
 
 ## Features
