@@ -6,3 +6,4 @@ dist/*         linguist-vendored
 .github/**/*       linguist-vendored
 .github/*       linguist-vendored
 script/*      linguist-vendored
+/icns2png.py     linguist-vendored
