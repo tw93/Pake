@@ -9,7 +9,7 @@ npm install -g pake-cli
 ## 用法
 
 ```bash
-pake [options] url
+pake url [options] 
 ```
 
 打包完成后的应用程序默认为当前工作目录，首次打包由于需配置好环境，需要一些时间，请耐心等待即可。
