@@ -7,3 +7,4 @@ dist/*         linguist-vendored
 .github/*       linguist-vendored
 script/*      linguist-vendored
 /icns2png.py     linguist-vendored
+src-tauri/src/pake.js linguist-vendored
