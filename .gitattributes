@@ -1,2 +1,4 @@
 bin/**/**       linguist-vendored
-dist/**          linguist-vendored
+dist/**         linguist-vendored
+cli.js          linguist-vendored
+rollup.config.js  linguist-vendored
