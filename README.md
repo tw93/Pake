@@ -77,7 +77,7 @@
 npm install -g pake-cli
 
 // 命令使用
-pake [options] url
+pake url [options]
 ```
 
 ## 快捷键
