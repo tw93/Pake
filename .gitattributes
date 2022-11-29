@@ -1,8 +1,8 @@
 bin/**/*       linguist-vendored
 bin/*       linguist-vendored
 dist/*         linguist-vendored
-cli.js          linguist-vendored
-rollup.config.js  linguist-vendored
+/cli.js          linguist-vendored
+/rollup.config.js  linguist-vendored
 .github/**/*       linguist-vendored
 .github/*       linguist-vendored
 script/*      linguist-vendored
