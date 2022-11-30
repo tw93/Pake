@@ -96,18 +96,21 @@ do
 
     echo "building package ${index}/${total}"
     echo "package name is ${package_name} (${package_zh_name})"
-    npm run tauri build
-    echo "package build success!"
-    index=$((index+1))
 
     if [[ "$OSTYPE" =~ ^linux ]]; then
-        mv src-tauri/target/release/bundle/deb/*.deb output/linux/${package_prefix}-${package_name}_amd64.deb
+        npm run tauri build
+        mv src-tauri/target/release/bundle/deb/*.deb output/linux/${package_title}_amd64.deb
     fi
 
     if [[ "$OSTYPE" =~ ^darwin ]]; then
-        mv src-tauri/target/release/bundle/dmg/*.dmg output/macos/${package_title}_x64.dmg
-        echo ""
+
+        npm run tauri build -- --target universal-apple-darwin
+        # mv src-tauri/target/release/bundle/dmg/*.dmg output/macos/${package_title}_x64.dmg
+        mv src-tauri/target/universal-apple-darwin/bundle/dmg/*.dmg output/macos/${package_title}.dmg
     fi
+
+    echo "package build success!"
+    index=$((index+1))
 done
 
 echo "build all package success!"
