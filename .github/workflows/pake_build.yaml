@@ -3,7 +3,7 @@ on:
   push:
     # Sequence of patterns matched against refs/tags
     tags:
-      - "v*"
+      - "V*"
 
 jobs:
   build:
@@ -30,7 +30,7 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-    
+
     - name: install node
       uses: actions/setup-node@v1
       with:
@@ -43,21 +43,21 @@ jobs:
         profile: minimal
         override: true
         target: ${{ matrix.target }}
-    
+
     - name: install dependencies (ubuntu only)
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
         sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf
-    
+
     - name: build for Ubuntu
       if: matrix.os == 'ubuntu-latest'
       run: npm run build:all-unix
-    
+
     - name: build for MacOS
       if: matrix.os == 'macos-latest'
       run: npm run build:all-unix
-    
+
     - name: build for windows
       if: matrix.os == 'windows-latest'
       run: |
@@ -74,7 +74,7 @@ jobs:
     #     prerelease: false
     #     files: |
     #       output/*/*.*
-    
+
     - uses: ncipollo/release-action@v1
       if: startsWith(github.ref, 'refs/tags/v')
       with:
