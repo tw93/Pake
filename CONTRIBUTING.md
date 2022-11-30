@@ -10,12 +10,12 @@ graph LR
     contributions([Develop / Pull requests]) -.-> b_dev;
 ```
 
--   `dev` branch
-    -   `dev` is the developing branch.
-    -   It's **RECOMMENDED** to commit feature PR to `dev`.
--   `master` branch
-    -   `master` is the release branch, we will make tag and publish version on this branch.
-    -   If it is a document modification, it can be submitted to this branch.
+- `dev` branch
+    - `dev` is the developing branch.
+    - It's **RECOMMENDED** to commit feature PR to `dev`.
+- `master` branch
+    - `master` is the release branch, we will make tag and publish version on this branch.
+    - If it is a document modification, it can be submitted to this branch.
 
 ## Commit Log
 
