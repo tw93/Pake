@@ -199,12 +199,6 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       }
     }
 
-    @media only screen and (min-width: 1000px) and (max-width: 1265px) {
-      body {
-        padding-left: 88px;
-      }
-    }
-
     @media only screen and (min-width: 1265px) {
       [data-testid="sidebarColumn"] form[role="search"] {
         visibility: visible !important;

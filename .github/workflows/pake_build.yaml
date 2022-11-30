@@ -24,7 +24,7 @@ jobs:
         - build: macos
           os: macos-latest
           rust: nightly
-          target: x86_64-apple-darwin
+          target: universal-apple-darwin
       fail-fast: false
 
     steps:
