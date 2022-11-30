@@ -106,7 +106,7 @@ do
 
         npm run tauri build -- --target universal-apple-darwin
         # mv src-tauri/target/release/bundle/dmg/*.dmg output/macos/${package_title}_x64.dmg
-        mv src-tauri/target/universal-apple-darwin/bundle/dmg/*.dmg output/macos/${package_title}.dmg
+        mv src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg output/macos/${package_title}.dmg
     fi
 
     echo "package build success!"
