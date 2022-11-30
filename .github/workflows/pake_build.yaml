@@ -1,0 +1,83 @@
+name: build
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    name: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build: [linux, windows, macos]
+        include:
+        - build: linux
+          os: ubuntu-latest
+          rust: nightly
+          target: x86_64-unknown-linux-musl
+        - build: windows
+          os: windows-latest
+          rust: nightly-x86_64-msvc
+          target: x86_64-pc-windows-msvc
+        - build: macos
+          os: macos-latest
+          rust: nightly
+          target: x86_64-apple-darwin
+      fail-fast: false
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - name: install node
+      uses: actions/setup-node@v1
+      with:
+        node-version: 18
+
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: ${{ matrix.rust }}
+        profile: minimal
+        override: true
+        target: ${{ matrix.target }}
+    
+    - name: install dependencies (ubuntu only)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf
+    
+    - name: build for Ubuntu
+      if: matrix.os == 'ubuntu-latest'
+      run: npm run build:all-unix
+    
+    - name: build for MacOS
+      if: matrix.os == 'macos-latest'
+      run: npm run build:all-unix
+    
+    - name: build for windows
+      if: matrix.os == 'windows-latest'
+      run: |
+        npm run build:all-windows
+
+    # - name: Create Release and Upload Release Asset
+    #   uses: softprops/action-gh-release@v1
+    #   if: startsWith(github.ref, 'refs/tags/')
+    #   with:
+    #     tag_name: ${{ github.ref }}
+    #     name: Release ${{ github.ref }}
+    #     body: TODO New Release.
+    #     draft: false
+    #     prerelease: false
+    #     files: |
+    #       output/*/*.*
+    
+    - uses: ncipollo/release-action@v1
+      if: startsWith(github.ref, 'refs/tags/v')
+      with:
+        allowUpdates: true
+        artifacts: "output/*/*.*"
+        token: ${{ secrets.GITHUB_TOKEN }}
