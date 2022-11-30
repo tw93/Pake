@@ -63,7 +63,7 @@ for /f "skip=1 tokens=1-4 delims=," %%i in (app.csv) do (
   echo npm run build:windows
   @echo off
   call npm run tauri build -- --target x86_64-pc-windows-msvc
-  move src-tauri\target\x86_64-pc-windows-msvc\release\bundle\msi\*.msi output\windows
+  move src-tauri\target\x86_64-pc-windows-msvc\release\bundle\msi\*.msi output\windows\!title!_x64_en-US.msi
   ::rm cache
   del /q /f /s src-tauri\target\x86_64-pc-windows-msvc\release\*.exe
   del /q /f /s src-tauri\target\x86_64-pc-windows-msvc\release\resources\*.ico
