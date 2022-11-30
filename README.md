@@ -79,8 +79,8 @@ npm install -g pake-cli
 // 命令使用
 pake url [options]
 
-// 谁便玩玩
-pake https://weekly.tw93.fun --name Weekly --icon https://static.tw93.fun/img/weekly.icns --transparent 
+// 随便玩玩
+pake weekly.tw93.fun --name Weekly --transparent 
 ```
 
 ## 快捷键
