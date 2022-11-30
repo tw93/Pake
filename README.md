@@ -70,7 +70,7 @@
 </kbd>
 <br/><br/>
 
-**Pake 提供了命令行工具，可以更快捷方便地一键自定义打你需要的包**
+**Pake 提供了命令行工具，可以更快捷方便地一键自定义打你需要的包，详细可见 [文档](./bin/README.md)。**
 
 ```bash
 // 使用 npm 进行安装
@@ -82,8 +82,6 @@ pake url [options]
 // 随便玩玩
 pake weekly.tw93.fun --name Weekly --transparent 
 ```
-
-详细使用可见 [文档](./bin/README.md)
 
 ## 快捷键
 
