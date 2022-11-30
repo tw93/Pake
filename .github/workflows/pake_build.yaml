@@ -56,7 +56,9 @@ jobs:
 
     - name: build for MacOS
       if: matrix.os == 'macos-latest'
-      run: npm run build:all-unix
+      run: |
+        rustup target add aarch64-apple-darwin
+        npm run build:all-unix
 
     - name: build for windows
       if: matrix.os == 'windows-latest'
