@@ -101,11 +101,11 @@ do
     index=$((index+1))
 
     if [[ "$OSTYPE" =~ ^linux ]]; then
-        mv src-tauri/target/release/bundle/deb/*.deb output/linux
+        mv src-tauri/target/release/bundle/deb/*.deb output/linux/${package_prefix}-${package_name}_amd64.deb
     fi
 
     if [[ "$OSTYPE" =~ ^darwin ]]; then
-        mv src-tauri/target/release/bundle/dmg/*.dmg output/macos
+        mv src-tauri/target/release/bundle/dmg/*.dmg output/macos/${package_title}_x64.dmg
         echo ""
     fi
 done
