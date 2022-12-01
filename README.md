@@ -214,7 +214,7 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
         <a href="https://github.com/wanghanzhen">
             <img src="https://avatars.githubusercontent.com/u/25301012?v=4" width="90;" alt="wanghanzhen"/>
             <br />
-            <sub><b>Null</b></sub>
+            <sub><b>volare</b></sub>
         </a>
     </td>
     <td align="center">
@@ -257,7 +257,7 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
         <a href="https://github.com/liusishan">
             <img src="https://avatars.githubusercontent.com/u/33129823?v=4" width="90;" alt="liusishan"/>
             <br />
-            <sub><b>Null</b></sub>
+            <sub><b>liusishan</b></sub>
         </a>
     </td>
     <td align="center">
