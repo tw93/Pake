@@ -158,7 +158,7 @@ fn main() -> wry::Result<()> {
 
     // 用于欺骗部分页面对于浏览器的强检测
 
-    #[cfg(target_os = "macos")]
+    // #[cfg(target_os = "macos")]
     // let user_agent_string = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15";
 
     #[cfg(target_os = "macos")]
