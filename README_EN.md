@@ -93,7 +93,7 @@
     </tr>
 </table>
 
-More common apps and Windows/Linux apps can be downloaded from [Releases](https://github.com/tw93/Pake/releases). It cannot be installed to C:\Program File under Windows, and it will crash directly. It is recommended to install to other non-administrator directories, such as D:\Program Files (x86).
+Note: it cannot be installed to C:\Program File under Windows, and it will crash directly. It is recommended to install to other non-administrator directories, such as D:\Program Files (x86).
 
 ## Shortcuts
 

@@ -94,7 +94,7 @@
 </table>
 
 
-更多 App 下载以及 Windows / Linux 的包可以去 [Releases](https://github.com/tw93/Pake/releases) 中看看。Windows 下不能安装到 `C:\Program File`，会直接闪退，建议安装到其他非管理员权限目录，比如 `D:\Program Files (x86)` 。
+注意：Windows 下不能安装到 `C:\Program File`，会直接闪退，建议安装到其他非管理员权限目录，比如 `D:\Program Files (x86)` 。
 
 ## 命令行打包
 
