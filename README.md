@@ -60,10 +60,10 @@
         <td><img src=https://cdn.fliggy.com/upic/KFsZIY.png width=600/></td>
     </tr>
     <tr>
-        <td>RunCode 
-            <a href="https://github.com/tw93/Pake/releases/latest/download/RunCode.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/RunCode_amd64.deb">Linux</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/RunCode_x64.msi">Windows</a>
+        <td>Code 
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Code.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Code_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Code_x64.msi">Windows</a>
         </td>
         <td>Google Translate 
             <a href="https://github.com/tw93/Pake/releases/latest/download/GoogleTranslate.dmg">Mac</a>
