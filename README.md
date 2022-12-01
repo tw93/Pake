@@ -28,38 +28,71 @@
 
 <table>
     <tr>
-        <td>WeRead <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead.dmg">Download</a></td>
-        <td>Twitter <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter.dmg">Download</a></td>
+        <td>WeRead 
+            <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead.dmg">MAC</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead_amd64.deb">Deb</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead_x64.msi">Win</a>
+        </td>
+        <td>Twitter 
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter_amd64.deb">Deb</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter_x64.msi">Win</a>
+        </td>
     </tr>
     <tr>
         <td><img src=https://cdn.fliggy.com/upic/17dC9I.jpg width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/mc41xq.jpg width=600/></td>
     </tr>
     <tr>
-        <td>YouTube <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Download</a></td>
-        <td>Reference <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Download</a></td>
+        <td>YouTube 
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_amd64.deb">Deb</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Win</a>
+        </td>
+        <td>Reference 
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_amd64.deb">Deb</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x64.msi">Win</a>
+        </td>
     </tr>
     <tr>
         <td><img src=https://cdn.fliggy.com/upic/Ea5ZRw.png width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/KFsZIY.png width=600/></td>
     </tr>
     <tr>
-        <td>RunCode <a href="https://github.com/tw93/Pake/releases/latest/download/RunCode.dmg">Download</a></td>
-        <td>Google Translate <a href="https://github.com/tw93/Pake/releases/latest/download/GoogleTranslate.dmg">Download</a></td>
+        <td>RunCode 
+            <a href="https://github.com/tw93/Pake/releases/latest/download/RunCode.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/RunCode_amd64.deb">Deb</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/RunCode_x64.msi">Win</a>
+        </td>
+        <td>Google Translate 
+            <a href="https://github.com/tw93/Pake/releases/latest/download/GoogleTranslate.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/GoogleTranslate_amd64.deb">Deb</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/GoogleTranslate_x64.msi">Win</a>
+        </td>
     </tr>
     <tr>
         <td><img src=https://cdn.fliggy.com/upic/EB1OYP.jpg width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/EmjUGy.png width=600/></td>
     </tr>
     <tr>
-        <td>Flomo <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Download</a></td>
-        <td>YuQue <a href="https://github.com/tw93/Pake/releases/latest/download/YuQue.dmg">Download</a></td>
+        <td>Flomo 
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_amd64.deb">Deb</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Win</a>
+        </td>
+        <td>YuQue 
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YuQue.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YuQue_amd64.deb">Deb</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YuQue_x64.msi">Win</a>
+        </td>
     </tr>
     <tr>
         <td><img src=https://cdn.fliggy.com/upic/jg9Eeu.jpg width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/02SZQl.png width=600/></td>
     </tr>
 </table>
+
 
 更多 App 下载以及 Windows / Linux 的包可以去 [Releases](https://github.com/tw93/Pake/releases) 中看看。Windows 下不能安装到 `C:\Program File`，会直接闪退，建议安装到其他非管理员权限目录，比如 `D:\Program Files (x86)` 。
 
