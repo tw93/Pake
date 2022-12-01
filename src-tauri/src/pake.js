@@ -55,6 +55,14 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       padding-top: 20px;
     }
 
+    .lark > .dashboard-sidebar, .lark > .dashboard-sidebar > .sidebar-user-info , .lark > .dashboard-sidebar .index-module_wrapper_F-Wbq{
+      padding-top:15px;
+    }
+
+    .lark > .main-wrapper [data-testid="aside"] {
+      top: 15px;
+    }
+
     .panel.give_me .nav_view {
       top: 154px !important;
     }
@@ -92,23 +100,23 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       margin-top:24px;
     }
 
-    [data-testid="placementTracking"] article,
-    a[href*="quick_promote_web"],
-    [data-testid="AppTabBar_Explore_Link"],
-    a[href*="/lists"][role="link"][aria-label],
-    a[href="/i/bookmarks"] {
+    #react-root [data-testid="placementTracking"] article,
+    #react-root a[href*="quick_promote_web"],
+    #react-root [data-testid="AppTabBar_Explore_Link"],
+    #react-root a[href*="/lists"][role="link"][aria-label],
+    #react-root a[href="/i/bookmarks"] {
       display: none !important;
     }
 
-    [data-testid="DMDrawer"] {
+    #react-root [data-testid="DMDrawer"] {
       visibility: hidden !important;
     }
 
-    [data-testid="primaryColumn"] > div > div {
+    #react-root [data-testid="primaryColumn"] > div > div {
       position: relative !important;
     }
 
-    [data-testid="sidebarColumn"] {
+    #react-root [data-testid="sidebarColumn"] {
       visibility: hidden !important;
       width: 0 !important;
       margin: 0 !important;
@@ -117,69 +125,69 @@ window.addEventListener("DOMContentLoaded", (_event) => {
     }
 
     @media only screen and (min-width: 1000px) {
-      main[role="main"] {
+      #react-root main[role="main"] {
         align-items: center !important;
         overflow-x: clip !important;
       }
 
-      [data-testid="primaryColumn"] {
+      #react-root [data-testid="primaryColumn"] {
         width: 700px !important;
         max-width: 700px !important;
         margin: 0 auto !important;
       }
-      [data-testid="primaryColumn"] > div > div:last-child,
-      [data-testid="primaryColumn"] > div > div:last-child div {
+      #react-root [data-testid="primaryColumn"] > div > div:last-child,
+      #react-root [data-testid="primaryColumn"] > div > div:last-child div {
         max-width: unset !important;
       }
 
-      div[aria-label][role="group"][id^="id__"] {
+      #react-root div[aria-label][role="group"][id^="id__"] {
         margin-right: 81px !important;
       }
 
-      header[role="banner"] {
+      #react-root header[role="banner"] {
         position: fixed !important;
         left: 0 !important;
       }
 
-      header[role="banner"] > div > div > div {
+      #react-root header[role="banner"] > div > div > div {
         justify-content: center !important;
         padding-top: 0;
       }
 
-      form[role="search"] > div:nth-child(1) > div {
+      #react-root form[role="search"] > div:nth-child(1) > div {
         background-color: transparent !important;
       }
 
-      h1[role="heading"] {
+      #react-root h1[role="heading"] {
         padding-top: 4px !important;
       }
 
-      header[role="banner"]
+      #react-root header[role="banner"]
         nav[role="navigation"]
         *
         div[dir="auto"]:not([aria-label])
         > span,
-      [data-testid="SideNav_AccountSwitcher_Button"] > div:not(:first-child) {
+      #react-root [data-testid="SideNav_AccountSwitcher_Button"] > div:not(:first-child) {
         display: inline-block !important;
         opacity: 0 !important;
         transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
       }
-      header[role="banner"]
+      #react-root header[role="banner"]
         nav[role="navigation"]:hover
         *
         div[dir="auto"]:not([aria-label])
         > span,
-      [data-testid="SideNav_AccountSwitcher_Button"]:hover > div:not(:first-child) {
+      #react-root [data-testid="SideNav_AccountSwitcher_Button"]:hover > div:not(:first-child) {
         opacity: 1 !important;
       }
-      header[role="banner"] nav[role="navigation"]:hover > * > div {
+      #react-root header[role="banner"] nav[role="navigation"]:hover > * > div {
         backdrop-filter: blur(12px) !important;
       }
-      header[role="banner"] nav[role="navigation"] > a {
+      #react-root header[role="banner"] nav[role="navigation"] > a {
         position: relative;
       }
 
-      header[role="banner"] nav[role="navigation"] > a::before {
+      #react-root header[role="banner"] nav[role="navigation"] > a::before {
         content: "";
         position: absolute;
         top: 0px;
@@ -187,12 +195,12 @@ window.addEventListener("DOMContentLoaded", (_event) => {
         bottom: 0px;
         left: 0px;
       }
-      [data-testid="SideNav_AccountSwitcher_Button"] {
+      #react-root [data-testid="SideNav_AccountSwitcher_Button"] {
         bottom: 18px !important;
         left: 1px !important;
       }
 
-      [data-testid="SideNav_NewTweet_Button"] {
+      #react-root [data-testid="SideNav_NewTweet_Button"] {
         position: fixed !important;
         right: 16px !important;
         bottom: 24px !important;
@@ -200,42 +208,43 @@ window.addEventListener("DOMContentLoaded", (_event) => {
     }
 
     @media only screen and (min-width: 1265px) {
-      [data-testid="sidebarColumn"] form[role="search"] {
+      #react-root [data-testid="sidebarColumn"] form[role="search"] {
         visibility: visible !important;
         position: fixed !important;
         top: 12px !important;
         right: 16px !important;
       }
 
-      [data-testid="sidebarColumn"] input[placeholder="Search Twitter"] {
+      #react-root [data-testid="sidebarColumn"] input[placeholder="Search Twitter"] {
         width: 150px;
       }
 
-      [data-testid="sidebarColumn"] form[role="search"]:focus-within {
+      #react-root [data-testid="sidebarColumn"] form[role="search"]:focus-within {
         width: 374px !important;
         backdrop-filter: blur(12px) !important;
       }
 
-      [data-testid="sidebarColumn"] input[placeholder="Search Twitter"]:focus {
+      #react-root [data-testid="sidebarColumn"] input[placeholder="Search Twitter"]:focus {
         width: 328px !important;
       }
 
-      div[style*="left: -12px"] {
+      #react-root div[style*="left: -12px"] {
         left: unset !important;
       }
-      div[style="left: -8px; width: 306px;"] {
+
+      #react-root div[style="left: -8px; width: 306px;"] {
         left: unset !important;
         width: 374px !important;
       }
 
-      .searchFilters {
+      #react-root .searchFilters {
         visibility: visible !important;
         position: fixed;
         top: 12px;
         right: 16px;
         width: 240px;
       }
-      .searchFilters > div > div:first-child {
+      #react-root .searchFilters > div > div:first-child {
         display: none;
       }
     }

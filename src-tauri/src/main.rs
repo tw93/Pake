@@ -159,12 +159,12 @@ fn main() -> wry::Result<()> {
     // 用于欺骗部分页面对于浏览器的强检测
 
     #[cfg(target_os = "macos")]
-    let user_agent_string = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15";
+    // let user_agent_string = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15";
 
     #[cfg(target_os = "macos")]
     let webview = WebViewBuilder::new(window)?
-        .with_user_agent(user_agent_string)
-        .with_accept_first_mouse(true)
+        // .with_user_agent(user_agent_string)
+        // .with_accept_first_mouse(true)
         .with_url(&url.to_string())?
         .with_devtools(cfg!(feature = "devtools"))
         .with_initialization_script(include_str!("pake.js"))
