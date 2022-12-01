@@ -298,7 +298,7 @@ window.addEventListener("DOMContentLoaded", (_event) => {
     }
     if (/macintosh|mac os x/i.test(navigator.userAgent)) {
       if (event.metaKey && event.key in metaKeyShortcuts) {
-        preventDefault(ctrlKeyShortcuts[event.key]);
+        preventDefault(metaKeyShortcuts[event.key]);
       }
     }
   });
