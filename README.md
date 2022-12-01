@@ -29,14 +29,14 @@
 <table>
     <tr>
         <td>WeRead 
-            <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead.dmg">MAC</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead_amd64.deb">Deb</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead_x64.msi">Win</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead_x64.msi">Windows</a>
         </td>
         <td>Twitter 
             <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter_amd64.deb">Deb</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter_x64.msi">Win</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter_x64.msi">Windows</a>
         </td>
     </tr>
     <tr>
@@ -46,13 +46,13 @@
     <tr>
         <td>YouTube 
             <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_amd64.deb">Deb</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Win</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Windows</a>
         </td>
         <td>Reference 
             <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_amd64.deb">Deb</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x64.msi">Win</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x64.msi">Windows</a>
         </td>
     </tr>
     <tr>
@@ -62,13 +62,13 @@
     <tr>
         <td>RunCode 
             <a href="https://github.com/tw93/Pake/releases/latest/download/RunCode.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/RunCode_amd64.deb">Deb</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/RunCode_x64.msi">Win</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/RunCode_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/RunCode_x64.msi">Windows</a>
         </td>
         <td>Google Translate 
             <a href="https://github.com/tw93/Pake/releases/latest/download/GoogleTranslate.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/GoogleTranslate_amd64.deb">Deb</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/GoogleTranslate_x64.msi">Win</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/GoogleTranslate_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/GoogleTranslate_x64.msi">Windows</a>
         </td>
     </tr>
     <tr>
@@ -78,13 +78,13 @@
     <tr>
         <td>Flomo 
             <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_amd64.deb">Deb</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Win</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Windows</a>
         </td>
         <td>YuQue 
             <a href="https://github.com/tw93/Pake/releases/latest/download/YuQue.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YuQue_amd64.deb">Deb</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YuQue_x64.msi">Win</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YuQue_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YuQue_x64.msi">Windows</a>
         </td>
     </tr>
     <tr>
