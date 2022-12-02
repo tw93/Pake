@@ -113,7 +113,7 @@ npm install -g pake-cli
 pake url [options]
 
 // 随便玩玩
-pake weekly.tw93.fun --name Weekly --transparent 
+pake https://weekly.tw93.fun --name Weekly --transparent 
 ```
 
 ## 快捷键
