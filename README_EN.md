@@ -26,6 +26,8 @@
 
 ## Download
 
+<details>
+<summary>A lot of surprise sense of app, click to see ❤️.</summary>
 <table>
     <tr>
         <td>WeRead 
@@ -92,8 +94,29 @@
         <td><img src=https://cdn.fliggy.com/upic/02SZQl.png width=600/></td>
     </tr>
 </table>
+</details>
 
 Note: it cannot be installed to C:\Program File under Windows, and it will crash directly. It is recommended to install to other non-administrator directories, such as D:\Program Files (x86).
+
+## Command line packing
+
+<kbd>
+  <img src="https://cdn.fliggy.com/upic/cOC1lF.gif" width="100%">
+</kbd>
+<br/><br/>
+
+**Pake provides a command line tool that makes it quicker and easier to customize the packages you need with one click, as detailed in [documentation](./bin/README_EN.md).**
+
+```bash
+// Install with npm
+npm install -g pake-cli
+
+// Command usage
+pake url [options]
+
+// Play casually,first time due to the installation environment will be a little slow
+pake https://weekly.tw93.fun --name Weekly --transparent
+```
 
 ## Shortcuts
 
@@ -132,15 +155,7 @@ npm run build:windows
 // Pack Linux application
 npm run build:linux
 
-// One-click packaging of all Linux/Mac projects
-chmod +x build.sh && ./build.sh
-
-// One-click packaging of all Windows projects
-.\build.bat
 ```
-
-// Package all your projects in one click
-chmod +x build.sh && ./build.sh
 
 ## New pack
 
@@ -165,9 +180,9 @@ Refer to the communication code in `pake.js` with `postMessage`, write the event
 
 ## Support
 
-- I have two cats, one is called TangYuan, and one is called Coke, If you think Pake makes your life better, you can give my cats <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">feed canned food 🥩🍤</a>.
-- If you like Pake, you can star it in Github. We are more welcome to [recommend Pake](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20A%20simple%20Rust%20packaged%20web%20pages%20to%20generate%20Mac%20App%20tool,%20compared%20to%20traditional%20Electron%20package,%20the%20size%20of%20nearly%2040%20times%20smaller,%20generally%20about%202M,%20the%20underlying%20use%20of%20Tauri,%20performance%20experience%20than%20the%20JS%20framework%20is%20much%20lighter~) to your like-minded friends.
-- You can follow my [Twitter](https://twitter.com/HiTw93) to get the latest news of Pake, or join [Telegram](https://t.me/miaoyan) chat group.
+-   I have two cats, one is called TangYuan, and one is called Coke, If you think Pake makes your life better, you can give my cats <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">feed canned food 🥩🍤</a>.
+-   If you like Pake, you can star it in Github. We are more welcome to [recommend Pake](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20A%20simple%20Rust%20packaged%20web%20pages%20to%20generate%20Mac%20App%20tool,%20compared%20to%20traditional%20Electron%20package,%20the%20size%20of%20nearly%2040%20times%20smaller,%20generally%20about%202M,%20the%20underlying%20use%20of%20Tauri,%20performance%20experience%20than%20the%20JS%20framework%20is%20much%20lighter~) to your like-minded friends.
+-   You can follow my [Twitter](https://twitter.com/HiTw93) to get the latest news of Pake, or join [Telegram](https://t.me/miaoyan) chat group.
 
 ## Finally
 
