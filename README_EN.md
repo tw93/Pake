@@ -27,7 +27,7 @@
 ## Download
 
 <details>
-<summary>**A lot of surprise sense of app, click to see** ❤️</summary>
+<summary>A lot of surprise sense of app, click to see ❤️</summary>
 <br/>
 <table>
     <tr>
@@ -107,7 +107,7 @@ Note: it cannot be installed to C:\Program File under Windows, and it will crash
 </kbd>
 <br/><br/>
 
-**Pake provides a command line tool that makes it quicker and easier to customize the packages you need with one click, as detailed in [documentation](./bin/README_EN.md).**
+**Pake provides a command line tool that makes it quicker and easier to customize the packages you need, as detailed in [documentation](./bin/README_EN.md).**
 
 ```bash
 // Install with npm
@@ -116,7 +116,7 @@ npm install -g pake-cli
 // Command usage
 pake url [options]
 
-// Play casually,first time due to the installation environment will be a little slow
+// Play casually, first time due to the installation environment will be a little slow
 pake https://weekly.tw93.fun --name Weekly --transparent
 ```
 
