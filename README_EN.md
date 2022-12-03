@@ -27,8 +27,8 @@
 ## Download
 
 <details>
-<summary>A lot of surprise sense of app, click to see ❤️.</summary>
-
+<summary>**A lot of surprise sense of app, click to see** ❤️</summary>
+<br/>
 <table>
     <tr>
         <td>WeRead 
