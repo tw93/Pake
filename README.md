@@ -65,15 +65,15 @@
             <a href="https://github.com/tw93/Pake/releases/latest/download/Code_amd64.deb">Linux</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Code_x64.msi">Windows</a>
         </td>
-        <td>Google Translate 
-            <a href="https://github.com/tw93/Pake/releases/latest/download/GoogleTranslate.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/GoogleTranslate_amd64.deb">Linux</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/GoogleTranslate_x64.msi">Windows</a>
+        <td>Qwerty 
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
         </td>
     </tr>
     <tr>
         <td><img src=https://cdn.fliggy.com/upic/EB1OYP.jpg width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/EmjUGy.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/FGdQec.png width=600/></td>
     </tr>
     <tr>
         <td>Flomo 
