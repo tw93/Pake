@@ -26,9 +26,6 @@
 
 ## Download
 
-<details>
-<summary>A lot of surprise sense of app, click to see ❤️</summary>
-<br/>
 <table>
     <tr>
         <td>WeRead 
@@ -97,8 +94,6 @@
 </table>
 
 Note: it cannot be installed to C:\Program File under Windows, and it will crash directly. It is recommended to install to other non-administrator directories, such as D:\Program Files (x86).
-
-</details>
 
 ## Command line packing
 
