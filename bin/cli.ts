@@ -1,5 +1,6 @@
-import { program, createArgument } from 'commander';
+import { program } from 'commander';
 import log from 'loglevel';
+import chalk from 'chalk';
 import { DEFAULT_PAKE_OPTIONS } from './defaults.js';
 import { PakeCliOptions } from './types.js';
 import { validateNumberInput, validateUrlInput } from './utils/validate.js';
@@ -8,8 +9,9 @@ import BuilderFactory from './builders/BuilderFactory.js';
 import { checkUpdateTips } from './helpers/updater.js';
 // @ts-expect-error
 import packageJson from '../../package.json';
+import logger from './options/logger.js';
 
-program.version(packageJson.version).description('A cli application can package a web page to desktop application');
+program.version(packageJson.version).description('A cli application can package a web page to desktop application.');
 
 program
   .showHelpAfterError()
