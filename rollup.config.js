@@ -4,9 +4,6 @@ import typescript from '@rollup/plugin-typescript';
 import alias from '@rollup/plugin-alias';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
-import terser from '@rollup/plugin-terser';
-
-const isDev = process.env.NODE_ENV !== "production";
 
 export default {
   input: 'bin/cli.ts',
@@ -23,6 +20,5 @@ export default {
     alias({
       entries: [{ find: '@', replacement: path.join(appRootPath.path, 'bin') }],
     }),
-    !isDev && terser(),
   ],
 };
