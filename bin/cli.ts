@@ -1,16 +1,19 @@
-import { program } from 'commander';
+import { program, createArgument } from 'commander';
+import log from 'loglevel';
 import { DEFAULT_PAKE_OPTIONS } from './defaults.js';
 import { PakeCliOptions } from './types.js';
 import { validateNumberInput, validateUrlInput } from './utils/validate.js';
 import handleInputOptions from './options/index.js';
 import BuilderFactory from './builders/BuilderFactory.js';
-import log from 'loglevel';
+import { checkUpdateTips } from './helpers/updater.js';
+// @ts-expect-error
+import packageJson from '../../package.json';
 
-program.version('0.0.1').description('A cli application can package a web page to desktop application');
+program.version(packageJson.version).description('A cli application can package a web page to desktop application');
 
 program
   .showHelpAfterError()
-  .argument('<url>', 'the web url you want to package', validateUrlInput)
+  .argument('[url]', 'the web url you want to package', validateUrlInput)
   .option('--name <string>', 'application name')
   .option('--icon <string>', 'application icon', DEFAULT_PAKE_OPTIONS.icon)
   .option('--height <number>', 'window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
@@ -20,7 +23,14 @@ program
   .option('--transparent', 'transparent title bar', DEFAULT_PAKE_OPTIONS.transparent)
   .option('--debug', 'debug', DEFAULT_PAKE_OPTIONS.transparent)
   .action(async (url: string, options: PakeCliOptions) => {
-    log.setDefaultLevel('info')
+    checkUpdateTips();
+
+    if (!url) {
+      // 直接 pake 不需要出现url提示
+      program.help();
+    }
+
+    log.setDefaultLevel('info');
     if (options.debug) {
       log.setLevel('debug');
     }
