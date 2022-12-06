@@ -1618,6 +1618,25 @@ function mergeTauriConfig(url, options, tauriConf) {
         tauriConf.package.productName = name;
         tauriConf.tauri.bundle.identifier = identifier;
         tauriConf.tauri.bundle.icon = [options.icon];
+        if (process.platform === "win32") {
+            const ico_path = path.join(npmDirectory, 'src-tauri/png/weread_32.ico');
+            // tauriConf.tauri.bundle.resources = [options.icon];
+            yield fs.copyFile(options.icon, ico_path);
+        }
+        let configPath = "";
+        switch (process.platform) {
+            case "win32": {
+                configPath = path.join(npmDirectory, 'src-tauri/tauri.windows.conf.json');
+                break;
+            }
+            case "darwin": {
+                configPath = path.join(npmDirectory, 'src-tauri/tauri.macos.conf.json');
+                break;
+            }
+        }
+        let bundleConf = { tauri: { bundle: tauriConf.tauri.bundle } };
+        yield fs.writeFile(configPath, Buffer.from(JSON.stringify(bundleConf), 'utf-8'));
+        // delete tauriConf.tauri.bundle;
         const configJsonPath = path.join(npmDirectory, 'src-tauri/tauri.conf.json');
         yield fs.writeFile(configJsonPath, Buffer.from(JSON.stringify(tauriConf), 'utf-8'));
     });
@@ -1791,9 +1810,15 @@ var tauri$2 = {
 			resizable: true
 		}
 	],
+	security: {
+		csp: null
+	},
+	updater: {
+		active: false
+	},
 	bundle: {
 		icon: [
-			"C:\\Users\\18826\\Documents\\electron_build\\Pake\\pake-default.icns"
+			"C:\\Users\\18826\\Documents\\electron_build\\Pake\\src-tauri\\png\\code_256.ico"
 		],
 		identifier: "pake-f9751d",
 		active: true,
@@ -1803,7 +1828,7 @@ var tauri$2 = {
 		],
 		longDescription: "",
 		resources: [
-			"png/weread_32.ico"
+			"C:\\Users\\18826\\Documents\\electron_build\\Pake\\src-tauri\\png\\code_256.ico"
 		],
 		shortDescription: "",
 		targets: [
@@ -1819,12 +1844,6 @@ var tauri$2 = {
 				]
 			}
 		}
-	},
-	security: {
-		csp: null
-	},
-	updater: {
-		active: false
 	}
 };
 var CommonConf = {
