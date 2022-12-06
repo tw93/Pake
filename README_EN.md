@@ -143,14 +143,8 @@ npm i
 // Local development
 npm run dev
 
-// Pack Mac application
-npm run build
-
-// Pack Windows application
-npm run build:windows
-
-// Pack Linux application
-npm run build:linux
+// Pack application
+npm run build:release
 
 ```
 

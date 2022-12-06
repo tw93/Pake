@@ -43,7 +43,7 @@ export async function mergeTauriConfig(
   tauriConf.tauri.bundle.icon = [options.icon];
 
 
-  const configJsonPath = path.join(npmDirectory, 'src-tauri/tauri.conf.json');
+  const configJsonPath = path.join(npmDirectory, 'src-tauri/tauri.conf.json')
   await fs.writeFile(
     configJsonPath,
     Buffer.from(JSON.stringify(tauriConf), 'utf-8')

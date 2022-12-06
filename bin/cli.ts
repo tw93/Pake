@@ -8,7 +8,7 @@ import handleInputOptions from './options/index.js';
 import BuilderFactory from './builders/BuilderFactory.js';
 import { checkUpdateTips } from './helpers/updater.js';
 // @ts-expect-error
-import packageJson from '../../package.json';
+import packageJson from '../package.json';
 import logger from './options/logger.js';
 
 program.version(packageJson.version).description('A cli application can package a web page to desktop application.');

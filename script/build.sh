@@ -34,6 +34,13 @@ old_zh_name="微信阅读"
 old_url="https://weread.qq.com/"
 package_prefix="com-tw93"
 
+
+# set init name,  we will recovery code to init when build finish.
+export init_name=${old_name}
+export init_title=${old_title}
+export init_zh_name=${old_zh_name}
+export init_url=${old_url}
+
 if [[ "$OSTYPE" =~ ^linux ]]; then
     echo "==============="
     echo "Build for Linux"
@@ -73,6 +80,7 @@ do
 
     # for apple, need replace title
     if [[ "$OSTYPE" =~ ^darwin ]]; then
+        $sd "${old_name}" "${package_name}" src-tauri/tauri.macos.conf.json
         $sd "${old_title}" "${package_title}" src-tauri/tauri.conf.json
     fi
 
@@ -80,6 +88,7 @@ do
     # cp "src-tauri/png/${package_name}_32.ico" "src-tauri/icons/icon.ico"
 
     if [[ "$OSTYPE" =~ ^linux ]]; then
+        $sd "${old_name}" "${package_name}" src-tauri/tauri.linux.conf.json
         echo "update desktop"
         old_desktop="src-tauri/assets/${package_prefix}-${old_name}.desktop"
         new_desktop="src-tauri/assets/${package_prefix}-${package_name}.desktop"
@@ -115,12 +124,20 @@ done
 
 echo "build all package success!"
 if [[ "$OSTYPE" =~ ^linux ]]; then
-$sd "\"productName\": \"com-tw93-weread\"" "\"productName\": \"WeRead\"" src-tauri/tauri.conf.json
+    # recovery linux code
+    $sd "\"productName\": \"com-tw93-weread\"" "\"productName\": \"WeRead\"" src-tauri/tauri.conf.json
+    $sd "${package_name}" "${init_name}" src-tauri/tauri.linux.conf.json
     echo "result file in output/linux"
 fi
 
 if [[ "$OSTYPE" =~ ^darwin ]]; then
-    # replace again
+    # recovery macos code
     $sd "\"productName\": \"weread\"" "\"productName\": \"WeRead\"" src-tauri/tauri.conf.json
+    $sd "${package_name}" "${init_name}" src-tauri/tauri.macos.conf.json
     echo "result file in output/macos"
 fi
+
+# recovery code
+$sd "${url}" "${init_url}" src-tauri/tauri.conf.json
+$sd ${package_name}" "${init_name}" src-tauri/tauri.conf.json
+$sd ${package_name}" "${init_name}" src-tauri/src/main.rs
