@@ -95,7 +95,7 @@
 
 注意：Windows 下不能安装到 `C:\Program File`，会直接闪退，建议安装到其他非管理员权限目录，比如 `D:\Program Files (x86)` 。
 
-此外对于轻度使用的小白用户，使用 **GitHub Actions 在线编译** 是一个不错的选择，可查看[文档](/docs/README.md)。
+对于轻度使用用户，使用 **GitHub Actions 在线编译多系统版本** 也是一个不错的选择，可查看[文档](/docs/README.md)。
 
 ## 命令行打包
 
