@@ -6,7 +6,9 @@ import { PakeAppOptions } from '@/types.js';
 import { IBuilder } from './base.js';
 import { shellExec } from '@/utils/shell.js';
 // @ts-expect-error 加上resolveJsonModule rollup会打包报错
-import tauriConf from '../../src-tauri/tauri.conf.json';
+// import tauriConf from '../../src-tauri/tauri.windows.conf.json';
+import tauriConf from './tauriConf.js';
+
 import { fileURLToPath } from 'url';
 import logger from '@/options/logger.js';
 import { mergeTauriConfig } from './common.js';
@@ -41,19 +43,26 @@ export default class WinBuilder implements IBuilder {
 
   async build(url: string, options: PakeAppOptions) {
     logger.debug('PakeAppOptions', options);
+    const { name } = options;
 
     await mergeTauriConfig(url, options, tauriConf);
 
-    const code = await shellExec(`cd ${npmDirectory} && npm run build:windows`);
-    // const dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
-    // const appPath = this.getBuildedAppPath(npmDirectory, dmgName);
-    // await fs.copyFile(appPath, path.resolve(`${name}_universal.dmg`));
+    const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build:release`);
+    const language = tauriConf.tauri.bundle.windows.wix.language[0];
+    const arch = process.arch;
+    const msiName = `${name}_${tauriConf.package.version}_${arch}_${language}.msi`;
+    const appPath = this.getBuildedAppPath(npmDirectory, msiName);
+    const distPath = path.resolve(`${name}.msi`);
+    await fs.copyFile(appPath, distPath);
+    await fs.unlink(appPath);
+    logger.success('Build success!');
+    logger.success('You can find the app installer in', distPath);
   }
 
   getBuildedAppPath(npmDirectory: string, dmgName: string) {
     return path.join(
       npmDirectory,
-      'src-tauri/target/universal-apple-darwin/release/bundle/dmg',
+      'src-tauri/target/release/bundle/msi',
       dmgName
     );
   }
