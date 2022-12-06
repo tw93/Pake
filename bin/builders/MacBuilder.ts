@@ -6,7 +6,8 @@ import { PakeAppOptions } from '@/types.js';
 import { IBuilder } from './base.js';
 import { shellExec } from '@/utils/shell.js';
 // @ts-expect-error 加上resolveJsonModule rollup会打包报错
-import tauriConf from '../../src-tauri/tauri.conf.json';
+// import tauriConf from '../../src-tauri/tauri.macos.conf.json';
+import tauriConf from './tauriConf.js';
 import log from 'loglevel';
 import { mergeTauriConfig } from './common.js';
 import { npmDirectory } from '@/utils/dir.js';
@@ -39,10 +40,11 @@ export default class MacBuilder implements IBuilder {
 
     await mergeTauriConfig(url, options, tauriConf);
 
-    const code = await shellExec(`cd ${npmDirectory} && npm run build`);
-    const dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
+    const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build:release`);
+    const arch = process.arch;
+    const dmgName = `${name}_${tauriConf.package.version}_${arch}.dmg`;
     const appPath = this.getBuildedAppPath(npmDirectory, dmgName);
-    const distPath = path.resolve(`${name}_universal.dmg`);
+    const distPath = path.resolve(`${name}.dmg`);
     await fs.copyFile(appPath, distPath);
     await fs.unlink(appPath);
 
@@ -53,7 +55,7 @@ export default class MacBuilder implements IBuilder {
   getBuildedAppPath(npmDirectory: string, dmgName: string) {
     return path.join(
       npmDirectory,
-      'src-tauri/target/universal-apple-darwin/release/bundle/dmg',
+      'src-tauri/target/release/bundle/dmg',
       dmgName
     );
   }

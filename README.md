@@ -145,14 +145,9 @@ npm i
 // 调试
 npm run dev
 
-// 打包 Mac 应用
-npm run build
+// 打包应用
+npm run build:release
 
-// 打包 Windows 应用
-npm run build:windows
-
-// 打包 Linux 应用
-npm run build:linux
 ```
 
 ## 打新包

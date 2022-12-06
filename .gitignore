@@ -9,7 +9,6 @@ lerna-debug.log*
 
 node_modules
 dist-ssr
-dist/cli.js
 *.local
 
 # Editor directories and files
@@ -25,6 +24,9 @@ dist/cli.js
 *.sw?
 .npmrc
 output
+*.msi
+*.deb
+*.dmg
 
 package-lock.json
 yarn.lock
