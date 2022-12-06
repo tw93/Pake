@@ -4,7 +4,7 @@
 npm install -g pake-cli
 ```
 
-If the installation fails and you are prompted that you do not have permission, please use `sudo` to run.
+If the installation fails and you are prompted that you do not have permission, please see this [website](https://gist.github.com/Giancarlos/d087f8a9e6516716da98ad0c0f5a8f58) , attention! **try not to use sudo permissions**.
 
 ## Usage
 
@@ -28,7 +28,7 @@ Some specific options are provided. When packaging, corresponding parameters can
 
 #### [name]
 
-The application name, if not specified when entering, will prompt you to enter.
+The application name, if not specified when entering, will prompt you to enter, input must be English.
 
 ```shell
 --name <value>
@@ -39,6 +39,8 @@ The application name, if not specified when entering, will prompt you to enter.
 应用 icon，支持本地/远程文件，默认为 Pake 自带图标。
 
 - MacOS must be `.icns`
+- Windows must be `.ico`
+- Linux must be `.png`
 
 ```shell
 --icon <path>
