@@ -6,17 +6,17 @@ let tauriConf = {
   package: CommonConf.package,
   tauri: CommonConf.tauri
 }
-
 switch (process.platform) {
   case "win32": {
-    tauriConf.tauri.bundle = WinConf.bundle;
+    tauriConf.tauri.bundle = WinConf.tauri.bundle;
     break;
   }
   case "darwin": {
-    tauriConf.tauri.bundle = MacConf.bundle;
+    tauriConf.tauri.bundle = MacConf.tauri.bundle;
     break;
   }
 }
+
 export default tauriConf;
 
 
