@@ -44,8 +44,18 @@ export async function mergeTauriConfig(
   if (process.platform === "win32") {
     const ico_path = path.join(npmDirectory, 'src-tauri/png/weread_32.ico');
     await fs.copyFile(options.icon, ico_path);
-
   }
+  if (process.platform === "linux") {
+    const installSrc = `/usr/share/applications/${name}.desktop`;
+    const assertSrc = `src-tauri/assets/${name}.desktop`;
+    const assertPath = path.join(npmDirectory, assertSrc);
+    tauriConf.tauri.bundle.deb.files = {
+      [installSrc]: assertPath
+    }
+    
+  }
+
+
   let configPath = "";
   switch (process.platform) {
     case "win32": {
@@ -54,6 +64,10 @@ export async function mergeTauriConfig(
     }
     case "darwin": {
       configPath = path.join(npmDirectory, 'src-tauri/tauri.macos.conf.json');
+      break;
+    }
+    case "linux": {
+      configPath = path.join(npmDirectory, 'src-tauri/tauri.linux.conf.json');
       break;
     }
   }

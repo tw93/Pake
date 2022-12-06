@@ -1,6 +1,7 @@
 import CommonConf from '../../src-tauri/tauri.conf.json';
 import WinConf from '../../src-tauri/tauri.windows.conf.json';
 import MacConf from '../../src-tauri/tauri.macos.conf.json';
+import LinuxConf from '../../src-tauri/tauri.linux.conf.json';
 
 let tauriConf = {
   package: CommonConf.package,
@@ -13,6 +14,10 @@ switch (process.platform) {
   }
   case "darwin": {
     tauriConf.tauri.bundle = MacConf.tauri.bundle;
+    break;
+  }
+  case "linux": {
+    tauriConf.tauri.bundle = LinuxConf.tauri.bundle;
     break;
   }
 }
