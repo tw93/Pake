@@ -92,8 +92,13 @@
         <td><img src=https://cdn.fliggy.com/upic/02SZQl.png width=600/></td>
     </tr>
 </table>
+Note: it cannot be installed to `C:\Program File` under Windows, and it will crash directly. It is recommended to install to other non-administrator directories, such as `D:\Program Files (x86)`.
 
-Note: it cannot be installed to C:\Program File under Windows, and it will crash directly. It is recommended to install to other non-administrator directories, such as D:\Program Files (x86).
+------
+
+- For light users, using **GitHub Actions** online compilation will be a better choice
+
+- You can view [tutorial](/docs/README_EN.md) for the online compilation tutorial using GitHub Actions
 
 ## Command line packing
 
