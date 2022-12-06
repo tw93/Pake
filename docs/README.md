@@ -47,7 +47,7 @@
 
 参考下面图片自定义配置，**推荐修改带星号的内容**，其他可以使用默认
 
-![image-20221205233244356](assets/image-20221205233244356.png)
+![image-20221206112931624](assets/image-20221206112931624.png)
 
 ## 6.发布以开始运行自动编译
 
@@ -65,14 +65,14 @@
 
 ![image-20221205233956978](assets/image-20221205233956978.png)
 
-- 点击下方的**Creat new tag**按钮
+- 点击下方的**Create new tag**按钮
 
 ![image-20221205234436283](assets/image-20221205234436283.png)
 
 - 填写标题和内容（可选）
-- 如果不是在master分支修改，需要在target下拉栏选择对应分支
+- 如果不是在`master`分支修改，需要在target下拉栏选择对应分支
 - 点击**Publish release**
-- 此时，前往actions页面，确保出现新workflow
+- 此时，前往actions页面，确保出现新workflows
 
 ![image-20221205234306770](assets/image-20221205234306770.png)
 
