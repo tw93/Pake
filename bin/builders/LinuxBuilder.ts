@@ -17,7 +17,7 @@ import { npmDirectory } from '@/utils/dir.js';
 export default class LinuxBuilder implements IBuilder {
   async prepare() {
     logger.info(
-      'To build the Windows app, you need to install Rust and VS Build Tools.'
+      'To build the Linux app, you need to install Rust and Linux package'
     );
     logger.info(
       'See more in https://tauri.app/v1/guides/getting-started/prerequisites#installing\n'
