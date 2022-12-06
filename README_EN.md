@@ -135,7 +135,7 @@ In addition, it supports double clicking the head to switch to full screen, and 
 
 ## Development
 
-Refer to the [Tauri documentation](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-macos) to quickly configure your environment before you start.
+Refer to the [Tauri documentation](https://tauri.app/v1/guides/getting-started/prerequisites) to quickly configure your environment before you start.
 
 ```sh
 // Install Dependencies
