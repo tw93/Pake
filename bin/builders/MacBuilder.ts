@@ -41,7 +41,12 @@ export default class MacBuilder implements IBuilder {
     await mergeTauriConfig(url, options, tauriConf);
 
     const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build:release`);
-    const arch = process.arch;
+    let arch  = "x64";
+    if (process.arch === "arm64") {
+      arch = "aarch64";
+    } else {
+      arch = process.arch;
+    }
     const dmgName = `${name}_${tauriConf.package.version}_${arch}.dmg`;
     const appPath = this.getBuildedAppPath(npmDirectory, dmgName);
     const distPath = path.resolve(`${name}.dmg`);
