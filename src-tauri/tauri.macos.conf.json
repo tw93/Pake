@@ -1,0 +1,25 @@
+{
+  "tauri": {
+    "bundle": {
+      "icon": [
+        "icons/weread.icns"
+      ],
+      "identifier": "com.tw93.weread",
+      "active": true,
+      "category": "DeveloperTool",
+      "copyright": "",
+      "externalBin": [],
+      "longDescription": "",
+      "macOS": {
+        "entitlements": null,
+        "exceptionDomain": "",
+        "frameworks": [],
+        "providerShortName": null,
+        "signingIdentity": null
+      },
+      "resources": [],
+      "shortDescription": "",
+      "targets": ["dmg"]
+    }
+  }
+}
