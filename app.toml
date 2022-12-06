@@ -72,3 +72,12 @@ category = "Network"
 [app.display_name]
 default = "WeRead"
 zh = "微信阅读"
+
+[[app]]
+id = "deepl"
+url = "https://www.deepl.com/translator"
+category = "Network"
+
+[app.display_name]
+default = "deepl"
+zh = "deepl 翻译"
