@@ -94,11 +94,7 @@
 </table>
 Note: it cannot be installed to  C:\Program File  under Windows, and it will crash directly. It is recommended to install to other non-administrator directories, such as  D:\Program Files (x86) .
 
-------
-
-- For light users, using **GitHub Actions** online compilation will be a better choice
-
-- You can view [tutorial](/docs/README_EN.md) for the online compilation tutorial using GitHub Actions
+Also for light users, a good option is to use **GitHub Actions online compilation**, see the [tutorial](/docs/README_EN.md).
 
 ## Command line packing
 
