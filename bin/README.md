@@ -16,7 +16,7 @@ pake url [options]
 
 Note: 打包需要用 `Rust` 环境，如果没有 `Rust`，会提示确认安装。如遇安装失败或超时，可[自行安装](https://www.rust-lang.org/tools/install)。
 
-Note: 目前仅支持 MacOs，后续会支持其他平台。
+Note: 目前支持 MacOS 和 WIndows，后续会支持 Linux。
 
 ### url
 
