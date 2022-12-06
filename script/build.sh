@@ -28,18 +28,13 @@ total=$(sed -n '$=' app.csv)
 export total=$((total-1))
 export index=1
 
-old_name="weread"
-old_title="WeRead"
-old_zh_name="微信阅读"
-old_url="https://weread.qq.com/"
-package_prefix="com-tw93"
+export old_name="weread"
+export old_title="WeRead"
+export old_zh_name="微信阅读"
+export old_url="https://weread.qq.com/"
+export package_prefix="com-tw93"
 
 
-# set init name,  we will recovery code to init when build finish.
-export init_name=${old_name}
-export init_title=${old_title}
-export init_zh_name=${old_zh_name}
-export init_url=${old_url}
 
 if [[ "$OSTYPE" =~ ^linux ]]; then
     echo "==============="
@@ -71,7 +66,6 @@ do
     package_title=${arr[1]}
     package_zh_name=${arr[2]}
     url=${arr[3]}
-    echo "update package name and url"
     # replace package info
     $sd "${old_url}" "${url}" src-tauri/tauri.conf.json
     $sd "${old_name}" "${package_name}" src-tauri/tauri.conf.json
@@ -123,21 +117,5 @@ do
 done
 
 echo "build all package success!"
-if [[ "$OSTYPE" =~ ^linux ]]; then
-    # recovery linux code
-    $sd "\"productName\": \"com-tw93-weread\"" "\"productName\": \"WeRead\"" src-tauri/tauri.conf.json
-    $sd "${package_name}" "${init_name}" src-tauri/tauri.linux.conf.json
-    echo "result file in output/linux"
-fi
-
-if [[ "$OSTYPE" =~ ^darwin ]]; then
-    # recovery macos code
-    $sd "\"productName\": \"weread\"" "\"productName\": \"WeRead\"" src-tauri/tauri.conf.json
-    $sd "${package_name}" "${init_name}" src-tauri/tauri.macos.conf.json
-    echo "result file in output/macos"
-fi
-
-# recovery code
-$sd "${url}" "${init_url}" src-tauri/tauri.conf.json
-$sd ${package_name}" "${init_name}" src-tauri/tauri.conf.json
-$sd ${package_name}" "${init_name}" src-tauri/src/main.rs
+echo "you run `rm src-tauri/assets/*.desktop && git checkout src-tauri` to recovery code"
+# rm src-tauri/assets/*.desktop && git checkout src-tauri

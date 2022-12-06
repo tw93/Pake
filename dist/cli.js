@@ -1620,8 +1620,15 @@ function mergeTauriConfig(url, options, tauriConf) {
         tauriConf.tauri.bundle.icon = [options.icon];
         if (process.platform === "win32") {
             const ico_path = path.join(npmDirectory, 'src-tauri/png/weread_32.ico');
-            // tauriConf.tauri.bundle.resources = [options.icon];
             yield fs.copyFile(options.icon, ico_path);
+        }
+        if (process.platform === "linux") {
+            const installSrc = `/usr/share/applications/${name}.desktop`;
+            const assertSrc = `src-tauri/assets/${name}.desktop`;
+            const assertPath = path.join(npmDirectory, assertSrc);
+            tauriConf.tauri.bundle.deb.files = {
+                [installSrc]: assertPath
+            };
         }
         let configPath = "";
         switch (process.platform) {
@@ -1633,10 +1640,13 @@ function mergeTauriConfig(url, options, tauriConf) {
                 configPath = path.join(npmDirectory, 'src-tauri/tauri.macos.conf.json');
                 break;
             }
+            case "linux": {
+                configPath = path.join(npmDirectory, 'src-tauri/tauri.linux.conf.json');
+                break;
+            }
         }
         let bundleConf = { tauri: { bundle: tauriConf.tauri.bundle } };
         yield fs.writeFile(configPath, Buffer.from(JSON.stringify(bundleConf), 'utf-8'));
-        // delete tauriConf.tauri.bundle;
         const configJsonPath = path.join(npmDirectory, 'src-tauri/tauri.conf.json');
         yield fs.writeFile(configJsonPath, Buffer.from(JSON.stringify(tauriConf), 'utf-8'));
     });
@@ -1764,7 +1774,7 @@ function handleOptions(options, url) {
 
 const IS_MAC = process.platform === 'darwin';
 const IS_WIN = process.platform === 'win32';
-process.platform === 'linux';
+const IS_LINUX = process.platform === 'linux';
 
 function shellExec(command) {
     return new Promise((resolve, reject) => {
@@ -1799,7 +1809,7 @@ function checkRustInstalled() {
     return shelljs.exec('rustc --version', { silent: true }).code === 0;
 }
 
-var tauri$2 = {
+var tauri$3 = {
 	windows: [
 		{
 			url: "https://www.baidu.com",
@@ -1818,43 +1828,47 @@ var tauri$2 = {
 	},
 	bundle: {
 		icon: [
-			"C:\\Users\\18826\\Documents\\electron_build\\Pake\\src-tauri\\png\\code_256.ico"
+			"/home/tlntin/文档/Program/Pake/src-tauri/png/code_512.png"
 		],
 		identifier: "pake-f9751d",
 		active: true,
 		category: "DeveloperTool",
 		copyright: "",
+		deb: {
+			depends: [
+				"libwebkit2gtk-4.0-dev",
+				"build-essential",
+				"curl",
+				"wget",
+				"libssl-dev",
+				"libgtk-3-dev",
+				"libayatana-appindicator3-dev",
+				"librsvg2-dev"
+			],
+			files: {
+				"/usr/share/applications/pake-f9751d-baidu.desktop": "/home/tlntin/文档/Program/Pake/src-tauri/assets/pake-f9751d-baidu.desktop"
+			}
+		},
 		externalBin: [
 		],
 		longDescription: "",
 		resources: [
-			"C:\\Users\\18826\\Documents\\electron_build\\Pake\\src-tauri\\png\\code_256.ico"
 		],
 		shortDescription: "",
 		targets: [
-			"msi"
-		],
-		windows: {
-			certificateThumbprint: null,
-			digestAlgorithm: "sha256",
-			timestampUrl: "",
-			wix: {
-				language: [
-					"en-US"
-				]
-			}
-		}
+			"deb"
+		]
 	}
 };
 var CommonConf = {
 	"package": {
-	version: "1.0.0",
-	productName: "baidu"
+	productName: "baidu",
+	version: "1.0.0"
 },
-	tauri: tauri$2
+	tauri: tauri$3
 };
 
-var tauri$1 = {
+var tauri$2 = {
 	bundle: {
 		icon: [
 			"png/weread_256.ico",
@@ -1887,10 +1901,10 @@ var tauri$1 = {
 	}
 };
 var WinConf = {
-	tauri: tauri$1
+	tauri: tauri$2
 };
 
-var tauri = {
+var tauri$1 = {
 	bundle: {
 		icon: [
 			"icons/weread.icns"
@@ -1919,6 +1933,45 @@ var tauri = {
 	}
 };
 var MacConf = {
+	tauri: tauri$1
+};
+
+var tauri = {
+	bundle: {
+		icon: [
+			"/home/tlntin/文档/Program/Pake/src-tauri/png/code_512.png"
+		],
+		identifier: "pake-f9751d",
+		active: true,
+		category: "DeveloperTool",
+		copyright: "",
+		deb: {
+			depends: [
+				"libwebkit2gtk-4.0-dev",
+				"build-essential",
+				"curl",
+				"wget",
+				"libssl-dev",
+				"libgtk-3-dev",
+				"libayatana-appindicator3-dev",
+				"librsvg2-dev"
+			],
+			files: {
+				"/usr/share/applications/pake-f9751d-baidu.desktop": "/home/tlntin/文档/Program/Pake/src-tauri/assets/pake-f9751d-baidu.desktop"
+			}
+		},
+		externalBin: [
+		],
+		longDescription: "",
+		resources: [
+		],
+		shortDescription: "",
+		targets: [
+			"deb"
+		]
+	}
+};
+var LinuxConf = {
 	tauri: tauri
 };
 
@@ -1933,6 +1986,10 @@ switch (process.platform) {
   }
   case "darwin": {
     tauriConf.tauri.bundle = MacConf.tauri.bundle;
+    break;
+  }
+  case "linux": {
+    tauriConf.tauri.bundle = LinuxConf.tauri.bundle;
     break;
   }
 }
@@ -2024,6 +2081,71 @@ class WinBuilder {
     }
 }
 
+class LinuxBuilder {
+    prepare() {
+        return __awaiter(this, void 0, void 0, function* () {
+            logger.info('To build the Windows app, you need to install Rust and VS Build Tools.');
+            logger.info('See more in https://tauri.app/v1/guides/getting-started/prerequisites#installing\n');
+            if (checkRustInstalled()) {
+                return;
+            }
+            const res = yield prompts({
+                type: 'confirm',
+                message: 'We detected that you have not installed Rust. Install it now?',
+                name: 'value',
+            });
+            if (res.value) {
+                // TODO 国内有可能会超时
+                yield installRust();
+            }
+            else {
+                logger.error('Error: Pake needs Rust to package your webapp!!!');
+                process.exit(2);
+            }
+        });
+    }
+    build(url, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            logger.debug('PakeAppOptions', options);
+            const { name } = options;
+            yield mergeTauriConfig(url, options, tauriConf);
+            // write desktop
+            const assertSrc = `src-tauri/assets/${name}.desktop`;
+            const assertPath = path.join(npmDirectory, assertSrc);
+            const desktopStr = `
+[Desktop Entry]
+Encoding=UTF-8
+Categories=Office
+Exec=${name}
+Icon=${name}
+Name=${name}
+StartupNotify=true
+Terminal=false
+Type=Application
+    `;
+            yield fs.writeFile(assertPath, desktopStr);
+            yield shellExec(`cd ${npmDirectory} && npm install && npm run build:release`);
+            let arch = "";
+            if (process.arch === "x64") {
+                arch = "amd64";
+            }
+            else {
+                arch = process.arch;
+            }
+            const debName = `${name}_${tauriConf.package.version}_${arch}.deb`;
+            const appPath = this.getBuildedAppPath(npmDirectory, debName);
+            const distPath = path.resolve(`${name}.deb`);
+            yield fs.copyFile(appPath, distPath);
+            yield fs.unlink(appPath);
+            logger.success('Build success!');
+            logger.success('You can find the app installer in', distPath);
+        });
+    }
+    getBuildedAppPath(npmDirectory, dmgName) {
+        return path.join(npmDirectory, 'src-tauri/target/release/bundle/deb', dmgName);
+    }
+}
+
 class BuilderFactory {
     static create() {
         console.log("now platform is ", process.platform);
@@ -2032,6 +2154,9 @@ class BuilderFactory {
         }
         if (IS_WIN) {
             return new WinBuilder();
+        }
+        if (IS_LINUX) {
+            return new LinuxBuilder();
         }
         throw new Error('The current system does not support!!');
     }
