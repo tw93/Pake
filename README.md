@@ -136,7 +136,7 @@ pake https://weekly.tw93.fun --name Weekly --transparent
 
 ## 开发
 
-开始前参考 [Tauri](https://tauri.app/v1/guides/getting-started/prerequisites#setting-up-macos) 快速配置好环境。
+开始前参考 [Tauri](https://tauri.app/v1/guides/getting-started/prerequisites) 快速配置好环境。
 
 ```sh
 // 安装依赖
