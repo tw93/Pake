@@ -80,6 +80,12 @@ fn main() -> wry::Result<()> {
     #[cfg(target_os = "macos")]
     menu_bar_menu.add_submenu("App", true, first_menu);
     #[cfg(target_os = "linux")]
+    let (package_name, windows_config) = get_windows_config();
+
+    #[cfg(target_os = "linux")]
+    let package_name = package_name.expect("can't get package name in config file");
+
+    #[cfg(target_os = "linux")]
     let WindowConfig {
         url,
         width,
@@ -87,7 +93,7 @@ fn main() -> wry::Result<()> {
         resizable,
         fullscreen,
         ..
-    } = get_windows_config().unwrap_or_default();
+    } = windows_config.unwrap_or_default();
     #[cfg(target_os = "windows")]
     let WindowConfig {
         url,
@@ -185,11 +191,12 @@ fn main() -> wry::Result<()> {
     // 自定义cookie文件夹，仅用于Linux
     // Custom Cookie folder, only for Linux
     #[cfg(target_os = "linux")]
-    let data_path =
-        std::path::PathBuf::from(concat!("/home/", env!("USER"), "/.config/com-tw93-weread/"));
+    let config_path = format!("/home/{}/.config/{}", env!("USER"), package_name);
+    #[cfg(target_os = "linux")]
+    let data_path = std::path::PathBuf::from(&config_path);
     #[cfg(target_os = "linux")]
     if !std::path::Path::new(&data_path).exists() {
-        std::fs::create_dir(&data_path)?;
+        std::fs::create_dir(&data_path).expect(&format!("can't create dir {}", &config_path));
     }
     #[cfg(target_os = "linux")]
     let mut web_content = WebContext::new(Some(data_path));
@@ -236,11 +243,14 @@ fn main() -> wry::Result<()> {
     });
 }
 
-fn get_windows_config() -> Option<WindowConfig> {
+fn get_windows_config() -> (Option<String>,Option<WindowConfig>) {
     let config_file = include_str!("../tauri.conf.json");
     let config: Config = serde_json::from_str(config_file).expect("failed to parse windows config");
 
-    config.tauri.windows.first().cloned()
+    (
+        config.package.product_name.clone(),
+        config.tauri.windows.first().cloned()
+    )
 }
 
 #[cfg(target_os = "windows")]
