@@ -4,19 +4,17 @@
 npm install -g pake-cli
 ```
 
-如果安装失败提示没有权限，请参考该贴解决：[链接](https://gist.github.com/Giancarlos/d087f8a9e6516716da98ad0c0f5a8f58)，注意：**尽量别用sudo权限**。
+如果安装失败提示没有权限，请参考该贴解决：[链接](https://gist.github.com/Giancarlos/d087f8a9e6516716da98ad0c0f5a8f58)，注意：**尽量别用 sudo 权限**。
 
 ## 用法
 
 ```bash
-pake url [options] 
+pake url [options]
 ```
 
 打包完成后的应用程序默认为当前工作目录，首次打包由于需配置好环境，需要一些时间，请耐心等待即可。
 
 Note: 打包需要用 `Rust` 环境，如果没有 `Rust`，会提示确认安装。如遇安装失败或超时，可[自行安装](https://www.rust-lang.org/tools/install)。
-
-Note: 目前支持 MacOS(dmg) 和 Windows(msi), Linux(deb)。
 
 ### url
 
@@ -38,9 +36,9 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 应用 icon，支持本地/远程文件，默认为 Pake 自带图标。
 
-- MacOS 下必须为 `.icns`
-- Windows 下必须为 `.ico`
-- Linux 下必须为 `.png`
+-   MacOS 下必须为 `.icns`
+-   Windows 下必须为 `.ico`
+-   Linux 下必须为 `.png`
 
 ```shell
 --icon <path>

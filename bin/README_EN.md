@@ -16,8 +16,6 @@ After the packaging, the application defaults to the current working directory. 
 
 Note: The Rust environment is required for packaging. If you do not have Rust, you will be prompted to confirm the installation. If the installation fails or times out, you can [install](https://www.rust-lang.org/tools/install) it yourself.
 
-Note: Currently only Macos are supported, and other platforms will be supported later.
-
 ### url
 
 The url🔗 is the webpage link you need to package, Must be provided.
