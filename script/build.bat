@@ -54,8 +54,6 @@ for /f "skip=1 tokens=1-4 delims=," %%i in (app.csv) do (
   ::replace  pacakge name
   .\script\sd.exe !old_title! !title! src-tauri\tauri.conf.json
   .\script\sd.exe !old_name! !name! src-tauri\tauri.windows.conf.json
-  echo update ico with 32x32 pictue
-  .\script\sd.exe !old_name! !name! src-tauri\src\main.rs
 
   echo.
   ::update package info
@@ -97,4 +95,3 @@ echo "output dir is output\windows"
 .\script\sd.exe %url% %init_url% src-tauri\tauri.conf.json
 .\script\sd.exe %title% %init_title% src-tauri\tauri.conf.json
 .\script\sd.exe %name% %init_name% src-tauri\tauri.windows.conf.json
-.\script\sd.exe %name% %init_name% src-tauri\src\main.rs

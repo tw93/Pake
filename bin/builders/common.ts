@@ -42,7 +42,7 @@ export async function mergeTauriConfig(
   tauriConf.tauri.bundle.identifier = identifier;
   tauriConf.tauri.bundle.icon = [options.icon];
   if (process.platform === "win32") {
-    const ico_path = path.join(npmDirectory, 'src-tauri/png/weread_32.ico');
+    const ico_path = path.join(npmDirectory, `src-tauri/png/${name.toLowerCase()}_32.ico`);
     await fs.copyFile(options.icon, ico_path);
   }
   if (process.platform === "linux") {
