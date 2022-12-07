@@ -195,8 +195,17 @@ fn main() -> wry::Result<()> {
         .build()?;
     // 自定义cookie文件夹，仅用于Linux
     // Custom Cookie folder, only for Linux
+    // #[cfg(target_os = "linux")]
+    // let config_path = format!("/home/{}/.config/{}", env!("USER"), package_name);
     #[cfg(target_os = "linux")]
-    let config_path = format!("/home/{}/.config/{}", env!("USER"), package_name);
+    let user = std::env::var_os("USER");
+    #[cfg(target_os = "linux")]
+    let config_path = match user {
+        Some(v) => format!(
+            "/home/{}/.config/{}", v.into_string().unwrap(), package_name
+        ),
+        None => panic!("can't found any user")
+    };
     #[cfg(target_os = "linux")]
     let data_path = std::path::PathBuf::from(&config_path);
     #[cfg(target_os = "linux")]
