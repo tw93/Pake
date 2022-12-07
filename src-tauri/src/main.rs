@@ -253,7 +253,10 @@ fn main() -> wry::Result<()> {
 fn get_windows_config() -> (Option<String>,Option<WindowConfig>) {
     let config_file = include_str!("../tauri.conf.json");
     let config: Config = serde_json::from_str(config_file).expect("failed to parse windows config");
-    (config.package.product_name.clone(),config.tauri.windows.first().cloned())
+    (
+        config.package.product_name.clone(),
+        config.tauri.windows.first().cloned(),
+    )
 }
 
 #[cfg(target_os = "windows")]
