@@ -127,7 +127,9 @@ fn main() -> wry::Result<()> {
         })
         .with_inner_size(wry::application::dpi::LogicalSize::new(width, height));
     #[cfg(target_os = "windows")]
-    let package_name = package_name.expect("can't get package name in config file").to_lowercase();
+    let package_name = package_name
+        .expect("can't get package name in config file")
+        .to_lowercase();
     
     #[cfg(target_os = "windows")]
     let icon_path = format!("png/{}_32.ico", package_name);
