@@ -177,12 +177,11 @@ fn main() -> wry::Result<()> {
     #[cfg(target_os = "macos")]
     let webview = WebViewBuilder::new(window)?
         // .with_user_agent(user_agent_string)
-        // .with_accept_first_mouse(true)
         .with_url(&url.to_string())?
         .with_devtools(cfg!(feature = "devtools"))
         .with_initialization_script(include_str!("pake.js"))
         .with_ipc_handler(handler)
-        // .with_back_forward_navigation_gestures(true)
+        .with_back_forward_navigation_gestures(true)
         .build()?;
 
     #[cfg(target_os = "windows")]
@@ -193,7 +192,6 @@ fn main() -> wry::Result<()> {
         .with_devtools(cfg!(feature = "devtools"))
         .with_initialization_script(include_str!("pake.js"))
         .with_ipc_handler(handler)
-        // .with_back_forward_navigation_gestures(true)
         .build()?;
     // 自定义cookie文件夹，仅用于Linux
     // Custom Cookie folder, only for Linux
@@ -211,13 +209,11 @@ fn main() -> wry::Result<()> {
     #[cfg(target_os = "linux")]
     let webview = WebViewBuilder::new(window)?
         // .with_user_agent(user_agent_string)
-        // .with_accept_first_mouse(true)
         .with_url(&url.to_string())?
         .with_devtools(cfg!(feature = "devtools"))
         .with_initialization_script(include_str!("pake.js"))
         .with_ipc_handler(handler)
         .with_web_context(&mut web_content)
-        // .with_back_forward_navigation_gestures(true)
         .build()?;
 
     #[cfg(feature = "devtools")]

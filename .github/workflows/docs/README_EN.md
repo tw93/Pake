@@ -8,10 +8,6 @@
 
 ![image-20221205230324046](assets/image-20221205230324046.png)
 
-
-
-
-
 ## 3. Modify the app.csv file
 
 ![image-20221205230432205](assets/image-20221205230432205.png)
@@ -29,13 +25,11 @@ The format is: `Linux application name, Mac and Windows application name, Chines
 
 **Note: Two .ico files and one .png file are required, refer to the table below**
 
-
-
-| File Name   | Description                       |
-| ----------- | --------------------------------- |
-| app_32.ico  | A ico file with a  size of 32*32  |
-| app_256.ico | A ico file with a size of 256*256 |
-| app_512.png | A png file with a size of 512*512 |
+| File Name   | Description                        |
+| ----------- | ---------------------------------- |
+| app_32.ico  | A ico file with a size of 32\*32   |
+| app_256.ico | A ico file with a size of 256\*256 |
+| app_512.png | A png file with a size of 512\*512 |
 
 > You can also directly git the entire project to the local, and use the icns2png.py file in the project root directory to batch convert .icns files into .ico and .png files (.icns files are required)
 >
