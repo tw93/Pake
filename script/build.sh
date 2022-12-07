@@ -69,8 +69,8 @@ do
     # replace package info
     $sd "${old_url}" "${url}" src-tauri/tauri.conf.json
     $sd "${old_name}" "${package_name}" src-tauri/tauri.conf.json
-    echo "update ico with 32x32 pictue"
-    $sd "${old_name}" "${package_name}" src-tauri/src/main.rs
+    # echo "update ico with 32x32 pictue"
+    # $sd "${old_name}" "${package_name}" src-tauri/src/main.rs
 
     # for apple, need replace title
     if [[ "$OSTYPE" =~ ^darwin ]]; then

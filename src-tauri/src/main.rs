@@ -95,6 +95,8 @@ fn main() -> wry::Result<()> {
         ..
     } = windows_config.unwrap_or_default();
     #[cfg(target_os = "windows")]
+    let (package_name, windows_config) = get_windows_config();
+    #[cfg(target_os = "windows")]
     let WindowConfig {
         url,
         width,
@@ -102,7 +104,7 @@ fn main() -> wry::Result<()> {
         resizable,
         fullscreen,
         ..
-    } = get_windows_config().unwrap_or_default();
+    } = windows_config.unwrap_or_default();
     #[cfg(target_os = "macos")]
     let WindowConfig {
         url,
@@ -112,7 +114,7 @@ fn main() -> wry::Result<()> {
         transparent,
         fullscreen,
         ..
-    } = get_windows_config().unwrap_or_default();
+    } = get_windows_config().1.unwrap_or_default();
     let event_loop = EventLoop::new();
 
     let common_window = WindowBuilder::new()
@@ -125,7 +127,12 @@ fn main() -> wry::Result<()> {
         })
         .with_inner_size(wry::application::dpi::LogicalSize::new(width, height));
     #[cfg(target_os = "windows")]
-    let icon = load_icon(std::path::Path::new("png/weread_32.ico"));
+    let package_name = package_name.expect("can't get package name in config file").to_lowercase();
+    
+    #[cfg(target_os = "windows")]
+    let icon_path = format!("png/{}_32.ico", package_name);
+    #[cfg(target_os = "windows")]
+    let icon = load_icon(std::path::Path::new(&icon_path));
 
     #[cfg(target_os = "windows")]
     let window = common_window
