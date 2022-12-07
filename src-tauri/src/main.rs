@@ -203,7 +203,7 @@ fn main() -> wry::Result<()> {
     let data_path = std::path::PathBuf::from(&config_path);
     #[cfg(target_os = "linux")]
     if !std::path::Path::new(&data_path).exists() {
-        std::fs::create_dir(&data_path).expect(&format!("can't create dir {}", &config_path));
+        std::fs::create_dir(&data_path).unwrap_or_else(|_| panic!("can't create dir {}", &config_path));
     }
     #[cfg(target_os = "linux")]
     let mut web_content = WebContext::new(Some(data_path));
@@ -253,11 +253,7 @@ fn main() -> wry::Result<()> {
 fn get_windows_config() -> (Option<String>,Option<WindowConfig>) {
     let config_file = include_str!("../tauri.conf.json");
     let config: Config = serde_json::from_str(config_file).expect("failed to parse windows config");
-
-    (
-        config.package.product_name.clone(),
-        config.tauri.windows.first().cloned()
-    )
+    (config.package.product_name.clone(),config.tauri.windows.first().cloned())
 }
 
 #[cfg(target_os = "windows")]
