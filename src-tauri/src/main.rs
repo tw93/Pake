@@ -130,12 +130,10 @@ fn main() -> wry::Result<()> {
     let package_name = package_name
         .expect("can't get package name in config file")
         .to_lowercase();
-    
     #[cfg(target_os = "windows")]
     let icon_path = format!("png/{}_32.ico", package_name);
     #[cfg(target_os = "windows")]
     let icon = load_icon(std::path::Path::new(&icon_path));
-
     #[cfg(target_os = "windows")]
     let window = common_window
         .with_decorations(true)
