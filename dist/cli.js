@@ -2145,7 +2145,7 @@ class BuilderFactory {
 }
 
 var name = "pake-cli";
-var version = "0.1.0";
+var version = "0.1.1";
 var description = "🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App 🤱🏻 A simple way to make any web page a desktop application using Rust.";
 var bin = {
 	pake: "./cli.js"
