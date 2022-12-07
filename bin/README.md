@@ -36,9 +36,9 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 应用 icon，支持本地/远程文件，默认为 Pake 自带图标。
 
--   MacOS 下必须为 `.icns`
--   Windows 下必须为 `.ico`
--   Linux 下必须为 `.png`
+- MacOS 下必须为 `.icns`
+- Windows 下必须为 `.ico`
+- Linux 下必须为 `.png`
 
 ```shell
 --icon <path>
