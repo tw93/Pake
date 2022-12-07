@@ -106,11 +106,8 @@ Also for light users, a good option is to use **GitHub Actions online compilatio
 **Pake provides a command line tool that makes it quicker and easier to customize the packages you need, as detailed in [documentation](./bin/README_EN.md).**
 
 ```bash
-// Install with npm (Only for Mac)
+// Install with npm
 npm install -g pake-cli
-
-// Install with npm for dev (Can use in Mac/Windows/Linux)
-npm install https://github.com/tw93/Pake/ -g
 
 // Command usage
 pake url [options]
