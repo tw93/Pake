@@ -203,7 +203,8 @@ fn main() -> wry::Result<()> {
     let data_path = std::path::PathBuf::from(&config_path);
     #[cfg(target_os = "linux")]
     if !std::path::Path::new(&data_path).exists() {
-        std::fs::create_dir(&data_path).unwrap_or_else(|_| panic!("can't create dir {}", &config_path));
+        std::fs::create_dir(&data_path)
+            .unwrap_or_else(|_| panic!("can't create dir {}", &config_path));
     }
     #[cfg(target_os = "linux")]
     let mut web_content = WebContext::new(Some(data_path));
