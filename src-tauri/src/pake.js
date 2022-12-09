@@ -306,16 +306,16 @@ window.addEventListener("DOMContentLoaded", (_event) => {
   document.addEventListener("click", (e) => {
     const origin = e.target.closest("a");
     if (origin && origin.href) {
+      const target = origin.target
       origin.target = "_self";
+      const hrefUrl = new URL(origin.href)
 
-      //额外处理下 twitter 的外跳，对于其他需要外跳的可以改这里成对应域名
-      const href = origin.href;
       if (
-        location.host === "twitter.com" &&
-        href.indexOf("twitter.com") === -1
+        window.location.host !== hrefUrl.host && // 如果 a 标签内链接的域名和当前页面的域名不一致 且
+        target === '_blank' // a 标签内链接的 target 属性为 _blank 时
       ) {
         e.preventDefault();
-        window.ipc.postMessage(`open_browser:${href}`);
+        window.ipc.postMessage(`open_browser:${origin.href}`);
       }
     }
   });
