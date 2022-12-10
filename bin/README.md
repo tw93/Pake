@@ -4,7 +4,7 @@
 npm install -g pake-cli
 ```
 
-如果安装失败提示没有权限，请参考该贴解决：[链接](https://gist.github.com/Giancarlos/d087f8a9e6516716da98ad0c0f5a8f58)，注意：**尽量别用 sudo 权限**。
+如果安装失败提示没有权限，请参考该贴解决：[链接](https://gist.github.com/Giancarlos/d087f8a9e6516716da98ad0c0f5a8f58)，**或者使用 `sudo` 权限**。
 
 ## 用法
 
