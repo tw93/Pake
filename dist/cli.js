@@ -1653,25 +1653,15 @@ function mergeTauriConfig(url, options, tauriConf) {
                 }
             }
             if (process.platform === "linux") {
-                tauriConf.package.productName = name.toLowerCase();
-                if (customIconExt === ".png") {
-                    const installSrc = `/usr/share/applications/${name.toLowerCase()}.desktop`;
-                    const assertSrc = `src-tauri/assets/${name.toLowerCase()}.desktop`;
-                    const assertPath = path.join(npmDirectory, assertSrc);
-                    tauriConf.tauri.bundle.deb.files = {
-                        [installSrc]: assertPath
-                    };
-                }
-                else {
+                delete tauriConf.tauri.bundle.deb.files;
+                if (customIconExt != ".png") {
                     updateIconPath = false;
                     logger.warn(`icon file in Linux must be 512 * 512 pix with .png type, but you give ${customIconExt}`);
                 }
             }
-            if (process.platform === "darwin") {
-                if (customIconExt !== ".icns") {
-                    updateIconPath = false;
-                    logger.warn(`icon file in MacOS must be .icns type, but you give ${customIconExt}`);
-                }
+            if (process.platform === "darwin" && customIconExt !== ".icns") {
+                updateIconPath = false;
+                logger.warn(`icon file in MacOS must be .icns type, but you give ${customIconExt}`);
             }
             if (updateIconPath) {
                 tauriConf.tauri.bundle.icon = [options.icon];
@@ -2133,21 +2123,6 @@ class LinuxBuilder {
             logger.debug('PakeAppOptions', options);
             const { name } = options;
             yield mergeTauriConfig(url, options, tauriConf);
-            // write desktop
-            const assertSrc = `src-tauri/assets/${name}.desktop`;
-            const assertPath = path.join(npmDirectory, assertSrc);
-            const desktopStr = `
-[Desktop Entry]
-Encoding=UTF-8
-Categories=Office
-Exec=${name}
-Icon=${name}
-Name=${name}
-StartupNotify=true
-Terminal=false
-Type=Application
-    `;
-            yield fs.writeFile(assertPath, desktopStr);
             yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
             let arch = "";
             if (process.arch === "x64") {
