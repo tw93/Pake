@@ -12,15 +12,12 @@ use wry::{
     webview::WebViewBuilder,
 };
 
-
 #[cfg(target_os = "macos")]
-use wry::{
-    application::{
-        accelerator::{Accelerator, SysMods},
-        keyboard::KeyCode,
-        menu::{MenuBar as Menu, MenuItem, MenuItemAttributes},
-        platform::macos::WindowBuilderExtMacOS,
-    },
+use wry::application::{
+    accelerator::{Accelerator, SysMods},
+    keyboard::KeyCode,
+    menu::{MenuBar as Menu, MenuItem, MenuItemAttributes},
+    platform::macos::WindowBuilderExtMacOS,
 };
 
 #[cfg(target_os = "windows")]
