@@ -69,19 +69,28 @@ Type=Application
       arch = process.arch;
     }
     const debName = `${name}_${tauriConf.package.version}_${arch}.deb`;
-    const appPath = this.getBuildedAppPath(npmDirectory, debName);
+    const appPath = this.getBuildedAppPath(npmDirectory, "deb", debName);
     const distPath = path.resolve(`${name}.deb`);
     await fs.copyFile(appPath, distPath);
     await fs.unlink(appPath);
+
+
+    const appImageName = `${name}_${tauriConf.package.version}_${arch}.AppImage`;
+    const appImagePath = this.getBuildedAppPath(npmDirectory, "appimage", appImageName);
+    const distAppPath = path.resolve(`${name}.AppImage`);
+    await fs.copyFile(appImagePath, distAppPath);
+    await fs.unlink(appImagePath);
     logger.success('Build success!');
-    logger.success('You can find the app installer in', distPath);
+    logger.success('You can find the deb app installer in', distPath);
+    logger.success('You can find the Appimage app installer in', distAppPath);
   }
 
-  getBuildedAppPath(npmDirectory: string, dmgName: string) {
+  getBuildedAppPath(npmDirectory: string,packageType: string, packageName: string) {
     return path.join(
       npmDirectory,
-      'src-tauri/target/release/bundle/deb',
-      dmgName
+      'src-tauri/target/release/bundle/',
+      packageType,
+      packageName
     );
   }
 }

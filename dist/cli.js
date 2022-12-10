@@ -1943,7 +1943,8 @@ var tauri = {
 		],
 		shortDescription: "",
 		targets: [
-			"deb"
+			"deb",
+			"appimage"
 		]
 	}
 };
@@ -2115,16 +2116,22 @@ Type=Application
                 arch = process.arch;
             }
             const debName = `${name}_${tauriConf.package.version}_${arch}.deb`;
-            const appPath = this.getBuildedAppPath(npmDirectory, debName);
+            const appPath = this.getBuildedAppPath(npmDirectory, "deb", debName);
             const distPath = path.resolve(`${name}.deb`);
             yield fs.copyFile(appPath, distPath);
             yield fs.unlink(appPath);
+            const appImageName = `${name}_${tauriConf.package.version}_${arch}.AppImage`;
+            const appImagePath = this.getBuildedAppPath(npmDirectory, "appimage", appImageName);
+            const distAppPath = path.resolve(`${name}.AppImage`);
+            yield fs.copyFile(appImagePath, distAppPath);
+            yield fs.unlink(appImagePath);
             logger.success('Build success!');
-            logger.success('You can find the app installer in', distPath);
+            logger.success('You can find the deb app installer in', distPath);
+            logger.success('You can find the Appimage app installer in', distAppPath);
         });
     }
-    getBuildedAppPath(npmDirectory, dmgName) {
-        return path.join(npmDirectory, 'src-tauri/target/release/bundle/deb', dmgName);
+    getBuildedAppPath(npmDirectory, packageType, packageName) {
+        return path.join(npmDirectory, 'src-tauri/target/release/bundle/', packageType, packageName);
     }
 }
 
