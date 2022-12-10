@@ -62,25 +62,29 @@ fn main() -> wry::Result<()> {
 
     #[cfg(target_os = "macos")]
     first_menu.add_native_item(MenuItem::Quit);
-
     #[cfg(target_os = "macos")]
     menu_bar_menu.add_submenu("App", true, first_menu);
-    #[cfg(any(target_os = "linux", target_os = "windows"))]
-    let (package_name, windows_config) = get_windows_config();
-    #[cfg(any(target_os = "linux", target_os = "windows"))]
-    let package_name = package_name
-        .expect("can't get package name in config file")
-        .to_lowercase();
 
     #[cfg(any(target_os = "linux", target_os = "windows"))]
-    let WindowConfig {
-        url,
-        width,
-        height,
-        resizable,
-        fullscreen,
-        ..
-    } = windows_config.unwrap_or_default();
+    let (
+        package_name,
+        WindowConfig {
+            url,
+            width,
+            height,
+            resizable,
+            fullscreen,
+            ..
+        },
+    ) = {
+        let (package_name, windows_config) = get_windows_config();
+        (
+            package_name
+                .expect("can't get package name in config file")
+                .to_lowercase(),
+            windows_config.unwrap_or_default(),
+        )
+    };
 
     #[cfg(target_os = "macos")]
     let WindowConfig {
