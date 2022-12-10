@@ -120,9 +120,7 @@ fn main() -> wry::Result<()> {
         .unwrap();
 
     #[cfg(target_os = "linux")]
-    let window = common_window
-        .build(&event_loop)
-        .unwrap();
+    let window = common_window.build(&event_loop).unwrap();
 
     #[cfg(target_os = "macos")]
     let window = common_window
