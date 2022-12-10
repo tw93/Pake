@@ -46,21 +46,6 @@ export default class LinuxBuilder implements IBuilder {
     const { name } = options;
 
     await mergeTauriConfig(url, options, tauriConf);
-    // write desktop
-    const assertSrc = `src-tauri/assets/${name}.desktop`;
-    const assertPath = path.join(npmDirectory, assertSrc);
-    const desktopStr = `
-[Desktop Entry]
-Encoding=UTF-8
-Categories=Office
-Exec=${name}
-Icon=${name}
-Name=${name}
-StartupNotify=true
-Terminal=false
-Type=Application
-    `
-    await fs.writeFile(assertPath, desktopStr);
     const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build`);
     let arch = "";
     if (process.arch === "x64") {
