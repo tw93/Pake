@@ -184,7 +184,7 @@ fn main() -> wry::Result<()> {
             v.into_string().unwrap(),
             package_name,
         ),
-        None => panic!("can't found any user")
+        None => panic!("can't found any user"),
     };
     #[cfg(target_os = "linux")]
     let data_path = std::path::PathBuf::from(&config_path);
