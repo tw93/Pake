@@ -23,7 +23,7 @@ use wry::application::{
 #[cfg(target_os = "windows")]
 use wry::application::window::Icon;
 
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "linux", target_os = "windows"))]
 use wry::webview::WebContext;
 
 fn main() -> wry::Result<()> {
@@ -147,35 +147,21 @@ fn main() -> wry::Result<()> {
         .with_back_forward_navigation_gestures(true)
         .build()?;
 
-    #[cfg(target_os = "windows")]
-    let webview = WebViewBuilder::new(window)?
-        // .with_user_agent(user_agent_string)
-        // .with_accept_first_mouse(true)
-        .with_url(&url.to_string())?
-        .with_devtools(cfg!(feature = "devtools"))
-        .with_initialization_script(include_str!("pake.js"))
-        .with_ipc_handler(handler)
-        .build()?;
-
-    // 自定义cookie文件夹，仅用于Linux
-    // Custom Cookie folder, only for Linux
-    #[cfg(target_os = "linux")]
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
     let webview = {
-        let user = std::env::var_os("USER");
-        let config_path = match user {
-            Some(v) => format!(
-                "/home/{}/.config/{}",
-                v.into_string().unwrap(),
-                package_name,
-            ),
-            None => panic!("can't found any user"),
+        let home_dir = match home::home_dir() {
+            Some(path1) => path1,
+            None => panic!("Error, can't found you home dir!!"),
         };
-        let data_path = std::path::PathBuf::from(&config_path);
-        if !std::path::Path::new(&data_path).exists() {
-            std::fs::create_dir(&data_path)
-                .unwrap_or_else(|_| panic!("can't create dir {}", &config_path));
+        #[cfg(target_os = "windows")]
+        let data_dir = home_dir.join("AppData").join("Roaming").join(package_name);
+        #[cfg(target_os = "linux")]
+        let data_dir = home_dir.join(".config").join(package_name);
+        if !data_dir.exists() {
+            std::fs::create_dir(&data_dir)
+                .unwrap_or_else(|_| panic!("can't create dir {}", data_dir.display()));
         }
-        let mut web_content = WebContext::new(Some(data_path));
+        let mut web_content = WebContext::new(Some(data_dir));
         WebViewBuilder::new(window)?
             // .with_user_agent(user_agent_string)
             .with_url(&url.to_string())?
