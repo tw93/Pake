@@ -34,7 +34,7 @@ The application name, if not specified when entering, will prompt you to enter, 
 
 #### [icon]
 
-应用 icon，支持本地/远程文件，默认为 Pake 自带图标。
+The application icon, support local and remote files. The default is brand icon of Pake.
 
 - MacOS must be `.icns`
 - Windows must be `.ico`

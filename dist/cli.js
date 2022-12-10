@@ -1678,6 +1678,10 @@ const logger = {
     }
 };
 
+const IS_MAC = process.platform === 'darwin';
+const IS_WIN = process.platform === 'win32';
+const IS_LINUX = process.platform === 'linux';
+
 function handleIcon(options, url) {
     return __awaiter(this, void 0, void 0, function* () {
         if (options.icon) {
@@ -1689,15 +1693,21 @@ function handleIcon(options, url) {
             }
         }
         if (!options.icon) {
-            return inferIcon(options.name);
+            return getDefaultIcon();
         }
     });
 }
-function inferIcon(name, url) {
+function getDefaultIcon() {
     return __awaiter(this, void 0, void 0, function* () {
         logger.info('You have not provided an app icon, use the default icon.(use --icon option to assign an icon)');
-        const npmDirectory = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-        return path.join(npmDirectory, 'pake-default.icns');
+        let iconPath = 'src-tauri/icons/icon.icns';
+        if (IS_WIN) {
+            iconPath = 'src-tauri/png/icon_256.ico';
+        }
+        else if (IS_LINUX) {
+            iconPath = 'src-tauri/png/icon_512.png';
+        }
+        return path.join(npmDirectory, iconPath);
     });
 }
 // export async function getIconFromPageUrl(url: string) {
@@ -1772,10 +1782,6 @@ function handleOptions(options, url) {
         return appOptions;
     });
 }
-
-const IS_MAC = process.platform === 'darwin';
-const IS_WIN = process.platform === 'win32';
-const IS_LINUX = process.platform === 'linux';
 
 function shellExec(command) {
     return new Promise((resolve, reject) => {
@@ -2137,7 +2143,6 @@ Type=Application
 
 class BuilderFactory {
     static create() {
-        console.log("now platform is ", process.platform);
         if (IS_MAC) {
             return new MacBuilder();
         }
@@ -2168,8 +2173,7 @@ var author = {
 var files = [
 	"dist",
 	"src-tauri",
-	"cli.js",
-	"pake-default.icns"
+	"cli.js"
 ];
 var scripts = {
 	start: "npm run dev",
