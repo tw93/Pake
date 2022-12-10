@@ -29,8 +29,6 @@ use wry::window::Icon;
 #[cfg(target_os = "linux")]
 use wry::webview::WebContext;
 
-
-
 fn main() -> wry::Result<()> {
     #[cfg(target_os = "macos")]
     let mut menu_bar_menu = Menu::new();
