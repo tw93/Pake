@@ -40,14 +40,14 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/17dC9I.jpg width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/sfnTXf.png width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/mc41xq.jpg width=600/></td>
     </tr>
     <tr>
-        <td>YouTube 
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_amd64.deb">Linux</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Windows</a>
+        <td>ChatGPT 
+            <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x64.msi">Windows</a>
         </td>
         <td>Reference 
             <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
@@ -65,7 +65,7 @@
             <a href="https://github.com/tw93/Pake/releases/latest/download/Code_amd64.deb">Linux</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Code_x64.msi">Windows</a>
         </td>
-         <td>Qwerty 
+        <td>Qwerty 
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_amd64.deb">Linux</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
@@ -81,10 +81,10 @@
             <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_amd64.deb">Linux</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Windows</a>
         </td>
-        <td>YuQue 
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YuQue.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YuQue_amd64.deb">Linux</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YuQue_x64.msi">Windows</a>
+        <td>YouTube 
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Windows</a>
         </td>
     </tr>
     <tr>
@@ -92,6 +92,7 @@
         <td><img src=https://cdn.fliggy.com/upic/02SZQl.png width=600/></td>
     </tr>
 </table>
+
 Note: it cannot be installed to  C:\Program File  under Windows, and it will crash directly. It is recommended to install to other non-administrator directories, such as  D:\Program Files (x86) .
 
 ## Command line packing
