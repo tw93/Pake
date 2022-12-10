@@ -6,7 +6,6 @@ import LinuxBuilder from './LinuxBuilder.js';
 
 export default class BuilderFactory {
   static create(): IBuilder {
-    console.log("now platform is ", process.platform);
     if (IS_MAC) {
       return new MacBuilder();
     }
