@@ -117,5 +117,5 @@ do
 done
 
 echo "build all package success!"
-echo "you run `rm src-tauri/assets/*.desktop && git checkout src-tauri` to recovery code"
+echo "you run 'rm src-tauri/assets/*.desktop && git checkout src-tauri' to recovery code"
 # rm src-tauri/assets/*.desktop && git checkout src-tauri
