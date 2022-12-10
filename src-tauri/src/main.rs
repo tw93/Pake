@@ -104,15 +104,15 @@ fn main() -> wry::Result<()> {
         })
         .with_inner_size(wry::application::dpi::LogicalSize::new(width, height));
     #[cfg(target_os = "windows")]
-    let icon_path = format!("png/{}_32.ico", package_name);
-    #[cfg(target_os = "windows")]
-    let icon = load_icon(std::path::Path::new(&icon_path));
-    #[cfg(target_os = "windows")]
-    let window = common_window
-        .with_decorations(true)
-        .with_window_icon(Some(icon))
-        .build(&event_loop)
-        .unwrap();
+    let window = {
+        let icon_path = format!("png/{}_32.ico", package_name);
+        let icon = load_icon(std::path::Path::new(&icon_path));
+        common_window
+            .with_decorations(true)
+            .with_window_icon(Some(icon))
+            .build(&event_loop)
+            .unwrap()
+    };
 
     #[cfg(target_os = "linux")]
     let window = common_window.build(&event_loop).unwrap();
