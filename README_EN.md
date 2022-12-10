@@ -49,51 +49,51 @@
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_amd64.deb">Linux</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x64.msi">Windows</a>
         </td>
-        <td>Reference 
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_amd64.deb">Linux</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x64.msi">Windows</a>
-        </td>
-    </tr>
-    <tr>
-        <td><img src=https://cdn.fliggy.com/upic/sfnTXf.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/KFsZIY.png width=600/></td>
-    </tr>
-    <tr>
-        <td>Flomo 
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_amd64.deb">Linux</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Windows</a>
-        </td>
-        <td>YouTube 
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_amd64.deb">Linux</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Windows</a>
-        </td>
-    </tr>
-    <tr>
-        <td><img src=https://cdn.fliggy.com/upic/jg9Eeu.jpg width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/Ea5ZRw.png width=600/></td>
-    </tr>
-    <tr>
-        <td>Code 
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Code.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Code_amd64.deb">Linux</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Code_x64.msi">Windows</a>
-        </td>
-        <td>Qwerty 
+          <td>Qwerty 
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_amd64.deb">Linux</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/EB1OYP.jpg width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/sfnTXf.png width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/FGdQec.png width=600/></td>
+    </tr>
+    <tr>
+        <td>Code
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Code.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Code_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Code_x64.msi">Windows</a>
+        </td>
+         <td>Reference
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x64.msi">Windows</a>
+        </td>
+    </tr>
+    <tr>
+        <td><img src=https://cdn.fliggy.com/upic/EB1OYP.jpg width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/KFsZIY.png width=600/></td>
+    </tr>
+        <tr>
+           <td>YouTube
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Windows</a>
+        </td>
+        <td>Flomo
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Windows</a>
+        </td>
+    </tr>
+    <tr>
+        <td><img src=https://cdn.fliggy.com/upic/Ea5ZRw.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/jg9Eeu.jpg width=600/></td>
     </tr>
 </table>
 
-Note: it cannot be installed to  C:\Program File  under Windows, and it will crash directly. It is recommended to install to other non-administrator directories, such as  D:\Program Files (x86) .
+Note: it cannot be installed to `C:\Program File` under Windows, and it will crash directly. It is recommended to install to other non-administrator directories, such as `D:\Program Files (x86)`.
 
 ## Command line packing
 
@@ -173,9 +173,9 @@ Refer to the communication code in `pake.js` with `postMessage`, write the event
 
 ## Support
 
-- I have two cats, one is called TangYuan, and one is called Coke, If you think Pake makes your life better, you can give my cats <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">feed canned food 🥩🍤</a>.
-- If you like Pake, you can star it in Github. We are more welcome to [recommend Pake](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20A%20simple%20Rust%20packaged%20web%20pages%20to%20generate%20Mac%20App%20tool,%20compared%20to%20traditional%20Electron%20package,%20the%20size%20of%20nearly%2040%20times%20smaller,%20generally%20about%202M,%20the%20underlying%20use%20of%20Tauri,%20performance%20experience%20than%20the%20JS%20framework%20is%20much%20lighter~) to your like-minded friends.
-- You can follow my [Twitter](https://twitter.com/HiTw93) to get the latest news of Pake, or join [Telegram](https://t.me/miaoyan) chat group.
+-   I have two cats, one is called TangYuan, and one is called Coke, If you think Pake makes your life better, you can give my cats <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">feed canned food 🥩🍤</a>.
+-   If you like Pake, you can star it in Github. We are more welcome to [recommend Pake](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20A%20simple%20Rust%20packaged%20web%20pages%20to%20generate%20Mac%20App%20tool,%20compared%20to%20traditional%20Electron%20package,%20the%20size%20of%20nearly%2040%20times%20smaller,%20generally%20about%202M,%20the%20underlying%20use%20of%20Tauri,%20performance%20experience%20than%20the%20JS%20framework%20is%20much%20lighter~) to your like-minded friends.
+-   You can follow my [Twitter](https://twitter.com/HiTw93) to get the latest news of Pake, or join [Telegram](https://t.me/miaoyan) chat group.
 
 ## Finally
 

@@ -49,47 +49,47 @@
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_amd64.deb">Linux</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x64.msi">Windows</a>
         </td>
-        <td>Reference 
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_amd64.deb">Linux</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x64.msi">Windows</a>
-        </td>
-    </tr>
-    <tr>
-        <td><img src=https://cdn.fliggy.com/upic/sfnTXf.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/KFsZIY.png width=600/></td>
-    </tr>
-    <tr>
-        <td>Flomo 
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_amd64.deb">Linux</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Windows</a>
-        </td>
-        <td>YouTube 
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_amd64.deb">Linux</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Windows</a>
-        </td>
-    </tr>
-    <tr>
-        <td><img src=https://cdn.fliggy.com/upic/jg9Eeu.jpg width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/Ea5ZRw.png width=600/></td>
-    </tr>
-    <tr>
-        <td>Code 
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Code.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Code_amd64.deb">Linux</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Code_x64.msi">Windows</a>
-        </td>
-        <td>Qwerty 
+          <td>Qwerty 
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_amd64.deb">Linux</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/EB1OYP.jpg width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/sfnTXf.png width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/FGdQec.png width=600/></td>
+    </tr>
+    <tr>
+        <td>Code
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Code.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Code_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Code_x64.msi">Windows</a>
+        </td>
+         <td>Reference
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x64.msi">Windows</a>
+        </td>
+    </tr>
+    <tr>
+        <td><img src=https://cdn.fliggy.com/upic/EB1OYP.jpg width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/KFsZIY.png width=600/></td>
+    </tr>
+        <tr>
+           <td>YouTube
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Windows</a>
+        </td>
+        <td>Flomo
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_amd64.deb">Linux</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Windows</a>
+        </td>
+    </tr>
+    <tr>
+        <td><img src=https://cdn.fliggy.com/upic/Ea5ZRw.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/jg9Eeu.jpg width=600/></td>
     </tr>
 </table>
 
