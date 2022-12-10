@@ -28,42 +28,28 @@ use wry::webview::WebContext;
 
 fn main() -> wry::Result<()> {
     #[cfg(target_os = "macos")]
-    let mut menu_bar_menu = Menu::new();
-    #[cfg(target_os = "macos")]
-    let mut first_menu = Menu::new();
-    #[cfg(target_os = "macos")]
-    first_menu.add_native_item(MenuItem::Hide);
-    #[cfg(target_os = "macos")]
-    first_menu.add_native_item(MenuItem::EnterFullScreen);
-    #[cfg(target_os = "macos")]
-    first_menu.add_native_item(MenuItem::Minimize);
-    #[cfg(target_os = "macos")]
-    first_menu.add_native_item(MenuItem::Separator);
-    #[cfg(target_os = "macos")]
-    first_menu.add_native_item(MenuItem::Copy);
-    #[cfg(target_os = "macos")]
-    first_menu.add_native_item(MenuItem::Cut);
-    #[cfg(target_os = "macos")]
-    first_menu.add_native_item(MenuItem::Paste);
-    #[cfg(target_os = "macos")]
-    first_menu.add_native_item(MenuItem::Undo);
-    #[cfg(target_os = "macos")]
-    first_menu.add_native_item(MenuItem::Redo);
-    #[cfg(target_os = "macos")]
-    first_menu.add_native_item(MenuItem::SelectAll);
-    #[cfg(target_os = "macos")]
-    first_menu.add_native_item(MenuItem::Separator);
-
-    #[cfg(target_os = "macos")]
-    let close_item = first_menu.add_item(
-        MenuItemAttributes::new("CloseWindow")
-            .with_accelerators(&Accelerator::new(SysMods::Cmd, KeyCode::KeyW)),
-    );
-
-    #[cfg(target_os = "macos")]
-    first_menu.add_native_item(MenuItem::Quit);
-    #[cfg(target_os = "macos")]
-    menu_bar_menu.add_submenu("App", true, first_menu);
+    let (menu_bar_menu, close_item) = {
+        let mut menu_bar_menu = Menu::new();
+        let mut first_menu = Menu::new();
+        first_menu.add_native_item(MenuItem::Hide);
+        first_menu.add_native_item(MenuItem::EnterFullScreen);
+        first_menu.add_native_item(MenuItem::Minimize);
+        first_menu.add_native_item(MenuItem::Separator);
+        first_menu.add_native_item(MenuItem::Copy);
+        first_menu.add_native_item(MenuItem::Cut);
+        first_menu.add_native_item(MenuItem::Paste);
+        first_menu.add_native_item(MenuItem::Undo);
+        first_menu.add_native_item(MenuItem::Redo);
+        first_menu.add_native_item(MenuItem::SelectAll);
+        first_menu.add_native_item(MenuItem::Separator);
+        let close_item = first_menu.add_item(
+            MenuItemAttributes::new("CloseWindow")
+                .with_accelerators(&Accelerator::new(SysMods::Cmd, KeyCode::KeyW)),
+        );
+        first_menu.add_native_item(MenuItem::Quit);
+        menu_bar_menu.add_submenu("App", true, first_menu);
+        (menu_bar_menu, close_item)
+    };
 
     #[cfg(any(target_os = "linux", target_os = "windows"))]
     let (
@@ -170,6 +156,7 @@ fn main() -> wry::Result<()> {
         .with_initialization_script(include_str!("pake.js"))
         .with_ipc_handler(handler)
         .build()?;
+
     // 自定义cookie文件夹，仅用于Linux
     // Custom Cookie folder, only for Linux
     #[cfg(target_os = "linux")]
