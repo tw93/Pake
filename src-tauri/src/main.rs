@@ -2,43 +2,34 @@
 #![windows_subsystem = "windows"]
 extern crate image;
 use tauri_utils::config::{Config, WindowConfig};
-#[cfg(target_os = "macos")]
-use wry::application::platform::macos::WindowBuilderExtMacOS;
+use wry::{
+    application::{
+        event::{Event, StartCause, WindowEvent},
+        event_loop::{ControlFlow, EventLoop},
+        menu::MenuType,
+        window::{Fullscreen, Window, WindowBuilder},
+    },
+    webview::WebViewBuilder,
+};
+
 
 #[cfg(target_os = "macos")]
 use wry::{
     application::{
         accelerator::{Accelerator, SysMods},
-        event::{Event, StartCause, WindowEvent},
-        event_loop::{ControlFlow, EventLoop},
         keyboard::KeyCode,
-        menu::{MenuBar as Menu, MenuItem, MenuItemAttributes, MenuType},
-        window::{Fullscreen, Window, WindowBuilder},
+        menu::{MenuBar as Menu, MenuItem, MenuItemAttributes},
+        platform::macos::WindowBuilderExtMacOS,
     },
-    webview::WebViewBuilder,
 };
 
 #[cfg(target_os = "windows")]
-use wry::{
-    application::{
-        event::{Event, StartCause, WindowEvent},
-        event_loop::{ControlFlow, EventLoop},
-        menu::MenuType,
-        window::{Fullscreen, Icon, Window, WindowBuilder},
-    },
-    webview::WebViewBuilder,
-};
+use wry::window::Icon;
 
 #[cfg(target_os = "linux")]
-use wry::{
-    application::{
-        event::{Event, StartCause, WindowEvent},
-        event_loop::{ControlFlow, EventLoop},
-        menu::MenuType,
-        window::{Fullscreen, Window, WindowBuilder},
-    },
-    webview::{WebContext, WebViewBuilder},
-};
+use wry::webview::WebContext;
+
+
 
 fn main() -> wry::Result<()> {
     #[cfg(target_os = "macos")]
@@ -79,13 +70,14 @@ fn main() -> wry::Result<()> {
 
     #[cfg(target_os = "macos")]
     menu_bar_menu.add_submenu("App", true, first_menu);
-    #[cfg(target_os = "linux")]
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
     let (package_name, windows_config) = get_windows_config();
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
+    let package_name = package_name
+        .expect("can't get package name in config file")
+        .to_lowercase();
 
-    #[cfg(target_os = "linux")]
-    let package_name = package_name.expect("can't get package name in config file");
-
-    #[cfg(target_os = "linux")]
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
     let WindowConfig {
         url,
         width,
@@ -94,17 +86,7 @@ fn main() -> wry::Result<()> {
         fullscreen,
         ..
     } = windows_config.unwrap_or_default();
-    #[cfg(target_os = "windows")]
-    let (package_name, windows_config) = get_windows_config();
-    #[cfg(target_os = "windows")]
-    let WindowConfig {
-        url,
-        width,
-        height,
-        resizable,
-        fullscreen,
-        ..
-    } = windows_config.unwrap_or_default();
+
     #[cfg(target_os = "macos")]
     let WindowConfig {
         url,
@@ -127,10 +109,6 @@ fn main() -> wry::Result<()> {
         })
         .with_inner_size(wry::application::dpi::LogicalSize::new(width, height));
     #[cfg(target_os = "windows")]
-    let package_name = package_name
-        .expect("can't get package name in config file")
-        .to_lowercase();
-    #[cfg(target_os = "windows")]
     let icon_path = format!("png/{}_32.ico", package_name);
     #[cfg(target_os = "windows")]
     let icon = load_icon(std::path::Path::new(&icon_path));
@@ -142,7 +120,9 @@ fn main() -> wry::Result<()> {
         .unwrap();
 
     #[cfg(target_os = "linux")]
-    let window = common_window.build(&event_loop).unwrap();
+    let window = common_window
+        .build(&event_loop)
+        .unwrap();
 
     #[cfg(target_os = "macos")]
     let window = common_window
@@ -195,14 +175,14 @@ fn main() -> wry::Result<()> {
         .build()?;
     // 自定义cookie文件夹，仅用于Linux
     // Custom Cookie folder, only for Linux
-    // #[cfg(target_os = "linux")]
-    // let config_path = format!("/home/{}/.config/{}", env!("USER"), package_name);
     #[cfg(target_os = "linux")]
     let user = std::env::var_os("USER");
     #[cfg(target_os = "linux")]
     let config_path = match user {
         Some(v) => format!(
-            "/home/{}/.config/{}", v.into_string().unwrap(), package_name
+            "/home/{}/.config/{}",
+            v.into_string().unwrap(),
+            package_name,
         ),
         None => panic!("can't found any user")
     };
