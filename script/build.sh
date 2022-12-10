@@ -102,7 +102,8 @@ do
 
     if [[ "$OSTYPE" =~ ^linux ]]; then
         npm run tauri build
-        mv src-tauri/target/release/bundle/deb/*.deb output/linux/${package_title}_amd64.deb
+        mv src-tauri/target/release/bundle/deb/${package_prefix}-${package_name}*.deb output/linux/${package_title}_amd64.deb
+        mv src-tauri/target/release/bundle/appimage/${package_prefix}-${package_name}*.AppImage output/linux/${package_title}_amd64.AppImage
     fi
 
     if [[ "$OSTYPE" =~ ^darwin ]]; then

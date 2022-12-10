@@ -1943,7 +1943,8 @@ var tauri = {
 		],
 		shortDescription: "",
 		targets: [
-			"deb"
+			"deb",
+			"appimage"
 		]
 	}
 };
@@ -1996,7 +1997,7 @@ class MacBuilder {
             log.debug('PakeAppOptions', options);
             const { name } = options;
             yield mergeTauriConfig(url, options, tauriConf);
-            yield shellExec(`cd ${npmDirectory} && npm install && npm run build:release`);
+            yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
             let arch = "x64";
             if (process.arch === "arm64") {
                 arch = "aarch64";
@@ -2046,7 +2047,7 @@ class WinBuilder {
             logger.debug('PakeAppOptions', options);
             const { name } = options;
             yield mergeTauriConfig(url, options, tauriConf);
-            yield shellExec(`cd ${npmDirectory} && npm install && npm run build:release`);
+            yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
             const language = tauriConf.tauri.bundle.windows.wix.language[0];
             const arch = process.arch;
             const msiName = `${name}_${tauriConf.package.version}_${arch}_${language}.msi`;
@@ -2106,7 +2107,7 @@ Terminal=false
 Type=Application
     `;
             yield fs.writeFile(assertPath, desktopStr);
-            yield shellExec(`cd ${npmDirectory} && npm install && npm run build:release`);
+            yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
             let arch = "";
             if (process.arch === "x64") {
                 arch = "amd64";
@@ -2115,16 +2116,22 @@ Type=Application
                 arch = process.arch;
             }
             const debName = `${name}_${tauriConf.package.version}_${arch}.deb`;
-            const appPath = this.getBuildedAppPath(npmDirectory, debName);
+            const appPath = this.getBuildedAppPath(npmDirectory, "deb", debName);
             const distPath = path.resolve(`${name}.deb`);
             yield fs.copyFile(appPath, distPath);
             yield fs.unlink(appPath);
+            const appImageName = `${name}_${tauriConf.package.version}_${arch}.AppImage`;
+            const appImagePath = this.getBuildedAppPath(npmDirectory, "appimage", appImageName);
+            const distAppPath = path.resolve(`${name}.AppImage`);
+            yield fs.copyFile(appImagePath, distAppPath);
+            yield fs.unlink(appImagePath);
             logger.success('Build success!');
-            logger.success('You can find the app installer in', distPath);
+            logger.success('You can find the deb app installer in', distPath);
+            logger.success('You can find the Appimage app installer in', distAppPath);
         });
     }
-    getBuildedAppPath(npmDirectory, dmgName) {
-        return path.join(npmDirectory, 'src-tauri/target/release/bundle/deb', dmgName);
+    getBuildedAppPath(npmDirectory, packageType, packageName) {
+        return path.join(npmDirectory, 'src-tauri/target/release/bundle/', packageType, packageName);
     }
 }
 
@@ -2168,7 +2175,7 @@ var scripts = {
 	start: "npm run dev",
 	dev: "npm run tauri dev",
 	"dev:debug": "npm run tauri dev -- --features devtools",
-	"build:release": "npm run tauri build --release",
+	build: "npm run tauri build --release",
 	"build:all-unix": "chmod +x ./script/build.sh && ./script/build.sh",
 	"build:all-windows": ".\\script\\build.bat",
 	tauri: "tauri",

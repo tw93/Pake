@@ -26,6 +26,7 @@ dist-ssr
 output
 *.msi
 *.deb
+*.AppImage
 *.dmg
 
 package-lock.json
