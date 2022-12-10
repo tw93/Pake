@@ -55,6 +55,18 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       padding-top: 20px;
     }
 
+    #__next .overflow-hidden .flex.flex-1.flex-col {
+        padding-left: 0;
+    }
+
+    #__next .overflow-hidden>.hidden.bg-gray-900 {
+      display: none;
+    }
+
+    #__next .overflow-hidden main .absolute .text-xs{
+      visibility: hidden;
+    }
+
     .lark > .dashboard-sidebar, .lark > .dashboard-sidebar > .sidebar-user-info , .lark > .dashboard-sidebar .index-module_wrapper_F-Wbq{
       padding-top:15px;
     }
