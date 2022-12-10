@@ -169,35 +169,31 @@ fn main() -> wry::Result<()> {
     // 自定义cookie文件夹，仅用于Linux
     // Custom Cookie folder, only for Linux
     #[cfg(target_os = "linux")]
-    let user = std::env::var_os("USER");
-    #[cfg(target_os = "linux")]
-    let config_path = match user {
-        Some(v) => format!(
-            "/home/{}/.config/{}",
-            v.into_string().unwrap(),
-            package_name,
-        ),
-        None => panic!("can't found any user"),
+    let webview = {
+        let user = std::env::var_os("USER");
+        let config_path = match user {
+            Some(v) => format!(
+                "/home/{}/.config/{}",
+                v.into_string().unwrap(),
+                package_name,
+            ),
+            None => panic!("can't found any user"),
+        };
+        let data_path = std::path::PathBuf::from(&config_path);
+        if !std::path::Path::new(&data_path).exists() {
+            std::fs::create_dir(&data_path)
+                .unwrap_or_else(|_| panic!("can't create dir {}", &config_path));
+        }
+        let mut web_content = WebContext::new(Some(data_path));
+        WebViewBuilder::new(window)?
+            // .with_user_agent(user_agent_string)
+            .with_url(&url.to_string())?
+            .with_devtools(cfg!(feature = "devtools"))
+            .with_initialization_script(include_str!("pake.js"))
+            .with_ipc_handler(handler)
+            .with_web_context(&mut web_content)
+            .build()?
     };
-    #[cfg(target_os = "linux")]
-    let data_path = std::path::PathBuf::from(&config_path);
-    #[cfg(target_os = "linux")]
-    if !std::path::Path::new(&data_path).exists() {
-        std::fs::create_dir(&data_path)
-            .unwrap_or_else(|_| panic!("can't create dir {}", &config_path));
-    }
-    #[cfg(target_os = "linux")]
-    let mut web_content = WebContext::new(Some(data_path));
-    #[cfg(target_os = "linux")]
-    let webview = WebViewBuilder::new(window)?
-        // .with_user_agent(user_agent_string)
-        .with_url(&url.to_string())?
-        .with_devtools(cfg!(feature = "devtools"))
-        .with_initialization_script(include_str!("pake.js"))
-        .with_ipc_handler(handler)
-        .with_web_context(&mut web_content)
-        .build()?;
-
     #[cfg(feature = "devtools")]
     {
         webview.open_devtools();
