@@ -3,6 +3,7 @@ import prompts from 'prompts';
 import path from 'path';
 import fs from 'fs/promises';
 import { npmDirectory } from '@/utils/dir.js';
+import logger from '@/options/logger.js';
 
 export async function promptText(message: string, initial?: string) {
   const response = await prompts({
@@ -40,20 +41,50 @@ export async function mergeTauriConfig(
   Object.assign(tauriConf.tauri.windows[0], { url, ...tauriConfWindowOptions });
   tauriConf.package.productName = name;
   tauriConf.tauri.bundle.identifier = identifier;
-  tauriConf.tauri.bundle.icon = [options.icon];
-  if (process.platform === "win32") {
-    const ico_path = path.join(npmDirectory, `src-tauri/png/${name.toLowerCase()}_32.ico`);
-    tauriConf.tauri.bundle.resources = [`png/${name.toLowerCase()}_32.ico`];
-    await fs.copyFile(options.icon, ico_path);
-  }
-  if (process.platform === "linux") {
-    const installSrc = `/usr/share/applications/${name}.desktop`;
-    const assertSrc = `src-tauri/assets/${name}.desktop`;
-    const assertPath = path.join(npmDirectory, assertSrc);
-    tauriConf.tauri.bundle.deb.files = {
-      [installSrc]: assertPath
+  const exists = await fs.stat(options.icon)
+    .then(() => true)
+    .catch(() => false);
+  if (exists) {
+    let updateIconPath = true;
+    let customIconExt = path.extname(options.icon).toLowerCase();
+    if (process.platform === "win32") {
+      if (customIconExt === ".ico") {
+        const ico_path = path.join(npmDirectory, `src-tauri/png/${name.toLowerCase()}_32.ico`);
+        tauriConf.tauri.bundle.resources = [`png/${name.toLowerCase()}_32.ico`];
+        await fs.copyFile(options.icon, ico_path);
+      } else {
+        updateIconPath = false;
+        logger.warn(`icon file in Windows must be 256 * 256 pix with .ico type, but you give ${customIconExt}`);
+      }
     }
-    
+    if (process.platform === "linux") {
+      tauriConf.package.productName = name.toLowerCase();
+      if (customIconExt === ".png") {
+        const installSrc = `/usr/share/applications/${name.toLowerCase()}.desktop`;
+        const assertSrc = `src-tauri/assets/${name.toLowerCase()}.desktop`;
+        const assertPath = path.join(npmDirectory, assertSrc);
+        tauriConf.tauri.bundle.deb.files = {
+          [installSrc]: assertPath
+        }
+      } else {
+        updateIconPath = false;
+        logger.warn(`icon file in Linux must be 512 * 512 pix with .png type, but you give ${customIconExt}`);
+      }
+    }
+
+    if (process.platform === "darwin") {
+      if (customIconExt !== ".icns") {
+        updateIconPath = false;
+        logger.warn(`icon file in MacOS must be .icns type, but you give ${customIconExt}`);
+      }
+    }
+    if (updateIconPath) {
+      tauriConf.tauri.bundle.icon = [options.icon];
+    } else {
+      logger.warn(`icon file will not change with default.`);
+    }
+  } else {
+    logger.warn("the custom icon path may not exists. we will use default icon to replace it");
   }
 
 
