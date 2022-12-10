@@ -146,7 +146,7 @@ npm i
 npm run dev
 
 // 打包应用
-npm run build:release
+npm run build
 
 ```
 
