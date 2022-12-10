@@ -40,7 +40,7 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/sfnTXf.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/17dC9I.jpg width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/mc41xq.jpg width=600/></td>
     </tr>
     <tr>
