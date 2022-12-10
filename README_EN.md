@@ -146,7 +146,7 @@ npm i
 npm run dev
 
 // Pack application
-npm run build:release
+npm run build
 
 ```
 
