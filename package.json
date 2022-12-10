@@ -24,7 +24,6 @@
     "dev": "npm run tauri dev",
     "dev:debug": "npm run tauri dev -- --features devtools",
     "build": "npm run tauri build --release",
-    "build:release": "npm run tauri build --release",
     "build:all-unix": "chmod +x ./script/build.sh && ./script/build.sh",
     "build:all-windows": ".\\script\\build.bat",
     "tauri": "tauri",

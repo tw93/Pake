@@ -61,7 +61,7 @@ Terminal=false
 Type=Application
     `
     await fs.writeFile(assertPath, desktopStr);
-    const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build:release`);
+    const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build`);
     let arch = "";
     if (process.arch === "x64") {
       arch = "amd64";

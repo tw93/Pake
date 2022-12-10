@@ -1996,7 +1996,7 @@ class MacBuilder {
             log.debug('PakeAppOptions', options);
             const { name } = options;
             yield mergeTauriConfig(url, options, tauriConf);
-            yield shellExec(`cd ${npmDirectory} && npm install && npm run build:release`);
+            yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
             let arch = "x64";
             if (process.arch === "arm64") {
                 arch = "aarch64";
@@ -2046,7 +2046,7 @@ class WinBuilder {
             logger.debug('PakeAppOptions', options);
             const { name } = options;
             yield mergeTauriConfig(url, options, tauriConf);
-            yield shellExec(`cd ${npmDirectory} && npm install && npm run build:release`);
+            yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
             const language = tauriConf.tauri.bundle.windows.wix.language[0];
             const arch = process.arch;
             const msiName = `${name}_${tauriConf.package.version}_${arch}_${language}.msi`;
@@ -2106,7 +2106,7 @@ Terminal=false
 Type=Application
     `;
             yield fs.writeFile(assertPath, desktopStr);
-            yield shellExec(`cd ${npmDirectory} && npm install && npm run build:release`);
+            yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
             let arch = "";
             if (process.arch === "x64") {
                 arch = "amd64";
@@ -2168,7 +2168,7 @@ var scripts = {
 	start: "npm run dev",
 	dev: "npm run tauri dev",
 	"dev:debug": "npm run tauri dev -- --features devtools",
-	"build:release": "npm run tauri build --release",
+	build: "npm run tauri build --release",
 	"build:all-unix": "chmod +x ./script/build.sh && ./script/build.sh",
 	"build:all-windows": ".\\script\\build.bat",
 	tauri: "tauri",

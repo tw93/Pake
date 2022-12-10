@@ -40,7 +40,7 @@ export default class MacBuilder implements IBuilder {
 
     await mergeTauriConfig(url, options, tauriConf);
 
-    const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build:release`);
+    const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build`);
     let arch  = "x64";
     if (process.arch === "arm64") {
       arch = "aarch64";
