@@ -21,7 +21,7 @@ use wry::application::{
 };
 
 #[cfg(target_os = "windows")]
-use wry::window::Icon;
+use wry::application::window::Icon;
 
 #[cfg(target_os = "linux")]
 use wry::webview::WebContext;
