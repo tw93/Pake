@@ -134,7 +134,7 @@ pake https://weekly.tw93.fun --name Weekly --transparent
 
 ## 开发
 
-开始前参考 [Tauri](https://tauri.app/v1/guides/getting-started/prerequisites) 快速配置好环境。
+开始前请确保电脑已经安装了 Rust 和 Node 的环境，此外需参考 [Tauri 文档](https://tauri.app/v1/guides/getting-started/prerequisites) 快速配置好环境才可以开始使用，假如你太不懂，请使用上面的命令行一键打包会更加合适。
 
 ```sh
 // 安装依赖
