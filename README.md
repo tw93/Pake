@@ -149,6 +149,80 @@ npm run build
 
 ```
 
+### 文档说明
+
+- 总的项目文档树
+
+```bash
+.
+├── app.csv
+├── bin
+│   ├── builders
+│   ├── cli.ts
+│   ├── defaults.ts
+│   ├── helpers
+│   ├── options
+│   ├── README_EN.md
+│   ├── README.md
+│   ├── types.ts
+│   └── utils
+├── cli.js
+├── CODE_OF_CONDUCT.md
+├── CONTRIBUTING.md
+├── dist
+│   └── cli.js
+├── icns2png.py
+├── LICENSE
+├── package.json
+├── pake-default.icns
+├── README_EN.md
+├── README.md
+├── rollup.config.js
+├── script
+│   ├── build.bat
+│   ├── build.sh
+│   ├── sd-apple-x64
+│   ├── sd.exe
+│   └── sd-linux-x64
+├── src-tauri
+│   ├── assets
+│   ├── build.rs
+│   ├── Cargo.lock
+│   ├── Cargo.toml
+│   ├── icons
+│   ├── png
+│   ├── src
+│   ├    ├──main.rs
+│   ├    └──pake.js
+│   ├── tauri.conf.json
+│   ├── tauri.linux.conf.json
+│   ├── tauri.macos.conf.json
+│   └── tauri.windows.conf.json
+└── tsconfig.json
+```
+
+- app.csv：用于bash/bat命令批量替换打包。
+- bin：采用TypeScript编写，为pake-cli，即pake命令行打包工具的源码，可以使用`npm run cli:build`来生成最终配置文件`dist\cli.js`。
+- cli.js：pake-cli的入口文件，该文件调用`dist\cli.js`文件，基本不用修改，可以忽略。
+- dist\cli.js：由`npm run cli:build`生成。
+- icns2png.py：python3编写，用于将Mac默认的icns图标转化为windows/Linux的ico与png格式图标。
+- package.json：npm模块依赖配置文件，运行`npm i`与`npm run xxx`时候需要用到该文件，用于构建基础开发环境。
+- pake-default.icns：pake默认的图标，适用于MacOS。
+- script：用于批量打包多个app的脚本，内置了[sd](https://github.com/chmln/sd)二进制包。可以用`npm run build:all-unix`和`npm run build:all-windows`分别调用Mac/Linux与Windows的批量打包功能。
+- src-tauri/assets：储存了一个Linux的desktop图标配置文件和Windows msi安装配置文件。
+- src-tauri/build.rs：tauri编译入口，基本不用修改，可忽略。
+- src-tauri/Cargo.lock：cargo包管理配置结果文件，可忽略。
+- src-tauri/Cargo.toml：cargo包依赖配置文件，用于管理各个crate版本信息，基本不用修改，可忽略。
+- src-tauri/icons：储存了一系列icns格式的图标文件，适用于MacOS应用图标。
+- src-tauri/png：由上面的icons文件夹生成，储存了ico与png格式文件，适用于Linux/Windows的应用图标。
+- src-tauri/src/main.rc：主程序文件，需要修改程序，跨平台移植方案，重点修改这个。
+- src-tauri/src/pake.js：主程序文件配套的js代码，用于添加快捷键监听，页面渲染效果等等。
+- src-tauri/tauri.conf.json：主配置文件，用于控制包名，版本号，打开链接，窗口大小等等。
+- src-tauri/tauri.linux.conf.json：Linux平台编译时用到的配置文件，包含Linux专用图标，维护者，二进制格式，映射相关等等。
+- src-tauri/tauri.macos.conf.json：MacOS平台编译时用到的配置文件，包含MacOS专用图标，维护者，二进制格式等等。
+- src-tauri/tauri.windows.conf.json：Windows平台编译时用到的配置文件，包含Windows专用图标，维护者，二进制格式，左上角小图标映射相关等等。
+- tsconfig.json：TypeScript配置，基本不需要修改，可忽略。
+
 ## 打新包
 
 1. 修改 `src-tauri` 目录下的 `tauri.conf.json` 中的 `url、productName、icon、identifier` 这 4 个字段，其中 icon 可以从 icons 目录选择一个，也可以去 [macOSicons](https://macosicons.com/#/) 下载符合产品名称的
