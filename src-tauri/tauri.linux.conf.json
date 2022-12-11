@@ -18,7 +18,9 @@
           "libssl-dev",
           "libgtk-3-dev",
           "libayatana-appindicator3-dev",
-          "librsvg2-dev"
+          "librsvg2-dev",
+          "gnome-video-effects",
+          "gnome-video-effects-extra"
         ],
         "files": {
           "/usr/share/applications/com-tw93-weread.desktop": "assets/com-tw93-weread.desktop"
