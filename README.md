@@ -113,7 +113,7 @@ pake url [options]
 pake https://weekly.tw93.fun --name Weekly --transparent
 ```
 
-假如你是不太会使用命令行的小白，使用 **GitHub Actions 在线编译多系统版本** 也是一个不错的选择，可查看[文档](https://github.com/tw93/Pake/wiki/GitHub-Actions-%E5%9C%A8%E7%BA%BF%E7%BC%96%E8%AF%91%E5%A4%9A%E7%B3%BB%E7%BB%9F%E7%89%88%E6%9C%AC)。
+假如你不太会使用命令行，或许使用 **GitHub Actions 在线编译多系统版本** 是一个不错的选择，可查看[文档](https://github.com/tw93/Pake/wiki/GitHub-Actions-%E5%9C%A8%E7%BA%BF%E7%BC%96%E8%AF%91%E5%A4%9A%E7%B3%BB%E7%BB%9F%E7%89%88%E6%9C%AC)。
 
 ## 快捷键
 
