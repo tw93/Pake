@@ -132,7 +132,7 @@ pake https://weekly.tw93.fun --name Weekly --transparent
 
 此外还支持双击头部进行全屏切换，拖拽头部进行移动窗口，还有其他需求，欢迎提过来。
 
-## 开发
+## 自己开发
 
 开始前请确保电脑已经安装了 Rust 和 Node 的环境，此外需参考 [Tauri 文档](https://tauri.app/v1/guides/getting-started/prerequisites) 快速配置好环境才可以开始使用，假如你太不懂，请使用上面的命令行一键打包会更加合适。
 
