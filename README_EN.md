@@ -113,7 +113,7 @@ pake url [options]
 pake https://weekly.tw93.fun --name Weekly --transparent
 ```
 
-If you are a little white who doesn't know how to use the command line, a good option is to use **GitHub Actions online compilation**, see the [tutorial]([/docs/README_EN.md](https://github.com/tw93/Pake/wiki/GitHub-Actions-Online-Compilation-Multi-system-Version)).
+If you are a little white who doesn't know how to use the command line, a good option is to use **GitHub Actions online compilation**, see the [tutorial](<[/docs/README_EN.md](https://github.com/tw93/Pake/wiki/GitHub-Actions-Online-Compilation-Multi-system-Version)>).
 
 ## Shortcuts
 
@@ -150,11 +150,10 @@ npm run build
 
 ## Advanced use
 
-1. The code structure of Pake can be referred to [wiki](https://github.com/tw93/Pake/wiki/Description-of-Pake's-code-structure).
-2. Modify the `tauri.conf.json` in the `src-tauri` directory to include 4 fields `url, productName, icon, identifier`, icon can be selected from the `icons` directory or downloaded from [macOSicons](https://macosicons.com/#/) to match the product.
-3. For window property settings, you can modify the `width/height` of the `windows` property in `tauri.conf.json`, whether it is `fullscreen`, whether it is `resizable`, If you want to adapt the immersive header under Mac, you can set `transparent` to `true` and then find header element and add the `padding-top` style.
-4. `npm run dev` for local debugging; `npm run dev:debug` to open the devtools for container debugging, `npm run build` can be run to package for production.
-5. About style rewriting, advertising shielding, js injection, container message communication, and user-defined shortcut keys, you can see [Advanced Usage of Make](https://github.com/tw93/Pake/wiki/Advanced-Usage-of-Make).
+1. Modify the `tauri.conf.json` in the `src-tauri` directory to include 4 fields `url, productName, icon, identifier`, icon can be selected from the `icons` directory or downloaded from [macOSicons](https://macosicons.com/#/) to match the product.
+2. For window property settings, you can modify the `width/height` of the `windows` property in `tauri.conf.json`, whether it is `fullscreen`, whether it is `resizable`, If you want to adapt the immersive header under Mac, you can set `transparent` to `true` and then find header element and add the `padding-top` style.
+3. `npm run dev` for local debugging; `npm run dev:debug` to open the devtools for container debugging, `npm run build` can be run to package for production.
+4. The code structure can be referred to [Here](https://github.com/tw93/Pake/wiki/Description-of-Pake's-code-structure), About style rewriting, advertising shielding, js injection, container message communication, and user-defined shortcut keys, you can see [Advanced Usage of Make](https://github.com/tw93/Pake/wiki/Advanced-Usage-of-Make).
 
 ## Support
 
