@@ -162,7 +162,10 @@ fn main() -> wry::Result<()> {
                 .unwrap_or_else(|_| panic!("can't create dir {}", data_dir.display()));
         }
         let mut web_content = WebContext::new(Some(data_dir));
+        #[cfg(target_os = "windows")]
         let user_agent_string = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36 Edg/103.0.1264.62";
+        #[cfg(target_os = "linux")]
+        let user_agent_string = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.46";
         WebViewBuilder::new(window)?
             .with_user_agent(user_agent_string)
             .with_url(&url.to_string())?
