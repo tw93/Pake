@@ -134,18 +134,18 @@ fn main() -> wry::Result<()> {
 
     // 用于欺骗部分页面对于浏览器的强检测
 
-    // #[cfg(target_os = "macos")]
-    // let user_agent_string = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15";
-
     #[cfg(target_os = "macos")]
-    let webview = WebViewBuilder::new(window)?
-        // .with_user_agent(user_agent_string)
-        .with_url(&url.to_string())?
-        .with_devtools(cfg!(feature = "devtools"))
-        .with_initialization_script(include_str!("pake.js"))
-        .with_ipc_handler(handler)
-        .with_back_forward_navigation_gestures(true)
-        .build()?;
+    let webview = {
+        let user_agent_string = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15";
+        WebViewBuilder::new(window)?
+            .with_user_agent(user_agent_string)
+            .with_url(&url.to_string())?
+            .with_devtools(cfg!(feature = "devtools"))
+            .with_initialization_script(include_str!("pake.js"))
+            .with_ipc_handler(handler)
+            .with_back_forward_navigation_gestures(true)
+            .build()?
+    };
 
     #[cfg(any(target_os = "linux", target_os = "windows"))]
     let webview = {
@@ -162,8 +162,9 @@ fn main() -> wry::Result<()> {
                 .unwrap_or_else(|_| panic!("can't create dir {}", data_dir.display()));
         }
         let mut web_content = WebContext::new(Some(data_dir));
+        let user_agent_string = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36 Edg/103.0.1264.62";
         WebViewBuilder::new(window)?
-            // .with_user_agent(user_agent_string)
+            .with_user_agent(user_agent_string)
             .with_url(&url.to_string())?
             .with_devtools(cfg!(feature = "devtools"))
             .with_initialization_script(include_str!("pake.js"))
