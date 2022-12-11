@@ -134,7 +134,7 @@ In addition, it supports double clicking the head to switch to full screen, and 
 
 ## Development
 
-Refer to the [Tauri documentation](https://tauri.app/v1/guides/getting-started/prerequisites) to quickly configure your environment before you start.
+Before starting, make sure that the computer has installed the Rust and Node environment，refer to the [Tauri documentation](https://tauri.app/v1/guides/getting-started/prerequisites) to quickly configure your environment before you start. If you don't understand, it will be more appropriate to use the above command line to pack with one click.
 
 ```sh
 // Install Dependencies
