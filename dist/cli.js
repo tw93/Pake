@@ -6,11 +6,11 @@ import isurl from 'is-url';
 import prompts from 'prompts';
 import path from 'path';
 import fs from 'fs/promises';
+import chalk from 'chalk';
 import crypto from 'crypto';
 import axios from 'axios';
 import { fileTypeFromBuffer } from 'file-type';
 import { dir } from 'tmp-promise';
-import chalk from 'chalk';
 import ora from 'ora';
 import shelljs from 'shelljs';
 import updateNotifier from 'update-notifier';
@@ -1593,6 +1593,24 @@ function validateUrlInput(url) {
 
 const npmDirectory = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 
+const logger = {
+    info(...msg) {
+        log.info(...msg.map((m) => chalk.blue.bold(m)));
+    },
+    debug(...msg) {
+        log.debug(...msg);
+    },
+    error(...msg) {
+        log.error(...msg.map((m) => chalk.red.bold(m)));
+    },
+    warn(...msg) {
+        log.info(...msg.map((m) => chalk.yellow.bold(m)));
+    },
+    success(...msg) {
+        log.info(...msg.map((m) => chalk.green.bold(m)));
+    }
+};
+
 function promptText(message, initial) {
     return __awaiter(this, void 0, void 0, function* () {
         const response = yield prompts({
@@ -1617,19 +1635,43 @@ function mergeTauriConfig(url, options, tauriConf) {
         Object.assign(tauriConf.tauri.windows[0], Object.assign({ url }, tauriConfWindowOptions));
         tauriConf.package.productName = name;
         tauriConf.tauri.bundle.identifier = identifier;
-        tauriConf.tauri.bundle.icon = [options.icon];
-        if (process.platform === "win32") {
-            const ico_path = path.join(npmDirectory, `src-tauri/png/${name.toLowerCase()}_32.ico`);
-            tauriConf.tauri.bundle.resources = [`png/${name.toLowerCase()}_32.ico`];
-            yield fs.copyFile(options.icon, ico_path);
+        const exists = yield fs.stat(options.icon)
+            .then(() => true)
+            .catch(() => false);
+        if (exists) {
+            let updateIconPath = true;
+            let customIconExt = path.extname(options.icon).toLowerCase();
+            if (process.platform === "win32") {
+                if (customIconExt === ".ico") {
+                    const ico_path = path.join(npmDirectory, `src-tauri/png/${name.toLowerCase()}_32.ico`);
+                    tauriConf.tauri.bundle.resources = [`png/${name.toLowerCase()}_32.ico`];
+                    yield fs.copyFile(options.icon, ico_path);
+                }
+                else {
+                    updateIconPath = false;
+                    logger.warn(`icon file in Windows must be 256 * 256 pix with .ico type, but you give ${customIconExt}`);
+                }
+            }
+            if (process.platform === "linux") {
+                delete tauriConf.tauri.bundle.deb.files;
+                if (customIconExt != ".png") {
+                    updateIconPath = false;
+                    logger.warn(`icon file in Linux must be 512 * 512 pix with .png type, but you give ${customIconExt}`);
+                }
+            }
+            if (process.platform === "darwin" && customIconExt !== ".icns") {
+                updateIconPath = false;
+                logger.warn(`icon file in MacOS must be .icns type, but you give ${customIconExt}`);
+            }
+            if (updateIconPath) {
+                tauriConf.tauri.bundle.icon = [options.icon];
+            }
+            else {
+                logger.warn(`icon file will not change with default.`);
+            }
         }
-        if (process.platform === "linux") {
-            const installSrc = `/usr/share/applications/${name}.desktop`;
-            const assertSrc = `src-tauri/assets/${name}.desktop`;
-            const assertPath = path.join(npmDirectory, assertSrc);
-            tauriConf.tauri.bundle.deb.files = {
-                [installSrc]: assertPath
-            };
+        else {
+            logger.warn("the custom icon path may not exists. we will use default icon to replace it");
         }
         let configPath = "";
         switch (process.platform) {
@@ -1660,23 +1702,9 @@ function getIdentifier(name, url) {
     return `pake-${postFixHash}`;
 }
 
-const logger = {
-    info(...msg) {
-        log.info(...msg.map((m) => chalk.blue.bold(m)));
-    },
-    debug(...msg) {
-        log.debug(...msg);
-    },
-    error(...msg) {
-        log.error(...msg.map((m) => chalk.red.bold(m)));
-    },
-    warn(...msg) {
-        log.info(...msg.map((m) => chalk.yellow.bold(m)));
-    },
-    success(...msg) {
-        log.info(...msg.map((m) => chalk.green.bold(m)));
-    }
-};
+const IS_MAC = process.platform === 'darwin';
+const IS_WIN = process.platform === 'win32';
+const IS_LINUX = process.platform === 'linux';
 
 function handleIcon(options, url) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -1689,15 +1717,21 @@ function handleIcon(options, url) {
             }
         }
         if (!options.icon) {
-            return inferIcon(options.name);
+            return getDefaultIcon();
         }
     });
 }
-function inferIcon(name, url) {
+function getDefaultIcon() {
     return __awaiter(this, void 0, void 0, function* () {
         logger.info('You have not provided an app icon, use the default icon.(use --icon option to assign an icon)');
-        const npmDirectory = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-        return path.join(npmDirectory, 'pake-default.icns');
+        let iconPath = 'src-tauri/icons/icon.icns';
+        if (IS_WIN) {
+            iconPath = 'src-tauri/png/icon_256.ico';
+        }
+        else if (IS_LINUX) {
+            iconPath = 'src-tauri/png/icon_512.png';
+        }
+        return path.join(npmDirectory, iconPath);
     });
 }
 // export async function getIconFromPageUrl(url: string) {
@@ -1772,10 +1806,6 @@ function handleOptions(options, url) {
         return appOptions;
     });
 }
-
-const IS_MAC = process.platform === 'darwin';
-const IS_WIN = process.platform === 'win32';
-const IS_LINUX = process.platform === 'linux';
 
 function shellExec(command) {
     return new Promise((resolve, reject) => {
@@ -1870,7 +1900,8 @@ var tauri$2 = {
 			wix: {
 				language: [
 					"en-US"
-				]
+				],
+				template: "assets/main.wxs"
 			}
 		}
 	}
@@ -2092,21 +2123,6 @@ class LinuxBuilder {
             logger.debug('PakeAppOptions', options);
             const { name } = options;
             yield mergeTauriConfig(url, options, tauriConf);
-            // write desktop
-            const assertSrc = `src-tauri/assets/${name}.desktop`;
-            const assertPath = path.join(npmDirectory, assertSrc);
-            const desktopStr = `
-[Desktop Entry]
-Encoding=UTF-8
-Categories=Office
-Exec=${name}
-Icon=${name}
-Name=${name}
-StartupNotify=true
-Terminal=false
-Type=Application
-    `;
-            yield fs.writeFile(assertPath, desktopStr);
             yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
             let arch = "";
             if (process.arch === "x64") {
@@ -2137,7 +2153,6 @@ Type=Application
 
 class BuilderFactory {
     static create() {
-        console.log("now platform is ", process.platform);
         if (IS_MAC) {
             return new MacBuilder();
         }
@@ -2152,7 +2167,7 @@ class BuilderFactory {
 }
 
 var name = "pake-cli";
-var version = "0.1.1";
+var version = "0.1.2";
 var description = "🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App 🤱🏻 A simple way to make any web page a desktop application using Rust.";
 var bin = {
 	pake: "./cli.js"
@@ -2168,8 +2183,7 @@ var author = {
 var files = [
 	"dist",
 	"src-tauri",
-	"cli.js",
-	"pake-default.icns"
+	"cli.js"
 ];
 var scripts = {
 	start: "npm run dev",

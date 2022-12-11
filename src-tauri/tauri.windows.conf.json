@@ -19,7 +19,8 @@
         "digestAlgorithm": "sha256",
         "timestampUrl": "",
         "wix": {
-          "language": ["en-US"]
+          "language": ["en-US"],
+          "template": "assets/main.wxs"
         }
       }
     }

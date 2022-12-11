@@ -4,8 +4,9 @@ import { PakeAppOptions } from '../types.js';
 import { dir } from 'tmp-promise';
 import path from 'path';
 import fs from 'fs/promises';
-import { fileURLToPath } from 'url';
 import logger from './logger.js';
+import { npmDirectory } from '@/utils/dir.js';
+import { IS_LINUX, IS_WIN } from '@/utils/platform.js';
 
 export async function handleIcon(options: PakeAppOptions, url: string) {
   if (options.icon) {
@@ -16,14 +17,20 @@ export async function handleIcon(options: PakeAppOptions, url: string) {
     }
   }
   if (!options.icon) {
-    return inferIcon(options.name, url);
+    return getDefaultIcon();
   }
 }
 
-export async function inferIcon(name: string, url: string) {
+export async function getDefaultIcon() {
   logger.info('You have not provided an app icon, use the default icon.(use --icon option to assign an icon)')
-  const npmDirectory = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-  return path.join(npmDirectory, 'pake-default.icns');
+  let iconPath = 'src-tauri/icons/icon.icns';
+  if (IS_WIN) {
+    iconPath = 'src-tauri/png/icon_256.ico';
+  } else if (IS_LINUX) {
+    iconPath = 'src-tauri/png/icon_512.png';
+  }
+
+  return path.join(npmDirectory, iconPath);
 }
 
 // export async function getIconFromPageUrl(url: string) {
