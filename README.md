@@ -150,11 +150,10 @@ npm run build
 
 ## 高级使用
 
-1. 关于 Pake 的代码结构可以参考[wiki](https://github.com/tw93/Pake/wiki/Pake-%E7%9A%84%E4%BB%A3%E7%A0%81%E7%BB%93%E6%9E%84%E8%AF%B4%E6%98%8E)
-2. 修改 `src-tauri` 目录下的 `tauri.conf.json` 中的 `url、productName、icon、identifier` 这 4 个字段，其中 icon 可以从 icons 目录选择一个，也可以去 [macOSicons](https://macosicons.com/#/) 下载符合产品名称的
-3. 关于窗口属性设置，可以在 `tauri.conf.json` 修改 `windows` 属性对应的 `width/height`，是否全屏 `fullscreen`，是否可以调整大小 `resizable`，假如想适配 Mac 沉浸式头部，可以将 `transparent` 设置成 `true`，找到 Header 元素加一个 `padding-top` 样式即可，不想适配改成 `false` 也行
-4. `npm run dev` 本地调试看看效果，此外可以使用 `npm run dev:debug` 进行容器调试，`npm run build` 运行即可打生产包
-5. 关于样式改写、屏蔽广告、逻辑代码注入、容器消息通信、自定义快捷键可见 [Pake 的高级用法](https://github.com/tw93/Pake/wiki/Pake-%E7%9A%84%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95)
+1. 修改 `src-tauri` 目录下的 `tauri.conf.json` 中的 `url、productName、icon、identifier` 这 4 个字段，其中 icon 可以从 icons 目录选择一个，也可以去 [macOSicons](https://macosicons.com/#/) 下载符合产品名称的
+2. 关于窗口属性设置，可以在 `tauri.conf.json` 修改 `windows` 属性对应的 `width/height`，是否全屏 `fullscreen`，是否可以调整大小 `resizable`，假如想适配 Mac 沉浸式头部，可以将 `transparent` 设置成 `true`，找到 Header 元素加一个 `padding-top` 样式即可，不想适配改成 `false` 也行
+3. `npm run dev` 本地调试看看效果，此外可以使用 `npm run dev:debug` 进行容器调试，`npm run build` 运行即可打生产包
+4. 代码结构可以参考 [文档](https://github.com/tw93/Pake/wiki/Pake-%E7%9A%84%E4%BB%A3%E7%A0%81%E7%BB%93%E6%9E%84%E8%AF%B4%E6%98%8E)，关于样式改写、屏蔽广告、逻辑代码注入、容器消息通信、自定义快捷键可见 [Pake 的高级用法](https://github.com/tw93/Pake/wiki/Pake-%E7%9A%84%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95)
 
 ## 开发者
 
