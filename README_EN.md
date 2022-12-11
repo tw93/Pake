@@ -93,8 +93,6 @@
     </tr>
 </table>
 
-Note: it cannot be installed to `C:\Program File` under Windows, and it will crash directly. It is recommended to install to other non-administrator directories, such as `D:\Program Files (x86)`.
-
 ## Command line packing
 
 <kbd>
