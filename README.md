@@ -93,7 +93,6 @@
     </tr>
 </table>
 
-
 ## 命令行打包
 
 <kbd>
@@ -149,86 +148,13 @@ npm run build
 
 ```
 
-### 文档说明
+## 定制
 
-- 总的项目文档树
-
-```bash
-.
-├── app.csv
-├── bin
-│   ├── builders
-│   ├── cli.ts
-│   ├── defaults.ts
-│   ├── helpers
-│   ├── options
-│   ├── README_EN.md
-│   ├── README.md
-│   ├── types.ts
-│   └── utils
-├── cli.js
-├── CODE_OF_CONDUCT.md
-├── CONTRIBUTING.md
-├── dist
-│   └── cli.js
-├── icns2png.py
-├── LICENSE
-├── package.json
-├── pake-default.icns
-├── README_EN.md
-├── README.md
-├── rollup.config.js
-├── script
-│   ├── build.bat
-│   ├── build.sh
-│   ├── sd-apple-x64
-│   ├── sd.exe
-│   └── sd-linux-x64
-├── src-tauri
-│   ├── assets
-│   ├── build.rs
-│   ├── Cargo.lock
-│   ├── Cargo.toml
-│   ├── icons
-│   ├── png
-│   ├── src
-│   ├    ├──main.rs
-│   ├    └──pake.js
-│   ├── tauri.conf.json
-│   ├── tauri.linux.conf.json
-│   ├── tauri.macos.conf.json
-│   └── tauri.windows.conf.json
-└── tsconfig.json
-```
-
-- app.csv：用于bash/bat命令批量替换打包。
-- bin：采用TypeScript编写，为pake-cli，即pake命令行打包工具的源码，可以使用`npm run cli:build`来生成最终配置文件`dist\cli.js`。
-- cli.js：pake-cli的入口文件，该文件调用`dist\cli.js`文件，基本不用修改，可以忽略。
-- dist\cli.js：由`npm run cli:build`生成。
-- icns2png.py：python3编写，用于将Mac默认的icns图标转化为windows/Linux的ico与png格式图标。
-- package.json：npm模块依赖配置文件，运行`npm i`与`npm run xxx`时候需要用到该文件，用于构建基础开发环境。
-- pake-default.icns：pake默认的图标，适用于MacOS。
-- script：用于批量打包多个app的脚本，内置了[sd](https://github.com/chmln/sd)二进制包。可以用`npm run build:all-unix`和`npm run build:all-windows`分别调用Mac/Linux与Windows的批量打包功能。
-- src-tauri/assets：储存了一个Linux的desktop图标配置文件和Windows msi安装配置文件。
-- src-tauri/build.rs：tauri编译入口，基本不用修改，可忽略。
-- src-tauri/Cargo.lock：cargo包管理配置结果文件，可忽略。
-- src-tauri/Cargo.toml：cargo包依赖配置文件，用于管理各个crate版本信息，基本不用修改，可忽略。
-- src-tauri/icons：储存了一系列icns格式的图标文件，适用于MacOS应用图标。
-- src-tauri/png：由上面的icons文件夹生成，储存了ico与png格式文件，适用于Linux/Windows的应用图标。
-- src-tauri/src/main.rc：主程序文件，需要修改程序，跨平台移植方案，重点修改这个。
-- src-tauri/src/pake.js：主程序文件配套的js代码，用于添加快捷键监听，页面渲染效果等等。
-- src-tauri/tauri.conf.json：主配置文件，用于控制包名，版本号，打开链接，窗口大小等等。
-- src-tauri/tauri.linux.conf.json：Linux平台编译时用到的配置文件，包含Linux专用图标，维护者，二进制格式，映射相关等等。
-- src-tauri/tauri.macos.conf.json：MacOS平台编译时用到的配置文件，包含MacOS专用图标，维护者，二进制格式等等。
-- src-tauri/tauri.windows.conf.json：Windows平台编译时用到的配置文件，包含Windows专用图标，维护者，二进制格式，左上角小图标映射相关等等。
-- tsconfig.json：TypeScript配置，基本不需要修改，可忽略。
-
-## 打新包
-
-1. 修改 `src-tauri` 目录下的 `tauri.conf.json` 中的 `url、productName、icon、identifier` 这 4 个字段，其中 icon 可以从 icons 目录选择一个，也可以去 [macOSicons](https://macosicons.com/#/) 下载符合产品名称的
-2. 关于窗口属性设置，可以在 `tauri.conf.json` 修改 `windows` 属性对应的 `width/height`，是否全屏 `fullscreen`，是否可以调整大小 `resizable`，假如想适配 Mac 沉浸式头部，可以将 `transparent` 设置成 `true`，找到 Header 元素加一个 `padding-top` 样式即可，不想适配改成 `false` 也行
-3. `npm run dev` 本地调试看看效果，此外可以使用 `npm run dev:debug` 进行容器调试
-4. `npm run build` 运行即可打生产包
+1. 关于 Pake 的代码结构可以参考[wiki](https://github.com/tw93/Pake/wiki/Pake-%E7%9A%84%E4%BB%A3%E7%A0%81%E7%BB%93%E6%9E%84%E8%AF%B4%E6%98%8E)
+2. 修改 `src-tauri` 目录下的 `tauri.conf.json` 中的 `url、productName、icon、identifier` 这 4 个字段，其中 icon 可以从 icons 目录选择一个，也可以去 [macOSicons](https://macosicons.com/#/) 下载符合产品名称的
+3. 关于窗口属性设置，可以在 `tauri.conf.json` 修改 `windows` 属性对应的 `width/height`，是否全屏 `fullscreen`，是否可以调整大小 `resizable`，假如想适配 Mac 沉浸式头部，可以将 `transparent` 设置成 `true`，找到 Header 元素加一个 `padding-top` 样式即可，不想适配改成 `false` 也行
+4. `npm run dev` 本地调试看看效果，此外可以使用 `npm run dev:debug` 进行容器调试
+5. `npm run build` 运行即可打生产包
 
 ## 高级用法
 
@@ -355,9 +281,9 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
 
 ## 支持
 
--   我有两只猫，一只叫汤圆，一只叫可乐，假如觉得 Pake 让你生活更美好，可以给汤圆可乐 <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">喂罐头 🥩🍤</a>。
--   如果你喜欢 Pake，可以在 Github Star，更欢迎 [推荐](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20%E4%B8%80%E4%B8%AA%E5%BE%88%E7%AE%80%E5%8D%95%E7%9A%84%E7%94%A8%20Rust%20%E6%89%93%E5%8C%85%E7%BD%91%E9%A1%B5%E7%94%9F%E6%88%90%20Mac%20App%20%E7%9A%84%E5%B7%A5%E5%85%B7%EF%BC%8C%E7%9B%B8%E6%AF%94%E4%BC%A0%E7%BB%9F%E7%9A%84%20Electron%20%E5%A5%97%E5%A3%B3%E6%89%93%E5%8C%85%EF%BC%8C%E5%A4%A7%E5%B0%8F%E8%A6%81%E5%B0%8F%E5%B0%86%E8%BF%91%2040%20%E5%80%8D%EF%BC%8C%E4%B8%80%E8%88%AC%202M%20%E5%B7%A6%E5%8F%B3%EF%BC%8C%E5%BA%95%E5%B1%82%E4%BD%BF%E7%94%A8Tauri%20%EF%BC%8C%E6%80%A7%E8%83%BD%E4%BD%93%E9%AA%8C%E8%BE%83%20JS%20%E6%A1%86%E6%9E%B6%E8%A6%81%E8%BD%BB%E5%BF%AB%E4%B8%8D%E5%B0%91%EF%BC%8C%E5%86%85%E5%AD%98%E5%B0%8F%E5%BE%88%E5%A4%9A%EF%BC%8C%E6%94%AF%E6%8C%81%E5%BE%AE%E4%BF%A1%E8%AF%BB%E4%B9%A6%E3%80%81Twitter%E3%80%81Youtube%E3%80%81RunCode%E3%80%81Flomo%E3%80%81%E8%AF%AD%E9%9B%80%E7%AD%89%EF%BC%8C%E5%8F%AF%E4%BB%A5%E5%BE%88%E6%96%B9%E4%BE%BF%E4%BA%8C%E6%AC%A1%E5%BC%80%E5%8F%91~) 给你志同道合的朋友使用。
--   可以关注我的 [Twitter](https://twitter.com/HiTw93) 获取到最新的 Pake 更新消息，也欢迎加入 [Telegram](https://t.me/miaoyan) 聊天群。
+- 我有两只猫，一只叫汤圆，一只叫可乐，假如觉得 Pake 让你生活更美好，可以给汤圆可乐 <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">喂罐头 🥩🍤</a>。
+- 如果你喜欢 Pake，可以在 Github Star，更欢迎 [推荐](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20%E4%B8%80%E4%B8%AA%E5%BE%88%E7%AE%80%E5%8D%95%E7%9A%84%E7%94%A8%20Rust%20%E6%89%93%E5%8C%85%E7%BD%91%E9%A1%B5%E7%94%9F%E6%88%90%20Mac%20App%20%E7%9A%84%E5%B7%A5%E5%85%B7%EF%BC%8C%E7%9B%B8%E6%AF%94%E4%BC%A0%E7%BB%9F%E7%9A%84%20Electron%20%E5%A5%97%E5%A3%B3%E6%89%93%E5%8C%85%EF%BC%8C%E5%A4%A7%E5%B0%8F%E8%A6%81%E5%B0%8F%E5%B0%86%E8%BF%91%2040%20%E5%80%8D%EF%BC%8C%E4%B8%80%E8%88%AC%202M%20%E5%B7%A6%E5%8F%B3%EF%BC%8C%E5%BA%95%E5%B1%82%E4%BD%BF%E7%94%A8Tauri%20%EF%BC%8C%E6%80%A7%E8%83%BD%E4%BD%93%E9%AA%8C%E8%BE%83%20JS%20%E6%A1%86%E6%9E%B6%E8%A6%81%E8%BD%BB%E5%BF%AB%E4%B8%8D%E5%B0%91%EF%BC%8C%E5%86%85%E5%AD%98%E5%B0%8F%E5%BE%88%E5%A4%9A%EF%BC%8C%E6%94%AF%E6%8C%81%E5%BE%AE%E4%BF%A1%E8%AF%BB%E4%B9%A6%E3%80%81Twitter%E3%80%81Youtube%E3%80%81RunCode%E3%80%81Flomo%E3%80%81%E8%AF%AD%E9%9B%80%E7%AD%89%EF%BC%8C%E5%8F%AF%E4%BB%A5%E5%BE%88%E6%96%B9%E4%BE%BF%E4%BA%8C%E6%AC%A1%E5%BC%80%E5%8F%91~) 给你志同道合的朋友使用。
+- 可以关注我的 [Twitter](https://twitter.com/HiTw93) 获取到最新的 Pake 更新消息，也欢迎加入 [Telegram](https://t.me/miaoyan) 聊天群。
 
 ## 最后
 
