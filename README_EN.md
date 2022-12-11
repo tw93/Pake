@@ -113,7 +113,7 @@ pake url [options]
 pake https://weekly.tw93.fun --name Weekly --transparent
 ```
 
-If you are a little white who doesn't know how to use the command line, a good option is to use **GitHub Actions online compilation**, see the [tutorial](/docs/README_EN.md).
+If you are a little white who doesn't know how to use the command line, a good option is to use **GitHub Actions online compilation**, see the [tutorial]([/docs/README_EN.md](https://github.com/tw93/Pake/wiki/GitHub-Actions-Online-Compilation-Multi-system-Version)).
 
 ## Shortcuts
 
@@ -148,33 +148,19 @@ npm run build
 
 ```
 
-## Custom Usage
+## Advanced use
 
 1. The code structure of Pake can be referred to [wiki](https://github.com/tw93/Pake/wiki/Description-of-Pake's-code-structure).
 2. Modify the `tauri.conf.json` in the `src-tauri` directory to include 4 fields `url, productName, icon, identifier`, icon can be selected from the `icons` directory or downloaded from [macOSicons](https://macosicons.com/#/) to match the product.
 3. For window property settings, you can modify the `width/height` of the `windows` property in `tauri.conf.json`, whether it is `fullscreen`, whether it is `resizable`, If you want to adapt the immersive header under Mac, you can set `transparent` to `true` and then find header element and add the `padding-top` style.
-4. `npm run dev` for local debugging; `npm run dev:debug` to open the devtools for container debugging.
-5. `npm run build` can be run to package for production.
-
-## Advanced
-
-#### 1. How do I rewrite the style, e.g. to remove ads from the original site, or even redesign it?
-
-First, open devtools debug mode with `npm run dev:debug`. After that, find the name of the style you want to change and verify the effect in devtools, and find the location of the style in `pake.js` with `style.innerHTML`. Finally, add the style you need to override, there are some examples you can copy.
-
-#### 2. How to inject js code, e.g. to implement event listeners, e.g. keyboard shortcuts?
-
-Refer to the event listener in `pake.js` with `document.addEventListener`, and write it directly, it's more of a basic front-end technique here.
-
-#### 3. How to communicate with Pake about events in containers, such as dragging and dropping, scrolling, special clicks on the Web, etc.?
-
-Refer to the communication code in `pake.js` with `postMessage`, write the event listener and then use `window.ipc.postMessage` to pass the event and its parameters, then refer to the container to receive events `window.drag_window` and handle them yourself, for more information, refer to tauri and wry's official documentation.
+4. `npm run dev` for local debugging; `npm run dev:debug` to open the devtools for container debugging, `npm run build` can be run to package for production.
+5. About style rewriting, advertising shielding, js injection, container message communication, and user-defined shortcut keys, you can see [Advanced Usage of Make](https://github.com/tw93/Pake/wiki/Advanced-Usage-of-Make).
 
 ## Support
 
-- I have two cats, one is called TangYuan, and one is called Coke, If you think Pake makes your life better, you can give my cats <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">feed canned food 🥩🍤</a>.
-- If you like Pake, you can star it in Github. We are more welcome to [recommend Pake](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20A%20simple%20Rust%20packaged%20web%20pages%20to%20generate%20Mac%20App%20tool,%20compared%20to%20traditional%20Electron%20package,%20the%20size%20of%20nearly%2040%20times%20smaller,%20generally%20about%202M,%20the%20underlying%20use%20of%20Tauri,%20performance%20experience%20than%20the%20JS%20framework%20is%20much%20lighter~) to your like-minded friends.
-- You can follow my [Twitter](https://twitter.com/HiTw93) to get the latest news of Pake, or join [Telegram](https://t.me/miaoyan) chat group.
+1. I have two cats, one is called TangYuan, and one is called Coke, If you think Pake makes your life better, you can give my cats <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">feed canned food 🥩🍤</a>.
+2. If you like Pake, you can star it in Github. We are more welcome to [recommend Pake](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20A%20simple%20Rust%20packaged%20web%20pages%20to%20generate%20Mac%20App%20tool,%20compared%20to%20traditional%20Electron%20package,%20the%20size%20of%20nearly%2040%20times%20smaller,%20generally%20about%202M,%20the%20underlying%20use%20of%20Tauri,%20performance%20experience%20than%20the%20JS%20framework%20is%20much%20lighter~) to your like-minded friends.
+3. You can follow my [Twitter](https://twitter.com/HiTw93) to get the latest news of Pake, or join [Telegram](https://t.me/miaoyan) chat group.
 
 ## Finally
 
