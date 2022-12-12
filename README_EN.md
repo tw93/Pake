@@ -130,7 +130,7 @@ If you are a little white who doesn't know how to use the command line, a good o
 | <kbd>⌘</kbd> + <kbd>=</kbd> | <kbd>Ctrl</kbd> + <kbd>=</kbd> | Zoom in the Page              |
 | <kbd>⌘</kbd> + <kbd>0</kbd> | <kbd>Ctrl</kbd> + <kbd>0</kbd> | Reset the page zoom           |
 
-In addition, it supports double clicking the head to switch to full screen, and dragging the head to move the window
+In addition, it supports double clicking the head to switch to full screen, and dragging the head to move the window.
 
 ## Development
 
