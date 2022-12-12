@@ -14,7 +14,7 @@
     <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank">
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
-<div align="left">很简单的用 Rust 打包网页生成很小的桌面 App，支持 Mac / Windows / Linux 系统，常用包下载、<a href="#命令行打包">命令行一键打包</a>、<a href="#自己开发">定制开发</a> 可见下面文档，也欢迎去 <a href=https://github.com/tw93/Pake/discussions>讨论区</a> 交流。</div>
+<div align="left">很简单的用 Rust 打包网页生成很小的桌面 App，支持 Mac / Windows / Linux 系统，常用包下载、<a href="#命令行打包">命令行一键打包</a>、<a href="#定制开发">定制开发</a> 可见下面文档，也欢迎去 <a href=https://github.com/tw93/Pake/discussions>讨论区</a> 交流。</div>
 </p>
 
 ## 特征
@@ -132,9 +132,9 @@ pake https://weekly.tw93.fun --name Weekly --transparent
 
 此外还支持双击头部进行全屏切换，拖拽头部进行移动窗口，还有其他需求，欢迎提过来。
 
-## 自己开发
+## 定制开发
 
-开始前请确保电脑已经安装了 Rust 和 Node 的环境，此外需参考 [Tauri 文档](https://tauri.app/v1/guides/getting-started/prerequisites) 快速配置好环境才可以开始使用，假如你太不懂，请使用上面的命令行一键打包会更加合适。
+开始前请确保电脑已经安装了 Rust 和 Node 的环境，此外需参考 [Tauri 文档](https://tauri.app/v1/guides/getting-started/prerequisites) 快速配置好环境才可以开始使用，假如你太不懂，使用上面的命令行打包会更加合适。
 
 ```sh
 // 安装依赖
@@ -153,7 +153,7 @@ npm run build
 1. 修改 `src-tauri` 目录下的 `tauri.conf.json` 中的 `url、productName、icon、identifier` 这 4 个字段，其中 icon 可以从 icons 目录选择一个，也可以去 [macOSicons](https://macosicons.com/#/) 下载符合产品名称的
 2. 关于窗口属性设置，可以在 `tauri.conf.json` 修改 `windows` 属性对应的 `width/height`，是否全屏 `fullscreen`，是否可以调整大小 `resizable`，假如想适配 Mac 沉浸式头部，可以将 `transparent` 设置成 `true`，找到 Header 元素加一个 `padding-top` 样式即可，不想适配改成 `false` 也行
 3. `npm run dev` 本地调试看看效果，此外可以使用 `npm run dev:debug` 进行容器调试，`npm run build` 运行即可打生产包
-4. 代码结构可以参考 [文档](https://github.com/tw93/Pake/wiki/Pake-%E7%9A%84%E4%BB%A3%E7%A0%81%E7%BB%93%E6%9E%84%E8%AF%B4%E6%98%8E)，关于样式改写、屏蔽广告、逻辑代码注入、容器消息通信、自定义快捷键可见 [Pake 的高级用法](https://github.com/tw93/Pake/wiki/Pake-%E7%9A%84%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95)
+4. 代码结构可参考 [文档](https://github.com/tw93/Pake/wiki/Pake-%E7%9A%84%E4%BB%A3%E7%A0%81%E7%BB%93%E6%9E%84%E8%AF%B4%E6%98%8E)，关于样式改写、屏蔽广告、逻辑代码注入、容器消息通信、自定义快捷键可见 [高级用法](https://github.com/tw93/Pake/wiki/Pake-%E7%9A%84%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95)
 
 ## 开发者
 
