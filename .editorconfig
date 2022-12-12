@@ -10,7 +10,7 @@ trim_trailing_whitespace = true
 insert_final_newline = true
 
 # Use 4 spaces for Python, Rust and Bash files
-[*.{py,rs,sh,md}]
+[*.{py,rs,sh}]
 indent_size = 4
 
 # Makefiles always use tabs for indentation
