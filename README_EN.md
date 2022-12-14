@@ -93,6 +93,12 @@
     </tr>
 </table>
 
+## Before you start
+
+1. **Beginner users**: Use the 「Download」 method to play with Pake's capabilities, go to discussion groups for help, or try the [Action](https://github.com/tw93/Pake/wiki/GitHub-Actions-Online-Compilation-Multi-system-Version) method.
+2. **Development users**: Use 「command line packing」, Mac friendly, Windows/Linux requires a bit of tinkering, but both require environment [configuration](https://tauri.app/v1/guides/getting-started/prerequisites).
+3. **Hacker users**: If you know both front-end and rust, try the following custom development, which allows you to customize your features with deep secondary development.
+
 ## Command line packing
 
 <kbd>
@@ -113,7 +119,7 @@ pake url [options]
 pake https://weekly.tw93.fun --name Weekly --transparent
 ```
 
-If you are a little white who doesn't know how to use the command line, a good option is to use **GitHub Actions online compilation**, see the [tutorial](<[/docs/README_EN.md](https://github.com/tw93/Pake/wiki/GitHub-Actions-Online-Compilation-Multi-system-Version)>).
+If you are a little white who doesn't know how to use the command line, a good option is to use **GitHub Actions online compilation**, see the [tutorial](https://github.com/tw93/Pake/wiki/GitHub-Actions-Online-Compilation-Multi-system-Version).
 
 ## Shortcuts
 
