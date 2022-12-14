@@ -96,6 +96,8 @@
 <details>
 <summary>🏂 <b>Expand the shortcut key</b></summary>
 
+<br/>
+
 | Mac                         | Windows/Linux                  | Function                      |
 | --------------------------- | ------------------------------ | ----------------------------- |
 | <kbd>⌘</kbd> + <kbd>[</kbd> | <kbd>Ctrl</kbd> + <kbd>←</kbd> | Return to the previous page   |
