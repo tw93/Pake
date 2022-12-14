@@ -44,7 +44,7 @@
         <td><img src=https://cdn.fliggy.com/upic/mc41xq.jpg width=600/></td>
     </tr>
     <tr>
-        <td>ChatGPT(代理被封，已换官方)  
+        <td>ChatGPT(被封已换官方)  
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_amd64.deb">Linux</a>
