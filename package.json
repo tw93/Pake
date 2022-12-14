@@ -1,6 +1,6 @@
 {
   "name": "pake-cli",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App 🤱🏻 A simple way to make any web page a desktop application using Rust.",
   "bin": {
     "pake": "./cli.js"
@@ -13,6 +13,14 @@
     "name": "Tw93",
     "email": "tw93@qq.com"
   },
+  "keywords": [
+    "pake",
+    "pake-cli",
+    "rust",
+    "tauri",
+    "no-electron",
+    "productivity"
+  ],
   "files": [
     "dist",
     "src-tauri",
