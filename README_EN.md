@@ -93,7 +93,8 @@
     </tr>
 </table>
 
-## Shortcuts
+<details>
+<summary>🏂 <b>Expand the shortcut key</b></summary>
 
 | Mac                         | Windows/Linux                  | Function                      |
 | --------------------------- | ------------------------------ | ----------------------------- |
@@ -109,6 +110,8 @@
 | <kbd>⌘</kbd> + <kbd>0</kbd> | <kbd>Ctrl</kbd> + <kbd>0</kbd> | Reset the page zoom           |
 
 In addition, it supports double clicking the head to switch to full screen, mac users support gesture mode to return and go to the next page, and dragging the head to move the window.
+
+</details>
 
 ## Before you start
 
