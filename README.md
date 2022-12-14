@@ -30,13 +30,13 @@
     <tr>
         <td>WeRead 
             <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead_amd64.deb">Linux</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead_amd64.deb">Linux</a>
         </td>
         <td>Twitter 
             <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter_amd64.deb">Linux</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter_amd64.deb">Linux</a>
         </td>
     </tr>
     <tr>
@@ -46,13 +46,13 @@
     <tr>
         <td>ChatGPT 
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_amd64.deb">Linux</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_amd64.deb">Linux</a>
         </td>
           <td>Qwerty 
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_amd64.deb">Linux</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_amd64.deb">Linux</a>
         </td>
     </tr>
     <tr>
@@ -62,13 +62,13 @@
     <tr>
         <td>Code
             <a href="https://github.com/tw93/Pake/releases/latest/download/Code.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Code_amd64.deb">Linux</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Code_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Code_amd64.deb">Linux</a>
         </td>
          <td>Reference
             <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_amd64.deb">Linux</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_amd64.deb">Linux</a>
         </td>
     </tr>
     <tr>
@@ -78,13 +78,13 @@
         <tr>
            <td>YouTube
             <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_amd64.deb">Linux</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_amd64.deb">Linux</a>
         </td>
         <td>Flomo
             <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_amd64.deb">Linux</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_amd64.deb">Linux</a>
         </td>
     </tr>
     <tr>
@@ -92,6 +92,12 @@
         <td><img src=https://cdn.fliggy.com/upic/jg9Eeu.jpg width=600/></td>
     </tr>
 </table>
+
+## 使用建议
+
+1. **小白用户**：使用 「下载」 通用包方式来把玩 Pake 的能力，也可以去 [讨论群](https://github.com/tw93/Pake/discussions) 寻求帮助。
+2. **想折腾的**：使用 「命令行」 来一键打包，对 Mac 友好，Windows/Linux 需折腾下，均需 [环境配置](https://tauri.app/v1/guides/getting-started/prerequisites)，不行就试试[在线 Actions](https://github.com/tw93/Pake/wiki/GitHub-Actions-%E5%9C%A8%E7%BA%BF%E7%BC%96%E8%AF%91%E5%A4%9A%E7%B3%BB%E7%BB%9F%E7%89%88%E6%9C%AC) 打包。
+3. **开发同学**：假如你前端和 Rust 都会，那可试试下面的 「定制开发」，可深度二次定制你的功能，还可以来给 Pake 贡献代码。
 
 ## 命令行打包
 
