@@ -93,7 +93,7 @@
     </tr>
 </table>
 
-## 使用建议
+## 开始之前
 
 1. **小白用户**：使用 「下载」 通用包方式来把玩 Pake 的能力，可去 [讨论群](https://github.com/tw93/Pake/discussions) 寻求帮助，也可试试 [Action](https://github.com/tw93/Pake/wiki/GitHub-Actions-%E5%9C%A8%E7%BA%BF%E7%BC%96%E8%AF%91%E5%A4%9A%E7%B3%BB%E7%BB%9F%E7%89%88%E6%9C%AC)方式。
 2. **开发用户**：使用 「命令行一键打包」，对 Mac 友好，Windows / Linux 需折腾下，不过均需 [环境配置](https://tauri.app/v1/guides/getting-started/prerequisites)。
