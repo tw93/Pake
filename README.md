@@ -94,7 +94,7 @@
 </table>
 
 <details>
-<summary>🏂 <b>展开 Pake 打包 App 对应的快捷键</b></summary>
+<summary>🏂 <b>点击展开快捷键说明</b></summary>
 
 <br/>
 
