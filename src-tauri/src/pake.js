@@ -212,10 +212,8 @@ window.addEventListener("DOMContentLoaded", (_event) => {
         left: 1px !important;
       }
 
-      #react-root [data-testid="SideNav_NewTweet_Button"] {
-        position: fixed !important;
-        right: 16px !important;
-        bottom: 24px !important;
+      #react-root [data-testid="SideNav_NewTweet_Button"], #react-root [aria-label="Twitter Blue"]{
+        display: none;
       }
     }
 
