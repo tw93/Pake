@@ -96,6 +96,8 @@
 <details>
 <summary>🏂 <b>展开 Pake 打包 App 对应的快捷键</b></summary>
 
+<br/>
+
 | Mac                         | Windows/Linux                  | 功能               |
 | --------------------------- | ------------------------------ | ------------------ |
 | <kbd>⌘</kbd> + <kbd>[</kbd> | <kbd>Ctrl</kbd> + <kbd>←</kbd> | 返回上一个页面     |
