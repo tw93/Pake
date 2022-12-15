@@ -154,6 +154,9 @@ npm i
 // Local development
 npm run dev
 
+// Local debug
+npm run dev:debug
+
 // Pack application
 npm run build
 
@@ -161,18 +164,14 @@ npm run build
 
 ## Advanced use
 
-1. Modify the `tauri.conf.json` in the `src-tauri` directory to include 4 fields `url, productName, icon, identifier`, icon can be selected from the `icons` directory or downloaded from [macOSicons](https://macosicons.com/#/) to match the product.
-2. For window property settings, you can modify the `width/height` of the `windows` property in `tauri.conf.json`, whether it is `fullscreen`, whether it is `resizable`, If you want to adapt the immersive header under Mac, you can set `transparent` to `true` and then find header element and add the `padding-top` style.
-3. `npm run dev` for local debugging; `npm run dev:debug` to open the devtools for container debugging, `npm run build` can be run to package for production.
-4. The code structure can be referred to [Here](https://github.com/tw93/Pake/wiki/Description-of-Pake's-code-structure), About style rewriting, advertising shielding, js injection, container message communication, and user-defined shortcut keys, you can see [Advanced Usage of Make](https://github.com/tw93/Pake/wiki/Advanced-Usage-of-Make).
+1. The code structure can be referred to [Here](https://github.com/tw93/Pake/wiki/Description-of-Pake's-code-structure), it is convenient for you to learn more before development.
+2. Modify the `tauri.conf.json` and `tauri.xxx.conf.json` in the `src-tauri` directory to include 4 fields `url, productName, icon, identifier`, icon can be selected from the `icons` directory or downloaded from [macOSicons](https://macosicons.com/#/) to match the product.
+3For window property settings, you can modify the `width/height` of the `windows` property in `tauri.conf.json`, whether it is `fullscreen`, whether it is `resizable`, If you want to adapt the immersive header under Mac, you can set `transparent` to `true` and then find header element and add the `padding-top` style.
+4. About style rewriting, advertising shielding, js injection, container message communication, and user-defined shortcut keys, you can see [Advanced Usage of Make](https://github.com/tw93/Pake/wiki/Advanced-Usage-of-Make).
 
 ## Support
 
 1. I have two cats, one is called TangYuan, and one is called Coke, If you think Pake makes your life better, you can give my cats <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">feed canned food 🥩🍤</a>.
 2. If you like Pake, you can star it in Github. Also welcome to [recommend Pake](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20A%20simple%20Rust%20packaged%20web%20pages%20to%20generate%20Mac%20App%20tool,%20compared%20to%20traditional%20Electron%20package,%20the%20size%20of%20nearly%2040%20times%20smaller,%20generally%20about%202M,%20the%20underlying%20use%20of%20Tauri,%20performance%20experience%20than%20the%20JS%20framework%20is%20much%20lighter~) to your friends.
 3. You can follow my [Twitter](https://twitter.com/HiTw93) to get the latest news of Pake, or join [Telegram](https://t.me/miaoyan) chat group.
-
-## Finally
-
-1. I hope that you will enjoy playing with it and let me know if you have any new ideas.
-2. If you find a page that would be great for a Mac App, please let me know, and I'll add it to the list.
+4. I hope that you will enjoy playing with it. If you find a page that would be great for a Mac App, please let me know.
