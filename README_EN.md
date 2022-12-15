@@ -166,7 +166,7 @@ npm run build
 
 1. The code structure can be referred to [Here](https://github.com/tw93/Pake/wiki/Description-of-Pake's-code-structure), it is convenient for you to learn more before development.
 2. Modify the `tauri.conf.json` and `tauri.xxx.conf.json` in the `src-tauri` directory to include 4 fields `url, productName, icon, identifier`, icon can be selected from the `icons` directory or downloaded from [macOSicons](https://macosicons.com/#/) to match the product.
-3For window property settings, you can modify the `width/height` of the `windows` property in `tauri.conf.json`, whether it is `fullscreen`, whether it is `resizable`, If you want to adapt the immersive header under Mac, you can set `transparent` to `true` and then find header element and add the `padding-top` style.
+3. For window property settings, you can modify the `width/height` of the `windows` property in `tauri.conf.json`, whether it is `fullscreen`, whether it is `resizable`, If you want to adapt the immersive header under Mac, you can set `transparent` to `true` and then find header element and add the `padding-top` style.
 4. About style rewriting, advertising shielding, js injection, container message communication, and user-defined shortcut keys, you can see [Advanced Usage of Make](https://github.com/tw93/Pake/wiki/Advanced-Usage-of-Make).
 
 ## Support
