@@ -60,12 +60,12 @@
         <td><img src=https://cdn.fliggy.com/upic/CJjagn.jpg width=600/></td>
     </tr>
     <tr>
-        <td>Code
+        <td>Code 
             <a href="https://github.com/tw93/Pake/releases/latest/download/Code.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Code_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Code_amd64.deb">Linux</a>
         </td>
-         <td>Reference
+         <td>Reference 
             <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_amd64.deb">Linux</a>
@@ -76,12 +76,12 @@
         <td><img src=https://cdn.fliggy.com/upic/KFsZIY.png width=600/></td>
     </tr>
         <tr>
-           <td>YouTube
+           <td>YouTube 
             <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_amd64.deb">Linux</a>
         </td>
-        <td>Flomo
+        <td>Flomo 
             <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_amd64.deb">Linux</a>
