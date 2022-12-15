@@ -1,7 +1,0 @@
-{
-  "cSpell.words": ["loglevel", "Pake", "tauri"],
-  "typescript.preferences.importModuleSpecifierEnding": "js",
-  "editor.fontSize": 18,
-  "files.autoSave": "afterDelay",
-  "editor.fontFamily": "JetBrains Mono, '得意黑', JetBrains Mono"
-}
