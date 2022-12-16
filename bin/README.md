@@ -6,6 +6,8 @@ npm install -g pake-cli
 
 如果安装失败提示没有权限，请参考该贴解决：[链接](https://gist.github.com/Giancarlos/d087f8a9e6516716da98ad0c0f5a8f58)。
 
+此外，请确保你使用的是正确的 Node.js 版本（`^14.13 || >=16.0.0`）。如果你在使用 [nvm](https://github.com/nvm-sh/nvm) 进行 Node.js 版本管理，可以尝试在项目的目录下运行 `nvm use`，就会拿到正确的版本；其他一众 Node.js 版本工具，比如 [fnm](https://github.com/Schniz/fnm)、[tj/n](https://github.com/tj/n) 应该也有类似的功能。
+
 **尽量不要使用 `sudo` 权限**。 如果实在要用sudo，请手动安装rust到系统环境。Mac可以用brew命令安装，Linux如Ubuntu可以用apt命令安装。
 
 
