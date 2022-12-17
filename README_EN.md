@@ -56,7 +56,7 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/8pPLed.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/zYqlVl.png width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/Ea5ZRw.png width=600/></td>
     </tr>
     <tr>
