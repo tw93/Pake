@@ -40,6 +40,7 @@ url 为你需要打包的网页链接 🔗，必须提供。
 #### [icon]
 
 应用 icon，支持本地/远程文件，默认为 Pake 自带图标。
+（可以去 https://icon-icons.com 搜索下载）
 
 - MacOS 下必须为 `.icns`
 - Windows 下必须为 `.ico`
