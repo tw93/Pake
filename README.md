@@ -235,17 +235,17 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/2nthony">
-            <img src="https://avatars.githubusercontent.com/u/19513289?v=4" width="90;" alt="2nthony"/>
-            <br />
-            <sub><b>2nthony</b></sub>
-        </a>
-    </td>
-    <td align="center">
         <a href="https://github.com/AielloChan">
             <img src="https://avatars.githubusercontent.com/u/7900765?v=4" width="90;" alt="AielloChan"/>
             <br />
             <sub><b>Aiello</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/2nthony">
+            <img src="https://avatars.githubusercontent.com/u/19513289?v=4" width="90;" alt="2nthony"/>
+            <br />
+            <sub><b>2nthony</b></sub>
         </a>
     </td>
     <td align="center">
