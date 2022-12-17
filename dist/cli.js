@@ -1847,7 +1847,7 @@ var tauri$3 = {
 			transparent: true,
 			fullscreen: false,
 			width: 1200,
-			height: 728,
+			height: 780,
 			resizable: true
 		}
 	],
