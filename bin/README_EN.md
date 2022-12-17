@@ -39,7 +39,7 @@ The application name, if not specified when entering, will prompt you to enter, 
 
 #### [icon]
 
-The application icon, support local and remote files. The default is brand icon of Pake.
+The application icon, support local and remote files. The default is brand icon of Pake.(Search for icons: https://icon-icons.com)
 
 - MacOS must be `.icns`
 - Windows must be `.ico`
