@@ -256,13 +256,6 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/turkyden">
-            <img src="https://avatars.githubusercontent.com/u/24560160?v=4" width="90;" alt="turkyden"/>
-            <br />
-            <sub><b>Dengju Deng</b></sub>
-        </a>
-    </td>
-    <td align="center">
         <a href="https://github.com/princemaple">
             <img src="https://avatars.githubusercontent.com/u/1329716?v=4" width="90;" alt="princemaple"/>
             <br />
@@ -275,15 +268,15 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
             <br />
             <sub><b>Hyzhao</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/liusishan">
             <img src="https://avatars.githubusercontent.com/u/33129823?v=4" width="90;" alt="liusishan"/>
             <br />
             <sub><b>Liusishan</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/piaoyidage">
             <img src="https://avatars.githubusercontent.com/u/5135405?v=4" width="90;" alt="piaoyidage"/>
