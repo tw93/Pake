@@ -50,7 +50,7 @@ The application icon, support local and remote files, the default is brand icon 
 
 #### [height]
 
-The height of the packaged application window. The default is `800px`.
+The height of the packaged application window. The default is `780px`.
 
 ```shell
 --height <number>
@@ -58,7 +58,7 @@ The height of the packaged application window. The default is `800px`.
 
 #### [width]
 
-The width of the packaged application window. The default is `1280px`.
+The width of the packaged application window. The default is `1200px`.
 
 ```shell
 --width <number>

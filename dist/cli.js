@@ -42,8 +42,8 @@ function __awaiter(thisArg, _arguments, P, generator) {
 
 const DEFAULT_PAKE_OPTIONS = {
     icon: '',
-    height: 800,
-    width: 1280,
+    height: 780,
+    width: 1200,
     fullscreen: false,
     resizable: true,
     transparent: false,
@@ -1961,7 +1961,9 @@ var tauri = {
 				"libssl-dev",
 				"libgtk-3-dev",
 				"libayatana-appindicator3-dev",
-				"librsvg2-dev"
+				"librsvg2-dev",
+				"gnome-video-effects",
+				"gnome-video-effects-extra"
 			],
 			files: {
 				"/usr/share/applications/com-tw93-weread.desktop": "assets/com-tw93-weread.desktop"
@@ -2167,8 +2169,11 @@ class BuilderFactory {
 }
 
 var name = "pake-cli";
-var version = "0.1.2";
+var version = "1.0.1";
 var description = "🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App 🤱🏻 A simple way to make any web page a desktop application using Rust.";
+var engines = {
+	node: "^14.13 || >=16.0.0"
+};
 var bin = {
 	pake: "./cli.js"
 };
@@ -2180,6 +2185,14 @@ var author = {
 	name: "Tw93",
 	email: "tw93@qq.com"
 };
+var keywords = [
+	"pake",
+	"pake-cli",
+	"rust",
+	"tauri",
+	"no-electron",
+	"productivity"
+];
 var files = [
 	"dist",
 	"src-tauri",
@@ -2190,6 +2203,7 @@ var scripts = {
 	dev: "npm run tauri dev",
 	"dev:debug": "npm run tauri dev -- --features devtools",
 	build: "npm run tauri build --release",
+	"build:mac": "npm run tauri build -- --target universal-apple-darwin",
 	"build:all-unix": "chmod +x ./script/build.sh && ./script/build.sh",
 	"build:all-windows": ".\\script\\build.bat",
 	tauri: "tauri",
@@ -2202,7 +2216,7 @@ var exports = "./dist/pake.js";
 var license = "MIT";
 var dependencies = {
 	"@tauri-apps/api": "^1.2.0",
-	"@tauri-apps/cli": "^1.2.1",
+	"@tauri-apps/cli": "^1.2.2",
 	axios: "^1.1.3",
 	chalk: "^5.1.2",
 	commander: "^9.4.1",
@@ -2238,9 +2252,11 @@ var packageJson = {
 	name: name,
 	version: version,
 	description: description,
+	engines: engines,
 	bin: bin,
 	repository: repository,
 	author: author,
+	keywords: keywords,
 	files: files,
 	scripts: scripts,
 	type: type,
