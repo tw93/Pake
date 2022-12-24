@@ -78,9 +78,15 @@ jobs:
     #     files: |
     #       output/*/*.*
 
-    - uses: ncipollo/release-action@v1
-      if: startsWith(github.ref, 'refs/tags/v')
-      with:
-        allowUpdates: true
-        artifacts: "output/*/*.*"
-        token: ${{ secrets.GITHUB_TOKEN }}
+    # - uses: ncipollo/release-action@v1
+    #   if: startsWith(github.ref, 'refs/tags/v')
+    #   with:
+    #     allowUpdates: true
+    #     artifacts: "output/*/*.*"
+    #     token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload files
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        curl -L https://github.com/probonopd/uploadtool/raw/master/upload.sh --output upload.sh
+        bash upload.sh output/*/*.*
