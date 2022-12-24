@@ -1635,7 +1635,7 @@ function mergeTauriConfig(url, options, tauriConf) {
         // Package name is valid ?
         // for Linux, package name must be a-z, 0-9 or "-", not allow to A-Z and other
         if (process.platform === "linux") {
-            const reg = new RegExp("/[0-9]*[a-z]+[0-9]*\-?[0-9]*[a-z]*[0-9]*\-?[0-9]*[a-z]*[0-9]*/");
+            const reg = new RegExp(/[0-9]*[a-z]+[0-9]*\-?[0-9]*[a-z]*[0-9]*\-?[0-9]*[a-z]*[0-9]*/);
             if (!reg.test(name)) {
                 logger.error("package name is illegal， it must be lowercase, numbers, dashes.");
                 logger.error("E.g com-123-xxx, 123pan, pan123,weread, we-read");
