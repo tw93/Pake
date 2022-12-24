@@ -85,8 +85,8 @@ jobs:
     #     artifacts: "output/*/*.*"
     #     token: ${{ secrets.GITHUB_TOKEN }}
     - name: Upload files
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
-          bash upload.sh output/*/*.*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+        bash upload.sh output/*/*.*
