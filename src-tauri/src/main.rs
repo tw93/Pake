@@ -3,11 +3,9 @@
     windows_subsystem = "windows"
 )]
 
-
+use app::{get_data_dir, get_pake_config, get_system_tray, get_window, system_tray_handle};
 #[cfg(target_os = "macos")]
 use app::{get_menu, menu_event_handle};
-use app::{get_window, get_system_tray, get_data_dir, get_pake_config, system_tray_handle};
-
 
 pub fn run_app() {
     let system_tray = get_system_tray();
@@ -58,8 +56,6 @@ pub fn run_app() {
     }
 }
 
-
 fn main() {
-    run_app() 
-    
+    run_app()
 }
