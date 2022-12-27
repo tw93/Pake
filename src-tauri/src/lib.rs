@@ -1,6 +1,10 @@
 #[cfg(target_os = "macos")]
 use tauri::MenuItem;
 
+#[cfg(target_os = "macos")]
+#[macro_use]
+extern crate objc;
+
 use tauri::{
     window::PlatformWebview, App, Config, CustomMenuItem, Manager, Menu, Submenu, SystemTray,
     SystemTrayEvent, SystemTrayMenu, Window, WindowBuilder, WindowMenuEvent, WindowUrl,
@@ -9,6 +13,7 @@ use tauri::{
 pub fn get_menu() -> Menu {
     // first menu
     let hide = CustomMenuItem::new("hide", "Hide");
+    let show = CustomMenuItem::new("show", "Show");
     let close = CustomMenuItem::new("close", "Close");
     let quit = CustomMenuItem::new("quit", "Quit");
     #[cfg(target_os = "macos")]
@@ -24,6 +29,7 @@ pub fn get_menu() -> Menu {
         .add_native_item(MenuItem::SelectAll)
         .add_native_item(MenuItem::Separator)
         .add_item(hide)
+        .add_item(show)
         .add_item(close)
         .add_item(quit);
     #[cfg(any(target_os = "linux", target_os = "windows"))]
@@ -102,6 +108,7 @@ pub fn zoom_reset(webview: PlatformWebview) {
 pub fn menu_event_handle(event: WindowMenuEvent) {
     match event.menu_item_id() {
         "hide" => event.window().hide().expect("can't hide window"),
+        "show" => event.window().show().expect("can't show window"),
         "close" => event.window().close().expect("can't close window"),
         "quit" => std::process::exit(0),
         "zoom_out" => {
@@ -209,24 +216,30 @@ pub fn system_tray_handle(app: &tauri::AppHandle, event: tauri::SystemTrayEvent)
     };
 }
 
-pub fn get_data_dir(tauri_config: Config) -> std::path::PathBuf {
-    let package_name = tauri_config.package.product_name.unwrap();
-    let home_dir = match home::home_dir() {
-        Some(path1) => path1,
-        None => panic!("Error, can't found you home dir!!"),
+pub fn get_data_dir(_tauri_config: Config) -> std::path::PathBuf {
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
+    let data_dir = {
+        let package_name = _tauri_config.package.product_name.unwrap();
+        let home_dir = match home::home_dir() {
+            Some(path1) => path1,
+            None => panic!("Error, can't found you home dir!!"),
+        };
+        #[cfg(target_os = "windows")]
+        let data_dir = home_dir.join("AppData").join("Roaming").join(package_name);
+        #[cfg(target_os = "linux")]
+        let data_dir = home_dir.join(".config").join(package_name);
+        if !data_dir.exists() {
+            std::fs::create_dir(&data_dir)
+                .unwrap_or_else(|_| panic!("can't create dir {}", data_dir.display()));
+        }
+        data_dir
     };
-    #[cfg(target_os = "windows")]
-    let data_dir = home_dir.join("AppData").join("Roaming").join(package_name);
-    #[cfg(target_os = "linux")]
-    let data_dir = home_dir.join(".config").join(package_name);
-    if !data_dir.exists() {
-        std::fs::create_dir(&data_dir)
-            .unwrap_or_else(|_| panic!("can't create dir {}", data_dir.display()));
-    }
+    #[cfg(target_os = "macos")]
+    let data_dir = std::path::PathBuf::new();
     data_dir
 }
 
-pub fn get_window(app: &mut App, config: PakeConfig, data_dir: std::path::PathBuf) -> Window {
+pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: std::path::PathBuf) -> Window {
     let window_config = config.windows.first().unwrap();
     let user_agent = config.user_agent;
     let url = match window_config.url_type.as_str() {
@@ -240,7 +253,7 @@ pub fn get_window(app: &mut App, config: PakeConfig, data_dir: std::path::PathBu
         .user_agent(user_agent.macos.as_str())
         .resizable(window_config.resizable)
         .fullscreen(window_config.fullscreen)
-        .transparent(window_config.transparent)
+        // .transparent(window_config.transparent)
         .inner_size(window_config.width, window_config.height)
         .initialization_script(include_str!("pake.js"));
 
@@ -252,7 +265,7 @@ pub fn get_window(app: &mut App, config: PakeConfig, data_dir: std::path::PathBu
         let user_agent = user_agent.windows.as_str();
         WindowBuilder::new(app, "pake", url)
             .title("")
-            .data_directory(data_dir)
+            .data_directory(_data_dir)
             .resizable(window_config.resizable)
             .fullscreen(window_config.fullscreen)
             .user_agent(user_agent)
