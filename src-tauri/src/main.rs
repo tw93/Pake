@@ -19,9 +19,7 @@ pub fn run_app() {
             .on_menu_event(menu_event_handle)
     };
     #[cfg(any(target_os = "linux", target_os = "windows"))]
-    let tauri_app = {
-        tauri::Builder::default()
-    };
+    let tauri_app = tauri::Builder::default();
     tauri_app
         .system_tray(system_tray)
         .on_system_tray_event(system_tray_handle)
