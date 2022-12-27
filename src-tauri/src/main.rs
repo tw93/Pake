@@ -1,230 +1,257 @@
-// at the top of main.rs - that will prevent the console from showing
-#![windows_subsystem = "windows"]
-extern crate image;
-use tauri_utils::config::{Config, WindowConfig};
-use wry::{
-    application::{
-        event::{Event, StartCause, WindowEvent},
-        event_loop::{ControlFlow, EventLoop},
-        menu::MenuType,
-        window::{Fullscreen, Window, WindowBuilder},
-    },
-    webview::WebViewBuilder,
-};
-
+#![cfg_attr(
+    all(not(debug_assertions), target_os = "windows"),
+    windows_subsystem = "windows"
+)]
 #[cfg(target_os = "macos")]
-use wry::application::{
-    accelerator::{Accelerator, SysMods},
-    keyboard::KeyCode,
-    menu::{MenuBar as Menu, MenuItem, MenuItemAttributes},
-    platform::macos::WindowBuilderExtMacOS,
+use tauri::MenuItem;
+
+use tauri::{
+    CustomMenuItem, Menu, Submenu, WindowBuilder, App,
+    Window, WindowUrl, WindowMenuEvent, window::PlatformWebview,
+    SystemTrayMenu, SystemTray, SystemTrayEvent, Manager
 };
 
-#[cfg(target_os = "windows")]
-use wry::application::window::Icon;
+// use tauri::Config;
 
-#[cfg(any(target_os = "linux", target_os = "windows"))]
-use wry::webview::WebContext;
+pub mod pake {
+    use serde::Deserialize;
 
-fn main() -> wry::Result<()> {
-    #[cfg(target_os = "macos")]
-    let (menu_bar_menu, close_item) = {
-        let mut menu_bar_menu = Menu::new();
-        let mut first_menu = Menu::new();
-        first_menu.add_native_item(MenuItem::Hide);
-        first_menu.add_native_item(MenuItem::EnterFullScreen);
-        first_menu.add_native_item(MenuItem::Minimize);
-        first_menu.add_native_item(MenuItem::Separator);
-        first_menu.add_native_item(MenuItem::Copy);
-        first_menu.add_native_item(MenuItem::Cut);
-        first_menu.add_native_item(MenuItem::Paste);
-        first_menu.add_native_item(MenuItem::Undo);
-        first_menu.add_native_item(MenuItem::Redo);
-        first_menu.add_native_item(MenuItem::SelectAll);
-        first_menu.add_native_item(MenuItem::Separator);
-        let close_item = first_menu.add_item(
-            MenuItemAttributes::new("CloseWindow")
-                .with_accelerators(&Accelerator::new(SysMods::Cmd, KeyCode::KeyW)),
-        );
-        first_menu.add_native_item(MenuItem::Quit);
-        menu_bar_menu.add_submenu("App", true, first_menu);
-        (menu_bar_menu, close_item)
-    };
-
-    #[cfg(any(target_os = "linux", target_os = "windows"))]
-    let (
-        package_name,
-        WindowConfig {
-            url,
-            width,
-            height,
-            resizable,
-            fullscreen,
-            ..
-        },
-    ) = {
-        let (package_name, windows_config) = get_windows_config();
-        (
-            package_name
-                .expect("can't get package name in config file")
-                .to_lowercase(),
-            windows_config.unwrap_or_default(),
-        )
-    };
-
-    #[cfg(target_os = "macos")]
-    let WindowConfig {
-        url,
-        width,
-        height,
-        resizable,
-        transparent,
-        fullscreen,
-        ..
-    } = get_windows_config().1.unwrap_or_default();
-    let event_loop = EventLoop::new();
-
-    let common_window = WindowBuilder::new()
-        .with_title("")
-        .with_resizable(resizable)
-        .with_fullscreen(if fullscreen {
-            Some(Fullscreen::Borderless(None))
-        } else {
-            None
-        })
-        .with_inner_size(wry::application::dpi::LogicalSize::new(width, height));
-    #[cfg(target_os = "windows")]
-    let window = {
-        let icon_path = format!("png/{}_32.ico", package_name);
-        let icon = load_icon(std::path::Path::new(&icon_path));
-        common_window
-            .with_decorations(true)
-            .with_window_icon(Some(icon))
-            .build(&event_loop)
-            .unwrap()
-    };
-
-    #[cfg(target_os = "linux")]
-    let window = common_window.build(&event_loop).unwrap();
-
-    #[cfg(target_os = "macos")]
-    let window = common_window
-        .with_fullsize_content_view(true)
-        .with_titlebar_buttons_hidden(false)
-        .with_titlebar_transparent(transparent)
-        .with_title_hidden(true)
-        .with_menu(menu_bar_menu)
-        .build(&event_loop)
-        .unwrap();
-
-    let handler = move |window: &Window, req: String| {
-        if req == "drag_window" {
-            let _ = window.drag_window();
-        } else if req == "fullscreen" {
-            if window.fullscreen().is_some() {
-                window.set_fullscreen(None);
-            } else {
-                window.set_fullscreen(Some(Fullscreen::Borderless(None)));
-            }
-        } else if req.starts_with("open_browser") {
-            let href = req.replace("open_browser:", "");
-            webbrowser::open(&href).expect("no browser");
-        }
-    };
-
-    // 用于欺骗部分页面对于浏览器的强检测
-
-    #[cfg(target_os = "macos")]
-    let webview = {
-        let user_agent_string = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15";
-        WebViewBuilder::new(window)?
-            .with_user_agent(user_agent_string)
-            .with_url(&url.to_string())?
-            .with_devtools(cfg!(feature = "devtools"))
-            .with_initialization_script(include_str!("pake.js"))
-            .with_ipc_handler(handler)
-            .with_back_forward_navigation_gestures(true)
-            .build()?
-    };
-
-    #[cfg(any(target_os = "linux", target_os = "windows"))]
-    let webview = {
-        let home_dir = match home::home_dir() {
-            Some(path1) => path1,
-            None => panic!("Error, can't found you home dir!!"),
-        };
-        #[cfg(target_os = "windows")]
-        let data_dir = home_dir.join("AppData").join("Roaming").join(package_name);
-        #[cfg(target_os = "linux")]
-        let data_dir = home_dir.join(".config").join(package_name);
-        if !data_dir.exists() {
-            std::fs::create_dir(&data_dir)
-                .unwrap_or_else(|_| panic!("can't create dir {}", data_dir.display()));
-        }
-        let mut web_content = WebContext::new(Some(data_dir));
-        #[cfg(target_os = "windows")]
-        let user_agent_string = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36";
-        #[cfg(target_os = "linux")]
-        let user_agent_string = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36";
-        WebViewBuilder::new(window)?
-            .with_user_agent(user_agent_string)
-            .with_url(&url.to_string())?
-            .with_devtools(cfg!(feature = "devtools"))
-            .with_initialization_script(include_str!("pake.js"))
-            .with_ipc_handler(handler)
-            .with_web_context(&mut web_content)
-            .build()?
-    };
-    #[cfg(feature = "devtools")]
-    {
-        webview.open_devtools();
+    #[derive(Debug, Deserialize)]
+    pub struct WindowConfig {
+        pub url: String,
+        pub transparent: bool,
+        pub fullscreen: bool,
+        pub width: f64,
+        pub height: f64,
+        pub resizable: bool,
+        pub url_type: String
     }
 
-    event_loop.run(move |event, _, control_flow| {
-        *control_flow = ControlFlow::Wait;
 
-        match event {
-            Event::NewEvents(StartCause::Init) => println!("Wry has started!"),
-            Event::WindowEvent {
-                event: WindowEvent::CloseRequested,
-                ..
-            } => *control_flow = ControlFlow::Exit,
-            Event::MenuEvent {
-                menu_id,
-                origin: MenuType::MenuBar,
-                ..
-            } => {
-                #[cfg(target_os = "macos")]
-                if menu_id == close_item.clone().id() {
-                    webview.window().set_minimized(true);
-                }
-                println!("Clicked on {:?}", menu_id);
-                println!("Clicked on {:?}", webview.window().is_visible());
-            }
-            _ => (),
-        }
-    });
+    // #[derive(Debug, Deserialize)]
+    // pub struct SystemTray {
+    //     pub icon_path: String, 
+    //     pub icon_as_template: bool,
+    // }
+    
+    #[derive(Debug, Deserialize)]
+    pub struct PakeConfig {
+        pub windows: Vec<WindowConfig>,
+        // pub system_tray: SystemTray,
+    }
 }
 
-fn get_windows_config() -> (Option<String>, Option<WindowConfig>) {
-    let config_file = include_str!("../tauri.conf.json");
-    let config: Config = serde_json::from_str(config_file).expect("failed to parse windows config");
-    (
-        config.package.product_name.clone(),
-        config.tauri.windows.first().cloned(),
-    )
+use pake::PakeConfig;
+
+pub fn get_pake_config() -> PakeConfig{
+    let config_path = include_str!("../pake.json");
+    let config: PakeConfig = serde_json::from_str(config_path)
+        .expect("failed to parse common config");
+    // println!("{:#?}", config);
+    config
 }
 
-#[cfg(target_os = "windows")]
-fn load_icon(path: &std::path::Path) -> Icon {
-    let (icon_rgba, icon_width, icon_height) = {
-        // alternatively, you can embed the icon in the binary through `include_bytes!` macro and use `image::load_from_memory`
-        let image = image::open(path)
-            .expect("Failed to open icon path")
-            .into_rgba8();
-        let (width, height) = image.dimensions();
-        let rgba = image.into_raw();
-        (rgba, width, height)
+
+pub fn get_menu() -> Menu {
+    // first menu
+    let debug = CustomMenuItem::new("debug", "Debug");
+    let hide = CustomMenuItem::new("hide", "Hide");
+    let close = CustomMenuItem::new("close", "Close");
+    let quit = CustomMenuItem::new("quit", "Quit");
+    #[cfg(target_os = "macos")]
+    let first_menu = Menu::new()
+        .add_native_item(MenuItem::EnterFullScreen)
+        .add_native_item(MenuItem::Minimize)
+        .add_native_item(MenuItem::Separator)
+        .add_native_item(MenuItem::Copy)
+        .add_native_item(MenuItem::Cut)
+        .add_native_item(MenuItem::Paste)
+        .add_native_item(MenuItem::Undo)
+        .add_native_item(MenuItem::Redo)
+        .add_native_item(MenuItem::SelectAll)
+        .add_native_item(MenuItem::Separator)
+        .add_item(debug)
+        .add_item(hide)
+        .add_item(close)
+        .add_item(quit);
+    #[cfg(any(target_os = "linux", target_os = "windows"))]
+    let first_menu = Menu::new()
+        .add_item(debug)
+        .add_item(hide)
+        .add_item(close)
+        .add_item(quit);
+    let first_menu = Submenu::new("File", first_menu);
+    // Hot Key 
+    // let top = CustomMenuItem::new("top", "Top (↑)");
+    // let buttom = CustomMenuItem::new("buttom", "Bottom (↓)");
+    // let previous = CustomMenuItem::new("previous", "Previous (←)");
+    // let next = CustomMenuItem::new("next", "next (→)");
+    // let refresh = CustomMenuItem::new("refresh", "Refresh");
+    let zoom_out = CustomMenuItem::new("zoom_out", "Zoom Out (125%)");
+    let zoom_in = CustomMenuItem::new("zoom_in", "Zoom In (75%)");
+    let zoom_reset = CustomMenuItem::new("reset", "Zoom Reset");
+    let hot_key = Menu::new()
+        // .add_item(top)
+        // .add_item(buttom)
+        // .add_item(previous)
+        // .add_item(next)
+        // .add_item(refresh)
+        .add_item(zoom_in)
+        .add_item(zoom_out)
+        .add_item(zoom_reset);
+    let hot_key_menu = Submenu::new("Hot Key",  hot_key);
+
+    // Help
+    // let instructions = CustomMenuItem::new("instruction", "Instruction");
+    // let about = CustomMenuItem::new("about", "About");
+    // let help = Menu::new()
+    //     .add_item(instructions)
+    //     .add_item(about);
+    // let help_menu = Submenu::new("Help", help);
+    let menu = Menu::new()
+        .add_submenu(first_menu)
+        .add_submenu(hot_key_menu);
+        // .add_submenu(help_menu);
+    menu
+
+
+}
+
+
+pub fn get_window(app: & mut App, config: PakeConfig) -> Window {
+    let window_config = config.windows.first().unwrap();
+    let url = match window_config.url_type.as_str() {
+       "web" => WindowUrl::External(window_config.url.parse().unwrap()),
+       "local" => WindowUrl::App(std::path::PathBuf::from(&window_config.url)),
+       _ => panic!("url type only can be web or local"),
     };
-    Icon::from_rgba(icon_rgba, icon_width, icon_height).expect("Failed to open icon")
+    let window = WindowBuilder::new(
+        app,
+        "pake",
+        url
+    )
+        .title("")
+        .resizable(window_config.resizable)
+        .fullscreen(window_config.fullscreen)
+        .inner_size(window_config.width, window_config.height)
+        .initialization_script(include_str!("pake.js"));
+
+    window.build().unwrap()
+}
+
+pub fn set_zoom(webview: PlatformWebview, zoom_value: f64) {
+    #[cfg(target_os = "linux")]
+     {
+       // see https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/struct.WebView.html
+       // and https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/trait.WebViewExt.html
+       use webkit2gtk::traits::WebViewExt;
+       webview.inner().set_zoom_level(zoom_value);
+     }
+
+     #[cfg(windows)]
+     unsafe {
+       // see https://docs.rs/webview2-com/0.19.1/webview2_com/Microsoft/Web/WebView2/Win32/struct.ICoreWebView2Controller.html
+       webview.controller().SetZoomFactor(zoom_value).unwrap();
+     }
+
+     #[cfg(target_os = "macos")]
+     unsafe {
+       let () = msg_send![webview.inner(), setPageZoom: zoom_value];
+       let () = msg_send![webview.controller(), removeAllUserScripts];
+       let bg_color: cocoa::base::id = msg_send![class!(NSColor), colorWithDeviceRed:0.5 green:0.2 blue:0.4 alpha:1.];
+       let () = msg_send![webview.ns_window(), setBackgroundColor: bg_color];
+     }
+}
+
+pub fn set_zoom_out(webview: PlatformWebview) {
+    set_zoom(webview, 1.25);
+}
+
+
+pub fn set_zoom_in(webview: PlatformWebview) {
+    set_zoom(webview, 0.75);
+}
+
+
+pub fn zoom_reset(webview: PlatformWebview) {
+    set_zoom(webview, 1.0);
+}
+
+pub fn menu_event_handle(event: WindowMenuEvent) {
+    match event.menu_item_id() {
+        "debug" => event.window().open_devtools(),
+        "hide" => event.window().hide().expect("can't hide window"),
+        "close" => event.window().close().expect("can't close window"),
+        "quit" => std::process::exit(0),
+        "zoom_out" => {
+            event.window()
+                .with_webview(set_zoom_out)
+                .expect("can't set zoom out");
+        },
+        "zoom_in" => {
+            event.window()
+                .with_webview(set_zoom_in)
+                .expect("can't set zoom in");
+        },
+        "reset" => {
+            event.window()
+                .with_webview(zoom_reset)
+                .expect("can't reset zoom");
+        },
+        _ => {},
+    }
+}
+
+
+pub fn get_system_tray() -> SystemTray {
+    let hide = CustomMenuItem::new("hide".to_string(), "Hide");
+    let show = CustomMenuItem::new("show".to_string(), "Show");
+    let quit = CustomMenuItem::new("quit".to_string(), "Quit");
+    let about = CustomMenuItem::new("about".to_string(), "About");
+    let tray_menu = SystemTrayMenu::new()
+        .add_item(hide)
+        .add_item(show)
+        .add_item(quit)
+        .add_item(about);
+    SystemTray::new().with_menu(tray_menu)
+}
+
+
+pub fn system_tray_handle(app: &tauri::AppHandle, event: tauri::SystemTrayEvent) {
+    if let SystemTrayEvent::MenuItemClick { tray_id: _, id, .. } = event {
+        match id.as_str() {
+            "hide" => {
+                app.get_window("pake").unwrap().hide().unwrap();
+            },
+            "show" => {
+                app.get_window("pake").unwrap().show().unwrap();
+            },
+            "quit" => {
+                std::process::exit(0);
+            },
+            _ => {},
+        }
+    };
+}
+
+
+
+fn main() {
+    let pake_config = get_pake_config();
+    let menu = get_menu();
+    let system_tray = get_system_tray();
+    tauri::Builder::default()
+        .menu(menu)
+        .on_menu_event(menu_event_handle)
+        .system_tray(system_tray)
+        .on_system_tray_event(system_tray_handle)
+        .plugin(tauri_plugin_window_state::Builder::default().build())
+        .invoke_handler(tauri::generate_handler![])
+        .setup(|app| {
+            let _window = get_window(app, pake_config);
+            Ok(())
+        })
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+    
 }
