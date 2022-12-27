@@ -5,10 +5,10 @@ export interface PakeCliOptions {
   /** 应用icon */
   icon: string;
 
-  /** 应用窗口宽度，默认 1280px */
+  /** 应用窗口宽度，默认 1200px */
   width: number;
 
-  /** 应用窗口高度，默认 800px */
+  /** 应用窗口高度，默认 780px */
   height: number;
 
   /** 是否可以拖动，默认true */

@@ -28,11 +28,13 @@ total=$(sed -n '$=' app.csv)
 export total=$((total-1))
 export index=1
 
-old_name="weread"
-old_title="WeRead"
-old_zh_name="微信阅读"
-old_url="https://weread.qq.com/"
-package_prefix="com-tw93"
+export old_name="weread"
+export old_title="WeRead"
+export old_zh_name="微信阅读"
+export old_url="https://weread.qq.com/"
+export package_prefix="com-tw93"
+
+
 
 if [[ "$OSTYPE" =~ ^linux ]]; then
     echo "==============="
@@ -64,15 +66,15 @@ do
     package_title=${arr[1]}
     package_zh_name=${arr[2]}
     url=${arr[3]}
-    echo "update package name and url"
     # replace package info
-    $sd "${old_url}" "${url}" src-tauri/tauri.conf.json
+    $sd -s "${old_url}" "${url}" src-tauri/tauri.conf.json
     $sd "${old_name}" "${package_name}" src-tauri/tauri.conf.json
-    echo "update ico with 32x32 pictue"
-    $sd "${old_name}" "${package_name}" src-tauri/src/main.rs
+    # echo "update ico with 32x32 pictue"
+    # $sd "${old_name}" "${package_name}" src-tauri/src/main.rs
 
     # for apple, need replace title
     if [[ "$OSTYPE" =~ ^darwin ]]; then
+        $sd "${old_name}" "${package_name}" src-tauri/tauri.macos.conf.json
         $sd "${old_title}" "${package_title}" src-tauri/tauri.conf.json
     fi
 
@@ -80,6 +82,7 @@ do
     # cp "src-tauri/png/${package_name}_32.ico" "src-tauri/icons/icon.ico"
 
     if [[ "$OSTYPE" =~ ^linux ]]; then
+        $sd "${old_name}" "${package_name}" src-tauri/tauri.linux.conf.json
         echo "update desktop"
         old_desktop="src-tauri/assets/${package_prefix}-${old_name}.desktop"
         new_desktop="src-tauri/assets/${package_prefix}-${package_name}.desktop"
@@ -99,7 +102,8 @@ do
 
     if [[ "$OSTYPE" =~ ^linux ]]; then
         npm run tauri build
-        mv src-tauri/target/release/bundle/deb/*.deb output/linux/${package_title}_amd64.deb
+        mv src-tauri/target/release/bundle/deb/${package_prefix}-${package_name}*.deb output/linux/${package_title}_amd64.deb
+        mv src-tauri/target/release/bundle/appimage/${package_prefix}-${package_name}*.AppImage output/linux/${package_title}_amd64.AppImage
     fi
 
     if [[ "$OSTYPE" =~ ^darwin ]]; then
@@ -114,13 +118,5 @@ do
 done
 
 echo "build all package success!"
-if [[ "$OSTYPE" =~ ^linux ]]; then
-$sd "\"productName\": \"com-tw93-weread\"" "\"productName\": \"WeRead\"" src-tauri/tauri.conf.json
-    echo "result file in output/linux"
-fi
-
-if [[ "$OSTYPE" =~ ^darwin ]]; then
-    # replace again
-    $sd "\"productName\": \"weread\"" "\"productName\": \"WeRead\"" src-tauri/tauri.conf.json
-    echo "result file in output/macos"
-fi
+echo "you run 'rm src-tauri/assets/*.desktop && git checkout src-tauri' to recovery code"
+# rm src-tauri/assets/*.desktop && git checkout src-tauri

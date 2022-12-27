@@ -1,7 +1,10 @@
 {
   "name": "pake-cli",
-  "version": "0.0.6",
+  "version": "1.0.1",
   "description": "🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App 🤱🏻 A simple way to make any web page a desktop application using Rust.",
+  "engines": {
+    "node": "^14.13 || >=16.0.0"
+  },
   "bin": {
     "pake": "./cli.js"
   },
@@ -13,33 +16,40 @@
     "name": "Tw93",
     "email": "tw93@qq.com"
   },
+  "keywords": [
+    "pake",
+    "pake-cli",
+    "rust",
+    "tauri",
+    "no-electron",
+    "productivity"
+  ],
   "files": [
     "dist",
     "src-tauri",
-    "cli.js",
-    "pake-default.icns"
+    "cli.js"
   ],
   "scripts": {
     "start": "npm run dev",
     "dev": "npm run tauri dev",
     "dev:debug": "npm run tauri dev -- --features devtools",
-    "build": "npm run tauri build -- --target universal-apple-darwin",
-    "build:windows": "npm run tauri build -- --target x86_64-pc-windows-msvc",
-    "build:linux": "npm run tauri build --release",
-    "build:all-unix":"chmod +x ./script/build.sh && ./script/build.sh",
+    "build": "npm run tauri build --release",
+    "build:mac": "npm run tauri build -- --target universal-apple-darwin",
+    "build:all-unix": "chmod +x ./script/build.sh && ./script/build.sh",
     "build:all-windows": ".\\script\\build.bat",
     "tauri": "tauri",
     "cli": "rollup -c rollup.config.js --watch",
     "cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
-    "cli:publish": "npm run cli:build && npm publish"
+    "prepublishOnly": "npm run cli:build"
   },
   "type": "module",
   "exports": "./dist/pake.js",
   "license": "MIT",
   "dependencies": {
     "@tauri-apps/api": "^1.2.0",
-    "@tauri-apps/cli": "^1.2.1",
+    "@tauri-apps/cli": "^1.2.2",
     "axios": "^1.1.3",
+    "chalk": "^5.1.2",
     "commander": "^9.4.1",
     "file-type": "^18.0.0",
     "is-url": "^1.2.4",
@@ -47,7 +57,8 @@
     "ora": "^6.1.2",
     "prompts": "^2.4.2",
     "shelljs": "^0.8.5",
-    "tmp-promise": "^3.0.3"
+    "tmp-promise": "^3.0.3",
+    "update-notifier": "^6.0.2"
   },
   "devDependencies": {
     "@rollup/plugin-alias": "^4.0.2",
@@ -60,11 +71,12 @@
     "@types/prompts": "^2.4.1",
     "@types/shelljs": "^0.8.11",
     "@types/tmp": "^0.2.3",
+    "@types/update-notifier": "^6.0.1",
     "app-root-path": "^3.1.0",
     "concurrently": "^7.5.0",
     "cross-env": "^7.0.3",
     "rollup": "^3.3.0",
     "tslib": "^2.4.1",
-    "typescript": "^4.8.4"
+    "typescript": "^4.9.3"
   }
 }
