@@ -37,6 +37,25 @@ export async function mergeTauriConfig(
     transparent,
     resizable,
   };
+  // Package name is valid ?
+  // for Linux, package name must be a-z, 0-9 or "-", not allow to A-Z and other
+  if (process.platform === "linux") {
+    const reg = new RegExp(/[0-9]*[a-z]+[0-9]*\-?[0-9]*[a-z]*[0-9]*\-?[0-9]*[a-z]*[0-9]*/);
+    if (!reg.test(name) || reg.exec(name)[0].length != name.length) {
+      logger.error("package name is illegal， it must be lowercase letters, numbers, dashes, and it must contain the lowercase letters.")
+      logger.error("E.g com-123-xxx, 123pan, pan123,weread, we-read");
+      process.exit();
+    }
+  }
+  if (process.platform === "win32" || process.platform === "darwin" ) {
+    const reg = new RegExp(/([0-9]*[a-zA-Z]+[0-9]*)+/);
+    if (!reg.test(name) || reg.exec(name)[0].length != name.length) {
+      logger.error("package name is illegal， it must be letters, numbers, and it must contain the letters")
+      logger.error("E.g 123pan,123Pan Pan123,weread, WeRead, WERead");
+      process.exit();
+    }
+  }
+
 
   Object.assign(tauriConf.tauri.windows[0], { url, ...tauriConfWindowOptions });
   tauriConf.package.productName = name;
