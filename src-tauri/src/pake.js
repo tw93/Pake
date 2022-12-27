@@ -55,6 +55,18 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       padding-top: 20px;
     }
 
+    #__next .overflow-hidden .flex.flex-1.flex-col {
+        padding-left: 0;
+    }
+
+    #__next .overflow-hidden>.hidden.bg-gray-900 {
+      display: none;
+    }
+
+    #__next .overflow-hidden main .absolute .text-xs{
+      visibility: hidden;
+    }
+
     .lark > .dashboard-sidebar, .lark > .dashboard-sidebar > .sidebar-user-info , .lark > .dashboard-sidebar .index-module_wrapper_F-Wbq{
       padding-top:15px;
     }
@@ -200,10 +212,8 @@ window.addEventListener("DOMContentLoaded", (_event) => {
         left: 1px !important;
       }
 
-      #react-root [data-testid="SideNav_NewTweet_Button"] {
-        position: fixed !important;
-        right: 16px !important;
-        bottom: 24px !important;
+      #react-root [data-testid="SideNav_NewTweet_Button"], #react-root [aria-label="Twitter Blue"]{
+        display: none;
       }
     }
 
@@ -306,16 +316,16 @@ window.addEventListener("DOMContentLoaded", (_event) => {
   document.addEventListener("click", (e) => {
     const origin = e.target.closest("a");
     if (origin && origin.href) {
+      const target = origin.target
       origin.target = "_self";
+      const hrefUrl = new URL(origin.href)
 
-      //额外处理下 twitter 的外跳，对于其他需要外跳的可以改这里成对应域名
-      const href = origin.href;
       if (
-        location.host === "twitter.com" &&
-        href.indexOf("twitter.com") === -1
+        window.location.host !== hrefUrl.host && // 如果 a 标签内链接的域名和当前页面的域名不一致 且
+        target === '_blank' // a 标签内链接的 target 属性为 _blank 时
       ) {
         e.preventDefault();
-        window.ipc.postMessage(`open_browser:${href}`);
+        window.ipc.postMessage(`open_browser:${origin.href}`);
       }
     }
   });

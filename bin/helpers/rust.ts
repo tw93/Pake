@@ -1,12 +1,16 @@
+import { IS_WIN } from '@/utils/platform.js';
 import ora from 'ora';
 import shelljs from 'shelljs';
 import { shellExec } from '../utils/shell.js';
 
-const InstallRustScript = "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
+const RustInstallScriptFocMac =
+  "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
+const RustInstallScriptForWin = 'winget install --id Rustlang.Rustup';
+
 export async function installRust() {
   const spinner = ora('Downloading Rust').start();
   try {
-    await shellExec(InstallRustScript);
+    await shellExec(IS_WIN ? RustInstallScriptForWin : RustInstallScriptFocMac);
     spinner.succeed();
   } catch (error) {
     console.error('install rust return code', error.message);

@@ -4,71 +4,15 @@
     "version": "1.0.0"
   },
   "tauri": {
-    "windows": [
-      {
-        "url": "https://weread.qq.com/",
-        "transparent": true,
-        "fullscreen": false,
-        "width": 1200,
-        "height": 728,
-        "resizable": true
-      }
-    ],
-    "allowlist": {
-      "all": true
-    },
-    "bundle": {
-      "icon": [
-        "icons/weread.icns",
-        "png/weread_256.ico",
-        "png/weread_32.ico",
-        "png/weread_512.png"
-      ],
-      "identifier": "com.tw93.weread",
-      "active": true,
-      "category": "DeveloperTool",
-      "copyright": "",
-      "deb": {
-        "depends": [
-          "libwebkit2gtk-4.0-dev",
-          "build-essential",
-          "curl",
-          "wget",
-          "libssl-dev",
-          "libgtk-3-dev",
-          "libayatana-appindicator3-dev",
-          "librsvg2-dev"
-        ],
-        "files": {
-          "/usr/share/applications/com-tw93-weread.desktop": "assets/com-tw93-weread.desktop"
-        }
-      },
-      "externalBin": [],
-      "longDescription": "",
-      "macOS": {
-        "entitlements": null,
-        "exceptionDomain": "",
-        "frameworks": [],
-        "providerShortName": null,
-        "signingIdentity": null
-      },
-      "resources": ["png/weread_32.ico"],
-      "shortDescription": "",
-      "targets": ["deb", "msi", "dmg"],
-      "windows": {
-        "certificateThumbprint": null,
-        "digestAlgorithm": "sha256",
-        "timestampUrl": "",
-        "wix": {
-          "language": ["en-US"]
-        }
-      }
-    },
     "security": {
       "csp": null
     },
     "updater": {
       "active": false
+    },
+    "systemTray": {
+      "iconPath": "png/weread_512.png",
+      "iconAsTemplate": true
     }
   },
   "build": {

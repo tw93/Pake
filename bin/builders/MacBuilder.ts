@@ -6,9 +6,12 @@ import { PakeAppOptions } from '@/types.js';
 import { IBuilder } from './base.js';
 import { shellExec } from '@/utils/shell.js';
 // @ts-expect-error 加上resolveJsonModule rollup会打包报错
-import tauriConf from '../../src-tauri/tauri.conf.json';
-import { fileURLToPath } from 'url';
+// import tauriConf from '../../src-tauri/tauri.macos.conf.json';
+import tauriConf from './tauriConf.js';
 import log from 'loglevel';
+import { mergeTauriConfig } from './common.js';
+import { npmDirectory } from '@/utils/dir.js';
+import logger from '@/options/logger.js';
 
 export default class MacBuilder implements IBuilder {
   async prepare() {
@@ -33,34 +36,32 @@ export default class MacBuilder implements IBuilder {
 
   async build(url: string, options: PakeAppOptions) {
     log.debug('PakeAppOptions', options);
+    const { name } = options;
 
-    const { width, height, fullscreen, transparent, resizable, identifier, name } = options;
+    await mergeTauriConfig(url, options, tauriConf);
 
-    const tauriConfWindowOptions = {
-      width,
-      height,
-      fullscreen,
-      transparent,
-      resizable,
-    };
-
-    // TODO 下面这块逻辑还可以再拆 目前比较简单
-    Object.assign(tauriConf.tauri.windows[0], { url, ...tauriConfWindowOptions });
-    tauriConf.package.productName = name;
-    tauriConf.tauri.bundle.identifier = identifier;
-    tauriConf.tauri.bundle.icon = [options.icon];
-
-    const npmDirectory = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-    const configJsonPath = path.join(npmDirectory, 'src-tauri/tauri.conf.json');
-    await fs.writeFile(configJsonPath, Buffer.from(JSON.stringify(tauriConf), 'utf-8'));
-
-    const code = await shellExec(`cd ${npmDirectory} && npm run build`);
-    const dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
+    const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+    let arch  = "x64";
+    if (process.arch === "arm64") {
+      arch = "aarch64";
+    } else {
+      arch = process.arch;
+    }
+    const dmgName = `${name}_${tauriConf.package.version}_${arch}.dmg`;
     const appPath = this.getBuildedAppPath(npmDirectory, dmgName);
-    await fs.copyFile(appPath, path.resolve(`${name}_universal.dmg`));
+    const distPath = path.resolve(`${name}.dmg`);
+    await fs.copyFile(appPath, distPath);
+    await fs.unlink(appPath);
+
+    logger.success('Build success!');
+    logger.success('You can find the app installer in', distPath);
   }
 
   getBuildedAppPath(npmDirectory: string, dmgName: string) {
-    return path.join(npmDirectory, 'src-tauri/target/universal-apple-darwin/release/bundle/dmg', dmgName);
+    return path.join(
+      npmDirectory,
+      'src-tauri/target/release/bundle/dmg',
+      dmgName
+    );
   }
 }
