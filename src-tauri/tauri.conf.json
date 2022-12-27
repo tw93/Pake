@@ -11,7 +11,7 @@
       "active": false
     },
     "systemTray": {
-      "iconPath": "png/weread_32.ico",
+      "iconPath": "png/weread_512.png",
       "iconAsTemplate": true
     }
   },

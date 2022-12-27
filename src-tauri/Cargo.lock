@@ -50,6 +50,7 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-window-state",
  "tauri-utils",
+ "webkit2gtk",
 ]
 
 [[package]]
