@@ -58,7 +58,6 @@ pub fn get_pake_config() -> (PakeConfig, Config){
 
 pub fn get_menu() -> Menu {
     // first menu
-    let debug = CustomMenuItem::new("debug", "Debug");
     let hide = CustomMenuItem::new("hide", "Hide");
     let close = CustomMenuItem::new("close", "Close");
     let quit = CustomMenuItem::new("quit", "Quit");
@@ -80,7 +79,6 @@ pub fn get_menu() -> Menu {
         .add_item(quit);
     #[cfg(any(target_os = "linux", target_os = "windows"))]
     let first_menu = Menu::new()
-        .add_item(debug)
         .add_item(hide)
         .add_item(close)
         .add_item(quit);
@@ -182,6 +180,7 @@ pub fn get_window(app: & mut App, config: PakeConfig, data_dir: std::path::PathB
         .initialization_script(include_str!("pake.js"))
     };
     window.build().unwrap()
+    
 }
 
 pub fn set_zoom(webview: PlatformWebview, zoom_value: f64) {
@@ -224,7 +223,6 @@ pub fn zoom_reset(webview: PlatformWebview) {
 
 pub fn menu_event_handle(event: WindowMenuEvent) {
     match event.menu_item_id() {
-        "debug" => event.window().open_devtools(),
         "hide" => event.window().hide().expect("can't hide window"),
         "close" => event.window().close().expect("can't close window"),
         "quit" => std::process::exit(0),
@@ -249,13 +247,11 @@ pub fn menu_event_handle(event: WindowMenuEvent) {
 
 
 pub fn get_system_tray() -> SystemTray {
-    let debug = CustomMenuItem::new("debug", "Debug");
     let hide = CustomMenuItem::new("hide".to_string(), "Hide");
     let show = CustomMenuItem::new("show".to_string(), "Show");
     let quit = CustomMenuItem::new("quit".to_string(), "Quit");
     let about = CustomMenuItem::new("about".to_string(), "About");
     let tray_menu = SystemTrayMenu::new()
-        .add_item(debug)
         .add_item(hide)
         .add_item(show)
         .add_item(quit)
@@ -267,7 +263,6 @@ pub fn get_system_tray() -> SystemTray {
 pub fn system_tray_handle(app: &tauri::AppHandle, event: tauri::SystemTrayEvent) {
     if let SystemTrayEvent::MenuItemClick { tray_id: _, id, .. } = event {
         match id.as_str() {
-            "debug" => app.get_window("pake").unwrap().open_devtools(),
             "hide" => {
                 app.get_window("pake").unwrap().hide().unwrap();
             },
@@ -311,6 +306,10 @@ pub fn run_app() {
             .invoke_handler(tauri::generate_handler![])
             .setup(|app| {
                 let _window = get_window(app, pake_config, std::path::PathBuf::new());
+                #[cfg(feature = "devtools")]
+                {
+                    app.get_window("pake").unwrap().open_devtools();
+                }
                 Ok(())
             })
             .run(tauri::generate_context!())
@@ -330,6 +329,10 @@ pub fn run_app() {
             .invoke_handler(tauri::generate_handler![])
             .setup(|app| {
                 let _window = get_window(app, pake_config, data_dir);
+                #[cfg(feature = "devtools")]
+                {
+                    app.get_window("pake").unwrap().open_devtools();
+                }
                 Ok(())
             })
             .run(tauri::generate_context!())
