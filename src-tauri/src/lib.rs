@@ -33,7 +33,11 @@ pub fn get_menu() -> Menu {
         .add_item(close)
         .add_item(quit);
     #[cfg(any(target_os = "linux", target_os = "windows"))]
-    let first_menu = Menu::new().add_item(hide).add_item(close).add_item(quit);
+    let first_menu = Menu::new()
+        .add_item(hide)
+        .add_item(show)
+        .add_item(close)
+        .add_item(quit);
     let first_menu = Submenu::new("File", first_menu);
     // Hot Key
     // let top = CustomMenuItem::new("top", "Top (↑)");
