@@ -179,13 +179,17 @@ pub fn get_pake_config() -> (PakeConfig, Config) {
 }
 
 pub fn get_system_tray() -> SystemTray {
-    let hide = CustomMenuItem::new("hide".to_string(), "Hide");
-    let show = CustomMenuItem::new("show".to_string(), "Show");
+    let hide_app = CustomMenuItem::new("hide_app".to_string(), "Hide App");
+    let show_app = CustomMenuItem::new("show_app".to_string(), "Show App");
+    let hide_menu = CustomMenuItem::new("hide_menu".to_string(), "Hide Menu");
+    let show_menu = CustomMenuItem::new("show_menu".to_string(), "Show Menu");
     let quit = CustomMenuItem::new("quit".to_string(), "Quit");
     let about = CustomMenuItem::new("about".to_string(), "About");
     let tray_menu = SystemTrayMenu::new()
-        .add_item(hide)
-        .add_item(show)
+        .add_item(hide_app)
+        .add_item(show_app)
+        .add_item(hide_menu)
+        .add_item(show_menu)
         .add_item(quit)
         .add_item(about);
     SystemTray::new().with_menu(tray_menu)
@@ -194,11 +198,25 @@ pub fn get_system_tray() -> SystemTray {
 pub fn system_tray_handle(app: &tauri::AppHandle, event: tauri::SystemTrayEvent) {
     if let SystemTrayEvent::MenuItemClick { tray_id: _, id, .. } = event {
         match id.as_str() {
-            "hide" => {
+            "hide_app" => {
                 app.get_window("pake").unwrap().hide().unwrap();
             }
-            "show" => {
+            "show_app" => {
                 app.get_window("pake").unwrap().show().unwrap();
+            }
+            "hide_menu" => {
+                app.get_window("pake")
+                    .unwrap()
+                    .menu_handle()
+                    .hide()
+                    .unwrap();
+            }
+            "show_menu" => {
+                app.get_window("pake")
+                    .unwrap()
+                    .menu_handle()
+                    .show()
+                    .unwrap();
             }
             "quit" => {
                 std::process::exit(0);

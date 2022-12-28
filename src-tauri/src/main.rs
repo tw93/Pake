@@ -3,24 +3,19 @@
     windows_subsystem = "windows"
 )]
 
-use app::{get_data_dir, get_pake_config, get_system_tray, get_window, system_tray_handle};
-#[cfg(target_os = "macos")]
-use app::{get_menu, menu_event_handle};
+use app::{
+    get_data_dir, get_menu, get_pake_config, get_system_tray, get_window, menu_event_handle,
+    system_tray_handle,
+};
 
 pub fn run_app() {
     let system_tray = get_system_tray();
     let (pake_config, tauri_config) = get_pake_config();
     let data_dir = get_data_dir(tauri_config);
-    #[cfg(target_os = "macos")]
-    let tauri_app = {
-        let menu = get_menu();
-        tauri::Builder::default()
-            .menu(menu)
-            .on_menu_event(menu_event_handle)
-    };
-    #[cfg(any(target_os = "linux", target_os = "windows"))]
-    let tauri_app = tauri::Builder::default();
-    tauri_app
+    let menu = get_menu();
+    tauri::Builder::default()
+        .menu(menu)
+        .on_menu_event(menu_event_handle)
         .system_tray(system_tray)
         .on_system_tray_event(system_tray_handle)
         .plugin(tauri_plugin_window_state::Builder::default().build())
