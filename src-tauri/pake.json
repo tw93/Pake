@@ -17,12 +17,12 @@
     },
     "menu": {
       "macos": true,
-      "linux": true,
+      "linux": false,
       "windows": false
     },
     "system_tray": {
       "macos": false,
-      "linux": false,
+      "linux": true,
       "windows": true
     }
 }
