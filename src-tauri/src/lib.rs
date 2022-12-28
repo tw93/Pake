@@ -203,7 +203,7 @@ pub fn system_tray_handle(app: &tauri::AppHandle, event: tauri::SystemTrayEvent)
                 )
                 .resizable(true)
                 .title("About")
-                .inner_size(100.0, 100.0)
+                .inner_size(600.0, 400.0)
                 .build()
                 .expect("can't open about!");
             }
