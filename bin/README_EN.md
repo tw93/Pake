@@ -22,7 +22,7 @@ Note: The Rust environment is required for packaging. If you do not have Rust, y
 
 ### url
 
-The url🔗 is the webpage link you need to package, Must be provided.
+The url🔗 is the webpage link or local html file you need to package, Must be provided.
 
 ### [options]
 
