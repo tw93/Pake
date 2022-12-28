@@ -87,3 +87,35 @@ Whether to open the full screen after opening the application. The default is `f
 ```shell
 --fullscreen <value>
 ```
+
+#### [user-agent]
+
+Custom browser user agent, default is empty.
+
+```shell
+--user-agent <value>
+```
+
+#### [show-menu]
+
+Display the menu bar, not display it by default.
+
+```shell
+--show-menu
+```
+
+#### [show-system-tray]
+
+Display the notification tray, not display it by default.
+
+```shell
+--show-system-tray <value>
+```
+
+#### [system-tray-icon]
+
+The notification tray icon is only valid when the notification tray is displayed. The icon must be a 512*512 pixel image in .ico or .png format.
+
+```shell
+--system-tray-icon <value>
+```
