@@ -25,12 +25,12 @@ tauri-plugin-window-state = { git = "https://github.com/tauri-apps/tauri-plugin-
 # webbrowser = "0.8.2"
 # wry = "0.23.4"
 
-[target.'cfg(target_os = "linux")'.dependencies]
-webkit2gtk = "0.18.0"
+# [target.'cfg(target_os = "linux")'.dependencies]
+# webkit2gtk = "0.18.0"
 
-[target.'cfg(target_os = "macos")'.dependencies]
-objc = "0.2.7"
-cocoa = {git = "https://github.com/servo/core-foundation-rs/"}
+# [target.'cfg(target_os = "macos")'.dependencies]
+# objc = "0.2.7"
+# cocoa = {git = "https://github.com/servo/core-foundation-rs/"}
 
 [features]
 # by default Tauri runs in production mode

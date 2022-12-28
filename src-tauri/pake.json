@@ -17,7 +17,7 @@
     },
     "menu": {
       "macos": true,
-      "linux": false,
+      "linux": true,
       "windows": false
     },
     "system_tray": {
