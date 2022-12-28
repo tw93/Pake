@@ -50,7 +50,7 @@ for /f "skip=1 tokens=1-4 delims=," %%i in (app.csv) do (
 
   ::echo name is !name! !name_zh!  !url!
   :: replace url
-  .\script\sd.exe -s !old_url! !url! src-tauri\tauri.conf.json
+  .\script\sd.exe -s !old_url! !url! src-tauri\pake.json
   ::replace  pacakge name
   .\script\sd.exe !old_title! !title! src-tauri\tauri.conf.json
   .\script\sd.exe !old_name! !name! src-tauri\tauri.windows.conf.json
