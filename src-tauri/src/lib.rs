@@ -5,9 +5,12 @@ use tauri::MenuItem;
 #[macro_use]
 extern crate objc;
 
+#[cfg(any(target_os = "linux", target_os = "windows"))]
+use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu};
+
 use tauri::{
-    window::PlatformWebview, App, Config, CustomMenuItem, Manager, Menu, Submenu, SystemTray,
-    SystemTrayEvent, SystemTrayMenu, Window, WindowBuilder, WindowMenuEvent, WindowUrl,
+    window::PlatformWebview, App, Config, CustomMenuItem, Menu, Submenu, Window, WindowBuilder,
+    WindowMenuEvent, WindowUrl,
 };
 mod pake;
 use pake::PakeConfig;
@@ -149,6 +152,7 @@ pub fn get_pake_config() -> (PakeConfig, Config) {
     (pake_config, tauri_config)
 }
 
+#[cfg(any(target_os = "linux", target_os = "windows"))]
 pub fn get_system_tray(show_menu: bool) -> SystemTray {
     let hide_app = CustomMenuItem::new("hide_app".to_string(), "Hide App");
     let show_app = CustomMenuItem::new("show_app".to_string(), "Show App");
@@ -169,6 +173,7 @@ pub fn get_system_tray(show_menu: bool) -> SystemTray {
     }
 }
 
+#[cfg(any(target_os = "linux", target_os = "windows"))]
 pub fn system_tray_handle(app: &tauri::AppHandle, event: tauri::SystemTrayEvent) {
     if let SystemTrayEvent::MenuItemClick { tray_id: _, id, .. } = event {
         match id.as_str() {
@@ -251,7 +256,7 @@ pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: std::path::PathB
         .fullscreen(window_config.fullscreen)
         // .transparent(window_config.transparent)
         //用于隐藏头部
-        .title_bar_style(tauri_utils::TitleBarStyle::Overlay)
+        // .title_bar_style(tauri_utils::TitleBarStyle::Overlay)
         .inner_size(window_config.width, window_config.height)
         .initialization_script(include_str!("pake.js"));
 
