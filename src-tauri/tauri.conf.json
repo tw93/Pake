@@ -9,10 +9,6 @@
     },
     "updater": {
       "active": false
-    },
-    "systemTray": {
-      "iconPath": "png/weread_512.png",
-      "iconAsTemplate": true
     }
   },
   "build": {
