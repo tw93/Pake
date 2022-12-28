@@ -49,10 +49,10 @@ pub mod pake {
             #[cfg(target_os = "macos")]
             let tray_status = self.system_tray.macos;
             #[cfg(target_os = "linux")]
-            let tary_status = self.system_tray.linux;
+            let tray_status = self.system_tray.linux;
             #[cfg(target_os = "windows")]
-            let tary_status = self.system_tray.windows;
-            tary_status
+            let tray_status = self.system_tray.windows;
+            tray_status
         }
     }
 }
