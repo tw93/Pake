@@ -23,6 +23,13 @@ program
   .option('--no-resizable', 'whether the window can be resizable', DEFAULT_PAKE_OPTIONS.resizable)
   .option('--fullscreen', 'makes the packaged app start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
   .option('--transparent', 'transparent title bar', DEFAULT_PAKE_OPTIONS.transparent)
+  .option('--user-agent <string>', 'custom user agent', DEFAULT_PAKE_OPTIONS.userAgent)
+  .option('--show-menu', 'show menu in app', DEFAULT_PAKE_OPTIONS.showMenu)
+  .option('--show-system-tray', 'show system tray in app', DEFAULT_PAKE_OPTIONS.showSystemTray)
+  .option('--system-tray-icon <string>', 'custom system tray icon', DEFAULT_PAKE_OPTIONS.systemTrayIcon)
+  // .option('--iter-copy-file', 
+  //         'copy all static file to pake app when url is a static file',
+  //         DEFAULT_PAKE_OPTIONS.iter_copy_file)
   .option('--debug', 'debug', DEFAULT_PAKE_OPTIONS.transparent)
   .action(async (url: string, options: PakeCliOptions) => {
     checkUpdateTips();
@@ -41,7 +48,7 @@ program
     await builder.prepare();
 
     const appOptions = await handleInputOptions(options, url);
-
+    // logger.warn(JSON.stringify(appOptions, null, 4));
     builder.build(url, appOptions);
   });
 

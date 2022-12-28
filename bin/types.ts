@@ -20,6 +20,21 @@ export interface PakeCliOptions {
   /** 是否开启沉浸式头部，默认为 false 不开启 ƒ*/
   transparent: boolean;
 
+  /** 自定义UA，默认为不开启 ƒ*/
+  userAgent: string;
+
+  /** 开启菜单栏，MacOS默认开启，Windows,Linux默认不开启 ƒ*/
+  showMenu: boolean;
+
+  /** 开启系统托盘，MacOS默认不开启，Windows,Linux默认开启 ƒ*/
+  showSystemTray: boolean;
+
+  /** 托盘图标, Windows、Linux默认和应用图标共用一样的，MacOS需要提别提供, 格式为png或者ico */
+  systemTrayIcon: string;
+
+  // /** 递归拷贝，当url为本地文件路径时候，将文件所在文件夹下面的所有子文件都拷贝到pake静态文件夹，默认不开启 */
+  // iter_copy_file: false;
+
   /** 调试模式，会输出更多日志 */
   debug: boolean;
 }

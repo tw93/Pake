@@ -1,11 +1,13 @@
 import CommonConf from '../../src-tauri/tauri.conf.json';
+import pakeConf from '../../src-tauri/pake.json';
 import WinConf from '../../src-tauri/tauri.windows.conf.json';
 import MacConf from '../../src-tauri/tauri.macos.conf.json';
 import LinuxConf from '../../src-tauri/tauri.linux.conf.json';
 
 let tauriConf = {
   package: CommonConf.package,
-  tauri: CommonConf.tauri
+  tauri: CommonConf.tauri,
+  pake: pakeConf
 }
 switch (process.platform) {
   case "win32": {
