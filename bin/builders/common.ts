@@ -119,6 +119,18 @@ export async function mergeTauriConfig(
      if (process.platform === "darwin") {
       tauriConf.pake.user_agent.macos = true;
      }
+  } else {
+    if (process.platform === "win32") {
+      tauriConf.pake.menu.windows = false;
+     }
+
+     if (process.platform === "linux") {
+      tauriConf.pake.menu.linux = false;
+     }
+
+     if (process.platform === "darwin") {
+      tauriConf.pake.user_agent.macos = false;
+     }
   }
 
   // 处理托盘
@@ -133,6 +145,18 @@ export async function mergeTauriConfig(
 
      if (process.platform === "darwin") {
       tauriConf.pake.system_tray.macos = true;
+     }
+  } else {
+    if (process.platform === "win32") {
+      tauriConf.pake.system_tray.windows = false;
+     }
+
+     if (process.platform === "linux") {
+      tauriConf.pake.system_tray.linux = false;
+     }
+
+     if (process.platform === "darwin") {
+      tauriConf.pake.system_tray.macos = false;
      }
   }
 

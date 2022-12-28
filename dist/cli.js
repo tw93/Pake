@@ -1709,6 +1709,17 @@ function mergeTauriConfig(url, options, tauriConf) {
                 tauriConf.pake.user_agent.macos = true;
             }
         }
+        else {
+            if (process.platform === "win32") {
+                tauriConf.pake.menu.windows = false;
+            }
+            if (process.platform === "linux") {
+                tauriConf.pake.menu.linux = false;
+            }
+            if (process.platform === "darwin") {
+                tauriConf.pake.user_agent.macos = false;
+            }
+        }
         // 处理托盘
         if (showSystemTray) {
             if (process.platform === "win32") {
@@ -1719,6 +1730,17 @@ function mergeTauriConfig(url, options, tauriConf) {
             }
             if (process.platform === "darwin") {
                 tauriConf.pake.system_tray.macos = true;
+            }
+        }
+        else {
+            if (process.platform === "win32") {
+                tauriConf.pake.system_tray.windows = false;
+            }
+            if (process.platform === "linux") {
+                tauriConf.pake.system_tray.linux = false;
+            }
+            if (process.platform === "darwin") {
+                tauriConf.pake.system_tray.macos = false;
             }
         }
         tauriConf.package.productName = name;
@@ -1977,22 +1999,29 @@ var tauri$3 = {
 		active: false
 	},
 	systemTray: {
-		iconPath: "/home/tlntin/data/code/rust_study/Pake/src-tauri/png/code_512.png",
+		iconPath: "png/weread_512.png",
 		iconAsTemplate: true
 	}
 };
+var build = {
+	devPath: "../dist",
+	distDir: "../dist",
+	beforeBuildCommand: "",
+	beforeDevCommand: ""
+};
 var CommonConf = {
 	"package": {
-	productName: "baidu",
+	productName: "WeRead",
 	version: "1.0.0"
 },
-	tauri: tauri$3
+	tauri: tauri$3,
+	build: build
 };
 
 var windows = [
 	{
-		url: "https://www.baidu.com",
-		transparent: false,
+		url: "https://weread.qq.com/",
+		transparent: true,
 		fullscreen: false,
 		width: 1200,
 		height: 780,
@@ -2007,7 +2036,7 @@ var user_agent = {
 };
 var menu = {
 	macos: true,
-	linux: true,
+	linux: false,
 	windows: false
 };
 var system_tray = {
@@ -2094,9 +2123,10 @@ var MacConf = {
 var tauri = {
 	bundle: {
 		icon: [
-			"/home/tlntin/data/code/rust_study/Pake/src-tauri/png/code_512.png"
+			"png/weread_256.ico",
+			"png/weread_512.png"
 		],
-		identifier: "pake-f9751d",
+		identifier: "com.tw93.weread",
 		active: true,
 		category: "DeveloperTool",
 		copyright: "",
@@ -2112,7 +2142,10 @@ var tauri = {
 				"librsvg2-dev",
 				"gnome-video-effects",
 				"gnome-video-effects-extra"
-			]
+			],
+			files: {
+				"/usr/share/applications/com-tw93-weread.desktop": "assets/com-tw93-weread.desktop"
+			}
 		},
 		externalBin: [
 		],
