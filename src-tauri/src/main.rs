@@ -15,16 +15,20 @@ pub fn run_app() {
     let system_tray = get_system_tray(show_menu);
     let data_dir = get_data_dir(tauri_config);
     let menu = get_menu();
-    let tauri_app = if show_menu && ! show_system_tray {
-        tauri::Builder::default().menu(menu).on_menu_event(menu_event_handle)
+    let tauri_app = if show_menu && !show_system_tray {
+        tauri::Builder::default()
+            .menu(menu)
+            .on_menu_event(menu_event_handle)
     } else if !show_menu && show_system_tray {
-        tauri::Builder::default().system_tray(system_tray).on_system_tray_event(system_tray_handle)
+        tauri::Builder::default()
+            .system_tray(system_tray)
+            .on_system_tray_event(system_tray_handle)
     } else if show_menu && show_system_tray {
         tauri::Builder::default()
-        .menu(menu)
-        .on_menu_event(menu_event_handle)
-        .system_tray(system_tray)
-        .on_system_tray_event(system_tray_handle)
+            .menu(menu)
+            .on_menu_event(menu_event_handle)
+            .system_tray(system_tray)
+            .on_system_tray_event(system_tray_handle)
     } else {
         tauri::Builder::default()
     };
