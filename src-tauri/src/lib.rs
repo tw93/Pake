@@ -10,7 +10,7 @@ use tauri::{
     SystemTrayEvent, SystemTrayMenu, Window, WindowBuilder, WindowMenuEvent, WindowUrl,
 };
 mod pake;
-use pake::pake::PakeConfig;
+use pake::PakeConfig;
 
 pub fn get_menu() -> Menu {
     // first menu
