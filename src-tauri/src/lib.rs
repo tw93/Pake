@@ -251,7 +251,7 @@ pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: std::path::PathB
         .fullscreen(window_config.fullscreen)
         // .transparent(window_config.transparent)
         //用于隐藏头部
-        .title_bar_style(tauri_utils::TitleBarStyle::Overlay)
+        // .title_bar_style(tauri_utils::TitleBarStyle::Overlay)
         .inner_size(window_config.width, window_config.height)
         .initialization_script(include_str!("pake.js"));
 
