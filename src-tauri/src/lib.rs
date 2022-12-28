@@ -68,10 +68,9 @@ pub fn get_menu() -> Menu {
     //     .add_item(instructions)
     //     .add_item(about);
     // let help_menu = Submenu::new("Help", help);
-    let menu = Menu::new()
+    Menu::new()
         .add_submenu(first_menu)
-        .add_submenu(hot_key_menu);
-    menu
+        .add_submenu(hot_key_menu)
 }
 
 pub fn set_zoom(webview: PlatformWebview, zoom_value: f64) {
