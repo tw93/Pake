@@ -7,6 +7,11 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   fullscreen: false,
   resizable: true,
   transparent: false,
+  userAgent: '',
+  showMenu: false,
+  showSystemTray: false,
+  // iter_copy_file: false,
+  systemTrayIcon: '',
   debug: false,
 };
 
