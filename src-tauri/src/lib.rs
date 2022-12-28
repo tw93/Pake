@@ -9,6 +9,8 @@ use tauri::{
     window::PlatformWebview, App, Config, CustomMenuItem, Manager, Menu, Submenu, SystemTray,
     SystemTrayEvent, SystemTrayMenu, Window, WindowBuilder, WindowMenuEvent, WindowUrl,
 };
+mod pake;
+use pake::pake::PakeConfig;
 
 pub fn get_menu() -> Menu {
     // first menu
@@ -137,36 +139,6 @@ pub fn menu_event_handle(event: WindowMenuEvent) {
     }
 }
 
-pub mod pake {
-    use serde::Deserialize;
-
-    #[derive(Debug, Deserialize)]
-    pub struct WindowConfig {
-        pub url: String,
-        pub transparent: bool,
-        pub fullscreen: bool,
-        pub width: f64,
-        pub height: f64,
-        pub resizable: bool,
-        pub url_type: String,
-    }
-
-    #[derive(Debug, Deserialize)]
-    pub struct UserAgent {
-        pub macos: String,
-        pub linux: String,
-        pub windows: String,
-    }
-
-    #[derive(Debug, Deserialize)]
-    pub struct PakeConfig {
-        pub windows: Vec<WindowConfig>,
-        pub user_agent: UserAgent,
-    }
-}
-
-use pake::PakeConfig;
-
 pub fn get_pake_config() -> (PakeConfig, Config) {
     let pake_config_path = include_str!("../pake.json");
     let pake_config: PakeConfig =
@@ -178,21 +150,24 @@ pub fn get_pake_config() -> (PakeConfig, Config) {
     (pake_config, tauri_config)
 }
 
-pub fn get_system_tray() -> SystemTray {
+pub fn get_system_tray(show_menu: bool) -> SystemTray {
     let hide_app = CustomMenuItem::new("hide_app".to_string(), "Hide App");
     let show_app = CustomMenuItem::new("show_app".to_string(), "Show App");
-    let hide_menu = CustomMenuItem::new("hide_menu".to_string(), "Hide Menu");
-    let show_menu = CustomMenuItem::new("show_menu".to_string(), "Show Menu");
     let quit = CustomMenuItem::new("quit".to_string(), "Quit");
     let about = CustomMenuItem::new("about".to_string(), "About");
     let tray_menu = SystemTrayMenu::new()
         .add_item(hide_app)
         .add_item(show_app)
-        .add_item(hide_menu)
-        .add_item(show_menu)
         .add_item(quit)
         .add_item(about);
-    SystemTray::new().with_menu(tray_menu)
+    if show_menu {
+        let hide_menu = CustomMenuItem::new("hide_menu".to_string(), "Hide Menu");
+        let show_menu = CustomMenuItem::new("show_menu".to_string(), "Show Menu");
+        let tray_menu = tray_menu.add_item(hide_menu).add_item(show_menu);
+        SystemTray::new().with_menu(tray_menu)
+    } else {
+        SystemTray::new().with_menu(tray_menu)
+    }
 }
 
 pub fn system_tray_handle(app: &tauri::AppHandle, event: tauri::SystemTrayEvent) {
