@@ -53,6 +53,7 @@ for /f "skip=1 tokens=1-4 delims=," %%i in (app.csv) do (
   .\script\sd.exe -s !old_url! !url! src-tauri\pake.json
   ::replace  pacakge name
   .\script\sd.exe !old_title! !title! src-tauri\tauri.conf.json
+  .\script\sd.exe !old_name! !name! src-tauri\tauri.conf.json
   .\script\sd.exe !old_name! !name! src-tauri\tauri.windows.conf.json
 
   echo.
@@ -92,6 +93,7 @@ for /f "skip=1 tokens=1-4 delims=," %%i in (app.csv) do (
 echo "output dir is output\windows"
 
 ::recovery code
-.\script\sd.exe %url% %init_url% src-tauri\tauri.conf.json
+.\script\sd.exe %url% %init_url% src-tauri\pake.json
 .\script\sd.exe %title% %init_title% src-tauri\tauri.conf.json
+.\script\sd.exe %name% %init_name% src-tauri\tauri.conf.json
 .\script\sd.exe %name% %init_name% src-tauri\tauri.windows.conf.json
