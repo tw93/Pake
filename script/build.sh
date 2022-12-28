@@ -67,7 +67,7 @@ do
     package_zh_name=${arr[2]}
     url=${arr[3]}
     # replace package info
-    $sd -s "${old_url}" "${url}" src-tauri/tauri.conf.json
+    $sd -s "${old_url}" "${url}" src-tauri/pake.json
     $sd "${old_name}" "${package_name}" src-tauri/tauri.conf.json
     # echo "update ico with 32x32 pictue"
     # $sd "${old_name}" "${package_name}" src-tauri/src/main.rs
