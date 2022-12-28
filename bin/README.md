@@ -67,7 +67,7 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 #### [transparent]
 
-是否开启沉浸式头部，默认为 `false` 不开启。
+是否开启沉浸式头部，默认为 `false` 不开启，输入下面的命令则开启沉浸式，推荐MacOS用户开启。
 
 ```shell
 --transparent
@@ -75,7 +75,7 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 #### [resize]
 
-是否可以拖动大小，默认为 `true` 可拖动。
+是否可以拖动大小，默认为 `true` 可拖动，输入下面的命令则不能对窗口大小进行拉伸。
 
 ```shell
 --no-resizable
@@ -83,10 +83,10 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 #### [fullscreen]
 
-打开应用后是否开启全屏，默认为 `false`。
+打开应用后是否开启全屏，默认为 `false`，输入下面的命令则会自动全屏。
 
 ```shell
---fullscreen <value>
+--fullscreen
 ```
 
 #### [user-agent]
@@ -99,7 +99,7 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 #### [show-menu]
 
-显示菜单栏, 默认不显示
+显示菜单栏, 默认不显示，输入下面的命令则会显示，推荐MacOS用户开启。
 
 ```shell
 --show-menu
@@ -107,10 +107,10 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 #### [show-system-tray]
 
-显示通知栏托盘, 默认不显示
+显示通知栏托盘, 默认不显示，输入下面的命令则会显示。
 
 ```shell
---show-system-tray <value>
+--show-system-tray
 ```
 
 #### [system-tray-icon]

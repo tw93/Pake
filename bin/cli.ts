@@ -48,7 +48,7 @@ program
     await builder.prepare();
 
     const appOptions = await handleInputOptions(options, url);
-    // logger.warn(JSON.stringify(appOptions, null, 4));
+    logger.warn(JSON.stringify(appOptions, null, 4));
     builder.build(url, appOptions);
   });
 
