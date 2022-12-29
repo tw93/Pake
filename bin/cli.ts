@@ -9,6 +9,7 @@ import BuilderFactory from './builders/BuilderFactory.js';
 import { checkUpdateTips } from './helpers/updater.js';
 // @ts-expect-error
 import packageJson from '../package.json';
+import logger from './options/logger.js';
 
 program.version(packageJson.version).description('A cli application can package a web page to desktop application.');
 
@@ -49,9 +50,9 @@ program
 
     const builder = BuilderFactory.create();
     await builder.prepare();
-
+    // logger.warn("you input url is ", url);
     const appOptions = await handleInputOptions(options, url);
-    // logger.warn(JSON.stringify(appOptions, null, 4));
+    // logger.info(JSON.stringify(appOptions, null, 4));
     builder.build(url, appOptions);
   });
 
