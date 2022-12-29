@@ -175,6 +175,11 @@ export async function mergeTauriConfig(
   tauriConf.package.productName = name;
   tauriConf.tauri.bundle.identifier = identifier;
 
+  // 删除映射关系
+  if (process.platform === "linux") {
+    delete tauriConf.tauri.bundle.deb.files;
+  }
+
   // 处理应用图标
   const exists = await fs.stat(options.icon)
     .then(() => true)
@@ -193,7 +198,6 @@ export async function mergeTauriConfig(
       }
     }
     if (process.platform === "linux") {
-      delete tauriConf.tauri.bundle.deb.files;
       if (customIconExt != ".png") {
         updateIconPath = false;
         logger.warn(`icon file in Linux must be 512 * 512 pix with .png type, but you give ${customIconExt}`);
