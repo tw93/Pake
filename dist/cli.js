@@ -1682,13 +1682,14 @@ function mergeTauriConfig(url, options, tauriConf) {
             else {
                 const old_dir = path.join(npmDirectory, "dist/");
                 const new_dir = path.join(npmDirectory, "dist_bak/");
-                fs$1.rename(old_dir, new_dir);
-                fs2.copy(dir_name, old_dir);
+                fs2.moveSync(old_dir, new_dir, { "overwrite": true });
+                fs2.copySync(dir_name, old_dir, { "overwrite": true });
+                // logger.warn("dir name", dir_name);
                 // 将dist_bak里面的cli.js和about_pake.html拷贝回去
                 const cli_path = path.join(new_dir, "cli.js");
                 const cli_path_target = path.join(old_dir, "cli.js");
                 const about_pake_path = path.join(new_dir, "about_pake.html");
-                const about_patk_path_target = path.join(new_dir, "about_pake.html");
+                const about_patk_path_target = path.join(old_dir, "about_pake.html");
                 fs$1.copyFile(cli_path, cli_path_target);
                 fs$1.copyFile(about_pake_path, about_patk_path_target);
             }
