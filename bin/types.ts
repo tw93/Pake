@@ -34,6 +34,8 @@ export interface PakeCliOptions {
 
   // /** 递归拷贝，当url为本地文件路径时候，将文件所在文件夹下面的所有子文件都拷贝到pake静态文件夹，默认不开启 */
   // iter_copy_file: false;
+  // 包输出产物，对linux用户有效，默认为deb，可选appimage, 或者all（即同时输出deb和all）;
+  targets: string;
 
   /** 调试模式，会输出更多日志 */
   debug: boolean;

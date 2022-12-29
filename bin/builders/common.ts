@@ -75,15 +75,17 @@ export async function mergeTauriConfig(
   // } else {
   //   fs.rm
   // }
-  const url_exists = await fs.stat(url)
+  let file_path = url.slice(8, url.length);
+  const url_exists = await fs.stat(file_path)
     .then(() => true)
     .catch(() => false);
   if (url_exists) {
+    logger.warn("you input may a local file");
     tauriConf.pake.windows[0].url_type = "local";
-    const file_name = path.basename(url);
+    const file_name = path.basename(file_path);
     // const dir_name = path.dirname(url);
     const url_path = path.join("dist/", file_name);
-    await fs.copyFile(url, url_path);
+    await fs.copyFile(file_path, url_path);
     tauriConf.pake.windows[0].url = file_name;
     tauriConf.pake.windows[0].url_type = "local";
   } else {
@@ -158,6 +160,17 @@ export async function mergeTauriConfig(
      if (process.platform === "darwin") {
       tauriConf.pake.system_tray.macos = false;
      }
+  }
+
+  // 处理targets 暂时只对linux开放
+  if (process.platform === "linux") {
+    if (options.targets.length > 0) {
+      if (options.targets === "deb" || options.targets === "appimage" || options.targets === "all") {
+        tauriConf.tauri.bundle.targets = [options.targets];
+      }
+    }
+  } else {
+    tauriConf.tauri.bundle.targets = ["deb"];
   }
 
   tauriConf.package.productName = name;

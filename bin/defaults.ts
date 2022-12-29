@@ -10,6 +10,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   userAgent: '',
   showMenu: false,
   showSystemTray: false,
+  targets: '',
   // iter_copy_file: false,
   systemTrayIcon: '',
   debug: false,

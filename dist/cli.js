@@ -50,6 +50,7 @@ const DEFAULT_PAKE_OPTIONS = {
     userAgent: '',
     showMenu: false,
     showSystemTray: false,
+    targets: '',
     // iter_copy_file: false,
     systemTrayIcon: '',
     debug: false,
@@ -1669,15 +1670,17 @@ function mergeTauriConfig(url, options, tauriConf) {
         // } else {
         //   fs.rm
         // }
-        const url_exists = yield fs.stat(url)
+        let file_path = url.slice(8, url.length);
+        const url_exists = yield fs.stat(file_path)
             .then(() => true)
             .catch(() => false);
         if (url_exists) {
+            logger.warn("you input may a local file");
             tauriConf.pake.windows[0].url_type = "local";
-            const file_name = path.basename(url);
+            const file_name = path.basename(file_path);
             // const dir_name = path.dirname(url);
             const url_path = path.join("dist/", file_name);
-            yield fs.copyFile(url, url_path);
+            yield fs.copyFile(file_path, url_path);
             tauriConf.pake.windows[0].url = file_name;
             tauriConf.pake.windows[0].url_type = "local";
         }
@@ -1742,6 +1745,17 @@ function mergeTauriConfig(url, options, tauriConf) {
             if (process.platform === "darwin") {
                 tauriConf.pake.system_tray.macos = false;
             }
+        }
+        // 处理targets 暂时只对linux开放
+        if (process.platform === "linux") {
+            if (options.targets.length > 0) {
+                if (options.targets === "deb" || options.targets === "appimage" || options.targets === "all") {
+                    tauriConf.tauri.bundle.targets = [options.targets];
+                }
+            }
+        }
+        else {
+            tauriConf.tauri.bundle.targets = ["deb"];
         }
         tauriConf.package.productName = name;
         tauriConf.tauri.bundle.identifier = identifier;
@@ -2313,18 +2327,30 @@ class LinuxBuilder {
                 arch = process.arch;
             }
             const debName = `${name}_${tauriConf.package.version}_${arch}.deb`;
-            const appPath = this.getBuildedAppPath(npmDirectory, "deb", debName);
+            const debPath = this.getBuildedAppPath(npmDirectory, "deb", debName);
             const distPath = path.resolve(`${name}.deb`);
-            yield fs.copyFile(appPath, distPath);
-            yield fs.unlink(appPath);
+            // 增加文件是否存在验证，再决定是否copy文件
+            const debExists = yield fs.stat(debPath)
+                .then(() => true)
+                .catch(() => false);
+            if (debExists) {
+                yield fs.copyFile(debPath, distPath);
+                yield fs.unlink(debPath);
+                logger.success('Build success!');
+                logger.success('You can find the deb app installer in', distPath);
+            }
             const appImageName = `${name}_${tauriConf.package.version}_${arch}.AppImage`;
             const appImagePath = this.getBuildedAppPath(npmDirectory, "appimage", appImageName);
             const distAppPath = path.resolve(`${name}.AppImage`);
-            yield fs.copyFile(appImagePath, distAppPath);
-            yield fs.unlink(appImagePath);
-            logger.success('Build success!');
-            logger.success('You can find the deb app installer in', distPath);
-            logger.success('You can find the Appimage app installer in', distAppPath);
+            const appExists = yield fs.stat(appImagePath)
+                .then(() => true)
+                .catch(() => false);
+            if (appExists) {
+                yield fs.copyFile(appImagePath, distAppPath);
+                yield fs.unlink(appImagePath);
+                logger.success('Build success!');
+                logger.success('You can find the Appimage app installer in', distAppPath);
+            }
         });
     }
     getBuildedAppPath(npmDirectory, packageType, packageName) {
@@ -2466,6 +2492,7 @@ program
     .option('--show-menu', 'show menu in app', DEFAULT_PAKE_OPTIONS.showMenu)
     .option('--show-system-tray', 'show system tray in app', DEFAULT_PAKE_OPTIONS.showSystemTray)
     .option('--system-tray-icon <string>', 'custom system tray icon', DEFAULT_PAKE_OPTIONS.systemTrayIcon)
+    .option('--targets <string>', 'only for linux, default is "deb", option "appaimge" or "all"(deb & appimage)', DEFAULT_PAKE_OPTIONS.targets)
     // .option('--iter-copy-file', 
     //         'copy all static file to pake app when url is a static file',
     //         DEFAULT_PAKE_OPTIONS.iter_copy_file)
