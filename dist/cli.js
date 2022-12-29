@@ -1666,7 +1666,7 @@ function mergeTauriConfig(url, options, tauriConf) {
         // logger.warn(JSON.stringify(tauriConf.pake.windows, null, 4));
         Object.assign(tauriConf.pake.windows[0], Object.assign({ url }, tauriConfWindowOptions));
         // 判断一下url类型，是文件还是网站
-        // 如果是文件，则需要将该文件以及所在文件夹下的所有文件拷贝到src目录下（待做）
+        // 如果是文件，并且开启了递归拷贝功能，则需要将该文件以及所在文件夹下的所有文件拷贝到src目录下，否则只拷贝单个文件。
         const url_exists = yield fs$1.stat(url)
             .then(() => true)
             .catch(() => false);
