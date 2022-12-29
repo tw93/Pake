@@ -195,18 +195,21 @@ export async function mergeTauriConfig(
       } else {
         updateIconPath = false;
         logger.warn(`icon file in Windows must be 256 * 256 pix with .ico type, but you give ${customIconExt}`);
+        tauriConf.tauri.bundle.icon = ["png/icon_256.ico"];
       }
     }
     if (process.platform === "linux") {
       if (customIconExt != ".png") {
         updateIconPath = false;
         logger.warn(`icon file in Linux must be 512 * 512 pix with .png type, but you give ${customIconExt}`);
+        tauriConf.tauri.bundle.icon = ["png/icon_512.png"];
       }
     }
 
     if (process.platform === "darwin" && customIconExt !== ".icns") {
         updateIconPath = false;
         logger.warn(`icon file in MacOS must be .icns type, but you give ${customIconExt}`);
+        tauriConf.tauri.bundle.icon = ["icons/icon.icns"];
     }
     if (updateIconPath) {
       tauriConf.tauri.bundle.icon = [options.icon];
