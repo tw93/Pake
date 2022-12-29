@@ -218,6 +218,15 @@ export async function mergeTauriConfig(
     }
   } else {
     logger.warn("the custom icon path may not exists. we will use default icon to replace it");
+    if (process.platform === "win32") {
+        tauriConf.tauri.bundle.icon = ["png/icon_256.ico"];
+    }
+    if (process.platform === "linux") {
+        tauriConf.tauri.bundle.icon = ["png/icon_512.png"];
+    }
+    if (process.platform === "darwin") {
+        tauriConf.tauri.bundle.icon = ["icons/icon.icns"];
+    }
   }
 
   // 处理托盘自定义图标
