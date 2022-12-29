@@ -177,7 +177,7 @@ export async function mergeTauriConfig(
 
   // 删除映射关系
   if (process.platform === "linux") {
-    delete tauriConf.tauri.bundle.deb.files;
+    tauriConf.tauri.bundle.deb.files = [];
   }
 
   // 处理应用图标
