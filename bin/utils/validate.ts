@@ -10,9 +10,9 @@ export function validateNumberInput(value: string) {
 }
 
 export function validateUrlInput(url: string) {
-  try {
-    return normalizeUrl(url);
-  } catch (error) {
-    throw new Commander.InvalidArgumentError(error.message);
-  }
+    try {
+      return normalizeUrl(url)
+    } catch (error) {
+      throw new Commander.InvalidArgumentError(error.message);
+    }
 }

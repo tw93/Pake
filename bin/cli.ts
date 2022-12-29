@@ -9,7 +9,6 @@ import BuilderFactory from './builders/BuilderFactory.js';
 import { checkUpdateTips } from './helpers/updater.js';
 // @ts-expect-error
 import packageJson from '../package.json';
-import logger from './options/logger.js';
 
 program.version(packageJson.version).description('A cli application can package a web page to desktop application.');
 
@@ -27,6 +26,10 @@ program
   .option('--show-menu', 'show menu in app', DEFAULT_PAKE_OPTIONS.showMenu)
   .option('--show-system-tray', 'show system tray in app', DEFAULT_PAKE_OPTIONS.showSystemTray)
   .option('--system-tray-icon <string>', 'custom system tray icon', DEFAULT_PAKE_OPTIONS.systemTrayIcon)
+  .option(
+    '--targets <string>',
+    'only for linux, default is "deb", option "appaimge" or "all"(deb & appimage)',
+    DEFAULT_PAKE_OPTIONS.targets)
   // .option('--iter-copy-file', 
   //         'copy all static file to pake app when url is a static file',
   //         DEFAULT_PAKE_OPTIONS.iter_copy_file)
@@ -48,7 +51,7 @@ program
     await builder.prepare();
 
     const appOptions = await handleInputOptions(options, url);
-    logger.warn(JSON.stringify(appOptions, null, 4));
+    // logger.warn(JSON.stringify(appOptions, null, 4));
     builder.build(url, appOptions);
   });
 
