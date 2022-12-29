@@ -120,3 +120,12 @@ url 为你需要打包的网页链接 🔗或者本地html文件，必须提供�
 ```shell
 --system-tray-icon <value>
 ```
+
+
+#### [copy-iter-file]
+
+递归拷贝，当url为本地文件路径时候，若开启该选项，则将url路径文件所在文件夹以及所有子文件都拷贝到pake静态文件夹，默认不开启
+
+```shell
+--copy-iter-file
+```

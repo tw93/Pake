@@ -32,8 +32,9 @@ export interface PakeCliOptions {
   /** 托盘图标, Windows、Linux默认和应用图标共用一样的，MacOS需要提别提供, 格式为png或者ico */
   systemTrayIcon: string;
 
-  // /** 递归拷贝，当url为本地文件路径时候，将文件所在文件夹下面的所有子文件都拷贝到pake静态文件夹，默认不开启 */
-  // iter_copy_file: false;
+  // /** 递归拷贝，当url为本地文件路径时候，若开启该选项，则将url路径文件所在文件夹以及所有子文件都拷贝到pake静态文件夹，默认不开启 */
+  iterCopyFile: false;
+
   // 包输出产物，对linux用户有效，默认为deb，可选appimage, 或者all（即同时输出deb和all）;
   targets: string;
 
