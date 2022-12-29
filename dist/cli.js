@@ -1766,7 +1766,7 @@ function mergeTauriConfig(url, options, tauriConf) {
         tauriConf.tauri.bundle.identifier = identifier;
         // 删除映射关系
         if (process.platform === "linux") {
-            tauriConf.tauri.bundle.deb.files = [];
+            delete tauriConf.tauri.bundle.deb.files;
         }
         // 处理应用图标
         const exists = yield fs$1.stat(options.icon)
