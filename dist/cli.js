@@ -3,9 +3,10 @@ import { program } from 'commander';
 import log from 'loglevel';
 import url, { fileURLToPath } from 'url';
 import isurl from 'is-url';
+import fs from 'fs';
 import prompts from 'prompts';
 import path from 'path';
-import fs from 'fs/promises';
+import fs$1 from 'fs/promises';
 import chalk from 'chalk';
 import crypto from 'crypto';
 import axios from 'axios';
@@ -50,7 +51,7 @@ const DEFAULT_PAKE_OPTIONS = {
     userAgent: '',
     showMenu: false,
     showSystemTray: false,
-    targets: '',
+    targets: 'deb',
     // iter_copy_file: false,
     systemTrayIcon: '',
     debug: false,
@@ -1589,11 +1590,16 @@ function validateNumberInput(value) {
     return parsedValue;
 }
 function validateUrlInput(url) {
-    try {
-        return normalizeUrl(url);
+    if (!fs.existsSync(url)) {
+        try {
+            return normalizeUrl(url);
+        }
+        catch (error) {
+            throw new Commander.InvalidArgumentError(error.message);
+        }
     }
-    catch (error) {
-        throw new Commander.InvalidArgumentError(error.message);
+    else {
+        return url;
     }
 }
 
@@ -1670,17 +1676,16 @@ function mergeTauriConfig(url, options, tauriConf) {
         // } else {
         //   fs.rm
         // }
-        let file_path = url.slice(8, url.length);
-        const url_exists = yield fs.stat(file_path)
+        const url_exists = yield fs$1.stat(url)
             .then(() => true)
             .catch(() => false);
         if (url_exists) {
             logger.warn("you input may a local file");
             tauriConf.pake.windows[0].url_type = "local";
-            const file_name = path.basename(file_path);
+            const file_name = path.basename(url);
             // const dir_name = path.dirname(url);
             const url_path = path.join("dist/", file_name);
-            yield fs.copyFile(file_path, url_path);
+            yield fs$1.copyFile(url, url_path);
             tauriConf.pake.windows[0].url = file_name;
             tauriConf.pake.windows[0].url_type = "local";
         }
@@ -1760,7 +1765,7 @@ function mergeTauriConfig(url, options, tauriConf) {
         tauriConf.package.productName = name;
         tauriConf.tauri.bundle.identifier = identifier;
         // 处理应用图标
-        const exists = yield fs.stat(options.icon)
+        const exists = yield fs$1.stat(options.icon)
             .then(() => true)
             .catch(() => false);
         if (exists) {
@@ -1770,7 +1775,7 @@ function mergeTauriConfig(url, options, tauriConf) {
                 if (customIconExt === ".ico") {
                     const ico_path = path.join(npmDirectory, `src-tauri/png/${name.toLowerCase()}_32.ico`);
                     tauriConf.tauri.bundle.resources = [`png/${name.toLowerCase()}_32.ico`];
-                    yield fs.copyFile(options.icon, ico_path);
+                    yield fs$1.copyFile(options.icon, ico_path);
                 }
                 else {
                     updateIconPath = false;
@@ -1801,7 +1806,7 @@ function mergeTauriConfig(url, options, tauriConf) {
         // 处理托盘自定义图标
         let useDefaultIcon = true; // 是否使用默认托盘图标
         if (systemTrayIcon.length > 0) {
-            const icon_exists = yield fs.stat(systemTrayIcon)
+            const icon_exists = yield fs$1.stat(systemTrayIcon)
                 .then(() => true)
                 .catch(() => false);
             if (icon_exists) {
@@ -1811,7 +1816,7 @@ function mergeTauriConfig(url, options, tauriConf) {
                     useDefaultIcon = false;
                     const trayIcoPath = path.join(npmDirectory, `src-tauri/png/${name.toLowerCase()}${iconExt}`);
                     tauriConf.tauri.systemTray.iconPath = `png/${name.toLowerCase()}${iconExt}`;
-                    yield fs.copyFile(systemTrayIcon, trayIcoPath);
+                    yield fs$1.copyFile(systemTrayIcon, trayIcoPath);
                 }
                 else {
                     logger.warn(`file type for system tray icon mut be .ico or .png , but you give ${iconExt}`);
@@ -1849,14 +1854,14 @@ function mergeTauriConfig(url, options, tauriConf) {
             }
         }
         let bundleConf = { tauri: { bundle: tauriConf.tauri.bundle } };
-        yield fs.writeFile(configPath, Buffer.from(JSON.stringify(bundleConf, null, 4), 'utf-8'));
+        yield fs$1.writeFile(configPath, Buffer.from(JSON.stringify(bundleConf, null, 4), 'utf-8'));
         const pakeConfigPath = path.join(npmDirectory, 'src-tauri/pake.json');
-        yield fs.writeFile(pakeConfigPath, Buffer.from(JSON.stringify(tauriConf.pake, null, 4), 'utf-8'));
+        yield fs$1.writeFile(pakeConfigPath, Buffer.from(JSON.stringify(tauriConf.pake, null, 4), 'utf-8'));
         let tauriConf2 = JSON.parse(JSON.stringify(tauriConf));
         delete tauriConf2.pake;
         delete tauriConf2.tauri.bundle;
         const configJsonPath = path.join(npmDirectory, 'src-tauri/tauri.conf.json');
-        yield fs.writeFile(configJsonPath, Buffer.from(JSON.stringify(tauriConf2, null, 4), 'utf-8'));
+        yield fs$1.writeFile(configJsonPath, Buffer.from(JSON.stringify(tauriConf2, null, 4), 'utf-8'));
     });
 }
 
@@ -1955,7 +1960,7 @@ function downloadIcon(iconUrl) {
         }
         const { path } = yield dir();
         const iconPath = `${path}/icon.${fileDetails.ext}`;
-        yield fs.writeFile(iconPath, iconData);
+        yield fs$1.writeFile(iconPath, iconData);
         return iconPath;
     });
 }
@@ -1963,8 +1968,16 @@ function downloadIcon(iconUrl) {
 function handleOptions(options, url) {
     return __awaiter(this, void 0, void 0, function* () {
         const appOptions = Object.assign(Object.assign({}, options), { identifier: '' });
+        const url_exists = yield fs$1.stat(url)
+            .then(() => true)
+            .catch(() => false);
         if (!appOptions.name) {
-            appOptions.name = yield promptText('please input your application name', getDomain(url));
+            if (!url_exists) {
+                appOptions.name = yield promptText('please input your application name', getDomain(url));
+            }
+            else {
+                appOptions.name = yield promptText('please input your application name', "");
+            }
         }
         appOptions.identifier = getIdentifier(appOptions.name, url);
         appOptions.icon = yield handleIcon(appOptions);
@@ -2013,29 +2026,22 @@ var tauri$3 = {
 		active: false
 	},
 	systemTray: {
-		iconPath: "png/weread_512.png",
+		iconPath: "/home/tlntin/data/code/rust_study/Pake/src-tauri/png/icon_512.png",
 		iconAsTemplate: true
 	}
 };
-var build = {
-	devPath: "../dist",
-	distDir: "../dist",
-	beforeBuildCommand: "",
-	beforeDevCommand: ""
-};
 var CommonConf = {
 	"package": {
-	productName: "WeRead",
+	productName: "ccc",
 	version: "1.0.0"
 },
-	tauri: tauri$3,
-	build: build
+	tauri: tauri$3
 };
 
 var windows = [
 	{
-		url: "https://weread.qq.com/",
-		transparent: true,
+		url: "/home/tlntin/下载/AriaNg-1.3.2-AllInOne/index.html",
+		transparent: false,
 		fullscreen: false,
 		width: 1200,
 		height: 780,
@@ -2137,10 +2143,9 @@ var MacConf = {
 var tauri = {
 	bundle: {
 		icon: [
-			"png/weread_256.ico",
-			"png/weread_512.png"
+			"/home/tlntin/data/code/rust_study/Pake/src-tauri/png/icon_512.png"
 		],
-		identifier: "com.tw93.weread",
+		identifier: "pake-34d841",
 		active: true,
 		category: "DeveloperTool",
 		copyright: "",
@@ -2156,10 +2161,7 @@ var tauri = {
 				"librsvg2-dev",
 				"gnome-video-effects",
 				"gnome-video-effects-extra"
-			],
-			files: {
-				"/usr/share/applications/com-tw93-weread.desktop": "assets/com-tw93-weread.desktop"
-			}
+			]
 		},
 		externalBin: [
 		],
@@ -2168,8 +2170,7 @@ var tauri = {
 		],
 		shortDescription: "",
 		targets: [
-			"deb",
-			"appimage"
+			"deb"
 		]
 	}
 };
@@ -2234,8 +2235,8 @@ class MacBuilder {
             const dmgName = `${name}_${tauriConf.package.version}_${arch}.dmg`;
             const appPath = this.getBuildedAppPath(npmDirectory, dmgName);
             const distPath = path.resolve(`${name}.dmg`);
-            yield fs.copyFile(appPath, distPath);
-            yield fs.unlink(appPath);
+            yield fs$1.copyFile(appPath, distPath);
+            yield fs$1.unlink(appPath);
             logger.success('Build success!');
             logger.success('You can find the app installer in', distPath);
         });
@@ -2279,8 +2280,8 @@ class WinBuilder {
             const msiName = `${name}_${tauriConf.package.version}_${arch}_${language}.msi`;
             const appPath = this.getBuildedAppPath(npmDirectory, msiName);
             const distPath = path.resolve(`${name}.msi`);
-            yield fs.copyFile(appPath, distPath);
-            yield fs.unlink(appPath);
+            yield fs$1.copyFile(appPath, distPath);
+            yield fs$1.unlink(appPath);
             logger.success('Build success!');
             logger.success('You can find the app installer in', distPath);
         });
@@ -2330,24 +2331,24 @@ class LinuxBuilder {
             const debPath = this.getBuildedAppPath(npmDirectory, "deb", debName);
             const distPath = path.resolve(`${name}.deb`);
             // 增加文件是否存在验证，再决定是否copy文件
-            const debExists = yield fs.stat(debPath)
+            const debExists = yield fs$1.stat(debPath)
                 .then(() => true)
                 .catch(() => false);
             if (debExists) {
-                yield fs.copyFile(debPath, distPath);
-                yield fs.unlink(debPath);
+                yield fs$1.copyFile(debPath, distPath);
+                yield fs$1.unlink(debPath);
                 logger.success('Build success!');
                 logger.success('You can find the deb app installer in', distPath);
             }
             const appImageName = `${name}_${tauriConf.package.version}_${arch}.AppImage`;
             const appImagePath = this.getBuildedAppPath(npmDirectory, "appimage", appImageName);
             const distAppPath = path.resolve(`${name}.AppImage`);
-            const appExists = yield fs.stat(appImagePath)
+            const appExists = yield fs$1.stat(appImagePath)
                 .then(() => true)
                 .catch(() => false);
             if (appExists) {
-                yield fs.copyFile(appImagePath, distAppPath);
-                yield fs.unlink(appImagePath);
+                yield fs$1.copyFile(appImagePath, distAppPath);
+                yield fs$1.unlink(appImagePath);
                 logger.success('Build success!');
                 logger.success('You can find the Appimage app installer in', distAppPath);
             }
@@ -2509,8 +2510,9 @@ program
     }
     const builder = BuilderFactory.create();
     yield builder.prepare();
+    // logger.warn("you input url is ", url);
     const appOptions = yield handleOptions(options, url);
-    // logger.warn(JSON.stringify(appOptions, null, 4));
+    // logger.info(JSON.stringify(appOptions, null, 4));
     builder.build(url, appOptions);
 }));
 program.parse();
