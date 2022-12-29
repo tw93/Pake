@@ -83,7 +83,7 @@ export async function mergeTauriConfig(
     tauriConf.pake.windows[0].url_type = "local";
     const file_name = path.basename(url);
     // const dir_name = path.dirname(url);
-    const url_path = path.join("dist/", file_name);
+    const url_path = path.join(npmDirectory,"dist/", file_name);
     await fs.copyFile(url, url_path);
     tauriConf.pake.windows[0].url = file_name;
     tauriConf.pake.windows[0].url_type = "local";

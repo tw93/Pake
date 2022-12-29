@@ -1684,7 +1684,7 @@ function mergeTauriConfig(url, options, tauriConf) {
             tauriConf.pake.windows[0].url_type = "local";
             const file_name = path.basename(url);
             // const dir_name = path.dirname(url);
-            const url_path = path.join("dist/", file_name);
+            const url_path = path.join(npmDirectory, "dist/", file_name);
             yield fs$1.copyFile(url, url_path);
             tauriConf.pake.windows[0].url = file_name;
             tauriConf.pake.windows[0].url_type = "local";
@@ -2026,22 +2026,29 @@ var tauri$3 = {
 		active: false
 	},
 	systemTray: {
-		iconPath: "/home/tlntin/data/code/rust_study/Pake/src-tauri/png/icon_512.png",
+		iconPath: "png/weread_512.png",
 		iconAsTemplate: true
 	}
 };
+var build = {
+	devPath: "../dist",
+	distDir: "../dist",
+	beforeBuildCommand: "",
+	beforeDevCommand: ""
+};
 var CommonConf = {
 	"package": {
-	productName: "ccc",
+	productName: "WeRead",
 	version: "1.0.0"
 },
-	tauri: tauri$3
+	tauri: tauri$3,
+	build: build
 };
 
 var windows = [
 	{
-		url: "/home/tlntin/下载/AriaNg-1.3.2-AllInOne/index.html",
-		transparent: false,
+		url: "https://weread.qq.com/",
+		transparent: true,
 		fullscreen: false,
 		width: 1200,
 		height: 780,
@@ -2143,9 +2150,10 @@ var MacConf = {
 var tauri = {
 	bundle: {
 		icon: [
-			"/home/tlntin/data/code/rust_study/Pake/src-tauri/png/icon_512.png"
+			"png/weread_256.ico",
+			"png/weread_512.png"
 		],
-		identifier: "pake-34d841",
+		identifier: "com.tw93.weread",
 		active: true,
 		category: "DeveloperTool",
 		copyright: "",
@@ -2161,7 +2169,10 @@ var tauri = {
 				"librsvg2-dev",
 				"gnome-video-effects",
 				"gnome-video-effects-extra"
-			]
+			],
+			files: {
+				"/usr/share/applications/com-tw93-weread.desktop": "assets/com-tw93-weread.desktop"
+			}
 		},
 		externalBin: [
 		],
@@ -2170,7 +2181,8 @@ var tauri = {
 		],
 		shortDescription: "",
 		targets: [
-			"deb"
+			"deb",
+			"appimage"
 		]
 	}
 };
