@@ -11,7 +11,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   showMenu: false,
   showSystemTray: false,
   targets: 'deb',
-  // iter_copy_file: false,
+  iterCopyFile: false,
   systemTrayIcon: '',
   debug: false,
 };

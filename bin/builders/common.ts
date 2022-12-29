@@ -2,8 +2,10 @@ import { PakeAppOptions } from '@/types.js';
 import prompts from 'prompts';
 import path from 'path';
 import fs from 'fs/promises';
+import fs2 from 'fs-extra';
 import { npmDirectory } from '@/utils/dir.js';
 import logger from '@/options/logger.js';
+
 
 export async function promptText(message: string, initial?: string) {
   const response = await prompts({
@@ -31,7 +33,7 @@ export async function mergeTauriConfig(
     showMenu,
     showSystemTray,
     systemTrayIcon,
-    // iter_copy_file,
+    iterCopyFile,
     identifier,
     name,
   } = options;
@@ -65,16 +67,8 @@ export async function mergeTauriConfig(
   // logger.warn(JSON.stringify(tauriConf.pake.windows, null, 4));
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
   // 判断一下url类型，是文件还是网站
-  // 如果是文件，则需要将该文件以及所在文件夹下的所有文件拷贝到src目录下（待做）
+  // 如果是文件，并且开启了递归拷贝功能，则需要将该文件以及所在文件夹下的所有文件拷贝到src目录下，否则只拷贝单个文件。
 
-  // const src_exists = await fs.stat("src")
-  //   .then(() => true)
-  //   .catch(() => false);
-  // if (!src_exists) {
-  //   fs.mkdir("src")
-  // } else {
-  //   fs.rm
-  // }
   const url_exists = await fs.stat(url)
     .then(() => true)
     .catch(() => false);
@@ -82,9 +76,23 @@ export async function mergeTauriConfig(
     logger.warn("you input may a local file");
     tauriConf.pake.windows[0].url_type = "local";
     const file_name = path.basename(url);
-    // const dir_name = path.dirname(url);
-    const url_path = path.join(npmDirectory,"dist/", file_name);
-    await fs.copyFile(url, url_path);
+    const dir_name = path.dirname(url);
+    if (!iterCopyFile) {
+      const url_path = path.join(npmDirectory,"dist/", file_name);
+      await fs.copyFile(url, url_path);
+    } else {
+      const old_dir = path.join(npmDirectory,"dist/");
+      const new_dir = path.join(npmDirectory,"dist_bak/");
+      fs.rename(old_dir, new_dir);
+      fs2.copy(dir_name, old_dir);
+      // 将dist_bak里面的cli.js和about_pake.html拷贝回去
+      const cli_path = path.join(new_dir, "cli.js")
+      const cli_path_target = path.join(old_dir, "cli.js")
+      const about_pake_path = path.join(new_dir, "about_pake.html");
+      const about_patk_path_target = path.join(new_dir, "about_pake.html")
+      fs.copyFile(cli_path, cli_path_target);
+      fs.copyFile(about_pake_path, about_patk_path_target);
+    }
     tauriConf.pake.windows[0].url = file_name;
     tauriConf.pake.windows[0].url_type = "local";
   } else {

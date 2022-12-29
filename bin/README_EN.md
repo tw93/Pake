@@ -119,3 +119,12 @@ The notification tray icon is only valid when the notification tray is displayed
 ```shell
 --system-tray-icon <value>
 ```
+
+
+#### [copy-iter-file]
+
+Recursive copy, when the url is a local file path, if this option is enabled, the folder where the url path file is located and all sub-files are copied to the pake static folder, which is not enabled by default
+
+```shell
+--copy-iter-file
+```

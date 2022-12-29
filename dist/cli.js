@@ -7,6 +7,7 @@ import fs from 'fs';
 import prompts from 'prompts';
 import path from 'path';
 import fs$1 from 'fs/promises';
+import fs2 from 'fs-extra';
 import chalk from 'chalk';
 import crypto from 'crypto';
 import axios from 'axios';
@@ -52,7 +53,7 @@ const DEFAULT_PAKE_OPTIONS = {
     showMenu: false,
     showSystemTray: false,
     targets: 'deb',
-    // iter_copy_file: false,
+    iterCopyFile: false,
     systemTrayIcon: '',
     debug: false,
 };
@@ -1636,9 +1637,7 @@ function promptText(message, initial) {
 }
 function mergeTauriConfig(url, options, tauriConf) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { width, height, fullscreen, transparent, resizable, userAgent, showMenu, showSystemTray, systemTrayIcon, 
-        // iter_copy_file,
-        identifier, name, } = options;
+        const { width, height, fullscreen, transparent, resizable, userAgent, showMenu, showSystemTray, systemTrayIcon, iterCopyFile, identifier, name, } = options;
         const tauriConfWindowOptions = {
             width,
             height,
@@ -1668,14 +1667,6 @@ function mergeTauriConfig(url, options, tauriConf) {
         Object.assign(tauriConf.pake.windows[0], Object.assign({ url }, tauriConfWindowOptions));
         // 判断一下url类型，是文件还是网站
         // 如果是文件，则需要将该文件以及所在文件夹下的所有文件拷贝到src目录下（待做）
-        // const src_exists = await fs.stat("src")
-        //   .then(() => true)
-        //   .catch(() => false);
-        // if (!src_exists) {
-        //   fs.mkdir("src")
-        // } else {
-        //   fs.rm
-        // }
         const url_exists = yield fs$1.stat(url)
             .then(() => true)
             .catch(() => false);
@@ -1683,9 +1674,24 @@ function mergeTauriConfig(url, options, tauriConf) {
             logger.warn("you input may a local file");
             tauriConf.pake.windows[0].url_type = "local";
             const file_name = path.basename(url);
-            // const dir_name = path.dirname(url);
-            const url_path = path.join(npmDirectory, "dist/", file_name);
-            yield fs$1.copyFile(url, url_path);
+            const dir_name = path.dirname(url);
+            if (!iterCopyFile) {
+                const url_path = path.join(npmDirectory, "dist/", file_name);
+                yield fs$1.copyFile(url, url_path);
+            }
+            else {
+                const old_dir = path.join(npmDirectory, "dist/");
+                const new_dir = path.join(npmDirectory, "dist_bak/");
+                fs$1.rename(old_dir, new_dir);
+                fs2.copy(dir_name, old_dir);
+                // 将dist_bak里面的cli.js和about_pake.html拷贝回去
+                const cli_path = path.join(new_dir, "cli.js");
+                const cli_path_target = path.join(old_dir, "cli.js");
+                const about_pake_path = path.join(new_dir, "about_pake.html");
+                const about_patk_path_target = path.join(new_dir, "about_pake.html");
+                fs$1.copyFile(cli_path, cli_path_target);
+                fs$1.copyFile(about_pake_path, about_patk_path_target);
+            }
             tauriConf.pake.windows[0].url = file_name;
             tauriConf.pake.windows[0].url_type = "local";
         }
@@ -2454,6 +2460,7 @@ var dependencies = {
 	chalk: "^5.1.2",
 	commander: "^9.4.1",
 	"file-type": "^18.0.0",
+	"fs-extra": "^11.1.0",
 	"is-url": "^1.2.4",
 	loglevel: "^1.8.1",
 	ora: "^6.1.2",
@@ -2468,6 +2475,7 @@ var devDependencies = {
 	"@rollup/plugin-json": "^5.0.1",
 	"@rollup/plugin-terser": "^0.1.0",
 	"@rollup/plugin-typescript": "^9.0.2",
+	"@types/fs-extra": "^9.0.13",
 	"@types/is-url": "^1.2.30",
 	"@types/page-icon": "^0.3.4",
 	"@types/prompts": "^2.4.1",
@@ -2520,10 +2528,8 @@ program
     .option('--show-menu', 'show menu in app', DEFAULT_PAKE_OPTIONS.showMenu)
     .option('--show-system-tray', 'show system tray in app', DEFAULT_PAKE_OPTIONS.showSystemTray)
     .option('--system-tray-icon <string>', 'custom system tray icon', DEFAULT_PAKE_OPTIONS.systemTrayIcon)
+    .option('--iter-copy-file', 'copy all static file to pake app when url is a local file', DEFAULT_PAKE_OPTIONS.iterCopyFile)
     .option('--targets <string>', 'only for linux, default is "deb", option "appaimge" or "all"(deb & appimage)', DEFAULT_PAKE_OPTIONS.targets)
-    // .option('--iter-copy-file', 
-    //         'copy all static file to pake app when url is a static file',
-    //         DEFAULT_PAKE_OPTIONS.iter_copy_file)
     .option('--debug', 'debug', DEFAULT_PAKE_OPTIONS.transparent)
     .action((url, options) => __awaiter(void 0, void 0, void 0, function* () {
     checkUpdateTips();
