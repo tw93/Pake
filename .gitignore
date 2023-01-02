@@ -30,3 +30,6 @@ output
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+dist/
+!dist/cli.js
+!dist/.gitkeep
