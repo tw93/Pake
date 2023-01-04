@@ -60,10 +60,10 @@
         <td><img src=https://cdn.fliggy.com/upic/Ea5ZRw.png width=600/></td>
     </tr>
     <tr>
-        <td>Code 
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Code.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Code_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Code_amd64.deb">Linux</a>
+        <td>ZLibrary
+            <a href="https://github.com/tw93/Pake/releases/latest/download/ZLibrary.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/ZLibrary_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/ZLibrary_amd64.deb">Linux</a>
         </td>
          <td>Reference 
             <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
@@ -72,7 +72,7 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/EB1OYP.jpg width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/XGilgr.png width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/KFsZIY.png width=600/></td>
     </tr>
         <tr>
@@ -95,7 +95,7 @@
 
 <details>
 
-<summary>🏂 更多应用如 Flomo / 语雀可去 <a href="https://github.com/tw93/Pake/releases">Release</a>下载，<b>此外点击可展开快捷键说明</b></summary>
+<summary>🏂 更多应用如 Flomo / 语雀 / RunCode 可去 <a href="https://github.com/tw93/Pake/releases">Release</a>下载，<b>此外点击可展开快捷键说明</b></summary>
 
 <br/>
 
