@@ -51,8 +51,12 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       display: none !important;
     }
 
-    #page .main_header, .cb-layout-basic--navbar{
+    #page .main_header, .cb-layout-basic--navbar {
       padding-top: 20px;
+    }
+
+    .chakra-ui-light #app .chakra-heading, .chakra-ui-dark #app .chakra-heading, .chakra-ui-light #app .chakra-stack, .chakra-ui-dark #app .chakra-stack {
+       padding-top: 10px;
     }
 
     #__next .overflow-hidden .flex.flex-1.flex-col {
