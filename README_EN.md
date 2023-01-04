@@ -60,32 +60,32 @@
         <td><img src=https://cdn.fliggy.com/upic/Ea5ZRw.png width=600/></td>
     </tr>
     <tr>
-      <td>Code 
-          <a href="https://github.com/tw93/Pake/releases/latest/download/Code.dmg">Mac</a>
-          <a href="https://github.com/tw93/Pake/releases/latest/download/Code_x64.msi">Windows</a>
-          <a href="https://github.com/tw93/Pake/releases/latest/download/Code_amd64.deb">Linux</a>
-       </td>
-        <td>Reference 
-          <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
-          <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x64.msi">Windows</a>
-          <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_amd64.deb">Linux</a>
-      </td>
+        <td>ZLibrary
+            <a href="https://github.com/tw93/Pake/releases/latest/download/ZLibrary.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/ZLibrary_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/ZLibrary_amd64.deb">Linux</a>
+        </td>
+         <td>Reference 
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_amd64.deb">Linux</a>
+        </td>
     </tr>
     <tr>
-      <td><img src=https://cdn.fliggy.com/upic/EB1OYP.jpg width=600/></td>
-      <td><img src=https://cdn.fliggy.com/upic/KFsZIY.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/XGilgr.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/KFsZIY.png width=600/></td>
     </tr>
-    <tr>
-      <td>Qwerty 
-          <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
-          <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
-          <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_amd64.deb">Linux</a>
-      </td>
-      <td>ChatGPT 
-          <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT.dmg">Mac</a>
-          <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x64.msi">Windows</a>
-          <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_amd64.deb">Linux</a>
-      </td>
+        <tr>
+        <td>Qwerty 
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_amd64.deb">Linux</a>
+        </td>
+        <td>ChatGPT 
+            <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_amd64.deb">Linux</a>
+        </td>
     </tr>
     <tr>
         <td><img src=https://cdn.fliggy.com/upic/CJjagn.jpg width=600/></td>
