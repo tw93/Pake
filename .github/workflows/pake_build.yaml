@@ -4,7 +4,6 @@ on:
     # Sequence of patterns matched against refs/tags
     tags:
       - "V*"
-    workflow_dispatch:
 
 jobs:
   build:
@@ -15,7 +14,7 @@ jobs:
         build: [linux, windows, macos]
         include:
         - build: linux
-          os: ubuntu-latest
+          os: ubuntu-20.04
           rust: nightly
           target: x86_64-unknown-linux-musl
         - build: windows
@@ -46,13 +45,13 @@ jobs:
         target: ${{ matrix.target }}
 
     - name: install dependencies (ubuntu only)
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'ubuntu-20.04'
       run: |
         sudo apt-get update
         sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf gnome-video-effects gnome-video-effects-extra
 
     - name: build for Ubuntu
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'ubuntu-20.04'
       run: npm run build:all-unix
 
     - name: build for MacOS
