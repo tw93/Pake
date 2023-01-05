@@ -11,20 +11,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [linux, windows, macos]
+        build: windows
         include:
-        - build: linux
-          os: ubuntu-20.04
-          rust: nightly
-          target: x86_64-unknown-linux-musl
         - build: windows
           os: windows-latest
           rust: nightly-x86_64-msvc
           target: x86_64-pc-windows-msvc
-        - build: macos
-          os: macos-latest
-          rust: nightly
-          target: x86_64-apple-darwin
       fail-fast: false
 
     steps:
@@ -43,22 +35,6 @@ jobs:
         profile: minimal
         override: true
         target: ${{ matrix.target }}
-
-    - name: install dependencies (ubuntu only)
-      if: matrix.os == 'ubuntu-20.04'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf gnome-video-effects gnome-video-effects-extra
-
-    - name: build for Ubuntu
-      if: matrix.os == 'ubuntu-20.04'
-      run: npm run build:all-unix
-
-    - name: build for MacOS
-      if: matrix.os == 'macos-latest'
-      run: |
-        rustup target add aarch64-apple-darwin
-        npm run build:all-unix
 
     - name: build for windows
       if: matrix.os == 'windows-latest'
@@ -88,4 +64,5 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         curl -L https://github.com/probonopd/uploadtool/raw/master/upload.sh --output upload.sh
+        ls -a
         bash upload.sh output/*/*.*
