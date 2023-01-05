@@ -15,7 +15,7 @@ jobs:
         build: [linux, windows, macos]
         include:
         - build: linux
-          os: ubuntu-latest
+          os: ubuntu-20.04
           rust: nightly
           target: x86_64-unknown-linux-musl
         - build: windows
