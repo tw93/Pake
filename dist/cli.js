@@ -1829,8 +1829,8 @@ function checkRustInstalled() {
 var tauri$3 = {
 	windows: [
 		{
-			url: "https://baidu.com",
-			transparent: false,
+			url: "https://weread.qq.com/",
+			transparent: true,
 			fullscreen: false,
 			width: 1200,
 			height: 780,
@@ -1842,40 +1842,21 @@ var tauri$3 = {
 	},
 	updater: {
 		active: false
-	},
-	bundle: {
-		icon: [
-			"/Users/tw93/www/pake/src-tauri/icons/icon.icns"
-		],
-		identifier: "pake-bb6e08",
-		active: true,
-		category: "DeveloperTool",
-		copyright: "",
-		externalBin: [
-		],
-		longDescription: "",
-		macOS: {
-			entitlements: null,
-			exceptionDomain: "",
-			frameworks: [
-			],
-			providerShortName: null,
-			signingIdentity: null
-		},
-		resources: [
-		],
-		shortDescription: "",
-		targets: [
-			"dmg"
-		]
 	}
+};
+var build = {
+	devPath: "../dist",
+	distDir: "../dist",
+	beforeBuildCommand: "",
+	beforeDevCommand: ""
 };
 var CommonConf = {
 	"package": {
-	productName: "baidu",
+	productName: "WeRead",
 	version: "1.0.0"
 },
-	tauri: tauri$3
+	tauri: tauri$3,
+	build: build
 };
 
 var tauri$2 = {
@@ -1918,9 +1899,9 @@ var WinConf = {
 var tauri$1 = {
 	bundle: {
 		icon: [
-			"/Users/tw93/www/pake/src-tauri/icons/icon.icns"
+			"icons/weread.icns"
 		],
-		identifier: "pake-bb6e08",
+		identifier: "com.tw93.weread",
 		active: true,
 		category: "DeveloperTool",
 		copyright: "",
@@ -2168,7 +2149,7 @@ class BuilderFactory {
 }
 
 var name = "pake-cli";
-var version = "1.2.0";
+var version = "1.2.1";
 var description = "🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App 🤱🏻 A simple way to make any web page a desktop application using Rust.";
 var engines = {
 	node: "^14.13 || >=16.0.0"
