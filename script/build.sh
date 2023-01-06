@@ -45,7 +45,6 @@ if [[ "$OSTYPE" =~ ^linux ]]; then
     # for linux, package name may be com.xxx.xxx
     echo "rename package name"
     export desktop_file="src-tauri/assets/${package_prefix}.weread.desktop"
-    # sed -i "s/\"productName\": \"weread\"/\"productName\": \"${package_prefix}-weread\"/g" src-tauri/tauri.conf.json
     $sd "\"productName\": \"WeRead\"" "\"productName\": \"${package_prefix}-weread\"" src-tauri/tauri.conf.json
 fi
 
@@ -109,7 +108,6 @@ do
     if [[ "$OSTYPE" =~ ^darwin ]]; then
 
         npm run tauri build -- --target universal-apple-darwin
-        # mv src-tauri/target/release/bundle/dmg/*.dmg output/macos/${package_title}_x64.dmg
         mv src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg output/macos/${package_title}.dmg
     fi
 
@@ -119,4 +117,3 @@ done
 
 echo "build all package success!"
 echo "you run 'rm src-tauri/assets/*.desktop && git checkout src-tauri' to recovery code"
-# rm src-tauri/assets/*.desktop && git checkout src-tauri
