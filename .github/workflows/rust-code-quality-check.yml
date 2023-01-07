@@ -67,9 +67,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         uses: awalsh128/cache-apt-pkgs-action@latest
         with:
-          packages: >
-            libwebkit2gtk-4.0-dev build-essential curl wget libssl-dev
-            libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+          packages: libwebkit2gtk-4.0-dev build-essential curl wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
           version: 1.0
       - name: Run all-features code quality checks
         run: cargo hack --feature-powerset --no-dev-deps clippy
