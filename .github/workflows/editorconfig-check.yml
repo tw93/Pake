@@ -1,4 +1,4 @@
-name: Check if the codebase matches the EditorConfig rules
+name: Check EditorConfig
 
 on:
   push:
