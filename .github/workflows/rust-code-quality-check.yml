@@ -1,4 +1,4 @@
-name: Check, test and format the Rust part of codebase
+name: Check Rust Code
 
 on:
   push:
