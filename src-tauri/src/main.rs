@@ -96,12 +96,12 @@ fn main() -> wry::Result<()> {
 
     #[cfg(target_os = "windows")]
     let window = {
-        let icon_path = format!("png/{}_32.ico", package_name);
+        let mut icon_path = format!("png/{}_32.ico", package_name);
         // 假如没有设置，就使用默认的即可
         if !std::path::Path::new(&icon_path).exists() {
             icon_path = "png/icon_32.ico".to_string();
         }
-        let icon = load_icon(std::path::Path::new(&icon_path));
+        let icon = load_icon(std::path::Path::new(&mut icon_path));
         common_window
             .with_decorations(true)
             .with_window_icon(Some(icon))
