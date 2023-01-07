@@ -38,7 +38,7 @@ jobs:
           tool: cargo-hack,nextest
       - name: Install dependencies for Ubuntu
         if: matrix.os == 'ubuntu-latest'
-        uses: awalsh128/cache-apt-pkgs-action@latest
+        uses: awalsh128/cache-apt-pkgs-action@1.2.0
         with:
           packages: >
             libwebkit2gtk-4.0-dev build-essential curl wget libssl-dev
