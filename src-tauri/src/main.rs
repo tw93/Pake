@@ -126,11 +126,8 @@ fn main() -> wry::Result<()> {
         if req == "drag_window" {
             let _ = window.drag_window();
         } else if req == "fullscreen" {
-            if window.fullscreen().is_some() {
-                window.set_fullscreen(None);
-            } else {
-                window.set_fullscreen(Some(Fullscreen::Borderless(None)));
-            }
+            let is_maximized = window.is_maximized();
+            window.set_maximized(!is_maximized);
         } else if req.starts_with("open_browser") {
             let href = req.replace("open_browser:", "");
             webbrowser::open(&href).expect("no browser");
