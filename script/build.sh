@@ -103,12 +103,20 @@ do
         npm run tauri build
         mv src-tauri/target/release/bundle/deb/${package_prefix}-${package_name}*.deb output/linux/${package_title}_amd64.deb
         mv src-tauri/target/release/bundle/appimage/${package_prefix}-${package_name}*.AppImage output/linux/${package_title}_amd64.AppImage
+        echo clear cache
+        rm src-tauri/target/release
+        rm -rf src-tauri/target/release/bundle
+
     fi
 
     if [[ "$OSTYPE" =~ ^darwin ]]; then
 
         npm run tauri build -- --target universal-apple-darwin
         mv src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg output/macos/${package_title}.dmg
+        echo clear cache
+        rm -rf src-tauri/target/universal-apple-darwin
+        rm src-tauri/target/aarch64-apple-darwin/release
+        rm src-tauri/target/x86_64-apple-darwin/release
     fi
 
     echo "package build success!"
