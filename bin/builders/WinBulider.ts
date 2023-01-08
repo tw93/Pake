@@ -5,11 +5,9 @@ import { checkRustInstalled, installRust } from '@/helpers/rust.js';
 import { PakeAppOptions } from '@/types.js';
 import { IBuilder } from './base.js';
 import { shellExec } from '@/utils/shell.js';
-// @ts-expect-error 加上resolveJsonModule rollup会打包报错
-// import tauriConf from '../../src-tauri/tauri.windows.conf.json';
+// @ts-expect-error
 import tauriConf from './tauriConf.js';
 
-import { fileURLToPath } from 'url';
 import logger from '@/options/logger.js';
 import { mergeTauriConfig } from './common.js';
 import { npmDirectory } from '@/utils/dir.js';
@@ -47,11 +45,11 @@ export default class WinBuilder implements IBuilder {
 
     await mergeTauriConfig(url, options, tauriConf);
 
-    const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+    await shellExec(`cd ${npmDirectory} && npm install && npm run build`);
     const language = tauriConf.tauri.bundle.windows.wix.language[0];
     const arch = process.arch;
     const msiName = `${name}_${tauriConf.package.version}_${arch}_${language}.msi`;
-    const appPath = this.getBuildedAppPath(npmDirectory, msiName);
+    const appPath = this.getBuildAppPath(npmDirectory, msiName);
     const distPath = path.resolve(`${name}.msi`);
     await fs.copyFile(appPath, distPath);
     await fs.unlink(appPath);
@@ -59,7 +57,7 @@ export default class WinBuilder implements IBuilder {
     logger.success('You can find the app installer in', distPath);
   }
 
-  getBuildedAppPath(npmDirectory: string, dmgName: string) {
+  getBuildAppPath(npmDirectory: string, dmgName: string) {
     return path.join(
       npmDirectory,
       'src-tauri/target/release/bundle/msi',
