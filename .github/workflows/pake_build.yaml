@@ -85,4 +85,4 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: ${{ matrix.archive-name }}
-        path: archive/${{ matrix.archive-name }}
+        path: src-tauri/${{ matrix.archive-name }}
