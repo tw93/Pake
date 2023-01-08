@@ -52,6 +52,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf gnome-video-effects gnome-video-effects-extra
+        git clone https://github.com/Tlntin/pake_target_linux.git
+        mv pake_target_linux/target src-tauri/target
 
     - name: build for Ubuntu
       if: matrix.os == 'ubuntu-20.04'
@@ -61,6 +63,8 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: |
         rustup target add aarch64-apple-darwin
+        git clone https://github.com/Tlntin/pake_target_macos.git
+        mv pake_target_macos/target src-tauri/target
         npm run build:all-unix
 
     - name: build for windows
@@ -75,14 +79,14 @@ jobs:
         curl -L https://github.com/probonopd/uploadtool/raw/master/upload.sh --output upload.sh
         bash upload.sh output/*/*.*
     
-    - name: Build archive
-      shell: bash
-      run: |
-        cd src-tauri
-        tar -czf "${{ matrix.archive-name }}" target
+    # - name: Build archive
+    #   shell: bash
+    #   run: |
+    #     cd src-tauri
+    #     tar -czf "${{ matrix.archive-name }}" target
     
-    - name: Upload archive
-      uses: actions/upload-artifact@v1
-      with:
-        name: ${{ matrix.archive-name }}
-        path: src-tauri/${{ matrix.archive-name }}
+    # - name: Upload archive
+    #   uses: actions/upload-artifact@v1
+    #   with:
+    #     name: ${{ matrix.archive-name }}
+    #     path: src-tauri/${{ matrix.archive-name }}
