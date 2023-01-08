@@ -55,7 +55,11 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       padding-top: 20px;
     }
 
-    .chakra-ui-light #app .chakra-heading, .chakra-ui-dark #app .chakra-heading, .chakra-ui-light #app .chakra-stack, .chakra-ui-dark #app .chakra-stack {
+    .chakra-ui-light #app .chakra-heading,
+    .chakra-ui-dark #app .chakra-heading,
+    .chakra-ui-light #app .chakra-stack,
+    .chakra-ui-dark #app .chakra-stack,
+    .app-main .sidebar-mouse-in-out {
        padding-top: 10px;
     }
 
