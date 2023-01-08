@@ -85,7 +85,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         UPLOADTOOL_ISPRERELEASE: true
       run: |
-        set -e
         curl -L https://github.com/probonopd/uploadtool/raw/master/upload.sh --output upload.sh
         bash upload.sh output/*/*.*
     
