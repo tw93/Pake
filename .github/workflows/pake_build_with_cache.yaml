@@ -1,9 +1,9 @@
-name: Build App
+name: Build App with Cache
 on:
   push:
     # Sequence of patterns matched against refs/tags
-    tags:
-      - "V*"
+    branches:
+      - release
 
 jobs:
   build:
@@ -109,17 +109,3 @@ jobs:
     #   with:
     #     name: ${{ matrix.archive-name }}
     #     path: src-tauri/${{ matrix.archive-name }}
-
-    # - name: "Store cache"
-    #   uses: Swatinem/rust-cache@v2
-    #   with:
-    #     prefix-key: ""
-    #     shared-key: ""
-    #     key: ""
-    #     env-vars: ""
-    #     workspaces: "src-tauri"
-    #     cache-directories: ""
-    #     cache-targets: ""
-    #     cache-on-failure: ""
-    #     save-if: ""
-        # for more to see: https://github.com/Swatinem/rust-cache

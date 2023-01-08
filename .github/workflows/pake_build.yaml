@@ -1,9 +1,9 @@
-name: Build App with Cache
+name: Build App
 on:
   push:
     # Sequence of patterns matched against refs/tags
-    branches:
-      - release
+    tags:
+      - "V*"
 
 jobs:
   build:
@@ -75,26 +75,3 @@ jobs:
       run: |
         curl -L https://github.com/probonopd/uploadtool/raw/master/upload.sh --output upload.sh
         bash upload.sh output/*/*.*
-    
-    - name: rust cache store
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          src-tauri/target/
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-    
-    # - name: Build archive
-    #   shell: bash
-    #   run: |
-    #     cd src-tauri
-    #     tar -czf "${{ matrix.archive-name }}" target
-    
-    # - name: Upload archive
-    #   uses: actions/upload-artifact@v1
-    #   with:
-    #     name: ${{ matrix.archive-name }}
-    #     path: src-tauri/${{ matrix.archive-name }}
