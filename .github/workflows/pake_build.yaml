@@ -46,6 +46,20 @@ jobs:
         profile: minimal
         override: true
         target: ${{ matrix.target }}
+    
+    - name: "Cache Restore"
+      uses: Swatinem/rust-cache@v2
+      with:
+        prefix-key: ""
+        shared-key: ""
+        key: ""
+        env-vars: ""
+        workspaces: "src-tauri"
+        cache-directories: ""
+        cache-targets: ""
+        cache-on-failure: ""
+        save-if: "false"
+        # for more to see: https://github.com/Swatinem/rust-cache
 
     - name: install dependencies (ubuntu only)
       if: matrix.os == 'ubuntu-20.04'
@@ -87,51 +101,16 @@ jobs:
     #     name: ${{ matrix.archive-name }}
     #     path: src-tauri/${{ matrix.archive-name }}
 
-    - name: "Store cache"
-      uses: Swatinem/rust-cache@v2
-      with:
-        # The prefix cache key, this can be changed to start a new cache manually.
-        # default: "v0-rust"
-        prefix-key: ""
-
-        # A cache key that is used instead of the automatic `job`-based key,
-        # and is stable over multiple jobs.
-        # default: empty
-        shared-key: ""
-
-        # An additional cache key that is added alongside the automatic `job`-based
-        # cache key and can be used to further differentiate jobs.
-        # default: empty
-        key: ""
-
-        # A whitespace separated list of env-var *prefixes* who's value contributes
-        # to the environment cache key.
-        # The env-vars are matched by *prefix*, so the default `RUST` var will
-        # match all of `RUSTC`, `RUSTUP_*`, `RUSTFLAGS`, `RUSTDOC_*`, etc.
-        # default: "CARGO CC CFLAGS CXX CMAKE RUST"
-        env-vars: ""
-
-        # The cargo workspaces and target directory configuration.
-        # These entries are separated by newlines and have the form
-        # `$workspace -> $target`. The `$target` part is treated as a directory
-        # relative to the `$workspace` and defaults to "target" if not explicitly given.
-        # default: ". -> target"
-        workspaces: "src-tauri"
-
-        # Additional non workspace directories to be cached, separated by newlines.
-        cache-directories: ""
-
-        # Determines whether workspace `target` directories are cached.
-        # If `false`, only the cargo registry will be cached.
-        # default: "true"
-        cache-targets: ""
-
-        # Determines if the cache should be saved even when the workflow has failed.
-        # default: "false"
-        cache-on-failure: ""
-
-        # Determiners whether the cache should be saved.
-        # If `false`, the cache is only restored.
-        # Useful for jobs where the matrix is additive e.g. additional Cargo features.
-        # default: "true"
-        save-if: ""
+    # - name: "Store cache"
+    #   uses: Swatinem/rust-cache@v2
+    #   with:
+    #     prefix-key: ""
+    #     shared-key: ""
+    #     key: ""
+    #     env-vars: ""
+    #     workspaces: "src-tauri"
+    #     cache-directories: ""
+    #     cache-targets: ""
+    #     cache-on-failure: ""
+    #     save-if: ""
+        # for more to see: https://github.com/Swatinem/rust-cache
