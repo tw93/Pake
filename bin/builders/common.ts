@@ -51,7 +51,7 @@ export async function mergeTauriConfig(
     const reg = new RegExp(/([0-9]*[a-zA-Z]+[0-9]*)+/);
     if (!reg.test(name) || reg.exec(name)[0].length != name.length) {
       logger.error("package name is illegal， it must be letters, numbers, and it must contain the letters")
-      logger.error("E.g 123pan,123Pan Pan123,weread, WeRead, WERead");
+      logger.error("E.g 123pan,123Pan,Pan123,weread,WeRead,WERead");
       process.exit();
     }
   }
@@ -113,7 +113,7 @@ export async function mergeTauriConfig(
       break;
     }
   }
-  
+
   let bundleConf = {tauri: {bundle: tauriConf.tauri.bundle}};
   await fs.writeFile(
     configPath,
