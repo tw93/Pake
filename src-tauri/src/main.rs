@@ -12,9 +12,9 @@ use wry::{
     webview::WebViewBuilder,
 };
 
-enum UserEvent {
-    NewWindow(String),
-}
+// enum UserEvent {
+//     NewWindow(String),
+// }
 
 #[cfg(target_os = "macos")]
 use wry::application::{
@@ -87,9 +87,9 @@ fn main() -> wry::Result<()> {
         ..
     } = get_windows_config().1.unwrap_or_default();
 
-    let event_loop: EventLoop<UserEvent> = EventLoop::with_user_event();
-    let proxy = event_loop.create_proxy();
-
+    // let event_loop: EventLoop<UserEvent> = EventLoop::with_user_event();
+    // let proxy = event_loop.create_proxy();
+    let event_loop = EventLoop::new();
     let common_window = WindowBuilder::new()
         .with_title("")
         .with_resizable(resizable)
@@ -151,10 +151,10 @@ fn main() -> wry::Result<()> {
             .with_devtools(cfg!(feature = "devtools"))
             .with_initialization_script(include_str!("pake.js"))
             .with_ipc_handler(handler)
-            .with_new_window_req_handler(move |uri: String| {
-                let submitted = proxy.send_event(UserEvent::NewWindow(uri.clone())).is_ok();
-                submitted
-            })
+            // .with_new_window_req_handler(move |uri: String| {
+            //     let submitted = proxy.send_event(UserEvent::NewWindow(uri.clone())).is_ok();
+            //     submitted
+            // })
             .with_back_forward_navigation_gestures(true)
             .build()?
     };
@@ -185,10 +185,10 @@ fn main() -> wry::Result<()> {
             .with_initialization_script(include_str!("pake.js"))
             .with_ipc_handler(handler)
             .with_web_context(&mut web_content)
-            .with_new_window_req_handler(move |uri: String| {
-                let submitted = proxy.send_event(UserEvent::NewWindow(uri.clone())).is_ok();
-                submitted
-            })
+            // .with_new_window_req_handler(move |uri: String| {
+            //     let submitted = proxy.send_event(UserEvent::NewWindow(uri.clone())).is_ok();
+            //     submitted
+            // })
             .build()?
     };
     #[cfg(feature = "devtools")]
@@ -217,11 +217,9 @@ fn main() -> wry::Result<()> {
                 println!("Clicked on {:?}", menu_id);
                 println!("Clicked on {:?}", webview.window().is_visible());
             }
-            Event::UserEvent(UserEvent::NewWindow(uri)) => {
-                if &uri.to_string() != "about:blank" {
-                    webview.load_url(&uri);
-                }
-            }
+            // Event::UserEvent(UserEvent::NewWindow(uri)) => {
+            //     webbrowser::open(&uri).expect("no browser");
+            // }
             _ => (),
         }
     });
