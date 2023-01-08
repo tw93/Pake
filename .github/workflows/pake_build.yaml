@@ -17,14 +17,17 @@ jobs:
           os: ubuntu-20.04
           rust: nightly
           target: x86_64-unknown-linux-musl
+          archive-name: target-linux.tar.gz
         - build: windows
           os: windows-latest
           rust: nightly-x86_64-msvc
           target: x86_64-pc-windows-msvc
+          archive-name: target-windows.tar.gz
         - build: macos
           os: macos-latest
           rust: nightly
           target: x86_64-apple-darwin
+          archive-name: target-macos.tar.gz
       fail-fast: false
 
     steps:
@@ -71,3 +74,15 @@ jobs:
       run: |
         curl -L https://github.com/probonopd/uploadtool/raw/master/upload.sh --output upload.sh
         bash upload.sh output/*/*.*
+    
+    - name: Build archive
+      shell: bash
+      run: |
+        cd src-tauri
+        tar -czf "${{ matrix.archive-name }}" target
+    
+    - name: Upload archive
+      uses: actions/upload-artifact@v1
+      with:
+        name: ${{ matrix.archive-name }}
+        path: archive/${{ matrix.archive-name }}
