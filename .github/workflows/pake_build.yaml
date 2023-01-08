@@ -15,19 +15,19 @@ jobs:
         include:
         - build: linux
           os: ubuntu-20.04
-          rust: nightly
+          rust: stable
           target: x86_64-unknown-linux-musl
-          archive-name: target-linux.tar.gz
+          # archive-name: target-linux.tar.gz
         - build: windows
           os: windows-latest
-          rust: nightly-x86_64-msvc
+          rust: stable-x86_64-msvc
           target: x86_64-pc-windows-msvc
-          archive-name: target-windows.tar.gz
+          # archive-name: target-windows.tar.gz
         - build: macos
           os: macos-latest
-          rust: nightly
+          rust: stable
           target: x86_64-apple-darwin
-          archive-name: target-macos.tar.gz
+          # archive-name: target-macos.tar.gz
       fail-fast: false
 
     steps:
@@ -52,8 +52,6 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf gnome-video-effects gnome-video-effects-extra
-        git clone https://github.com/Tlntin/pake_target_linux.git
-        mv pake_target_linux/target src-tauri/target
 
     - name: build for Ubuntu
       if: matrix.os == 'ubuntu-20.04'
@@ -63,8 +61,6 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: |
         rustup target add aarch64-apple-darwin
-        git clone https://github.com/Tlntin/pake_target_macos.git
-        mv pake_target_macos/target src-tauri/target
         npm run build:all-unix
 
     - name: build for windows
@@ -90,3 +86,52 @@ jobs:
     #   with:
     #     name: ${{ matrix.archive-name }}
     #     path: src-tauri/${{ matrix.archive-name }}
+
+    - name: "Store cache"
+      uses: Swatinem/rust-cache@v2
+      with:
+        # The prefix cache key, this can be changed to start a new cache manually.
+        # default: "v0-rust"
+        prefix-key: ""
+
+        # A cache key that is used instead of the automatic `job`-based key,
+        # and is stable over multiple jobs.
+        # default: empty
+        shared-key: ""
+
+        # An additional cache key that is added alongside the automatic `job`-based
+        # cache key and can be used to further differentiate jobs.
+        # default: empty
+        key: ""
+
+        # A whitespace separated list of env-var *prefixes* who's value contributes
+        # to the environment cache key.
+        # The env-vars are matched by *prefix*, so the default `RUST` var will
+        # match all of `RUSTC`, `RUSTUP_*`, `RUSTFLAGS`, `RUSTDOC_*`, etc.
+        # default: "CARGO CC CFLAGS CXX CMAKE RUST"
+        env-vars: ""
+
+        # The cargo workspaces and target directory configuration.
+        # These entries are separated by newlines and have the form
+        # `$workspace -> $target`. The `$target` part is treated as a directory
+        # relative to the `$workspace` and defaults to "target" if not explicitly given.
+        # default: ". -> target"
+        workspaces: "src-tauri"
+
+        # Additional non workspace directories to be cached, separated by newlines.
+        cache-directories: ""
+
+        # Determines whether workspace `target` directories are cached.
+        # If `false`, only the cargo registry will be cached.
+        # default: "true"
+        cache-targets: ""
+
+        # Determines if the cache should be saved even when the workflow has failed.
+        # default: "false"
+        cache-on-failure: ""
+
+        # Determiners whether the cache should be saved.
+        # If `false`, the cache is only restored.
+        # Useful for jobs where the matrix is additive e.g. additional Cargo features.
+        # default: "true"
+        save-if: ""
