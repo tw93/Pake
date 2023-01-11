@@ -97,8 +97,8 @@ do
             echo "warning"
             echo "icon for linux not exsist, will use default icon to replace it"
             echo "warning"
-            cp "src-tauri/png/icon_256.ico" "src-tauri/png/${packaage_name}_256.ico"
-            cp "src-tauri/png/icon_512.png" "src-tauri/png/${packaage_name}_512.png"
+            cp "src-tauri/png/icon_256.ico" "src-tauri/png/${package_name}_256.ico"
+            cp "src-tauri/png/icon_512.png" "src-tauri/png/${package_name}_512.png"
         fi
         $sd "${old_name}" "${package_name}" src-tauri/tauri.linux.conf.json
         echo "update desktop"
