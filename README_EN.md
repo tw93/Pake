@@ -88,7 +88,7 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/z0Ddm0.jpg width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/2vPptL.png width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/sfnTXf.png width=600/></td>
     </tr>
 </table>
