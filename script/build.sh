@@ -73,7 +73,17 @@ do
 
     # for apple, need replace title
     if [[ "$OSTYPE" =~ ^darwin ]]; then
-        $sd "${old_name}" "${package_name}" src-tauri/tauri.macos.conf.json
+        # update icon
+        # if icon exsits, change icon path
+        if [ -f "src-tauri/icons/${package_name}.icns" ]; then
+            $sd "${old_name}" "${package_name}" src-tauri/tauri.macos.conf.json
+        else
+            echo "warning"
+            echo "icon for macos not exsist, will use default icon to replace it"
+            echo "warning"
+            $sd "${old_name}" "icon" src-tauri/tauri.macos.conf.json
+            package_name="icon"
+        fi
         $sd "${old_title}" "${package_title}" src-tauri/tauri.conf.json
     fi
 
@@ -81,7 +91,18 @@ do
     # cp "src-tauri/png/${package_name}_32.ico" "src-tauri/icons/icon.ico"
 
     if [[ "$OSTYPE" =~ ^linux ]]; then
-        $sd "${old_name}" "${package_name}" src-tauri/tauri.linux.conf.json
+        # update icon
+        # if icon exsits, change icon path
+        if [ -f "src-tauri/png/${package_name}_512.png" ]; then
+            $sd "${old_name}" "${package_name}" src-tauri/tauri.linux.conf.json
+        else
+            # else, replace icon to default
+            echo "warning"
+            echo "icon for linux not exsist, will use default icon to replace it"
+            echo "warning"
+            $sd "${old_name}" "icon" src-tauri/tauri.linux.conf.json
+            package_name="icon"
+        fi
         echo "update desktop"
         old_desktop="src-tauri/assets/${package_prefix}-${old_name}.desktop"
         new_desktop="src-tauri/assets/${package_prefix}-${package_name}.desktop"
