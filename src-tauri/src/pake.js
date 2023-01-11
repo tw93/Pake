@@ -51,7 +51,8 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       display: none !important;
     }
 
-    #page .main_header, .cb-layout-basic--navbar {
+    #page .main_header, .cb-layout-basic--navbar,
+    #app .splitpanes.splitpanes--horizontal.no-splitter header {
       padding-top: 20px;
     }
 
