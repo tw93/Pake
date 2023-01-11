@@ -80,7 +80,7 @@ do
             echo "warning"
             echo "icon for MacOS not exsist, will use default icon to replace it"
             echo "warning"
-            cp "src-tauri/icons/icon.icns" "src-tauri/icons/${packaage_name}.icons"
+            cp "src-tauri/icons/icon.icns" "src-tauri/icons/${package_name}.icons"
         fi
         $sd "${old_name}" "${package_name}" src-tauri/tauri.macos.conf.json
         $sd "${old_title}" "${package_title}" src-tauri/tauri.conf.json
