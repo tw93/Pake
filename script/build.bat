@@ -53,14 +53,14 @@ for /f "skip=1 tokens=1-4 delims=," %%i in (app.csv) do (
   .\script\sd.exe -s !old_url! !url! src-tauri\tauri.conf.json
   ::replace  pacakge name
   .\script\sd.exe !old_title! !title! src-tauri\tauri.conf.json
-  if not exist src-tauri\png\!title!_32.ico (
-    copy src-tauri\png\icon_32.ico src-tauri\png\!title!_32.ico
+  .\script\sd.exe !old_name! !name! src-tauri\tauri.windows.conf.json
+  if not exist src-tauri\png\!name!_32.ico (
+    copy src-tauri\png\icon_32.ico src-tauri\png\!name!_32.ico
   )
 
-  if not exist src-tauri\png\!title!_256.ico (
-    copy src-tauri\png\icon_256.ico src-tauri\png\!title!_256.ico
+  if not exist src-tauri\png\!name!_256.ico (
+    copy src-tauri\png\icon_256.ico src-tauri\png\!name!_256.ico
   )
-  .\script\sd.exe !old_name! !name! src-tauri\tauri.windows.conf.json
   echo.
   ::update package info
   set old_zh_name=!name_zh!
