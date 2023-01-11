@@ -75,15 +75,14 @@ do
     if [[ "$OSTYPE" =~ ^darwin ]]; then
         # update icon
         # if icon exsits, change icon path
-        if [ -f "src-tauri/icons/${package_name}.icns" ]; then
-            $sd "${old_name}" "${package_name}" src-tauri/tauri.macos.conf.json
-        else
+        if [! -f "src-tauri/icons/${packaage_name}.icons" ]; then
+            # else, replace icon to default
             echo "warning"
-            echo "icon for macos not exsist, will use default icon to replace it"
+            echo "icon for MacOS not exsist, will use default icon to replace it"
             echo "warning"
-            $sd "${old_name}" "icon" src-tauri/tauri.macos.conf.json
-            package_name="icon"
+            cp "src-tauri/icons/icon.icns" "src-tauri/icons/${packaage_name}.icons"
         fi
+        $sd "${old_name}" "${package_name}" src-tauri/tauri.macos.conf.json
         $sd "${old_title}" "${package_title}" src-tauri/tauri.conf.json
     fi
 
@@ -93,16 +92,15 @@ do
     if [[ "$OSTYPE" =~ ^linux ]]; then
         # update icon
         # if icon exsits, change icon path
-        if [ -f "src-tauri/png/${package_name}_512.png" ]; then
-            $sd "${old_name}" "${package_name}" src-tauri/tauri.linux.conf.json
-        else
+        if [! -f "src-tauri/png/${package_name}_512.png" ]; then
             # else, replace icon to default
             echo "warning"
             echo "icon for linux not exsist, will use default icon to replace it"
             echo "warning"
-            $sd "${old_name}" "icon" src-tauri/tauri.linux.conf.json
-            package_name="icon"
+            cp "src-tauri/png/icon_256.ico" "src-tauri/png/${packaage_name}_256.ico"
+            cp "src-tauri/png/icon_512.png" "src-tauri/png/${packaage_name}_512.png"
         fi
+        $sd "${old_name}" "${package_name}" src-tauri/tauri.linux.conf.json
         echo "update desktop"
         old_desktop="src-tauri/assets/${package_prefix}-${old_name}.desktop"
         new_desktop="src-tauri/assets/${package_prefix}-${package_name}.desktop"
