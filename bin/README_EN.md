@@ -6,7 +6,7 @@ npm install -g pake-cli
 
 If the installation fails and you are prompted that you do not have permission, please see this [website](https://gist.github.com/Giancarlos/d087f8a9e6516716da98ad0c0f5a8f58) .
 
-Also make sure that you're using a correct Node.js version (`^14.13 || >=16.0.0`). If you're using [nvm](https://github.com/nvm-sh/nvm) for Node.js version management you may run `nvm use` from the root folder of the project and the correct version will be picked up. Other Node.js version management tools, such as [fnm](https://github.com/Schniz/fnm) and [tj/n](https://github.com/tj/n), should also have similar feature.
+Also make sure that you're using a correct Node.js version `^>=16.x`. If you're using [nvm](https://github.com/nvm-sh/nvm) for Node.js version management you may run `nvm use` from the root folder of the project and the correct version will be picked up. Other Node.js version management tools, such as [fnm](https://github.com/Schniz/fnm) and [tj/n](https://github.com/tj/n), should also have similar feature.
 
 **try not to use `sudo` permissions**, If you must use sudo, you need install rust in you system environment. For Mac, you can use brew to install it. For Linux like Ubuntu, you need apt to install it. In addition, Ubuntu can run the following commands before starting, depending on the previous needs.
 
