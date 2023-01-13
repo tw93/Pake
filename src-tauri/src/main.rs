@@ -1,6 +1,8 @@
 // at the top of main.rs - that will prevent the console from showing
 #![windows_subsystem = "windows"]
 extern crate image;
+use dirs::download_dir;
+use std::path::PathBuf;
 use tauri_utils::config::{Config, WindowConfig};
 use wry::{
     application::{
@@ -12,9 +14,10 @@ use wry::{
     webview::WebViewBuilder,
 };
 
-// enum UserEvent {
-//     NewWindow(String),
-// }
+enum UserEvent {
+    DownloadStarted(String, String),
+    DownloadComplete(Option<PathBuf>, bool),
+}
 
 #[cfg(target_os = "macos")]
 use wry::application::{
@@ -87,9 +90,8 @@ fn main() -> wry::Result<()> {
         ..
     } = get_windows_config().1.unwrap_or_default();
 
-    // let event_loop: EventLoop<UserEvent> = EventLoop::with_user_event();
-    // let proxy = event_loop.create_proxy();
-    let event_loop = EventLoop::new();
+    let event_loop: EventLoop<UserEvent> = EventLoop::with_user_event();
+    let proxy = event_loop.create_proxy();
     let common_window = WindowBuilder::new()
         .with_title("")
         .with_resizable(resizable)
@@ -103,7 +105,7 @@ fn main() -> wry::Result<()> {
     #[cfg(target_os = "windows")]
     let window = {
         let mut icon_path = format!("png/{}_32.ico", package_name);
-        // 假如没有设置，就使用默认的即可
+        // If there is no setting, use the default one.
         if !std::path::Path::new(&icon_path).exists() {
             icon_path = "png/icon_32.ico".to_string();
         }
@@ -128,6 +130,7 @@ fn main() -> wry::Result<()> {
         .build(&event_loop)
         .unwrap();
 
+    // Handling events of JS -> Rust
     let handler = move |window: &Window, req: String| {
         if req == "drag_window" {
             let _ = window.drag_window();
@@ -140,7 +143,31 @@ fn main() -> wry::Result<()> {
         }
     };
 
-    // 用于欺骗部分页面对于浏览器的强检测
+    let download_started = {
+        let proxy = proxy.clone();
+        move |uri: String, default_path: &mut PathBuf| {
+            let path = download_dir()
+                .unwrap()
+                .join(default_path.display().to_string())
+                .as_path()
+                .to_path_buf();
+            *default_path = path.clone();
+            let submitted = proxy
+                .send_event(UserEvent::DownloadStarted(
+                    uri.clone(),
+                    path.display().to_string(),
+                ))
+                .is_ok();
+            return submitted;
+        }
+    };
+
+    let download_completed = {
+        let proxy = proxy.clone();
+        move |_uri, path, success| {
+            let _ = proxy.send_event(UserEvent::DownloadComplete(path, success));
+        }
+    };
 
     #[cfg(target_os = "macos")]
     let webview = {
@@ -151,11 +178,9 @@ fn main() -> wry::Result<()> {
             .with_devtools(cfg!(feature = "devtools"))
             .with_initialization_script(include_str!("pake.js"))
             .with_ipc_handler(handler)
-            // .with_new_window_req_handler(move |uri: String| {
-            //     let submitted = proxy.send_event(UserEvent::NewWindow(uri.clone())).is_ok();
-            //     submitted
-            // })
             .with_back_forward_navigation_gestures(true)
+            .with_download_started_handler(download_started)
+            .with_download_completed_handler(download_completed)
             .build()?
     };
 
@@ -185,10 +210,8 @@ fn main() -> wry::Result<()> {
             .with_initialization_script(include_str!("pake.js"))
             .with_ipc_handler(handler)
             .with_web_context(&mut web_content)
-            // .with_new_window_req_handler(move |uri: String| {
-            //     let submitted = proxy.send_event(UserEvent::NewWindow(uri.clone())).is_ok();
-            //     submitted
-            // })
+            .with_download_started_handler(download_started)
+            .with_download_completed_handler(download_completed)
             .build()?
     };
     #[cfg(feature = "devtools")]
@@ -217,9 +240,18 @@ fn main() -> wry::Result<()> {
                 println!("Clicked on {:?}", menu_id);
                 println!("Clicked on {:?}", webview.window().is_visible());
             }
-            // Event::UserEvent(UserEvent::NewWindow(uri)) => {
-            //     webbrowser::open(&uri).expect("no browser");
-            // }
+            Event::UserEvent(UserEvent::DownloadStarted(uri, temp_dir)) => {
+                println!("Download: {}", uri);
+                println!("Will write to: {:?}", temp_dir);
+            }
+            Event::UserEvent(UserEvent::DownloadComplete(_, success)) => {
+                println!("Succeeded: {}", success);
+                if success {
+                    let _ = webview.evaluate_script("window.Toast('Save in downloads folder')");
+                } else {
+                    println!("No output path")
+                }
+            }
             _ => (),
         }
     });
