@@ -22,7 +22,8 @@ image = "0.24.5"
 home = "0.5"
 tauri-utils = "1.2.1"
 webbrowser = "0.8.2"
-wry = "0.23.4"
+wry = "0.24.1"
+dirs = "4.0"
 
 [features]
 # by default Tauri runs in production mode
