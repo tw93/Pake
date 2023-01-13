@@ -75,12 +75,12 @@ do
     if [[ "$OSTYPE" =~ ^darwin ]]; then
         # update icon
         # if icon exsits, change icon path
-        if [ ! -f "src-tauri/icons/${package_name}.icons" ]; then
+        if [ ! -f "src-tauri/icons/${package_name}.icns" ]; then
             # else, replace icon to default
             echo "warning"
             echo "icon for MacOS not exsist, will use default icon to replace it"
             echo "warning"
-            cp "src-tauri/icons/icon.icns" "src-tauri/icons/${package_name}.icons"
+            cp "src-tauri/icons/icon.icns" "src-tauri/icons/${package_name}.icns"
         fi
         $sd "${old_name}" "${package_name}" src-tauri/tauri.macos.conf.json
         $sd "${old_title}" "${package_title}" src-tauri/tauri.conf.json
