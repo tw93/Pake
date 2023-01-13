@@ -375,11 +375,12 @@ function Toast(msg) {
 	m.style.cssText = "max-width:60%;min-width: 180px;padding:0 8px;height: 36px;color: rgb(255, 255, 255);line-height: 36px;text-align: center;border-radius: 4px;position: fixed;bottom:16px;right: 16px;transform: translate(-50%, -50%);z-index: 999999;background: rgba(0, 0, 0,.9);font-size: 14px;";
 	document.body.appendChild(m);
 	setTimeout(function() {
+    const d = 0.5;
 		m.style.transition = 'transform ' + d + 's ease-in, opacity ' + d + 's ease-in';
 		m.style.opacity = '0';
 		setTimeout(function() {
 			document.body.removeChild(m)
-		}, 500);
-	}, 3000);
+		}, d * 1000);
+	}, 2500);
 }
 

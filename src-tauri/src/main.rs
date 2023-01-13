@@ -153,10 +153,7 @@ fn main() -> wry::Result<()> {
                 .to_path_buf();
             *default_path = path.clone();
             let submitted = proxy
-                .send_event(UserEvent::DownloadStarted(
-                    uri,
-                    path.display().to_string(),
-                ))
+                .send_event(UserEvent::DownloadStarted(uri, path.display().to_string()))
                 .is_ok();
             submitted
         }
