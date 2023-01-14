@@ -1,8 +1,6 @@
 // at the top of main.rs - that will prevent the console from showing
 #![windows_subsystem = "windows"]
 extern crate image;
-use dirs::download_dir;
-use std::path::PathBuf;
 use tauri_utils::config::{Config, WindowConfig};
 use wry::{
     application::{
@@ -13,11 +11,6 @@ use wry::{
     },
     webview::WebViewBuilder,
 };
-
-enum UserEvent {
-    DownloadStarted(String, String),
-    DownloadComplete(Option<PathBuf>, bool),
-}
 
 #[cfg(target_os = "macos")]
 use wry::application::{
@@ -32,6 +25,14 @@ use wry::application::window::Icon;
 
 #[cfg(any(target_os = "linux", target_os = "windows"))]
 use wry::webview::WebContext;
+
+use dirs::download_dir;
+use std::path::PathBuf;
+
+enum UserEvent {
+    DownloadStarted(String, String),
+    DownloadComplete(Option<PathBuf>, bool),
+}
 
 fn main() -> wry::Result<()> {
     #[cfg(target_os = "macos")]
