@@ -1,0 +1,46 @@
+name: Feature
+description: Add new feature, improve code, and more
+labels: [ "enhancement" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you very much for your feature proposal!
+  - type: checkboxes
+    attributes:
+      label: Search before asking
+      description: >
+        Please search [issues](https://github.com/tw93/Pake/issues?q=) to check if your issue has already been reported.
+      options:
+        - label: >
+            我在 [issues](https://github.com/tw93/Pake/issues?q=) 列表中搜索，没有找到类似的内容。
+
+            I searched in the [issues](https://github.com/tw93/Pake/issues?q=) and found nothing similar.
+          required: true
+  - type: textarea
+    attributes:
+      label: Motivation
+      description: Describe the motivations for this feature, like how it fixes the problem you meet.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Solution
+      description: Describe the proposed solution and add related materials like links if any.
+  - type: textarea
+    attributes:
+      label: Alternatives
+      description: Describe other alternative solutions or features you considered, but rejected.
+  - type: textarea
+    attributes:
+      label: Anything else?
+  - type: checkboxes
+    attributes:
+      label: Are you willing to submit a PR?
+      description: >
+        We look forward to the community of developers or users helping develop Pake features together. If you are willing to submit a PR to implement the feature, please check the box.
+      options:
+        - label: I'm willing to submit a PR!
+  - type: markdown
+    attributes:
+      value: "Thanks for completing our form!"
