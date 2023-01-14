@@ -51,7 +51,7 @@ dependencies = [
  "tauri-build",
  "tauri-utils",
  "webbrowser",
- "wry 0.24.1",
+ "wry",
 ]
 
 [[package]]
@@ -2537,63 +2537,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tao"
-version = "0.16.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "704522803dda895767f69198af8351b0a3f4fe2e293c3ca54cce0ecba05a97f2"
-dependencies = [
- "bitflags",
- "cairo-rs",
- "cc",
- "cocoa",
- "core-foundation",
- "core-graphics",
- "crossbeam-channel",
- "dispatch",
- "gdk",
- "gdk-pixbuf",
- "gdk-sys",
- "gdkx11-sys",
- "gio",
- "glib",
- "glib-sys",
- "gtk",
- "image",
- "instant",
- "jni",
- "lazy_static",
- "libc",
- "log",
- "ndk",
- "ndk-context",
- "ndk-sys",
- "objc",
- "once_cell",
- "parking_lot",
- "png",
- "raw-window-handle",
- "scopeguard",
- "serde",
- "tao-macros",
- "unicode-segmentation",
- "uuid 1.2.2",
- "windows 0.39.0",
- "windows-implement",
- "x11-dl",
-]
-
-[[package]]
-name = "tao-macros"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b6fcd8245d45a39ffc8715183d92ae242750eb57b285eb3bcd63dfd512afd09"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "tar"
 version = "0.4.38"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2741,7 +2684,7 @@ dependencies = [
  "webkit2gtk",
  "webview2-com",
  "windows 0.39.0",
- "wry 0.23.4",
+ "wry",
 ]
 
 [[package]]
@@ -3496,45 +3439,7 @@ dependencies = [
  "serde_json",
  "sha2",
  "soup2",
- "tao 0.15.8",
- "thiserror",
- "url",
- "webkit2gtk",
- "webkit2gtk-sys",
- "webview2-com",
- "windows 0.39.0",
- "windows-implement",
-]
-
-[[package]]
-name = "wry"
-version = "0.24.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c846dc4dda988e959869dd0802cd27417c9696e584593e49178aeee28890d25"
-dependencies = [
- "base64",
- "block",
- "cocoa",
- "core-graphics",
- "crossbeam-channel",
- "dunce",
- "gdk",
- "gio",
- "glib",
- "gtk",
- "html5ever",
- "http",
- "kuchiki",
- "libc",
- "log",
- "objc",
- "objc_id",
- "once_cell",
- "serde",
- "serde_json",
- "sha2",
- "soup2",
- "tao 0.16.0",
+ "tao",
  "thiserror",
  "url",
  "webkit2gtk",
