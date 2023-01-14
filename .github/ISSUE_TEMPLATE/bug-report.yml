@@ -1,0 +1,76 @@
+name: Bug report
+description: Problems with the software
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you very much for your feedback!
+
+        有关讨论、建议或者咨询的内容请去往[讨论区](https://github.com/tw93/Pake/discussions)。
+
+        For suggestions or help, please consider using [Github Discussion](https://github.com/tw93/Pake/discussions) instead.
+  - type: checkboxes
+    attributes:
+      label: Search before asking
+      description: >
+        🙊 辛苦提 bug 前，去找一下 [历史](https://github.com/tw93/Pake/issues?q=) 是否有提。辛苦提供系统版本、录屏或者截图、复现路径，期待解决的点——这几个说明能帮助我更好的解决问题，此外假如是讨论，建议辛苦去 [Discussions](https://github.com/tw93/Pake/discussions) 看看是否有类似的讨论。
+
+        🙊 Check out [Issues](https://github.com/tw93/Pake/issues?q=) before reporting. Please provide your system version, screencasts, screenshots, way to reproduce, and the expected result – helpful for me to understand and fix up this issue! Besides, for suggestions or something else, head to [Pake's Discussions Platform](https://github.com/tw93/Pake/discussions).
+      options:
+        - label: >
+            我在 [issues](https://github.com/tw93/Pake/issues?q=) 列表中搜索，没有找到类似的内容。
+
+            I searched in the [issues](https://github.com/tw93/Pake/issues?q=) and found nothing similar.
+          required: true
+  - type: textarea
+    attributes:
+      label: Pake version
+      description: >
+        Please provide the version of Pake you are using. If you are using the master/dev branch, please provide the commit id.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: System version
+      description: >
+        Please provide the version of System you are using.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Node.js version
+      description: >
+        Please provide the Node.js version.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Minimal reproduce step
+      description: Please try to give reproducing steps to facilitate quick location of the problem.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What did you expect to see?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What did you see instead?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Anything else?
+  - type: checkboxes
+    attributes:
+      label: Are you willing to submit a PR?
+      description: >
+        We look forward to the community of developers or users helping solve Pake problems together. If you are willing to submit a PR to fix this problem, please check the box.
+      options:
+        - label: I'm willing to submit a PR!
+  - type: markdown
+    attributes:
+      value: "Thanks for completing our form!"
