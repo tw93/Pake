@@ -244,7 +244,7 @@ fn main() -> wry::Result<()> {
             Event::UserEvent(UserEvent::DownloadComplete(_, success)) => {
                 println!("Succeeded: {}", success);
                 if success {
-                    let _ = webview.evaluate_script("window.Toast('Save in downloads folder')");
+                    let _ = webview.evaluate_script("window.pakeToast('Save in downloads folder')");
                 } else {
                     println!("No output path")
                 }
