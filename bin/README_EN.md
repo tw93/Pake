@@ -11,7 +11,7 @@ Also make sure that you're using a correct Node.js version `>=16 as 16.18.1`. If
 **Preparation before installation**
 - Check out the dependency guide provided by tauri(**very important**): [link](https://tauri.app/v1/guides/getting-started/prerequisites)
 - Check nodejs, rust version.
-- For windows(at least install `Win10 SDK (10.0.19041.0)` and `Visual Studio build tool 2022(>=17.2)` installed),, additional installation is required:
+- For windows(at least install `Win10 SDK (10.0.19041.0)` and `Visual Studio build tool 2022(>=17.2)` installed),additional installation is required:
 1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
 2. Microsoft Visual C++ 2015-2022 Redistributable (x86)
 3. Microsoft Visual C++ 2012 Redistributable (x86) (optional)
