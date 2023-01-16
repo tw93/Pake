@@ -9,15 +9,19 @@ If the installation fails and you are prompted that you do not have permission, 
 Also make sure that you're using a correct Node.js version `>=16 as 16.18.1`. If you're using [nvm](https://github.com/nvm-sh/nvm) for Node.js version management you may run `nvm use` from the root folder of the project and the correct version will be picked up. Other Node.js version management tools, such as [fnm](https://github.com/Schniz/fnm) and [tj/n](https://github.com/tj/n), should also have similar feature.
 
 **Preparation before installation**
+
 - Check out the dependency guide provided by tauri(**very important**): [link](https://tauri.app/v1/guides/getting-started/prerequisites)
 - Check nodejs, rust version.
 - For windows(at least installed `Win10 SDK (10.0.19041.0)` and `Visual Studio build tool 2022(>=17.2)`),additional installation is required:
-1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
-2. Microsoft Visual C++ 2015-2022 Redistributable (x86)
-3. Microsoft Visual C++ 2012 Redistributable (x86) (optional)
-4. Microsoft Visual C++ 2013 Redistributable (x86) (optional)
-5. Microsoft Visual C++ 2008 Redistributable (x86) (optional)
+
+  1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
+  2. Microsoft Visual C++ 2015-2022 Redistributable (x86)
+  3. Microsoft Visual C++ 2012 Redistributable (x86) (optional)
+  4. Microsoft Visual C++ 2013 Redistributable (x86) (optional)
+  5. Microsoft Visual C++ 2008 Redistributable (x86) (optional)
+
 - In addition, Ubuntu can run the following command before starting to install the required dependencies in the early stage.
+
 ```bash
 sudo apt install libdbus-1-dev \
     libsoup2.4-dev \
@@ -34,7 +38,7 @@ sudo apt install libdbus-1-dev \
     gnome-video-effects-extra
 ```
 
-**try not to use `sudo` permissions**, If you must use sudo, you need install rust in you system environment. For Mac, you can use brew to install it. For Linux like Ubuntu, you need apt to install it. 
+**try not to use `sudo` permissions**, If you must use sudo, you need install rust in you system environment. For Mac, you can use brew to install it. For Linux like Ubuntu, you need apt to install it.
 
 ## Usage
 

@@ -9,15 +9,19 @@ npm install -g pake-cli
 此外，请确保你使用的是正确的 Node.js 版本 `>=16 如 16.18.1`，如果你在使用 [nvm](https://github.com/nvm-sh/nvm) 进行 Node.js 版本管理，可以尝试在项目的目录下运行 `nvm use`，就会拿到正确的版本；其他一众 Node.js 版本工具，比如 [fnm](https://github.com/Schniz/fnm)、[tj/n](https://github.com/tj/n) 应该也有类似的功能。
 
 **安装前准备工作**
-- 查看tauri提供的依赖指南（**十分重要**）：[链接](https://tauri.app/v1/guides/getting-started/prerequisites)
-- 检查nodejs, rust版本。
-- 对于windows（至少安装了`Win10 SDK(10.0.19041.0)` 与`Visual Studio build tool 2022（>=17.2）`），还需要额外安装：
-1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
-2. Microsoft Visual C++ 2015-2022 Redistributable (x86)
-3. Microsoft Visual C++ 2012 Redistributable (x86)（可选）
-4. Microsoft Visual C++ 2013 Redistributable (x86)（可选）
-5. Microsoft Visual C++ 2008 Redistributable (x86)（可选）
+
+- 查看 tauri 提供的依赖指南（**十分重要**）：[链接](https://tauri.app/v1/guides/getting-started/prerequisites)
+- 检查 nodejs, rust 版本。
+- 对于 windows（至少安装了`Win10 SDK(10.0.19041.0)` 与`Visual Studio build tool 2022（>=17.2）`），还需要额外安装：
+
+  1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
+  2. Microsoft Visual C++ 2015-2022 Redistributable (x86)
+  3. Microsoft Visual C++ 2012 Redistributable (x86)（可选）
+  4. Microsoft Visual C++ 2013 Redistributable (x86)（可选）
+  5. Microsoft Visual C++ 2008 Redistributable (x86)（可选）
+
 - 此外 Ubuntu 在开始之前可以运行如下命令，安装前期所需依赖。
+
 ```bash
 sudo apt install libdbus-1-dev \
     libsoup2.4-dev \
