@@ -67,7 +67,7 @@ do
     url=${arr[3]}
     # replace package info
     $sd -s "${old_url}" "${url}" src-tauri/tauri.conf.json
-    $sd "${old_name}" "${package_name}" src-tauri/tauri.conf.json
+    $sd -s "${old_name}" "${package_name}" src-tauri/tauri.conf.json
     # echo "update ico with 32x32 pictue"
     # $sd "${old_name}" "${package_name}" src-tauri/src/main.rs
 
@@ -82,8 +82,8 @@ do
             echo "warning"
             cp "src-tauri/icons/icon.icns" "src-tauri/icons/${package_name}.icns"
         fi
-        $sd "${old_name}" "${package_name}" src-tauri/tauri.macos.conf.json
-        $sd "${old_title}" "${package_title}" src-tauri/tauri.conf.json
+        $sd -s "${old_name}" "${package_name}" src-tauri/tauri.macos.conf.json
+        $sd -s "${old_title}" "${package_title}" src-tauri/tauri.conf.json
     fi
 
     # echo "update ico with 32x32 pictue"
@@ -105,8 +105,8 @@ do
         old_desktop="src-tauri/assets/${package_prefix}-${old_name}.desktop"
         new_desktop="src-tauri/assets/${package_prefix}-${package_name}.desktop"
         mv "${old_desktop}" "${new_desktop}"
-        $sd "${old_zh_name}" "${package_zh_name}" "${new_desktop}"
-        $sd "${old_name}" "${package_name}" "${new_desktop}"
+        $sd -s "${old_zh_name}" "${package_zh_name}" "${new_desktop}"
+        $sd -s "${old_name}" "${package_name}" "${new_desktop}"
     fi
 
     # update package info
