@@ -8,11 +8,33 @@ npm install -g pake-cli
 
 此外，请确保你使用的是正确的 Node.js 版本 `>=16 如 16.18.1`，如果你在使用 [nvm](https://github.com/nvm-sh/nvm) 进行 Node.js 版本管理，可以尝试在项目的目录下运行 `nvm use`，就会拿到正确的版本；其他一众 Node.js 版本工具，比如 [fnm](https://github.com/Schniz/fnm)、[tj/n](https://github.com/tj/n) 应该也有类似的功能。
 
-**尽量不要使用 `sudo` 权限**。 如果实在要用 sudo，请手动安装 rust 到系统环境。Mac 可以用 brew 命令安装，Linux 如 Ubuntu 可以用 apt 命令安装，此外 Ubuntu 在开始之前可以运行如下命令，按照前期所需依赖。
-
+**安装前准备工作**
+- 查看tauri提供的依赖指南（**十分重要**）：[链接](https://tauri.app/v1/guides/getting-started/prerequisites)
+- 检查nodejs, rust版本。
+- 对于windows，还需要额外安装（[离线安装]()）
+1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
+2. Microsoft Visual C++ 2015-2022 Redistributable (x86)
+3. Microsoft Visual C++ 2012 Redistributable (x86)（可选）
+4. Microsoft Visual C++ 2013 Redistributable (x86)（可选）
+5. Microsoft Visual C++ 2008 Redistributable (x86)（可选）
+- 此外 Ubuntu 在开始之前可以运行如下命令，安装前期所需依赖。
 ```bash
-sudo apt install libdbus-1-dev libgtk-3-dev libsoup2.4-dev libjavascriptcoregtk-4.0-dev libwebkit2gtk-4.0-dev
+sudo apt install libdbus-1-dev \
+    libsoup2.4-dev \
+    libjavascriptcoregtk-4.0-dev \
+    libwebkit2gtk-4.0-dev \
+    build-essential \
+    curl \
+    wget \
+    libssl-dev \
+    libgtk-3-dev \
+    libayatana-appindicator3-dev \
+    librsvg2-dev \
+    gnome-video-effects \
+    gnome-video-effects-extra
 ```
+
+**尽量不要使用 `sudo` 权限**。 如果实在要用 sudo，请手动安装 rust 到系统环境，Mac 可以用 brew 命令安装，Linux 如 Ubuntu 可以用 apt 命令安装。
 
 ## 用法
 
