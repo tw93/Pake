@@ -22,21 +22,21 @@ npm install -g pake-cli
 
 - 此外 Ubuntu 在开始之前可以运行如下命令，安装前期所需依赖。
 
-```bash
-sudo apt install libdbus-1-dev \
-    libsoup2.4-dev \
-    libjavascriptcoregtk-4.0-dev \
-    libwebkit2gtk-4.0-dev \
-    build-essential \
-    curl \
-    wget \
-    libssl-dev \
-    libgtk-3-dev \
-    libayatana-appindicator3-dev \
-    librsvg2-dev \
-    gnome-video-effects \
-    gnome-video-effects-extra
-```
+  ```bash
+  sudo apt install libdbus-1-dev \
+      libsoup2.4-dev \
+      libjavascriptcoregtk-4.0-dev \
+      libwebkit2gtk-4.0-dev \
+      build-essential \
+      curl \
+      wget \
+      libssl-dev \
+      libgtk-3-dev \
+      libayatana-appindicator3-dev \
+      librsvg2-dev \
+      gnome-video-effects \
+      gnome-video-effects-extra
+  ```
 
 **尽量不要使用 `sudo` 权限**。 如果实在要用 sudo，请手动安装 rust 到系统环境，Mac 可以用 brew 命令安装，Linux 如 Ubuntu 可以用 apt 命令安装。
 

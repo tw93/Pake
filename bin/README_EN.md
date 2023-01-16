@@ -22,21 +22,21 @@ Also make sure that you're using a correct Node.js version `>=16 as 16.18.1`. If
 
 - In addition, Ubuntu can run the following command before starting to install the required dependencies in the early stage.
 
-```bash
-sudo apt install libdbus-1-dev \
-    libsoup2.4-dev \
-    libjavascriptcoregtk-4.0-dev \
-    libwebkit2gtk-4.0-dev \
-    build-essential \
-    curl \
-    wget \
-    libssl-dev \
-    libgtk-3-dev \
-    libayatana-appindicator3-dev \
-    librsvg2-dev \
-    gnome-video-effects \
-    gnome-video-effects-extra
-```
+  ```bash
+  sudo apt install libdbus-1-dev \
+      libsoup2.4-dev \
+      libjavascriptcoregtk-4.0-dev \
+      libwebkit2gtk-4.0-dev \
+      build-essential \
+      curl \
+      wget \
+      libssl-dev \
+      libgtk-3-dev \
+      libayatana-appindicator3-dev \
+      librsvg2-dev \
+      gnome-video-effects \
+      gnome-video-effects-extra
+  ```
 
 **try not to use `sudo` permissions**, If you must use sudo, you need install rust in you system environment. For Mac, you can use brew to install it. For Linux like Ubuntu, you need apt to install it.
 
