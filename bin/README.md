@@ -1,17 +1,16 @@
 ## 安装
 
+请确保 Node 版本>=16 如 16.8，不要使用 sudo 进行安装：
+
 ```bash
 npm install -g pake-cli
 ```
 
-如果安装失败提示没有权限，请参考该贴解决：[链接](https://gist.github.com/Giancarlos/d087f8a9e6516716da98ad0c0f5a8f58)。
+假如 npm 报没有权限可以参考 [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo)。
 
-此外，请确保你使用的是正确的 Node.js 版本 `>=16 如 16.18.1`，如果你在使用 [nvm](https://github.com/nvm-sh/nvm) 进行 Node.js 版本管理，可以尝试在项目的目录下运行 `nvm use`，就会拿到正确的版本；其他一众 Node.js 版本工具，比如 [fnm](https://github.com/Schniz/fnm)、[tj/n](https://github.com/tj/n) 应该也有类似的功能。
+## Windows 和 Linux 用户注意点
 
-**安装前准备工作**
-
-- 查看 tauri 提供的依赖指南（**十分重要**）：[链接](https://tauri.app/v1/guides/getting-started/prerequisites)
-- 检查 nodejs, rust 版本。
+- 查看 tauri 提供的[依赖指南](https://tauri.app/v1/guides/getting-started/prerequisites)（**十分重要**）
 - 对于 windows（至少安装了`Win10 SDK(10.0.19041.0)` 与`Visual Studio build tool 2022（>=17.2）`），还需要额外安装：
 
   1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
@@ -37,8 +36,6 @@ npm install -g pake-cli
       gnome-video-effects \
       gnome-video-effects-extra
   ```
-
-**尽量不要使用 `sudo` 权限**。 如果实在要用 sudo，请手动安装 rust 到系统环境，Mac 可以用 brew 命令安装，Linux 如 Ubuntu 可以用 apt 命令安装。
 
 ## 用法
 

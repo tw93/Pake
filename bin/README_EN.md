@@ -1,17 +1,16 @@
 ## Install
 
+Please ensure that Node version>=16, such as 16.8, do not use sudo for installation:
+
 ```bash
 npm install -g pake-cli
 ```
 
-If the installation fails and you are prompted that you do not have permission, please see this [website](https://gist.github.com/Giancarlos/d087f8a9e6516716da98ad0c0f5a8f58) .
+If the npm report has no permission, you can refer to [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo).
 
-Also make sure that you're using a correct Node.js version `>=16 as 16.18.1`. If you're using [nvm](https://github.com/nvm-sh/nvm) for Node.js version management you may run `nvm use` from the root folder of the project and the correct version will be picked up. Other Node.js version management tools, such as [fnm](https://github.com/Schniz/fnm) and [tj/n](https://github.com/tj/n), should also have similar feature.
+## Windows and Linux user considerations
 
-**Preparation before installation**
-
-- Check out the dependency guide provided by tauri(**very important**): [link](https://tauri.app/v1/guides/getting-started/prerequisites)
-- Check nodejs, rust version.
+- Check out the dependency guide provided by tauri [link](https://tauri.app/v1/guides/getting-started/prerequisites)(**very important**).
 - For windows(at least installed `Win10 SDK (10.0.19041.0)` and `Visual Studio build tool 2022(>=17.2)`),additional installation is required:
 
   1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
@@ -37,8 +36,6 @@ Also make sure that you're using a correct Node.js version `>=16 as 16.18.1`. If
       gnome-video-effects \
       gnome-video-effects-extra
   ```
-
-**try not to use `sudo` permissions**, If you must use sudo, you need install rust in you system environment. For Mac, you can use brew to install it. For Linux like Ubuntu, you need apt to install it.
 
 ## Usage
 
