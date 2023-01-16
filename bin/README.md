@@ -1,16 +1,14 @@
 ## 安装
 
-请确保 Node 版本>=16 如 16.8，不要使用 sudo 进行安装：
+请确保 Node 版本>=16 如 16.8，不要使用 sudo 进行安装，假如 npm 报没有权限可以参考 [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo)。
 
 ```bash
 npm install -g pake-cli
 ```
 
-假如 npm 报没有权限可以参考 [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo)。
+## Windows/Linux 注意点
 
-## Windows 和 Linux 用户注意点
-
-- 查看 tauri 提供的[依赖指南](https://tauri.app/v1/guides/getting-started/prerequisites)（**十分重要**）
+- **十分重要** 查看 Tauri 提供的[依赖指南](https://tauri.app/v1/guides/getting-started/prerequisites)
 - 对于 windows（至少安装了`Win10 SDK(10.0.19041.0)` 与`Visual Studio build tool 2022（>=17.2）`），还需要额外安装：
 
   1. Microsoft Visual C++ 2015-2022 Redistributable (x64)

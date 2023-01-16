@@ -1,17 +1,16 @@
 ## Install
 
-Please ensure that Node version>=16, such as 16.8, do not use sudo for installation:
+Please ensure that Node version>=16, such as 16.8, do not use sudo for installation.
+If the npm report has no permission, you can refer to [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo).
 
 ```bash
 npm install -g pake-cli
 ```
 
-If the npm report has no permission, you can refer to [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo).
+## Windows and Linux considerations
 
-## Windows and Linux user considerations
-
-- Check out the dependency guide provided by tauri [link](https://tauri.app/v1/guides/getting-started/prerequisites)(**very important**).
-- For windows(at least installed `Win10 SDK (10.0.19041.0)` and `Visual Studio build tool 2022(>=17.2)`),additional installation is required:
+- **Very important**, check out the dependency guide provided by Tauri [link](https://tauri.app/v1/guides/getting-started/prerequisites).
+- For windows (at least installed `Win10 SDK (10.0.19041.0)` and `Visual Studio build tool 2022(>=17.2)`), additional installation is required:
 
   1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
   2. Microsoft Visual C++ 2015-2022 Redistributable (x86)
