@@ -11,7 +11,7 @@ npm install -g pake-cli
 **安装前准备工作**
 - 查看tauri提供的依赖指南（**十分重要**）：[链接](https://tauri.app/v1/guides/getting-started/prerequisites)
 - 检查nodejs, rust版本。
-- 对于windows，还需要额外安装（[离线安装]()）
+- 对于windows，还需要额外安装：
 1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
 2. Microsoft Visual C++ 2015-2022 Redistributable (x86)
 3. Microsoft Visual C++ 2012 Redistributable (x86)（可选）
