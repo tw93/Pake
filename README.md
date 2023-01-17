@@ -170,7 +170,7 @@ npm run build
 3. For window property settings, you can modify the `width/height` of the `windows` property in `tauri.conf.json`, whether it is `fullscreen`, whether it is `resizable`, If you want to adapt the immersive header under Mac, you can set `transparent` to `true` and then find header element and add the `padding-top` style.
 4. About style rewriting, advertising shielding, js injection, container message communication, and user-defined shortcut keys, you can see [Advanced Usage of Make](https://github.com/tw93/Pake/wiki/Advanced-Usage-of-Make).
 
-## 开发者
+## Developer
 
 Pake's development can not be separated from these Hackers, together contributed a lot of ability, also welcome to follow them ❤️
 
