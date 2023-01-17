@@ -16,8 +16,7 @@
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-<strong align="center">A simple way to package a web page to desktop application, support Mac / Windows / Linux</strong>.
-<div align="left">App download、<a href="#Command line packing">command line packaging</a>、<a href="#Development">custom development</a> can be found in the following document.Welcome to <a href=https://github.com/tw93/Pake/discussions>Discussions</a> to see if there have anything you're interesting.</div>
+<div align="left"><strong align="center">A simple way to package a web page to desktop application, support Mac / Windows / Linux</strong>. App download、<a href="#Command line packing">command line packaging</a>、<a href="#Development">custom development</a> can be found in readme. Welcome to <a href=https://github.com/tw93/Pake/discussions>Discussions</a> to see if there have anything you're interesting.</div>
 
 ## Features
 
