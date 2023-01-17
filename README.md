@@ -21,7 +21,7 @@
 
 🏂 **Small**：Nearly 40 times smaller than Electron package, less than 3M.  
 😂 **Fast**：Using the Rust Tauri, it`s much lighter and faster than JS.  
-🩴 **Special**：Not just packaged, with shortcut pass-through, immersive windows, minimalist customization of products.  
+🩴 **Special**：Not just packaged, with shortcut pass-through, immersive windows, minimalist customization.  
 🐶 **Toy**：Just a simple way to play with Rust instead of the old idea of shelling the web.
 
 ## Download
