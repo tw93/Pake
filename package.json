@@ -1,6 +1,6 @@
 {
   "name": "pake-cli",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App 🤱🏻 A simple way to make any web page a desktop application using Rust.",
   "engines": {
     "node": ">=16.0.0"
