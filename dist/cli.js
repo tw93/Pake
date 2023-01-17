@@ -1642,7 +1642,7 @@ function mergeTauriConfig(url, options, tauriConf) {
                 process.exit();
             }
         }
-        if (process.platform === "win32" || process.platform === "darwin") {
+        if (process.platform === "win32") {
             const reg = new RegExp(/([0-9]*[a-zA-Z]+[0-9]*)+/);
             if (!reg.test(name) || reg.exec(name)[0].length != name.length) {
                 logger.error("package name is illegal， it must be letters, numbers, and it must contain the letters");
@@ -2149,10 +2149,10 @@ class BuilderFactory {
 }
 
 var name = "pake-cli";
-var version = "1.2.1";
+var version = "1.2.2";
 var description = "🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App 🤱🏻 A simple way to make any web page a desktop application using Rust.";
 var engines = {
-	node: "^14.13 || >=16.0.0"
+	node: ">=16.0.0"
 };
 var bin = {
 	pake: "./cli.js"
