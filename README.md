@@ -16,7 +16,7 @@
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-<div align="left"><strong align="center">A simple way to package a web page to desktop application, support Mac / Windows / Linux</strong>. App download、<a href="#Command line packing">command line packaging</a>、<a href="#Development">custom development</a> can be found in readme. Welcome to <a href=https://github.com/tw93/Pake/discussions>Discussions</a> to see if there have anything you're interesting.</div>
+<div align="left"><strong>Simply make any web page a desktop application using rust, support Mac/Windows/Linux.</strong><br>About app download、<a href="#command-line-packing">command line packaging</a>、<a href="#Development">custom development</a> can be found in readme. Welcome to <a href=https://github.com/tw93/Pake/discussions>discussions</a> to see if there have anything you're interesting.</div>
 
 ## Features
 
