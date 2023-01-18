@@ -16,7 +16,7 @@
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-<div align="left"><strong>Simply make any web page a desktop application using rust.</strong><br>Support Mac/Windows/Linux, about <a href="#popular-downloads">popular downloads</a>、<a href="#command-line-packing">command line packing</a>、<a href="#Development">custom development</a> can be found in readme. Welcome to <a href=https://github.com/tw93/Pake/discussions>discussions</a> to see if there have anything you're interesting.</div>
+<div align="left"><strong>Simply make any web page a desktop application using rust.</strong><br>Support Mac / Windows / Linux, about <a href="#popular-downloads">popular downloads</a>、<a href="#command-line-packing">command line packing</a>、<a href="#Development">custom development</a> can be found in readme. Welcome to <a href=https://github.com/tw93/Pake/discussions>discussions</a> to see if there have anything you're interesting.</div>
 
 ## Features
 
