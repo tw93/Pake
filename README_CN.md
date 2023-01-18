@@ -1,4 +1,4 @@
-<h4 align="right"><strong><a href="https://github.com/tw93/Pake">English</a></strong> | 中文</h4>
+<h4 align="right"><strong><a href="https://github.com/tw93/Pake">English</a></strong> | 简体中文</h4>
 <p align="center">
     <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
 </p>
