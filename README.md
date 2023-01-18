@@ -3,6 +3,7 @@
     <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
 </p>
 <h1 align="center">Pake</h1>
+<p align="center"><strong>Simply make any web page a desktop application using rust.</strong></p>
 <div align="center">
     <a href="https://twitter.com/HiTw93" target="_blank">
     <img alt="twitter" src="https://img.shields.io/twitter/follow/Hitw93?color=%231D9BF0&label=Pake%20%F0%9F%93%A2%20&logo=Twitter&style=flat-square"></a>
@@ -16,7 +17,7 @@
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-<div align="left"><strong>Simply make any web page a desktop application using rust.</strong><br>Support Mac / Windows / Linux, about <a href="#popular-downloads">popular downloads</a>、<a href="#command-line-packing">command line packing</a>、<a href="#Development">custom development</a> can be found in readme. Welcome to <a href=https://github.com/tw93/Pake/discussions>discussions</a> to see if there have anything you're interesting.</div>
+<div align="left">Support Mac / Windows / Linux, about <a href="#popular-downloads">popular downloads</a>、<a href="#command-line-packing">command line packing</a>、<a href="#Development">custom development</a> can be found in readme. Welcome to <a href=https://github.com/tw93/Pake/discussions>discussions</a> to see if there have anything you're interesting.</div>
 
 ## Features
 
