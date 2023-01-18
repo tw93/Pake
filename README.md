@@ -16,7 +16,7 @@
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-<div align="left"><strong>Simply make any web page a desktop application using rust, support Mac/Windows/Linux.</strong><br>About app download、<a href="#command-line-packing">command line packaging</a>、<a href="#Development">custom development</a> can be found in readme. Welcome to <a href=https://github.com/tw93/Pake/discussions>discussions</a> to see if there have anything you're interesting.</div>
+<div align="left"><strong>Simply make any web page a desktop application using rust, support Mac/Windows/Linux.</strong><br>About <a href="#popular-download">popular download</a>、<a href="#command-line-packing">command line packing</a>、<a href="#Development">custom development</a> can be found in readme. Welcome to <a href=https://github.com/tw93/Pake/discussions>discussions</a> to see if there have anything you're interesting.</div>
 
 ## Features
 
@@ -25,7 +25,7 @@
 🩴 **Special**：Not just packaged, with shortcut pass-through, immersive windows, minimalist customization.  
 🐶 **Toy**：Just a simple way to play with Rust instead of the old idea of shelling the web.
 
-## Download
+## Popular Downloads
 
 <table>
     <tr>
