@@ -20,21 +20,21 @@
 
 ## 特征
 
-🏂 **小**：相比传统的 Electron 套壳打包，要小将近 40 倍，不到 3M。  
-😂 **快**：Pake 的底层使用的 Rust Tauri 框架，性能体验较 JS 框架要轻快不少，内存小很多。  
-🩴 **特**：不是单纯打包，实现了快捷键的透传、沉浸式的窗口、拖动、样式改写、去广告、产品的极简风格定制。  
+🏂 **小**：相比传统的 Electron 套壳打包，要小将近 40 倍，不到 3M。
+😂 **快**：Pake 的底层使用的 Rust Tauri 框架，性能体验较 JS 框架要轻快不少，内存小很多。
+🩴 **特**：不是单纯打包，实现了快捷键的透传、沉浸式的窗口、拖动、样式改写、去广告、产品的极简风格定制。
 🐶 **玩**：只是一个很简单的小玩具，用 Rust 替代之前套壳网页打包的老思路，其实 PWA 也很好。
 
 ## 常用包下载
 
 <table>
     <tr>
-        <td>WeRead 
+        <td>WeRead
             <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead_amd64.deb">Linux</a>
         </td>
-        <td>Twitter 
+        <td>Twitter
             <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter_amd64.deb">Linux</a>
@@ -45,12 +45,12 @@
         <td><img src=https://cdn.fliggy.com/upic/mc41xq.jpg width=600/></td>
     </tr>
     <tr>
-        <td>LiZhi 
+        <td>LiZhi
             <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi_amd64.deb">Linux</a>
         </td>
-         <td>YouTube 
+         <td>YouTube
             <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_amd64.deb">Linux</a>
@@ -61,12 +61,12 @@
         <td><img src=https://cdn.fliggy.com/upic/Ea5ZRw.png width=600/></td>
     </tr>
     <tr>
-        <td>Qwerty 
+        <td>Qwerty
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_amd64.deb">Linux</a>
         </td>
-         <td>Reference 
+         <td>Reference
             <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_amd64.deb">Linux</a>
@@ -77,12 +77,12 @@
         <td><img src=https://cdn.fliggy.com/upic/KFsZIY.png width=600/></td>
     </tr>
         <tr>
-           <td>Library  
+           <td>Library
             <a href="https://github.com/tw93/Pake/releases/latest/download/ZLibrary.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/ZLibrary_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/ZLibrary_amd64.deb">Linux</a>
         </td>
-        <td>ChatGPT 
+        <td>ChatGPT
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_amd64.deb">Linux</a>
@@ -133,13 +133,13 @@
 **Pake 提供了命令行工具，可以更快捷方便地一键自定义打你需要的包，详细可见 [文档](./bin/README.md)。**
 
 ```bash
-// 使用 npm 进行安装
+# 使用 npm 进行安装
 npm install -g pake-cli
 
-// 命令使用
+# 命令使用
 pake url [options]
 
-// 随便玩玩，首次由于安装环境会有些慢，后面就快了
+# 随便玩玩，首次由于安装环境会有些慢，后面就快了
 pake https://weekly.tw93.fun --name Weekly --transparent
 ```
 
@@ -150,16 +150,16 @@ pake https://weekly.tw93.fun --name Weekly --transparent
 开始前请确保电脑已经安装了 Rust `>=1.63` 和 Node `>=16 如 16.18.1` 的环境，此外需参考 [Tauri 文档](https://tauri.app/v1/guides/getting-started/prerequisites) 快速配置好环境才可以开始使用，假如你太不懂，使用上面的命令行打包会更加合适。
 
 ```sh
-// 安装依赖
+# 安装依赖
 npm i
 
-// 本地开发
+# 本地开发
 npm run dev
 
-// 本地调试
+# 本地调试
 npm run dev:debug
 
-// 打包应用
+# 打包应用
 npm run build
 
 ```
