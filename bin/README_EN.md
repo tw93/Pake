@@ -1,16 +1,15 @@
 ## Install
 
-Please ensure that Node version>=16, such as 16.8, do not use sudo for installation.
-If the npm report has no permission, you can refer to [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo).
+Ensure the version of your installed Node.js is greater than `16.0` such as `16.8`. Do not use `sudo` to install. If you encountered permission issues/problems while installing using npm, see [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo).
 
 ```bash
 npm install -g pake-cli
 ```
 
-## Windows and Linux considerations
+## Notes for Windows & Linux users
 
-- **Very important**, check out the dependency guide provided by Tauri [link](https://tauri.app/v1/guides/getting-started/prerequisites).
-- For windows (at least installed `Win10 SDK (10.0.19041.0)` and `Visual Studio build tool 2022(>=17.2)`), additional installation is required:
+- **VERY IMPORTANT**: Check out [the Tauri prerequisites](https://tauri.app/v1/guides/getting-started/prerequisites) before proceeding.
+- For Windows users who had been installed `Win10 SDK (10.0.19041.0)` and `Visual Studio build tool 2022(>=17.2)`, you may need to install these additionally:
 
   1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
   2. Microsoft Visual C++ 2015-2022 Redistributable (x86)
@@ -18,7 +17,7 @@ npm install -g pake-cli
   4. Microsoft Visual C++ 2013 Redistributable (x86) (optional)
   5. Microsoft Visual C++ 2008 Redistributable (x86) (optional)
 
-- In addition, Ubuntu can run the following command before starting to install the required dependencies in the early stage.
+- For Ubuntu users, run the following commands to install the required libraries before compiling:
 
   ```bash
   sudo apt install libdbus-1-dev \
@@ -42,21 +41,22 @@ npm install -g pake-cli
 pake url [options]
 ```
 
-After the packaging, the application defaults to the current working directory. Since the environment needs to be configured for the first packaging, it will take some time. Please wait patiently.
+The packaged application will be placed in the current working directory by default. Since the environment needs to be configured for the first packaging, it will take some time. Please wait patiently.
 
-Note: The Rust environment is required for packaging. If you do not have Rust, you will be prompted to confirm the installation. If the installation fails or times out, you can [install](https://www.rust-lang.org/tools/install) it yourself.
+> **Note**:
+> The Rust environment is required for packaging. If you have not installed Rust, you will be prompted to confirm the installation. If the installation fails or times out, you can [install](https://www.rust-lang.org/tools/install) by yourself.
 
 ### url
 
-The url🔗 is the webpage link you need to package, Must be provided.
+The url🔗 is the link to the website you want to package. Required.
 
 ### [options]
 
-Some specific options are provided. When packaging, corresponding parameters can be passed to achieve customized effects.
+We provide some options for customization. When packaging, the corresponding arguments can be passed to configure your app.
 
 #### [name]
 
-The application name, if not specified when entering, will prompt you to enter, input must be English.
+The name of your application. We will prompt you to enter this if you do not provide it in this phase. Input must be in English.
 
 ```shell
 --name <value>
@@ -64,9 +64,9 @@ The application name, if not specified when entering, will prompt you to enter, 
 
 #### [icon]
 
-The application icon, support local and remote files, the default is brand icon of Pake. Customized product icon can go to [icon icons](https://icon-icons.com) Or [macOSicons](https://macosicons.com/#/) download it.
+The application icon. Supports local and remote files. By default, it is the brand icon of Pake. For customizing the icon of your product, go to [icon icons](https://icon-icons.com) or [macOSicons](https://macosicons.com/#/) to download it.
 
-- MacOS must be `.icns`
+- macOS must be `.icns`
 - Windows must be `.ico`
 - Linux must be `.png`
 
@@ -100,7 +100,7 @@ Whether to enable the immersive header. The default is `false`.
 
 #### [resize]
 
-Whether the size can be dragged. The default value is `true`.
+Indicates if the window can be resized. The default value is `true`.
 
 ```shell
 --no-resizable
@@ -108,7 +108,7 @@ Whether the size can be dragged. The default value is `true`.
 
 #### [fullscreen]
 
-Whether to open the full screen after opening the application. The default is `false`.
+Indicates if the window should be full screen on application launch. The default is `false`.
 
 ```shell
 --fullscreen <value>
