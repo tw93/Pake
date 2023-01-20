@@ -1,6 +1,6 @@
 ## Install
 
-Ensure your Node.js installation is greater than `16`, such as `16.8`. Do not use `sudo` to install. If `npm` reports that you don't have permission to install this, see [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo).
+Ensure the version of your installed Node.js is greater than `16.0` such as `16.8`. Do not use `sudo` to install. If you encountered permission issues/problems while installing using npm, see [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo).
 
 ```bash
 npm install -g pake-cli
@@ -64,7 +64,7 @@ The name of your application. We will prompt you to enter this if you do not pro
 
 #### [icon]
 
-The application icon. Support local and remote files. By default, it is the brand icon of Pake. For customizing the icon of your product, go to [icon icons](https://icon-icons.com) or [macOSicons](https://macosicons.com/#/) to download it.
+The application icon. Supports local and remote files. By default, it is the brand icon of Pake. For customizing the icon of your product, go to [icon icons](https://icon-icons.com) or [macOSicons](https://macosicons.com/#/) to download it.
 
 - macOS must be `.icns`
 - Windows must be `.ico`
