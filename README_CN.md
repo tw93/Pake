@@ -137,7 +137,7 @@
 npm install -g pake-cli
 
 # 命令使用
-pake url [options]
+pake url [OPTIONS]...
 
 # 随便玩玩，首次由于安装环境会有些慢，后面就快了
 pake https://weekly.tw93.fun --name Weekly --transparent
