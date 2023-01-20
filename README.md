@@ -3,7 +3,7 @@
     <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
 </p>
 <h1 align="center">Pake</h1>
-<p align="center"><strong>Simply make any web page a desktop application using rust.</strong></p>
+<p align="center"><strong>Turn any webpage into a desktop app with Rust <em>with ease</em>.</strong></p>
 <div align="center">
     <a href="https://twitter.com/HiTw93" target="_blank">
     <img alt="twitter" src="https://img.shields.io/twitter/follow/Hitw93?color=%231D9BF0&label=Pake%20%F0%9F%93%A2%20&logo=Twitter&style=flat-square"></a>
@@ -17,25 +17,25 @@
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-<div align="left">Support Mac / Windows / Linux, about <a href="#popular-downloads">popular downloads</a>、<a href="#command-line-packing">command line packing</a>、<a href="#Development">custom development</a> can be found in readme. Welcome to <a href=https://github.com/tw93/Pake/discussions>discussions</a> to see if there have anything you're interesting.</div>
+<div align="left">Pake supports Mac, Windows, and Linux. Check out README for <a href="#popular-packages">Popular Packages</a>, <a href="#command-line-packaging">Command-Line Packaging</a>, and <a href="#development">Customized Development</a> information. Feel free to share your suggestions in <a href=https://github.com/tw93/Pake/discussions>Discussions</a></div>
 
 ## Features
 
-🏂 **Small**：Nearly 40 times smaller than Electron package, less than 3M.  
-😂 **Fast**：Using the Rust Tauri, it`s much lighter and faster than JS.  
-🩴 **Special**：Not just packaged, with shortcut pass-through, immersive windows, minimalist customization.  
-🐶 **Toy**：Just a simple way to play with Rust instead of the old idea of shelling the web.
+🏂 **Small**: Nearly 40 times smaller than an Electron package (less than 3M!) \
+😂 **Fast**: With Rust Tauri, Pake is much more lightweight and faster than JS-based frameworks. \
+🩴 **Special**: Battery-included package — shortcut pass-through, immersive windows, and minimalist customization. \
+🐶 **Toy**: Pake is just a simple tool — replace the old bundle approach with Rust (though PWA is good enough).
 
-## Popular Downloads
+## Popular Packages
 
 <table>
     <tr>
-        <td>WeRead 
+        <td>WeRead
             <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead_amd64.deb">Linux</a>
         </td>
-        <td>Twitter 
+        <td>Twitter
             <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter_amd64.deb">Linux</a>
@@ -46,12 +46,12 @@
         <td><img src=https://cdn.fliggy.com/upic/mc41xq.jpg width=600/></td>
     </tr>
     <tr>
-        <td>LiZhi 
+        <td>LiZhi
             <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi_amd64.deb">Linux</a>
         </td>
-         <td>YouTube 
+         <td>YouTube
             <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_amd64.deb">Linux</a>
@@ -62,12 +62,12 @@
         <td><img src=https://cdn.fliggy.com/upic/Ea5ZRw.png width=600/></td>
     </tr>
     <tr>
-        <td>Qwerty 
+        <td>Qwerty
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_amd64.deb">Linux</a>
         </td>
-         <td>Reference 
+         <td>Reference
             <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_amd64.deb">Linux</a>
@@ -78,12 +78,12 @@
         <td><img src=https://cdn.fliggy.com/upic/KFsZIY.png width=600/></td>
     </tr>
         <tr>
-           <td>Library  
+           <td>Library
             <a href="https://github.com/tw93/Pake/releases/latest/download/ZLibrary.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/ZLibrary_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/ZLibrary_amd64.deb">Linux</a>
         </td>
-        <td>ChatGPT 
+        <td>ChatGPT
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_amd64.deb">Linux</a>
@@ -96,7 +96,7 @@
 </table>
 
 <details>
-<summary>🏂More applications such as Flomo / YuQue / RunCode can be downloaded from <a href="https://github.com/tw93/Pake/releases">Release</a>, <b>click to expand shortcut descriptions</b></summary>
+<summary>🏂 You can download more applications (such as Flomo / YuQue / RunCode) from <a href="https://github.com/tw93/Pake/releases">Releases</a>. <b>Click here to expand the shortcuts reference!</b></summary>
 
 <br/>
 
@@ -113,67 +113,65 @@
 | <kbd>⌘</kbd> + <kbd>=</kbd> | <kbd>Ctrl</kbd> + <kbd>=</kbd> | Zoom in the Page              |
 | <kbd>⌘</kbd> + <kbd>0</kbd> | <kbd>Ctrl</kbd> + <kbd>0</kbd> | Reset the page zoom           |
 
-In addition, it supports double-clicking the head to switch to full screen, Mac users support gesture mode to return and go to the next page, and dragging the head to move the window.
+In addition, double-click the title bar to switch to full-screen mode. For Mac users, you can also use the gesture to go to the previous or next page and drag the title bar to move the window.
 
 </details>
 
-## Before you start
+## Before starting
 
-1. **Beginner users**: Use the 「Download」 method to play with Pake's capabilities, go to discussion groups for help, or try the [Github Actions](https://github.com/tw93/Pake/wiki/GitHub-Actions-Online-Compilation-Multi-system-Version) method.
-2. **Development users**: Use 「command line packing」, Mac friendly, Windows/Linux requires a bit of tinkering, but both require environment [configuration](https://tauri.app/v1/guides/getting-started/prerequisites).
-3. **Hacker users**: If you know both front-end and rust, try the following custom development, which allows you to customize your features with deep secondary development.
+1. **For beginners**: Play with Popular Packages to find out Pake's capabilities, or try to pack your application with [GitHub Actions](https://github.com/tw93/Pake/wiki/GitHub-Actions-Online-Compilation-Multi-system-Version). Don't hesitate to reach for assistance at [Discussion](https://github.com/tw93/Pake/discussions)!
+2. **For developers**: Packaging with Command-Like Packaging fully supports macOS. For Windows/Linux users, it requires some tinkering. [Configure your environment](https://tauri.app/v1/guides/getting-started/prerequisites) before getting started.
+3. **For hackers**: For people who are good at both front-end development and Rust, how about customizing your apps' function more with the following [Customized Development](#development)?
 
-## Command line packing
+## Command-Line Packaging
 
-<kbd>
-  <img src="https://gw.alipayobjects.com/zos/k/zd/pake.gif" width="100%">
-</kbd>
-<br/><br/>
+![Pake](https://gw.alipayobjects.com/zos/k/zd/pake.gif)
 
-**Pake provides a command line tool that makes it quicker and easier to customize the packages you need, as detailed in [documentation](./.github/workflows/docs/README_EN.md).**
+**Pake provides a command line tool, making the flow of package customization quicker and easier. See [documentation](./bin/README_EN.md) for more information.**
 
 ```bash
-// Install with npm
+# Install with npm
 npm install -g pake-cli
 
-// Command usage
-pake url [options]
+# Command usage
+pake url [OPTIONS]...
 
-// Play casually, first time due to the installation environment will be a little slow
+# Feel free to play with Pake! It might take a while to prepare the environment the first time you launch Pake.
 pake https://weekly.tw93.fun --name Weekly --transparent
 ```
 
-If you are a little white who doesn't know how to use the command line, a good option is to use **GitHub Actions online compilation**, see the [tutorial](https://github.com/tw93/Pake/wiki/GitHub-Actions-Online-Compilation-Multi-system-Version).
+If you are new to the command line, you can compile packages online with _GitHub Actions_. See the [Tutorial](https://github.com/tw93/Pake/wiki/GitHub-Actions-Online-Compilation-Multi-system-Version) for more information.
 
 ## Development
 
-Before starting, make sure that the computer has installed the Rust `>=1.63` and Node `>=16 as 16.18.1` environment，refer to the [Tauri documentation](https://tauri.app/v1/guides/getting-started/prerequisites) to quickly configure your environment before you start. If you don't understand, it will be more appropriate to use the above command line to pack with one click.
+Prepare your environment before starting. Make sure you have Rust `>=1.63` and Node `>=16` (e.g., `16.18.1`) installed on your computer. For installation guidance, see [Tauri documentation](https://tauri.app/v1/guides/getting-started/prerequisites).
+
+If you are unfamiliar with these, it is better to try out the above tool to pack with one click.
 
 ```sh
-// Install Dependencies
+# Install Dependencies
 npm i
 
-// Local development
+# Local development
 npm run dev
 
-// Local debug
+# Local debug
 npm run dev:debug
 
-// Pack application
+# Pack application
 npm run build
-
 ```
 
-## Advanced use
+## Advanced Usage
 
-1. The code structure can be referred to [Here](https://github.com/tw93/Pake/wiki/Description-of-Pake's-code-structure), it is convenient for you to learn more before development.
-2. Modify the `tauri.conf.json` and `tauri.xxx.conf.json` in the `src-tauri` directory to include 4 fields `url, productName, icon, identifier`, icon can be selected from the `icons` directory or downloaded from [macOSicons](https://macosicons.com/#/) to match the product.
-3. For window property settings, you can modify the `width/height` of the `windows` property in `tauri.conf.json`, whether it is `fullscreen`, whether it is `resizable`, If you want to adapt the immersive header under Mac, you can set `transparent` to `true` and then find header element and add the `padding-top` style.
-4. About style rewriting, advertising shielding, js injection, container message communication, and user-defined shortcut keys, you can see [Advanced Usage of Make](https://github.com/tw93/Pake/wiki/Advanced-Usage-of-Make).
+1. You can refer to the [codebase structure](https://github.com/tw93/Pake/wiki/Description-of-Pake's-code-structure) before working on Pake, which will help you much in development.
+2. Add four fields (`url`, `productName`, `icon`, and `identifier`) to the `tauri.conf.json` and `tauri.xxx.conf.json` in the `src-tauri` directory. You can select a `icon` from the `icons` directory or download one from [macOSicons](https://macosicons.com/#/) to match your product needs.
+3. For configurations on window properties, you can modify the `tauri.conf.json` file to change the value of `width`, `height`, `fullscreen` (or not), `resizable` (or not) of the `windows` property. To adapt to the immersive header on Mac, change `transparent` to `true`, look for the `Header` element, and add the `padding-top` property.
+4. For advanced usages such as style rewriting, advertisement removal, JS injection, container message communication, and user-defined shortcut keys, see [Advanced Usage of Make](https://github.com/tw93/Pake/wiki/Advanced-Usage-of-Make).
 
 ## Developer
 
-Pake's development can not be separated from these Hackers, together contributed a lot of ability, also welcome to follow them ❤️
+Pake's development can not be without these Hackers. They contributed a lot of capabilities for Pake. Also, welcome to follow them! ❤️
 
 <!-- readme: contributors -start -->
 <table>
@@ -304,7 +302,7 @@ Pake's development can not be separated from these Hackers, together contributed
 
 ## Support
 
-1. I have two cats, one is called TangYuan, and one is called Coke, If you think Pake makes your life better, you can give my cats <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">feed canned food 🥩🍤</a>.
-2. If you like Pake, you can star it in Github. Also welcome to [recommend Pake](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=%23Pake%20-%20A%20simple%20Rust%20packaged%20web%20pages%20to%20generate%20Mac%20App%20tool,%20compared%20to%20traditional%20Electron%20package,%20the%20size%20of%20nearly%2040%20times%20smaller,%20generally%20about%202M,%20the%20underlying%20use%20of%20Tauri,%20performance%20experience%20than%20the%20JS%20framework%20is%20much%20lighter~) to your friends.
-3. You can follow my [Twitter](https://twitter.com/HiTw93) to get the latest news of Pake, or join [Telegram](https://t.me/miaoyan) chat group.
-4. I hope that you will enjoy playing with it. If you find a page that would be great for a Mac App, please let me know.
+1. I have two cats, TangYuan and Coke. If you think Pake delights your life, you can feed my cats <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">some canned food 🥩🍤</a>.
+2. If you like Pake, you can star it on GitHub. Also, welcome to [recommend Pake](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=%23Pake%20-%20A%20simple%20Rust%20packaged%20web%20pages%20to%20generate%20Mac%20App%20tool,%20compared%20to%20traditional%20Electron%20package,%20the%20size%20of%20nearly%2040%20times%20smaller,%20generally%20about%202M,%20the%20underlying%20use%20of%20Tauri,%20performance%20experience%20than%20the%20JS%20framework%20is%20much%20lighter~) to your friends.
+3. You can follow my [Twitter](https://twitter.com/HiTw93) to get the latest news of Pake or join our [Telegram](https://t.me/miaoyan) chat group.
+4. I hope that you enjoy playing with it. Let us know if you find a website that would be great for a Mac App!
