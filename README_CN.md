@@ -6,7 +6,7 @@
 <p align="center"><strong>很简单的用 Rust 打包网页生成很小的桌面App</strong></p>
 <div align="center">
     <a href="https://twitter.com/HiTw93" target="_blank">
-    <img alt="twitter" src="https://img.shields.io/badge/Follow-Tw93-red?style=flat-square&logo=Twitter"></a>
+    <img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
     <a href="https://t.me/miaoyan" target="_blank">
     <img alt="telegram" src="https://img.shields.io/badge/chat-telegram-blueviolet?style=flat-square&logo=Telegram"></a>
     <a href="https://github.com/tw93/Pake/releases" target="_blank">
