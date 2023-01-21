@@ -1,6 +1,8 @@
+bin/**/*              linguist-vendored
 bin/*                 linguist-vendored
 dist/*                linguist-vendored
 /cli.js               linguist-vendored
+.github/**/*          linguist-vendored
 .github/*             linguist-vendored
 script/*              linguist-vendored
 /icns2png.py          linguist-vendored
