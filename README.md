@@ -57,23 +57,7 @@
             <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_amd64.deb">Linux</a>
         </td>
     </tr>
-    <tr>
-        <td><img src=https://cdn.fliggy.com/upic/DX3dfG.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/Ea5ZRw.png width=600/></td>
-    </tr>
-    <tr>
-        <td>Qwerty
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_amd64.deb">Linux</a>
-        </td>
-         <td>Reference
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_amd64.deb">Linux</a>
-        </td>
-    </tr>
-    <tr>
+        <tr>
         <td><img src=https://cdn.fliggy.com/upic/CJjagn.jpg width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/KFsZIY.png width=600/></td>
     </tr>
@@ -90,8 +74,24 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/2vPptL.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/puPaGO.png width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/sfnTXf.png width=600/></td>
+    </tr>
+    <tr>
+        <td><img src=https://cdn.fliggy.com/upic/DX3dfG.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/Ea5ZRw.png width=600/></td>
+    </tr>
+    <tr>
+        <td>Qwerty
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_amd64.deb">Linux</a>
+        </td>
+         <td>Reference
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_amd64.deb">Linux</a>
+        </td>
     </tr>
 </table>
 
