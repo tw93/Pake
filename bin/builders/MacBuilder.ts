@@ -29,7 +29,7 @@ export default class MacBuilder implements IBuilder {
       // TODO 国内有可能会超时
       await installRust();
     } else {
-      log.error('Error: Pake need Rust to package your webapp!!!');
+      log.error('Error: Pake need Rust to package your webapp!');
       process.exit(2);
     }
   }
@@ -40,15 +40,11 @@ export default class MacBuilder implements IBuilder {
 
     await mergeTauriConfig(url, options, tauriConf);
 
-    const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build`);
-    let arch  = "x64";
-    if (process.arch === "arm64") {
-      arch = "aarch64";
-    } else {
-      arch = process.arch;
-    }
-    const dmgName = `${name}_${tauriConf.package.version}_${arch}.dmg`;
-    const appPath = this.getBuildedAppPath(npmDirectory, dmgName);
+    //这里直接使用 universal-apple-darwin 的打包，而非当前系统的包
+    await shellExec(`cd ${npmDirectory} && npm install && npm run build:mac`);
+
+    const dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
+    const appPath = this.getBuildAppPath(npmDirectory, dmgName);
     const distPath = path.resolve(`${name}.dmg`);
     await fs.copyFile(appPath, distPath);
     await fs.unlink(appPath);
@@ -57,10 +53,10 @@ export default class MacBuilder implements IBuilder {
     logger.success('You can find the app installer in', distPath);
   }
 
-  getBuildedAppPath(npmDirectory: string, dmgName: string) {
+  getBuildAppPath(npmDirectory: string, dmgName: string) {
     return path.join(
       npmDirectory,
-      'src-tauri/target/release/bundle/dmg',
+      'src-tauri/target/universal-apple-darwin/release/bundle/dmg',
       dmgName
     );
   }

@@ -26,6 +26,14 @@ use wry::application::window::Icon;
 #[cfg(any(target_os = "linux", target_os = "windows"))]
 use wry::webview::WebContext;
 
+use dirs::download_dir;
+use std::path::PathBuf;
+
+enum UserEvent {
+    DownloadStarted(String, String),
+    DownloadComplete(Option<PathBuf>, bool),
+}
+
 fn main() -> wry::Result<()> {
     #[cfg(target_os = "macos")]
     let (menu_bar_menu, close_item) = {
@@ -82,8 +90,9 @@ fn main() -> wry::Result<()> {
         fullscreen,
         ..
     } = get_windows_config().1.unwrap_or_default();
-    let event_loop = EventLoop::new();
 
+    let event_loop: EventLoop<UserEvent> = EventLoop::with_user_event();
+    let proxy = event_loop.create_proxy();
     let common_window = WindowBuilder::new()
         .with_title("")
         .with_resizable(resizable)
@@ -93,9 +102,14 @@ fn main() -> wry::Result<()> {
             None
         })
         .with_inner_size(wry::application::dpi::LogicalSize::new(width, height));
+
     #[cfg(target_os = "windows")]
     let window = {
-        let icon_path = format!("png/{}_32.ico", package_name);
+        let mut icon_path = format!("png/{}_32.ico", package_name);
+        // If there is no setting, use the default one.
+        if !std::path::Path::new(&icon_path).exists() {
+            icon_path = "png/icon_32.ico".to_string();
+        }
         let icon = load_icon(std::path::Path::new(&icon_path));
         common_window
             .with_decorations(true)
@@ -117,22 +131,40 @@ fn main() -> wry::Result<()> {
         .build(&event_loop)
         .unwrap();
 
+    // Handling events of JS -> Rust
     let handler = move |window: &Window, req: String| {
         if req == "drag_window" {
             let _ = window.drag_window();
         } else if req == "fullscreen" {
-            if window.fullscreen().is_some() {
-                window.set_fullscreen(None);
-            } else {
-                window.set_fullscreen(Some(Fullscreen::Borderless(None)));
-            }
+            let is_maximized = window.is_maximized();
+            window.set_maximized(!is_maximized);
         } else if req.starts_with("open_browser") {
             let href = req.replace("open_browser:", "");
             webbrowser::open(&href).expect("no browser");
         }
     };
 
-    // 用于欺骗部分页面对于浏览器的强检测
+    let download_started = {
+        let proxy = proxy.clone();
+        move |uri: String, default_path: &mut PathBuf| {
+            let path = download_dir()
+                .unwrap()
+                .join(default_path.display().to_string())
+                .as_path()
+                .to_path_buf();
+            *default_path = path.clone();
+            let submitted = proxy
+                .send_event(UserEvent::DownloadStarted(uri, path.display().to_string()))
+                .is_ok();
+            submitted
+        }
+    };
+
+    let download_completed = {
+        move |_uri, path, success| {
+            let _ = proxy.send_event(UserEvent::DownloadComplete(path, success));
+        }
+    };
 
     #[cfg(target_os = "macos")]
     let webview = {
@@ -144,6 +176,8 @@ fn main() -> wry::Result<()> {
             .with_initialization_script(include_str!("pake.js"))
             .with_ipc_handler(handler)
             .with_back_forward_navigation_gestures(true)
+            .with_download_started_handler(download_started)
+            .with_download_completed_handler(download_completed)
             .build()?
     };
 
@@ -173,6 +207,8 @@ fn main() -> wry::Result<()> {
             .with_initialization_script(include_str!("pake.js"))
             .with_ipc_handler(handler)
             .with_web_context(&mut web_content)
+            .with_download_started_handler(download_started)
+            .with_download_completed_handler(download_completed)
             .build()?
     };
     #[cfg(feature = "devtools")]
@@ -200,6 +236,18 @@ fn main() -> wry::Result<()> {
                 }
                 println!("Clicked on {:?}", menu_id);
                 println!("Clicked on {:?}", webview.window().is_visible());
+            }
+            Event::UserEvent(UserEvent::DownloadStarted(uri, temp_dir)) => {
+                println!("Download: {}", uri);
+                println!("Will write to: {:?}", temp_dir);
+            }
+            Event::UserEvent(UserEvent::DownloadComplete(_, success)) => {
+                println!("Succeeded: {}", success);
+                if success {
+                    let _ = webview.evaluate_script("window.pakeToast('Save in downloads folder')");
+                } else {
+                    println!("No output path")
+                }
             }
             _ => (),
         }

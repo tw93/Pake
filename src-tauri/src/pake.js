@@ -51,11 +51,16 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       display: none !important;
     }
 
-    #page .main_header, .cb-layout-basic--navbar {
+    #page .main_header, .cb-layout-basic--navbar,
+    #app .splitpanes.splitpanes--horizontal.no-splitter header {
       padding-top: 20px;
     }
 
-    .chakra-ui-light #app .chakra-heading, .chakra-ui-dark #app .chakra-heading, .chakra-ui-light #app .chakra-stack, .chakra-ui-dark #app .chakra-stack {
+    .chakra-ui-light #app .chakra-heading,
+    .chakra-ui-dark #app .chakra-heading,
+    .chakra-ui-light #app .chakra-stack,
+    .chakra-ui-dark #app .chakra-stack,
+    .app-main .sidebar-mouse-in-out {
        padding-top: 10px;
     }
 
@@ -362,3 +367,20 @@ function zoomIn() {
 function zoomOut() {
   zoomCommon((htmlZoom) => `${Math.max(parseInt(htmlZoom) - 10, 30)}%`);
 }
+
+
+function pakeToast(msg) {
+	const m = document.createElement('div');
+	m.innerHTML = msg;
+	m.style.cssText = "max-width:60%;min-width: 180px;padding:0 8px;height: 36px;color: rgb(255, 255, 255);line-height: 36px;text-align: center;border-radius: 4px;position: fixed;bottom:16px;right: 16px;transform: translate(-50%, -50%);z-index: 999999;background: rgba(0, 0, 0,.9);font-size: 14px;";
+	document.body.appendChild(m);
+	setTimeout(function() {
+    const d = 0.5;
+		m.style.transition = 'transform ' + d + 's ease-in, opacity ' + d + 's ease-in';
+		m.style.opacity = '0';
+		setTimeout(function() {
+			document.body.removeChild(m)
+		}, d * 1000);
+	}, 2500);
+}
+
