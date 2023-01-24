@@ -60,7 +60,8 @@ window.addEventListener("DOMContentLoaded", (_event) => {
     .chakra-ui-dark #app .chakra-heading,
     .chakra-ui-light #app .chakra-stack,
     .chakra-ui-dark #app .chakra-stack,
-    .app-main .sidebar-mouse-in-out {
+    .app-main .sidebar-mouse-in-out,
+    .chakra-modal__content-container .chakra-modal__header > div > div {
        padding-top: 10px;
     }
 
