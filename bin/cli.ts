@@ -22,7 +22,7 @@ program
   .option('-f, --fullscreen', 'makes the packaged app start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
   .option('-t, --transparent', 'transparent title bar', DEFAULT_PAKE_OPTIONS.transparent)
   .option('-d, --debug', 'debug', DEFAULT_PAKE_OPTIONS.debug)
-  .option('-m, --multi-arch', "Supports both Intel and m1 chips, only for Mac.", DEFAULT_PAKE_OPTIONS.multi_arch)
+  .option('-m, --multi-arch', "Supports both Intel and m1 chips, only for Mac.", DEFAULT_PAKE_OPTIONS.multiArch)
   .action(async (url: string, options: PakeCliOptions) => {
 
     await checkUpdateTips();

@@ -24,7 +24,7 @@ export interface PakeCliOptions {
   debug: boolean;
 
   /** mutli arch, Supports both Intel and m1 chips, only for Mac */
-  multi_arch: boolean;
+  multiArch: boolean;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {

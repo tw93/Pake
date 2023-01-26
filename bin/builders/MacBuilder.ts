@@ -40,7 +40,7 @@ export default class MacBuilder implements IBuilder {
 
     await mergeTauriConfig(url, options, tauriConf);
     let dmgName: string;
-    if (options.multi_arch) {
+    if (options.multiArch) {
       await shellExec(`cd ${npmDirectory} && npm install && npm run build:mac`);
       dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
     } else {
@@ -53,7 +53,7 @@ export default class MacBuilder implements IBuilder {
       }
       dmgName = `${name}_${tauriConf.package.version}_${arch}.dmg`;
     }
-    const appPath = this.getBuildAppPath(npmDirectory, dmgName, options.multi_arch);
+    const appPath = this.getBuildAppPath(npmDirectory, dmgName, options.multiArch);
     const distPath = path.resolve(`${name}.dmg`);
     await fs.copyFile(appPath, distPath);
     await fs.unlink(appPath);

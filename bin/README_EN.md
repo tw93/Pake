@@ -98,7 +98,7 @@ The width of the packaged application window. The default is `1200px`.
 
 #### [transparent]
 
-Whether to enable the immersive header. The default is `false`.
+Whether to enable the immersive header. The default is `false`. Use the command below to enable this feature.
 
 ```shell
 --transparent
@@ -109,6 +109,7 @@ Whether to enable the immersive header. The default is `false`.
 #### [resize]
 
 Indicates if the window can be resized. The default value is `true`.
+Use the command below to disable this feature.
 
 ```shell
 --no-resizable
@@ -117,11 +118,12 @@ Indicates if the window can be resized. The default value is `true`.
 #### [fullscreen]
 
 Indicates if the window should be full screen on application launch. The default is `false`.
+Use the command below to enable this feature.
 
 ```shell
---fullscreen <value>
+--fullscreen
 # or
--f <value>
+-f
 ```
 
 #### [multi-arch]
@@ -139,7 +141,7 @@ rustup target add x86_64-apple-darwin
 ```
 ##### Instructions
 ```shell
---multi-arch <value>
+--multi-arch
 # or
--m <value>
+-m
 ```
