@@ -21,7 +21,8 @@ program
   .option('--no-resizable', 'whether the window can be resizable', DEFAULT_PAKE_OPTIONS.resizable)
   .option('-f, --fullscreen', 'makes the packaged app start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
   .option('-t, --transparent', 'transparent title bar', DEFAULT_PAKE_OPTIONS.transparent)
-  .option('-d, --debug', 'debug', DEFAULT_PAKE_OPTIONS.transparent)
+  .option('-d, --debug', 'debug', DEFAULT_PAKE_OPTIONS.debug)
+  .option('-m, --multi-arch', "Supports both Intel and m1 chips, only for Mac.", DEFAULT_PAKE_OPTIONS.multi_arch)
   .action(async (url: string, options: PakeCliOptions) => {
 
     await checkUpdateTips();

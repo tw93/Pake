@@ -123,3 +123,23 @@ Indicates if the window should be full screen on application launch. The default
 # or
 -f <value>
 ```
+
+#### [multi-arch]
+Package results support both Intel and m1 chips, only for MacOS. The default is `false`.
+
+##### Preparation
+- Note: After enabling this option, you need to use rustup on the rust official website to install rust, brew installation is not supported.
+- For intel chip users, you need to install the arm64 cross-platform package to make the installation package support the m1 chip, and use the following command to install.
+```shell
+rustup target add aarch64-apple-darwin
+```
+- For M1 chip users, you need to install the x86 cross-platform package to make the installation package support the interl chip, and use the following command to install.
+```shell
+rustup target add x86_64-apple-darwin
+```
+##### Instructions
+```shell
+--multi-arch <value>
+# or
+-m <value>
+```

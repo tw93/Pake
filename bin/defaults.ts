@@ -8,6 +8,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   resizable: true,
   transparent: false,
   debug: false,
+  multi_arch: false,
 };
 
 export const DEFAULT_APP_NAME = 'Pake';
