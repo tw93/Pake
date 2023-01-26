@@ -2033,7 +2033,7 @@ class MacBuilder {
                 }
                 dmgName = `${name}_${tauriConf.package.version}_${arch}.dmg`;
             }
-            const appPath = this.getBuildAppPath(npmDirectory, dmgName);
+            const appPath = this.getBuildAppPath(npmDirectory, dmgName, options.multi_arch);
             const distPath = path.resolve(`${name}.dmg`);
             yield fs.copyFile(appPath, distPath);
             yield fs.unlink(appPath);
@@ -2041,8 +2041,15 @@ class MacBuilder {
             logger.success('You can find the app installer in', distPath);
         });
     }
-    getBuildAppPath(npmDirectory, dmgName) {
-        return path.join(npmDirectory, 'src-tauri/target/universal-apple-darwin/release/bundle/dmg', dmgName);
+    getBuildAppPath(npmDirectory, dmgName, multiArch) {
+        let dmgPath;
+        if (multiArch) {
+            dmgPath = 'src-tauri/target/universal-apple-darwin/release/bundle/dmg';
+        }
+        else {
+            dmgPath = 'src-tauri/target/release/bundle/dmg';
+        }
+        return path.join(npmDirectory, dmgPath, dmgName);
     }
 }
 
