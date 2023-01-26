@@ -2170,8 +2170,8 @@ class BuilderFactory {
 }
 
 var name = "pake-cli";
-var version = "1.2.2";
-var description = "🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App 🤱🏻 A simple way to make any web page a desktop application using Rust.";
+var version = "1.2.3";
+var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
 };
@@ -2279,11 +2279,11 @@ program
     .argument('[url]', 'the web url you want to package', validateUrlInput)
     .option('-n, --name <string>', 'application name')
     .option('-i, --icon <string>', 'application icon', DEFAULT_PAKE_OPTIONS.icon)
-    .option('--height <number>', 'window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
     .option('-w, --width <number>', 'window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
-    .option('--no-resizable', 'whether the window can be resizable', DEFAULT_PAKE_OPTIONS.resizable)
+    .option('-h, --height <number>', 'window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
     .option('-f, --fullscreen', 'makes the packaged app start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
     .option('-t, --transparent', 'transparent title bar', DEFAULT_PAKE_OPTIONS.transparent)
+    .option('-r, --no-resizable', 'whether the window can be resizable', DEFAULT_PAKE_OPTIONS.resizable)
     .option('-d, --debug', 'debug', DEFAULT_PAKE_OPTIONS.debug)
     .option('-m, --multi-arch', "Supports both Intel and m1 chips, only for Mac.", DEFAULT_PAKE_OPTIONS.multiArch)
     .action((url, options) => __awaiter(void 0, void 0, void 0, function* () {

@@ -64,7 +64,6 @@ url 为你需要打包的网页链接 🔗，必须提供。
 -n <value>
 ```
 
-
 #### [icon]
 
 应用 icon，支持本地/远程文件，默认为 Pake 自带图标，定制的可以去 [icon-icons](https://icon-icons.com) 或 [macOSicons](https://macosicons.com/#/) 搜索下载。
@@ -85,6 +84,8 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 ```shell
 --height <number>
+# 或者
+-h <number>
 ```
 
 #### [width]
@@ -107,14 +108,6 @@ url 为你需要打包的网页链接 🔗，必须提供。
 -t
 ```
 
-#### [resize]
-
-是否可以拖动大小，默认为 `true` 可拖动。使用下面的命令来关闭该功能。
-
-```shell
---no-resizable
-```
-
 #### [fullscreen]
 
 打开应用后是否开启全屏，默认为 `false`，使用下面的命令开启该功能。
@@ -125,20 +118,37 @@ url 为你需要打包的网页链接 🔗，必须提供。
 -f
 ```
 
+#### [resize]
+
+是否可以拖动大小，默认为 `true` 可拖动。使用下面的命令来关闭该功能。
+
+```shell
+--no-resizable
+# 或者
+-r
+```
+
 #### [multi-arch]
-打包结果同时支持英特尔和m1芯片，仅适用于MacOS，默认为 `false`。
+
+打包结果同时支持英特尔和 m1 芯片，仅适用于 MacOS，默认为 `false`。
 
 ##### 准备工作
-- 注意：开启该选项后，需要用rust官网的rustup安装rust，不支持brew安装。
-- 对于intel芯片用户，需要安装arm64跨平台包，使安装包支持m1芯片，使用下面命令安装。
+
+- 注意：开启该选项后，需要用 rust 官网的 rustup 安装 rust，不支持 brew 安装。
+- 对于 intel 芯片用户，需要安装 arm64 跨平台包，使安装包支持 m1 芯片，使用下面命令安装。
+
 ```shell
 rustup target add aarch64-apple-darwin
 ```
-- 对于M1芯片用户，需要安装x86跨平台包，使安装包支持interl芯片，使用下面的命令安装。
+
+- 对于 M1 芯片用户，需要安装 x86 跨平台包，使安装包支持 interl 芯片，使用下面的命令安装。
+
 ```shell
 rustup target add x86_64-apple-darwin
 ```
+
 ##### 使用方法
+
 ```shell
 --multi-arch
 # 或者
