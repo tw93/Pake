@@ -9,7 +9,7 @@ import { checkUpdateTips } from './helpers/updater.js';
 // @ts-expect-error
 import packageJson from '../package.json';
 
-program.version(packageJson.version).description('A cli application can package a web page to desktop application.');
+program.version(packageJson.version).description('A cli application can turn any webpage into a desktop app with Rust.');
 
 program
   .showHelpAfterError()

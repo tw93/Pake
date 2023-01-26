@@ -2273,7 +2273,7 @@ function checkUpdateTips() {
     });
 }
 
-program.version(packageJson.version).description('A cli application can package a web page to desktop application.');
+program.version(packageJson.version).description('A cli application can turn any webpage into a desktop app with Rust.');
 program
     .showHelpAfterError()
     .argument('[url]', 'the web url you want to package', validateUrlInput)
