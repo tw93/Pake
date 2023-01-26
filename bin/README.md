@@ -60,7 +60,10 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 ```shell
 --name <value>
+# 或者
+-n <value>
 ```
+
 
 #### [icon]
 
@@ -72,6 +75,8 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 ```shell
 --icon <path>
+# 或者
+-i <path>
 ```
 
 #### [height]
@@ -88,6 +93,8 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 ```shell
 --width <number>
+# 或者
+-w <number>
 ```
 
 #### [transparent]
@@ -96,6 +103,8 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 ```shell
 --transparent
+# 或者
+-t
 ```
 
 #### [resize]
@@ -112,4 +121,6 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 ```shell
 --fullscreen <value>
+# 或者
+-f <value>
 ```

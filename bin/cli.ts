@@ -14,14 +14,14 @@ program.version(packageJson.version).description('A cli application can package 
 program
   .showHelpAfterError()
   .argument('[url]', 'the web url you want to package', validateUrlInput)
-  .option('--name <string>', 'application name')
-  .option('--icon <string>', 'application icon', DEFAULT_PAKE_OPTIONS.icon)
+  .option('-n, --name <string>', 'application name')
+  .option('-i, --icon <string>', 'application icon', DEFAULT_PAKE_OPTIONS.icon)
   .option('--height <number>', 'window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
-  .option('--width <number>', 'window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
+  .option('-w, --width <number>', 'window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
   .option('--no-resizable', 'whether the window can be resizable', DEFAULT_PAKE_OPTIONS.resizable)
-  .option('--fullscreen', 'makes the packaged app start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
-  .option('--transparent', 'transparent title bar', DEFAULT_PAKE_OPTIONS.transparent)
-  .option('--debug', 'debug', DEFAULT_PAKE_OPTIONS.transparent)
+  .option('-f, --fullscreen', 'makes the packaged app start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
+  .option('-t, --transparent', 'transparent title bar', DEFAULT_PAKE_OPTIONS.transparent)
+  .option('-d, --debug', 'debug', DEFAULT_PAKE_OPTIONS.transparent)
   .action(async (url: string, options: PakeCliOptions) => {
 
     await checkUpdateTips();

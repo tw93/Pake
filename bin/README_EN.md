@@ -60,6 +60,8 @@ The name of your application. We will prompt you to enter this if you do not pro
 
 ```shell
 --name <value>
+# or
+-n <value>
 ```
 
 #### [icon]
@@ -72,6 +74,8 @@ The application icon. Supports local and remote files. By default, it is the bra
 
 ```shell
 --icon <path>
+# or
+-i <path>
 ```
 
 #### [height]
@@ -88,6 +92,8 @@ The width of the packaged application window. The default is `1200px`.
 
 ```shell
 --width <number>
+# or
+-w <number>
 ```
 
 #### [transparent]
@@ -96,6 +102,8 @@ Whether to enable the immersive header. The default is `false`.
 
 ```shell
 --transparent
+# or
+-t
 ```
 
 #### [resize]
@@ -112,4 +120,6 @@ Indicates if the window should be full screen on application launch. The default
 
 ```shell
 --fullscreen <value>
+# or
+-f <value>
 ```
