@@ -84,6 +84,8 @@ The height of the packaged application window. The default is `780px`.
 
 ```shell
 --height <number>
+# or
+-h <number>
 ```
 
 #### [width]
@@ -106,15 +108,6 @@ Whether to enable the immersive header. The default is `false`. Use the command 
 -t
 ```
 
-#### [resize]
-
-Indicates if the window can be resized. The default value is `true`.
-Use the command below to disable this feature.
-
-```shell
---no-resizable
-```
-
 #### [fullscreen]
 
 Indicates if the window should be full screen on application launch. The default is `false`.
@@ -126,20 +119,38 @@ Use the command below to enable this feature.
 -f
 ```
 
+#### [resize]
+
+Indicates if the window can be resized. The default value is `true`.
+Use the command below to disable this feature.
+
+```shell
+--no-resizable
+#or
+-r
+```
+
 #### [multi-arch]
+
 Package results support both Intel and m1 chips, only for MacOS. The default is `false`.
 
 ##### Preparation
+
 - Note: After enabling this option, you need to use rustup on the rust official website to install rust, brew installation is not supported.
 - For intel chip users, you need to install the arm64 cross-platform package to make the installation package support the m1 chip, and use the following command to install.
+
 ```shell
 rustup target add aarch64-apple-darwin
 ```
+
 - For M1 chip users, you need to install the x86 cross-platform package to make the installation package support the interl chip, and use the following command to install.
+
 ```shell
 rustup target add x86_64-apple-darwin
 ```
+
 ##### Instructions
+
 ```shell
 --multi-arch
 # or
