@@ -48,6 +48,7 @@ const DEFAULT_PAKE_OPTIONS = {
     resizable: true,
     transparent: false,
     debug: false,
+    multi_arch: false,
 };
 
 const tlds = [
@@ -2016,9 +2017,22 @@ class MacBuilder {
             log.debug('PakeAppOptions', options);
             const { name } = options;
             yield mergeTauriConfig(url, options, tauriConf);
-            //这里直接使用 universal-apple-darwin 的打包，而非当前系统的包
-            yield shellExec(`cd ${npmDirectory} && npm install && npm run build:mac`);
-            const dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
+            let dmgName;
+            if (options.multi_arch) {
+                yield shellExec(`cd ${npmDirectory} && npm install && npm run build:mac`);
+                dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
+            }
+            else {
+                yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+                let arch;
+                if (process.arch === "x64") {
+                    arch = "amd64";
+                }
+                else {
+                    arch = process.arch;
+                }
+                dmgName = `${name}_${tauriConf.package.version}_${arch}.deb`;
+            }
             const appPath = this.getBuildAppPath(npmDirectory, dmgName);
             const distPath = path.resolve(`${name}.dmg`);
             yield fs.copyFile(appPath, distPath);
@@ -2263,7 +2277,8 @@ program
     .option('--no-resizable', 'whether the window can be resizable', DEFAULT_PAKE_OPTIONS.resizable)
     .option('-f, --fullscreen', 'makes the packaged app start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
     .option('-t, --transparent', 'transparent title bar', DEFAULT_PAKE_OPTIONS.transparent)
-    .option('-d, --debug', 'debug', DEFAULT_PAKE_OPTIONS.transparent)
+    .option('-d, --debug', 'debug', DEFAULT_PAKE_OPTIONS.debug)
+    .option('-m, --multi-arch', "Supports both Intel and m1 chips, only for Mac.", DEFAULT_PAKE_OPTIONS.multi_arch)
     .action((url, options) => __awaiter(void 0, void 0, void 0, function* () {
     yield checkUpdateTips();
     if (!url) {

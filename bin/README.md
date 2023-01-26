@@ -124,3 +124,23 @@ url 为你需要打包的网页链接 🔗，必须提供。
 # 或者
 -f <value>
 ```
+
+#### [multi-arch]
+打包结果同时支持英特尔和m1芯片，仅适用于MacOS，默认为 `false`。
+
+##### 准备工作
+- 注意：开启该选项后，需要用rust官网的rustup安装rust，不支持brew安装。
+- 对于intel芯片用户，需要安装arm64跨平台包，使安装包支持m1芯片，使用下面命令安装。
+```shell
+rustup target add aarch64-apple-darwin
+```
+- 对于M1芯片用户，需要安装x86跨平台包，使安装包支持interl芯片，使用下面的命令安装。
+```shell
+rustup target add x86_64-apple-darwin
+```
+##### 使用方法
+```shell
+--multi-arch <value>
+# 或者
+-m <value>
+```

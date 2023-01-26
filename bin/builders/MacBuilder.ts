@@ -39,11 +39,20 @@ export default class MacBuilder implements IBuilder {
     const { name } = options;
 
     await mergeTauriConfig(url, options, tauriConf);
-
-    //这里直接使用 universal-apple-darwin 的打包，而非当前系统的包
-    await shellExec(`cd ${npmDirectory} && npm install && npm run build:mac`);
-
-    const dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
+    let dmgName: string;
+    if (options.multi_arch) {
+      await shellExec(`cd ${npmDirectory} && npm install && npm run build:mac`);
+      dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
+    } else {
+      await shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+      let arch: string;
+      if (process.arch === "x64") {
+        arch = "amd64";
+      } else {
+        arch = process.arch;
+      }
+      dmgName = `${name}_${tauriConf.package.version}_${arch}.deb`;
+    }
     const appPath = this.getBuildAppPath(npmDirectory, dmgName);
     const distPath = path.resolve(`${name}.dmg`);
     await fs.copyFile(appPath, distPath);
