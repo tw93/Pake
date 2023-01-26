@@ -99,7 +99,7 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 #### [transparent]
 
-是否开启沉浸式头部，默认为 `false` 不开启。
+是否开启沉浸式头部，默认为 `false` 不开启。使用下面的命令来开启该功能。
 
 ```shell
 --transparent
@@ -109,7 +109,7 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 #### [resize]
 
-是否可以拖动大小，默认为 `true` 可拖动。
+是否可以拖动大小，默认为 `true` 可拖动。使用下面的命令来关闭该功能。
 
 ```shell
 --no-resizable
@@ -117,12 +117,12 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 #### [fullscreen]
 
-打开应用后是否开启全屏，默认为 `false`。
+打开应用后是否开启全屏，默认为 `false`，使用下面的命令开启该功能。
 
 ```shell
---fullscreen <value>
+--fullscreen
 # 或者
--f <value>
+-f
 ```
 
 #### [multi-arch]
@@ -140,7 +140,7 @@ rustup target add x86_64-apple-darwin
 ```
 ##### 使用方法
 ```shell
---multi-arch <value>
+--multi-arch
 # 或者
--m <value>
+-m
 ```

@@ -48,7 +48,7 @@ const DEFAULT_PAKE_OPTIONS = {
     resizable: true,
     transparent: false,
     debug: false,
-    multi_arch: false,
+    multiArch: false,
 };
 
 const tlds = [
@@ -1830,8 +1830,8 @@ function checkRustInstalled() {
 var tauri$3 = {
 	windows: [
 		{
-			url: "https://weread.qq.com/",
-			transparent: true,
+			url: "https://www.baidu.com",
+			transparent: false,
 			fullscreen: false,
 			width: 1200,
 			height: 780,
@@ -1843,21 +1843,40 @@ var tauri$3 = {
 	},
 	updater: {
 		active: false
+	},
+	bundle: {
+		icon: [
+			"/Users/hfy/Documents/electron_s/Pake/src-tauri/icons/icon.icns"
+		],
+		identifier: "pake-f9751d",
+		active: true,
+		category: "DeveloperTool",
+		copyright: "",
+		externalBin: [
+		],
+		longDescription: "",
+		macOS: {
+			entitlements: null,
+			exceptionDomain: "",
+			frameworks: [
+			],
+			providerShortName: null,
+			signingIdentity: null
+		},
+		resources: [
+		],
+		shortDescription: "",
+		targets: [
+			"dmg"
+		]
 	}
-};
-var build = {
-	devPath: "../dist",
-	distDir: "../dist",
-	beforeBuildCommand: "",
-	beforeDevCommand: ""
 };
 var CommonConf = {
 	"package": {
-	productName: "WeRead",
+	productName: "baidu",
 	version: "1.0.0"
 },
-	tauri: tauri$3,
-	build: build
+	tauri: tauri$3
 };
 
 var tauri$2 = {
@@ -1900,9 +1919,9 @@ var WinConf = {
 var tauri$1 = {
 	bundle: {
 		icon: [
-			"icons/weread.icns"
+			"/Users/hfy/Documents/electron_s/Pake/src-tauri/icons/icon.icns"
 		],
-		identifier: "com.tw93.weread",
+		identifier: "pake-f9751d",
 		active: true,
 		category: "DeveloperTool",
 		copyright: "",
@@ -2018,7 +2037,7 @@ class MacBuilder {
             const { name } = options;
             yield mergeTauriConfig(url, options, tauriConf);
             let dmgName;
-            if (options.multi_arch) {
+            if (options.multiArch) {
                 yield shellExec(`cd ${npmDirectory} && npm install && npm run build:mac`);
                 dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
             }
@@ -2033,7 +2052,7 @@ class MacBuilder {
                 }
                 dmgName = `${name}_${tauriConf.package.version}_${arch}.dmg`;
             }
-            const appPath = this.getBuildAppPath(npmDirectory, dmgName, options.multi_arch);
+            const appPath = this.getBuildAppPath(npmDirectory, dmgName, options.multiArch);
             const distPath = path.resolve(`${name}.dmg`);
             yield fs.copyFile(appPath, distPath);
             yield fs.unlink(appPath);
@@ -2285,7 +2304,7 @@ program
     .option('-f, --fullscreen', 'makes the packaged app start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
     .option('-t, --transparent', 'transparent title bar', DEFAULT_PAKE_OPTIONS.transparent)
     .option('-d, --debug', 'debug', DEFAULT_PAKE_OPTIONS.debug)
-    .option('-m, --multi-arch', "Supports both Intel and m1 chips, only for Mac.", DEFAULT_PAKE_OPTIONS.multi_arch)
+    .option('-m, --multi-arch', "Supports both Intel and m1 chips, only for Mac.", DEFAULT_PAKE_OPTIONS.multiArch)
     .action((url, options) => __awaiter(void 0, void 0, void 0, function* () {
     yield checkUpdateTips();
     if (!url) {
