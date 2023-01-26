@@ -2024,14 +2024,14 @@ class MacBuilder {
             }
             else {
                 yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
-                let arch;
-                if (process.arch === "x64") {
-                    arch = "amd64";
+                let arch = "x64";
+                if (process.arch === "arm64") {
+                    arch = "aarch64";
                 }
                 else {
                     arch = process.arch;
                 }
-                dmgName = `${name}_${tauriConf.package.version}_${arch}.deb`;
+                dmgName = `${name}_${tauriConf.package.version}_${arch}.dmg`;
             }
             const appPath = this.getBuildAppPath(npmDirectory, dmgName);
             const distPath = path.resolve(`${name}.dmg`);
