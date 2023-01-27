@@ -1796,7 +1796,7 @@ function handleOptions(options, url) {
 
 function shellExec(command) {
     return new Promise((resolve, reject) => {
-        shelljs.exec(command, { async: true, silent: false }, (code) => {
+        shelljs.exec(command, { async: true, silent: false, cwd: npmDirectory }, (code) => {
             if (code === 0) {
                 resolve(0);
             }
