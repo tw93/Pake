@@ -234,15 +234,14 @@ fn main() -> wry::Result<()> {
                 if menu_id == close_item.clone().id() {
                     webview.window().set_minimized(true);
                 }
-                println!("Clicked on {:?}", menu_id);
-                println!("Clicked on {:?}", webview.window().is_visible());
+                println!("Clicked on {menu_id:?}");
             }
             Event::UserEvent(UserEvent::DownloadStarted(uri, temp_dir)) => {
-                println!("Download: {}", uri);
-                println!("Will write to: {:?}", temp_dir);
+                println!("Download: {uri}");
+                println!("Will write to: {temp_dir:?}");
             }
             Event::UserEvent(UserEvent::DownloadComplete(_, success)) => {
-                println!("Succeeded: {}", success);
+                println!("Succeeded: {success}");
                 if success {
                     let _ = webview.evaluate_script("window.pakeToast('Save in downloads folder')");
                 } else {
