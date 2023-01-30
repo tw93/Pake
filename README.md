@@ -101,7 +101,7 @@
 <br/>
 
 | Mac                         | Windows/Linux                  | Function                      |
-| --------------------------- | ------------------------------ | ----------------------------- |
+|-----------------------------|--------------------------------|-------------------------------|
 | <kbd>⌘</kbd> + <kbd>[</kbd> | <kbd>Ctrl</kbd> + <kbd>←</kbd> | Return to the previous page   |
 | <kbd>⌘</kbd> + <kbd>]</kbd> | <kbd>Ctrl</kbd> + <kbd>→</kbd> | Go to the next page           |
 | <kbd>⌘</kbd> + <kbd>↑</kbd> | <kbd>Ctrl</kbd> + <kbd>↑</kbd> | Auto scroll to top of page    |
