@@ -68,17 +68,17 @@ do
     # replace package info
     $sd -s "${old_url}" "${url}" src-tauri/tauri.conf.json
     $sd -s "${old_name}" "${package_name}" src-tauri/tauri.conf.json
-    # echo "update ico with 32x32 pictue"
+    # echo "update ico with 32x32 picture"
     # $sd "${old_name}" "${package_name}" src-tauri/src/main.rs
 
     # for apple, need replace title
     if [[ "$OSTYPE" =~ ^darwin ]]; then
         # update icon
-        # if icon exsits, change icon path
+        # if icon exists, change icon path
         if [ ! -f "src-tauri/icons/${package_name}.icns" ]; then
             # else, replace icon to default
             echo "warning"
-            echo "icon for MacOS not exsist, will use default icon to replace it"
+            echo "icon for MacOS not exist, will use default icon to replace it"
             echo "warning"
             cp "src-tauri/icons/icon.icns" "src-tauri/icons/${package_name}.icns"
         fi
@@ -86,16 +86,16 @@ do
         $sd -s "${old_title}" "${package_title}" src-tauri/tauri.conf.json
     fi
 
-    # echo "update ico with 32x32 pictue"
+    # echo "update ico with 32x32 picture"
     # cp "src-tauri/png/${package_name}_32.ico" "src-tauri/icons/icon.ico"
 
     if [[ "$OSTYPE" =~ ^linux ]]; then
         # update icon
-        # if icon exsits, change icon path
+        # if icon exists, change icon path
         if [ ! -f "src-tauri/png/${package_name}_512.png" ]; then
             # else, replace icon to default
             echo "warning"
-            echo "icon for linux not exsist, will use default icon to replace it"
+            echo "icon for linux not exist, will use default icon to replace it"
             echo "warning"
             cp "src-tauri/png/icon_256.ico" "src-tauri/png/${package_name}_256.ico"
             cp "src-tauri/png/icon_512.png" "src-tauri/png/${package_name}_512.png"
@@ -120,8 +120,8 @@ do
 
     if [[ "$OSTYPE" =~ ^linux ]]; then
         npm run tauri build
-        mv src-tauri/target/release/bundle/deb/${package_prefix}-${package_name}*.deb output/linux/${package_title}_amd64.deb
-        mv src-tauri/target/release/bundle/appimage/${package_prefix}-${package_name}*.AppImage output/linux/${package_title}_amd64.AppImage
+        mv src-tauri/target/release/bundle/deb/${package_prefix}-"${package_name}"*.deb output/linux/"${package_title}"_amd64.deb
+        mv src-tauri/target/release/bundle/appimage/${package_prefix}-"${package_name}"*.AppImage output/linux/"${package_title}"_amd64.AppImage
         echo clear cache
         rm src-tauri/target/release
         rm -rf src-tauri/target/release/bundle
@@ -131,7 +131,7 @@ do
     if [[ "$OSTYPE" =~ ^darwin ]]; then
 
         npm run tauri build -- --target universal-apple-darwin
-        mv src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg output/macos/${package_title}.dmg
+        mv src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg output/macos/"${package_title}".dmg
         echo clear cache
         rm -rf src-tauri/target/universal-apple-darwin
         rm src-tauri/target/aarch64-apple-darwin/release
