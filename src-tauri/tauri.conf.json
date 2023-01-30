@@ -1,12 +1,12 @@
 {
   "package": {
-    "productName": "WeRead",
+    "productName": "chatGPT",
     "version": "1.0.0"
   },
   "tauri": {
     "windows": [
       {
-        "url": "https://weread.qq.com/",
+        "url": "https://chatgpt-expo.netlify.app/",
         "transparent": true,
         "fullscreen": false,
         "width": 1200,

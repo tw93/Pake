@@ -2,9 +2,9 @@
   "tauri": {
     "bundle": {
       "icon": [
-        "icons/weread.icns"
+        "icons/chatgpt.icns"
       ],
-      "identifier": "com.tw93.weread",
+      "identifier": "chatgpt-expo.netlify.app",
       "active": true,
       "category": "DeveloperTool",
       "copyright": "",
@@ -19,7 +19,9 @@
       },
       "resources": [],
       "shortDescription": "",
-      "targets": ["dmg"]
+      "targets": [
+        "dmg"
+      ]
     }
   }
 }
