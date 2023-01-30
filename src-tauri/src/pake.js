@@ -282,6 +282,7 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       height: 20px;
       cursor: grab;
       cursor: -webkit-grab;
+      user-select: none;
       z-index: 90000;
     }
   `;
@@ -293,6 +294,7 @@ window.addEventListener("DOMContentLoaded", (_event) => {
   const domEl = document.getElementById("pack-top-dom");
 
   domEl.addEventListener("mousedown", (e) => {
+    e && e.preventDefault();
     if (e.buttons === 1 && e.detail !== 2) {
       window.ipc.postMessage("drag_window");
     }
