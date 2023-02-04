@@ -146,9 +146,10 @@ jobs:
           install: |
             apt-get update && apt-get install -y gnupg2 && apt-get install curl -y
             curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-            apt-get install -y nodejs
+            apt-get install -y nodejs gcc g++ make
             apt-get install -y libwebkit2gtk-4.0-dev build-essential wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra
-            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+            source "$HOME/.cargo/env"
             corepack enable
           run: |
             uname -a
