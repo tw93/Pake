@@ -154,4 +154,5 @@ jobs:
           run: |
             uname -a
             chmod -R 777 /build
+            npm install
             npm run build:all-unix
