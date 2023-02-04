@@ -103,7 +103,6 @@ jobs:
   # test build aarch64
   aarch64-linux:
     runs-on: ubuntu-20.04
-#     needs: build-dist-bundle
     steps:
       - uses: actions/checkout@v3
 
