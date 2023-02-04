@@ -75,3 +75,40 @@ jobs:
       run: |
         curl -L https://github.com/probonopd/uploadtool/raw/master/upload.sh --output upload.sh
         bash upload.sh output/*/*.*
+  aarch64-linux:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: uraimo/run-on-arch-action@v2.3.0
+        name: build native modules using another arch
+        with:
+          arch: aarch64
+          distro: ubuntu20.04
+          githubToken: ${{ github.token }}
+          dockerRunArgs: |
+            --volume "${PWD}:/build"
+            --volume "/home/runner:/home/runner"
+          install: |
+            apt-get update && apt-get install -y gnupg2 && apt-get install curl -y
+            curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+            apt-get install -y nodejs gcc g++ make
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+            source "$HOME/.cargo/env"
+            apt-get install -y libwebkit2gtk-4.0-dev build-essential wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra
+            corepack enable
+          run: |
+            uname -a
+            chmod -R 777 /build
+            npm install
+            source "$HOME/.cargo/env"
+            export RUST_BACKTRACE=1
+            npm run build:all-unix
+          
+      - name: Upload files
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPLOADTOOL_ISPRERELEASE: true
+        run: |
+          curl -L https://github.com/probonopd/uploadtool/raw/master/upload.sh --output upload.sh
+          bash upload.sh output/*/*.* 
