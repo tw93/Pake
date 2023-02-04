@@ -110,3 +110,47 @@ jobs:
     #   with:
     #     name: ${{ matrix.archive-name }}
     #     path: src-tauri/${{ matrix.archive-name }}
+
+  # test build aarch64
+  build-arm64:
+    runs-on: ubuntu-20.04
+    needs: build-dist-bundle
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: install node
+      uses: actions/setup-node@v1
+      with:
+        node-version: 18
+
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        profile: minimal
+        override: true
+        target: aarch64-unknown-linux-gnu
+
+      - name: pnpm install
+        run: pnpm install
+
+      - uses: uraimo/run-on-arch-action@v2.3.0
+        name: build native modules using another arch
+        with:
+          arch: aarch64
+          distro: ubuntu20.04
+          githubToken: ${{ github.token }}
+          dockerRunArgs: |
+            --volume "${PWD}:/build"
+            --volume "/home/runner:/home/runner"
+          install: |
+            apt-get update && apt-get install -y gnupg2 && apt-get install curl -y
+            curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+            apt-get install -y nodejs
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+            corepack enable
+          run: |
+            uname -a
+            chmod -R 777 /build
+            cd /build/Pake
+            npm run build:all-unix
