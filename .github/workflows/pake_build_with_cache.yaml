@@ -118,21 +118,21 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: install node
-        uses: actions/setup-node@v1
-        with:
-          node-version: 18
+      # - name: install node
+      #   uses: actions/setup-node@v1
+      #   with:
+      #     node-version: 18
 
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
-          target: aarch64-unknown-linux-gnu
+      # - name: Install Rust
+      #   uses: actions-rs/toolchain@v1
+      #   with:
+      #     toolchain: stable
+      #     profile: minimal
+      #     override: true
+      #     target: aarch64-unknown-linux-gnu
 
-      - name: npm install
-        run: npm install
+      # - name: npm install
+      #   run: npm install
 
       - uses: uraimo/run-on-arch-action@v2.3.0
         name: build native modules using another arch
@@ -156,3 +156,11 @@ jobs:
             chmod -R 777 /build
             npm install
             npm run build:all-unix
+          
+      - name: Upload files
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPLOADTOOL_ISPRERELEASE: true
+        run: |
+          curl -L https://github.com/probonopd/uploadtool/raw/master/upload.sh --output upload.sh
+          bash upload.sh output/*/*.* 
