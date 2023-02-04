@@ -99,20 +99,9 @@ jobs:
           src-tauri/target/
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     
-    - name: Build archive
-      shell: bash
-      run: |
-        cd src-tauri
-        tar -czf "${{ matrix.archive-name }}" target
-    
-    - name: Upload archive
-      uses: actions/upload-artifact@v1
-      with:
-        name: ${{ matrix.archive-name }}
-        path: src-tauri/${{ matrix.archive-name }}
 
   # test build aarch64
-  build-aarch64-linux:
+  build(aarch64-linux):
     runs-on: ubuntu-20.04
 #     needs: build-dist-bundle
     steps:
@@ -139,6 +128,8 @@ jobs:
             uname -a
             chmod -R 777 /build
             npm install
+            source "$HOME/.cargo/env"
+            export RUST_BACKTRACE=1
             npm run build:all-unix
           
       - name: Upload files
