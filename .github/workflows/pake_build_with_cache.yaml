@@ -114,25 +114,25 @@ jobs:
   # test build aarch64
   build-arm64:
     runs-on: ubuntu-20.04
-    needs: build-dist-bundle
+#     needs: build-dist-bundle
     steps:
       - uses: actions/checkout@v3
 
       - name: install node
-      uses: actions/setup-node@v1
-      with:
-        node-version: 18
+        uses: actions/setup-node@v1
+        with:
+          node-version: 18
 
-    - name: Install Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        profile: minimal
-        override: true
-        target: aarch64-unknown-linux-gnu
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+          target: aarch64-unknown-linux-gnu
 
-      - name: pnpm install
-        run: pnpm install
+      - name: npm install
+        run: npm install
 
       - uses: uraimo/run-on-arch-action@v2.3.0
         name: build native modules using another arch
