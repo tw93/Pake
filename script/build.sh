@@ -40,7 +40,7 @@ if [[ "$OSTYPE" =~ ^linux ]]; then
     echo "==============="
     echo "Build for Linux"
     echo "==============="
-    export sd=${SHELL_FOLDER}/sd-linux-x64
+    export sd=${SHELL_FOLDER}/sd-linux-`arch`
     chmod +x "$sd"
     # for linux, package name may be com.xxx.xxx
     echo "rename package name"
