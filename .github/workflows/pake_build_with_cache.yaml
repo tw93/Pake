@@ -6,98 +6,98 @@ on:
       - release
 
 jobs:
-  build:
-    name: build
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        build: [linux, windows, macos]
-        include:
-        - build: linux
-          os: ubuntu-20.04
-          rust: stable
-          target: x86_64-unknown-linux-musl
-          # archive-name: target-linux.tar.gz
-        - build: windows
-          os: windows-latest
-          rust: stable-x86_64-msvc
-          target: x86_64-pc-windows-msvc
-          # archive-name: target-windows.tar.gz
-        - build: macos
-          os: macos-latest
-          rust: stable
-          target: x86_64-apple-darwin
-          # archive-name: target-macos.tar.gz
-      fail-fast: false
+  # build:
+  #   name: build
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       build: [linux, windows, macos]
+  #       include:
+  #       - build: linux
+  #         os: ubuntu-20.04
+  #         rust: stable
+  #         target: x86_64-unknown-linux-musl
+  #         # archive-name: target-linux.tar.gz
+  #       - build: windows
+  #         os: windows-latest
+  #         rust: stable-x86_64-msvc
+  #         target: x86_64-pc-windows-msvc
+  #         # archive-name: target-windows.tar.gz
+  #       - build: macos
+  #         os: macos-latest
+  #         rust: stable
+  #         target: x86_64-apple-darwin
+  #         # archive-name: target-macos.tar.gz
+  #     fail-fast: false
 
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v2
 
-    - name: install node
-      uses: actions/setup-node@v1
-      with:
-        node-version: 18
+  #   - name: install node
+  #     uses: actions/setup-node@v1
+  #     with:
+  #       node-version: 18
 
-    - name: Install Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: ${{ matrix.rust }}
-        profile: minimal
-        override: true
-        target: ${{ matrix.target }}
+  #   - name: Install Rust
+  #     uses: actions-rs/toolchain@v1
+  #     with:
+  #       toolchain: ${{ matrix.rust }}
+  #       profile: minimal
+  #       override: true
+  #       target: ${{ matrix.target }}
     
-    - name: install dependencies (ubuntu only)
-      if: matrix.os == 'ubuntu-20.04'
-      uses: awalsh128/cache-apt-pkgs-action@latest
-      with:
-        packages: libwebkit2gtk-4.0-dev build-essential curl wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra
-        version: 1.1
+  #   - name: install dependencies (ubuntu only)
+  #     if: matrix.os == 'ubuntu-20.04'
+  #     uses: awalsh128/cache-apt-pkgs-action@latest
+  #     with:
+  #       packages: libwebkit2gtk-4.0-dev build-essential curl wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra
+  #       version: 1.1
     
-    - name: rust cache restore
-      uses: ylemkimon/cache-restore@v2
-      with:
-        path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          src-tauri/target/
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+  #   - name: rust cache restore
+  #     uses: ylemkimon/cache-restore@v2
+  #     with:
+  #       path: |
+  #         ~/.cargo/bin/
+  #         ~/.cargo/registry/index/
+  #         ~/.cargo/registry/cache/
+  #         ~/.cargo/git/db/
+  #         src-tauri/target/
+  #       key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-    - name: build for Ubuntu
-      if: matrix.os == 'ubuntu-20.04'
-      run: npm run build:all-unix
+  #   - name: build for Ubuntu
+  #     if: matrix.os == 'ubuntu-20.04'
+  #     run: npm run build:all-unix
 
-    - name: build for MacOS
-      if: matrix.os == 'macos-latest'
-      run: |
-        rustup target add aarch64-apple-darwin
-        npm run build:all-unix
+  #   - name: build for MacOS
+  #     if: matrix.os == 'macos-latest'
+  #     run: |
+  #       rustup target add aarch64-apple-darwin
+  #       npm run build:all-unix
 
-    - name: build for windows
-      if: matrix.os == 'windows-latest'
-      run: |
-        npm run build:all-windows
+  #   - name: build for windows
+  #     if: matrix.os == 'windows-latest'
+  #     run: |
+  #       npm run build:all-windows
 
-    - name: Upload files
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        UPLOADTOOL_ISPRERELEASE: true
-      run: |
-        curl -L https://github.com/probonopd/uploadtool/raw/master/upload.sh --output upload.sh
-        bash upload.sh output/*/*.*
+  #   - name: Upload files
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       UPLOADTOOL_ISPRERELEASE: true
+  #     run: |
+  #       curl -L https://github.com/probonopd/uploadtool/raw/master/upload.sh --output upload.sh
+  #       bash upload.sh output/*/*.*
     
-    - name: rust cache store
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          src-tauri/target/
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+  #   - name: rust cache store
+  #     uses: actions/cache@v3
+  #     with:
+  #       path: |
+  #         ~/.cargo/bin/
+  #         ~/.cargo/registry/index/
+  #         ~/.cargo/registry/cache/
+  #         ~/.cargo/git/db/
+  #         src-tauri/target/
+  #       key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
     
     # - name: Build archive
     #   shell: bash
