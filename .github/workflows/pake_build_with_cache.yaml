@@ -106,6 +106,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+    - name: rust cache restore
+      uses: ylemkimon/cache-restore@v2
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          src-tauri/target/
+        key:  ${{ runner.os }}-aarch64-cargo-${{ hashFiles('**/Cargo.lock') }} 
+
       - uses: uraimo/run-on-arch-action@v2.3.0
         name: build native modules using another arch
         with:
@@ -115,6 +126,7 @@ jobs:
           dockerRunArgs: |
             --volume "${PWD}:/build"
             --volume "/home/runner:/home/runner"
+            --volume "~/.cargo:~/.cargo"
           install: |
             apt-get update && apt-get install -y gnupg2 && apt-get install curl -y
             curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
@@ -137,4 +149,15 @@ jobs:
           UPLOADTOOL_ISPRERELEASE: true
         run: |
           curl -L https://github.com/probonopd/uploadtool/raw/master/upload.sh --output upload.sh
-          bash upload.sh output/*/*.* 
+          bash upload.sh output/*/*.*
+
+    - name: rust cache store
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          src-tauri/target/
+        key: ${{ runner.os }}-aarch64-cargo-${{ hashFiles('**/Cargo.lock') }} 
