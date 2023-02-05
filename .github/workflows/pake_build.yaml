@@ -55,7 +55,7 @@ jobs:
         version: 1.1
     
     - name: rust cache restore
-      uses: ylemkimon/cache-restore@v2
+      uses: actions/cache/restore@v3
       with:
         path: |
           ~/.cargo/bin/
