@@ -1,9 +1,6 @@
 name: Build App with Cache
 on:
-  push:
-    # Sequence of patterns matched against refs/tags
-    branches:
-      - release
+  workflow_dispatch: {}
 
 jobs:
   build:
@@ -142,6 +139,7 @@ jobs:
             source "$HOME/.cargo/env"
             export RUST_BACKTRACE=1
             npm run build:all-unix
+            chmod -R 777 /build
           
       - name: Upload files
         env:
