@@ -126,7 +126,7 @@ jobs:
           dockerRunArgs: |
             --volume "${PWD}:/build"
             --volume "/home/runner:/home/runner"
-            --volume "~/.cargo:~/.cargo"
+            --volume "/home/runner/.cargo:/home/runner/.cargo"
           install: |
             apt-get update && apt-get install -y gnupg2 && apt-get install curl -y
             curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
