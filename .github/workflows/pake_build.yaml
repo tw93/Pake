@@ -116,14 +116,3 @@ jobs:
         run: |
           curl -L https://github.com/probonopd/uploadtool/raw/master/upload.sh --output upload.sh
           bash upload.sh output/*/*.*
-
-      - name: rust cache store
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            src-tauri/target/
-          key: ${{ runner.os }}-aarch64-cargo-${{ hashFiles('**/Cargo.lock') }} 
