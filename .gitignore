@@ -30,3 +30,4 @@ yarn-error.log*
 
 # vercel
 .vercel
+src-tauri
