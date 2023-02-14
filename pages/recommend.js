@@ -1,3 +1,9 @@
-export default function About() {
-  return <div>官方推荐</div>
+import Layout from './components/layout';
+
+export default function Home() {
+  return (
+    <Layout>
+      <div className="py-48 text-3xl">官方推荐</div>
+    </Layout>
+  );
 }

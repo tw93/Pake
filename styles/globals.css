@@ -20,13 +20,51 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
+  font-size: 14px;
 }
 
 a {
   color: inherit;
   text-decoration: none;
+  color: #424242;
+}
+
+.main {
+  padding: 16px 50px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu li {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.menu a {
+  font-size: 16px;
+}
+
+.menu a.active,
+.menu a:hover {
+  border-width: 2px;
+  border-color: black;
+  background: none;
+  color: black;
+  border: none;
+  border-radius: 0;
+  position: relative;
+  font-weight: bold;
+}
+
+.menu a.active::after,
+.menu a:hover::after {
+  content: '';
+  width: 30px;
+  height: 3px;
+  background: black;
+  position: absolute;
+  bottom: 6px;
+  right: 15px;
+  transform: skew(-30deg);
 }
