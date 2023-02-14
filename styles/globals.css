@@ -30,7 +30,7 @@ a {
 }
 
 .main {
-  padding: 16px 50px;
+  padding: 16px 150px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;

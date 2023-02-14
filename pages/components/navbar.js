@@ -8,7 +8,7 @@ export default function Navbar({ children }) {
   return (
     <>
       <div className="navbar bg-base-100">
-        <div className="navbar-start flex flex-col pt-4">
+        <div className="navbar-start flex flex-col pt-4 w-1/3">
           <a className="normal-case text-4xl italic font-bold text-black w-full">
             Pake
           </a>
@@ -40,7 +40,21 @@ export default function Navbar({ children }) {
             </li>
           </ul>
         </div>
-        <div className="navbar-end xl:w-1/2 w-1/4"></div>
+        <div className="navbar-end w-1/5 pt-2">
+          <a
+            className="ri-twitter-fill ri-xl mr-7"
+            target="_blank"
+            rel="noreferrer"
+            href="https://twitter.com/HiTw93"
+          ></a>
+          <a
+            className="ri-github-fill ri-xl mr-7"
+            target="_blank"
+            rel="noreferrer"
+            href="https://github.com/tw93/Pake"
+          ></a>
+          <i className="ri-settings-fill ri-xl cursor-pointer"></i>
+        </div>
       </div>
     </>
   );

@@ -1,6 +1,7 @@
 import Navbar from './navbar'
 import Footer from './footer'
 import Head from 'next/head';
+import 'remixicon/fonts/remixicon.css'
 
 export default function Layout({ children }) {
   return (
