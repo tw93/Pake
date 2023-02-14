@@ -3,7 +3,8 @@ import { useRouter } from 'next/router';
 
 export default function Navbar({ children }) {
   const router = useRouter();
-  const pathName = router.pathname;
+  const active = (path) => (router.pathname === `/${path}` ? 'active' : '');
+
   return (
     <>
       <div className="navbar bg-base-100">
@@ -18,31 +19,22 @@ export default function Navbar({ children }) {
         <div className="navbar-center flex">
           <ul className="menu menu-horizontal px-1">
             <li>
-              <Link className={pathName === '/' ? 'active' : ''} href="/">
+              <Link className={active('')} href="/">
                 在线编译
               </Link>
             </li>
             <li>
-              <Link
-                href="/recommend"
-                className={pathName === '/recommend' ? 'active' : ''}
-              >
+              <Link href="/recommend" className={active('recommend')}>
                 官方推荐
               </Link>
             </li>
             <li>
-              <Link
-                href="/myapp"
-                className={pathName === '/myapp' ? 'active' : ''}
-              >
+              <Link href="/my" className={active('my')}>
                 我的应用
               </Link>
             </li>
             <li>
-              <Link
-                href="/contributor"
-                className={pathName === '/contributor' ? 'active' : ''}
-              >
+              <Link href="/contributor" className={active('contributor')}>
                 贡献者们
               </Link>
             </li>
