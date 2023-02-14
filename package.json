@@ -1,5 +1,5 @@
 {
-  "name": "nextjs",
+  "name": "Pake",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@next/font": "13.1.6",
+    "daisyui": "^2.50.0",
     "eslint": "8.32.0",
     "eslint-config-next": "13.1.6",
     "next": "13.1.6",
