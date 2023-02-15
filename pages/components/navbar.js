@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
-export default function Navbar({ children }) {
+export default function Navbar() {
   const router = useRouter();
   const active = (path) => (router.pathname === `/${path}` ? 'active' : '');
 
