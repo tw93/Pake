@@ -1552,7 +1552,7 @@ function getDomain(inputUrl) {
         if (i === 0 || // 'asia.com' (last remaining must be the SLD)
             i < ln - 2 || // TLDs only span 2 levels
             part.length < minLength || // 'www.cn.com' (valid TLD as second-level domain)
-            tlds.indexOf(part) < 0 // officialy not a TLD
+            tlds.indexOf(part) < 0 // officially not a TLD
         ) {
             return part;
         }
@@ -2019,11 +2019,11 @@ class MacBuilder {
             yield mergeTauriConfig(url, options, tauriConf);
             let dmgName;
             if (options.multiArch) {
-                yield shellExec(`cd ${npmDirectory} && npm install && npm run build:mac`);
+                yield shellExec(`cd "${npmDirectory}" && npm install && npm run build:mac`);
                 dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
             }
             else {
-                yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+                yield shellExec(`cd "${npmDirectory}" && npm install && npm run build`);
                 let arch = "x64";
                 if (process.arch === "arm64") {
                     arch = "aarch64";
@@ -2081,7 +2081,7 @@ class WinBuilder {
             logger.debug('PakeAppOptions', options);
             const { name } = options;
             yield mergeTauriConfig(url, options, tauriConf);
-            yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+            yield shellExec(`cd "${npmDirectory}" && npm install && npm run build`);
             const language = tauriConf.tauri.bundle.windows.wix.language[0];
             const arch = process.arch;
             const msiName = `${name}_${tauriConf.package.version}_${arch}_${language}.msi`;
@@ -2126,7 +2126,7 @@ class LinuxBuilder {
             logger.debug('PakeAppOptions', options);
             const { name } = options;
             yield mergeTauriConfig(url, options, tauriConf);
-            yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+            yield shellExec(`cd "${npmDirectory}" && npm install && npm run build`);
             let arch;
             if (process.arch === "x64") {
                 arch = "amd64";
@@ -2217,7 +2217,7 @@ var exports = "./dist/pake.js";
 var license = "MIT";
 var dependencies = {
 	"@tauri-apps/api": "^1.2.0",
-	"@tauri-apps/cli": "^1.2.2",
+	"@tauri-apps/cli": "^1.2.3",
 	axios: "^1.1.3",
 	chalk: "^5.1.2",
 	commander: "^9.4.1",
