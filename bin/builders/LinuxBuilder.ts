@@ -46,7 +46,7 @@ export default class LinuxBuilder implements IBuilder {
     const { name } = options;
 
     await mergeTauriConfig(url, options, tauriConf);
-    await shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+    await shellExec(`cd "${npmDirectory}" && npm install && npm run build`);
 
     let arch: string;
     if (process.arch === "x64") {
