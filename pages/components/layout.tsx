@@ -1,8 +1,9 @@
 import Navbar from './navbar'
 import Head from 'next/head';
 import 'remixicon/fonts/remixicon.css'
+import { PropsWithChildren } from 'react';
 
-export default function Layout({ children }) {
+export default function Layout({ children }: PropsWithChildren) {
   return (
     <>
       <Head>

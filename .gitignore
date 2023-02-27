@@ -18,6 +18,8 @@
 # misc
 .DS_Store
 *.pem
+.vscode
+.idea
 
 # debug
 npm-debug.log*
@@ -30,6 +32,11 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# tauri
 src-tauri
-.vscode/
-.idea/
+

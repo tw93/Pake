@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 
 export default function Navbar() {
   const router = useRouter();
-  const active = (path) => (router.pathname === `/${path}` ? 'active' : '');
+  const active = (path: string) => (router.pathname === `/${path}` ? 'active' : '');
 
   return (
     <>
