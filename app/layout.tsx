@@ -1,7 +1,12 @@
-import './styles/globals.css'
+import { ReactNode } from 'react';
+import '#/styles/globals.css';
+import GlobalNav from '#/ui/global-nav';
 
 export const metadata = {
-  title: 'Pake',
+  title: {
+    default: 'Pake',
+    template: '%s | Pake',
+  },
   description: '很简单的用 Rust 打包网页生成很小的桌面 App~',
 };
 
@@ -10,11 +15,18 @@ export default function RootLayout({
   // This will be populated with nested layouts or pages
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
+  console.log(11111);
   return (
     <html lang="zh-CN" translate="no">
-      <body>{children}</body>
+      <head />
+      <body>
+        <main className="main">
+          <GlobalNav />
+          {children}
+        </main>
+      </body>
     </html>
   );
 }
