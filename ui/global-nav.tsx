@@ -1,18 +1,20 @@
-import Link from 'next/link';
-import { useRouter } from 'next/router';
+'use client';
 
-export default function Navbar() {
-  const router = useRouter();
-  const active = (path) => (router.pathname === `/${path}` ? 'active' : '');
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+export default function GlobalNav() {
+  const pathname = usePathname();
+  const active = (path: string) => (pathname === `/${path}` ? 'active' : '');
 
   return (
     <>
       <div className="navbar bg-base-100">
-        <div className="navbar-start flex flex-col pt-4 w-1/3">
-          <a className="normal-case text-4xl italic font-bold text-black w-full">
+        <div className="navbar-start flex w-1/3 flex-col pt-4">
+          <a className="w-full text-4xl font-bold normal-case italic text-black">
             Pake
           </a>
-          <p className="text-gray-700 text-md w-full mt-2">
+          <p className="text-md mt-2 w-full text-gray-700">
             很简单的用 Rust 打包网页生成很小的桌面 App
           </p>
         </div>
