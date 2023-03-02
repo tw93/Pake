@@ -51,21 +51,21 @@
             <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi_x86_64.deb">Linux</a>
         </td>
-         <td>YouTube
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x86_64.deb">Linux</a>
+        <td>ChatGPT
+            <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x86_64.deb">Linux</a>
         </td>
     </tr>
     <tr>
         <td><img src=https://cdn.fliggy.com/upic/DX3dfG.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/Ea5ZRw.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/iKGVZy.png width=600/></td>
     </tr>
     <tr>
-        <td>Qwerty
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x86_64.deb">Linux</a>
+      <td>YouTube
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x86_64.deb">Linux</a>
         </td>
          <td>Reference
             <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
@@ -74,7 +74,7 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/CJjagn.jpg width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/Ea5ZRw.png width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/KFsZIY.png width=600/></td>
     </tr>
     <tr>
@@ -83,15 +83,15 @@
             <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x86_64.deb">Linux</a>
         </td>
-        <td>ChatGPT
-            <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x86_64.deb">Linux</a>
+        <td>Qwerty
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x86_64.deb">Linux</a>
         </td>
     </tr>
     <tr>
         <td><img src=https://gw.alipayobjects.com/zos/k/30/RoUSUf.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/sfnTXf.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/CJjagn.jpg width=600/></td>
     </tr>
 </table>
 
