@@ -11,7 +11,7 @@ export default async function handleOptions(options: PakeCliOptions, url: string
   };
 
   if (!appOptions.name) {
-    appOptions.name = await promptText('please input your application name', getDomain(url));
+    appOptions.name = await promptText('Please enter the name of your application.', getDomain(url));
   }
 
   appOptions.identifier = getIdentifier(appOptions.name, url);

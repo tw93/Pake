@@ -42,6 +42,6 @@ export function normalizeUrl(urlToNormalize: string): string {
   if (isurl(urlWithProtocol)) {
     return urlWithProtocol;
   } else {
-    throw new Error(`Your url "${urlWithProtocol}" is invalid`);
+    throw new Error(`The URL "${urlWithProtocol}" you provided is invalid.`);
   }
 }
