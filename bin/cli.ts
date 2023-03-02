@@ -9,20 +9,20 @@ import { checkUpdateTips } from './helpers/updater.js';
 // @ts-expect-error
 import packageJson from '../package.json';
 
-program.version(packageJson.version).description('A cli application can turn any webpage into a desktop app with Rust.');
+program.version(packageJson.version).description('A command-line tool that can quickly convert a webpage into a desktop application.');
 
 program
   .showHelpAfterError()
-  .argument('[url]', 'the web url you want to package', validateUrlInput)
+  .argument('[url]', 'the web URL you want to package', validateUrlInput)
   .option('-n, --name <string>', 'application name')
   .option('-i, --icon <string>', 'application icon', DEFAULT_PAKE_OPTIONS.icon)
   .option('-w, --width <number>', 'window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
   .option('-h, --height <number>', 'window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
-  .option('-f, --fullscreen', 'makes the packaged app start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
+  .option('-f, --fullscreen', 'start in full screen mode', DEFAULT_PAKE_OPTIONS.fullscreen)
   .option('-t, --transparent', 'transparent title bar', DEFAULT_PAKE_OPTIONS.transparent)
   .option('-r, --no-resizable', 'whether the window can be resizable', DEFAULT_PAKE_OPTIONS.resizable)
   .option('-d, --debug', 'debug', DEFAULT_PAKE_OPTIONS.debug)
-  .option('-m, --multi-arch', "Supports both Intel and m1 chips, only for Mac.", DEFAULT_PAKE_OPTIONS.multiArch)
+  .option('-m, --multi-arch', "available for Mac only, and supports both Intel and M1", DEFAULT_PAKE_OPTIONS.multiArch)
   .action(async (url: string, options: PakeCliOptions) => {
 
     await checkUpdateTips();
