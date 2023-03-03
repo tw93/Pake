@@ -86,10 +86,11 @@ window.addEventListener("DOMContentLoaded", (_event) => {
     }
 
     .panel.give_me .nav_view {
-      top: 154px !important;
+      top: 164px !important;
     }
 
-    .columns .column #header{
+    .columns .column #header,
+    .main > div > div.panel.give_me > div.header {
       padding-top: 30px;
     }
 
