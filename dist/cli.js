@@ -1572,14 +1572,14 @@ function normalizeUrl(urlToNormalize) {
         return urlWithProtocol;
     }
     else {
-        throw new Error(`Your url "${urlWithProtocol}" is invalid`);
+        throw new Error(`The URL "${urlWithProtocol}" you provided is invalid.`);
     }
 }
 
 function validateNumberInput(value) {
     const parsedValue = Number(value);
     if (isNaN(parsedValue)) {
-        throw new Commander.InvalidArgumentError('Not a number.');
+        throw new Commander.InvalidArgumentError('The input cannot be a number.');
     }
     return parsedValue;
 }
@@ -1742,7 +1742,7 @@ function handleIcon(options, url) {
 }
 function getDefaultIcon() {
     return __awaiter(this, void 0, void 0, function* () {
-        logger.info('You have not provided an app icon, use the default icon.(use --icon option to assign an icon)');
+        logger.info('You haven\'t provided an app icon, so the default icon will be used. To assign a custom icon, please use the --icon option.');
         let iconPath = 'src-tauri/icons/icon.icns';
         if (IS_WIN) {
             iconPath = 'src-tauri/png/icon_256.ico';
@@ -1786,7 +1786,7 @@ function handleOptions(options, url) {
     return __awaiter(this, void 0, void 0, function* () {
         const appOptions = Object.assign(Object.assign({}, options), { identifier: '' });
         if (!appOptions.name) {
-            appOptions.name = yield promptText('please input your application name', getDomain(url));
+            appOptions.name = yield promptText('Please enter the name of your application.', getDomain(url));
         }
         appOptions.identifier = getIdentifier(appOptions.name, url);
         appOptions.icon = yield handleIcon(appOptions);
@@ -1817,7 +1817,7 @@ function installRust() {
             spinner.succeed();
         }
         catch (error) {
-            console.error('install rust return code', error.message);
+            console.error('Error codes that occur during the Rust installation process.', error.message);
             spinner.fail();
             process.exit(1);
         }
@@ -2170,7 +2170,7 @@ class BuilderFactory {
 }
 
 var name = "pake-cli";
-var version = "1.2.6";
+var version = "1.2.7";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -2273,19 +2273,19 @@ function checkUpdateTips() {
     });
 }
 
-program.version(packageJson.version).description('A cli application can turn any webpage into a desktop app with Rust.');
+program.version(packageJson.version).description('A command-line tool that can quickly convert a webpage into a desktop application.');
 program
     .showHelpAfterError()
-    .argument('[url]', 'the web url you want to package', validateUrlInput)
+    .argument('[url]', 'the web URL you want to package', validateUrlInput)
     .option('-n, --name <string>', 'application name')
     .option('-i, --icon <string>', 'application icon', DEFAULT_PAKE_OPTIONS.icon)
     .option('-w, --width <number>', 'window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
     .option('-h, --height <number>', 'window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
-    .option('-f, --fullscreen', 'makes the packaged app start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
+    .option('-f, --fullscreen', 'start in full screen mode', DEFAULT_PAKE_OPTIONS.fullscreen)
     .option('-t, --transparent', 'transparent title bar', DEFAULT_PAKE_OPTIONS.transparent)
     .option('-r, --no-resizable', 'whether the window can be resizable', DEFAULT_PAKE_OPTIONS.resizable)
     .option('-d, --debug', 'debug', DEFAULT_PAKE_OPTIONS.debug)
-    .option('-m, --multi-arch', "Supports both Intel and m1 chips, only for Mac.", DEFAULT_PAKE_OPTIONS.multiArch)
+    .option('-m, --multi-arch', "available for Mac only, and supports both Intel and M1", DEFAULT_PAKE_OPTIONS.multiArch)
     .action((url, options) => __awaiter(void 0, void 0, void 0, function* () {
     yield checkUpdateTips();
     if (!url) {
