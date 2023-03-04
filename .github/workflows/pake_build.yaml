@@ -64,6 +64,29 @@ jobs:
           ~/.cargo/git/db/
           src-tauri/target/
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    
+    - name: build for Ubuntu
+      if: matrix.os == 'ubuntu-20.04'
+      run: npm run build:all-unix
+
+    - name: build for MacOS
+      if: matrix.os == 'macos-latest'
+      run: |
+        rustup target add aarch64-apple-darwin
+        npm run build:all-unix
+
+    - name: build for windows
+      if: matrix.os == 'windows-latest'
+      run: |
+        npm run build:all-windows
+
+    - name: Upload files
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        UPLOADTOOL_ISPRERELEASE: true
+      run: |
+        curl -L https://github.com/probonopd/uploadtool/raw/master/upload.sh --output upload.sh
+        bash upload.sh output/*/*.*
 
   # test build aarch64
   aarch64-linux:
