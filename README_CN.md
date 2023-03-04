@@ -73,7 +73,7 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/Ea5ZRw.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/s4ZLNC.jpg width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/KFsZIY.png width=600/></td>
     </tr>
     <tr>
