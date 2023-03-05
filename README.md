@@ -112,7 +112,7 @@
 </table>
 
 <details>
-<summary>🏂 You can download more applications (such as YuQue / RunCode / Reference) from <a href="https://github.com/tw93/Pake/releases">Releases</a>. <b>Click here to expand the shortcuts reference!</b></summary>
+<summary>🏂 You can download more applications (such as YuQue / Reference) from <a href="https://github.com/tw93/Pake/releases">Releases</a>. <b>Click here to expand the shortcuts reference!</b></summary>
 
 <br/>
 
