@@ -47,8 +47,18 @@ window.addEventListener("DOMContentLoaded", (_event) => {
     #Wrapper > div.sep20,
     #Main > div.box:nth-child(8),
     #masthead-ad,
+    #app > header > div > div.menu,
     #Rightbar > div:nth-child(6) > div.sidebar_compliance {
       display: none !important;
+    }
+
+    #app > header .right .avatar.logged-in{
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    #app > header .right .avatar.logged-in:hover{
+      opacity: 1;
     }
 
     #page .main_header, .cb-layout-basic--navbar,
