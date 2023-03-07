@@ -90,7 +90,7 @@ do
         # clear identifier with regex
         $sd "\"identifier\": \"(.*?)\"," "\"identifier\": \"\"," src-tauri/tauri.macos.conf.json
         # replace identifier with not regex
-        $sd -s "\"identifier\": \"(.*?)\"," "\"identifier\": \"${identifier_prefix}.${package_name}\"," src-tauri/tauri.macos.conf.json
+        $sd -s "\"identifier\": \"\"," "\"identifier\": \"${identifier_prefix}.${package_name}\"," src-tauri/tauri.macos.conf.json
     fi
 
     # echo "update ico with 32x32 picture"
