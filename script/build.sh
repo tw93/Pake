@@ -84,7 +84,7 @@ do
         # replace package_name with no regex
         $sd -s "\"productName\": \"\"," "\"productName\": \"${package_title}\"," src-tauri/tauri.conf.json
         # clear icon path with regex
-        $sd "\"icon\": \[\"(.*?)\"\]," "\"icon\": \[\"\"\]," src-tauri/tauri.macos.conf.json
+        $sd "\"icon\": \[\"(.*?)\"\]," "\"icon\": [\"\"]," src-tauri/tauri.macos.conf.json
         # replace icon path with no regex
         $sd -s "\"icon\": [\"\"]," "\"icon\": [\"icons/${package_name}.icns\"]," src-tauri/tauri.macos.conf.json
         # clear identifier with regex
