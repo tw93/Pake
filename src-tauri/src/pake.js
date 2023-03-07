@@ -48,6 +48,7 @@ window.addEventListener("DOMContentLoaded", (_event) => {
     #Main > div.box:nth-child(8),
     #masthead-ad,
     #app > header > div > div.menu,
+    #root > div > div.fixed.top-0.left-0.w-64.h-screen.p-10.pb-0.flex.flex-col.justify-between > div > div.space-y-4 > a:nth-child(3),
     #Rightbar > div:nth-child(6) > div.sidebar_compliance {
       display: none !important;
     }
