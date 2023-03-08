@@ -10,6 +10,9 @@ if (-not (Test-Path output)) {
 
 if (-not (Test-Path output\windows)) {
   New-Item -ItemType Directory -Path output\windows
+} else {
+  Remove-Item output\windows -Recurse -Force
+  New-Item -ItemType Directory -Path output\windows
 }
 
 Write-Host "`n======================="
@@ -41,7 +44,7 @@ ForEach ($line in (Get-Content -Path .\app.csv | Select-Object -Skip 1)) {
     Write-Host "=========================="
     # -- replace url --
     # clear url with regex
-    (Get-Content -Path $common_conf_path -Raw) -replace '"url":\s*"[^"]*"', '"url": ""' | Set-Content -Path $common_conf_path
+    .\script\sd.exe "`"url`":\s`"(.*?)`"" '"url": ""' $common_conf_path
     # replace url with no regex
     .\script\sd.exe -s '"url": ""'  "`"url`": `"${url}`"" $common_conf_path
 
@@ -53,19 +56,22 @@ ForEach ($line in (Get-Content -Path .\app.csv | Select-Object -Skip 1)) {
 
     # -- replace icon -- 
     # clear icon path with regex
-    (Get-Content -Path $windows_conf_path -Raw) -replace '(?s)"icon":\s*\[[^\]]*\]', '"icon": []' | Set-Content -Path $windows_conf_path
+    # (Get-Content -Path $windows_conf_path -Raw) -replace '(?s)"icon":\s*\[[^\]]*\]', '"icon": []' | Set-Content -Path $windows_conf_path
+    .\script\sd.exe "`"icon`":\s(.*)`]" '"icon": []'  $windows_conf_path
     # replace icon path with no regex
     .\script\sd.exe -s '"icon": []' "`"icon`": [`"png/${name}_256.ico`", `"png/${name}_32.ico`"]" $windows_conf_path
 
     # -- replace identifier --
     # clear identifier with regex
-    (Get-Content -Path $windows_conf_path -Raw) -replace '"identifier":\s*"[^"]*"', '"identifier": ""' | Set-Content -Path $windows_conf_path
+    # (Get-Content -Path $windows_conf_path -Raw) -replace '"identifier":\s*"[^"]*"', '"identifier": ""' | Set-Content -Path $windows_conf_path
+    .\script\sd.exe "`"identifier`":\s`"(.*?)`"" '"identifier": ""' $windows_conf_path
     # -- replace identifier with no regex --
     .\script\sd.exe -s '"identifier": ""' "`"identifier`": `"${identifier_prefix}.${name}`"" $windows_conf_path
 
     # -- replace icon resources --
     # clear resources with regex
-    (Get-Content -Path $windows_conf_path -Raw) -replace '(?s)"resources":\s*\[[^\]]*\]', '"resources": []' | Set-Content -Path $windows_conf_path
+    #(Get-Content -Path $windows_conf_path -Raw) -replace '(?s)"resources":\s*\[[^\]]*\]', '"resources": []' | Set-Content -Path $windows_conf_path
+    .\script\sd.exe "`"resources`":\s(.*)`]" '"resources": []'  $windows_conf_path
     # replace resources with no regex
     .\script\sd.exe -s '"resources": []' "`"resources`": [`"png/${name}_32.ico`"]" $windows_conf_path
 
@@ -93,27 +99,27 @@ ForEach ($line in (Get-Content -Path .\app.csv | Select-Object -Skip 1)) {
     Write-Host "package build success!"
     Write-Host ""
     $index++
-    # strip blank line for common_conf_path
-    $lines = Get-Content ${common_conf_path}
-    $lastNonEmptyLineIndex = ($lines.Count - 1)
-    while ($lastNonEmptyLineIndex -ge 0 -and -not $lines[$lastNonEmptyLineIndex].Trim()) {
-        $lastNonEmptyLineIndex--
-    }
-    if ($lastNonEmptyLineIndex -lt ($lines.Count - 1)) {
-        $lines = $lines[0..$lastNonEmptyLineIndex]
-    }
-    Set-Content -Path ${common_conf_path} -Value $lines
+    # # strip blank line for common_conf_path
+    # $lines = Get-Content ${common_conf_path}
+    # $lastNonEmptyLineIndex = ($lines.Count - 1)
+    # while ($lastNonEmptyLineIndex -ge 0 -and -not $lines[$lastNonEmptyLineIndex].Trim()) {
+    #     $lastNonEmptyLineIndex--
+    # }
+    # if ($lastNonEmptyLineIndex -lt ($lines.Count - 1)) {
+    #     $lines = $lines[0..$lastNonEmptyLineIndex]
+    # }
+    # Set-Content -Path ${common_conf_path} -Value $lines
 
-    # strip blank line for windows conf_path
-    $lines = Get-Content ${windows_conf_path}
-    $lastNonEmptyLineIndex = ($lines.Count - 1)
-    while ($lastNonEmptyLineIndex -ge 0 -and -not $lines[$lastNonEmptyLineIndex].Trim()) {
-        $lastNonEmptyLineIndex--
-    }
-    if ($lastNonEmptyLineIndex -lt ($lines.Count - 1)) {
-        $lines = $lines[0..$lastNonEmptyLineIndex]
-    }
-    Set-Content -Path ${windows_conf_path} -Value $lines
+    # # strip blank line for windows conf_path
+    # $lines = Get-Content ${windows_conf_path}
+    # $lastNonEmptyLineIndex = ($lines.Count - 1)
+    # while ($lastNonEmptyLineIndex -ge 0 -and -not $lines[$lastNonEmptyLineIndex].Trim()) {
+    #     $lastNonEmptyLineIndex--
+    # }
+    # if ($lastNonEmptyLineIndex -lt ($lines.Count - 1)) {
+    #     $lines = $lines[0..$lastNonEmptyLineIndex]
+    # }
+    # Set-Content -Path ${windows_conf_path} -Value $lines
 }
 
 Write-Host "output dir is output\windows"
