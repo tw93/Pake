@@ -12,39 +12,39 @@ on:
         - "macos-latest"
         - "ubuntu-20.04"
       url:
-        description: "[URL]The url link is the link to the website you want to package"
+        description: "[URL]"
         required: true
       name:
-        description: "[Name]The name of your application. We will prompt you to enter this if you do not provide it in this phase. Input must be in English."
+        description: "[Name]"
         required: true
       icon:
-        description: "[Icon, Optional] Application icon, need to provide a url link, Mac needs icns format, Windows needs (256*256 pixels) ico format, Linux needs (512*512 pixels) png format."
+        description: "[Icon, Optional]"
         required: false
       height:
-        description: "[Height, Optional]The height of the packaged application window."
+        description: "[Height, Optional]"
         required: false
         default: "780"
       width:
-        description: "[Width, Optional]The width of the packaged application window. "
+        description: "[Width, Optional]"
         required: false
         default: "1200"
       transparent:
-        description: "[Transparent, Optional]Whether to enable the immersive header."
+        description: "[Transparent, Optional]"
         required: false
         type: boolean
         default: false
       fullscreen:
-        description: "[FullScreen, Optional]Indicates if the window should be full screen on application launch. "
+        description: "[FullScreen, Optional]"
         required: false
         type: boolean
         default: false
       resize:
-        description: "[Resize, Optional]Indicates if the window can be resized."
+        description: "[Resize, Optional]"
         required: false
         type: boolean
         default: true
       multi_arch:
-        description: "[MultiArch, Optional]Package results support both Intel and m1 chips, only for MacOS. "
+        description: "[MultiArch, Optional, MacOS only]"
         required: false
         type: boolean
         default: false
