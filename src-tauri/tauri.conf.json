@@ -1,12 +1,12 @@
 {
   "package": {
-    "productName": "WeRead",
+    "productName": "",
     "version": "1.0.0"
   },
   "tauri": {
     "windows": [
       {
-        "url": "",
+        "url": "https://riju.codes/",
         "transparent": true,
         "fullscreen": false,
         "width": 1200,
@@ -28,4 +28,5 @@
     "beforeDevCommand": ""
   }
 }
+
 
