@@ -74,9 +74,10 @@ jobs:
 
     - name: build for windows
       if: matrix.os == 'windows-latest'
+      shell: pwsh
       run: |
         npm run build:all-windows
-
+        
     - name: Upload files
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
