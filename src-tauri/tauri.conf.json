@@ -6,7 +6,7 @@
   "tauri": {
     "windows": [
       {
-        "url": "https://weread.qq.com/",
+        "url": "",
         "transparent": true,
         "fullscreen": false,
         "width": 1200,
@@ -28,3 +28,4 @@
     "beforeDevCommand": ""
   }
 }
+
