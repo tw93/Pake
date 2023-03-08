@@ -79,7 +79,7 @@ jobs:
       if: matrix.os == 'windows-latest'
       shell: pwsh
       run: |
-        build:all-windows
+        npm run build:all-windows
 
     - name: Upload files
       env:
