@@ -48,7 +48,6 @@ ForEach ($line in (Get-Content -Path .\app.csv | Select-Object -Skip 1)) {
     # replace package name
     # clear package_name with regex
     .\script\sd.exe "`"productName`":\s`"(.*?)`"" '"productName": ""' $common_conf_path
-    # (Get-Content -Path $common_conf_path -Raw) -replace '"productName":\s*"[^"]*"', '"productName": ""' | Set-Content -Path $common_conf_path
     # replace package_name with no regex
     .\script\sd.exe -s '"productName": ""' "`"productName`": `"$title`"" $common_conf_path
 
