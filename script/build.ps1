@@ -28,7 +28,6 @@ $windows_conf_path = "src-tauri/tauri.windows.conf.json"
 $total = $total - 1
 
 # for windows, we need replace package name to title
-# .\script\sd.exe "\"productName\": \"weread\"" "\"productName\": \"WeRead\"" src-tauri\tauri.conf.json
 ForEach ($line in (Get-Content -Path .\app.csv | Select-Object -Skip 1)) {
     $name, $title, $name_zh, $url = $line.Split(",")
     Write-Host "building package ${index}/${total}"
@@ -48,7 +47,8 @@ ForEach ($line in (Get-Content -Path .\app.csv | Select-Object -Skip 1)) {
 
     # replace package name
     # clear package_name with regex
-    (Get-Content -Path $common_conf_path -Raw) -replace '"productName":\s*"[^"]*"', '"productName": ""' | Set-Content -Path $common_conf_path
+    .\script\sd.exe "`"productName`":\s`"(.*?)`"" '"productName": ""' $common_conf_path
+    # (Get-Content -Path $common_conf_path -Raw) -replace '"productName":\s*"[^"]*"', '"productName": ""' | Set-Content -Path $common_conf_path
     # replace package_name with no regex
     .\script\sd.exe -s '"productName": ""' "`"productName`": `"$title`"" $common_conf_path
 
