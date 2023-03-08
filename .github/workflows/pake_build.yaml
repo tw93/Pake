@@ -79,8 +79,7 @@ jobs:
       if: matrix.os == 'windows-latest'
       shell: pwsh
       run: |
-        $PSVersionTable
-        .\script\build.ps1
+        build:all-windows
 
     - name: Upload files
       env:
