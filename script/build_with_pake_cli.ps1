@@ -24,7 +24,7 @@ Write-Host "===========================`n"
 ${Params}="node node_modules/pake-cli/cli.js $env:URL --name $env:NAME"
 
 # download icon
-if (($null -eq $env:URL) -or ($env:URL -eq "")){
+if ((($null -ne $env:URL) -or ($env:URL -ne ""))){
   if ($IsLinux) {
     curl -L "$env:ICON" -o icon.png
     ${Params}="${Params} --icon icon.png"
@@ -58,7 +58,7 @@ if ("$env:FULLSCREEN" -eq "true" ) {
 }
 
 # multi-arch
-if ($env:MULTI_ARCH -eq "true") {
+if (($env:MULTI_ARCH -eq "true") -and ($IsMacOS)) {
   rustup target add aarch64-apple-darwin
   ${Params}="${Params} --multi-arch"
 }
