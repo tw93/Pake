@@ -24,7 +24,7 @@ Write-Host "===========================`n"
 ${Params}="node node_modules/pake-cli/cli.js $env:URL --name $env:NAME"
 
 # download icon
-if ((($null -ne $env:URL) -or ($env:URL -ne ""))){
+if ((($null -ne $env:URL) -and ($env:URL -ne ""))){
   if ($IsLinux) {
     curl -L "$env:ICON" -o icon.png
     ${Params}="${Params} --icon icon.png"
