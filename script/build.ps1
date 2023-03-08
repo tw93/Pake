@@ -94,8 +94,6 @@ ForEach ($line in (Get-Content -Path .\app.csv | Select-Object -Skip 1)) {
     Remove-Item -Path "src-tauri\target\x86_64-pc-windows-msvc\release\wix\*.*" -Recurse -Force
     Remove-Item -Path "src-tauri\target\x86_64-pc-windows-msvc\release\app.*" -Force
     Remove-Item -Path "src-tauri\target\x86_64-pc-windows-msvc\release\resources" -Recurse -Force
-    Remove-Item -Path "src-tauri\target\x86_64-pc-windows-msvc\release\png" -Recurse -Force
-    Remove-Item -Path "src-tauri\target\x86_64-pc-windows-msvc\release\wix" -Recurse -Force
     Write-Host "package build success!"
     Write-Host ""
     $index++
