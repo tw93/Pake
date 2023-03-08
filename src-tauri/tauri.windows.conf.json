@@ -1,14 +1,14 @@
 {
   "tauri": {
     "bundle": {
-      "icon": ["png/coderunner_256.ico", "png/coderunner_32.ico"],
-      "identifier": "com.tw93.coderunner",
+      "icon": ["png/weread_256.ico", "png/weread_32.ico"],
+      "identifier": "com.tw93.weread",
       "active": true,
       "category": "DeveloperTool",
       "copyright": "",
       "externalBin": [],
       "longDescription": "",
-      "resources": ["png/coderunner_32.ico"],
+      "resources": ["png/weread_32.ico"],
       "shortDescription": "",
       "targets": ["msi"],
       "windows": {
