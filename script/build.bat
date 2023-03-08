@@ -20,22 +20,16 @@ echo "build for windows"
 echo =======================
 echo.
 
+set identifier_prefix="com.tw93"
+
+
+
 :: total package number
 set /A index=1
 for /f %%a in (' find /c /v "" ^<"app.csv" ') do set /A total=%%a
 :: ignore first header line
 set /A total=total-1
 
-set old_name=weread
-set old_title=WeRead
-set old_zh_name=微信阅读
-set old_url=https://weread.qq.com/
-
-:: set init name,  we will recovery code to init when build finish.
-set init_name=%old_name%
-set init_title=%old_title%
-set init_zh_name=%old_zh_name%
-set init_url=%old_url%
 
 :: for windows, we need replace package name to title
 :: .\script\sd.exe "\"productName\": \"weread\"" "\"productName\": \"WeRead\"" src-tauri\tauri.conf.json
@@ -48,12 +42,36 @@ for /f "skip=1 tokens=1-4 delims=," %%i in (app.csv) do (
   set url=%%l
   @echo on
 
-  ::echo name is !name! !name_zh!  !url!
   :: replace url
-  .\script\sd.exe -s !old_url! !url! src-tauri\tauri.conf.json
+  :: clear url with regex
+  .\script\sd.exe "\"url\": \"(.*?)\"," "\"url\": \"\"," src-tauri/tauri.conf.json
+  :: replace url with no regex
+  .\script\sd.exe -s "\"url\": \"\","  "\"url\": \"!url!\"," src-tauri/tauri.conf.json
+
   ::replace  pacakge name
-  .\script\sd.exe -s !old_title! !title! src-tauri\tauri.conf.json
-  .\script\sd.exe -s !old_name! !name! src-tauri\tauri.windows.conf.json
+  :: clear package_name with regex
+  .\script\sd.exe "\"productName\": \"(.*?)\"," "\"productName\": \"\"," src-tauri/tauri.conf.json
+  :: replace package_name with no regex
+  .\script\sd.exe -s "\"productName\": \"\"," "\"productName\": \"!title!\"," src-tauri/tauri.conf.json
+
+  :: replace icon
+  ::clear icon path with regex
+  .\script\sd.exe "\"icon\": \[\"(.*?)\"\]," "\"icon\": [\"\"]," src-tauri/tauri.windows.conf.json
+  :: replace icon path with no regex
+  .\script\sd.exe -s "\"icon\": [\"\"]," "\"icon\": [\"icons/!name!_256.ico\", \"!name!_32.ico\"]," src-tauri/tauri.windows.conf.json
+
+  :: replace identifier
+  :: clear identifier with regex
+  .\script\sd.exe "\"identifier\": \"(.*?)\"," "\"identifier\": \"\"," src-tauri/tauri.windows.conf.json
+  :: replace identifier with not regex
+  .\script\sd.exe -s "\"identifier\": \"\"," "\"identifier\": \"!identifier_prefix!.!name!\"," src-tauri/tauri.windows.conf.json
+
+  :: replace icon resources
+  :: clear resources with regex
+  .\script\sd.exe "\"resources\": \[\"(.*?)\"\]" "\"resources\": \[\"\"\]" src-tauri/tauri.windows.conf.json
+  :: replace resources with no regex
+  .\script\sd.exe -s "\"resources\": [\"\"]" "\"resources\": [\"!name!_32.ico\"]" src-tauri/tauri.windows.conf.json
+
   if not exist src-tauri\png\!name!_32.ico (
     copy src-tauri\png\icon_32.ico src-tauri\png\!name!_32.ico
   )
@@ -62,11 +80,7 @@ for /f "skip=1 tokens=1-4 delims=," %%i in (app.csv) do (
     copy src-tauri\png\icon_256.ico src-tauri\png\!name!_256.ico
   )
   echo.
-  ::update package info
-  set old_zh_name=!name_zh!
-  set old_name=!name!
-  set old_title=!title!
-  set old_url=!url!
+  
   ::build package
   echo building package !index!/!total!
   echo package name is !name! !name_zh!
@@ -96,8 +110,3 @@ for /f "skip=1 tokens=1-4 delims=," %%i in (app.csv) do (
 :: for windows, we need replace package name to lower again
 :: .\script\sd.exe "\"productName\": \"WeRead\"" "\"productName\": \"weread\"" src-tauri\tauri.conf.json
 echo "output dir is output\windows"
-
-::recovery code
-.\script\sd.exe -s %url% %init_url% src-tauri\tauri.conf.json
-.\script\sd.exe -s %title% %init_title% src-tauri\tauri.conf.json
-.\script\sd.exe -s %name% %init_name% src-tauri\tauri.windows.conf.json
