@@ -74,6 +74,7 @@ jobs:
 
     - name: build for windows
       if: matrix.os == 'windows-latest'
+      shell: pwsh
       run: |
         npm run build:all-windows
 
