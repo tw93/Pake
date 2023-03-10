@@ -27,6 +27,7 @@ use wry::application::window::Icon;
 use wry::webview::WebContext;
 
 use native_dialog::FileDialog;
+use dirs::download_dir;
 use std::path::PathBuf;
 
 enum UserEvent {
@@ -148,6 +149,7 @@ fn main() -> wry::Result<()> {
         let proxy = proxy.clone();
         move |uri: String, default_path: &mut PathBuf| {
             let dialog_result = FileDialog::new()
+                .set_location(&download_dir().unwrap())
                 .set_filename(&default_path.display().to_string())
                 .show_save_single_file();
             if let Ok(Some(path)) = dialog_result {
