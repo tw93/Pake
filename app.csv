@@ -1,4 +1,3 @@
 name(Linux),name(Mac/Windows),name_zh,url
-reference,Reference,Reference,https://wangchujiang.com/reference/index.html
-code,Code,Code,https://riju.codes/
-manageSystem,manageSystem,销售管理系统,https://demo.system.teduis.com/
+manageSystemOnline,manageSystemOnline,销售管理系统在线,https://demo.system.teduis.com/
+manageSystem,manageSystem,销售管理系统,http://127.0.0.1:8000/
