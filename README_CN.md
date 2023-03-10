@@ -50,38 +50,6 @@
             <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi_x86_64.deb">Linux</a>
         </td>
-         <td>YouTube
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x86_64.deb">Linux</a>
-        </td>
-    </tr>
-    <tr>
-        <td><img src=https://cdn.fliggy.com/upic/DX3dfG.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/Ea5ZRw.png width=600/></td>
-    </tr>
-    <tr>
-        <td>Qwerty
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x86_64.deb">Linux</a>
-        </td>
-         <td>Reference
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x86_64.deb">Linux</a>
-        </td>
-    </tr>
-    <tr>
-        <td><img src=https://cdn.fliggy.com/upic/CJjagn.jpg width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/KFsZIY.png width=600/></td>
-    </tr>
-    <tr>
-        <td>Flomo
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x86_64.deb">Linux</a>
-        </td>
         <td>ChatGPT
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x64.msi">Windows</a>
@@ -89,14 +57,62 @@
         </td>
     </tr>
     <tr>
+        <td><img src=https://cdn.fliggy.com/upic/nYEKqN.jpg width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/LW9BMz.png width=600/></td>
+    </tr>
+    <tr>
+      <td>YouTube
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x86_64.deb">Linux</a>
+        </td>
+         <td>XiaoHongShu
+            <a href="https://github.com/tw93/Pake/releases/latest/download/XiaoHongShu.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/XiaoHongShu_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/XiaoHongShu_x86_64.deb">Linux</a>
+        </td>
+    </tr>
+    <tr>
+        <td><img src=https://cdn.fliggy.com/upic/s4ZLNC.jpg width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/0CvT6K.png width=600/></td>
+    </tr>
+    <tr>
+        <td>ProgramMusic
+            <a href="https://github.com/tw93/Pake/releases/latest/download/ProgramMusic.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/ProgramMusic_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/ProgramMusic_x86_64.deb">Linux</a>
+        </td>
+        <td>CodeRunner
+            <a href="https://github.com/tw93/Pake/releases/latest/download/CodeRunner.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/CodeRunner_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/CodeRunner_x86_64.deb">Linux</a>
+        </td>
+    </tr>
+    <tr>
+        <td><img src=https://cdn.fliggy.com/upic/8A3FfQ.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/EB1OYP.jpg width=600/></td>
+    </tr>
+    <tr>
+        <td>Flomo
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x86_64.deb">Linux</a>
+        </td>
+        <td>Qwerty
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x86_64.deb">Linux</a>
+        </td>
+    </tr>
+    <tr>
         <td><img src=https://gw.alipayobjects.com/zos/k/30/RoUSUf.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/sfnTXf.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/CJjagn.jpg width=600/></td>
     </tr>
 </table>
 
 <details>
 
-<summary>🏂 更多应用如 语雀 / RunCode 可去 <a href="https://github.com/tw93/Pake/releases">Release</a>下载，<b>此外点击可展开快捷键说明</b></summary>
+<summary>🏂 更多应用如 语雀 / Reference 可去 <a href="https://github.com/tw93/Pake/releases">Release</a>下载，<b>此外点击可展开快捷键说明</b></summary>
 
 <br/>
 

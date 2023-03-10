@@ -22,7 +22,7 @@ export async function handleIcon(options: PakeAppOptions, url: string) {
 }
 
 export async function getDefaultIcon() {
-  logger.info('You have not provided an app icon, use the default icon.(use --icon option to assign an icon)')
+  logger.info('You haven\'t provided an app icon, so the default icon will be used. To assign a custom icon, please use the --icon option.')
   let iconPath = 'src-tauri/icons/icon.icns';
   if (IS_WIN) {
     iconPath = 'src-tauri/png/icon_256.ico';

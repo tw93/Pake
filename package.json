@@ -1,6 +1,6 @@
 {
   "name": "pake-cli",
-  "version": "1.2.4",
+  "version": "1.2.7",
   "description": "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。",
   "engines": {
     "node": ">=16.0.0"
@@ -36,7 +36,7 @@
     "build": "npm run tauri build --release",
     "build:mac": "npm run tauri build -- --target universal-apple-darwin",
     "build:all-unix": "chmod +x ./script/build.sh && ./script/build.sh",
-    "build:all-windows": ".\\script\\build.bat",
+    "build:all-windows": "pwsh ./script/build.ps1",
     "tauri": "tauri",
     "cli": "rollup -c rollup.config.js --watch",
     "cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
