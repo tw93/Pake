@@ -6,7 +6,7 @@
   "tauri": {
     "windows": [
       {
-        "url": "https://weread.qq.com/",
+        "url": "https://github.com/tw93/Pake/releases/tag/V1.0.6",
         "transparent": true,
         "fullscreen": false,
         "width": 1200,
