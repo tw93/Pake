@@ -243,7 +243,7 @@ fn main() -> wry::Result<()> {
             Event::UserEvent(UserEvent::DownloadComplete(_, success)) => {
                 println!("Succeeded: {success}");
                 if success {
-                    let _ = webview.evaluate_script("window.pakeToast('已保存到桌面~')");
+                    let _ = webview.evaluate_script("window.pakeToast('Downloaded to Desktop~')");
                 } else {
                     println!("No output path")
                 }
