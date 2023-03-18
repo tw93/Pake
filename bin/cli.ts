@@ -23,6 +23,7 @@ program
   .option('-r, --no-resizable', 'whether the window can be resizable', DEFAULT_PAKE_OPTIONS.resizable)
   .option('-d, --debug', 'debug', DEFAULT_PAKE_OPTIONS.debug)
   .option('-m, --multi-arch', "available for Mac only, and supports both Intel and M1", DEFAULT_PAKE_OPTIONS.multiArch)
+  .option('--targets <string>', "Select the output package format, support deb/appimage/all, only for Linux", DEFAULT_PAKE_OPTIONS.targets)
   .action(async (url: string, options: PakeCliOptions) => {
 
     await checkUpdateTips();

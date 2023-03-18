@@ -82,6 +82,11 @@ export async function mergeTauriConfig(
         updateIconPath = false;
         logger.warn(`icon file in Linux must be 512 * 512 pix with .png type, but you give ${customIconExt}`);
       }
+      if (["all", "deb", "appimage"].includes(options.targets)) {
+        tauriConf.tauri.bundle.targets = [options.targets];
+      } else {
+        logger.warn("targets must be 'all', 'deb', 'appimage', we will use default 'all'");
+      }
     }
 
     if (process.platform === "darwin" && customIconExt !== ".icns") {
@@ -117,13 +122,13 @@ export async function mergeTauriConfig(
   let bundleConf = {tauri: {bundle: tauriConf.tauri.bundle}};
   await fs.writeFile(
     configPath,
-    Buffer.from(JSON.stringify(bundleConf), 'utf-8')
+    Buffer.from(JSON.stringify(bundleConf, null, '\t'), 'utf-8')
   );
 
 
   const configJsonPath = path.join(npmDirectory, 'src-tauri/tauri.conf.json')
   await fs.writeFile(
     configJsonPath,
-    Buffer.from(JSON.stringify(tauriConf), 'utf-8')
+    Buffer.from(JSON.stringify(tauriConf, null, '\t'), 'utf-8')
   );
 }

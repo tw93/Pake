@@ -9,6 +9,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   transparent: false,
   debug: false,
   multiArch: false,
+  targets: "all",
 };
 
 export const DEFAULT_APP_NAME = 'Pake';

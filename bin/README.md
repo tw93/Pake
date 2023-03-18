@@ -132,6 +132,14 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 打包结果同时支持英特尔和 m1 芯片，仅适用于 MacOS，默认为 `false`。
 
+#### [targets]
+
+选择输出的包格式，支持deb/appimage/all，如果选择all,则同时打包deb和appimage，该选项仅支持Linux，默认为`all`。
+
+```shell
+--targets xxx
+```
+
 ##### 准备工作
 
 - 注意：开启该选项后，需要用 rust 官网的 rustup 安装 rust，不支持 brew 安装。
