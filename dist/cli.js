@@ -1837,8 +1837,8 @@ function checkRustInstalled() {
 var tauri$3 = {
 	windows: [
 		{
-			url: "https://www.baidu.com",
-			transparent: false,
+			url: "https://weread.qq.com/",
+			transparent: true,
 			fullscreen: false,
 			width: 1200,
 			height: 780,
@@ -1850,46 +1850,21 @@ var tauri$3 = {
 	},
 	updater: {
 		active: false
-	},
-	bundle: {
-		icon: [
-			"/home/tlntin/data/code/rust_study/pake-tw93/Pake/src-tauri/png/icon_512.png"
-		],
-		identifier: "pake-f9751d",
-		active: true,
-		category: "DeveloperTool",
-		copyright: "",
-		deb: {
-			depends: [
-				"libwebkit2gtk-4.0-dev",
-				"build-essential",
-				"curl",
-				"wget",
-				"libssl-dev",
-				"libgtk-3-dev",
-				"libayatana-appindicator3-dev",
-				"librsvg2-dev",
-				"gnome-video-effects",
-				"gnome-video-effects-extra"
-			]
-		},
-		externalBin: [
-		],
-		longDescription: "",
-		resources: [
-		],
-		shortDescription: "",
-		targets: [
-			"deb"
-		]
 	}
+};
+var build = {
+	devPath: "../dist",
+	distDir: "../dist",
+	beforeBuildCommand: "",
+	beforeDevCommand: ""
 };
 var CommonConf = {
 	"package": {
-	productName: "baidu",
+	productName: "WeRead",
 	version: "1.0.0"
 },
-	tauri: tauri$3
+	tauri: tauri$3,
+	build: build
 };
 
 var tauri$2 = {
@@ -1964,9 +1939,9 @@ var MacConf = {
 var tauri = {
 	bundle: {
 		icon: [
-			"/home/tlntin/data/code/rust_study/pake-tw93/Pake/src-tauri/png/icon_512.png"
+			"png/weread_512.png"
 		],
-		identifier: "pake-f9751d",
+		identifier: "com.tw93.weread",
 		active: true,
 		category: "DeveloperTool",
 		copyright: "",
@@ -1982,7 +1957,10 @@ var tauri = {
 				"librsvg2-dev",
 				"gnome-video-effects",
 				"gnome-video-effects-extra"
-			]
+			],
+			files: {
+				"/usr/share/applications/com-tw93-weread.desktop": "assets/com-tw93-weread.desktop"
+			}
 		},
 		externalBin: [
 		],
@@ -1991,7 +1969,8 @@ var tauri = {
 		],
 		shortDescription: "",
 		targets: [
-			"deb"
+			"deb",
+			"appimage"
 		]
 	}
 };
