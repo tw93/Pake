@@ -27,7 +27,7 @@ Set-Location node_modules/pake-cli
 ${Params}="node cli.js $env:URL --name $env:NAME"
 
 # download icon
-if ((($null -ne $env:URL) -and ($env:URL -ne ""))){
+if ((($null -ne $env:ICON) -and ($env:ICON -ne ""))){
   if ($IsLinux) {
     curl -L "$env:ICON" -o icon.png
     ${Params}="${Params} --icon icon.png"
