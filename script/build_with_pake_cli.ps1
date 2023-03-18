@@ -15,7 +15,7 @@ Write-Host "icon: " $env:ICON
 Write-Host "height: " $env:HEIGHT
 Write-Host "width: " $env:WIDTH
 Write-Host "transparent: " $env:TRANSPARENT
-Write-Host "fullscreen: " $env:FULLSCREEN
+# Write-Host "fullscreen: " $env:FULLSCREEN
 Write-Host "resize: " $env:RESIZE
 Write-Host "is multi arch? only for Mac: " $env:MULTI_ARCH
 Write-Host "targets type? only for Linux: " $env:TARGETS
@@ -49,9 +49,9 @@ if ("$env:TRANSPARENT" -eq "true") {
 }
 
 # fullscreen
-if ("$env:FULLSCREEN" -eq "true") {
-  ${Params}="${Params} --fullscreen"
-}
+# if ("$env:FULLSCREEN" -eq "true") {
+#   ${Params}="${Params} --fullscreen"
+# }
 
 # resize
 if ("$env:FULLSCREEN" -eq "true" ) {
