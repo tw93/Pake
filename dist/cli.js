@@ -1658,6 +1658,14 @@ function mergeTauriConfig(url, options, tauriConf) {
         const exists = yield fs.stat(options.icon)
             .then(() => true)
             .catch(() => false);
+        if (process.platform === "linux") {
+            if (["all", "deb", "appimage"].includes(options.targets)) {
+                tauriConf.tauri.bundle.targets = [options.targets];
+            }
+            else {
+                logger.warn("targets must be 'all', 'deb', 'appimage', we will use default 'all'");
+            }
+        }
         if (exists) {
             let updateIconPath = true;
             let customIconExt = path.extname(options.icon).toLowerCase();
@@ -1677,12 +1685,6 @@ function mergeTauriConfig(url, options, tauriConf) {
                 if (customIconExt != ".png") {
                     updateIconPath = false;
                     logger.warn(`icon file in Linux must be 512 * 512 pix with .png type, but you give ${customIconExt}`);
-                }
-                if (["all", "deb", "appimage"].includes(options.targets)) {
-                    tauriConf.tauri.bundle.targets = [options.targets];
-                }
-                else {
-                    logger.warn("targets must be 'all', 'deb', 'appimage', we will use default 'all'");
                 }
             }
             if (process.platform === "darwin" && customIconExt !== ".icns") {
@@ -2025,11 +2027,11 @@ class MacBuilder {
             yield mergeTauriConfig(url, options, tauriConf);
             let dmgName;
             if (options.multiArch) {
-                yield shellExec(`cd "${npmDirectory}" && npm install && npm run build:mac`);
+                yield shellExec(`cd "${npmDirectory}" && npm install --verbose && npm run build:mac`);
                 dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
             }
             else {
-                yield shellExec(`cd "${npmDirectory}" && npm install && npm run build`);
+                yield shellExec(`cd "${npmDirectory}" && npm install --verbose && npm run build`);
                 let arch = "x64";
                 if (process.arch === "arm64") {
                     arch = "aarch64";
@@ -2087,7 +2089,7 @@ class WinBuilder {
             logger.debug('PakeAppOptions', options);
             const { name } = options;
             yield mergeTauriConfig(url, options, tauriConf);
-            yield shellExec(`cd "${npmDirectory}" && npm install && npm run build`);
+            yield shellExec(`cd "${npmDirectory}" && npm install --verbose && npm run build`);
             const language = tauriConf.tauri.bundle.windows.wix.language[0];
             const arch = process.arch;
             const msiName = `${name}_${tauriConf.package.version}_${arch}_${language}.msi`;
@@ -2132,7 +2134,7 @@ class LinuxBuilder {
             logger.debug('PakeAppOptions', options);
             const { name } = options;
             yield mergeTauriConfig(url, options, tauriConf);
-            yield shellExec(`cd "${npmDirectory}" && npm install && npm run build`);
+            yield shellExec(`cd "${npmDirectory}" && npm install --verbose && npm run build`);
             let arch;
             if (process.arch === "x64") {
                 arch = "amd64";
@@ -2181,7 +2183,7 @@ class BuilderFactory {
 }
 
 var name = "pake-cli";
-var version = "1.2.8";
+var version = "1.2.9";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
