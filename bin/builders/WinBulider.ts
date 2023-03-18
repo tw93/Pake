@@ -45,7 +45,7 @@ export default class WinBuilder implements IBuilder {
 
     await mergeTauriConfig(url, options, tauriConf);
 
-    await shellExec(`cd "${npmDirectory}" && npm install && npm run build`);
+    await shellExec(`cd "${npmDirectory}" && npm install --verbose && npm run build`);
     const language = tauriConf.tauri.bundle.windows.wix.language[0];
     const arch = process.arch;
     const msiName = `${name}_${tauriConf.package.version}_${arch}_${language}.msi`;

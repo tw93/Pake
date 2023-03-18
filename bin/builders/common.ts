@@ -63,6 +63,14 @@ export async function mergeTauriConfig(
   const exists = await fs.stat(options.icon)
     .then(() => true)
     .catch(() => false);
+  if (process.platform === "linux") {
+    if (["all", "deb", "appimage"].includes(options.targets)) {
+      tauriConf.tauri.bundle.targets = [options.targets];
+    } else {
+      logger.warn("targets must be 'all', 'deb', 'appimage', we will use default 'all'");
+    }
+  }
+
   if (exists) {
     let updateIconPath = true;
     let customIconExt = path.extname(options.icon).toLowerCase();
@@ -81,11 +89,6 @@ export async function mergeTauriConfig(
       if (customIconExt != ".png") {
         updateIconPath = false;
         logger.warn(`icon file in Linux must be 512 * 512 pix with .png type, but you give ${customIconExt}`);
-      }
-      if (["all", "deb", "appimage"].includes(options.targets)) {
-        tauriConf.tauri.bundle.targets = [options.targets];
-      } else {
-        logger.warn("targets must be 'all', 'deb', 'appimage', we will use default 'all'");
       }
     }
 
