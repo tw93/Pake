@@ -64,6 +64,7 @@ export async function mergeTauriConfig(
     .then(() => true)
     .catch(() => false);
   if (process.platform === "linux") {
+    delete tauriConf.tauri.bundle.deb.files;
     if (["all", "deb", "appimage"].includes(options.targets)) {
       tauriConf.tauri.bundle.targets = [options.targets];
     } else {
@@ -85,7 +86,6 @@ export async function mergeTauriConfig(
       }
     }
     if (process.platform === "linux") {
-      delete tauriConf.tauri.bundle.deb.files;
       if (customIconExt != ".png") {
         updateIconPath = false;
         logger.warn(`icon file in Linux must be 512 * 512 pix with .png type, but you give ${customIconExt}`);
@@ -103,6 +103,21 @@ export async function mergeTauriConfig(
     }
   } else {
     logger.warn("the custom icon path may not exists. we will use default icon to replace it");
+    switch (process.platform) {
+      case "win32": {
+        tauriConf.tauri.bundle.resources = ['png/icon_32.ico'];
+        tauriConf.tauri.bundle.icon = ['png/icon_32.ico', 'png/icon_256.ico']
+        break;
+      }
+      case "darwin": {
+        tauriConf.tauri.bundle.icon = ['icons/icon.icns']
+        break;
+      }
+      case "linux": {
+        tauriConf.tauri.bundle.icon = ['png/icon_512.png']
+        break;
+      }
+    }
   }
 
 
