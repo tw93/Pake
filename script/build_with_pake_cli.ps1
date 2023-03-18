@@ -24,7 +24,7 @@ Write-Host "===========================`n"
 
 Set-Location node_modules/pake-cli
 # init params
-${Params}=" && node cli.js $env:URL --name $env:NAME"
+${Params}="node cli.js $env:URL --name $env:NAME"
 
 # download icon
 if ((($null -ne $env:URL) -and ($env:URL -ne ""))){
