@@ -21,8 +21,10 @@ Write-Host "is multi arch? only for Mac: " $env:MULTI_ARCH
 Write-Host "targets type? only for Linux: " $env:TARGETS
 Write-Host "===========================`n"
 
+
+Set-Location node_modules/pake-cli
 # init params
-${Params}="node node_modules/pake-cli/cli.js $env:URL --name $env:NAME"
+${Params}=" && node cli.js $env:URL --name $env:NAME"
 
 # download icon
 if ((($null -ne $env:URL) -and ($env:URL -ne ""))){
@@ -79,3 +81,4 @@ if (-not(Test-Path output)) {
 }
 Move-Item -Path "$env:NAME.*" -Destination "output/"
 Write-Host "Build Success"
+Set-Location ../..
