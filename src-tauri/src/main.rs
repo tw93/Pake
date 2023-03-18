@@ -26,7 +26,7 @@ use wry::application::window::Icon;
 #[cfg(any(target_os = "linux", target_os = "windows"))]
 use wry::webview::WebContext;
 
-use dirs::desktop_dir;
+use dirs::download_dir;
 use std::path::PathBuf;
 
 enum UserEvent {
@@ -147,7 +147,7 @@ fn main() -> wry::Result<()> {
     let download_started = {
         let proxy = proxy.clone();
         move |uri: String, default_path: &mut PathBuf| {
-            let path = desktop_dir()
+            let path = download_dir()
                 .unwrap()
                 .join(default_path.display().to_string())
                 .as_path()
@@ -243,7 +243,7 @@ fn main() -> wry::Result<()> {
             Event::UserEvent(UserEvent::DownloadComplete(_, success)) => {
                 println!("Succeeded: {success}");
                 if success {
-                    let _ = webview.evaluate_script("window.pakeToast('Downloaded to Desktop~')");
+                    let _ = webview.evaluate_script("window.pakeToast('Downloaded to download folder~')");
                 } else {
                     println!("No output path")
                 }
