@@ -48,6 +48,15 @@ on:
         required: false
         type: boolean
         default: false
+      targets:
+        description: "[Targets, Optional, Linux only]"
+        required: false
+        default: "deb"
+        type: choice
+        options:
+        - "deb"
+        - "appimage"
+        - "all"
 
 
 jobs:
@@ -131,6 +140,7 @@ jobs:
         FULLSCREEN: ${{ inputs.fullscreen }}
         RESIZE: ${{ inputs.resize }}
         MULTI_ARCH: ${{ inputs.multi_arch }}
+        TARGETS: ${{ inputs.targets }}
 
     - name: Upload archive
       uses: actions/upload-artifact@v3

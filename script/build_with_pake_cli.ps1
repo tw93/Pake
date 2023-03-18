@@ -18,6 +18,7 @@ Write-Host "transparent: " $env:TRANSPARENT
 Write-Host "fullscreen: " $env:FULLSCREEN
 Write-Host "resize: " $env:RESIZE
 Write-Host "is multi arch? only for Mac: " $env:MULTI_ARCH
+Write-Host "targets type? only for Linux: " $env:TARGETS
 Write-Host "===========================`n"
 
 # init params
@@ -57,10 +58,15 @@ if ("$env:FULLSCREEN" -eq "true" ) {
   ${Params}="${Params} --resize"
 }
 
-# multi-arch
+# multi-arch only for mac
 if (($env:MULTI_ARCH -eq "true") -and ($IsMacOS)) {
   rustup target add aarch64-apple-darwin
   ${Params}="${Params} --multi-arch"
+}
+
+# targets type, only for linux
+if (($null -ne $env:TARGETS) -and ($env:TARGETS -ne "") -and ($IsLinux)) {
+  ${Params}="${Params} --targets $env:TARGETS"
 }
 
 Write-Host "Pake parameters is: ${Params}"
