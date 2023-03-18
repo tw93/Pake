@@ -49,6 +49,7 @@ const DEFAULT_PAKE_OPTIONS = {
     transparent: false,
     debug: false,
     multiArch: false,
+    targets: "all",
 };
 
 const tlds = [
@@ -1677,6 +1678,12 @@ function mergeTauriConfig(url, options, tauriConf) {
                     updateIconPath = false;
                     logger.warn(`icon file in Linux must be 512 * 512 pix with .png type, but you give ${customIconExt}`);
                 }
+                if (["all", "deb", "appimage"].includes(options.targets)) {
+                    tauriConf.tauri.bundle.targets = [options.targets];
+                }
+                else {
+                    logger.warn("targets must be 'all', 'deb', 'appimage', we will use default 'all'");
+                }
             }
             if (process.platform === "darwin" && customIconExt !== ".icns") {
                 updateIconPath = false;
@@ -1708,9 +1715,9 @@ function mergeTauriConfig(url, options, tauriConf) {
             }
         }
         let bundleConf = { tauri: { bundle: tauriConf.tauri.bundle } };
-        yield fs.writeFile(configPath, Buffer.from(JSON.stringify(bundleConf), 'utf-8'));
+        yield fs.writeFile(configPath, Buffer.from(JSON.stringify(bundleConf, null, '\t'), 'utf-8'));
         const configJsonPath = path.join(npmDirectory, 'src-tauri/tauri.conf.json');
-        yield fs.writeFile(configJsonPath, Buffer.from(JSON.stringify(tauriConf), 'utf-8'));
+        yield fs.writeFile(configJsonPath, Buffer.from(JSON.stringify(tauriConf, null, '\t'), 'utf-8'));
     });
 }
 
@@ -1830,8 +1837,8 @@ function checkRustInstalled() {
 var tauri$3 = {
 	windows: [
 		{
-			url: "https://weread.qq.com/",
-			transparent: true,
+			url: "https://www.baidu.com",
+			transparent: false,
 			fullscreen: false,
 			width: 1200,
 			height: 780,
@@ -1843,21 +1850,46 @@ var tauri$3 = {
 	},
 	updater: {
 		active: false
+	},
+	bundle: {
+		icon: [
+			"/home/tlntin/data/code/rust_study/pake-tw93/Pake/src-tauri/png/icon_512.png"
+		],
+		identifier: "pake-f9751d",
+		active: true,
+		category: "DeveloperTool",
+		copyright: "",
+		deb: {
+			depends: [
+				"libwebkit2gtk-4.0-dev",
+				"build-essential",
+				"curl",
+				"wget",
+				"libssl-dev",
+				"libgtk-3-dev",
+				"libayatana-appindicator3-dev",
+				"librsvg2-dev",
+				"gnome-video-effects",
+				"gnome-video-effects-extra"
+			]
+		},
+		externalBin: [
+		],
+		longDescription: "",
+		resources: [
+		],
+		shortDescription: "",
+		targets: [
+			"deb"
+		]
 	}
-};
-var build = {
-	devPath: "../dist",
-	distDir: "../dist",
-	beforeBuildCommand: "",
-	beforeDevCommand: ""
 };
 var CommonConf = {
 	"package": {
-	productName: "WeRead",
+	productName: "baidu",
 	version: "1.0.0"
 },
-	tauri: tauri$3,
-	build: build
+	tauri: tauri$3
 };
 
 var tauri$2 = {
@@ -1932,10 +1964,9 @@ var MacConf = {
 var tauri = {
 	bundle: {
 		icon: [
-			"png/weread_256.ico",
-			"png/weread_512.png"
+			"/home/tlntin/data/code/rust_study/pake-tw93/Pake/src-tauri/png/icon_512.png"
 		],
-		identifier: "com.tw93.weread",
+		identifier: "pake-f9751d",
 		active: true,
 		category: "DeveloperTool",
 		copyright: "",
@@ -1951,10 +1982,7 @@ var tauri = {
 				"librsvg2-dev",
 				"gnome-video-effects",
 				"gnome-video-effects-extra"
-			],
-			files: {
-				"/usr/share/applications/com-tw93-weread.desktop": "assets/com-tw93-weread.desktop"
-			}
+			]
 		},
 		externalBin: [
 		],
@@ -1963,8 +1991,7 @@ var tauri = {
 		],
 		shortDescription: "",
 		targets: [
-			"deb",
-			"appimage"
+			"deb"
 		]
 	}
 };
@@ -2134,19 +2161,24 @@ class LinuxBuilder {
             else {
                 arch = process.arch;
             }
-            const debName = `${name}_${tauriConf.package.version}_${arch}.deb`;
-            const appPath = this.getBuildAppPath(npmDirectory, "deb", debName);
-            const distPath = path.resolve(`${name}.deb`);
-            yield fs.copyFile(appPath, distPath);
-            yield fs.unlink(appPath);
-            const appImageName = `${name}_${tauriConf.package.version}_${arch}.AppImage`;
-            const appImagePath = this.getBuildAppPath(npmDirectory, "appimage", appImageName);
-            const distAppPath = path.resolve(`${name}.AppImage`);
-            yield fs.copyFile(appImagePath, distAppPath);
-            yield fs.unlink(appImagePath);
-            logger.success('Build success!');
-            logger.success('You can find the deb app installer in', distPath);
-            logger.success('You can find the AppImage app installer in', distAppPath);
+            if (options.targets === "deb" || options.targets === "all") {
+                const debName = `${name}_${tauriConf.package.version}_${arch}.deb`;
+                const appPath = this.getBuildAppPath(npmDirectory, "deb", debName);
+                const distPath = path.resolve(`${name}.deb`);
+                yield fs.copyFile(appPath, distPath);
+                yield fs.unlink(appPath);
+                logger.success('Build Deb success!');
+                logger.success('You can find the deb app installer in', distPath);
+            }
+            if (options.targets === "appimage" || options.targets === "all") {
+                const appImageName = `${name}_${tauriConf.package.version}_${arch}.AppImage`;
+                const appImagePath = this.getBuildAppPath(npmDirectory, "appimage", appImageName);
+                const distAppPath = path.resolve(`${name}.AppImage`);
+                yield fs.copyFile(appImagePath, distAppPath);
+                yield fs.unlink(appImagePath);
+                logger.success('Build AppImage success!');
+                logger.success('You can find the AppImage app installer in', distAppPath);
+            }
         });
     }
     getBuildAppPath(npmDirectory, packageType, packageName) {
@@ -2170,7 +2202,7 @@ class BuilderFactory {
 }
 
 var name = "pake-cli";
-var version = "1.2.7";
+var version = "1.2.8";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -2206,7 +2238,7 @@ var scripts = {
 	build: "npm run tauri build --release",
 	"build:mac": "npm run tauri build -- --target universal-apple-darwin",
 	"build:all-unix": "chmod +x ./script/build.sh && ./script/build.sh",
-	"build:all-windows": ".\\script\\build.bat",
+	"build:all-windows": "pwsh ./script/build.ps1",
 	tauri: "tauri",
 	cli: "rollup -c rollup.config.js --watch",
 	"cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
@@ -2286,6 +2318,7 @@ program
     .option('-r, --no-resizable', 'whether the window can be resizable', DEFAULT_PAKE_OPTIONS.resizable)
     .option('-d, --debug', 'debug', DEFAULT_PAKE_OPTIONS.debug)
     .option('-m, --multi-arch', "available for Mac only, and supports both Intel and M1", DEFAULT_PAKE_OPTIONS.multiArch)
+    .option('--targets <string>', "Select the output package format, support deb/appimage/all, only for Linux", DEFAULT_PAKE_OPTIONS.targets)
     .action((url, options) => __awaiter(void 0, void 0, void 0, function* () {
     yield checkUpdateTips();
     if (!url) {

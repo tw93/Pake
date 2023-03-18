@@ -134,6 +134,14 @@ Use the command below to disable this feature.
 
 Package results support both Intel and m1 chips, only for MacOS. The default is `false`.
 
+#### [targets]
+
+Select the output package format, support deb/appimage/all, if all is selected, deb and appimage will be packaged at the same time, this option only supports Linux, the default is `all`.
+
+```shell
+--targets xxx
+```
+
 ##### Preparation
 
 - Note: After enabling this option, you need to use rustup on the rust official website to install rust, brew installation is not supported.

@@ -54,20 +54,24 @@ export default class LinuxBuilder implements IBuilder {
     } else {
       arch = process.arch;
     }
-    const debName = `${name}_${tauriConf.package.version}_${arch}.deb`;
-    const appPath = this.getBuildAppPath(npmDirectory, "deb", debName);
-    const distPath = path.resolve(`${name}.deb`);
-    await fs.copyFile(appPath, distPath);
-    await fs.unlink(appPath);
-
-    const appImageName = `${name}_${tauriConf.package.version}_${arch}.AppImage`;
-    const appImagePath = this.getBuildAppPath(npmDirectory, "appimage", appImageName);
-    const distAppPath = path.resolve(`${name}.AppImage`);
-    await fs.copyFile(appImagePath, distAppPath);
-    await fs.unlink(appImagePath);
-    logger.success('Build success!');
-    logger.success('You can find the deb app installer in', distPath);
-    logger.success('You can find the AppImage app installer in', distAppPath);
+    if (options.targets === "deb" || options.targets === "all") {
+      const debName = `${name}_${tauriConf.package.version}_${arch}.deb`;
+      const appPath = this.getBuildAppPath(npmDirectory, "deb", debName);
+      const distPath = path.resolve(`${name}.deb`);
+      await fs.copyFile(appPath, distPath);
+      await fs.unlink(appPath);
+      logger.success('Build Deb success!');
+      logger.success('You can find the deb app installer in', distPath);
+    }
+    if (options.targets === "appimage" || options.targets === "all") {
+      const appImageName = `${name}_${tauriConf.package.version}_${arch}.AppImage`;
+      const appImagePath = this.getBuildAppPath(npmDirectory, "appimage", appImageName);
+      const distAppPath = path.resolve(`${name}.AppImage`);
+      await fs.copyFile(appImagePath, distAppPath);
+      await fs.unlink(appImagePath);
+      logger.success('Build AppImage success!');
+      logger.success('You can find the AppImage app installer in', distAppPath);
+    }
   }
 
   getBuildAppPath(npmDirectory: string, packageType: string, packageName: string) {

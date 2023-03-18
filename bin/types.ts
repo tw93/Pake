@@ -25,6 +25,9 @@ export interface PakeCliOptions {
 
   /** mutli arch, Supports both Intel and m1 chips, only for Mac */
   multiArch: boolean;
+
+  /** Select the output package format, support deb/appimage/all, only for Linux */
+  targets: string,
 }
 
 export interface PakeAppOptions extends PakeCliOptions {
