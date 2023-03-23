@@ -106,7 +106,7 @@
     </tr>
     <tr>
         <td><img src=https://gw.alipayobjects.com/zos/k/30/RoUSUf.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/mcnzEv.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/ajRw5F.png width=600/></td>
     </tr>
 </table>
 
