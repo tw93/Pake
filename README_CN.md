@@ -98,21 +98,21 @@
             <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x86_64.deb">Linux</a>
         </td>
-        <td>Qwerty
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x86_64.deb">Linux</a>
+        <td>Loop
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Loop.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Loop_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Loop_x86_64.deb">Linux</a>
         </td>
     </tr>
     <tr>
         <td><img src=https://gw.alipayobjects.com/zos/k/30/RoUSUf.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/CJjagn.jpg width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/mcnzEv.png width=600/></td>
     </tr>
 </table>
 
 <details>
 
-<summary>🏂 更多应用如 语雀 / Reference 可去 <a href="https://github.com/tw93/Pake/releases">Release</a>下载，<b>此外点击可展开快捷键说明</b></summary>
+<summary>🏂 更多应用如 语雀 / Reference / Qwerty 可去 <a href="https://github.com/tw93/Pake/releases">Release</a>下载，<b>此外点击可展开快捷键说明</b></summary>
 
 <br/>
 
