@@ -67,6 +67,10 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       padding-top: 20px;
     }
 
+    .fui-FluentProvider .fui-Button[data-testid="HomeButton"]{
+       padding-top: 20px;
+    }
+
     .chakra-ui-light #app .chakra-heading,
     .chakra-ui-dark #app .chakra-heading,
     .chakra-ui-light #app .chakra-stack,
