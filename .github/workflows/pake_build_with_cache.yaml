@@ -1,6 +1,17 @@
 name: Build App with Cache
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "tag version"
+        required: true
+        default: "V0.0.1"
+      is_pre_release:
+        description: "pre-release or release, is true, is pre-release"
+        required: true
+        type: boolean
+        default: true
+      
 
 jobs:
   build:
@@ -79,12 +90,14 @@ jobs:
         npm run build:all-windows
         
     - name: Upload files
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        UPLOADTOOL_ISPRERELEASE: true
-      run: |
-        curl -L https://github.com/probonopd/uploadtool/raw/master/upload.sh --output upload.sh
-        bash upload.sh output/*/*.*
+      # arg info: https://github.com/ncipollo/release-action#release-action
+      uses: ncipollo/release-action@v1
+      with:
+        allowUpdates: true
+        prerelease: ${{ inputs.is_pre_release }}
+        artifacts: "output/*/*.*"
+        tag: ${{ inputs.version }}
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: rust cache store
       uses: actions/cache/save@v3
