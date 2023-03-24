@@ -7,7 +7,7 @@ on:
         required: true
         default: "V0.0.1"
       is_pre_release:
-        description: "pre-release or release, is true, is pre-release"
+        description: "pre-release or release, if true, is pre-release"
         required: true
         type: boolean
         default: true
