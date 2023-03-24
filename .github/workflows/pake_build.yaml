@@ -78,9 +78,9 @@ jobs:
       run: |
         npm run build:all-windows
 
-    - name: Upload files (only for Windows)
+    - name: Upload files
+      # arg info: https://github.com/ncipollo/release-action#release-action
       uses: ncipollo/release-action@v1
-      if: matrix.target == 'x86_64-pc-windows-msvc'
       with:
         allowUpdates: true
         artifacts: "output/*/*.*"
