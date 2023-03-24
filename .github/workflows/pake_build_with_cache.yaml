@@ -5,7 +5,13 @@ on:
       version:
         description: "tag version"
         required: true
-        default: "v0.0.1"
+        default: "V0.0.1"
+      is_pre_release:
+        description: "pre-release or release, is true, is pre-release"
+        required: true
+        type: boolean
+        default: true
+      
 
 jobs:
   build:
@@ -88,7 +94,7 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         allowUpdates: true
-        prerelease: true
+        prerelease: ${{ inputs.is_pre_release }}
         artifacts: "output/*/*.*"
         tag: ${{ inputs.version }}
         token: ${{ secrets.GITHUB_TOKEN }}
