@@ -7,6 +7,12 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   fullscreen: false,
   resizable: true,
   transparent: false,
+  userAgent: '',
+  showMenu: false,
+  showSystemTray: false,
+  targets: 'deb',
+  iterCopyFile: false,
+  systemTrayIcon: '',
   debug: false,
 };
 

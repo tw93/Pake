@@ -22,7 +22,7 @@ Note: The Rust environment is required for packaging. If you do not have Rust, y
 
 ### url
 
-The url🔗 is the webpage link you need to package, Must be provided.
+The url🔗 is the webpage link or local html file you need to package, Must be provided.
 
 ### [options]
 
@@ -66,7 +66,7 @@ The width of the packaged application window. The default is `1200px`.
 
 #### [transparent]
 
-Whether to enable the immersive header. The default is `false`.
+Whether to enable the immersive header. The default is `false`, enter the following command to enable immersive, recommended for MacOS users to enable
 
 ```shell
 --transparent
@@ -74,7 +74,7 @@ Whether to enable the immersive header. The default is `false`.
 
 #### [resize]
 
-Whether the size can be dragged. The default value is `true`.
+Whether the size can be dragged. The default value is `true`, the window size cannot be stretched by entering the following command.
 
 ```shell
 --no-resizable
@@ -82,8 +82,49 @@ Whether the size can be dragged. The default value is `true`.
 
 #### [fullscreen]
 
-Whether to open the full screen after opening the application. The default is `false`.
+Whether to open the full screen after opening the application. The default is `false`, enter the following command to automatically full screen
 
 ```shell
 --fullscreen <value>
+```
+
+#### [user-agent]
+
+Custom browser user agent, default is empty.
+
+```shell
+--user-agent <value>
+```
+
+#### [show-menu]
+
+Display the menu bar, not display it by default, enter the following command and it will be displayed. MacOS users are recommended to enable.
+
+```shell
+--show-menu
+```
+
+#### [show-system-tray]
+
+Display the notification tray, not display it by default, entering the following command will display.
+
+```shell
+--show-system-tray <value>
+```
+
+#### [system-tray-icon]
+
+The notification tray icon is only valid when the notification tray is displayed. The icon must be a 512*512 pixel image in .ico or .png format.
+
+```shell
+--system-tray-icon <value>
+```
+
+
+#### [copy-iter-file]
+
+Recursive copy, when the url is a local file path, if this option is enabled, the folder where the url path file is located and all sub-files are copied to the pake static folder, which is not enabled by default
+
+```shell
+--copy-iter-file
 ```

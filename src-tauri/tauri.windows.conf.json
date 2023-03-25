@@ -1,9 +1,5 @@
 {
   "tauri": {
-    "systemTray": {
-      "iconPath": "png/weread_256.ico",
-      "iconAsTemplate": true
-    },
     "bundle": {
       "icon": [
         "png/weread_256.ico",

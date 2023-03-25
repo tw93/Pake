@@ -54,20 +54,33 @@ export default class LinuxBuilder implements IBuilder {
       arch = process.arch;
     }
     const debName = `${name}_${tauriConf.package.version}_${arch}.deb`;
-    const appPath = this.getBuildedAppPath(npmDirectory, "deb", debName);
+    const debPath = this.getBuildedAppPath(npmDirectory, "deb", debName);
     const distPath = path.resolve(`${name}.deb`);
-    await fs.copyFile(appPath, distPath);
-    await fs.unlink(appPath);
+    // 增加文件是否存在验证，再决定是否copy文件
+    const debExists = await fs.stat(debPath)
+    .then(() => true)
+    .catch(() => false);
+    if (debExists) {
+      await fs.copyFile(debPath, distPath);
+      await fs.unlink(debPath);
+      logger.success('Build success!');
+      logger.success('You can find the deb app installer in', distPath);
+    }
 
 
     const appImageName = `${name}_${tauriConf.package.version}_${arch}.AppImage`;
     const appImagePath = this.getBuildedAppPath(npmDirectory, "appimage", appImageName);
     const distAppPath = path.resolve(`${name}.AppImage`);
-    await fs.copyFile(appImagePath, distAppPath);
-    await fs.unlink(appImagePath);
-    logger.success('Build success!');
-    logger.success('You can find the deb app installer in', distPath);
-    logger.success('You can find the Appimage app installer in', distAppPath);
+
+    const appExists = await fs.stat(appImagePath)
+    .then(() => true)
+    .catch(() => false);
+    if (appExists) {
+      await fs.copyFile(appImagePath, distAppPath);
+      await fs.unlink(appImagePath);
+      logger.success('Build success!');
+      logger.success('You can find the Appimage app installer in', distAppPath);
+    }
   }
 
   getBuildedAppPath(npmDirectory: string,packageType: string, packageName: string) {
