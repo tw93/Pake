@@ -1,16 +1,13 @@
 #[cfg(target_os = "macos")]
 use tauri::MenuItem;
 
-#[cfg(target_os = "macos")]
-#[macro_use]
-extern crate objc;
-
-#[cfg(any(target_os = "linux", target_os = "windows"))]
-use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu};
+// #[cfg(target_os = "macos")]
+// #[macro_use]
+// extern crate objc;
 
 use tauri::{
-    window::PlatformWebview, App, Config, CustomMenuItem, Menu, Submenu, Window, WindowBuilder,
-    WindowMenuEvent, WindowUrl,
+    window::PlatformWebview, App, Config, CustomMenuItem, Manager, Menu, Submenu, SystemTray,
+    SystemTrayEvent, SystemTrayMenu, Window, WindowBuilder, WindowMenuEvent, WindowUrl,
 };
 mod pake;
 use pake::PakeConfig;
@@ -50,19 +47,19 @@ pub fn get_menu() -> Menu {
     // let previous = CustomMenuItem::new("previous", "Previous (←)");
     // let next = CustomMenuItem::new("next", "next (→)");
     // let refresh = CustomMenuItem::new("refresh", "Refresh");
-    let zoom_out = CustomMenuItem::new("zoom_out", "Zoom Out (125%)");
-    let zoom_in = CustomMenuItem::new("zoom_in", "Zoom In (75%)");
-    let zoom_reset = CustomMenuItem::new("reset", "Zoom Reset");
-    let hot_key = Menu::new()
-        // .add_item(top)
-        // .add_item(buttom)
-        // .add_item(previous)
-        // .add_item(next)
-        // .add_item(refresh)
-        .add_item(zoom_in)
-        .add_item(zoom_out)
-        .add_item(zoom_reset);
-    let hot_key_menu = Submenu::new("Hot Key", hot_key);
+    // let zoom_out = CustomMenuItem::new("zoom_out", "Zoom Out (125%)");
+    // let zoom_in = CustomMenuItem::new("zoom_in", "Zoom In (75%)");
+    // let zoom_reset = CustomMenuItem::new("reset", "Zoom Reset");
+    // let hot_key = Menu::new()
+    //     .add_item(top)
+    //     .add_item(buttom)
+    //     .add_item(previous)
+    //     .add_item(next)
+    //     .add_item(refresh)
+    //     .add_item(zoom_in)
+    //     .add_item(zoom_out)
+    //     .add_item(zoom_reset);
+    // let hot_key_menu = Submenu::new("Hot Key", hot_key);
 
     // Help
     // let instructions = CustomMenuItem::new("instruction", "Instruction");
@@ -71,47 +68,46 @@ pub fn get_menu() -> Menu {
     //     .add_item(instructions)
     //     .add_item(about);
     // let help_menu = Submenu::new("Help", help);
-    Menu::new()
-        .add_submenu(first_menu)
-        .add_submenu(hot_key_menu)
+    Menu::new().add_submenu(first_menu)
+    // .add_submenu(hot_key_menu)
 }
 
-pub fn set_zoom(webview: PlatformWebview, zoom_value: f64) {
-    #[cfg(target_os = "linux")]
-    {
-        // see https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/struct.WebView.html
-        // and https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/trait.WebViewExt.html
-        use webkit2gtk::traits::WebViewExt;
-        webview.inner().set_zoom_level(zoom_value);
-    }
+// pub fn set_zoom(webview: PlatformWebview, zoom_value: f64) {
+//     #[cfg(target_os = "linux")]
+//     {
+//         // see https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/struct.WebView.html
+//         // and https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/trait.WebViewExt.html
+//         use webkit2gtk::traits::WebViewExt;
+//         webview.inner().set_zoom_level(zoom_value);
+//     }
 
-    #[cfg(windows)]
-    unsafe {
-        // see https://docs.rs/webview2-com/0.19.1/webview2_com/Microsoft/Web/WebView2/Win32/struct.ICoreWebView2Controller.html
-        webview.controller().SetZoomFactor(zoom_value).unwrap();
-    }
+//     #[cfg(windows)]
+//     unsafe {
+//         // see https://docs.rs/webview2-com/0.19.1/webview2_com/Microsoft/Web/WebView2/Win32/struct.ICoreWebView2Controller.html
+//         webview.controller().SetZoomFactor(zoom_value).unwrap();
+//     }
 
-    #[cfg(target_os = "macos")]
-    unsafe {
-        let () = msg_send![webview.inner(), setPageZoom: zoom_value];
-        let () = msg_send![webview.controller(), removeAllUserScripts];
-        let bg_color: cocoa::base::id =
-            msg_send![class!(NSColor), colorWithDeviceRed:0.5 green:0.2 blue:0.4 alpha:1.];
-        let () = msg_send![webview.ns_window(), setBackgroundColor: bg_color];
-    }
-}
+//     #[cfg(target_os = "macos")]
+//     unsafe {
+//         let () = msg_send![webview.inner(), setPageZoom: zoom_value];
+//         let () = msg_send![webview.controller(), removeAllUserScripts];
+//         let bg_color: cocoa::base::id =
+//             msg_send![class!(NSColor), colorWithDeviceRed:0.5 green:0.2 blue:0.4 alpha:1.];
+//         let () = msg_send![webview.ns_window(), setBackgroundColor: bg_color];
+//     }
+// }
 
-pub fn set_zoom_out(webview: PlatformWebview) {
-    set_zoom(webview, 1.25);
-}
+// pub fn set_zoom_out(webview: PlatformWebview) {
+//     set_zoom(webview, 1.25);
+// }
 
-pub fn set_zoom_in(webview: PlatformWebview) {
-    set_zoom(webview, 0.75);
-}
+// pub fn set_zoom_in(webview: PlatformWebview) {
+//     set_zoom(webview, 0.75);
+// }
 
-pub fn zoom_reset(webview: PlatformWebview) {
-    set_zoom(webview, 1.0);
-}
+// pub fn zoom_reset(webview: PlatformWebview) {
+//     set_zoom(webview, 1.0);
+// }
 
 pub fn menu_event_handle(event: WindowMenuEvent) {
     match event.menu_item_id() {
@@ -119,24 +115,24 @@ pub fn menu_event_handle(event: WindowMenuEvent) {
         "show" => event.window().show().expect("can't show window"),
         "close" => event.window().close().expect("can't close window"),
         "quit" => std::process::exit(0),
-        "zoom_out" => {
-            event
-                .window()
-                .with_webview(set_zoom_out)
-                .expect("can't set zoom out");
-        }
-        "zoom_in" => {
-            event
-                .window()
-                .with_webview(set_zoom_in)
-                .expect("can't set zoom in");
-        }
-        "reset" => {
-            event
-                .window()
-                .with_webview(zoom_reset)
-                .expect("can't reset zoom");
-        }
+        // "zoom_out" => {
+        //     event
+        //         .window()
+        //         .with_webview(set_zoom_out)
+        //         .expect("can't set zoom out");
+        // }
+        // "zoom_in" => {
+        //     event
+        //         .window()
+        //         .with_webview(set_zoom_in)
+        //         .expect("can't set zoom in");
+        // }
+        // "reset" => {
+        //     event
+        //         .window()
+        //         .with_webview(zoom_reset)
+        //         .expect("can't reset zoom");
+        // }
         _ => {}
     }
 }
@@ -158,17 +154,18 @@ pub fn get_system_tray(show_menu: bool) -> SystemTray {
     let show_app = CustomMenuItem::new("show_app".to_string(), "Show App");
     let quit = CustomMenuItem::new("quit".to_string(), "Quit");
     let about = CustomMenuItem::new("about".to_string(), "About");
-    let tray_menu = SystemTrayMenu::new()
-        .add_item(hide_app)
-        .add_item(show_app)
-        .add_item(quit)
-        .add_item(about);
+    let tray_menu = SystemTrayMenu::new().add_item(hide_app).add_item(show_app);
     if show_menu {
         let hide_menu = CustomMenuItem::new("hide_menu".to_string(), "Hide Menu");
         let show_menu = CustomMenuItem::new("show_menu".to_string(), "Show Menu");
-        let tray_menu = tray_menu.add_item(hide_menu).add_item(show_menu);
+        let tray_menu = tray_menu
+            .add_item(hide_menu)
+            .add_item(show_menu)
+            .add_item(quit)
+            .add_item(about);
         SystemTray::new().with_menu(tray_menu)
     } else {
+        let tray_menu = tray_menu.add_item(quit).add_item(about);
         SystemTray::new().with_menu(tray_menu)
     }
 }

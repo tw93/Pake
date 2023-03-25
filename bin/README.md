@@ -23,7 +23,7 @@ Note: 打包需要用 `Rust` 环境，如果没有 `Rust`，会提示确认安�
 
 ### url
 
-url 为你需要打包的网页链接 🔗，必须提供。
+url 为你需要打包的网页链接 🔗或者本地html文件，必须提供。
 
 ### [options]
 
@@ -67,7 +67,7 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 #### [transparent]
 
-是否开启沉浸式头部，默认为 `false` 不开启。
+是否开启沉浸式头部，默认为 `false` 不开启，输入下面的命令则开启沉浸式，推荐MacOS用户开启。
 
 ```shell
 --transparent
@@ -75,7 +75,7 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 #### [resize]
 
-是否可以拖动大小，默认为 `true` 可拖动。
+是否可以拖动大小，默认为 `true` 可拖动，输入下面的命令则不能对窗口大小进行拉伸。
 
 ```shell
 --no-resizable
@@ -83,8 +83,49 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 #### [fullscreen]
 
-打开应用后是否开启全屏，默认为 `false`。
+打开应用后是否开启全屏，默认为 `false`，输入下面的命令则会自动全屏。
 
 ```shell
---fullscreen <value>
+--fullscreen
+```
+
+#### [user-agent]
+
+自定义浏览器请求头, 默认为空。
+
+```shell
+--user-agent <value>
+```
+
+#### [show-menu]
+
+显示菜单栏, 默认不显示，输入下面的命令则会显示，推荐MacOS用户开启。
+
+```shell
+--show-menu
+```
+
+#### [show-system-tray]
+
+显示通知栏托盘, 默认不显示，输入下面的命令则会显示。
+
+```shell
+--show-system-tray
+```
+
+#### [system-tray-icon]
+
+通知栏托盘图标，仅当显示通知栏托盘时有效, 图标必须为.ico或者.png格式的，512*512像素的图片。
+
+```shell
+--system-tray-icon <value>
+```
+
+
+#### [copy-iter-file]
+
+递归拷贝，当url为本地文件路径时候，若开启该选项，则将url路径文件所在文件夹以及所有子文件都拷贝到pake静态文件夹，默认不开启
+
+```shell
+--copy-iter-file
 ```
