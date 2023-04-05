@@ -237,8 +237,9 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       width: 100%;
       height: 20px;
       cursor: grab;
-      cursor: -webkit-grab;
       -webkit-app-region: drag;
+      user-select: none;
+      -webkit-user-select: none;
       z-index: 90000;
     }
   `;

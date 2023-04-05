@@ -83,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const domEl = document.getElementById('pack-top-dom');
 
   domEl.addEventListener('mousedown', (e) => {
+    e.preventDefault();
     if (e.buttons === 1 && e.detail !== 2) {
       invoke('drag_window');
     }
