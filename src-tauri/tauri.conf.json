@@ -13,9 +13,13 @@
     "systemTray": {
       "iconPath": "png/weread_512.png",
       "iconAsTemplate": true
+    },
+    "allowlist": {
+      "all": true
     }
   },
   "build": {
+    "withGlobalTauri": true,
     "devPath": "../dist",
     "distDir": "../dist",
     "beforeBuildCommand": "",

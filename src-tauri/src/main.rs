@@ -4,6 +4,7 @@
 )]
 
 use app::{get_data_dir, get_menu, get_pake_config, get_window, menu_event_handle};
+pub mod cmd;
 
 pub fn run_app() {
     let (pake_config, tauri_config) = get_pake_config();
@@ -45,7 +46,7 @@ pub fn run_app() {
 
     tauri_app
         .plugin(tauri_plugin_window_state::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![])
+        .invoke_handler(tauri::generate_handler![cmd::drag_window, cmd::fullscreen])
         .setup(|app| {
             let _window = get_window(app, pake_config, data_dir);
             #[cfg(feature = "devtools")]

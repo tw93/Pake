@@ -22,6 +22,43 @@ const ctrlKeyShortcuts = {
   0: () => zoomCommon(() => '100%'),
 };
 
+const uid = () => window.crypto.getRandomValues(new Uint32Array(1))[0];
+function transformCallback(callback = () => {}, once = false) {
+  const identifier = uid();
+  const prop = `_${identifier}`;
+  Object.defineProperty(window, prop, {
+    value: (result) => {
+      if (once) {
+        Reflect.deleteProperty(window, prop);
+      }
+      return callback(result);
+    },
+    writable: false,
+    configurable: true,
+  });
+  return identifier;
+}
+async function invoke(cmd, args) {
+  return new Promise((resolve, reject) => {
+    if (!window.__TAURI_POST_MESSAGE__)
+      reject('__TAURI_POST_MESSAGE__ does not exist~');
+    const callback = transformCallback((e) => {
+      resolve(e);
+      Reflect.deleteProperty(window, `_${error}`);
+    }, true);
+    const error = transformCallback((e) => {
+      reject(e);
+      Reflect.deleteProperty(window, `_${callback}`);
+    }, true);
+    window.__TAURI_POST_MESSAGE__({
+      cmd,
+      callback,
+      error,
+      ...args,
+    });
+  });
+}
+
 window.addEventListener('DOMContentLoaded', (_event) => {
   const style = document.createElement('style');
   style.innerHTML = `
@@ -275,16 +312,16 @@ window.addEventListener('DOMContentLoaded', (_event) => {
 
   domEl.addEventListener('mousedown', (e) => {
     if (e.buttons === 1 && e.detail !== 2) {
-      window.ipc.postMessage('drag_window');
+      invoke('drag_window');
     }
   });
 
   domEl.addEventListener('touchstart', () => {
-    window.ipc.postMessage('drag_window');
+    invoke('drag_window');
   });
 
   domEl.addEventListener('dblclick', () => {
-    window.ipc.postMessage('fullscreen');
+    invoke('fullscreen');
   });
 
   document.addEventListener('keyup', function (event) {
@@ -316,7 +353,7 @@ window.addEventListener('DOMContentLoaded', (_event) => {
         target === '_blank' // a 标签内链接的 target 属性为 _blank 时
       ) {
         e.preventDefault();
-        window.ipc.postMessage(`open_browser:${origin.href}`);
+        invoke('open_browser', { url: origin.href });
       }
     }
   });
