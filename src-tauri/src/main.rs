@@ -53,6 +53,12 @@ pub fn run_app() {
             }
             Ok(())
         })
+        .on_window_event(|event| {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event.event() {
+                event.window().minimize().unwrap();
+                api.prevent_close();
+            }
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
