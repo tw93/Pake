@@ -18,39 +18,25 @@ pub fn run_app() {
     let menu = get_menu();
     let data_dir = get_data_dir(tauri_config);
 
-    #[cfg(target_os = "macos")]
-    let tauri_app = if show_menu {
-        tauri::Builder::default()
-            .menu(menu)
-            .on_menu_event(menu_event_handle)
-    } else {
-        tauri::Builder::default()
-    };
+    let mut tauri_app = tauri::Builder::default();
+
+    if show_menu {
+        tauri_app = tauri_app.menu(menu).on_menu_event(menu_event_handle);
+    }
 
     #[cfg(not(target_os = "macos"))]
-    let tauri_app = {
+    {
         use pake::{get_system_tray, system_tray_handle};
 
         let show_system_tray = pake_config.show_system_tray();
         let system_tray = get_system_tray(show_menu);
-        let tauri_app = if show_menu && !show_system_tray {
-            tauri::Builder::default()
-                .menu(menu)
-                .on_menu_event(menu_event_handle)
-        } else if !show_menu && show_system_tray {
-            tauri::Builder::default()
+
+        if show_system_tray {
+            tauri_app = tauri_app
                 .system_tray(system_tray)
-                .on_system_tray_event(system_tray_handle)
-        } else if show_menu && show_system_tray {
-            tauri::Builder::default()
-                .menu(menu)
-                .on_menu_event(menu_event_handle)
-                .system_tray(system_tray)
-                .on_system_tray_event(system_tray_handle)
-        } else {
-            tauri::Builder::default()
-        };
-    };
+                .on_system_tray_event(system_tray_handle);
+        }
+    }
 
     tauri_app
         .plugin(tauri_plugin_window_state::Builder::default().build())
