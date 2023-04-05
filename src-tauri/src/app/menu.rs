@@ -8,6 +8,7 @@ pub fn get_menu() -> Menu {
     let show = CustomMenuItem::new("show", "Show");
     let close = CustomMenuItem::new("close", "Close");
     let quit = CustomMenuItem::new("quit", "Quit");
+
     #[cfg(target_os = "macos")]
     let first_menu = Menu::new()
         .add_native_item(MenuItem::EnterFullScreen)
