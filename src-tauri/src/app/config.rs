@@ -44,6 +44,7 @@ impl PakeConfig {
         menu_status
     }
 
+    #[cfg(not(target_os = "macos"))]
     pub fn show_system_tray(&self) -> bool {
         #[cfg(target_os = "macos")]
         let tray_status = self.system_tray.macos;
