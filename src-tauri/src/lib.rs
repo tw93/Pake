@@ -2,9 +2,9 @@
 use tauri::MenuItem;
 
 use tauri::{
-    App, Config, CustomMenuItem, Menu, Submenu, Window, WindowBuilder, WindowMenuEvent, WindowUrl,
+    App, Config, CustomMenuItem, Menu, Submenu, TitleBarStyle, Window, WindowBuilder,
+    WindowMenuEvent, WindowUrl,
 };
-use tauri_utils::TitleBarStyle;
 
 mod pake;
 use pake::PakeConfig;
@@ -155,7 +155,7 @@ pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: std::path::PathB
     let window_config = config.windows.first().unwrap();
     let user_agent = config.user_agent;
     let url = match window_config.url_type.as_str() {
-        "web" => WindowUrl::External(window_config.url.parse().unwrap()),
+        "web" =>WindowUrl::App(window_config.url.parse().unwrap()),
         "local" => WindowUrl::App(std::path::PathBuf::from(&window_config.url)),
         _ => panic!("url type only can be web or local"),
     };
