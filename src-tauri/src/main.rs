@@ -26,7 +26,7 @@ pub fn run_app() {
 
     #[cfg(not(target_os = "macos"))]
     {
-        use pake::{get_system_tray, system_tray_handle};
+        use menu::{get_system_tray, system_tray_handle};
 
         let show_system_tray = pake_config.show_system_tray();
         let system_tray = get_system_tray(show_menu);

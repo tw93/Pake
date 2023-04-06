@@ -2,6 +2,9 @@
 use tauri::MenuItem;
 use tauri::{CustomMenuItem, Menu, Submenu, WindowMenuEvent};
 
+#[cfg(any(target_os = "linux", target_os = "windows"))]
+use tauri::{Manager, SystemTray, SystemTrayMenu, WindowBuilder, WindowUrl};
+
 pub fn get_menu() -> Menu {
     // first menu
     let hide = CustomMenuItem::new("hide", "Hide");
