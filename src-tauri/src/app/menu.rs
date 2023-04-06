@@ -34,7 +34,8 @@ pub fn get_menu() -> Menu {
 
 pub fn menu_event_handle(event: WindowMenuEvent) {
     match event.menu_item_id() {
-        "close" => event.window().close().expect("can't close window"),
+        // default close to minimize
+        "close" => event.window().minimize().expect("can't minimize window"),
         _ => {}
     }
 }
@@ -86,7 +87,7 @@ pub fn system_tray_handle(app: &tauri::AppHandle, event: SystemTrayEvent) {
                     .unwrap();
             }
             "quit" => {
-                let _res = app.save_window_state(StateFlags::all()); 
+                let _res = app.save_window_state(StateFlags::all());
                 // println!("save windows state result {:?}", _res);
                 std::process::exit(0);
             }
