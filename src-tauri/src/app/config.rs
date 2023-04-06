@@ -12,18 +12,36 @@ pub struct WindowConfig {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct UserAgent {
-    pub macos: String,
-    pub linux: String,
-    pub windows: String,
+pub struct PlatformSpecific<T> {
+    pub macos: T,
+    pub linux: T,
+    pub windows: T,
 }
 
-#[derive(Debug, Deserialize)]
-pub struct FunctionON {
-    pub macos: bool,
-    pub linux: bool,
-    pub windows: bool,
+impl<T> PlatformSpecific<T> {
+    pub const fn get(&self) -> &T {
+        #[cfg(target_os = "macos")]
+        let platform = &self.macos;
+        #[cfg(target_os = "linux")]
+        let platform = &self.linux;
+        #[cfg(target_os = "windows")]
+        let platform = &self.windows;
+
+        platform
+    }
 }
+
+impl<T> PlatformSpecific<T>
+where
+    T: Copy,
+{
+    pub const fn copied(&self) -> T {
+        *self.get()
+    }
+}
+
+pub type UserAgent = PlatformSpecific<String>;
+pub type FunctionON = PlatformSpecific<bool>;
 
 #[derive(Debug, Deserialize)]
 pub struct PakeConfig {
@@ -35,23 +53,11 @@ pub struct PakeConfig {
 
 impl PakeConfig {
     pub fn show_menu(&self) -> bool {
-        #[cfg(target_os = "macos")]
-        let menu_status = self.menu.macos;
-        #[cfg(target_os = "linux")]
-        let menu_status = self.menu.linux;
-        #[cfg(target_os = "windows")]
-        let menu_status = self.menu.windows;
-        menu_status
+        self.menu.copied()
     }
 
     #[cfg(not(target_os = "macos"))]
     pub fn show_system_tray(&self) -> bool {
-        #[cfg(target_os = "macos")]
-        let tray_status = self.system_tray.macos;
-        #[cfg(target_os = "linux")]
-        let tray_status = self.system_tray.linux;
-        #[cfg(target_os = "windows")]
-        let tray_status = self.system_tray.windows;
-        tray_status
+        self.menu.copied()
     }
 }
