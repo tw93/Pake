@@ -20,6 +20,7 @@ serde = { version = "1.0.150", features = ["derive"] }
 tauri = { version = "1.2.1", features = ["api-all", "devtools", "system-tray"] }
 image = "0.24.5"
 home = "0.5"
+dirs = "5.0"
 tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "dev" }
 
 [features]
