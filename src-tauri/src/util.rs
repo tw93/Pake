@@ -1,7 +1,7 @@
 use crate::app::config::PakeConfig;
+use dirs::config_dir;
 use std::path::PathBuf;
 use tauri::Config;
-use dirs::config_dir;
 
 pub fn get_pake_config() -> (PakeConfig, Config) {
     let pake_config: PakeConfig =
@@ -16,7 +16,9 @@ pub fn get_pake_config() -> (PakeConfig, Config) {
 pub fn get_data_dir(_tauri_config: Config) -> PathBuf {
     {
         let package_name = _tauri_config.package.product_name.unwrap();
-        let data_dir = config_dir().expect("Failed to get data dirname").join(package_name);
+        let data_dir = config_dir()
+            .expect("Failed to get data dirname")
+            .join(package_name);
 
         if !data_dir.exists() {
             std::fs::create_dir(&data_dir)
@@ -25,4 +27,3 @@ pub fn get_data_dir(_tauri_config: Config) -> PathBuf {
         data_dir
     }
 }
-
