@@ -5,6 +5,9 @@ use tauri::{CustomMenuItem, Menu, Submenu, WindowMenuEvent};
 #[cfg(any(target_os = "linux", target_os = "windows"))]
 use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, WindowBuilder, WindowUrl};
 
+#[cfg(any(target_os = "linux", target_os = "windows"))]
+use tauri_plugin_window_state::{AppHandleExt, StateFlags};
+
 pub fn get_menu() -> Menu {
     // first menu
     let hide = CustomMenuItem::new("hide", "Hide");
@@ -95,6 +98,8 @@ pub fn system_tray_handle(app: &tauri::AppHandle, event: SystemTrayEvent) {
                     .unwrap();
             }
             "quit" => {
+                let _res = app.save_window_state(StateFlags::all()); 
+                // println!("save windows state result {:?}", _res);
                 std::process::exit(0);
             }
             "about" => {
