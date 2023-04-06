@@ -1,6 +1,9 @@
 use crate::app::config::PakeConfig;
 use std::path::PathBuf;
-use tauri::{App, TitleBarStyle, Window, WindowBuilder, WindowUrl};
+use tauri::{App, Window, WindowBuilder, WindowUrl};
+
+#[cfg(target_os = "macos")]
+use tauri::TitleBarStyle;
 
 pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Window {
     let window_config = config
@@ -21,21 +24,24 @@ pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Wind
         _ => panic!("url type only can be web or local"),
     };
 
-    let title_bar_style = if window_config.transparent {
-        TitleBarStyle::Overlay
-    } else {
-        TitleBarStyle::Visible
-    };
-
-    let window_builder = WindowBuilder::new(app, "pake", url)
+    let mut window_builder = WindowBuilder::new(app, "pake", url)
         .title("")
         .user_agent(user_agent)
         .resizable(window_config.resizable)
         .fullscreen(window_config.fullscreen)
-        .title_bar_style(title_bar_style)
         .inner_size(window_config.width, window_config.height)
         .initialization_script(include_str!("../inject/style.js"))
         .initialization_script(include_str!("../inject/index.js"));
+
+    #[cfg(target_os = "macos")]
+    {
+        let title_bar_style = if window_config.transparent {
+            TitleBarStyle::Overlay
+        } else {
+            TitleBarStyle::Visible
+        };
+        window_builder = window_builder.title_bar_style(title_bar_style)
+    }
 
     #[cfg(not(target_os = "macos"))]
     {
