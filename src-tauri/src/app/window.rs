@@ -11,17 +11,12 @@ pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Wind
         .first()
         .expect("At least one window configuration is required");
 
-    #[cfg(target_os = "macos")]
-    let user_agent = config.user_agent.macos.as_str();
-    #[cfg(target_os = "linux")]
-    let user_agent = config.user_agent.linux.as_str();
-    #[cfg(target_os = "windows")]
-    let user_agent = config.user_agent.windows.as_str();
+    let user_agent = config.user_agent.get();
 
     let url = match window_config.url_type.as_str() {
         "web" => WindowUrl::App(window_config.url.parse().unwrap()),
         "local" => WindowUrl::App(PathBuf::from(&window_config.url)),
-        _ => panic!("url type only can be web or local"),
+        _ => panic!("url type can only be web or local"),
     };
 
     let mut window_builder = WindowBuilder::new(app, "pake", url)

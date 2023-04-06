@@ -34,4 +34,3 @@ pub fn get_data_dir(_tauri_config: Config) -> PathBuf {
         PathBuf::new()
     }
 }
-
