@@ -1,6 +1,6 @@
 use crate::app::config::PakeConfig;
-use tauri::Config;
 use std::path::PathBuf;
+use tauri::Config;
 
 pub fn get_pake_config() -> (PakeConfig, Config) {
     let pake_config: PakeConfig =

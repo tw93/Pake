@@ -3,7 +3,7 @@ use tauri::MenuItem;
 use tauri::{CustomMenuItem, Menu, Submenu, WindowMenuEvent};
 
 #[cfg(any(target_os = "linux", target_os = "windows"))]
-use tauri::{Manager, SystemTray, SystemTrayMenu, WindowBuilder, WindowUrl};
+use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, WindowBuilder, WindowUrl};
 
 pub fn get_menu() -> Menu {
     // first menu
@@ -71,7 +71,7 @@ pub fn get_system_tray(show_menu: bool) -> SystemTray {
 }
 
 #[cfg(any(target_os = "linux", target_os = "windows"))]
-pub fn system_tray_handle(app: &tauri::AppHandle, event: tauri::SystemTrayEvent) {
+pub fn system_tray_handle(app: &tauri::AppHandle, event: SystemTrayEvent) {
     if let SystemTrayEvent::MenuItemClick { tray_id: _, id, .. } = event {
         match id.as_str() {
             "hide_app" => {
