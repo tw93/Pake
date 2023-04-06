@@ -1,22 +1,14 @@
 #[cfg(target_os = "macos")]
 use tauri::MenuItem;
+
 use tauri::{CustomMenuItem, Menu, Submenu, WindowMenuEvent};
 
 #[cfg(any(target_os = "linux", target_os = "windows"))]
 use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, WindowBuilder, WindowUrl};
 
 pub fn get_menu() -> Menu {
-    // first menu
-    let hide = CustomMenuItem::new("hide", "Hide");
-    let show = CustomMenuItem::new("show", "Show");
-    let close = CustomMenuItem::new("close", "Close");
-    let quit = CustomMenuItem::new("quit", "Quit");
-
-    #[cfg(target_os = "macos")]
+    let close = CustomMenuItem::new("close".to_string(), "Close Window").accelerator("CmdOrCtrl+W");
     let first_menu = Menu::new()
-        .add_native_item(MenuItem::EnterFullScreen)
-        .add_native_item(MenuItem::Minimize)
-        .add_native_item(MenuItem::Separator)
         .add_native_item(MenuItem::Copy)
         .add_native_item(MenuItem::Cut)
         .add_native_item(MenuItem::Paste)
@@ -24,26 +16,22 @@ pub fn get_menu() -> Menu {
         .add_native_item(MenuItem::Redo)
         .add_native_item(MenuItem::SelectAll)
         .add_native_item(MenuItem::Separator)
-        .add_item(hide)
-        .add_item(show)
+        .add_native_item(MenuItem::EnterFullScreen)
+        .add_native_item(MenuItem::Minimize)
+        .add_native_item(MenuItem::Hide)
+        .add_native_item(MenuItem::HideOthers)
+        .add_native_item(MenuItem::ShowAll)
+        .add_native_item(MenuItem::Separator)
         .add_item(close)
-        .add_item(quit);
-    #[cfg(any(target_os = "linux", target_os = "windows"))]
-    let first_menu = Menu::new()
-        .add_item(hide)
-        .add_item(show)
-        .add_item(close)
-        .add_item(quit);
-    let first_menu = Submenu::new("File", first_menu);
-    Menu::new().add_submenu(first_menu)
+        .add_native_item(MenuItem::Quit);
+
+    let app_menu = Submenu::new("File", first_menu);
+    Menu::new().add_submenu(app_menu)
 }
 
 pub fn menu_event_handle(event: WindowMenuEvent) {
     match event.menu_item_id() {
-        "hide" => event.window().hide().expect("can't hide window"),
-        "show" => event.window().show().expect("can't show window"),
         "close" => event.window().close().expect("can't close window"),
-        "quit" => std::process::exit(0),
         _ => {}
     }
 }
