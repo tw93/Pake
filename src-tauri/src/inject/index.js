@@ -107,18 +107,31 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.addEventListener('click', (e) => {
-    const origin = e.target.closest('a');
-    if (origin && origin.href) {
-      const target = origin.target;
-      origin.target = '_self';
-      const hrefUrl = new URL(origin.href);
+    const anchorElement = e.target.closest('a');
 
-      if (
-        window.location.host !== hrefUrl.host && // 如果 a 标签内链接的域名和当前页面的域名不一致 且
-        target === '_blank' // a 标签内链接的 target 属性为 _blank 时
-      ) {
+    if (anchorElement && anchorElement.href) {
+      const target = anchorElement.target;
+      anchorElement.target = '_self';
+      const hrefUrl = new URL(anchorElement.href);
+      const absoluteUrl = hrefUrl.href;
+
+      // 处理外部链接跳转
+      if (window.location.host !== hrefUrl.host && target === '_blank') {
         e.preventDefault();
-        invoke('open_browser', { url: origin.href });
+        invoke('open_browser', { url: absoluteUrl });
+        return;
+      }
+
+      // 处理下载链接让Rust处理
+      if (/\.[a-zA-Z0-9]+$/i.test(absoluteUrl)) {
+        e.preventDefault();
+        // invoke('open_browser', { url: absoluteUrl });
+        invoke('download_file', {
+          params: {
+            url: absoluteUrl,
+            filename: getFilenameFromUrl(absoluteUrl),
+          },
+        });
       }
     }
   });
@@ -131,4 +144,27 @@ function setDefaultZoom() {
   if (htmlZoom) {
     setZoom(htmlZoom);
   }
+}
+
+function getFilenameFromUrl(url) {
+  const urlPath = new URL(url).pathname;
+  const filename = urlPath.substring(urlPath.lastIndexOf('/') + 1);
+  return filename;
+}
+
+function pakeToast(msg) {
+  const m = document.createElement('div');
+  m.innerHTML = msg;
+  m.style.cssText =
+    'max-width:60%;min-width: 80px;padding:0 12px;height: 32px;color: rgb(255, 255, 255);line-height: 32px;text-align: center;border-radius: 8px;position: fixed; bottom:24px;right: 28px;z-index: 999999;background: rgba(0, 0, 0,.8);font-size: 13px;';
+  document.body.appendChild(m);
+  setTimeout(function () {
+    const d = 0.5;
+    m.style.transition =
+      'transform ' + d + 's ease-in, opacity ' + d + 's ease-in';
+    m.style.opacity = '0';
+    setTimeout(function () {
+      document.body.removeChild(m);
+    }, d * 1000);
+  }, 3000);
 }
