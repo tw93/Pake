@@ -9,6 +9,7 @@ mod util;
 use app::{invoke, menu, window};
 use invoke::{download, drag_window, fullscreen, open_browser};
 use menu::{get_menu, menu_event_handle};
+use tauri_plugin_window_state::{Builder, StateFlags, WindowExt};
 use util::{get_data_dir, get_pake_config};
 use window::get_window;
 
@@ -39,7 +40,7 @@ pub fn run_app() {
     }
 
     tauri_app
-        .plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             drag_window,
             fullscreen,
@@ -48,6 +49,9 @@ pub fn run_app() {
         ])
         .setup(|app| {
             let _window = get_window(app, pake_config, data_dir);
+            // Prevent initial shaking
+            _window.restore_state(StateFlags::all()).unwrap();
+            _window.show().unwrap();
             #[cfg(feature = "devtools")]
             {
                 _window.open_devtools();
