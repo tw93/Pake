@@ -1,3 +1,4 @@
+use std::fs;
 use tauri::{api, command, AppHandle, Manager};
 
 #[command]
@@ -18,4 +19,10 @@ pub fn fullscreen(app: AppHandle) {
 #[tauri::command]
 pub fn open_browser(app: AppHandle, url: String) {
     api::shell::open(&app.shell_scope(), url, None).unwrap();
+}
+
+#[command]
+pub fn download(_app: AppHandle, name: String, blob: Vec<u8>) {
+    let path = api::path::download_dir().unwrap().join(name);
+    fs::write(&path, blob).unwrap();
 }
