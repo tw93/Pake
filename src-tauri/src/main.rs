@@ -7,7 +7,7 @@ mod app;
 mod util;
 
 use app::{invoke, menu, window};
-use invoke::{drag_window, fullscreen, open_browser};
+use invoke::{download, drag_window, fullscreen, open_browser};
 use menu::{get_menu, menu_event_handle};
 use util::{get_data_dir, get_pake_config};
 use window::get_window;
@@ -43,7 +43,8 @@ pub fn run_app() {
         .invoke_handler(tauri::generate_handler![
             drag_window,
             fullscreen,
-            open_browser
+            open_browser,
+            download
         ])
         .setup(|app| {
             let _window = get_window(app, pake_config, data_dir);
