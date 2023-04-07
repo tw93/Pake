@@ -13,6 +13,8 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     #Wrapper > div.sep20,
     #Main > div.box:nth-child(8),
     #masthead-ad,
+    #app > div.layout > div.main-container > div.side-bar > div,
+    #app > div.layout > div.main-container > div.side-bar > li.divider,
     #Rightbar > div:nth-child(6) > div.sidebar_compliance {
       display: none !important;
     }
@@ -70,7 +72,8 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       top: 30px;
     }
 
-    .geist-page nav.dashboard_nav__PRmJv {
+    .geist-page nav.dashboard_nav__PRmJv,
+    #app > div.layout > div.header-container.showSearchBoxOrHeaderFixed > header > a {
       padding-top:10px;
     }
 
