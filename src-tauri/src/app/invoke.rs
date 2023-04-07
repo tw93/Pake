@@ -1,5 +1,12 @@
-use std::fs;
-use tauri::{api, command, AppHandle, Manager};
+use crate::util::{check_file_or_append, get_download_message, show_toast};
+use download_rs::sync_download::Download;
+use tauri::{api, command, AppHandle, Manager, Window};
+
+#[derive(serde::Deserialize)]
+pub struct DownloadFileParams {
+    url: String,
+    filename: String,
+}
 
 #[command]
 pub fn drag_window(app: AppHandle) {
@@ -22,7 +29,19 @@ pub fn open_browser(app: AppHandle, url: String) {
 }
 
 #[command]
-pub fn download(_app: AppHandle, name: String, blob: Vec<u8>) {
-    let path = api::path::download_dir().unwrap().join(name);
-    fs::write(&path, blob).unwrap();
+pub async fn download_file(app: AppHandle, params: DownloadFileParams) -> Result<(), String> {
+    let window: Window = app.get_window("pake").unwrap().clone();
+    let output_path = api::path::download_dir().unwrap().join(params.filename);
+    let file_path = check_file_or_append(&output_path.to_str().unwrap());
+    let download = Download::new(&params.url, Some(&file_path), None);
+    match download.download() {
+        Ok(_) => {
+            show_toast(&window, &get_download_message());
+            Ok(())
+        }
+        Err(e) => {
+            show_toast(&window, &e.to_string());
+            Err(e.to_string())
+        }
+    }
 }

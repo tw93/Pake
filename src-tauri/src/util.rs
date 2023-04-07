@@ -1,7 +1,9 @@
 use crate::app::config::PakeConfig;
 use dirs::config_dir;
+use libc::getenv;
+use std::ffi::CStr;
 use std::path::PathBuf;
-use tauri::Config;
+use tauri::{Config, Window};
 
 pub fn get_pake_config() -> (PakeConfig, Config) {
     let pake_config: PakeConfig =
@@ -26,4 +28,33 @@ pub fn get_data_dir(_tauri_config: Config) -> PathBuf {
         }
         data_dir
     }
+}
+
+pub fn show_toast(window: &Window, message: &str) {
+    let script = format!(r#"pakeToast("{}");"#, message);
+    window.eval(&script).unwrap();
+}
+
+pub fn get_download_message() -> String {
+    let lang_env_var = unsafe { CStr::from_ptr(getenv(b"LANG\0".as_ptr() as *const i8)) };
+    let lang_str = lang_env_var.to_string_lossy().to_lowercase();
+    if lang_str.starts_with("zh") {
+        "下载成功，已保存到下载目录~".to_string()
+    } else {
+        "Download successful, saved to download directory~".to_string()
+    }
+}
+
+// Check if the file exists, if it exists, add a number to file name
+pub fn check_file_or_append(file_path: &str) -> String {
+    let mut new_path = PathBuf::from(file_path);
+    let mut counter = 1;
+    while new_path.exists() {
+        let file_stem = new_path.file_stem().unwrap().to_string_lossy().to_string();
+        let extension = new_path.extension().unwrap().to_string_lossy().to_string();
+        let parent_dir = new_path.parent().unwrap();
+        new_path = parent_dir.join(format!("{}-{}.{}", file_stem, counter, extension));
+        counter += 1;
+    }
+    new_path.to_string_lossy().into_owned()
 }

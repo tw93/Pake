@@ -7,9 +7,9 @@ mod app;
 mod util;
 
 use app::{invoke, menu, window};
-use invoke::{download, drag_window, fullscreen, open_browser};
+use invoke::{download_file, drag_window, fullscreen, open_browser};
 use menu::{get_menu, menu_event_handle};
-use tauri_plugin_window_state::{Builder, StateFlags, WindowExt};
+use tauri_plugin_window_state::{Builder as windowStatePlugin, StateFlags, WindowExt};
 use util::{get_data_dir, get_pake_config};
 use window::get_window;
 
@@ -40,12 +40,12 @@ pub fn run_app() {
     }
 
     tauri_app
-        .plugin(Builder::default().build())
+        .plugin(windowStatePlugin::default().build())
         .invoke_handler(tauri::generate_handler![
             drag_window,
             fullscreen,
             open_browser,
-            download
+            download_file
         ])
         .setup(|app| {
             let _window = get_window(app, pake_config, data_dir);
