@@ -5,6 +5,7 @@ import { checkRustInstalled, installRust } from '@/helpers/rust.js';
 import { PakeAppOptions } from '@/types.js';
 import { IBuilder } from './base.js';
 import { shellExec } from '@/utils/shell.js';
+import {isChinaDomain} from '@/utils/ip_addr.js';
 // @ts-expect-error 加上resolveJsonModule rollup会打包报错
 // import tauriConf from '../../src-tauri/tauri.windows.conf.json';
 import tauriConf from './tauriConf.js';
@@ -44,10 +45,22 @@ export default class LinuxBuilder implements IBuilder {
   async build(url: string, options: PakeAppOptions) {
     logger.debug('PakeAppOptions', options);
     const { name } = options;
-
     await mergeTauriConfig(url, options, tauriConf);
-    await shellExec(`cd "${npmDirectory}" && npm install --verbose && npm run build`);
+    const isChina = isChinaDomain("www.npmjs.com")
 
+    if (isChina) {
+      // crates.io也顺便换源
+      const rust_project_dir = path.join(npmDirectory, 'src-tauri', ".cargo");
+      const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
+      const project_conf = path.join(rust_project_dir, "config");
+      fs.copyFile(project_cn_conf, project_conf);
+
+      const _ = await shellExec(
+        `cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build`
+      );
+    } else {
+      const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+    }
     let arch: string;
     if (process.arch === "x64") {
       arch = "amd64";

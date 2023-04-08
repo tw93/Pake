@@ -1,10 +1,10 @@
 [package]
 name = "app"
 version = "0.1.0"
-description = "Pake 打包工具"
+description = "🤱🏻 Turn any webpage into a desktop app with Rust."
 authors = ["Tw93"]
-license = ""
-repository = ""
+license = "MIT"
+repository = "https://github.com/tw93/Pake"
 default-run = "app"
 edition = "2021"
 rust-version = "1.63.0"
@@ -15,15 +15,15 @@ rust-version = "1.63.0"
 tauri-build = { version = "1.2.1", features = [] }
 
 [dependencies]
-serde_json = "1.0.91"
-serde = { version = "1.0.152", features = ["derive"] }
-tauri = { version = "1.2.4", features = [] }
+serde_json = "1.0.89"
+serde = { version = "1.0.150", features = ["derive"] }
+tauri = { version = "1.2.1", features = ["api-all", "devtools", "system-tray"] }
 image = "0.24.5"
-home = "0.5.4"
-tauri-utils = "1.2.1"
-webbrowser = "0.8.7"
-wry = "0.23.4"
-dirs = "4.0"
+home = "0.5"
+dirs = "5.0"
+libc = "0.2"
+download_rs = { version = "0.2.0", features = ["sync_download"] }
+tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "dev" }
 
 [features]
 # by default Tauri runs in production mode
@@ -32,5 +32,3 @@ default = ["custom-protocol"]
 # this feature is used used for production builds where `devPath` points to the filesystem
 # DO NOT remove this
 custom-protocol = ["tauri/custom-protocol"]
-# Enable DevTools for debugging.
-devtools = []

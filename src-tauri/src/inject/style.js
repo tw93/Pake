@@ -1,39 +1,5 @@
-/**
- * @typedef {string} KeyboardKey `event.key` 的代号，
- * 见 <https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values>
- * @typedef {() => void} OnKeyDown 使用者按下 [CtrlKey] 或者 ⌘ [KeyboardKey]时应该执行的行为
- * 以 Ctrl键或者Meta 键 (⌘) 为首的快捷键清单。
- * 每个写在这里的 shortcuts 都会运行 {@link Event.preventDefault}.
- * @type {Record<KeyboardKey, OnKeyDown>}
- */
-
-const metaKeyShortcuts = {
-  ArrowUp: () => scrollTo(0, 0),
-  ArrowDown: () => scrollTo(0, document.body.scrollHeight),
-  "[": () => window.history.back(),
-  "]": () => window.history.forward(),
-  r: () => window.location.reload(),
-  "-": () => zoomOut(),
-  "=": () => zoomIn(),
-  "+": () => zoomIn(),
-  0: () => zoomCommon(() => "100%"),
-};
-
-const ctrlKeyShortcuts = {
-  ArrowUp: () => scrollTo(0, 0),
-  ArrowDown: () => scrollTo(0, document.body.scrollHeight),
-  ArrowLeft: () => window.history.back(),
-  ArrowRight: () => window.history.forward(),
-  r: () => window.location.reload(),
-  "-": () => zoomOut(),
-  "=": () => zoomIn(),
-  "+": () => zoomIn(),
-  0: () => zoomCommon(() => "100%"),
-};
-
-window.addEventListener("DOMContentLoaded", (_event) => {
-  const style = document.createElement("style");
-  style.innerHTML = `
+window.addEventListener('DOMContentLoaded', (_event) => {
+  const css = `
     #page #footer-wrapper,
     .drawing-board .toolbar .toolbar-action,
     .c-swiper-container,
@@ -49,6 +15,8 @@ window.addEventListener("DOMContentLoaded", (_event) => {
     #masthead-ad,
     #app > header > div > div.menu,
     #root > div > div.fixed.top-0.left-0.w-64.h-screen.p-10.pb-0.flex.flex-col.justify-between > div > div.space-y-4 > a:nth-child(3),
+    #app > div.layout > div.main-container > div.side-bar > div,
+    #app > div.layout > div.main-container > div.side-bar > li.divider,
     #Rightbar > div:nth-child(6) > div.sidebar_compliance {
       display: none !important;
     }
@@ -130,7 +98,8 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       top: 30px;
     }
 
-    .geist-page nav.dashboard_nav__PRmJv {
+    .geist-page nav.dashboard_nav__PRmJv,
+    #app > div.layout > div.header-container.showSearchBoxOrHeaderFixed > header > a {
       padding-top:10px;
     }
 

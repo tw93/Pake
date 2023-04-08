@@ -3,9 +3,11 @@ import { program } from 'commander';
 import log from 'loglevel';
 import url, { fileURLToPath } from 'url';
 import isurl from 'is-url';
+import fs from 'fs';
 import prompts from 'prompts';
 import path from 'path';
-import fs from 'fs/promises';
+import fs$1 from 'fs/promises';
+import fs2 from 'fs-extra';
 import chalk from 'chalk';
 import crypto from 'crypto';
 import axios from 'axios';
@@ -13,6 +15,9 @@ import { fileTypeFromBuffer } from 'file-type';
 import { dir } from 'tmp-promise';
 import ora from 'ora';
 import shelljs from 'shelljs';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import dns from 'dns';
 import updateNotifier from 'update-notifier';
 
 /******************************************************************************
@@ -47,6 +52,13 @@ const DEFAULT_PAKE_OPTIONS = {
     fullscreen: false,
     resizable: true,
     transparent: false,
+    userAgent: '',
+    showMenu: false,
+    showSystemTray: false,
+    multiArch: false,
+    targets: 'deb',
+    iterCopyFile: false,
+    systemTrayIcon: '',
     debug: false,
     multiArch: false,
     targets: "all",
@@ -1585,11 +1597,16 @@ function validateNumberInput(value) {
     return parsedValue;
 }
 function validateUrlInput(url) {
-    try {
-        return normalizeUrl(url);
+    if (!fs.existsSync(url)) {
+        try {
+            return normalizeUrl(url);
+        }
+        catch (error) {
+            throw new Commander.InvalidArgumentError(error.message);
+        }
     }
-    catch (error) {
-        throw new Commander.InvalidArgumentError(error.message);
+    else {
+        return url;
     }
 }
 
@@ -1626,7 +1643,7 @@ function promptText(message, initial) {
 }
 function mergeTauriConfig(url, options, tauriConf) {
     return __awaiter(this, void 0, void 0, function* () {
-        const { width, height, fullscreen, transparent, resizable, identifier, name, } = options;
+        const { width, height, fullscreen, transparent, resizable, userAgent, showMenu, showSystemTray, systemTrayIcon, iterCopyFile, identifier, name, } = options;
         const tauriConfWindowOptions = {
             width,
             height,
@@ -1652,10 +1669,120 @@ function mergeTauriConfig(url, options, tauriConf) {
                 process.exit();
             }
         }
-        Object.assign(tauriConf.tauri.windows[0], Object.assign({ url }, tauriConfWindowOptions));
+        // logger.warn(JSON.stringify(tauriConf.pake.windows, null, 4));
+        Object.assign(tauriConf.pake.windows[0], Object.assign({ url }, tauriConfWindowOptions));
+        // 判断一下url类型，是文件还是网站
+        // 如果是文件，并且开启了递归拷贝功能，则需要将该文件以及所在文件夹下的所有文件拷贝到src目录下，否则只拷贝单个文件。
+        const url_exists = yield fs$1.stat(url)
+            .then(() => true)
+            .catch(() => false);
+        if (url_exists) {
+            logger.warn("you input may a local file");
+            tauriConf.pake.windows[0].url_type = "local";
+            const file_name = path.basename(url);
+            const dir_name = path.dirname(url);
+            if (!iterCopyFile) {
+                const url_path = path.join(npmDirectory, "dist/", file_name);
+                yield fs$1.copyFile(url, url_path);
+            }
+            else {
+                const old_dir = path.join(npmDirectory, "dist/");
+                const new_dir = path.join(npmDirectory, "dist_bak/");
+                fs2.moveSync(old_dir, new_dir, { "overwrite": true });
+                fs2.copySync(dir_name, old_dir, { "overwrite": true });
+                // logger.warn("dir name", dir_name);
+                // 将dist_bak里面的cli.js和about_pake.html拷贝回去
+                const cli_path = path.join(new_dir, "cli.js");
+                const cli_path_target = path.join(old_dir, "cli.js");
+                const about_pake_path = path.join(new_dir, "about_pake.html");
+                const about_patk_path_target = path.join(old_dir, "about_pake.html");
+                fs$1.copyFile(cli_path, cli_path_target);
+                fs$1.copyFile(about_pake_path, about_patk_path_target);
+            }
+            tauriConf.pake.windows[0].url = file_name;
+            tauriConf.pake.windows[0].url_type = "local";
+        }
+        else {
+            tauriConf.pake.windows[0].url_type = "web";
+        }
+        // 处理user-agent
+        logger.warn(userAgent);
+        if (userAgent.length > 0) {
+            if (process.platform === "win32") {
+                tauriConf.pake.user_agent.windows = userAgent;
+            }
+            if (process.platform === "linux") {
+                tauriConf.pake.user_agent.linux = userAgent;
+            }
+            if (process.platform === "darwin") {
+                tauriConf.pake.user_agent.macos = userAgent;
+            }
+        }
+        // 处理菜单栏
+        if (showMenu) {
+            if (process.platform === "win32") {
+                tauriConf.pake.menu.windows = true;
+            }
+            if (process.platform === "linux") {
+                tauriConf.pake.menu.linux = true;
+            }
+            if (process.platform === "darwin") {
+                tauriConf.pake.user_agent.macos = true;
+            }
+        }
+        else {
+            if (process.platform === "win32") {
+                tauriConf.pake.menu.windows = false;
+            }
+            if (process.platform === "linux") {
+                tauriConf.pake.menu.linux = false;
+            }
+            if (process.platform === "darwin") {
+                tauriConf.pake.user_agent.macos = false;
+            }
+        }
+        // 处理托盘
+        if (showSystemTray) {
+            if (process.platform === "win32") {
+                tauriConf.pake.system_tray.windows = true;
+            }
+            if (process.platform === "linux") {
+                tauriConf.pake.system_tray.linux = true;
+            }
+            if (process.platform === "darwin") {
+                tauriConf.pake.system_tray.macos = true;
+            }
+        }
+        else {
+            if (process.platform === "win32") {
+                tauriConf.pake.system_tray.windows = false;
+            }
+            if (process.platform === "linux") {
+                tauriConf.pake.system_tray.linux = false;
+            }
+            if (process.platform === "darwin") {
+                tauriConf.pake.system_tray.macos = false;
+            }
+        }
+        // 处理targets 暂时只对linux开放
+        if (process.platform === "linux") {
+            if (options.targets.length > 0) {
+                if (options.targets === "deb" || options.targets === "appimage" || options.targets === "all") {
+                    tauriConf.tauri.bundle.targets = [options.targets];
+                }
+            }
+        }
+        else {
+            tauriConf.tauri.bundle.targets = ["deb"];
+        }
         tauriConf.package.productName = name;
         tauriConf.tauri.bundle.identifier = identifier;
-        const exists = yield fs.stat(options.icon)
+        // 删除映射关系
+        if (process.platform === "linux") {
+            delete tauriConf.tauri.bundle.deb.files;
+        }
+        // 处理应用图标
+        const exists = yield fs$1.stat(options.icon)
             .then(() => true)
             .catch(() => false);
         if (process.platform === "linux") {
@@ -1674,22 +1801,25 @@ function mergeTauriConfig(url, options, tauriConf) {
                 if (customIconExt === ".ico") {
                     const ico_path = path.join(npmDirectory, `src-tauri/png/${name.toLowerCase()}_32.ico`);
                     tauriConf.tauri.bundle.resources = [`png/${name.toLowerCase()}_32.ico`];
-                    yield fs.copyFile(options.icon, ico_path);
+                    yield fs$1.copyFile(options.icon, ico_path);
                 }
                 else {
                     updateIconPath = false;
                     logger.warn(`icon file in Windows must be 256 * 256 pix with .ico type, but you give ${customIconExt}`);
+                    tauriConf.tauri.bundle.icon = ["png/icon_256.ico"];
                 }
             }
             if (process.platform === "linux") {
                 if (customIconExt != ".png") {
                     updateIconPath = false;
                     logger.warn(`icon file in Linux must be 512 * 512 pix with .png type, but you give ${customIconExt}`);
+                    tauriConf.tauri.bundle.icon = ["png/icon_512.png"];
                 }
             }
             if (process.platform === "darwin" && customIconExt !== ".icns") {
                 updateIconPath = false;
                 logger.warn(`icon file in MacOS must be .icns type, but you give ${customIconExt}`);
+                tauriConf.tauri.bundle.icon = ["icons/icon.icns"];
             }
             if (updateIconPath) {
                 tauriConf.tauri.bundle.icon = [options.icon];
@@ -1716,6 +1846,41 @@ function mergeTauriConfig(url, options, tauriConf) {
                 }
             }
         }
+        // 处理托盘自定义图标
+        let useDefaultIcon = true; // 是否使用默认托盘图标
+        if (systemTrayIcon.length > 0) {
+            const icon_exists = yield fs$1.stat(systemTrayIcon)
+                .then(() => true)
+                .catch(() => false);
+            if (icon_exists) {
+                // 需要判断图标格式，默认只支持ico和png两种
+                let iconExt = path.extname(systemTrayIcon).toLowerCase();
+                if (iconExt == ".png" || iconExt == ".icon") {
+                    useDefaultIcon = false;
+                    const trayIcoPath = path.join(npmDirectory, `src-tauri/png/${name.toLowerCase()}${iconExt}`);
+                    tauriConf.tauri.systemTray.iconPath = `png/${name.toLowerCase()}${iconExt}`;
+                    yield fs$1.copyFile(systemTrayIcon, trayIcoPath);
+                }
+                else {
+                    logger.warn(`file type for system tray icon mut be .ico or .png , but you give ${iconExt}`);
+                    logger.warn(`system tray icon file will not change with default.`);
+                }
+            }
+            else {
+                logger.warn(`${systemTrayIcon} not exists!`);
+                logger.warn(`system tray icon file will not change with default.`);
+            }
+        }
+        // 处理托盘默认图标
+        if (useDefaultIcon) {
+            if (process.platform === "linux" || process.platform === "win32") {
+                tauriConf.tauri.systemTray.iconPath = tauriConf.tauri.bundle.icon[0];
+            }
+            else {
+                tauriConf.tauri.systemTray.iconPath = "png/icon_512.png";
+            }
+        }
+        // 保存配置文件
         let configPath = "";
         switch (process.platform) {
             case "win32": {
@@ -1732,9 +1897,14 @@ function mergeTauriConfig(url, options, tauriConf) {
             }
         }
         let bundleConf = { tauri: { bundle: tauriConf.tauri.bundle } };
-        yield fs.writeFile(configPath, Buffer.from(JSON.stringify(bundleConf, null, '\t'), 'utf-8'));
+        yield fs$1.writeFile(configPath, Buffer.from(JSON.stringify(bundleConf, null, 4), 'utf-8'));
+        const pakeConfigPath = path.join(npmDirectory, 'src-tauri/pake.json');
+        yield fs$1.writeFile(pakeConfigPath, Buffer.from(JSON.stringify(tauriConf.pake, null, 4), 'utf-8'));
+        let tauriConf2 = JSON.parse(JSON.stringify(tauriConf));
+        delete tauriConf2.pake;
+        delete tauriConf2.tauri.bundle;
         const configJsonPath = path.join(npmDirectory, 'src-tauri/tauri.conf.json');
-        yield fs.writeFile(configJsonPath, Buffer.from(JSON.stringify(tauriConf, null, '\t'), 'utf-8'));
+        yield fs$1.writeFile(configJsonPath, Buffer.from(JSON.stringify(tauriConf2, null, 4), 'utf-8'));
     });
 }
 
@@ -1801,7 +1971,7 @@ function downloadIcon(iconUrl) {
         }
         const { path } = yield dir();
         const iconPath = `${path}/icon.${fileDetails.ext}`;
-        yield fs.writeFile(iconPath, iconData);
+        yield fs$1.writeFile(iconPath, iconData);
         return iconPath;
     });
 }
@@ -1809,8 +1979,16 @@ function downloadIcon(iconUrl) {
 function handleOptions(options, url) {
     return __awaiter(this, void 0, void 0, function* () {
         const appOptions = Object.assign(Object.assign({}, options), { identifier: '' });
+        const url_exists = yield fs$1.stat(url)
+            .then(() => true)
+            .catch(() => false);
         if (!appOptions.name) {
-            appOptions.name = yield promptText('Please enter the name of your application.', getDomain(url));
+            if (!url_exists) {
+                appOptions.name = yield promptText('please input your application name', getDomain(url));
+            }
+            else {
+                appOptions.name = yield promptText('please input your application name', "");
+            }
         }
         appOptions.identifier = getIdentifier(appOptions.name, url);
         appOptions.icon = yield handleIcon(appOptions);
@@ -1831,7 +2009,50 @@ function shellExec(command) {
     });
 }
 
-const RustInstallScriptFocMac = "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
+const resolve = promisify(dns.resolve);
+function isChinaDomain(domain) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            // 解析域名为IP地址
+            const [ip] = yield resolve(domain);
+            return yield isChinaIP(ip);
+        }
+        catch (error) {
+            // 域名无法解析，返回false
+            return false;
+        }
+    });
+}
+function isChinaIP(ip) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => {
+            exec(`ping -c 1 -w 1 ${ip}`, (error, stdout, stderr) => {
+                if (error) {
+                    // 命令执行出错，返回false
+                    resolve(false);
+                }
+                else {
+                    // 解析输出信息，提取延迟值
+                    const match = stdout.match(/time=(\d+\.\d+) ms/);
+                    const latency = match ? parseFloat(match[1]) : 0;
+                    // 判断延迟是否超过100ms
+                    resolve(latency > 100);
+                }
+            });
+        });
+    });
+}
+
+const is_china = isChinaDomain("sh.rustup.rs");
+let RustInstallScriptFocMac = "";
+if (is_china) {
+    RustInstallScriptFocMac =
+        'export RUSTUP_DIST_SERVER="https://rsproxy.cn" && export RUSTUP_UPDATE_ROOT="https://rsproxy.cn/rustup" && curl --proto "=https" --tlsv1.2 -sSf https://rsproxy.cn/rustup-init.sh | sh';
+}
+else {
+    RustInstallScriptFocMac =
+        "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
+}
 const RustInstallScriptForWin = 'winget install --id Rustlang.Rustup';
 function installRust() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -1852,24 +2073,22 @@ function checkRustInstalled() {
 }
 
 var tauri$3 = {
-	windows: [
-		{
-			url: "https://weread.qq.com/",
-			transparent: true,
-			fullscreen: false,
-			width: 1200,
-			height: 780,
-			resizable: true
-		}
-	],
 	security: {
 		csp: null
 	},
 	updater: {
 		active: false
+	},
+	systemTray: {
+		iconPath: "png/weread_512.png",
+		iconAsTemplate: true
+	},
+	allowlist: {
+		all: true
 	}
 };
 var build = {
+	withGlobalTauri: true,
 	devPath: "../dist",
 	distDir: "../dist",
 	beforeBuildCommand: "",
@@ -1882,6 +2101,39 @@ var CommonConf = {
 },
 	tauri: tauri$3,
 	build: build
+};
+
+var windows = [
+	{
+		url: "https://weread.qq.com/",
+		transparent: true,
+		fullscreen: false,
+		width: 1200,
+		height: 780,
+		resizable: true,
+		url_type: "web"
+	}
+];
+var user_agent = {
+	macos: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15",
+	linux: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+	windows: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
+};
+var menu = {
+	macos: true,
+	linux: false,
+	windows: false
+};
+var system_tray = {
+	macos: false,
+	linux: true,
+	windows: true
+};
+var pakeConf = {
+	windows: windows,
+	user_agent: user_agent,
+	menu: menu,
+	system_tray: system_tray
 };
 
 var tauri$2 = {
@@ -1964,16 +2216,8 @@ var tauri = {
 		copyright: "",
 		deb: {
 			depends: [
-				"libwebkit2gtk-4.0-dev",
-				"build-essential",
 				"curl",
-				"wget",
-				"libssl-dev",
-				"libgtk-3-dev",
-				"libayatana-appindicator3-dev",
-				"librsvg2-dev",
-				"gnome-video-effects",
-				"gnome-video-effects-extra"
+				"wget"
 			],
 			files: {
 				"/usr/share/applications/com-tw93-weread.desktop": "assets/com-tw93-weread.desktop"
@@ -1997,7 +2241,8 @@ var LinuxConf = {
 
 let tauriConf = {
   package: CommonConf.package,
-  tauri: CommonConf.tauri
+  tauri: CommonConf.tauri,
+  pake: pakeConf
 };
 switch (process.platform) {
   case "win32": {
@@ -2042,11 +2287,28 @@ class MacBuilder {
             yield mergeTauriConfig(url, options, tauriConf);
             let dmgName;
             if (options.multiArch) {
-                yield shellExec(`cd "${npmDirectory}" && npm install --verbose && npm run build:mac`);
+                const isChina = isChinaDomain("www.npmjs.com");
+                if (isChina) {
+                    // crates.io也顺便换源
+                    const rust_project_dir = path.join(npmDirectory, 'src-tauri', ".cargo");
+                    const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
+                    const project_conf = path.join(rust_project_dir, "config");
+                    fs$1.copyFile(project_cn_conf, project_conf);
+                    yield shellExec(`cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build:mac`);
+                }
+                else {
+                    yield shellExec(`cd ${npmDirectory} && npm install && npm run build:mac`);
+                }
                 dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
             }
             else {
-                yield shellExec(`cd "${npmDirectory}" && npm install --verbose && npm run build`);
+                const isChina = isChinaDomain("www.npmjs.com");
+                if (isChina) {
+                    yield shellExec(`cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build`);
+                }
+                else {
+                    yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+                }
                 let arch = "x64";
                 if (process.arch === "arm64") {
                     arch = "aarch64";
@@ -2058,8 +2320,8 @@ class MacBuilder {
             }
             const appPath = this.getBuildAppPath(npmDirectory, dmgName, options.multiArch);
             const distPath = path.resolve(`${name}.dmg`);
-            yield fs.copyFile(appPath, distPath);
-            yield fs.unlink(appPath);
+            yield fs$1.copyFile(appPath, distPath);
+            yield fs$1.unlink(appPath);
             logger.success('Build success!');
             logger.success('You can find the app installer in', distPath);
         });
@@ -2104,14 +2366,25 @@ class WinBuilder {
             logger.debug('PakeAppOptions', options);
             const { name } = options;
             yield mergeTauriConfig(url, options, tauriConf);
-            yield shellExec(`cd "${npmDirectory}" && npm install --verbose && npm run build`);
+            const isChina = isChinaDomain("www.npmjs.com");
+            if (isChina) {
+                // crates.io也顺便换源
+                const rust_project_dir = path.join(npmDirectory, 'src-tauri', ".cargo");
+                const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
+                const project_conf = path.join(rust_project_dir, "config");
+                fs$1.copyFile(project_cn_conf, project_conf);
+                yield shellExec(`cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build`);
+            }
+            else {
+                yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+            }
             const language = tauriConf.tauri.bundle.windows.wix.language[0];
             const arch = process.arch;
             const msiName = `${name}_${tauriConf.package.version}_${arch}_${language}.msi`;
             const appPath = this.getBuildAppPath(npmDirectory, msiName);
             const distPath = path.resolve(`${name}.msi`);
-            yield fs.copyFile(appPath, distPath);
-            yield fs.unlink(appPath);
+            yield fs$1.copyFile(appPath, distPath);
+            yield fs$1.unlink(appPath);
             logger.success('Build success!');
             logger.success('You can find the app installer in', distPath);
         });
@@ -2149,7 +2422,18 @@ class LinuxBuilder {
             logger.debug('PakeAppOptions', options);
             const { name } = options;
             yield mergeTauriConfig(url, options, tauriConf);
-            yield shellExec(`cd "${npmDirectory}" && npm install --verbose && npm run build`);
+            const isChina = isChinaDomain("www.npmjs.com");
+            if (isChina) {
+                // crates.io也顺便换源
+                const rust_project_dir = path.join(npmDirectory, 'src-tauri', ".cargo");
+                const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
+                const project_conf = path.join(rust_project_dir, "config");
+                fs$1.copyFile(project_cn_conf, project_conf);
+                yield shellExec(`cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build`);
+            }
+            else {
+                yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+            }
             let arch;
             if (process.arch === "x64") {
                 arch = "amd64";
@@ -2161,8 +2445,8 @@ class LinuxBuilder {
                 const debName = `${name}_${tauriConf.package.version}_${arch}.deb`;
                 const appPath = this.getBuildAppPath(npmDirectory, "deb", debName);
                 const distPath = path.resolve(`${name}.deb`);
-                yield fs.copyFile(appPath, distPath);
-                yield fs.unlink(appPath);
+                yield fs$1.copyFile(appPath, distPath);
+                yield fs$1.unlink(appPath);
                 logger.success('Build Deb success!');
                 logger.success('You can find the deb app installer in', distPath);
             }
@@ -2170,8 +2454,8 @@ class LinuxBuilder {
                 const appImageName = `${name}_${tauriConf.package.version}_${arch}.AppImage`;
                 const appImagePath = this.getBuildAppPath(npmDirectory, "appimage", appImageName);
                 const distAppPath = path.resolve(`${name}.AppImage`);
-                yield fs.copyFile(appImagePath, distAppPath);
-                yield fs.unlink(appImagePath);
+                yield fs$1.copyFile(appImagePath, distAppPath);
+                yield fs$1.unlink(appImagePath);
                 logger.success('Build AppImage success!');
                 logger.success('You can find the AppImage app installer in', distAppPath);
             }
@@ -2250,6 +2534,7 @@ var dependencies = {
 	chalk: "^5.1.2",
 	commander: "^9.4.1",
 	"file-type": "^18.0.0",
+	"fs-extra": "^11.1.0",
 	"is-url": "^1.2.4",
 	loglevel: "^1.8.1",
 	ora: "^6.1.2",
@@ -2264,6 +2549,7 @@ var devDependencies = {
 	"@rollup/plugin-json": "^5.0.1",
 	"@rollup/plugin-terser": "^0.1.0",
 	"@rollup/plugin-typescript": "^9.0.2",
+	"@types/fs-extra": "^9.0.13",
 	"@types/is-url": "^1.2.30",
 	"@types/page-icon": "^0.3.4",
 	"@types/prompts": "^2.4.1",
@@ -2304,17 +2590,22 @@ function checkUpdateTips() {
 program.version(packageJson.version).description('A command-line tool that can quickly convert a webpage into a desktop application.');
 program
     .showHelpAfterError()
-    .argument('[url]', 'the web URL you want to package', validateUrlInput)
-    .option('-n, --name <string>', 'application name')
-    .option('-i, --icon <string>', 'application icon', DEFAULT_PAKE_OPTIONS.icon)
-    .option('-w, --width <number>', 'window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
-    .option('-h, --height <number>', 'window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
-    .option('-f, --fullscreen', 'start in full screen mode', DEFAULT_PAKE_OPTIONS.fullscreen)
-    .option('-t, --transparent', 'transparent title bar', DEFAULT_PAKE_OPTIONS.transparent)
-    .option('-r, --no-resizable', 'whether the window can be resizable', DEFAULT_PAKE_OPTIONS.resizable)
-    .option('-d, --debug', 'debug', DEFAULT_PAKE_OPTIONS.debug)
+    .argument('[url]', 'the web url you want to package', validateUrlInput)
+    .option('--name <string>', 'application name')
+    .option('--icon <string>', 'application icon', DEFAULT_PAKE_OPTIONS.icon)
+    .option('--height <number>', 'window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
+    .option('--width <number>', 'window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
+    .option('--no-resizable', 'whether the window can be resizable', DEFAULT_PAKE_OPTIONS.resizable)
+    .option('--fullscreen', 'makes the packaged app start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
+    .option('--transparent', 'transparent title bar', DEFAULT_PAKE_OPTIONS.transparent)
+    .option('--user-agent <string>', 'custom user agent', DEFAULT_PAKE_OPTIONS.userAgent)
+    .option('--show-menu', 'show menu in app', DEFAULT_PAKE_OPTIONS.showMenu)
+    .option('--show-system-tray', 'show system tray in app', DEFAULT_PAKE_OPTIONS.showSystemTray)
+    .option('--system-tray-icon <string>', 'custom system tray icon', DEFAULT_PAKE_OPTIONS.systemTrayIcon)
+    .option('--iter-copy-file', 'copy all static file to pake app when url is a local file', DEFAULT_PAKE_OPTIONS.iterCopyFile)
     .option('-m, --multi-arch', "available for Mac only, and supports both Intel and M1", DEFAULT_PAKE_OPTIONS.multiArch)
-    .option('--targets <string>', "Select the output package format, support deb/appimage/all, only for Linux", DEFAULT_PAKE_OPTIONS.targets)
+    .option('--targets <string>', 'only for linux, default is "deb", option "appaimge" or "all"(deb & appimage)', DEFAULT_PAKE_OPTIONS.targets)
+    .option('--debug', 'debug', DEFAULT_PAKE_OPTIONS.transparent)
     .action((url, options) => __awaiter(void 0, void 0, void 0, function* () {
     yield checkUpdateTips();
     if (!url) {
@@ -2327,7 +2618,9 @@ program
     }
     const builder = BuilderFactory.create();
     yield builder.prepare();
+    // logger.warn("you input url is ", url);
     const appOptions = yield handleOptions(options, url);
-    yield builder.build(url, appOptions);
+    // logger.info(JSON.stringify(appOptions, null, 4));
+    builder.build(url, appOptions);
 }));
 program.parse();

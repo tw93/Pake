@@ -1,32 +1,33 @@
 {
-	"tauri": {
-	  "bundle": {
-		"icon": ["png/weread_512.png"],
-		"identifier": "com.tw93.weread",
-		"active": true,
-		"category": "DeveloperTool",
-		"copyright": "",
-		"deb": {
-		  "depends": [
-			"libwebkit2gtk-4.0-dev",
-			"build-essential",
-			"curl",
-			"wget",
-			"libssl-dev",
-			"libgtk-3-dev",
-			"libayatana-appindicator3-dev",
-			"librsvg2-dev",
-			"gnome-video-effects",
-			"gnome-video-effects-extra"
-		  ],
-		  "files": {"/usr/share/applications/com-tw93-weread.desktop": "assets/com-tw93-weread.desktop"}
-		},
-		"externalBin": [],
-		"longDescription": "",
-		"resources": [],
-		"shortDescription": "",
-		"targets": ["deb", "appimage"]
-	  }
-	}
+  "tauri": {
+    "bundle": {
+      "icon": ["png/weread_512.png"],
+      "identifier": "com.tw93.weread",
+      "active": true,
+      "category": "DeveloperTool",
+      "copyright": "",
+      "deb": {
+        "depends": [
+          "libwebkit2gtk-4.0-dev",
+          "build-essential",
+          "curl",
+          "wget",
+          "libssl-dev",
+          "libgtk-3-dev",
+          "libayatana-appindicator3-dev",
+          "librsvg2-dev",
+          "gnome-video-effects",
+          "gnome-video-effects-extra"
+        ],
+        "files": {
+          "/usr/share/applications/com-tw93-weread.desktop": "assets/com-tw93-weread.desktop"
+        }
+      },
+      "externalBin": [],
+      "longDescription": "",
+      "resources": [],
+      "shortDescription": "",
+      "targets": ["deb", "appimage"]
+    }
   }
-  
+}

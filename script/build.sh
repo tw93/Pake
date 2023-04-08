@@ -61,12 +61,12 @@ do
     package_title=${arr[1]}
     package_zh_name=${arr[2]}
     url=${arr[3]}
-    
+
     # replace package info
     # clear url with regex
-    $sd "\"url\": \"(.*?)\"," "\"url\": \"\"," src-tauri/tauri.conf.json
+    $sd "\"url\": \"(.*?)\"," "\"url\": \"\"," src-tauri/pake.json
     # replace url with no regex
-    $sd -s "\"url\": \"\","  "\"url\": \"${url}\"," src-tauri/tauri.conf.json
+    $sd -s "\"url\": \"\","  "\"url\": \"${url}\"," src-tauri/pake.json
 
     # for apple, need replace title
     if [[ "$OSTYPE" =~ ^darwin ]]; then
@@ -106,14 +106,25 @@ do
             echo "warning"
             cp "src-tauri/png/icon_512.png" "src-tauri/png/${package_name}_512.png"
         fi
+        # -- replace package name -- #
         # clear package_name with regex
         $sd "\"productName\": \"(.*?)\"," "\"productName\": \"\"," src-tauri/tauri.conf.json
         # replace package_name with no regex
         $sd -s "\"productName\": \"\"," "\"productName\": \"${package_prefix}-${package_name}\"," src-tauri/tauri.conf.json
+
+        # -- replace systemTray iconPath -- #
+        # clear systemTray iconPath with regex
+        $sd "\"iconPath\": \"(.*?)\"," "\"iconPath\": \"\"," src-tauri/tauri.conf.json
+        # replace systemTray iconPath with no regex
+        $sd -s "\"iconPath\": \"\"," "\"iconPath\": \"png/${package_name}_512.png\"," src-tauri/tauri.conf.json
+
+        # -- replace icon -- #
         # clear icon path with regex
         $sd "\"icon\": \[\"(.*?)\"\]," "\"icon\": [\"\"]," src-tauri/tauri.linux.conf.json
         # replace icon path with no regex
         $sd -s "\"icon\": [\"\"]," "\"icon\": [\"png/${package_name}_512.png\"]," src-tauri/tauri.linux.conf.json
+
+        # -- replace identifier -- #
         # clear identifier with regex
         $sd "\"identifier\": \"(.*?)\"," "\"identifier\": \"\"," src-tauri/tauri.linux.conf.json
         # replace identifier with not regex
@@ -122,10 +133,10 @@ do
 
         new_desktop="${PROJECT_FOLDER}/src-tauri/assets/${package_prefix}-${package_name}.desktop"
         new_desktop_map_path="/usr/share/applications/${package_prefix}-${package_name}.desktop"
-        for file in `ls ${PROJECT_FOLDER}/src-tauri/assets/`
+        for file in `ls ${PROJECT_FOLDER}/src-tauri/assets/*.desktop`
         do
-            mv "${PROJECT_FOLDER}/src-tauri/assets/${file}" "${new_desktop}"
-            echo mv "${PROJECT_FOLDER}/src-tauri/assets/${file}" "${new_desktop}"
+            mv "${file}" "${new_desktop}"
+            echo mv "${file}" "${new_desktop}"
         done
         # clear desktop file with regex
         $sd "\"files\": \{\"(.*)\"\}" "\"files\": \{\"\"\}" src-tauri/tauri.linux.conf.json

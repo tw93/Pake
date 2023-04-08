@@ -11,6 +11,7 @@ import tauriConf from './tauriConf.js';
 import logger from '@/options/logger.js';
 import { mergeTauriConfig } from './common.js';
 import { npmDirectory } from '@/utils/dir.js';
+import {isChinaDomain} from '@/utils/ip_addr.js';
 
 export default class WinBuilder implements IBuilder {
   async prepare() {
@@ -45,7 +46,20 @@ export default class WinBuilder implements IBuilder {
 
     await mergeTauriConfig(url, options, tauriConf);
 
-    await shellExec(`cd "${npmDirectory}" && npm install --verbose && npm run build`);
+    const isChina = isChinaDomain("www.npmjs.com")
+    if (isChina) {
+      // crates.io也顺便换源
+      const rust_project_dir = path.join(npmDirectory, 'src-tauri', ".cargo");
+      const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
+      const project_conf = path.join(rust_project_dir, "config");
+      fs.copyFile(project_cn_conf, project_conf);
+
+      const _ = await shellExec(
+        `cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build`
+      );
+    } else {
+      const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+    }
     const language = tauriConf.tauri.bundle.windows.wix.language[0];
     const arch = process.arch;
     const msiName = `${name}_${tauriConf.package.version}_${arch}_${language}.msi`;
