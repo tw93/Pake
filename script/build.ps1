@@ -29,6 +29,7 @@ $identifier_prefix = "com.tw93"
 # total package number
 $index = 1
 $total = (Get-Content ./app.csv | Measure-Object -Line).Lines
+$pake_conf_path = "src-tauri/pake.json"
 $common_conf_path = "src-tauri/tauri.conf.json"
 $windows_conf_path = "src-tauri/tauri.windows.conf.json"
 
@@ -47,20 +48,27 @@ ForEach ($line in (Get-Content -Path .\app.csv | Select-Object -Skip 1)) {
     Write-Host "name_zh = ${name_zh}"
     Write-Host "url = ${url}"
     Write-Host "=========================="
-    # -- replace url --
+    # -- replace url -- #
     # clear url with regex
-    (Get-Content -Path $common_conf_path -Raw) -replace '"url":\s*"[^"]*"', '"url": ""' | Set-Content -Path $common_conf_path
+    (Get-Content -Path $pake_conf_path -Raw) -replace '"url":\s*"[^"]*"', '"url": ""' | Set-Content -Path $pake_conf_path
     # replace url with no regex
-    (Get-Content -Path $common_conf_path -Raw) | ForEach-Object { $_.Replace('"url": ""', "`"url`": `"${url}`"") } | Set-Content $common_conf_path
+    (Get-Content -Path $pake_conf_path -Raw) | ForEach-Object { $_.Replace('"url": ""', "`"url`": `"${url}`"") } | Set-Content $pake_conf_path
 
 
-    # replace package name
+    # -- replace package name -- #
     # clear package_name with regex
     (Get-Content -Path $common_conf_path -Raw) -replace '"productName":\s*"[^"]*"', '"productName": ""' | Set-Content -Path $common_conf_path
     # replace package_name with no regex
     (Get-Content -Path $common_conf_path -Raw) | ForEach-Object { $_.Replace('"productName": ""', "`"productName`": `"${title}`"") } | Set-Content $common_conf_path
 
-    # -- replace icon -- 
+
+    # -- replace systemTray iconPath -- #
+    # clear systemTray iconPath with regex
+    (Get-Content -Path $common_conf_path -Raw) -replace '"iconPath":\s*"[^"]*"', '"iconPath": ""' | Set-Content -Path $common_conf_path
+    # replace systemTray iconPath with no regex
+    (Get-Content -Path $common_conf_path -Raw) | ForEach-Object { $_.Replace('"iconPath": ""', "`"iconPath`": `"png/${name}_32.ico`"") } | Set-Content $common_conf_path
+
+    # -- replace icon --
     # clear icon path with regex
     (Get-Content -Path $windows_conf_path -Raw) -replace '(?s)"icon":\s*\[[^\]]*\]', '"icon": []' | Set-Content -Path $windows_conf_path
     # replace icon path with no regex
@@ -85,7 +93,7 @@ ForEach ($line in (Get-Content -Path .\app.csv | Select-Object -Skip 1)) {
     if (-not (Test-Path "src-tauri\png\${name}_256.ico")) {
       Copy-Item "src-tauri\png\icon_256.ico" "src-tauri\png\${name}_256.ico"
     }
-  
+
     # build package
     Write-Host "npm run build:windows"
     npm run tauri build -- --target x86_64-pc-windows-msvc

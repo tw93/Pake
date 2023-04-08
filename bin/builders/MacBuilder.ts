@@ -11,6 +11,7 @@ import tauriConf from './tauriConf.js';
 import log from 'loglevel';
 import { mergeTauriConfig } from './common.js';
 import { npmDirectory } from '@/utils/dir.js';
+import {isChinaDomain} from '@/utils/ip_addr.js';
 import logger from '@/options/logger.js';
 
 export default class MacBuilder implements IBuilder {
@@ -41,10 +42,30 @@ export default class MacBuilder implements IBuilder {
     await mergeTauriConfig(url, options, tauriConf);
     let dmgName: string;
     if (options.multiArch) {
-      await shellExec(`cd "${npmDirectory}" && npm install --verbose && npm run build:mac`);
+      const isChina = isChinaDomain("www.npmjs.com")
+      if (isChina) {
+        // crates.io也顺便换源
+        const rust_project_dir = path.join(npmDirectory, 'src-tauri', ".cargo");
+        const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
+        const project_conf = path.join(rust_project_dir, "config");
+        fs.copyFile(project_cn_conf, project_conf);
+
+        const _ = await shellExec(
+          `cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build:mac`
+        );
+      } else {
+        const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build:mac`);
+      }
       dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
     } else {
-      await shellExec(`cd "${npmDirectory}" && npm install --verbose && npm run build`);
+      const isChina = isChinaDomain("www.npmjs.com")
+      if (isChina) {
+        const _ = await shellExec(
+          `cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build`
+        );
+      } else {
+        const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+      }
       let arch  = "x64";
       if (process.arch === "arm64") {
         arch = "aarch64";

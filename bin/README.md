@@ -48,7 +48,7 @@ pake url [options]
 
 ### url
 
-url 为你需要打包的网页链接 🔗，必须提供。
+url 为你需要打包的网页链接 🔗 或者本地 html 文件，必须提供。
 
 ### [options]
 
@@ -100,32 +100,66 @@ url 为你需要打包的网页链接 🔗，必须提供。
 
 #### [transparent]
 
-是否开启沉浸式头部，默认为 `false` 不开启。使用下面的命令来开启该功能。
+是否开启沉浸式头部，默认为 `false` 不开启，输入下面的命令则开启沉浸式，推荐 MacOS 用户开启。
 
 ```shell
 --transparent
-# 或者
--t
-```
-
-#### [fullscreen]
-
-打开应用后是否开启全屏，默认为 `false`，使用下面的命令开启该功能。
-
-```shell
---fullscreen
-# 或者
--f
 ```
 
 #### [resize]
 
-是否可以拖动大小，默认为 `true` 可拖动。使用下面的命令来关闭该功能。
+是否可以拖动大小，默认为 `true` 可拖动，输入下面的命令则不能对窗口大小进行拉伸。
 
 ```shell
 --no-resizable
-# 或者
--r
+```
+
+#### [fullscreen]
+
+打开应用后是否开启全屏，默认为 `false`，输入下面的命令则会自动全屏。
+
+```shell
+--fullscreen
+```
+
+#### [user-agent]
+
+自定义浏览器请求头, 默认为空。
+
+```shell
+--user-agent <value>
+```
+
+#### [show-menu]
+
+显示菜单栏, 默认不显示，输入下面的命令则会显示，推荐 MacOS 用户开启。
+
+```shell
+--show-menu
+```
+
+#### [show-system-tray]
+
+显示通知栏托盘, 默认不显示，输入下面的命令则会显示。
+
+```shell
+--show-system-tray
+```
+
+#### [system-tray-icon]
+
+通知栏托盘图标，仅当显示通知栏托盘时有效, 图标必须为.ico 或者.png 格式的，512\*512 像素的图片。
+
+```shell
+--system-tray-icon <value>
+```
+
+#### [copy-iter-file]
+
+递归拷贝，当 url 为本地文件路径时候，若开启该选项，则将 url 路径文件所在文件夹以及所有子文件都拷贝到 pake 静态文件夹，默认不开启
+
+```shell
+--copy-iter-file
 ```
 
 #### [multi-arch]
@@ -157,7 +191,7 @@ rustup target add x86_64-apple-darwin
 
 #### [targets]
 
-选择输出的包格式，支持deb/appimage/all，如果选择all,则同时打包deb和appimage，该选项仅支持Linux，默认为`all`。
+选择输出的包格式，支持 deb/appimage/all，如果选择 all,则同时打包 deb 和 appimage，该选项仅支持 Linux，默认为`all`。
 
 ```shell
 --targets xxx
