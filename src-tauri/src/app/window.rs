@@ -25,6 +25,7 @@ pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Wind
         .resizable(window_config.resizable)
         .fullscreen(window_config.fullscreen)
         .inner_size(window_config.width, window_config.height)
+        .transparent(window_config.transparent)
         .visible(false) // Prevent initial shaking
         .initialization_script(include_str!("../inject/style.js"))
         .initialization_script(include_str!("../inject/index.js"));
