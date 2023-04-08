@@ -128,3 +128,39 @@ Recursive copy, when the url is a local file path, if this option is enabled, th
 ```shell
 --copy-iter-file
 ```
+
+
+#### [multi-arch]
+
+Package results support both Intel and m1 chips, only for MacOS. The default is `false`.
+
+```shell
+--targets xxx
+```
+
+##### Preparation
+
+- Note: After enabling this option, you need to use rustup on the rust official website to install rust, brew installation is not supported.
+- For intel chip users, you need to install the arm64 cross-platform package to make the installation package support the m1 chip, and use the following command to install.
+
+```shell
+rustup target add aarch64-apple-darwin
+```
+
+- For M1 chip users, you need to install the x86 cross-platform package to make the installation package support the interl chip, and use the following command to install.
+
+```shell
+rustup target add x86_64-apple-darwin
+```
+
+##### Instructions
+
+```shell
+--multi-arch
+# or
+-m
+```
+
+#### [targets]
+
+Select the output package format, support deb/appimage/all, if all is selected, deb and appimage will be packaged at the same time, this option only supports Linux, the default is `all`.

@@ -35,6 +35,9 @@ export interface PakeCliOptions {
   // /** 递归拷贝，当url为本地文件路径时候，若开启该选项，则将url路径文件所在文件夹以及所有子文件都拷贝到pake静态文件夹，默认不开启 */
   iterCopyFile: false;
 
+  /** mutli arch, Supports both Intel and m1 chips, only for Mac */
+  multiArch: boolean;
+
   // 包输出产物，对linux用户有效，默认为deb，可选appimage, 或者all（即同时输出deb和all）;
   targets: string;
 

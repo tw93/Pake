@@ -31,9 +31,15 @@ program
           'copy all static file to pake app when url is a local file',
           DEFAULT_PAKE_OPTIONS.iterCopyFile)
   .option(
+    '-m, --multi-arch',
+    "available for Mac only, and supports both Intel and M1",
+    DEFAULT_PAKE_OPTIONS.multiArch
+  )
+  .option(
     '--targets <string>',
     'only for linux, default is "deb", option "appaimge" or "all"(deb & appimage)',
-    DEFAULT_PAKE_OPTIONS.targets)
+    DEFAULT_PAKE_OPTIONS.targets
+  )
   .option('--debug', 'debug', DEFAULT_PAKE_OPTIONS.transparent)
   .action(async (url: string, options: PakeCliOptions) => {
     checkUpdateTips();
