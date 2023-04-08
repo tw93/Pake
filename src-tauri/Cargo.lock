@@ -46,7 +46,6 @@ dependencies = [
  "download_rs",
  "home",
  "image",
- "libc",
  "serde",
  "serde_json",
  "tauri",
