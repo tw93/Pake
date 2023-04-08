@@ -36,7 +36,7 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     }
 
     .fui-FluentProvider .fui-Button[data-testid="HomeButton"]{
-       padding-top: 20px;
+      padding-top: 20px;
     }
 
     .chakra-ui-light #app .chakra-heading,
@@ -45,7 +45,7 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     .chakra-ui-dark #app .chakra-stack,
     .app-main .sidebar-mouse-in-out,
     .chakra-modal__content-container .chakra-modal__header > div > div {
-       padding-top: 10px;
+      padding-top: 10px;
     }
 
     #__next .overflow-hidden>.hidden.bg-gray-900 span.rounded-md.bg-yellow-200 {
@@ -57,7 +57,7 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     }
 
     #__next .absolute .px-3.pt-2.pb-3.text-center {
-       visibility: hidden;
+      visibility: hidden;
     }
 
     .lark > .dashboard-sidebar, .lark > .dashboard-sidebar > .sidebar-user-info , .lark > .dashboard-sidebar .index-module_wrapper_F-Wbq{
@@ -266,109 +266,13 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       width: 100%;
       height: 20px;
       cursor: grab;
-      cursor: -webkit-grab;
+      -webkit-app-region: drag;
       user-select: none;
+      -webkit-user-select: none;
       z-index: 90000;
     }
   `;
-  document.head.append(style);
-  const topDom = document.createElement("div");
-  topDom.id = "pack-top-dom";
-  document.body.appendChild(topDom);
-
-  const domEl = document.getElementById("pack-top-dom");
-
-  domEl.addEventListener("mousedown", (e) => {
-    e && e.preventDefault();
-    if (e.buttons === 1 && e.detail !== 2) {
-      window.ipc.postMessage("drag_window");
-    }
-  });
-
-  domEl.addEventListener("touchstart", () => {
-    window.ipc.postMessage("drag_window");
-  });
-
-  domEl.addEventListener("dblclick", () => {
-    window.ipc.postMessage("fullscreen");
-  });
-
-  document.addEventListener("keyup", function (event) {
-    const preventDefault = (f) => {
-      event.preventDefault();
-      f();
-    };
-    if (/windows|linux/i.test(navigator.userAgent)) {
-      if (event.ctrlKey && event.key in ctrlKeyShortcuts) {
-        preventDefault(ctrlKeyShortcuts[event.key]);
-      }
-    }
-    if (/macintosh|mac os x/i.test(navigator.userAgent)) {
-      if (event.metaKey && event.key in metaKeyShortcuts) {
-        preventDefault(metaKeyShortcuts[event.key]);
-      }
-    }
-  });
-
-  document.addEventListener("click", (e) => {
-    const origin = e.target.closest("a");
-    if (origin && origin.href) {
-      const target = origin.target
-      origin.target = "_self";
-      const hrefUrl = new URL(origin.href)
-
-      if (
-        window.location.host !== hrefUrl.host && // 如果 a 标签内链接的域名和当前页面的域名不一致 且
-        target === '_blank' // a 标签内链接的 target 属性为 _blank 时
-      ) {
-        e.preventDefault();
-        window.ipc.postMessage(`open_browser:${origin.href}`);
-      }
-    }
-  });
+  const styleElement = document.createElement('style');
+  styleElement.innerHTML = css;
+  document.head.appendChild(styleElement);
 });
-
-setDefaultZoom();
-
-function setDefaultZoom() {
-  const htmlZoom = window.localStorage.getItem("htmlZoom");
-  if (htmlZoom) {
-    document.getElementsByTagName("html")[0].style.zoom = htmlZoom;
-  }
-}
-
-/**
- * @param {(htmlZoom: string) => string} [zoomRule]
- */
-function zoomCommon(zoomRule) {
-  const htmlZoom = window.localStorage.getItem("htmlZoom") || "100%";
-  const html = document.getElementsByTagName("html")[0];
-  const zoom = zoomRule(htmlZoom);
-  html.style.zoom = zoom;
-  window.localStorage.setItem("htmlZoom", zoom);
-}
-
-function zoomIn() {
-  zoomCommon((htmlZoom) => `${Math.min(parseInt(htmlZoom) + 10, 200)}%`);
-}
-
-function zoomOut() {
-  zoomCommon((htmlZoom) => `${Math.max(parseInt(htmlZoom) - 10, 30)}%`);
-}
-
-
-function pakeToast(msg) {
-	const m = document.createElement('div');
-	m.innerHTML = msg;
-	m.style.cssText = "max-width:60%;min-width: 180px;padding:0 8px;height: 36px;color: rgb(255, 255, 255);line-height: 36px;text-align: center;border-radius: 4px;position: fixed;bottom:16px;right: 16px;transform: translate(-50%, -50%);z-index: 999999;background: rgba(0, 0, 0,.9);font-size: 14px;";
-	document.body.appendChild(m);
-	setTimeout(function() {
-    const d = 0.5;
-		m.style.transition = 'transform ' + d + 's ease-in, opacity ' + d + 's ease-in';
-		m.style.opacity = '0';
-		setTimeout(function() {
-			document.body.removeChild(m)
-		}, d * 1000);
-	}, 2500);
-}
-

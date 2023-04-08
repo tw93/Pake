@@ -32,7 +32,6 @@
   "scripts": {
     "start": "npm run dev",
     "dev": "npm run tauri dev",
-    "dev:debug": "npm run tauri dev -- --features devtools",
     "build": "npm run tauri build --release",
     "build:mac": "npm run tauri build -- --target universal-apple-darwin",
     "build:all-unix": "chmod +x ./script/build.sh && ./script/build.sh",
