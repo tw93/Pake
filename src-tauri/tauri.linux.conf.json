@@ -7,10 +7,7 @@
       "category": "DeveloperTool",
       "copyright": "",
       "deb": {
-        "depends": [
-          "curl",
-          "wget"
-        ],
+        "depends": ["curl", "wget"],
         "files": {
           "/usr/share/applications/com-tw93-weread.desktop": "assets/com-tw93-weread.desktop"
         }
