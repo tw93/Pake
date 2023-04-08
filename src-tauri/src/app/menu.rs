@@ -1,4 +1,3 @@
-#[cfg(target_os = "macos")]
 use tauri::MenuItem;
 
 use tauri::{CustomMenuItem, Menu, Submenu, WindowMenuEvent};
