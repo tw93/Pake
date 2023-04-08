@@ -21,7 +21,6 @@ tauri = { version = "1.2.4", features = ["api-all", "system-tray"] }
 image = "0.24.5"
 home = "0.5"
 dirs = "5.0"
-libc = "0.2"
 download_rs = { version = "0.2.0", features = ["sync_download"] }
 tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "dev" }
 

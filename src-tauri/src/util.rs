@@ -1,7 +1,6 @@
 use crate::app::config::PakeConfig;
 use dirs::config_dir;
-use libc::getenv;
-use std::ffi::CStr;
+use std::env;
 use std::path::PathBuf;
 use tauri::{Config, Window};
 
@@ -36,25 +35,45 @@ pub fn show_toast(window: &Window, message: &str) {
 }
 
 pub fn get_download_message() -> String {
-    let lang_env_var = unsafe { CStr::from_ptr(getenv(b"LANG\0".as_ptr() as *const i8)) };
-    let lang_str = lang_env_var.to_string_lossy().to_lowercase();
-    if lang_str.starts_with("zh") {
-        "下载成功，已保存到下载目录~".to_string()
-    } else {
-        "Download successful, saved to download directory~".to_string()
-    }
+    let default_message = "Download successful, saved to download directory~";
+    let chinese_message = "下载成功，已保存到下载目录~";
+
+    env::var("LANG")
+        .map(|lang| {
+            if lang.starts_with("zh") {
+                chinese_message
+            } else {
+                default_message
+            }
+        })
+        .unwrap_or(default_message)
+        .to_string()
 }
 
 // Check if the file exists, if it exists, add a number to file name
 pub fn check_file_or_append(file_path: &str) -> String {
     let mut new_path = PathBuf::from(file_path);
-    let mut counter = 1;
+    let mut counter = 0;
+
     while new_path.exists() {
         let file_stem = new_path.file_stem().unwrap().to_string_lossy().to_string();
         let extension = new_path.extension().unwrap().to_string_lossy().to_string();
         let parent_dir = new_path.parent().unwrap();
-        new_path = parent_dir.join(format!("{}-{}.{}", file_stem, counter, extension));
-        counter += 1;
+
+        let new_file_stem = match file_stem.rfind('-') {
+            Some(index) if file_stem[index + 1..].parse::<u32>().is_ok() => {
+                let base_name = &file_stem[..index];
+                counter = file_stem[index + 1..].parse::<u32>().unwrap() + 1;
+                format!("{}-{}", base_name, counter)
+            }
+            _ => {
+                counter += 1;
+                format!("{}-{}", file_stem, counter)
+            }
+        };
+
+        new_path = parent_dir.join(format!("{}.{}", new_file_stem, extension));
     }
+
     new_path.to_string_lossy().into_owned()
 }
