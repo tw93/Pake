@@ -10,6 +10,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   userAgent: '',
   showMenu: false,
   showSystemTray: false,
+  multiArch: false,
   targets: 'deb',
   iterCopyFile: false,
   systemTrayIcon: '',

@@ -39,16 +39,21 @@ export default class MacBuilder implements IBuilder {
     const { name } = options;
 
     await mergeTauriConfig(url, options, tauriConf);
-
-    const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build`);
-    let arch  = "x64";
-    if (process.arch === "arm64") {
-      arch = "aarch64";
+    let dmgName: string;
+    if (options.multiArch) {
+      await shellExec(`cd "${npmDirectory}" && npm install --verbose && npm run build:mac`);
+      dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
     } else {
-      arch = process.arch;
+      await shellExec(`cd "${npmDirectory}" && npm install --verbose && npm run build`);
+      let arch  = "x64";
+      if (process.arch === "arm64") {
+        arch = "aarch64";
+      } else {
+        arch = process.arch;
+      }
+      dmgName = `${name}_${tauriConf.package.version}_${arch}.dmg`;
     }
-    const dmgName = `${name}_${tauriConf.package.version}_${arch}.dmg`;
-    const appPath = this.getBuildedAppPath(npmDirectory, dmgName);
+    const appPath = this.getBuildAppPath(npmDirectory, dmgName, options.multiArch);
     const distPath = path.resolve(`${name}.dmg`);
     await fs.copyFile(appPath, distPath);
     await fs.unlink(appPath);
@@ -57,11 +62,13 @@ export default class MacBuilder implements IBuilder {
     logger.success('You can find the app installer in', distPath);
   }
 
-  getBuildedAppPath(npmDirectory: string, dmgName: string) {
-    return path.join(
-      npmDirectory,
-      'src-tauri/target/release/bundle/dmg',
-      dmgName
-    );
+  getBuildAppPath(npmDirectory: string, dmgName: string, multiArch: boolean) {
+    let dmgPath: string;
+    if (multiArch) {
+      dmgPath = 'src-tauri/target/universal-apple-darwin/release/bundle/dmg';
+    } else {
+      dmgPath = 'src-tauri/target/release/bundle/dmg';
+    }
+    return path.join(npmDirectory, dmgPath, dmgName);
   }
 }
