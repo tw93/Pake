@@ -15,6 +15,9 @@ import { fileTypeFromBuffer } from 'file-type';
 import { dir } from 'tmp-promise';
 import ora from 'ora';
 import shelljs from 'shelljs';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import dns from 'dns';
 import updateNotifier from 'update-notifier';
 
 /******************************************************************************
@@ -52,6 +55,7 @@ const DEFAULT_PAKE_OPTIONS = {
     userAgent: '',
     showMenu: false,
     showSystemTray: false,
+    multiArch: false,
     targets: 'deb',
     iterCopyFile: false,
     systemTrayIcon: '',
@@ -2020,7 +2024,50 @@ function shellExec(command) {
     });
 }
 
-const RustInstallScriptFocMac = "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
+const resolve = promisify(dns.resolve);
+function isChinaDomain(domain) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            // 解析域名为IP地址
+            const [ip] = yield resolve(domain);
+            return yield isChinaIP(ip);
+        }
+        catch (error) {
+            // 域名无法解析，返回false
+            return false;
+        }
+    });
+}
+function isChinaIP(ip) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => {
+            exec(`ping -c 1 -w 1 ${ip}`, (error, stdout, stderr) => {
+                if (error) {
+                    // 命令执行出错，返回false
+                    resolve(false);
+                }
+                else {
+                    // 解析输出信息，提取延迟值
+                    const match = stdout.match(/time=(\d+\.\d+) ms/);
+                    const latency = match ? parseFloat(match[1]) : 0;
+                    // 判断延迟是否超过100ms
+                    resolve(latency > 100);
+                }
+            });
+        });
+    });
+}
+
+const is_china = isChinaDomain("sh.rustup.rs");
+let RustInstallScriptFocMac = "";
+if (is_china) {
+    RustInstallScriptFocMac =
+        'export RUSTUP_DIST_SERVER="https://rsproxy.cn" && export RUSTUP_UPDATE_ROOT="https://rsproxy.cn/rustup" && curl --proto "=https" --tlsv1.2 -sSf https://rsproxy.cn/rustup-init.sh | sh';
+}
+else {
+    RustInstallScriptFocMac =
+        "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
+}
 const RustInstallScriptForWin = 'winget install --id Rustlang.Rustup';
 function installRust() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -2037,7 +2084,7 @@ function installRust() {
     });
 }
 function checkRustInstalled() {
-    return shelljs.exec('rustc --version', { silent: true }).code === 0;
+    return shelljs.exec('source "$HOME/.cargo/env" && rustc --version', { silent: true }).code === 0;
 }
 
 var tauri$3 = {
@@ -2050,9 +2097,13 @@ var tauri$3 = {
 	systemTray: {
 		iconPath: "png/weread_512.png",
 		iconAsTemplate: true
+	},
+	allowlist: {
+		all: true
 	}
 };
 var build = {
+	withGlobalTauri: true,
 	devPath: "../dist",
 	distDir: "../dist",
 	beforeBuildCommand: "",
@@ -2172,7 +2223,6 @@ var MacConf = {
 var tauri = {
 	bundle: {
 		icon: [
-			"png/weread_256.ico",
 			"png/weread_512.png"
 		],
 		identifier: "com.tw93.weread",
@@ -2181,16 +2231,8 @@ var tauri = {
 		copyright: "",
 		deb: {
 			depends: [
-				"libwebkit2gtk-4.0-dev",
-				"build-essential",
 				"curl",
-				"wget",
-				"libssl-dev",
-				"libgtk-3-dev",
-				"libayatana-appindicator3-dev",
-				"librsvg2-dev",
-				"gnome-video-effects",
-				"gnome-video-effects-extra"
+				"wget"
 			],
 			files: {
 				"/usr/share/applications/com-tw93-weread.desktop": "assets/com-tw93-weread.desktop"
@@ -2258,16 +2300,41 @@ class MacBuilder {
             log.debug('PakeAppOptions', options);
             const { name } = options;
             yield mergeTauriConfig(url, options, tauriConf);
-            yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
-            let arch = "x64";
-            if (process.arch === "arm64") {
-                arch = "aarch64";
+            let dmgName;
+            if (options.multiArch) {
+                const isChina = isChinaDomain("www.npmjs.com");
+                if (isChina) {
+                    // crates.io也顺便换源
+                    const rust_project_dir = path.join(npmDirectory, 'src-tauri', ".cargo");
+                    const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
+                    const project_conf = path.join(rust_project_dir, "config");
+                    fs$1.copyFile(project_cn_conf, project_conf);
+                    fs$1.unlink(project_cn_conf);
+                    yield shellExec(`cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build:mac`);
+                }
+                else {
+                    yield shellExec(`cd ${npmDirectory} && npm install && npm run build:mac`);
+                }
+                dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
             }
             else {
-                arch = process.arch;
+                const isChina = isChinaDomain("www.npmjs.com");
+                if (isChina) {
+                    yield shellExec(`cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build`);
+                }
+                else {
+                    yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+                }
+                let arch = "x64";
+                if (process.arch === "arm64") {
+                    arch = "aarch64";
+                }
+                else {
+                    arch = process.arch;
+                }
+                dmgName = `${name}_${tauriConf.package.version}_${arch}.dmg`;
             }
-            const dmgName = `${name}_${tauriConf.package.version}_${arch}.dmg`;
-            const appPath = this.getBuildedAppPath(npmDirectory, dmgName);
+            const appPath = this.getBuildAppPath(npmDirectory, dmgName, options.multiArch);
             const distPath = path.resolve(`${name}.dmg`);
             yield fs$1.copyFile(appPath, distPath);
             yield fs$1.unlink(appPath);
@@ -2275,8 +2342,15 @@ class MacBuilder {
             logger.success('You can find the app installer in', distPath);
         });
     }
-    getBuildedAppPath(npmDirectory, dmgName) {
-        return path.join(npmDirectory, 'src-tauri/target/release/bundle/dmg', dmgName);
+    getBuildAppPath(npmDirectory, dmgName, multiArch) {
+        let dmgPath;
+        if (multiArch) {
+            dmgPath = 'src-tauri/target/universal-apple-darwin/release/bundle/dmg';
+        }
+        else {
+            dmgPath = 'src-tauri/target/release/bundle/dmg';
+        }
+        return path.join(npmDirectory, dmgPath, dmgName);
     }
 }
 
@@ -2308,7 +2382,19 @@ class WinBuilder {
             logger.debug('PakeAppOptions', options);
             const { name } = options;
             yield mergeTauriConfig(url, options, tauriConf);
-            yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+            const isChina = isChinaDomain("www.npmjs.com");
+            if (isChina) {
+                // crates.io也顺便换源
+                const rust_project_dir = path.join(npmDirectory, 'src-tauri', ".cargo");
+                const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
+                const project_conf = path.join(rust_project_dir, "config");
+                fs$1.copyFile(project_cn_conf, project_conf);
+                fs$1.unlink(project_cn_conf);
+                yield shellExec(`cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build`);
+            }
+            else {
+                yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+            }
             const language = tauriConf.tauri.bundle.windows.wix.language[0];
             const arch = process.arch;
             const msiName = `${name}_${tauriConf.package.version}_${arch}_${language}.msi`;
@@ -2353,42 +2439,47 @@ class LinuxBuilder {
             logger.debug('PakeAppOptions', options);
             const { name } = options;
             yield mergeTauriConfig(url, options, tauriConf);
-            yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
-            let arch = "";
+            const isChina = isChinaDomain("www.npmjs.com");
+            if (isChina) {
+                // crates.io也顺便换源
+                const rust_project_dir = path.join(npmDirectory, 'src-tauri', ".cargo");
+                const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
+                const project_conf = path.join(rust_project_dir, "config");
+                fs$1.copyFile(project_cn_conf, project_conf);
+                fs$1.unlink(project_cn_conf);
+                yield shellExec(`cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build`);
+            }
+            else {
+                yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+            }
+            let arch;
             if (process.arch === "x64") {
                 arch = "amd64";
             }
             else {
                 arch = process.arch;
             }
-            const debName = `${name}_${tauriConf.package.version}_${arch}.deb`;
-            const debPath = this.getBuildedAppPath(npmDirectory, "deb", debName);
-            const distPath = path.resolve(`${name}.deb`);
-            // 增加文件是否存在验证，再决定是否copy文件
-            const debExists = yield fs$1.stat(debPath)
-                .then(() => true)
-                .catch(() => false);
-            if (debExists) {
-                yield fs$1.copyFile(debPath, distPath);
-                yield fs$1.unlink(debPath);
-                logger.success('Build success!');
+            if (options.targets === "deb" || options.targets === "all") {
+                const debName = `${name}_${tauriConf.package.version}_${arch}.deb`;
+                const appPath = this.getBuildAppPath(npmDirectory, "deb", debName);
+                const distPath = path.resolve(`${name}.deb`);
+                yield fs$1.copyFile(appPath, distPath);
+                yield fs$1.unlink(appPath);
+                logger.success('Build Deb success!');
                 logger.success('You can find the deb app installer in', distPath);
             }
-            const appImageName = `${name}_${tauriConf.package.version}_${arch}.AppImage`;
-            const appImagePath = this.getBuildedAppPath(npmDirectory, "appimage", appImageName);
-            const distAppPath = path.resolve(`${name}.AppImage`);
-            const appExists = yield fs$1.stat(appImagePath)
-                .then(() => true)
-                .catch(() => false);
-            if (appExists) {
+            if (options.targets === "appimage" || options.targets === "all") {
+                const appImageName = `${name}_${tauriConf.package.version}_${arch}.AppImage`;
+                const appImagePath = this.getBuildAppPath(npmDirectory, "appimage", appImageName);
+                const distAppPath = path.resolve(`${name}.AppImage`);
                 yield fs$1.copyFile(appImagePath, distAppPath);
                 yield fs$1.unlink(appImagePath);
-                logger.success('Build success!');
-                logger.success('You can find the Appimage app installer in', distAppPath);
+                logger.success('Build AppImage success!');
+                logger.success('You can find the AppImage app installer in', distAppPath);
             }
         });
     }
-    getBuildedAppPath(npmDirectory, packageType, packageName) {
+    getBuildAppPath(npmDirectory, packageType, packageName) {
         return path.join(npmDirectory, 'src-tauri/target/release/bundle/', packageType, packageName);
     }
 }
@@ -2409,7 +2500,7 @@ class BuilderFactory {
 }
 
 var name = "pake-cli";
-var version = "1.0.1";
+var version = "1.3.1";
 var description = "🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App 🤱🏻 A simple way to make any web page a desktop application using Rust.";
 var engines = {
 	node: "^14.13 || >=16.0.0"
@@ -2445,7 +2536,7 @@ var scripts = {
 	build: "npm run tauri build --release",
 	"build:mac": "npm run tauri build -- --target universal-apple-darwin",
 	"build:all-unix": "chmod +x ./script/build.sh && ./script/build.sh",
-	"build:all-windows": ".\\script\\build.bat",
+	"build:all-windows": "pwsh ./script/build.ps1",
 	tauri: "tauri",
 	cli: "rollup -c rollup.config.js --watch",
 	"cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
@@ -2530,6 +2621,7 @@ program
     .option('--show-system-tray', 'show system tray in app', DEFAULT_PAKE_OPTIONS.showSystemTray)
     .option('--system-tray-icon <string>', 'custom system tray icon', DEFAULT_PAKE_OPTIONS.systemTrayIcon)
     .option('--iter-copy-file', 'copy all static file to pake app when url is a local file', DEFAULT_PAKE_OPTIONS.iterCopyFile)
+    .option('-m, --multi-arch', "available for Mac only, and supports both Intel and M1", DEFAULT_PAKE_OPTIONS.multiArch)
     .option('--targets <string>', 'only for linux, default is "deb", option "appaimge" or "all"(deb & appimage)', DEFAULT_PAKE_OPTIONS.targets)
     .option('--debug', 'debug', DEFAULT_PAKE_OPTIONS.transparent)
     .action((url, options) => __awaiter(void 0, void 0, void 0, function* () {
