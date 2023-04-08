@@ -133,10 +133,10 @@ do
 
         new_desktop="${PROJECT_FOLDER}/src-tauri/assets/${package_prefix}-${package_name}.desktop"
         new_desktop_map_path="/usr/share/applications/${package_prefix}-${package_name}.desktop"
-        for file in `ls ${PROJECT_FOLDER}/src-tauri/assets/`
+        for file in `ls ${PROJECT_FOLDER}/src-tauri/assets/*.desktop`
         do
-            mv "${PROJECT_FOLDER}/src-tauri/assets/${file}" "${new_desktop}"
-            echo mv "${PROJECT_FOLDER}/src-tauri/assets/${file}" "${new_desktop}"
+            mv "${file}" "${new_desktop}"
+            echo mv "${file}" "${new_desktop}"
         done
         # clear desktop file with regex
         $sd "\"files\": \{\"(.*)\"\}" "\"files\": \{\"\"\}" src-tauri/tauri.linux.conf.json

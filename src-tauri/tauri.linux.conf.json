@@ -11,9 +11,7 @@
           "curl",
           "wget"
         ],
-        "files": {
-          "/usr/share/applications/com-tw93-weread.desktop": "assets/com-tw93-weread.desktop"
-        }
+        "files": {"/usr/share/applications/com-tw93-weread.desktop": "assets/com-tw93-weread.desktop"}
       },
       "externalBin": [],
       "longDescription": "",
