@@ -34,3 +34,4 @@ dist
 !dist/about_pake.html
 !dist/cli.js
 !dist/.gitkeep
+src-tauri/.cargo/config

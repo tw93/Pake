@@ -29,5 +29,5 @@ export async function installRust() {
 }
 
 export function checkRustInstalled() {
-  return shelljs.exec('source "$HOME/.cargo/env" && rustc --version', { silent: true }).code === 0;
+  return shelljs.exec('rustc --version', { silent: true }).code === 0;
 }

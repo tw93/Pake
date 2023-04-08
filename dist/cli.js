@@ -2084,7 +2084,7 @@ function installRust() {
     });
 }
 function checkRustInstalled() {
-    return shelljs.exec('source "$HOME/.cargo/env" && rustc --version', { silent: true }).code === 0;
+    return shelljs.exec('rustc --version', { silent: true }).code === 0;
 }
 
 var tauri$3 = {
@@ -2309,7 +2309,6 @@ class MacBuilder {
                     const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
                     const project_conf = path.join(rust_project_dir, "config");
                     fs$1.copyFile(project_cn_conf, project_conf);
-                    fs$1.unlink(project_cn_conf);
                     yield shellExec(`cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build:mac`);
                 }
                 else {
@@ -2389,7 +2388,6 @@ class WinBuilder {
                 const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
                 const project_conf = path.join(rust_project_dir, "config");
                 fs$1.copyFile(project_cn_conf, project_conf);
-                fs$1.unlink(project_cn_conf);
                 yield shellExec(`cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build`);
             }
             else {
@@ -2446,7 +2444,6 @@ class LinuxBuilder {
                 const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
                 const project_conf = path.join(rust_project_dir, "config");
                 fs$1.copyFile(project_cn_conf, project_conf);
-                fs$1.unlink(project_cn_conf);
                 yield shellExec(`cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build`);
             }
             else {
