@@ -172,9 +172,6 @@ npm i
 # 本地开发
 npm run dev
 
-# 本地调试
-npm run dev:debug
-
 # 打包应用
 npm run build
 

@@ -52,10 +52,6 @@ pub fn run_app() {
             // Prevent initial shaking
             _window.restore_state(StateFlags::all()).unwrap();
             _window.show().unwrap();
-            #[cfg(feature = "devtools")]
-            {
-                _window.open_devtools();
-            }
             Ok(())
         })
         .on_window_event(|event| {
