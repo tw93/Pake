@@ -47,43 +47,33 @@ export default class LinuxBuilder implements IBuilder {
 
     await mergeTauriConfig(url, options, tauriConf);
     const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build`);
-    let arch = "";
+    let arch: string;
     if (process.arch === "x64") {
       arch = "amd64";
     } else {
       arch = process.arch;
     }
-    const debName = `${name}_${tauriConf.package.version}_${arch}.deb`;
-    const debPath = this.getBuildedAppPath(npmDirectory, "deb", debName);
-    const distPath = path.resolve(`${name}.deb`);
-    // 增加文件是否存在验证，再决定是否copy文件
-    const debExists = await fs.stat(debPath)
-    .then(() => true)
-    .catch(() => false);
-    if (debExists) {
-      await fs.copyFile(debPath, distPath);
-      await fs.unlink(debPath);
-      logger.success('Build success!');
+    if (options.targets === "deb" || options.targets === "all") {
+      const debName = `${name}_${tauriConf.package.version}_${arch}.deb`;
+      const appPath = this.getBuildAppPath(npmDirectory, "deb", debName);
+      const distPath = path.resolve(`${name}.deb`);
+      await fs.copyFile(appPath, distPath);
+      await fs.unlink(appPath);
+      logger.success('Build Deb success!');
       logger.success('You can find the deb app installer in', distPath);
     }
-
-
-    const appImageName = `${name}_${tauriConf.package.version}_${arch}.AppImage`;
-    const appImagePath = this.getBuildedAppPath(npmDirectory, "appimage", appImageName);
-    const distAppPath = path.resolve(`${name}.AppImage`);
-
-    const appExists = await fs.stat(appImagePath)
-    .then(() => true)
-    .catch(() => false);
-    if (appExists) {
+    if (options.targets === "appimage" || options.targets === "all") {
+      const appImageName = `${name}_${tauriConf.package.version}_${arch}.AppImage`;
+      const appImagePath = this.getBuildAppPath(npmDirectory, "appimage", appImageName);
+      const distAppPath = path.resolve(`${name}.AppImage`);
       await fs.copyFile(appImagePath, distAppPath);
       await fs.unlink(appImagePath);
-      logger.success('Build success!');
-      logger.success('You can find the Appimage app installer in', distAppPath);
+      logger.success('Build AppImage success!');
+      logger.success('You can find the AppImage app installer in', distAppPath);
     }
   }
 
-  getBuildedAppPath(npmDirectory: string,packageType: string, packageName: string) {
+  getBuildAppPath(npmDirectory: string, packageType: string, packageName: string) {
     return path.join(
       npmDirectory,
       'src-tauri/target/release/bundle/',
