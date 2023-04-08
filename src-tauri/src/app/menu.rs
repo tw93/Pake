@@ -32,10 +32,8 @@ pub fn get_menu() -> Menu {
 }
 
 pub fn menu_event_handle(event: WindowMenuEvent) {
-    match event.menu_item_id() {
-        // default close to minimize
-        "close" => event.window().minimize().expect("can't minimize window"),
-        _ => {}
+    if event.menu_item_id() == "close" {
+        event.window().minimize().expect("can't minimize window");
     }
 }
 
