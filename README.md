@@ -21,7 +21,7 @@
 
 ## Features
 
-- 🎐 Nearly 40 times smaller than an Electron package (less than 5M!)
+- 🎐 Nearly 20 times smaller than an Electron package (around 6M!)
 - 🚀 With Rust Tauri, Pake is much more lightweight and faster than JS-based frameworks.
 - 📦 Battery-included package — shortcut pass-through, immersive windows, and minimalist customization.
 - 👻 Pake is just a simple tool — replace the old bundle approach with Rust (though PWA is good enough).
