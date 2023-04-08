@@ -21,7 +21,7 @@
 
 ## Features
 
-- 🎐 Nearly 40 times smaller than an Electron package (less than 3M!)
+- 🎐 Nearly 40 times smaller than an Electron package (less than 5M!)
 - 🚀 With Rust Tauri, Pake is much more lightweight and faster than JS-based frameworks.
 - 📦 Battery-included package — shortcut pass-through, immersive windows, and minimalist customization.
 - 👻 Pake is just a simple tool — replace the old bundle approach with Rust (though PWA is good enough).
@@ -135,7 +135,7 @@ In addition, double-click the title bar to switch to full-screen mode. For Mac u
 
 ## Before starting
 
-1. **For beginners**: Play with Popular Packages to find out Pake's capabilities, or try to pack your application with [GitHub Actions](https://github.com/tw93/Pake/wiki/GitHub-Actions-Online-Compilation-Multi-system-Version). Don't hesitate to reach for assistance at [Discussion](https://github.com/tw93/Pake/discussions)!
+1. **For beginners**: Play with Popular Packages to find out Pake's capabilities, or try to pack your application with [GitHub Actions](https://github.com/tw93/Pake/wiki/Online-Compilation-(used-by-ordinary-users)). Don't hesitate to reach for assistance at [Discussion](https://github.com/tw93/Pake/discussions)!
 2. **For developers**: “Command-Line Packaging” supports macOS fully. For Windows/Linux users, it requires some tinkering. [Configure your environment](https://tauri.app/v1/guides/getting-started/prerequisites) before getting started.
 3. **For hackers**: For people who are good at both front-end development and Rust, how about customizing your apps' function more with the following [Customized Development](#development)?
 
@@ -156,7 +156,7 @@ pake url [OPTIONS]...
 pake https://weekly.tw93.fun --name Weekly --transparent
 ```
 
-If you are new to the command line, you can compile packages online with _GitHub Actions_. See the [Tutorial](https://github.com/tw93/Pake/wiki/GitHub-Actions-Online-Compilation-Multi-system-Version) for more information.
+If you are new to the command line, you can compile packages online with _GitHub Actions_. See the [Tutorial](https://github.com/tw93/Pake/wiki/Online-Compilation-(used-by-ordinary-users)) for more information.
 
 ## Development
 
@@ -168,7 +168,7 @@ If you are unfamiliar with these, it is better to try out the above tool to pack
 # Install Dependencies
 npm i
 
-# Local development
+# Local development [Right-click to open debug mode.]
 npm run dev
 
 # Pack application
