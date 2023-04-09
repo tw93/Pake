@@ -125,7 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // 处理下载链接让Rust处理
       if (/\.[a-zA-Z0-9]+$/i.test(absoluteUrl)) {
         e.preventDefault();
-        // invoke('open_browser', { url: absoluteUrl });
         invoke('download_file', {
           params: {
             url: absoluteUrl,
@@ -141,8 +140,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // Rewrite the window.open function.
   const originalWindowOpen = window.open;
   window.open = function (url, name, specs) {
-    invoke('open_browser', { url });
-
+    console.log('0window.open>>>>>>>', url, name, specs);
+    // Apple login and google login
+    if (name === 'AppleAuthentication') {
+      //do nothing
+    } else if (specs.includes('height=') || specs.includes('height=')) {
+      location.href = url;
+    } else {
+      const baseUrl = window.location.origin + window.location.pathname;
+      const hrefUrl = new URL(url, baseUrl);
+      invoke('open_browser', { url: hrefUrl.href });
+    }
     // Call the original window.open function to maintain its normal functionality.
     return originalWindowOpen.call(window, url, name, specs);
   };
