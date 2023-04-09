@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    font-size: 14px;
     margin-bottom: 12px;
     outline: none;
   }
