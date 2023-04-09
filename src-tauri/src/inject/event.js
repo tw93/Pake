@@ -115,15 +115,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const hrefUrl = new URL(anchorElement.href);
       const absoluteUrl = hrefUrl.href;
 
-      // 处理外部链接跳转
+      // Handling external link redirection.
       if (window.location.host !== hrefUrl.host && target === '_blank') {
         e.preventDefault();
         invoke('open_browser', { url: absoluteUrl });
         return;
       }
 
-      // 处理下载链接让Rust处理
-      if (/\.[a-zA-Z0-9]+$/i.test(absoluteUrl)) {
+      // Process download links for Rust to handle.
+      if (/\.[a-zA-Z0-9]+$/i.test(removeUrlParameters(absoluteUrl))) {
         e.preventDefault();
         invoke('download_file', {
           params: {
@@ -140,7 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Rewrite the window.open function.
   const originalWindowOpen = window.open;
   window.open = function (url, name, specs) {
-    console.log('0window.open>>>>>>>', url, name, specs);
     // Apple login and google login
     if (name === 'AppleAuthentication') {
       //do nothing
@@ -167,4 +166,10 @@ function getFilenameFromUrl(url) {
   const urlPath = new URL(url).pathname;
   const filename = urlPath.substring(urlPath.lastIndexOf('/') + 1);
   return filename;
+}
+
+function removeUrlParameters(url) {
+  const parsedUrl = new URL(url);
+  parsedUrl.search = '';
+  return parsedUrl.toString();
 }
