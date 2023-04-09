@@ -10,6 +10,7 @@ use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
 pub fn get_menu() -> Menu {
     let close = CustomMenuItem::new("close".to_string(), "Close Window").accelerator("CmdOrCtrl+W");
+    let goto_url_item = CustomMenuItem::new("goto_url".to_string(), "Go to URL...").accelerator("CmdOrCtrl+Shift+L");
     let first_menu = Menu::new()
         .add_native_item(MenuItem::Copy)
         .add_native_item(MenuItem::Cut)
@@ -17,6 +18,8 @@ pub fn get_menu() -> Menu {
         .add_native_item(MenuItem::Undo)
         .add_native_item(MenuItem::Redo)
         .add_native_item(MenuItem::SelectAll)
+        .add_native_item(MenuItem::Separator)
+        .add_item(goto_url_item)
         .add_native_item(MenuItem::Separator)
         .add_native_item(MenuItem::EnterFullScreen)
         .add_native_item(MenuItem::Minimize)
@@ -34,6 +37,11 @@ pub fn get_menu() -> Menu {
 pub fn menu_event_handle(event: WindowMenuEvent) {
     if event.menu_item_id() == "close" {
         event.window().minimize().expect("can't minimize window");
+    }
+
+    if event.menu_item_id() == "goto_url" {
+        let js_code = "showUrlModal();";
+        event.window().eval(js_code).unwrap();
     }
 }
 
@@ -85,7 +93,6 @@ pub fn system_tray_handle(app: &tauri::AppHandle, event: SystemTrayEvent) {
             }
             "quit" => {
                 let _res = app.save_window_state(StateFlags::all());
-                // println!("save windows state result {:?}", _res);
                 std::process::exit(0);
             }
             "about" => {
