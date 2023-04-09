@@ -137,6 +137,17 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   setDefaultZoom();
+
+  // Rewrite the window.open function.
+  const originalWindowOpen = window.open;
+  window.open = function (url, name, specs) {
+    console.log('window.open called with URL:', url);
+    // Call Rust code to open a browser.
+    invoke('open_browser', { url });
+
+    // Call the original window.open function to maintain its normal functionality.
+    return originalWindowOpen.call(window, url, name, specs);
+  };
 });
 
 function setDefaultZoom() {
