@@ -9,7 +9,7 @@ mod util;
 use app::{invoke, menu, window};
 use invoke::{download_file, drag_window, fullscreen, open_browser};
 use menu::{get_menu, menu_event_handle};
-use tauri_plugin_window_state::{Builder as windowStatePlugin};
+use tauri_plugin_window_state::Builder as windowStatePlugin;
 use util::{get_data_dir, get_pake_config};
 use window::get_window;
 
