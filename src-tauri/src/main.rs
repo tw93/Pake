@@ -9,7 +9,7 @@ mod util;
 use app::{invoke, menu, window};
 use invoke::{download_file, drag_window, fullscreen, open_browser};
 use menu::{get_menu, menu_event_handle};
-use tauri_plugin_window_state::{Builder as windowStatePlugin, StateFlags, WindowExt};
+use tauri_plugin_window_state::{Builder as windowStatePlugin};
 use util::{get_data_dir, get_pake_config};
 use window::get_window;
 
@@ -50,8 +50,6 @@ pub fn run_app() {
         .setup(|app| {
             let _window = get_window(app, pake_config, data_dir);
             // Prevent initial shaking
-            _window.restore_state(StateFlags::all()).unwrap();
-            _window.set_decorations(true).unwrap();
             _window.show().unwrap();
             Ok(())
         })
