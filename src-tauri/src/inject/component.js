@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   .pake-modal-content label {
     display: block;
+    color: #11182B;
     margin-bottom: 12px;
     font-weight: bold;
   }
