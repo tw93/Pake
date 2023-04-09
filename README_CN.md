@@ -45,20 +45,20 @@
         <td><img src=https://cdn.fliggy.com/upic/mc41xq.jpg width=600/></td>
     </tr>
     <tr>
-        <td>LiZhi
-            <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi_x86_64.deb">Linux</a>
-        </td>
         <td>ChatGPT
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x86_64.deb">Linux</a>
         </td>
+        <td>LiZhi
+            <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi_x86_64.deb">Linux</a>
+        </td>
     </tr>
     <tr>
+        <td><img src=https://cdn.fliggy.com/upic/0khyI4.png width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/nYEKqN.jpg width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/LW9BMz.png width=600/></td>
     </tr>
     <tr>
       <td>YouTube
@@ -74,7 +74,7 @@
     </tr>
     <tr>
         <td><img src=https://cdn.fliggy.com/upic/s4ZLNC.jpg width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/0CvT6K.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/sKN5Bn.png width=600/></td>
     </tr>
     <tr>
         <td>ProgramMusic
