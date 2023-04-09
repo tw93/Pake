@@ -51,6 +51,7 @@ pub fn run_app() {
             let _window = get_window(app, pake_config, data_dir);
             // Prevent initial shaking
             _window.restore_state(StateFlags::all()).unwrap();
+            _window.set_decorations(true).unwrap();
             _window.show().unwrap();
             Ok(())
         })
