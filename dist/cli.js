@@ -1897,14 +1897,14 @@ function mergeTauriConfig(url, options, tauriConf) {
             }
         }
         let bundleConf = { tauri: { bundle: tauriConf.tauri.bundle } };
-        yield fs$1.writeFile(configPath, Buffer.from(JSON.stringify(bundleConf, null, 4), 'utf-8'));
+        yield fs$1.writeFile(configPath, Buffer.from(JSON.stringify(bundleConf, null, '\t'), 'utf-8'));
         const pakeConfigPath = path.join(npmDirectory, 'src-tauri/pake.json');
         yield fs$1.writeFile(pakeConfigPath, Buffer.from(JSON.stringify(tauriConf.pake, null, 4), 'utf-8'));
         let tauriConf2 = JSON.parse(JSON.stringify(tauriConf));
         delete tauriConf2.pake;
         delete tauriConf2.tauri.bundle;
         const configJsonPath = path.join(npmDirectory, 'src-tauri/tauri.conf.json');
-        yield fs$1.writeFile(configJsonPath, Buffer.from(JSON.stringify(tauriConf2, null, 4), 'utf-8'));
+        yield fs$1.writeFile(configJsonPath, Buffer.from(JSON.stringify(tauriConf, null, '\t'), 'utf-8'));
     });
 }
 
@@ -2178,7 +2178,7 @@ var tauri$1 = {
 		icon: [
 			"icons/weread.icns"
 		],
-		identifier: "com.tw93.weread",
+		identifier: "com.tw93.weread1",
 		active: true,
 		category: "DeveloperTool",
 		copyright: "",
@@ -2482,7 +2482,7 @@ class BuilderFactory {
 }
 
 var name = "pake-cli";
-var version = "1.3.1";
+var version = "2.0.0-alpha";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -2514,7 +2514,6 @@ var files = [
 var scripts = {
 	start: "npm run dev",
 	dev: "npm run tauri dev",
-	"dev:debug": "npm run tauri dev -- --features devtools",
 	build: "npm run tauri build --release",
 	"build:mac": "npm run tauri build -- --target universal-apple-darwin",
 	"build:all-unix": "chmod +x ./script/build.sh && ./script/build.sh",
