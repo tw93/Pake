@@ -54,7 +54,7 @@ export default class LinuxBuilder implements IBuilder {
       const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
       const project_conf = path.join(rust_project_dir, "config");
       fs.copyFile(project_cn_conf, project_conf);
-
+      
       const _ = await shellExec(
         `cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build`
       );

@@ -55,11 +55,11 @@ export async function mergeTauriConfig(
       process.exit();
     }
   }
-  if (process.platform === "win32") {
+  if (process.platform === "win32" || process.platform === "darwin" ) {
     const reg = new RegExp(/([0-9]*[a-zA-Z]+[0-9]*)+/);
     if (!reg.test(name) || reg.exec(name)[0].length != name.length) {
       logger.error("package name is illegal， it must be letters, numbers, and it must contain the letters")
-      logger.error("E.g 123pan,123Pan,Pan123,weread,WeRead,WERead");
+      logger.error("E.g 123pan,123Pan Pan123,weread, WeRead, WERead");
       process.exit();
     }
   }
@@ -193,15 +193,6 @@ export async function mergeTauriConfig(
   const exists = await fs.stat(options.icon)
     .then(() => true)
     .catch(() => false);
-  if (process.platform === "linux") {
-    delete tauriConf.tauri.bundle.deb.files;
-    if (["all", "deb", "appimage"].includes(options.targets)) {
-      tauriConf.tauri.bundle.targets = [options.targets];
-    } else {
-      logger.warn("targets must be 'all', 'deb', 'appimage', we will use default 'all'");
-    }
-  }
-
   if (exists) {
     let updateIconPath = true;
     let customIconExt = path.extname(options.icon).toLowerCase();
@@ -236,20 +227,14 @@ export async function mergeTauriConfig(
     }
   } else {
     logger.warn("the custom icon path may not exists. we will use default icon to replace it");
-    switch (process.platform) {
-      case "win32": {
-        tauriConf.tauri.bundle.resources = ['png/icon_32.ico'];
-        tauriConf.tauri.bundle.icon = ['png/icon_32.ico', 'png/icon_256.ico']
-        break;
-      }
-      case "darwin": {
-        tauriConf.tauri.bundle.icon = ['icons/icon.icns']
-        break;
-      }
-      case "linux": {
-        tauriConf.tauri.bundle.icon = ['png/icon_512.png']
-        break;
-      }
+    if (process.platform === "win32") {
+        tauriConf.tauri.bundle.icon = ["png/icon_256.ico"];
+    }
+    if (process.platform === "linux") {
+        tauriConf.tauri.bundle.icon = ["png/icon_512.png"];
+    }
+    if (process.platform === "darwin") {
+        tauriConf.tauri.bundle.icon = ["icons/icon.icns"];
     }
   }
 
@@ -302,11 +287,11 @@ export async function mergeTauriConfig(
       break;
     }
   }
-
+  
   let bundleConf = {tauri: {bundle: tauriConf.tauri.bundle}};
   await fs.writeFile(
     configPath,
-    Buffer.from(JSON.stringify(bundleConf, null, '\t'), 'utf-8')
+    Buffer.from(JSON.stringify(bundleConf, null, 4), 'utf-8')
   );
 
   const pakeConfigPath = path.join(npmDirectory, 'src-tauri/pake.json')
@@ -322,6 +307,6 @@ export async function mergeTauriConfig(
   const configJsonPath = path.join(npmDirectory, 'src-tauri/tauri.conf.json')
   await fs.writeFile(
     configJsonPath,
-    Buffer.from(JSON.stringify(tauriConf, null, '\t'), 'utf-8')
+    Buffer.from(JSON.stringify(tauriConf2, null, 4), 'utf-8')
   );
 }

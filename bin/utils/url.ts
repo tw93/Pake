@@ -20,7 +20,7 @@ export function getDomain(inputUrl: string) {
       i === 0 || // 'asia.com' (last remaining must be the SLD)
       i < ln - 2 || // TLDs only span 2 levels
       part.length < minLength || // 'www.cn.com' (valid TLD as second-level domain)
-      tlds.indexOf(part) < 0 // officially not a TLD
+      tlds.indexOf(part) < 0 // officialy not a TLD
     ) {
       return part;
     }
@@ -42,6 +42,6 @@ export function normalizeUrl(urlToNormalize: string): string {
   if (isurl(urlWithProtocol)) {
     return urlWithProtocol;
   } else {
-    throw new Error(`The URL "${urlWithProtocol}" you provided is invalid.`);
+    throw new Error(`Your url "${urlWithProtocol}" is invalid`);
   }
 }

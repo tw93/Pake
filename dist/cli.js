@@ -1563,7 +1563,7 @@ function getDomain(inputUrl) {
         if (i === 0 || // 'asia.com' (last remaining must be the SLD)
             i < ln - 2 || // TLDs only span 2 levels
             part.length < minLength || // 'www.cn.com' (valid TLD as second-level domain)
-            tlds.indexOf(part) < 0 // officially not a TLD
+            tlds.indexOf(part) < 0 // officialy not a TLD
         ) {
             return part;
         }
@@ -1583,14 +1583,14 @@ function normalizeUrl(urlToNormalize) {
         return urlWithProtocol;
     }
     else {
-        throw new Error(`The URL "${urlWithProtocol}" you provided is invalid.`);
+        throw new Error(`Your url "${urlWithProtocol}" is invalid`);
     }
 }
 
 function validateNumberInput(value) {
     const parsedValue = Number(value);
     if (isNaN(parsedValue)) {
-        throw new Commander.InvalidArgumentError('The input cannot be a number.');
+        throw new Commander.InvalidArgumentError('Not a number.');
     }
     return parsedValue;
 }
@@ -1659,11 +1659,11 @@ function mergeTauriConfig(url, options, tauriConf) {
                 process.exit();
             }
         }
-        if (process.platform === "win32") {
+        if (process.platform === "win32" || process.platform === "darwin") {
             const reg = new RegExp(/([0-9]*[a-zA-Z]+[0-9]*)+/);
             if (!reg.test(name) || reg.exec(name)[0].length != name.length) {
                 logger.error("package name is illegal， it must be letters, numbers, and it must contain the letters");
-                logger.error("E.g 123pan,123Pan,Pan123,weread,WeRead,WERead");
+                logger.error("E.g 123pan,123Pan Pan123,weread, WeRead, WERead");
                 process.exit();
             }
         }
@@ -1783,15 +1783,6 @@ function mergeTauriConfig(url, options, tauriConf) {
         const exists = yield fs$1.stat(options.icon)
             .then(() => true)
             .catch(() => false);
-        if (process.platform === "linux") {
-            delete tauriConf.tauri.bundle.deb.files;
-            if (["all", "deb", "appimage"].includes(options.targets)) {
-                tauriConf.tauri.bundle.targets = [options.targets];
-            }
-            else {
-                logger.warn("targets must be 'all', 'deb', 'appimage', we will use default 'all'");
-            }
-        }
         if (exists) {
             let updateIconPath = true;
             let customIconExt = path.extname(options.icon).toLowerCase();
@@ -1828,20 +1819,14 @@ function mergeTauriConfig(url, options, tauriConf) {
         }
         else {
             logger.warn("the custom icon path may not exists. we will use default icon to replace it");
-            switch (process.platform) {
-                case "win32": {
-                    tauriConf.tauri.bundle.resources = ['png/icon_32.ico'];
-                    tauriConf.tauri.bundle.icon = ['png/icon_32.ico', 'png/icon_256.ico'];
-                    break;
-                }
-                case "darwin": {
-                    tauriConf.tauri.bundle.icon = ['icons/icon.icns'];
-                    break;
-                }
-                case "linux": {
-                    tauriConf.tauri.bundle.icon = ['png/icon_512.png'];
-                    break;
-                }
+            if (process.platform === "win32") {
+                tauriConf.tauri.bundle.icon = ["png/icon_256.ico"];
+            }
+            if (process.platform === "linux") {
+                tauriConf.tauri.bundle.icon = ["png/icon_512.png"];
+            }
+            if (process.platform === "darwin") {
+                tauriConf.tauri.bundle.icon = ["icons/icon.icns"];
             }
         }
         // 处理托盘自定义图标
@@ -1895,14 +1880,14 @@ function mergeTauriConfig(url, options, tauriConf) {
             }
         }
         let bundleConf = { tauri: { bundle: tauriConf.tauri.bundle } };
-        yield fs$1.writeFile(configPath, Buffer.from(JSON.stringify(bundleConf, null, '\t'), 'utf-8'));
+        yield fs$1.writeFile(configPath, Buffer.from(JSON.stringify(bundleConf, null, 4), 'utf-8'));
         const pakeConfigPath = path.join(npmDirectory, 'src-tauri/pake.json');
         yield fs$1.writeFile(pakeConfigPath, Buffer.from(JSON.stringify(tauriConf.pake, null, 4), 'utf-8'));
         let tauriConf2 = JSON.parse(JSON.stringify(tauriConf));
         delete tauriConf2.pake;
         delete tauriConf2.tauri.bundle;
         const configJsonPath = path.join(npmDirectory, 'src-tauri/tauri.conf.json');
-        yield fs$1.writeFile(configJsonPath, Buffer.from(JSON.stringify(tauriConf, null, '\t'), 'utf-8'));
+        yield fs$1.writeFile(configJsonPath, Buffer.from(JSON.stringify(tauriConf2, null, 4), 'utf-8'));
     });
 }
 
@@ -1934,7 +1919,7 @@ function handleIcon(options, url) {
 }
 function getDefaultIcon() {
     return __awaiter(this, void 0, void 0, function* () {
-        logger.info('You haven\'t provided an app icon, so the default icon will be used. To assign a custom icon, please use the --icon option.');
+        logger.info('You have not provided an app icon, use the default icon.(use --icon option to assign an icon)');
         let iconPath = 'src-tauri/icons/icon.icns';
         if (IS_WIN) {
             iconPath = 'src-tauri/png/icon_256.ico';
@@ -1945,6 +1930,38 @@ function getDefaultIcon() {
         return path.join(npmDirectory, iconPath);
     });
 }
+// export async function getIconFromPageUrl(url: string) {
+//   const icon = await pageIcon(url);
+//   console.log(icon);
+//   if (icon.ext === '.ico') {
+//     const a = await ICO.parse(icon.data);
+//     icon.data = Buffer.from(a[0].buffer);
+//   }
+//   const iconDir = (await dir()).path;
+//   const iconPath = path.join(iconDir, `/icon.icns`);
+//   const out = png2icons.createICNS(icon.data, png2icons.BILINEAR, 0);
+//   await fs.writeFile(iconPath, out);
+//   return iconPath;
+// }
+// export async function getIconFromMacosIcons(name: string) {
+//   const data = {
+//     query: name,
+//     filters: 'approved:true',
+//     hitsPerPage: 10,
+//     page: 1,
+//   };
+//   const res = await axios.post('https://p1txh7zfb3-2.algolianet.com/1/indexes/macOSicons/query?x-algolia-agent=Algolia%20for%20JavaScript%20(4.13.1)%3B%20Browser', data, {
+//     headers: {
+//       'x-algolia-api-key': '0ba04276e457028f3e11e38696eab32c',
+//       'x-algolia-application-id': 'P1TXH7ZFB3',
+//     },
+//   });
+//   if (!res.data.hits.length) {
+//     return '';
+//   } else {
+//     return downloadIcon(res.data.hits[0].icnsUrl);
+//   }
+// }
 function downloadIcon(iconUrl) {
     return __awaiter(this, void 0, void 0, function* () {
         let iconResponse;
@@ -1996,7 +2013,7 @@ function handleOptions(options, url) {
 
 function shellExec(command) {
     return new Promise((resolve, reject) => {
-        shelljs.exec(command, { async: true, silent: false, cwd: npmDirectory }, (code) => {
+        shelljs.exec(command, { async: true, silent: false }, (code) => {
             if (code === 0) {
                 resolve(0);
             }
@@ -2060,7 +2077,7 @@ function installRust() {
             spinner.succeed();
         }
         catch (error) {
-            console.error('Error codes that occur during the Rust installation process.', error.message);
+            console.error('install rust return code', error.message);
             spinner.fail();
             process.exit(1);
         }
@@ -2273,7 +2290,7 @@ class MacBuilder {
                 yield installRust();
             }
             else {
-                log.error('Error: Pake need Rust to package your webapp!');
+                log.error('Error: Pake need Rust to package your webapp!!!');
                 process.exit(2);
             }
         });
@@ -2379,7 +2396,7 @@ class WinBuilder {
             const language = tauriConf.tauri.bundle.windows.wix.language[0];
             const arch = process.arch;
             const msiName = `${name}_${tauriConf.package.version}_${arch}_${language}.msi`;
-            const appPath = this.getBuildAppPath(npmDirectory, msiName);
+            const appPath = this.getBuildedAppPath(npmDirectory, msiName);
             const distPath = path.resolve(`${name}.msi`);
             yield fs$1.copyFile(appPath, distPath);
             yield fs$1.unlink(appPath);
@@ -2387,7 +2404,7 @@ class WinBuilder {
             logger.success('You can find the app installer in', distPath);
         });
     }
-    getBuildAppPath(npmDirectory, dmgName) {
+    getBuildedAppPath(npmDirectory, dmgName) {
         return path.join(npmDirectory, 'src-tauri/target/release/bundle/msi', dmgName);
     }
 }
@@ -2580,11 +2597,11 @@ var packageJson = {
 
 function checkUpdateTips() {
     return __awaiter(this, void 0, void 0, function* () {
-        updateNotifier({ pkg: packageJson }).notify({ isGlobal: true });
+        updateNotifier({ pkg: packageJson }).notify();
     });
 }
 
-program.version(packageJson.version).description('A command-line tool that can quickly convert a webpage into a desktop application.');
+program.version(packageJson.version).description('A cli application can package a web page to desktop application.');
 program
     .showHelpAfterError()
     .argument('[url]', 'the web url you want to package', validateUrlInput)
@@ -2604,7 +2621,7 @@ program
     .option('--targets <string>', 'only for linux, default is "deb", option "appaimge" or "all"(deb & appimage)', DEFAULT_PAKE_OPTIONS.targets)
     .option('--debug', 'debug', DEFAULT_PAKE_OPTIONS.transparent)
     .action((url, options) => __awaiter(void 0, void 0, void 0, function* () {
-    yield checkUpdateTips();
+    checkUpdateTips();
     if (!url) {
         // 直接 pake 不需要出现url提示
         program.help();

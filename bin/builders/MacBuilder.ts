@@ -30,7 +30,7 @@ export default class MacBuilder implements IBuilder {
       // TODO 国内有可能会超时
       await installRust();
     } else {
-      log.error('Error: Pake need Rust to package your webapp!');
+      log.error('Error: Pake need Rust to package your webapp!!!');
       process.exit(2);
     }
   }

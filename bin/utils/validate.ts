@@ -5,7 +5,7 @@ import fs from 'fs';
 export function validateNumberInput(value: string) {
   const parsedValue = Number(value);
   if (isNaN(parsedValue)) {
-    throw new Commander.InvalidArgumentError('The input cannot be a number.');
+    throw new Commander.InvalidArgumentError('Not a number.');
   }
   return parsedValue;
 }

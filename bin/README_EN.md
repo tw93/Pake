@@ -1,39 +1,14 @@
 ## Install
 
-Ensure the version of your installed Node.js is greater than `16.0` such as `16.8`. Do not use `sudo` to install. If you encountered permission issues/problems while installing using npm, see [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo).
-
 ```bash
 npm install -g pake-cli
 ```
 
-## Notes for Windows & Linux users
+If the installation fails and you are prompted that you do not have permission, please see this [website](https://gist.github.com/Giancarlos/d087f8a9e6516716da98ad0c0f5a8f58) .
 
-- **VERY IMPORTANT**: Check out [the Tauri prerequisites](https://tauri.app/v1/guides/getting-started/prerequisites) before proceeding.
-- For Windows users who had been installed `Win10 SDK (10.0.19041.0)` and `Visual Studio build tool 2022(>=17.2)`, you may need to install these additionally:
+Also make sure that you're using a correct Node.js version (`^14.13 || >=16.0.0`). If you're using [nvm](https://github.com/nvm-sh/nvm) for Node.js version management you may run `nvm use` from the root folder of the project and the correct version will be picked up. Other Node.js version management tools, such as [fnm](https://github.com/Schniz/fnm) and [tj/n](https://github.com/tj/n), should also have similar feature.
 
-  1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
-  2. Microsoft Visual C++ 2015-2022 Redistributable (x86)
-  3. Microsoft Visual C++ 2012 Redistributable (x86) (optional)
-  4. Microsoft Visual C++ 2013 Redistributable (x86) (optional)
-  5. Microsoft Visual C++ 2008 Redistributable (x86) (optional)
-
-- For Ubuntu users, run the following commands to install the required libraries before compiling:
-
-  ```bash
-  sudo apt install libdbus-1-dev \
-      libsoup2.4-dev \
-      libjavascriptcoregtk-4.0-dev \
-      libwebkit2gtk-4.0-dev \
-      build-essential \
-      curl \
-      wget \
-      libssl-dev \
-      libgtk-3-dev \
-      libayatana-appindicator3-dev \
-      librsvg2-dev \
-      gnome-video-effects \
-      gnome-video-effects-extra
-  ```
+**try not to use `sudo` permissions**, If you must use sudo, you need install rust in you system environment. For Mac, you can use brew to install it. For Linux like Ubuntu, you need apt to install it.
 
 ## Usage
 
@@ -41,41 +16,36 @@ npm install -g pake-cli
 pake url [options]
 ```
 
-The packaged application will be placed in the current working directory by default. Since the environment needs to be configured for the first packaging, it will take some time. Please wait patiently.
+After the packaging, the application defaults to the current working directory. Since the environment needs to be configured for the first packaging, it will take some time. Please wait patiently.
 
-> **Note**:
-> The Rust environment is required for packaging. If you have not installed Rust, you will be prompted to confirm the installation. If the installation fails or times out, you can [install](https://www.rust-lang.org/tools/install) by yourself.
+Note: The Rust environment is required for packaging. If you do not have Rust, you will be prompted to confirm the installation. If the installation fails or times out, you can [install](https://www.rust-lang.org/tools/install) it yourself.
 
 ### url
 
-The url🔗 is the link to the website you want to package. Required.
+The url🔗 is the webpage link or local html file you need to package, Must be provided.
 
 ### [options]
 
-We provide some options for customization. When packaging, the corresponding arguments can be passed to configure your app.
+Some specific options are provided. When packaging, corresponding parameters can be passed to achieve customized effects.
 
 #### [name]
 
-The name of your application. We will prompt you to enter this if you do not provide it in this phase. Input must be in English.
+The application name, if not specified when entering, will prompt you to enter, input must be English.
 
 ```shell
 --name <value>
-# or
--n <value>
 ```
 
 #### [icon]
 
-The application icon. Supports local and remote files. By default, it is the brand icon of Pake. For customizing the icon of your product, go to [icon icons](https://icon-icons.com) or [macOSicons](https://macosicons.com/#/) to download it.
+The application icon, support local and remote files, the default is brand icon of Pake. Customized product icon can go to [icon icons](https://icon-icons.com) Or [macOSicons](https://macosicons.com/#/) download it.
 
-- macOS must be `.icns`
+- MacOS must be `.icns`
 - Windows must be `.ico`
 - Linux must be `.png`
 
 ```shell
 --icon <path>
-# or
--i <path>
 ```
 
 #### [height]
@@ -84,8 +54,6 @@ The height of the packaged application window. The default is `780px`.
 
 ```shell
 --height <number>
-# or
--h <number>
 ```
 
 #### [width]
@@ -94,41 +62,73 @@ The width of the packaged application window. The default is `1200px`.
 
 ```shell
 --width <number>
-# or
--w <number>
 ```
 
 #### [transparent]
 
-Whether to enable the immersive header. The default is `false`. Use the command below to enable this feature.
+Whether to enable the immersive header. The default is `false`, enter the following command to enable immersive, recommended for MacOS users to enable
 
 ```shell
 --transparent
-# or
--t
-```
-
-#### [fullscreen]
-
-Indicates if the window should be full screen on application launch. The default is `false`.
-Use the command below to enable this feature.
-
-```shell
---fullscreen
-# or
--f
 ```
 
 #### [resize]
 
-Indicates if the window can be resized. The default value is `true`.
-Use the command below to disable this feature.
+Whether the size can be dragged. The default value is `true`, the window size cannot be stretched by entering the following command.
 
 ```shell
 --no-resizable
-#or
--r
 ```
+
+#### [fullscreen]
+
+Whether to open the full screen after opening the application. The default is `false`, enter the following command to automatically full screen
+
+```shell
+--fullscreen <value>
+```
+
+#### [user-agent]
+
+Custom browser user agent, default is empty.
+
+```shell
+--user-agent <value>
+```
+
+#### [show-menu]
+
+Display the menu bar, not display it by default, enter the following command and it will be displayed. MacOS users are recommended to enable.
+
+```shell
+--show-menu
+```
+
+#### [show-system-tray]
+
+Display the notification tray, not display it by default, entering the following command will display.
+
+```shell
+--show-system-tray <value>
+```
+
+#### [system-tray-icon]
+
+The notification tray icon is only valid when the notification tray is displayed. The icon must be a 512*512 pixel image in .ico or .png format.
+
+```shell
+--system-tray-icon <value>
+```
+
+
+#### [copy-iter-file]
+
+Recursive copy, when the url is a local file path, if this option is enabled, the folder where the url path file is located and all sub-files are copied to the pake static folder, which is not enabled by default
+
+```shell
+--copy-iter-file
+```
+
 
 #### [multi-arch]
 
