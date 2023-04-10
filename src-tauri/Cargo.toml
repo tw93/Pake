@@ -29,8 +29,7 @@ default = ["custom-protocol"]
 # DO NOT remove this
 custom-protocol = ["tauri/custom-protocol"]
 
-
-#Pay attention to the code size during optimization in order to generate smaller binary files.
-[profile.release]
-opt-level = "s"
-lto = true
+# Pay attention to the code size during optimization in order to generate smaller binary files.
+# [profile.release]
+# opt-level = "s"
+# lto = true
