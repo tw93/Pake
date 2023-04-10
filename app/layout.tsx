@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import '#/styles/globals.css';
+import 'remixicon/fonts/remixicon.css';
 import GlobalNav from '#/ui/global-nav';
 
 export const metadata = {
@@ -17,7 +18,6 @@ export default function RootLayout({
 }: {
   children: ReactNode;
 }) {
-  console.log(11111);
   return (
     <html lang="zh-CN" translate="no">
       <head />
