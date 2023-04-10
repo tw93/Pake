@@ -30,6 +30,7 @@ default = ["custom-protocol"]
 custom-protocol = ["tauri/custom-protocol"]
 
 
+#Pay attention to the code size during optimization in order to generate smaller binary files.
 [profile.release]
-opt-level = "z" # 或者 "s"，以优化大小
+opt-level = "s"
 lto = true
