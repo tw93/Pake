@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const absoluteUrl = hrefUrl.href;
 
       // Handling external link redirection.
-      if (window.location.host !== hrefUrl.host && (target === '_blank'|| target === '_new'))) {
+      if (window.location.host !== hrefUrl.host && (target === '_blank'|| target === '_new')) {
         e.preventDefault();
         invoke('open_browser', { url: absoluteUrl });
         return;
