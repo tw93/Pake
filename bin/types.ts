@@ -38,15 +38,9 @@ export interface PakeCliOptions {
   /** mutli arch, Supports both Intel and m1 chips, only for Mac */
   multiArch: boolean;
 
-  // 包输出产物，对linux用户有效，默认为deb，可选appimage, 或者all（即同时输出deb和all）;
-  targets: string;
-
   /** 调试模式，会输出更多日志 */
   debug: boolean;
-
-  /** mutli arch, Supports both Intel and m1 chips, only for Mac */
-  multiArch: boolean;
-
+  
   /** Select the output package format, support deb/appimage/all, only for Linux */
   targets: string,
 }
