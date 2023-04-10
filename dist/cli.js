@@ -2309,10 +2309,10 @@ class MacBuilder {
                     const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
                     const project_conf = path.join(rust_project_dir, "config");
                     fs$1.copyFile(project_cn_conf, project_conf);
-                    yield shellExec(`cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build:mac`);
+                    yield shellExec(`cd "${npmDirectory}" && npm install --registry=https://registry.npmmirror.com && npm run build:mac`);
                 }
                 else {
-                    yield shellExec(`cd ${npmDirectory} && npm install && npm run build:mac`);
+                    yield shellExec(`cd "${npmDirectory}" && npm install && npm run build:mac`);
                 }
                 dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
             }
@@ -2388,10 +2388,10 @@ class WinBuilder {
                 const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
                 const project_conf = path.join(rust_project_dir, "config");
                 fs$1.copyFile(project_cn_conf, project_conf);
-                yield shellExec(`cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build`);
+                yield shellExec(`cd "${npmDirectory}" && npm install --registry=https://registry.npmmirror.com && npm run build`);
             }
             else {
-                yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+                yield shellExec(`cd "${npmDirectory}" && npm install && npm run build`);
             }
             const language = tauriConf.tauri.bundle.windows.wix.language[0];
             const arch = process.arch;
@@ -2444,10 +2444,10 @@ class LinuxBuilder {
                 const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
                 const project_conf = path.join(rust_project_dir, "config");
                 fs$1.copyFile(project_cn_conf, project_conf);
-                yield shellExec(`cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build`);
+                yield shellExec(`cd "${npmDirectory}" && npm install --registry=https://registry.npmmirror.com && npm run build`);
             }
             else {
-                yield shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+                yield shellExec(`cd "${npmDirectory}" && npm install && npm run build`);
             }
             let arch;
             if (process.arch === "x64") {

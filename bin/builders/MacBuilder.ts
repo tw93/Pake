@@ -51,10 +51,10 @@ export default class MacBuilder implements IBuilder {
         fs.copyFile(project_cn_conf, project_conf);
 
         const _ = await shellExec(
-          `cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build:mac`
+          `cd "${npmDirectory}" && npm install --registry=https://registry.npmmirror.com && npm run build:mac`
         );
       } else {
-        const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build:mac`);
+        const _ = await shellExec(`cd "${npmDirectory}" && npm install && npm run build:mac`);
       }
       dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
     } else {
