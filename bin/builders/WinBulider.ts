@@ -57,10 +57,10 @@ export default class WinBuilder implements IBuilder {
       fs.copyFile(project_cn_conf, project_conf);
 
       const _ = await shellExec(
-        `cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build`
+        `cd "${npmDirectory}" && npm install --registry=https://registry.npmmirror.com && npm run build`
       );
     } else {
-      const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build`);
+      const _ = await shellExec(`cd "${npmDirectory}" && npm install && npm run build`);
     }
     const language = tauriConf.tauri.bundle.windows.wix.language[0];
     const arch = process.arch;
