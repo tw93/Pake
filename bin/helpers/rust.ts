@@ -21,7 +21,7 @@ export async function installRust() {
     await shellExec(IS_WIN ? RustInstallScriptForWin : RustInstallScriptFocMac);
     spinner.succeed();
   } catch (error) {
-    console.error('Error codes that occur during the Rust installation process.', error.message);
+    console.error('install rust return code', error.message);
     spinner.fail();
 
     process.exit(1);

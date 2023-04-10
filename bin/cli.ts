@@ -1,5 +1,6 @@
 import { program } from 'commander';
 import log from 'loglevel';
+import chalk from 'chalk';
 import { DEFAULT_PAKE_OPTIONS } from './defaults.js';
 import { PakeCliOptions } from './types.js';
 import { validateNumberInput, validateUrlInput } from './utils/validate.js';
@@ -8,8 +9,9 @@ import BuilderFactory from './builders/BuilderFactory.js';
 import { checkUpdateTips } from './helpers/updater.js';
 // @ts-expect-error
 import packageJson from '../package.json';
+import logger from './options/logger.js';
 
-program.version(packageJson.version).description('A command-line tool that can quickly convert a webpage into a desktop application.');
+program.version(packageJson.version).description('A cli application can package a web page to desktop application.');
 
 program
   .showHelpAfterError()
@@ -25,7 +27,7 @@ program
   .option('--show-menu', 'show menu in app', DEFAULT_PAKE_OPTIONS.showMenu)
   .option('--show-system-tray', 'show system tray in app', DEFAULT_PAKE_OPTIONS.showSystemTray)
   .option('--system-tray-icon <string>', 'custom system tray icon', DEFAULT_PAKE_OPTIONS.systemTrayIcon)
-  .option('--iter-copy-file',
+  .option('--iter-copy-file', 
           'copy all static file to pake app when url is a local file',
           DEFAULT_PAKE_OPTIONS.iterCopyFile)
   .option(
@@ -40,8 +42,7 @@ program
   )
   .option('--debug', 'debug', DEFAULT_PAKE_OPTIONS.transparent)
   .action(async (url: string, options: PakeCliOptions) => {
-
-    await checkUpdateTips();
+    checkUpdateTips();
 
     if (!url) {
       // 直接 pake 不需要出现url提示
