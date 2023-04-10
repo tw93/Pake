@@ -130,46 +130,6 @@ Use the command below to disable this feature.
 -r
 ```
 
-#### [user-agent]
-
-Custom browser user agent, default is empty.
-
-```shell
---user-agent <value>
-```
-
-#### [show-menu]
-
-Display the menu bar, not display it by default, enter the following command and it will be displayed. MacOS users are recommended to enable.
-
-```shell
---show-menu
-```
-
-#### [show-system-tray]
-
-Display the notification tray, not display it by default, entering the following command will display.
-
-```shell
---show-system-tray <value>
-```
-
-#### [system-tray-icon]
-
-The notification tray icon is only valid when the notification tray is displayed. The icon must be a 512\*512 pixel image in .ico or .png format.
-
-```shell
---system-tray-icon <value>
-```
-
-#### [copy-iter-file]
-
-Recursive copy, when the url is a local file path, if this option is enabled, the folder where the url path file is located and all sub-files are copied to the pake static folder, which is not enabled by default
-
-```shell
---copy-iter-file
-```
-
 #### [multi-arch]
 
 Package results support both Intel and m1 chips, only for MacOS. The default is `false`.

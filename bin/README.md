@@ -122,46 +122,6 @@ url 为你需要打包的网页链接 🔗 或者本地 html 文件，必须提�
 --fullscreen
 ```
 
-#### [user-agent]
-
-自定义浏览器请求头, 默认为空。
-
-```shell
---user-agent <value>
-```
-
-#### [show-menu]
-
-显示菜单栏, 默认不显示，输入下面的命令则会显示，推荐 MacOS 用户开启。
-
-```shell
---show-menu
-```
-
-#### [show-system-tray]
-
-显示通知栏托盘, 默认不显示，输入下面的命令则会显示。
-
-```shell
---show-system-tray
-```
-
-#### [system-tray-icon]
-
-通知栏托盘图标，仅当显示通知栏托盘时有效, 图标必须为.ico 或者.png 格式的，512\*512 像素的图片。
-
-```shell
---system-tray-icon <value>
-```
-
-#### [copy-iter-file]
-
-递归拷贝，当 url 为本地文件路径时候，若开启该选项，则将 url 路径文件所在文件夹以及所有子文件都拷贝到 pake 静态文件夹，默认不开启
-
-```shell
---copy-iter-file
-```
-
 #### [multi-arch]
 
 打包结果同时支持英特尔和 m1 芯片，仅适用于 MacOS，默认为 `false`。
