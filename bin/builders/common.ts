@@ -292,7 +292,7 @@ export async function mergeTauriConfig(
     pakeConfigPath,
     Buffer.from(JSON.stringify(tauriConf.pake, null, 4), 'utf-8')
   );
-  logger.info("tauri config", JSON.stringify(tauriConf.build));
+  // logger.info("tauri config", JSON.stringify(tauriConf.build));
   let tauriConf2 = JSON.parse(JSON.stringify(tauriConf));
   delete tauriConf2.pake;
   delete tauriConf2.tauri.bundle;

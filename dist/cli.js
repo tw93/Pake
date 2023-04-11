@@ -1878,7 +1878,7 @@ function mergeTauriConfig(url, options, tauriConf) {
         yield fs$1.writeFile(configPath, Buffer.from(JSON.stringify(bundleConf, null, 4), 'utf-8'));
         const pakeConfigPath = path.join(npmDirectory, 'src-tauri/pake.json');
         yield fs$1.writeFile(pakeConfigPath, Buffer.from(JSON.stringify(tauriConf.pake, null, 4), 'utf-8'));
-        logger.info("tauri config", JSON.stringify(tauriConf.build));
+        // logger.info("tauri config", JSON.stringify(tauriConf.build));
         let tauriConf2 = JSON.parse(JSON.stringify(tauriConf));
         delete tauriConf2.pake;
         delete tauriConf2.tauri.bundle;
