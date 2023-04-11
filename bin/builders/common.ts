@@ -66,6 +66,8 @@ export async function mergeTauriConfig(
 
   // logger.warn(JSON.stringify(tauriConf.pake.windows, null, 4));
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
+  tauriConf.package.productName = name;
+  tauriConf.tauri.bundle.identifier = identifier;
   // 判断一下url类型，是文件还是网站
   // 如果是文件，并且开启了递归拷贝功能，则需要将该文件以及所在文件夹下的所有文件拷贝到src目录下，否则只拷贝单个文件。
 
@@ -172,21 +174,12 @@ export async function mergeTauriConfig(
 
   // 处理targets 暂时只对linux开放
   if (process.platform === "linux") {
-    if (options.targets.length > 0) {
-      if (options.targets === "deb" || options.targets === "appimage" || options.targets === "all") {
-        tauriConf.tauri.bundle.targets = [options.targets];
-      }
-    }
-  } else {
-    tauriConf.tauri.bundle.targets = ["deb"];
-  }
-
-  tauriConf.package.productName = name;
-  tauriConf.tauri.bundle.identifier = identifier;
-
-  // 删除映射关系
-  if (process.platform === "linux") {
     delete tauriConf.tauri.bundle.deb.files;
+    if (["all", "deb", "appimage"].includes(options.targets)) {
+      tauriConf.tauri.bundle.targets = [options.targets];
+    } else {
+      logger.warn("targets must be 'all', 'deb', 'appimage', we will use default 'all'");
+    }
   }
 
   // 处理应用图标
@@ -299,7 +292,7 @@ export async function mergeTauriConfig(
     pakeConfigPath,
     Buffer.from(JSON.stringify(tauriConf.pake, null, 4), 'utf-8')
   );
-
+  logger.info("tauri config", JSON.stringify(tauriConf.build));
   let tauriConf2 = JSON.parse(JSON.stringify(tauriConf));
   delete tauriConf2.pake;
   delete tauriConf2.tauri.bundle;
