@@ -7,6 +7,7 @@ import LinuxConf from '../../src-tauri/tauri.linux.conf.json';
 let tauriConf = {
   package: CommonConf.package,
   tauri: CommonConf.tauri,
+  build: CommonConf.build,
   pake: pakeConf
 }
 switch (process.platform) {
