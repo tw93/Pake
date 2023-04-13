@@ -255,13 +255,13 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     }
 
     @media (min-width:1024px){
-      #__next .text-base.lg\\:max-w-xl {
-        max-width: 41rem;
+      #__next .text-base.lg\\:max-w-xl, #__next form.stretch.lg\\:max-w-2xl {
+        max-width: 44rem;
       }
     }
 
     @media (min-width:1280px){
-      #__next .text-base.xl\\:max-w-3xl {
+      #__next .text-base.xl\\:max-w-3xl, #__next form.stretch.xl\\:max-w-3xl {
         max-width: 48rem;
       }
     }
