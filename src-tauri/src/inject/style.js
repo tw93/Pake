@@ -254,6 +254,24 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       }
     }
 
+    @media (min-width:1024px){
+      #__next .text-base.lg\\:max-w-xl {
+        max-width: 41rem;
+      }
+    }
+
+    @media (min-width:1280px){
+      #__next .text-base.xl\\:max-w-3xl {
+        max-width: 48rem;
+      }
+    }
+
+    @media (min-width:640px){
+      #__next .sticky.top-0{
+        padding-top: 15px;
+      }
+    }
+
     #pack-top-dom:active {
       cursor: grabbing;
       cursor: -webkit-grabbing;
