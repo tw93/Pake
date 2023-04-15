@@ -11,7 +11,7 @@ on:
         required: true
         type: boolean
         default: true
-      
+
 
 jobs:
   build:
@@ -40,10 +40,10 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: install node
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
         node-version: 18
 
@@ -88,7 +88,7 @@ jobs:
       shell: pwsh
       run: |
         npm run build:all-windows
-        
+
     - name: Upload files
       # arg info: https://github.com/ncipollo/release-action#release-action
       uses: ncipollo/release-action@v1
