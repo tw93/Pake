@@ -29,15 +29,15 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: install node
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
         node-version: 18
 
     - name: Install Rust
-      uses: actions-rs/toolchain@v1
+      uses: tw93/toolchain@v1
       with:
         toolchain: ${{ matrix.rust }}
         profile: minimal

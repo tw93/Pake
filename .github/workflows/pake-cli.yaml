@@ -68,16 +68,16 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: install node
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
         node-version: 18
 
     - name: Install Rust for ubuntu-20.04
       if: inputs.platform == 'ubuntu-20.04'
-      uses: actions-rs/toolchain@v1
+      uses: tw93/toolchain@v1
       with:
         toolchain: stable
         profile: minimal
@@ -86,7 +86,7 @@ jobs:
 
     - name: Install Rust for windows-latest
       if: inputs.platform == 'windows-latest'
-      uses: actions-rs/toolchain@v1
+      uses: tw93/toolchain@v1
       with:
         toolchain: stable-x86_64-msvc
         profile: minimal
@@ -95,7 +95,7 @@ jobs:
 
     - name: Install Rust for macos-latest
       if: inputs.platform == 'macos-latest'
-      uses: actions-rs/toolchain@v1
+      uses: tw93/toolchain@v1
       with:
         toolchain: stable
         profile: minimal
