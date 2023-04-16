@@ -48,7 +48,7 @@ jobs:
         node-version: 18
 
     - name: Install Rust
-      uses: actions-rs/toolchain@v1
+      uses: tw93/toolchain@v1
       with:
         toolchain: ${{ matrix.rust }}
         profile: minimal
