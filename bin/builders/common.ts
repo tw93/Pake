@@ -103,7 +103,6 @@ export async function mergeTauriConfig(
   }
 
   // 处理user-agent
-  logger.warn(userAgent);
   if (userAgent.length > 0) {
      if (process.platform === "win32") {
       tauriConf.pake.user_agent.windows = userAgent;
@@ -129,7 +128,7 @@ export async function mergeTauriConfig(
      }
 
      if (process.platform === "darwin") {
-      tauriConf.pake.user_agent.macos = true;
+      tauriConf.pake.menu.macos = true;
      }
   } else {
     if (process.platform === "win32") {
@@ -141,7 +140,7 @@ export async function mergeTauriConfig(
      }
 
      if (process.platform === "darwin") {
-      tauriConf.pake.user_agent.macos = false;
+      tauriConf.pake.menu.macos = false;
      }
   }
 
