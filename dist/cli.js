@@ -1706,7 +1706,6 @@ function mergeTauriConfig(url, options, tauriConf) {
             tauriConf.pake.windows[0].url_type = "web";
         }
         // 处理user-agent
-        logger.warn(userAgent);
         if (userAgent.length > 0) {
             if (process.platform === "win32") {
                 tauriConf.pake.user_agent.windows = userAgent;
@@ -1727,7 +1726,7 @@ function mergeTauriConfig(url, options, tauriConf) {
                 tauriConf.pake.menu.linux = true;
             }
             if (process.platform === "darwin") {
-                tauriConf.pake.user_agent.macos = true;
+                tauriConf.pake.menu.macos = true;
             }
         }
         else {
@@ -1738,7 +1737,7 @@ function mergeTauriConfig(url, options, tauriConf) {
                 tauriConf.pake.menu.linux = false;
             }
             if (process.platform === "darwin") {
-                tauriConf.pake.user_agent.macos = false;
+                tauriConf.pake.menu.macos = false;
             }
         }
         // 处理托盘
@@ -2091,7 +2090,7 @@ var tauri$3 = {
 		active: false
 	},
 	systemTray: {
-		iconPath: "png/weread_512.png",
+		iconPath: "png/icon_512.png",
 		iconAsTemplate: true
 	},
 	allowlist: {
@@ -2107,7 +2106,7 @@ var build = {
 };
 var CommonConf = {
 	"package": {
-	productName: "WeRead",
+	productName: "baidu",
 	version: "1.0.0"
 },
 	tauri: tauri$3,
@@ -2116,8 +2115,8 @@ var CommonConf = {
 
 var windows = [
 	{
-		url: "https://weread.qq.com/",
-		transparent: true,
+		url: "https://www.baidu.com",
+		transparent: false,
 		fullscreen: false,
 		width: 1200,
 		height: 780,
@@ -2131,7 +2130,7 @@ var user_agent = {
 	windows: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
 };
 var menu = {
-	macos: true,
+	macos: false,
 	linux: false,
 	windows: false
 };
@@ -2187,9 +2186,9 @@ var WinConf = {
 var tauri$1 = {
 	bundle: {
 		icon: [
-			"icons/weread.icns"
+			"/Users/hfy/Documents/electron_s/Pake/src-tauri/icons/icon.icns"
 		],
-		identifier: "com.tw93.weread",
+		identifier: "pake-f9751d",
 		active: true,
 		category: "DeveloperTool",
 		copyright: "",
