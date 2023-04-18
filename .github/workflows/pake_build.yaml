@@ -37,7 +37,7 @@ jobs:
         node-version: 18
 
     - name: Install Rust
-      uses: tw93/toolchain@master
+      uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: ${{ matrix.rust }}
         profile: minimal

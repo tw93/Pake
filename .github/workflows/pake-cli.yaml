@@ -77,7 +77,7 @@ jobs:
 
     - name: Install Rust for ubuntu-20.04
       if: inputs.platform == 'ubuntu-20.04'
-      uses: tw93/toolchain@master
+      uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: stable
         profile: minimal
@@ -86,7 +86,7 @@ jobs:
 
     - name: Install Rust for windows-latest
       if: inputs.platform == 'windows-latest'
-      uses: tw93/toolchain@master
+      uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: stable-x86_64-msvc
         profile: minimal
@@ -95,7 +95,7 @@ jobs:
 
     - name: Install Rust for macos-latest
       if: inputs.platform == 'macos-latest'
-      uses: tw93/toolchain@master
+      uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: stable
         profile: minimal
