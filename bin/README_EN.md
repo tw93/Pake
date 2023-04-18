@@ -104,8 +104,6 @@ Whether to enable the immersive header. The default is `false`. Use the command 
 
 ```shell
 --transparent
-# or
--t
 ```
 
 #### [fullscreen]
@@ -115,8 +113,6 @@ Use the command below to enable this feature.
 
 ```shell
 --fullscreen
-# or
--f
 ```
 
 #### [resize]

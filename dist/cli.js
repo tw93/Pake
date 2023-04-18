@@ -2090,7 +2090,7 @@ var tauri$3 = {
 		active: false
 	},
 	systemTray: {
-		iconPath: "png/icon_512.png",
+		iconPath: "png/weread_512.png",
 		iconAsTemplate: true
 	},
 	allowlist: {
@@ -2106,7 +2106,7 @@ var build = {
 };
 var CommonConf = {
 	"package": {
-	productName: "baidu",
+	productName: "WeRead",
 	version: "1.0.0"
 },
 	tauri: tauri$3,
@@ -2115,8 +2115,8 @@ var CommonConf = {
 
 var windows = [
 	{
-		url: "https://www.baidu.com",
-		transparent: false,
+		url: "https://weread.qq.com/",
+		transparent: true,
 		fullscreen: false,
 		width: 1200,
 		height: 780,
@@ -2130,7 +2130,7 @@ var user_agent = {
 	windows: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
 };
 var menu = {
-	macos: false,
+	macos: true,
 	linux: false,
 	windows: false
 };
@@ -2186,9 +2186,9 @@ var WinConf = {
 var tauri$1 = {
 	bundle: {
 		icon: [
-			"/Users/hfy/Documents/electron_s/Pake/src-tauri/icons/icon.icns"
+			"icons/weread.icns"
 		],
-		identifier: "pake-f9751d",
+		identifier: "com.tw93.weread",
 		active: true,
 		category: "DeveloperTool",
 		copyright: "",
@@ -2493,7 +2493,7 @@ class BuilderFactory {
 }
 
 var name = "pake-cli";
-var version = "2.0.0-alpha5";
+var version = "2.0.0-alpha6";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
