@@ -62,6 +62,7 @@ jobs:
 
     - name: rust cache restore
       uses: actions/cache/restore@v3
+      id: cache_store
       with:
         path: |
           ~/.cargo/bin/
@@ -99,6 +100,7 @@ jobs:
 
     - name: rust cache store
       uses: actions/cache/save@v3
+      if: steps.cache_store.outputs.cache-hit != 'true'
       with:
         path: |
           ~/.cargo/bin/
