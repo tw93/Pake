@@ -80,8 +80,6 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: stable
-        profile: minimal
-        override: true
         target: x86_64-unknown-linux-musl
 
     - name: Install Rust for windows-latest
@@ -89,8 +87,6 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: stable-x86_64-msvc
-        profile: minimal
-        override: true
         target: x86_64-pc-windows-msvc
 
     - name: Install Rust for macos-latest
@@ -98,8 +94,6 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: stable
-        profile: minimal
-        override: true
         target: x86_64-apple-darwin
 
     - name: install dependencies (ubuntu only)
