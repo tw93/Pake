@@ -272,10 +272,6 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       }
     }
 
-    #__next .prose ol {
-      overflow: hidden;
-    }
-
     #__next .prose ol li p {
       margin: 0;
       display: inline;
