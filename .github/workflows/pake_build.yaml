@@ -40,8 +40,6 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: ${{ matrix.rust }}
-        profile: minimal
-        override: true
         target: ${{ matrix.target }}
 
     - name: install dependencies (ubuntu only)
