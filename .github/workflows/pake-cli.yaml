@@ -146,7 +146,7 @@ jobs:
 
     - name: rust cache store
       uses: actions/cache/save@v3
-      if: step.cache_store.outputs.cache-hit != 'true'
+      if: steps.cache_store.outputs.cache-hit != 'true'
       with:
         path: |
           ~/.cargo/bin/
