@@ -80,6 +80,11 @@ if ($IsLinux) {
   ${Params}="${Params} --show-system-tray"
 }
 
+# add menu for MacOS default
+if ($IsMacOS) {
+  ${Params}="${Params} --show-menu"
+}
+
 Write-Host "Pake parameters is: ${Params}"
 Write-Host "compile...."
 Invoke-Expression $Params
