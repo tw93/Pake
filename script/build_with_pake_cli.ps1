@@ -71,6 +71,15 @@ if (($null -ne $env:TARGETS) -and ($env:TARGETS -ne "") -and ($IsLinux)) {
   ${Params}="${Params} --targets $env:TARGETS"
 }
 
+# add systemTray for Window / Linux default
+if ($IsWindows) {
+  ${Params}="${Params} --show-system-tray"
+}
+
+if ($IsLinux) {
+  ${Params}="${Params} --show-system-tray"
+}
+
 Write-Host "Pake parameters is: ${Params}"
 Write-Host "compile...."
 Invoke-Expression $Params
