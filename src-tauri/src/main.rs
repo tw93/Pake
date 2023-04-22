@@ -55,7 +55,7 @@ pub fn run_app() {
         })
         .on_window_event(|event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event.event() {
-                event.window().minimize().unwrap();
+                event.window().close().unwrap();
                 api.prevent_close();
             }
         })
