@@ -60,6 +60,10 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       visibility: hidden;
     }
 
+    #__next > div.overflow-hidden.w-full.h-full.relative.flex > div.dark.hidden.flex-shrink-0.bg-gray-900.md\\:flex.md\\:w-\\[260px\\].md\\:flex-col > div > div > nav {
+      width: 100%;
+    }
+
     .lark > .dashboard-sidebar, .lark > .dashboard-sidebar > .sidebar-user-info , .lark > .dashboard-sidebar .index-module_wrapper_F-Wbq{
       padding-top:15px;
     }
@@ -110,8 +114,7 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     #react-root [data-testid="placementTracking"] article,
     #react-root a[href*="quick_promote_web"],
     #react-root [data-testid="AppTabBar_Explore_Link"],
-    #react-root a[href*="/lists"][role="link"][aria-label],
-    #react-root a[href="/i/bookmarks"] {
+    #react-root a[href*="/lists"][role="link"][aria-label] {
       display: none !important;
     }
 
