@@ -114,7 +114,8 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     #react-root [data-testid="placementTracking"] article,
     #react-root a[href*="quick_promote_web"],
     #react-root [data-testid="AppTabBar_Explore_Link"],
-    #react-root a[href*="/lists"][role="link"][aria-label] {
+    #react-root a[href*="/lists"][role="link"][aria-label],
+    #react-root a[href*="/i/verified-orgs-signup"][role="link"][aria-label] {
       display: none !important;
     }
 
@@ -162,6 +163,7 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       #react-root header[role="banner"] > div > div > div {
         justify-content: center !important;
         padding-top: 0;
+        overflow-x: hidden;
       }
 
       #react-root form[role="search"] > div:nth-child(1) > div {
