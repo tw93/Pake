@@ -15,9 +15,9 @@ import { fileTypeFromBuffer } from 'file-type';
 import { dir } from 'tmp-promise';
 import ora from 'ora';
 import shelljs from 'shelljs';
-import { exec } from 'child_process';
 import { promisify } from 'util';
 import dns from 'dns';
+import http from 'http';
 import updateNotifier from 'update-notifier';
 
 /******************************************************************************
@@ -2019,35 +2019,50 @@ function shellExec(command) {
     });
 }
 
+const ping = (host) => __awaiter(void 0, void 0, void 0, function* () {
+    const lookup = promisify(dns.lookup);
+    const ip = yield lookup(host);
+    const start = new Date();
+    return new Promise((resolve, reject) => {
+        const req = http.get(`http://${ip.address}`, (res) => {
+            const delay = new Date().getTime() - start.getTime();
+            res.resume();
+            resolve(delay);
+        });
+        req.on('error', (err) => {
+            reject(err);
+        });
+    });
+});
 const resolve = promisify(dns.resolve);
 function isChinaDomain(domain) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // 解析域名为IP地址
             const [ip] = yield resolve(domain);
-            return yield isChinaIP(ip);
+            return yield isChinaIP(ip, domain);
         }
         catch (error) {
             // 域名无法解析，返回false
+            logger.info(`${domain} can't be parse, is not in China!`);
             return false;
         }
     });
 }
-function isChinaIP(ip) {
+function isChinaIP(ip, domain) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
-            exec(`ping -c 1 -w 1 ${ip}`, (error, stdout, stderr) => {
-                if (error) {
-                    // 命令执行出错，返回false
-                    resolve(false);
-                }
-                else {
-                    // 解析输出信息，提取延迟值
-                    const match = stdout.match(/time=(\d+\.\d+) ms/);
-                    const latency = match ? parseFloat(match[1]) : 0;
-                    // 判断延迟是否超过100ms
-                    resolve(latency > 100);
-                }
+            // exec(`ping -c -w 1 ${ip}`, (error, stdout, stderr) => {
+            ping(ip)
+                .then((declay) => {
+                logger.info(`${domain} latency is ${declay} ms`);
+                // 判断延迟是否超过500ms
+                resolve(declay > 500);
+            })
+                .catch((error) => {
+                // 命令执行出错，返回false
+                logger.info(`ping ${domain} failed!, is not in China!`);
+                resolve(false);
             });
         });
     });
