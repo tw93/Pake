@@ -35,4 +35,5 @@ dist
 !dist/cli.js
 !dist/.gitkeep
 src-tauri/.cargo/config
+src-tauri/.cargo/
 .next

@@ -42,11 +42,15 @@ export default class MacBuilder implements IBuilder {
     await mergeTauriConfig(url, options, tauriConf);
     let dmgName: string;
     if (options.multiArch) {
-      const isChina = isChinaDomain("www.npmjs.com")
+      const isChina = await isChinaDomain("www.npmjs.com");
       if (isChina) {
-        // crates.io也顺便换源
+        logger.info("it's in China, use npm/rust cn mirror")
         const rust_project_dir = path.join(npmDirectory, 'src-tauri', ".cargo");
-        const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
+        const e1 = fs.access(rust_project_dir);
+        if (e1) {
+          await fs.mkdir(rust_project_dir, { recursive: true });
+        }
+        const project_cn_conf = path.join(npmDirectory, "src-tauri", "cn_config.bak");
         const project_conf = path.join(rust_project_dir, "config");
         fs.copyFile(project_cn_conf, project_conf);
 

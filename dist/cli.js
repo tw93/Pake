@@ -2051,36 +2051,34 @@ function isChinaDomain(domain) {
 }
 function isChinaIP(ip, domain) {
     return __awaiter(this, void 0, void 0, function* () {
-        return new Promise((resolve, reject) => {
-            // exec(`ping -c -w 1 ${ip}`, (error, stdout, stderr) => {
-            ping(ip)
-                .then((declay) => {
-                logger.info(`${domain} latency is ${declay} ms`);
-                // 判断延迟是否超过500ms
-                resolve(declay > 500);
-            })
-                .catch((error) => {
-                // 命令执行出错，返回false
-                logger.info(`ping ${domain} failed!, is not in China!`);
-                resolve(false);
-            });
-        });
+        try {
+            const delay = yield ping(ip);
+            logger.info(`${domain} latency is ${delay} ms`);
+            // 判断延迟是否超过500ms
+            return delay > 500;
+        }
+        catch (error) {
+            // 命令执行出错，返回false
+            logger.info(`ping ${domain} failed!, is not in China!`);
+            return false;
+        }
     });
 }
 
-const is_china = isChinaDomain("sh.rustup.rs");
-let RustInstallScriptFocMac = "";
-if (is_china) {
-    RustInstallScriptFocMac =
-        'export RUSTUP_DIST_SERVER="https://rsproxy.cn" && export RUSTUP_UPDATE_ROOT="https://rsproxy.cn/rustup" && curl --proto "=https" --tlsv1.2 -sSf https://rsproxy.cn/rustup-init.sh | sh';
-}
-else {
-    RustInstallScriptFocMac =
-        "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
-}
-const RustInstallScriptForWin = 'winget install --id Rustlang.Rustup';
 function installRust() {
     return __awaiter(this, void 0, void 0, function* () {
+        const is_china = yield isChinaDomain("sh.rustup.rs");
+        let RustInstallScriptFocMac = "";
+        if (is_china) {
+            logger.info("it's in China, use rust cn mirror to install rust");
+            RustInstallScriptFocMac =
+                'export RUSTUP_DIST_SERVER="https://rsproxy.cn" && export RUSTUP_UPDATE_ROOT="https://rsproxy.cn/rustup" && curl --proto "=https" --tlsv1.2 -sSf https://rsproxy.cn/rustup-init.sh | sh';
+        }
+        else {
+            RustInstallScriptFocMac =
+                "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
+        }
+        const RustInstallScriptForWin = 'winget install --id Rustlang.Rustup';
         const spinner = ora('Downloading Rust').start();
         try {
             yield shellExec(IS_WIN ? RustInstallScriptForWin : RustInstallScriptFocMac);
@@ -2313,11 +2311,15 @@ class MacBuilder {
             yield mergeTauriConfig(url, options, tauriConf);
             let dmgName;
             if (options.multiArch) {
-                const isChina = isChinaDomain("www.npmjs.com");
+                const isChina = yield isChinaDomain("www.npmjs.com");
                 if (isChina) {
-                    // crates.io也顺便换源
+                    logger.info("it's in China, use npm/rust cn mirror");
                     const rust_project_dir = path.join(npmDirectory, 'src-tauri', ".cargo");
-                    const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
+                    const e1 = fs$1.access(rust_project_dir);
+                    if (e1) {
+                        yield fs$1.mkdir(rust_project_dir, { recursive: true });
+                    }
+                    const project_cn_conf = path.join(npmDirectory, "src-tauri", "cn_config.bak");
                     const project_conf = path.join(rust_project_dir, "config");
                     fs$1.copyFile(project_cn_conf, project_conf);
                     yield shellExec(`cd "${npmDirectory}" && npm install --registry=https://registry.npmmirror.com && npm run build:mac`);
@@ -2392,11 +2394,15 @@ class WinBuilder {
             logger.debug('PakeAppOptions', options);
             const { name } = options;
             yield mergeTauriConfig(url, options, tauriConf);
-            const isChina = isChinaDomain("www.npmjs.com");
+            const isChina = yield isChinaDomain("www.npmjs.com");
             if (isChina) {
-                // crates.io也顺便换源
+                logger.info("it's in China, use npm/rust cn mirror");
                 const rust_project_dir = path.join(npmDirectory, 'src-tauri', ".cargo");
-                const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
+                const e1 = fs$1.access(rust_project_dir);
+                if (e1) {
+                    yield fs$1.mkdir(rust_project_dir, { recursive: true });
+                }
+                const project_cn_conf = path.join(npmDirectory, "src-tauri", "cn_config.bak");
                 const project_conf = path.join(rust_project_dir, "config");
                 fs$1.copyFile(project_cn_conf, project_conf);
                 yield shellExec(`cd "${npmDirectory}" && npm install --registry=https://registry.npmmirror.com && npm run build`);
@@ -2448,11 +2454,15 @@ class LinuxBuilder {
             logger.debug('PakeAppOptions', options);
             const { name } = options;
             yield mergeTauriConfig(url, options, tauriConf);
-            const isChina = isChinaDomain("www.npmjs.com");
+            const isChina = yield isChinaDomain("www.npmjs.com");
             if (isChina) {
-                // crates.io也顺便换源
+                logger.info("it's in China, use npm/rust cn mirror");
                 const rust_project_dir = path.join(npmDirectory, 'src-tauri', ".cargo");
-                const project_cn_conf = path.join(rust_project_dir, "cn_config.bak");
+                const e1 = fs$1.access(rust_project_dir);
+                if (e1) {
+                    yield fs$1.mkdir(rust_project_dir, { recursive: true });
+                }
+                const project_cn_conf = path.join(npmDirectory, "src-tauri", "cn_config.bak");
                 const project_conf = path.join(rust_project_dir, "config");
                 fs$1.copyFile(project_cn_conf, project_conf);
                 yield shellExec(`cd "${npmDirectory}" && npm install --registry=https://registry.npmmirror.com && npm run build`);
@@ -2508,7 +2518,7 @@ class BuilderFactory {
 }
 
 var name = "pake-cli";
-var version = "2.0.0-alpha7";
+var version = "2.0.0-alpha8";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"

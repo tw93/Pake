@@ -39,20 +39,16 @@ async function isChinaDomain(domain: string): Promise<boolean> {
 }
 
 async function isChinaIP(ip: string, domain: string): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    // exec(`ping -c -w 1 ${ip}`, (error, stdout, stderr) => {
-    ping(ip)
-      .then((declay)=>{
-        logger.info(`${domain} latency is ${declay} ms`);
+    try {
+        const delay = await ping(ip);
+        logger.info(`${domain} latency is ${delay} ms`);
         // 判断延迟是否超过500ms
-        resolve(declay > 500);
-      })
-      .catch((error)=>{
+        return delay > 500;
+    } catch (error) {
         // 命令执行出错，返回false
-       logger.info(`ping ${domain} failed!, is not in China!`);
-        resolve(false);
-      })
-  });
+        logger.info(`ping ${domain} failed!, is not in China!`);
+        return false;
+    }
 }
 
 export { isChinaDomain, isChinaIP };
