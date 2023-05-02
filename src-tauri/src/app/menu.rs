@@ -38,6 +38,7 @@ pub fn get_menu() -> Menu {
 pub fn menu_event_handle(event: WindowMenuEvent) {
     if event.menu_item_id() == "close" {
         event.window().minimize().expect("can't minimize window");
+        event.window().eval("toggleVideoPlayback(true);").unwrap();
     }
 
     if event.menu_item_id() == "goto_url" {
