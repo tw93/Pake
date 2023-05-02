@@ -56,7 +56,10 @@ pub fn run_app() {
         .on_window_event(|event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event.event() {
                 #[cfg(target_os = "macos")]
-                event.window().minimize().unwrap();
+                {
+                    event.window().minimize().unwrap();
+                    event.window().eval("toggleVideoPlayback(true);").unwrap();
+                }
 
                 #[cfg(not(target_os = "macos"))]
                 event.window().close().unwrap();
