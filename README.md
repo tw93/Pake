@@ -99,15 +99,15 @@
             <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x86_64.deb">Linux</a>
         </td>
-        <td>Loop
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Loop.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Loop_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Loop_x86_64.deb">Linux</a>
+        <td>Poe
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Poe.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Poe_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Poe_x86_64.deb">Linux</a>
         </td>
     </tr>
     <tr>
         <td><img src=https://gw.alipayobjects.com/zos/k/30/RoUSUf.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/ajRw5F.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/7QUfi3.png width=600/></td>
     </tr>
 </table>
 
