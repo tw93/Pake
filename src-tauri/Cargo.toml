@@ -21,6 +21,9 @@ tauri = { version = "1.2.4", features = ["api-all", "system-tray"] }
 download_rs = { version = "0.2.0", features = ["sync_download"] }
 tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "dev" }
 
+[dev-dependencies]
+cargo-bloat = "0.11.1"
+
 [features]
 # by default Tauri runs in production mode
 # when `tauri dev` runs it is executed with `cargo run --no-default-features` if `devPath` is an URL
@@ -28,11 +31,3 @@ default = ["custom-protocol"]
 # this feature is used used for production builds where `devPath` points to the filesystem
 # DO NOT remove this
 custom-protocol = ["tauri/custom-protocol"]
-
-# Pay attention to the code size during optimization in order to generate smaller binary files.
-# [profile.release]
-# panic = "abort" # Strip expensive panic clean-up logic
-# codegen-units = 1 # Compile crates one after another so the compiler can optimize better
-# lto = true # Enables link to optimizations
-# opt-level = "s" # Optimize for binary size
-# strip = true # Remove debug symbols
