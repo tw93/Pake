@@ -17,7 +17,10 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     #root > div > div.fixed.top-0.left-0.w-64.h-screen.p-10.pb-0.flex.flex-col.justify-between > div > div.space-y-4 > a:nth-child(3),
     #app > div.layout > div.main-container > div.side-bar > div,
     #app > div.layout > div.main-container > div.side-bar > li.divider,
-    #Rightbar > div:nth-child(6) > div.sidebar_compliance {
+    #Rightbar > div:nth-child(6) > div.sidebar_compliance,
+    #__next > div.PageWithSidebarLayout_centeringDiv___L9br > aside > div > div > a.ChatPageFollowTwitterLink_followLink__Gl2tt,
+    #__next > div.PageWithSidebarLayout_centeringDiv___L9br > aside > div > div > a.Button_buttonBase__0QP_m.Button_primary__pIDjn.ChatPageDownloadLinks_downloadButton__amBRh,
+    #__next > div.PageWithSidebarLayout_centeringDiv___L9br > aside > div > div > section a[href*="/contact"] {
       display: none !important;
     }
 
@@ -31,12 +34,19 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     }
 
     #page .main_header, .cb-layout-basic--navbar,
-    #app .splitpanes.splitpanes--horizontal.no-splitter header {
+    #app .splitpanes.splitpanes--horizontal.no-splitter header,
+    .fui-FluentProvider .fui-Button[data-testid="HomeButton"],
+    #__next > div.PageWithSidebarLayout_centeringDiv___L9br > aside .ChatPageSidebar_logo__9PIXq {
       padding-top: 20px;
     }
 
-    .fui-FluentProvider .fui-Button[data-testid="HomeButton"]{
-      padding-top: 20px;
+    #__next .PageWithSidebarLayout_mainSection__i1yOg {
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    #__next > div.PageWithSidebarLayout_centeringDiv___L9br > aside{
+      min-width: 260px;
     }
 
     .chakra-ui-light #app .chakra-heading,
@@ -44,7 +54,8 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     .chakra-ui-light #app .chakra-stack,
     .chakra-ui-dark #app .chakra-stack,
     .app-main .sidebar-mouse-in-out,
-    .chakra-modal__content-container .chakra-modal__header > div > div {
+    .chakra-modal__content-container .chakra-modal__header > div > div,
+    #__next > div.PageWithSidebarLayout_centeringDiv___L9br > section > header {
       padding-top: 10px;
     }
 
