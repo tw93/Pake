@@ -89,8 +89,8 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/8A3FfQ.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/EB1OYP.jpg width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/0C9lju.jpg width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/fS1lVi.jpg width=600/></td>
     </tr>
     <tr>
         <td>Flomo
