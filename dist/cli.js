@@ -2518,7 +2518,7 @@ class BuilderFactory {
 }
 
 var name = "pake-cli";
-var version = "2.0.0";
+var version = "2.0.1";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -2554,6 +2554,7 @@ var scripts = {
 	"build:mac": "npm run tauri build -- --target universal-apple-darwin",
 	"build:all-unix": "chmod +x ./script/build.sh && ./script/build.sh",
 	"build:all-windows": "pwsh ./script/build.ps1",
+	analyze: "cd src-tauri && cargo bloat --release --crates",
 	tauri: "tauri",
 	cli: "rollup -c rollup.config.js --watch",
 	"cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
