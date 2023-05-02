@@ -116,14 +116,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const absoluteUrl = hrefUrl.href;
 
       // Handling external link redirection.
-      if (window.location.host !== hrefUrl.host && (target === '_blank'|| target === '_new')) {
+      if (
+        window.location.host !== hrefUrl.host &&
+        (target === '_blank' || target === '_new')
+      ) {
         e.preventDefault();
         invoke('open_browser', { url: absoluteUrl });
         return;
       }
 
       // Process download links for Rust to handle.
-      if (/\.[a-zA-Z0-9]+$/i.test(removeUrlParameters(absoluteUrl))) {
+      if (
+        /\.[a-zA-Z0-9]+$/i.test(removeUrlParameters(absoluteUrl)) &&
+        !externalDownLoadLink()
+      ) {
         e.preventDefault();
         invoke('download_file', {
           params: {
@@ -134,8 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
-
-  setDefaultZoom();
 
   // Rewrite the window.open function.
   const originalWindowOpen = window.open;
@@ -153,6 +157,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Call the original window.open function to maintain its normal functionality.
     return originalWindowOpen.call(window, url, name, specs);
   };
+
+  // Set the default zoom, There are problems with Loop without using try-catch.
+  try {
+    setDefaultZoom();
+  } catch (e) {
+    console.log(e);
+  }
 });
 
 function setDefaultZoom() {
@@ -173,3 +184,21 @@ function removeUrlParameters(url) {
   parsedUrl.search = '';
   return parsedUrl.toString();
 }
+
+// No need to go to the download link.
+function externalDownLoadLink() {
+  return ['quickref.me'].indexOf(location.hostname) > -1;
+}
+
+// Toggle video playback when the window is hidden.
+function toggleVideoPlayback(pause) {
+  const videos = document.getElementsByTagName('video');
+  for (const video of videos) {
+    if (pause) {
+      video.pause();
+    } else {
+      video.play();
+    }
+  }
+}
+
