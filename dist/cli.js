@@ -1767,7 +1767,12 @@ function mergeTauriConfig(url, options, tauriConf) {
         if (process.platform === "linux") {
             delete tauriConf.tauri.bundle.deb.files;
             if (["all", "deb", "appimage"].includes(options.targets)) {
-                tauriConf.tauri.bundle.targets = [options.targets];
+                if (options.targets === "all") {
+                    tauriConf.tauri.bundle.targets = ["deb", "appimage"];
+                }
+                else {
+                    tauriConf.tauri.bundle.targets = [options.targets];
+                }
             }
             else {
                 logger.warn("targets must be 'all', 'deb', 'appimage', we will use default 'all'");
