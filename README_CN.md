@@ -98,6 +98,22 @@
             <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x86_64.deb">Linux</a>
         </td>
+        <td>Qwerty
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x86_64.deb">Linux</a>
+        </td>
+    </tr>
+    <tr>
+        <td><img src=https://gw.alipayobjects.com/zos/k/30/RoUSUf.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/i2eg6G.png width=600/></td>
+    </tr>
+    <tr>
+        <td>Reference
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x86_64.deb">Linux</a>
+        </td>
         <td>CodeRunner
             <a href="https://github.com/tw93/Pake/releases/latest/download/CodeRunner.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/CodeRunner_x64.msi">Windows</a>
@@ -105,14 +121,14 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://gw.alipayobjects.com/zos/k/30/RoUSUf.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/SPGMRY.png width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/fS1lVi.jpg width=600/></td>
     </tr>
 </table>
 
 <details>
 
-<summary>🏂 更多应用如 语雀 / Reference / Qwerty 可去 <a href="https://github.com/tw93/Pake/releases">Release</a>下载，<b>此外点击可展开快捷键说明</b></summary>
+<summary>🏂 更多应用可去 <a href="https://github.com/tw93/Pake/releases">Release</a>下载，<b>此外点击可展开快捷键说明</b></summary>
 
 <br/>
 

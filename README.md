@@ -99,6 +99,22 @@
             <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x86_64.deb">Linux</a>
         </td>
+        <td>Qwerty
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x86_64.deb">Linux</a>
+        </td>
+    </tr>
+    <tr>
+        <td><img src=https://gw.alipayobjects.com/zos/k/30/RoUSUf.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/i2eg6G.png width=600/></td>
+    </tr>
+    <tr>
+        <td>Reference
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x86_64.deb">Linux</a>
+        </td>
         <td>CodeRunner
             <a href="https://github.com/tw93/Pake/releases/latest/download/CodeRunner.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/CodeRunner_x64.msi">Windows</a>
@@ -106,13 +122,13 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://gw.alipayobjects.com/zos/k/30/RoUSUf.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/SPGMRY.png width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/fS1lVi.jpg width=600/></td>
     </tr>
 </table>
 
 <details>
-<summary>🏂 You can download more applications (such as YuQue / Reference / Qwerty) from <a href="https://github.com/tw93/Pake/releases">Releases</a>. <b>Click here to expand the shortcuts reference!</b></summary>
+<summary>🏂 You can download more applications from <a href="https://github.com/tw93/Pake/releases">Releases</a>. <b>Click here to expand the shortcuts reference!</b></summary>
 
 <br/>
 
