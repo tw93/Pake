@@ -23,7 +23,7 @@ pub fn fullscreen(app: AppHandle) {
     }
 }
 
-#[tauri::command]
+#[command]
 pub fn open_browser(app: AppHandle, url: String) {
     api::shell::open(&app.shell_scope(), url, None).unwrap();
 }
