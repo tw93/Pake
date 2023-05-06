@@ -33,6 +33,15 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       opacity: 1;
     }
 
+    #layout > ytmusic-nav-bar{
+      padding: 6px 16px 0 72px;
+    }
+
+    html.inactive-player::-webkit-scrollbar,
+    html.no-focus-outline::-webkit-scrollbar {
+      display: none !important;
+    }
+
     #page .main_header, .cb-layout-basic--navbar,
     #app .splitpanes.splitpanes--horizontal.no-splitter header,
     .fui-FluentProvider .fui-Button[data-testid="HomeButton"],
