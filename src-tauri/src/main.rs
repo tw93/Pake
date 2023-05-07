@@ -58,7 +58,7 @@ pub fn run_app() {
                 #[cfg(target_os = "macos")]
                 {
                     event.window().minimize().unwrap();
-                    event.window().eval("toggleVideoPlayback(true);").unwrap();
+                    // event.window().eval("toggleVideoPlayback(true);").unwrap();
                 }
 
                 #[cfg(not(target_os = "macos"))]
