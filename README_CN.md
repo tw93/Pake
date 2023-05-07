@@ -61,6 +61,22 @@
         <td><img src=https://cdn.fliggy.com/upic/7QUfi3.png width=600/></td>
     </tr>
     <tr>
+      <td>YouTube Music
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTubeMusic.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTubeMusic_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTubeMusic_x86_64.deb">Linux</a>
+      </td>
+      <td>YouTube
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x86_64.deb">Linux</a>
+      </td>
+    </tr>
+    <tr>
+        <td><img src=https://cdn.fliggy.com/upic/iz3mtQ.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/s4ZLNC.jpg width=600/></td>
+    </tr>
+    <tr>
         <td>LiZhi
             <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi_x64.msi">Windows</a>
@@ -77,42 +93,10 @@
         <td><img src=https://cdn.fliggy.com/upic/0C9lju.jpg width=600/></td>
     </tr>
     <tr>
-      <td>YouTube
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x86_64.deb">Linux</a>
-        </td>
-         <td>XiaoHongShu
-            <a href="https://github.com/tw93/Pake/releases/latest/download/XiaoHongShu.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/XiaoHongShu_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/XiaoHongShu_x86_64.deb">Linux</a>
-        </td>
-    </tr>
-    <tr>
-        <td><img src=https://cdn.fliggy.com/upic/s4ZLNC.jpg width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/sKN5Bn.png width=600/></td>
-    </tr>
-    <tr>
-        <td>Flomo
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x86_64.deb">Linux</a>
-        </td>
         <td>Qwerty
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x86_64.deb">Linux</a>
-        </td>
-    </tr>
-    <tr>
-        <td><img src=https://gw.alipayobjects.com/zos/k/30/RoUSUf.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/i2eg6G.png width=600/></td>
-    </tr>
-    <tr>
-        <td>Reference
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Reference_x86_64.deb">Linux</a>
         </td>
         <td>CodeRunner
             <a href="https://github.com/tw93/Pake/releases/latest/download/CodeRunner.dmg">Mac</a>
@@ -121,8 +105,24 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/SPGMRY.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/i2eg6G.png width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/fS1lVi.jpg width=600/></td>
+    </tr>
+        <tr>
+        <td>Flomo
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x86_64.deb">Linux</a>
+        </td>
+        <td>XiaoHongShu
+            <a href="https://github.com/tw93/Pake/releases/latest/download/XiaoHongShu.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/XiaoHongShu_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/XiaoHongShu_x86_64.deb">Linux</a>
+        </td>
+    </tr>
+    <tr>
+        <td><img src=https://gw.alipayobjects.com/zos/k/30/RoUSUf.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/yJVwyi.png width=600/></td>
     </tr>
 </table>
 
