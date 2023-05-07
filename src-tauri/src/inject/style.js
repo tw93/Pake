@@ -37,8 +37,7 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       padding: 6px 16px 0 72px;
     }
 
-    html.inactive-player::-webkit-scrollbar,
-    html.no-focus-outline::-webkit-scrollbar {
+    html::-webkit-scrollbar {
       display: none !important;
     }
 
@@ -102,7 +101,11 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     }
 
     ytd-masthead>#container.style-scope.ytd-masthead {
-      padding-top: 12px !important;
+      padding-top: 12px;
+    }
+
+    #background.ytd-masthead {
+      height: 68px;
     }
 
     .wrap.h1body-exist.max-container > div.menu-tocs > div.menu-btn{
