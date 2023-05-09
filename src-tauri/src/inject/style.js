@@ -71,12 +71,13 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       display: none;
     }
 
-    #__next .overflow-hidden>.hidden.bg-gray-900 .scrollbar-trigger{
-      padding-top: 20px;
+    #__next .overflow-hidden>.overflow-x-hidden .scrollbar-trigger > nav {
+      padding-top: 30px;
     }
 
     #__next .absolute .px-3.pt-2.pb-3.text-center {
       visibility: hidden;
+      padding-bottom: 4px;
     }
 
     #__next > div.overflow-hidden.w-full.h-full.relative.flex > div.dark.hidden.flex-shrink-0.bg-gray-900.md\\:flex.md\\:w-\\[260px\\].md\\:flex-col > div > div > nav {
@@ -294,9 +295,9 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       }
     }
 
-    @media (min-width:640px){
-      #__next .sticky.top-0{
-        padding-top: 15px;
+    @media (max-width:767px){
+      #__next .overflow-hidden.w-full .max-w-full>.sticky.top-0 {
+        padding-top: 20px;
       }
     }
 

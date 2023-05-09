@@ -57,7 +57,7 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/0khyI4.png width=600/></td>
+        <td><img src=https://gw.alipayobjects.com/zos/k/8d/klY6ae.jpg width=600/></td>
         <td><img src=https://cdn.fliggy.com/upic/7QUfi3.png width=600/></td>
     </tr>
     <tr>
