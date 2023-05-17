@@ -243,7 +243,7 @@ export async function mergeTauriConfig(
     if (icon_exists) {
       // 需要判断图标格式，默认只支持ico和png两种
       let iconExt = path.extname(systemTrayIcon).toLowerCase();
-      if (iconExt == ".png" || iconExt == ".icon") {
+      if (iconExt == ".png" || iconExt == ".ico") {
         useDefaultIcon = false;
         const trayIcoPath = path.join(npmDirectory, `src-tauri/png/${name.toLowerCase()}${iconExt}`);
         tauriConf.tauri.systemTray.iconPath = `png/${name.toLowerCase()}${iconExt}`;
