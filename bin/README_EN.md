@@ -187,7 +187,7 @@ Display the notification tray, not display it by default, entering the following
 
 #### [system-tray-icon]
 
-The notification tray icon is only valid when the notification tray is displayed. The icon must be a 512*512 pixel image in .ico or .png format.
+The notification tray icon is only valid when the notification tray is displayed. The icon must be a 32x32~256x256 pixel image in .ico or .png format.
 
 ```shell
 --system-tray-icon <value>
