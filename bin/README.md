@@ -183,7 +183,7 @@ rustup target add x86_64-apple-darwin
 
 #### [system-tray-icon]
 
-通知栏托盘图标，仅当显示通知栏托盘时有效, 图标必须为.ico或者.png格式的，512*512像素的图片。
+通知栏托盘图标，仅当显示通知栏托盘时有效, 图标必须为.ico或者.png格式的，32x32~256*256像素的图片。
 
 ```shell
 --system-tray-icon <value>
