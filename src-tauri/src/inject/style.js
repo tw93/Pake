@@ -84,6 +84,19 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       width: 100%;
     }
 
+    #tabs-sidebar--tabpanel-0 > div.tw-flex.tw-items-center.tw-mb-\\[12px\\].tw-mt-\\[14px\\].tw-px-4 {
+      padding-top: 15px;
+    }
+
+    #tabs-sidebar--tabpanel-1 > div > div.tw-p-\\[16px\\].tw-flex.tw-flex-col.tw-gap-1\\.5{
+      padding-top: 30px;
+    }
+
+    #tabs-sidebar--tabpanel-2 > div > h2 {
+      padding-top: 20px;
+      height: 70px;
+    }
+
     .lark > .dashboard-sidebar, .lark > .dashboard-sidebar > .sidebar-user-info , .lark > .dashboard-sidebar .index-module_wrapper_F-Wbq{
       padding-top:15px;
     }
