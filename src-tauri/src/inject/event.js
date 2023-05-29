@@ -1,8 +1,6 @@
 const shortcuts = {
   ArrowUp: () => scrollTo(0, 0),
   ArrowDown: () => scrollTo(0, document.body.scrollHeight),
-  ArrowLeft: () => window.history.back(),
-  ArrowRight: () => window.history.forward(),
   '[': () => window.history.back(),
   ']': () => window.history.forward(),
   r: () => window.location.reload(),
