@@ -128,7 +128,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.addEventListener('click', (e) => {
+    // Prevent some special websites from executing in advance, before the click event is triggered.
+    document.addEventListener('mousedown', (e) => {
         const anchorElement = e.target.closest('a');
 
         if (anchorElement && anchorElement.href) {
