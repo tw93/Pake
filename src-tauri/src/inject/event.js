@@ -127,16 +127,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      let filename = anchorElement.download ? anchorElement.download : getFilenameFromUrl(absoluteUrl)
       // Process download links for Rust to handle.
-      if (
-        /\.[a-zA-Z0-9]+$/i.test(removeUrlParameters(absoluteUrl)) &&
-        !externalDownLoadLink()
+      if ((anchorElement.download /* download attribute */ || e.metaKey /* Click anchor with meta key pressed could download any kind of resource. */)
+        && !externalDownLoadLink()
       ) {
         e.preventDefault();
         invoke('download_file', {
           params: {
             url: absoluteUrl,
-            filename: getFilenameFromUrl(absoluteUrl),
+            filename,
           },
         });
       }
