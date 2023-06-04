@@ -57,6 +57,11 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       min-width: 260px;
     }
 
+    #__next > div.overflow-hidden.w-full.h-full.relative.flex.z-0 > div.relative.flex.h-full.max-w-full.flex-1.overflow-hidden > div > main > div.absolute.left-2.top-2.z-10.hidden.md\\:inline-block{
+      margin-top:20px;
+      margin-left: 10px;
+    } 
+    
     .chakra-ui-light #app .chakra-heading,
     .chakra-ui-dark #app .chakra-heading,
     .chakra-ui-light #app .chakra-stack,
