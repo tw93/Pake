@@ -26,6 +26,7 @@ pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Wind
         .resizable(window_config.resizable)
         .fullscreen(window_config.fullscreen)
         .inner_size(window_config.width, window_config.height)
+        .disable_file_drop_handler() //Very annoying, otherwise dragging files to the window will not work.
         .initialization_script(include_str!("../inject/style.js"))
         .initialization_script(include_str!("../inject/event.js"))
         .initialization_script(include_str!("../inject/component.js"));

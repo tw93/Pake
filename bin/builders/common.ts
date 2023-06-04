@@ -92,9 +92,9 @@ export async function mergeTauriConfig(
       const cli_path = path.join(new_dir, "cli.js")
       const cli_path_target = path.join(old_dir, "cli.js")
       const about_pake_path = path.join(new_dir, "about_pake.html");
-      const about_patk_path_target = path.join(old_dir, "about_pake.html")
+      const about_pake_path_target = path.join(old_dir, "about_pake.html")
       fs.copyFile(cli_path, cli_path_target);
-      fs.copyFile(about_pake_path, about_patk_path_target);
+      fs.copyFile(about_pake_path, about_pake_path_target);
     }
     tauriConf.pake.windows[0].url = file_name;
     tauriConf.pake.windows[0].url_type = "local";
