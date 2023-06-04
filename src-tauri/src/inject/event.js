@@ -1,8 +1,10 @@
 const shortcuts = {
   ArrowUp: () => scrollTo(0, 0),
   ArrowDown: () => scrollTo(0, document.body.scrollHeight),
-  ArrowLeft: () => window.history.back(),
-  ArrowRight: () => window.history.forward(),
+  // Don't use command + ArrowLeft or command + ArrowRight
+  // When editing text in page, it causes unintended page navigation.
+  // ArrowLeft: () => window.history.back(),
+  // ArrowRight: () => window.history.forward(),
   '[': () => window.history.back(),
   ']': () => window.history.forward(),
   r: () => window.location.reload(),
@@ -125,16 +127,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      let filename = anchorElement.download ? anchorElement.download : getFilenameFromUrl(absoluteUrl)
       // Process download links for Rust to handle.
-      if (
-        /\.[a-zA-Z0-9]+$/i.test(removeUrlParameters(absoluteUrl)) &&
-        !externalDownLoadLink()
+      if ((anchorElement.download /* download attribute */ || e.metaKey /* Click anchor with meta key pressed could download any kind of resource. */)
+        && !externalDownLoadLink()
       ) {
         e.preventDefault();
         invoke('download_file', {
           params: {
             url: absoluteUrl,
-            filename: getFilenameFromUrl(absoluteUrl),
+            filename,
           },
         });
       }
