@@ -153,10 +153,12 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       margin-top:24px;
     }
 
+
     #react-root [data-testid="placementTracking"] article,
     #react-root a[href*="quick_promote_web"],
     #react-root [data-testid="AppTabBar_Explore_Link"],
     #react-root a[href*="/lists"][role="link"][aria-label],
+    #react-root a[href*="/i/communitynotes"][role="link"][aria-label],
     #react-root a[href*="/i/verified-orgs-signup"][role="link"][aria-label] {
       display: none !important;
     }
