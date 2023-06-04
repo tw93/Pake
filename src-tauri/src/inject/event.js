@@ -129,7 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       let filename = anchorElement.download ? anchorElement.download : getFilenameFromUrl(absoluteUrl)
       // Process download links for Rust to handle.
-      if ((anchorElement.download /* download attribute */ || e.metaKey /* Click anchor with meta key pressed could download any kind of resource. */)
+      // If the download attribute is set, the download attribute is used as the file name.
+      if ((anchorElement.download || e.metaKey || e.ctrlKey)
         && !externalDownLoadLink()
       ) {
         e.preventDefault();
