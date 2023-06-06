@@ -9,6 +9,7 @@ import path from 'path';
 import fs$1 from 'fs/promises';
 import fs2 from 'fs-extra';
 import chalk from 'chalk';
+import URL from 'node:url';
 import crypto from 'crypto';
 import axios from 'axios';
 import { fileTypeFromBuffer } from 'file-type';
@@ -1639,6 +1640,10 @@ function promptText(message, initial) {
         return response.content;
     });
 }
+function setSecurityConfigWithUrl(tauriConfig, url) {
+    const { hostname } = URL.parse(url);
+    tauriConfig.tauri.security.dangerousRemoteDomainIpcAccess[0].domain = hostname;
+}
 function mergeTauriConfig(url, options, tauriConf) {
     return __awaiter(this, void 0, void 0, function* () {
         const { width, height, fullscreen, transparent, resizable, userAgent, showMenu, showSystemTray, systemTrayIcon, iterCopyFile, identifier, name, } = options;
@@ -1862,6 +1867,8 @@ function mergeTauriConfig(url, options, tauriConf) {
                 tauriConf.tauri.systemTray.iconPath = "png/icon_512.png";
             }
         }
+        // 设置安全调用 window.__TAURI__ 的安全域名为设置的应用域名
+        setSecurityConfigWithUrl(tauriConf, url);
         // 保存配置文件
         let configPath = "";
         switch (process.platform) {
@@ -2102,17 +2109,32 @@ function checkRustInstalled() {
 
 var tauri$3 = {
 	security: {
-		csp: null
+		csp: null,
+		dangerousRemoteDomainIpcAccess: [
+			{
+				domain: "weread.qq.com",
+				windows: [
+					"pake"
+				],
+				enableTauriAPI: true
+			}
+		]
 	},
 	updater: {
 		active: false
 	},
 	systemTray: {
-		iconPath: "png/weread_512.png",
+		iconPath: "png/icon_512.png",
 		iconAsTemplate: true
 	},
 	allowlist: {
-		all: true
+		all: true,
+		fs: {
+			all: true,
+			scope: [
+				"$DOWNLOAD/*"
+			]
+		}
 	}
 };
 var build = {
