@@ -128,42 +128,58 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    const detectAnchorElementClick = (e) => {
+      const anchorElement = e.target.closest('a');
+
+      if (anchorElement && anchorElement.href) {
+          const target = anchorElement.target;
+          anchorElement.target = '_self';
+          const hrefUrl = new URL(anchorElement.href);
+          const absoluteUrl = hrefUrl.href;
+          if (absoluteUrl.includes('blob:')) {
+            // convert blob url to binary file
+            converBlobUrlToBinary(absoluteUrl).then(binary => {
+              const tarui = window.__TAURI__;
+              tarui.fs.writeBinaryFile(anchorElement.download, binary, {
+                dir: tarui.fs.BaseDirectory.Download,
+              });
+    
+            })
+            return;
+          }
+
+          // Handling external link redirection.
+          if (
+              window.location.host !== hrefUrl.host &&
+              (target === '_blank' || target === '_new')
+          ) {
+              e.preventDefault();
+              invoke('open_browser', {url: absoluteUrl});
+              return;
+          }
+
+          let filename = anchorElement.download ? anchorElement.download : getFilenameFromUrl(absoluteUrl)
+          // Process download links for Rust to handle.
+          // If the download attribute is set, the download attribute is used as the file name.
+          if ((anchorElement.download || e.metaKey || e.ctrlKey || isDownloadLink(absoluteUrl))
+              && !externalDownLoadLink()
+          ) {
+              e.preventDefault();
+              invoke('download_file', {
+                  params: {
+                      url: absoluteUrl,
+                      filename,
+                  },
+              });
+          }
+      }
+  };
+
     // Prevent some special websites from executing in advance, before the click event is triggered.
-    document.addEventListener('mousedown', (e) => {
-        const anchorElement = e.target.closest('a');
+    document.addEventListener('mousedown', detectAnchorElementClick);
+    document.addEventListener('click', detectAnchorElementClick);
 
-        if (anchorElement && anchorElement.href) {
-            const target = anchorElement.target;
-            anchorElement.target = '_self';
-            const hrefUrl = new URL(anchorElement.href);
-            const absoluteUrl = hrefUrl.href;
-
-            // Handling external link redirection.
-            if (
-                window.location.host !== hrefUrl.host &&
-                (target === '_blank' || target === '_new')
-            ) {
-                e.preventDefault();
-                invoke('open_browser', {url: absoluteUrl});
-                return;
-            }
-
-            let filename = anchorElement.download ? anchorElement.download : getFilenameFromUrl(absoluteUrl)
-            // Process download links for Rust to handle.
-            // If the download attribute is set, the download attribute is used as the file name.
-            if ((anchorElement.download || e.metaKey || e.ctrlKey || isDownloadLink(absoluteUrl))
-                && !externalDownLoadLink()
-            ) {
-                e.preventDefault();
-                invoke('download_file', {
-                    params: {
-                        url: absoluteUrl,
-                        filename,
-                    },
-                });
-            }
-        }
-    });
+    collectUrlToBlobs();
 
     // Rewrite the window.open function.
     const originalWindowOpen = window.open;
@@ -222,3 +238,27 @@ function toggleVideoPlayback(pause) {
     }
 }
 
+// Collect blob urls to blob by overriding window.URL.createObjectURL
+function collectUrlToBlobs() {
+  const backupCreateObjectURL = window.URL.createObjectURL;
+  window.blobToUrlCaches = new Map();
+  window.URL.createObjectURL = (blob) => {
+    const url = backupCreateObjectURL.call(window.URL, blob);
+    window.blobToUrlCaches.set(url, blob);
+    return url;
+  }  
+}
+
+
+function converBlobUrlToBinary(blobUrl) {
+  return new Promise((resolve) => {
+    const blob = window.blobToUrlCaches.get(blobUrl);
+    const reader = new FileReader();
+    
+    reader.readAsArrayBuffer(blob);
+    reader.onload = () => {
+      resolve(reader.result);
+    };
+  })
+  
+}
