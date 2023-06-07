@@ -7,7 +7,7 @@ mod app;
 mod util;
 
 use app::{invoke, menu, window};
-use invoke::{download_file, drag_window, fullscreen, open_browser};
+use invoke::download_file;
 use menu::{get_menu, menu_event_handle};
 use tauri_plugin_window_state::Builder as windowStatePlugin;
 use util::{get_data_dir, get_pake_config};
@@ -41,12 +41,7 @@ pub fn run_app() {
 
     tauri_app
         .plugin(windowStatePlugin::default().build())
-        .invoke_handler(tauri::generate_handler![
-            drag_window,
-            fullscreen,
-            open_browser,
-            download_file
-        ])
+        .invoke_handler(tauri::generate_handler![download_file])
         .setup(|app| {
             let _window = get_window(app, pake_config, data_dir);
             // Prevent initial shaking

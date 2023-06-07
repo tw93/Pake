@@ -1,5 +1,5 @@
 import { PakeAppOptions } from '@/types.js';
-import prompts, { override } from 'prompts';
+import prompts from 'prompts';
 import path from 'path';
 import fs from 'fs/promises';
 import fs2 from 'fs-extra';
@@ -7,7 +7,6 @@ import {TauriConfig} from 'tauri/src/types';
 
 import { npmDirectory } from '@/utils/dir.js';
 import logger from '@/options/logger.js';
-import URL from 'node:url';
 
 type DangerousRemoteDomainIpAccess = {
   domain: string;
@@ -38,7 +37,8 @@ export async function promptText(message: string, initial?: string) {
 }
 
 function setSecurityConfigWithUrl(tauriConfig: NextTauriConfig, url: string) {
-  const {hostname} = URL.parse(url);
+  const myURL = new URL(url);
+  const hostname = myURL.hostname;
   tauriConfig.tauri.security.dangerousRemoteDomainIpcAccess[0].domain = hostname;
 }
 
