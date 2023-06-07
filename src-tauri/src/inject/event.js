@@ -139,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const detectAnchorElementClick = (e) => {
     const anchorElement = e.target.closest('a');
-    console.log(">>>>>>>>>",anchorElement);
     if (anchorElement && anchorElement.href) {
       const target = anchorElement.target;
       anchorElement.target = '_self';
@@ -281,7 +280,6 @@ function detectDownloadByCreateAnchor() {
               });
             });
           }
-          
           return anchorClick.bind(anchorEle);
         }
       }
