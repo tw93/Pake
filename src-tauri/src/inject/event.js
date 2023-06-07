@@ -146,16 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const hrefUrl = new URL(anchorElement.href);
       const absoluteUrl = hrefUrl.href;
 
-      // Convert blob url to binary file
-      if (absoluteUrl.includes('blob:')) {
-        convertBlobUrlToBinary(absoluteUrl).then((binary) => {
-          tauri.fs.writeBinaryFile(anchorElement.download, binary, {
-            dir: tauri.fs.BaseDirectory.Download,
-          });
-        });
-        return;
-      }
-
       // Handling external link redirection.
       if (
         window.location.host !== hrefUrl.host &&
@@ -166,9 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      let filename = anchorElement.download
-        ? anchorElement.download
-        : getFilenameFromUrl(absoluteUrl);
+      let filename = anchorElement.download || getFilenameFromUrl(absoluteUrl);
       // Process download links for Rust to handle.
       // If the download attribute is set, the download attribute is used as the file name.
       if (
@@ -193,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', detectAnchorElementClick, true);
 
   collectUrlToBlobs();
+  detectDownloadByCreateAnchor();
 
   // Rewrite the window.open function.
   const originalWindowOpen = window.open;
@@ -271,4 +260,31 @@ function convertBlobUrlToBinary(blobUrl) {
       resolve(reader.result);
     };
   });
+}
+
+// detect blob download by createElement("a")
+function detectDownloadByCreateAnchor() {
+  const createEle = document.createElement;
+  document.createElement = (el) => {
+    if (el !== "a") return createEle.call(document, el);
+    const anchorEle = createEle.call(document, el);
+    const anchorClick = anchorEle.click;
+
+    Object.defineProperties(anchorEle, {
+      click: {
+        get: () => {
+          if (anchorEle.href && anchorEle.href.includes('blob:')) {
+            const url = anchorEle.href;
+            convertBlobUrlToBinary(url).then((binary) => {
+              tauri.fs.writeBinaryFile(anchorEle.download || getFilenameFromUrl(url), binary, {
+                dir: tauri.fs.BaseDirectory.Download,
+              });
+            });
+          }
+          
+          return anchorClick.bind(anchorEle);
+        }
+      }
+    })
+  }
 }
