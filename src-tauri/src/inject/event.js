@@ -130,20 +130,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const detectAnchorElementClick = (e) => {
       const anchorElement = e.target.closest('a');
-
       if (anchorElement && anchorElement.href) {
           const target = anchorElement.target;
           anchorElement.target = '_self';
           const hrefUrl = new URL(anchorElement.href);
           const absoluteUrl = hrefUrl.href;
+
+          // Convert blob url to binary file
           if (absoluteUrl.includes('blob:')) {
-            // convert blob url to binary file
-            converBlobUrlToBinary(absoluteUrl).then(binary => {
-              const tarui = window.__TAURI__;
-              tarui.fs.writeBinaryFile(anchorElement.download, binary, {
-                dir: tarui.fs.BaseDirectory.Download,
+            convertBlobUrlToBinary(absoluteUrl).then(binary => {
+              const tauri = window.__TAURI__;
+              tauri.fs.writeBinaryFile(anchorElement.download, binary, {
+                dir: tauri.fs.BaseDirectory.Download,
               });
-    
             })
             return;
           }
@@ -177,7 +176,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Prevent some special websites from executing in advance, before the click event is triggered.
     document.addEventListener('mousedown', detectAnchorElementClick);
-    document.addEventListener('click', detectAnchorElementClick);
 
     collectUrlToBlobs();
 
@@ -246,19 +244,19 @@ function collectUrlToBlobs() {
     const url = backupCreateObjectURL.call(window.URL, blob);
     window.blobToUrlCaches.set(url, blob);
     return url;
-  }  
+  }
 }
 
 
-function converBlobUrlToBinary(blobUrl) {
+function convertBlobUrlToBinary(blobUrl) {
   return new Promise((resolve) => {
     const blob = window.blobToUrlCaches.get(blobUrl);
     const reader = new FileReader();
-    
+
     reader.readAsArrayBuffer(blob);
     reader.onload = () => {
       resolve(reader.result);
     };
   })
-  
+
 }

@@ -75,6 +75,12 @@ document.addEventListener('DOMContentLoaded', () => {
     background: #fff;
     color: #11182B;
   }
+
+  #pakeUrlInput {
+    min-width: 320px;
+    text-align: left;
+    min-height: 30px;
+  }
   `;
 
   const modalDiv = document.createElement('div');
