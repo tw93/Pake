@@ -3,9 +3,28 @@ import prompts, { override } from 'prompts';
 import path from 'path';
 import fs from 'fs/promises';
 import fs2 from 'fs-extra';
+import {TauriConfig} from 'tauri/src/types';
+
 import { npmDirectory } from '@/utils/dir.js';
 import logger from '@/options/logger.js';
 import URL from 'node:url';
+
+type DangerousRemoteDomainIpAccess = {
+  domain: string;
+  windows: string[];
+  enableTauriAPI: boolean;
+  schema?: string;
+  plugins?: string[];
+}
+
+// https://tauri.app/v1/api/config/#remotedomainaccessscope
+type NextTauriConfig = TauriConfig & {
+  tauri: {
+    security: {
+      dangerousRemoteDomainIpcAccess?: DangerousRemoteDomainIpAccess[]
+    }
+  }
+}
 
 
 export async function promptText(message: string, initial?: string) {
@@ -18,7 +37,7 @@ export async function promptText(message: string, initial?: string) {
   return response.content;
 }
 
-function setSecurityConfigWithUrl(tauriConfig: any, url: string) {
+function setSecurityConfigWithUrl(tauriConfig: NextTauriConfig, url: string) {
   const {hostname} = URL.parse(url);
   tauriConfig.tauri.security.dangerousRemoteDomainIpcAccess[0].domain = hostname;
 }
