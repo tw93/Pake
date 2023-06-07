@@ -41,6 +41,14 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       display: none !important;
     }
 
+    #__next header.HeaderBar_header__jn5ju{
+      padding-top: 16px;
+    }
+
+    #__next .ChatPageSidebar_menuFooter__E1KTY,#__next > div.PageWithSidebarLayout_centeringDiv___L9br > div > aside > div > menu > section:nth-child(6) {
+      display: none;
+    }
+
     #page .main_header, .cb-layout-basic--navbar,
     #app .splitpanes.splitpanes--horizontal.no-splitter header,
     .fui-FluentProvider .fui-Button[data-testid="HomeButton"],
@@ -60,8 +68,8 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     #__next > div.overflow-hidden.w-full.h-full.relative.flex.z-0 > div.relative.flex.h-full.max-w-full.flex-1.overflow-hidden > div > main > div.absolute.left-2.top-2.z-10.hidden.md\\:inline-block{
       margin-top:20px;
       margin-left: 10px;
-    } 
-    
+    }
+
     .chakra-ui-light #app .chakra-heading,
     .chakra-ui-dark #app .chakra-heading,
     .chakra-ui-light #app .chakra-stack,
