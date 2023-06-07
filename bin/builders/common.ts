@@ -3,8 +3,28 @@ import prompts, { override } from 'prompts';
 import path from 'path';
 import fs from 'fs/promises';
 import fs2 from 'fs-extra';
+import {TauriConfig} from 'tauri/src/types';
+
 import { npmDirectory } from '@/utils/dir.js';
 import logger from '@/options/logger.js';
+import URL from 'node:url';
+
+type DangerousRemoteDomainIpAccess = {
+  domain: string;
+  windows: string[];
+  enableTauriAPI: boolean;
+  schema?: string;
+  plugins?: string[];
+}
+
+// https://tauri.app/v1/api/config/#remotedomainaccessscope
+type NextTauriConfig = TauriConfig & {
+  tauri: {
+    security: {
+      dangerousRemoteDomainIpcAccess?: DangerousRemoteDomainIpAccess[]
+    }
+  }
+}
 
 
 export async function promptText(message: string, initial?: string) {
@@ -17,6 +37,10 @@ export async function promptText(message: string, initial?: string) {
   return response.content;
 }
 
+function setSecurityConfigWithUrl(tauriConfig: NextTauriConfig, url: string) {
+  const {hostname} = URL.parse(url);
+  tauriConfig.tauri.security.dangerousRemoteDomainIpcAccess[0].domain = hostname;
+}
 
 export async function mergeTauriConfig(
   url: string,
@@ -266,6 +290,9 @@ export async function mergeTauriConfig(
       tauriConf.tauri.systemTray.iconPath = "png/icon_512.png";
     }
   }
+
+  // 设置安全调用 window.__TAURI__ 的安全域名为设置的应用域名
+  setSecurityConfigWithUrl(tauriConf, url);
 
   // 保存配置文件
   let configPath = "";
