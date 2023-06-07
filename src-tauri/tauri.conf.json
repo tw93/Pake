@@ -20,7 +20,7 @@
             "active": false
         },
         "systemTray": {
-            "iconPath": "png/icon_512.png",
+            "iconPath": "png/weread_512.png",
             "iconAsTemplate": true
         },
         "allowlist": {
