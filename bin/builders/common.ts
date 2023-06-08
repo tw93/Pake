@@ -38,8 +38,12 @@ export async function promptText(message: string, initial?: string) {
 
 function setSecurityConfigWithUrl(tauriConfig: NextTauriConfig, url: string) {
   const myURL = new URL(url);
-  const hostname = myURL.hostname;
-  tauriConfig.tauri.security.dangerousRemoteDomainIpcAccess[0].domain = hostname;
+  const currentUrlConfig: DangerousRemoteDomainIpAccess = {
+    domain: myURL.hostname,
+    windows: ["pake"],
+    enableTauriAPI: true,
+  };
+  tauriConfig.tauri.security.dangerousRemoteDomainIpcAccess = [currentUrlConfig];
 }
 
 export async function mergeTauriConfig(

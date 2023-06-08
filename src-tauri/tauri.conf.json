@@ -5,16 +5,7 @@
     },
     "tauri": {
         "security": {
-            "csp": null,
-            "dangerousRemoteDomainIpcAccess": [
-                {
-                    "domain": "weread.qq.com",
-                    "windows": [
-                        "pake"
-                    ],
-                    "enableTauriAPI": true
-                }
-            ]
+            "csp": null
         },
         "updater": {
             "active": false
