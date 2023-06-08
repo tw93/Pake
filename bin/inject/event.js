@@ -264,6 +264,7 @@ function convertBlobUrlToBinary(blobUrl) {
 // detect blob download by createElement("a")
 function detectDownloadByCreateAnchor() {
   const createEle = document.createElement;
+  const tauri = window.__TAURI__;
   document.createElement = (el) => {
     if (el !== "a") return createEle.call(document, el);
     const anchorEle = createEle.call(document, el);

@@ -41,6 +41,7 @@ program
     DEFAULT_PAKE_OPTIONS.targets
   )
   .option('--debug', 'debug', DEFAULT_PAKE_OPTIONS.transparent)
+  .option('--inject [injects...]', 'inject .js or .css for this app', DEFAULT_PAKE_OPTIONS.inject)
   .action(async (url: string, options: PakeCliOptions) => {
     checkUpdateTips();
 

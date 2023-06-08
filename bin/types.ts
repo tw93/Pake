@@ -43,6 +43,9 @@ export interface PakeCliOptions {
 
   /** 调试模式，会输出更多日志 */
   debug: boolean;
+
+  /** 需要注入页面的外部脚本 */
+  inject: string[];
 }
 
 export interface PakeAppOptions extends PakeCliOptions {
