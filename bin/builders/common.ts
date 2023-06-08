@@ -7,6 +7,7 @@ import {TauriConfig} from 'tauri/src/types';
 
 import { npmDirectory } from '@/utils/dir.js';
 import logger from '@/options/logger.js';
+import combineFiles from '@/helpers/combine.js';
 
 type DangerousRemoteDomainIpAccess = {
   domain: string;
@@ -64,6 +65,7 @@ export async function mergeTauriConfig(
     iterCopyFile,
     identifier,
     name,
+    inject,
   } = options;
 
   const tauriConfWindowOptions = {
@@ -297,6 +299,27 @@ export async function mergeTauriConfig(
 
   // 设置安全调用 window.__TAURI__ 的安全域名为设置的应用域名
   setSecurityConfigWithUrl(tauriConf, url);
+
+  // 内部注入文件
+  const internalInjectScripts = [
+    path.join(npmDirectory, 'bin/inject/component.js'),
+    path.join(npmDirectory, 'bin/inject/event.js'),
+    path.join(npmDirectory, 'bin/inject/style.js'),
+  ];
+
+  let injectFiles = [...internalInjectScripts];
+  // 注入外部 js css
+  if (inject?.length > 0) {
+    if (!inject.every(item => item.endsWith('.css') || item.endsWith('.js'))) {
+      logger.error("The injected file must be in either CSS or JS format.");
+      return;
+    }
+    const files = inject.map(relativePath => path.join(process.cwd(), relativePath));
+    injectFiles = injectFiles.concat(...files);
+    tauriConf.pake.inject = files;
+  }
+  combineFiles(injectFiles);
+
 
   // 保存配置文件
   let configPath = "";
