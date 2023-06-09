@@ -284,5 +284,7 @@ function detectDownloadByCreateAnchor() {
         }
       }
     })
+
+    return anchorEle;
   }
 }
