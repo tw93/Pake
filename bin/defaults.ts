@@ -15,6 +15,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   iterCopyFile: false,
   systemTrayIcon: '',
   debug: false,
+  inject: [],
 };
 
 export const DEFAULT_APP_NAME = 'Pake';
