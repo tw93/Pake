@@ -300,14 +300,7 @@ export async function mergeTauriConfig(
   // 设置安全调用 window.__TAURI__ 的安全域名为设置的应用域名
   setSecurityConfigWithUrl(tauriConf, url);
 
-  // 内部注入文件
-  const internalInjectScripts = [
-    path.join(npmDirectory, 'bin/inject/component.js'),
-    path.join(npmDirectory, 'bin/inject/event.js'),
-    path.join(npmDirectory, 'bin/inject/style.js'),
-  ];
-
-  let injectFiles = [...internalInjectScripts];
+  let injectFiles: string[] = [];
   // 注入外部 js css
   if (inject?.length > 0) {
     if (!inject.every(item => item.endsWith('.css') || item.endsWith('.js'))) {
