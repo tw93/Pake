@@ -56,6 +56,10 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       padding-top: 20px;
     }
 
+    #__next > div.overflow-hidden.w-full.h-full  .min-h-\\[20px\\].items-start.gap-4.whitespace-pre-wrap.break-words {
+      word-break: break-all;
+    }
+
     #__next .PageWithSidebarLayout_mainSection__i1yOg {
       width: 100%;
       max-width: 1000px;
@@ -312,7 +316,8 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     }
 
     @media (min-width:1024px){
-      #__next .text-base.lg\\:max-w-xl, #__next form.stretch.lg\\:max-w-2xl {
+      #__next .text-base.lg\\:max-w-xl, #__next form.stretch.lg\\:max-w-2xl,
+      #__next > .w-full.h-full .lg\\:max-w-\\[38rem\\] {
         max-width: 44rem;
       }
     }

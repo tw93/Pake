@@ -114,17 +114,17 @@ document.addEventListener('DOMContentLoaded', () => {
   domEl.addEventListener('mousedown', (e) => {
     e.preventDefault();
     if (e.buttons === 1 && e.detail !== 2) {
-      appWindow.startDragging();
+      appWindow.startDragging().then();
     }
   });
 
   domEl.addEventListener('touchstart', () => {
-    appWindow.startDragging();
+    appWindow.startDragging().then();
   });
 
   domEl.addEventListener('dblclick', () => {
     appWindow.isFullscreen().then((fullscreen) => {
-      appWindow.setFullscreen(!fullscreen);
+      appWindow.setFullscreen(!fullscreen).then();
     });
   });
 
