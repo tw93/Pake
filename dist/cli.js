@@ -9,7 +9,6 @@ import path from 'path';
 import fs$1 from 'fs/promises';
 import fs2 from 'fs-extra';
 import chalk from 'chalk';
-import URL from 'node:url';
 import crypto from 'crypto';
 import axios from 'axios';
 import { fileTypeFromBuffer } from 'file-type';
@@ -35,6 +34,8 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
+/* global Reflect, Promise */
+
 
 function __awaiter(thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -1641,7 +1642,8 @@ function promptText(message, initial) {
     });
 }
 function setSecurityConfigWithUrl(tauriConfig, url) {
-    const { hostname } = URL.parse(url);
+    const myURL = new URL(url);
+    const hostname = myURL.hostname;
     tauriConfig.tauri.security.dangerousRemoteDomainIpcAccess[0].domain = hostname;
 }
 function mergeTauriConfig(url, options, tauriConf) {
@@ -2056,7 +2058,7 @@ function isChinaDomain(domain) {
         }
         catch (error) {
             // 域名无法解析，返回false
-            logger.info(`${domain} can't be parse, is not in China!`);
+            logger.info(`${domain} can't be parse!`);
             return false;
         }
     });
@@ -2071,7 +2073,7 @@ function isChinaIP(ip, domain) {
         }
         catch (error) {
             // 命令执行出错，返回false
-            logger.info(`ping ${domain} failed!, is not in China!`);
+            logger.info(`ping ${domain} failed!`);
             return false;
         }
     });
@@ -2124,7 +2126,7 @@ var tauri$3 = {
 		active: false
 	},
 	systemTray: {
-		iconPath: "png/icon_512.png",
+		iconPath: "png/weread_512.png",
 		iconAsTemplate: true
 	},
 	allowlist: {
@@ -2545,7 +2547,7 @@ class BuilderFactory {
 }
 
 var name = "pake-cli";
-var version = "2.0.6";
+var version = "2.0.7-beta3";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -2591,11 +2593,11 @@ var type = "module";
 var exports = "./dist/pake.js";
 var license = "MIT";
 var dependencies = {
-	"@tauri-apps/api": "^1.2.0",
-	"@tauri-apps/cli": "^1.2.3",
+	"@tauri-apps/api": "^1.4.0",
+	"@tauri-apps/cli": "1.3.1",
 	axios: "^1.1.3",
 	chalk: "^5.1.2",
-	commander: "^9.4.1",
+	commander: "^11.0.0",
 	"file-type": "^18.0.0",
 	"fs-extra": "^11.1.0",
 	"is-url": "^1.2.4",
@@ -2620,7 +2622,6 @@ var devDependencies = {
 	"@types/tmp": "^0.2.3",
 	"@types/update-notifier": "^6.0.1",
 	"app-root-path": "^3.1.0",
-	concurrently: "^7.5.0",
 	"cross-env": "^7.0.3",
 	rollup: "^3.3.0",
 	tslib: "^2.4.1",

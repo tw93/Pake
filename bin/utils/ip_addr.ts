@@ -33,7 +33,7 @@ async function isChinaDomain(domain: string): Promise<boolean> {
     return await isChinaIP(ip, domain);
   } catch (error) {
     // 域名无法解析，返回false
-    logger.info(`${domain} can't be parse, is not in China!`);
+    logger.info(`${domain} can't be parse!`);
     return false;
   }
 }
@@ -46,7 +46,7 @@ async function isChinaIP(ip: string, domain: string): Promise<boolean> {
         return delay > 500;
     } catch (error) {
         // 命令执行出错，返回false
-        logger.info(`ping ${domain} failed!, is not in China!`);
+        logger.info(`ping ${domain} failed!`);
         return false;
     }
 }

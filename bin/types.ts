@@ -48,3 +48,155 @@ export interface PakeCliOptions {
 export interface PakeAppOptions extends PakeCliOptions {
   identifier: string;
 }
+
+export interface TauriBuildConfig {
+  /**
+   * the path to the app's dist dir
+   * this path must contain your index.html file
+   */
+  distDir: string
+  /**
+   * the app's dev server URL, or the path to the directory containing an index.html to open
+   */
+  devPath: string
+  /**
+   * a shell command to run before `tauri dev` kicks in
+   */
+  beforeDevCommand?: string
+  /**
+   * a shell command to run before `tauri build` kicks in
+   */
+  beforeBuildCommand?: string
+  withGlobalTauri?: boolean
+}
+
+type DangerousRemoteDomainIpAccess = {
+  domain: string;
+  windows: string[];
+  enableTauriAPI: boolean;
+  schema?: string;
+  plugins?: string[];
+}
+
+/**
+ * Tauri configuration
+ */
+export interface TauriConfig {
+  /**
+   * build/dev configuration
+   */
+  build: TauriBuildConfig
+  /**
+   * the context of the current `tauri dev` or `tauri build`
+   */
+  ctx: {
+    /**
+     * whether we're building for production or not
+     */
+    prod?: boolean
+    /**
+     * whether we're running on the dev environment or not
+     */
+    dev?: boolean
+    /**
+     * the target of the compilation (see `rustup target list`)
+     */
+    target?: string
+    /**
+     * whether the app should be built on debug mode or not
+     */
+    debug?: boolean
+    /**
+     * defines we should exit the `tauri dev` process if a Rust code error is found
+     */
+    exitOnPanic?: boolean
+  }
+  /**
+   * tauri root configuration object
+   */
+  tauri: {
+    /**
+     * the embedded server configuration
+     */
+    embeddedServer: {
+      /**
+       * whether we should use the embedded-server or the no-server mode
+       */
+      active?: boolean
+      /**
+       * the embedded server port number or the 'random' string to generate one at runtime
+       */
+      port?: number | 'random' | undefined
+    }
+    /**
+     * tauri bundler configuration
+     */
+    bundle: {
+      /**
+       * whether we should build your app with tauri-bundler or plain `cargo build`
+       */
+      active?: boolean
+      /**
+       * the bundle targets, currently supports ["deb", "osx", "msi", "appimage", "dmg"] or "all"
+       */
+      targets?: string | string[]
+      /**
+       * the app's identifier
+       */
+      identifier: string
+      /**
+       * the app's icons
+       */
+      icon: string[]
+      /**
+       * app resources to bundle
+       * each resource is a path to a file or directory
+       * glob patterns are supported
+       */
+      resources?: string[]
+      externalBin?: string[]
+      copyright?: string
+      category?: string
+      shortDescription?: string
+      longDescription?: string
+      deb?: {
+        depends?: string[]
+        useBootstrapper?: boolean
+      }
+      osx?: {
+        frameworks?: string[]
+        minimumSystemVersion?: string
+        license?: string
+        useBootstrapper?: boolean
+      }
+      exceptionDomain?: string
+    }
+    allowlist: {
+      all: boolean
+      [index: string]: boolean
+    }
+    window: {
+      title: string
+      width?: number
+      height?: number
+      resizable?: boolean
+      fullscreen?: boolean
+    }
+    security: {
+      csp?: string,
+      dangerousRemoteDomainIpcAccess?: DangerousRemoteDomainIpAccess[]
+    }
+    inliner: {
+      active?: boolean
+    }
+  }
+  plugins?: {
+    [name: string]: {
+      [key: string]: any
+    }
+  }
+  /**
+   * Whether or not to enable verbose logging
+   */
+  verbose?: boolean
+}
