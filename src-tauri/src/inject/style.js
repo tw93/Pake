@@ -332,6 +332,20 @@ window.addEventListener('DOMContentLoaded', (_event) => {
       #__next .overflow-hidden.w-full .max-w-full>.sticky.top-0 {
         padding-top: 20px;
       }
+
+      #__next .overflow-hidden.w-full main.relative.h-full.w-full.flex-1{
+        padding-bottom: 82px;
+      }
+
+      #__next > div.overflow-hidden.w-full.h-full  main.relative.h-full.w-full.flex-1 > .flex-1.overflow-hidden .h-32.md\\:h-48.flex-shrink-0{
+        height: 0px;
+      }
+    }
+
+    @media (max-width:565px){
+      #__next .overflow-hidden.w-full main.relative.h-full.w-full.flex-1{
+        padding-bottom: 98px;
+      }
     }
 
     #__next .prose ol li p {
