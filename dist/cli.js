@@ -2547,7 +2547,7 @@ class BuilderFactory {
 }
 
 var name = "pake-cli";
-var version = "2.0.7-beta3";
+var version = "2.0.7";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
