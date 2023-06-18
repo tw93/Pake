@@ -146,4 +146,36 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.pakeToast = pakeToast;
+
+  // chatgpt supports unlimited times of GPT4-Mobile
+  if (window.location.hostname === 'chat.openai.com') {
+    const originFetch = fetch;
+    window.fetch = (url, options) => {
+      return originFetch(url, options).then(async (response) => {
+        if (url.indexOf('/backend-api/models') === -1) {
+          return response;
+        }
+        const responseClone = response.clone();
+        let res = await responseClone.json();
+        res.models = res.models.map((m) => {
+          m.tags = m.tags.filter((t) => {
+            return t !== 'mobile';
+          });
+          if (m.slug === 'gpt-4-mobile') {
+            res.categories.push({
+              browsing_model: null,
+              category: 'gpt_4',
+              code_interpreter_model: null,
+              default_model: 'gpt-4-mobile',
+              human_category_name: 'GPT-4-Mobile',
+              plugins_model: null,
+              subscription_level: 'plus',
+            });
+          }
+          return m;
+        });
+        return new Response(JSON.stringify(res), response);
+      });
+    };
+  }
 });
