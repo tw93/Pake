@@ -161,10 +161,10 @@ rustup target add x86_64-apple-darwin
 
 Select the output package format, support deb/appimage/all, if all is selected, deb and appimage will be packaged at the same time, this option only supports Linux, the default is `all`.
 
-
 #### [user-agent]
 
 Custom browser user agent, default is empty.
+
 ```shell
 --user-agent <value>
 ```
