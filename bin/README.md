@@ -189,7 +189,6 @@ rustup target add x86_64-apple-darwin
 --system-tray-icon <value>
 ```
 
-
 #### [copy-iter-file]
 
 递归拷贝，当url为本地文件路径时候，若开启该选项，则将url路径文件所在文件夹以及所有子文件都拷贝到pake静态文件夹，默认不开启
