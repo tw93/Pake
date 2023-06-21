@@ -156,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       let filename = anchorElement.download || getFilenameFromUrl(absoluteUrl);
+
       // Process download links for Rust to handle.
       // If the download attribute is set, the download attribute is used as the file name.
       if (
@@ -261,29 +262,32 @@ function convertBlobUrlToBinary(blobUrl) {
   });
 }
 
+function downloadFromBlobUrl(blobUrl, filename) {
+  const tauri = window.__TAURI__;
+  convertBlobUrlToBinary(blobUrl).then((binary) => {
+    console.log('binary', binary);
+    tauri.fs.writeBinaryFile(filename, binary, {
+      dir: tauri.fs.BaseDirectory.Download,
+    }).then(() => {
+      window.pakeToast('Download successful, saved to download directory~');
+    });
+  });
+}
+
 // detect blob download by createElement("a")
 function detectDownloadByCreateAnchor() {
   const createEle = document.createElement;
   document.createElement = (el) => {
     if (el !== "a") return createEle.call(document, el);
     const anchorEle = createEle.call(document, el);
-    const anchorClick = anchorEle.click;
 
-    Object.defineProperties(anchorEle, {
-      click: {
-        get: () => {
-          if (anchorEle.href && anchorEle.href.includes('blob:')) {
-            const url = anchorEle.href;
-            convertBlobUrlToBinary(url).then((binary) => {
-              tauri.fs.writeBinaryFile(anchorEle.download || getFilenameFromUrl(url), binary, {
-                dir: tauri.fs.BaseDirectory.Download,
-              });
-            });
-          }
-          return anchorClick.bind(anchorEle);
-        }
+    // use addEventListener to avoid overriding the original click event.
+    anchorEle.addEventListener('click', () => {
+      const url = anchorEle.href;
+      if (window.blobToUrlCaches.has(url)) {
+        downloadFromBlobUrl(url, anchorEle.download || getFilenameFromUrl(url));
       }
-    })
+    });
 
     return anchorEle;
   }
