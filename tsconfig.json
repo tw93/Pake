@@ -5,6 +5,10 @@
     "types": [
       "node"
     ],
+    "lib": [
+      "es2020",
+      "dom"
+    ],
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,

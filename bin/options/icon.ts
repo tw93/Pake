@@ -25,11 +25,10 @@ export async function handleIcon(options: PakeAppOptions) {
 
 export async function downloadIcon(iconUrl: string) {
   try {
-    const iconResponse = await axios.get(iconUrl, {
-      responseType: 'arraybuffer',
-    });
+    const iconResponse = await axios.get(iconUrl, { responseType: 'arraybuffer' });
 
     const iconData = await iconResponse.data;
+
     if (!iconData) {
       return null;
     }
@@ -42,6 +41,7 @@ export async function downloadIcon(iconUrl: string) {
     const { path: tempPath } = await dir();
     const iconPath = `${tempPath}/icon.${fileDetails.ext}`;
     await fsExtra.outputFile(iconPath, iconData);
+
     return iconPath;
   } catch (error) {
     if (error.response && error.response.status === 404) {

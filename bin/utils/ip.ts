@@ -10,7 +10,8 @@ const ping = async (host: string) => {
   const ip = await lookup(host);
   const start = new Date();
 
-  return new Promise<number>((resolve, reject) => {
+  // Prevent timeouts from affecting user experience.
+  const requestPromise = new Promise<number>((resolve, reject) => {
     const req = http.get(`http://${ip.address}`, (res) => {
       const delay = new Date().getTime() - start.getTime();
       res.resume();
@@ -21,14 +22,23 @@ const ping = async (host: string) => {
       reject(err);
     });
   });
+
+  const timeoutPromise = new Promise<number>((_, reject) => {
+    setTimeout(() => {
+      reject(new Error('Request timed out after 3 seconds'));
+    }, 3000);
+  });
+
+  return Promise.race([requestPromise, timeoutPromise]);
 };
+
 
 async function isChinaDomain(domain: string): Promise<boolean> {
   try {
     const [ip] = await resolve(domain);
     return await isChinaIP(ip, domain);
   } catch (error) {
-    logger.info(`${domain} can't be parse!`);
+    logger.debug(`${domain} can't be parse!`);
     return false;
   }
 }
@@ -36,10 +46,10 @@ async function isChinaDomain(domain: string): Promise<boolean> {
 async function isChinaIP(ip: string, domain: string): Promise<boolean> {
   try {
     const delay = await ping(ip);
-    logger.info(`${domain} latency is ${delay} ms`);
+    logger.debug(`${domain} latency is ${delay} ms`);
     return delay > 500;
   } catch (error) {
-    logger.info(`ping ${domain} failed!`);
+    logger.debug(`ping ${domain} failed!`);
     return false;
   }
 }

@@ -1,3 +1,4 @@
+import ora from 'ora';
 import log from 'loglevel';
 import { InvalidArgumentError, program } from 'commander';
 import fsExtra from 'fs-extra';
@@ -15,7 +16,6 @@ import shelljs from 'shelljs';
 import dns from 'dns';
 import http from 'http';
 import { promisify } from 'util';
-import ora from 'ora';
 import updateNotifier from 'update-notifier';
 import fs from 'fs';
 
@@ -42,10 +42,10 @@ const currentModulePath = fileURLToPath(import.meta.url);
 // Resolve the parent directory of the current module
 const npmDirectory = path.join(path.dirname(currentModulePath), '..');
 
-const { platform: platform$1 } = process;
-const IS_MAC = platform$1 === 'darwin';
-const IS_WIN = platform$1 === 'win32';
-const IS_LINUX = platform$1 === 'linux';
+const { platform: platform$2 } = process;
+const IS_MAC = platform$2 === 'darwin';
+const IS_WIN = platform$2 === 'win32';
+const IS_LINUX = platform$2 === 'linux';
 
 async function handleIcon(options) {
     if (options.icon) {
@@ -64,9 +64,7 @@ async function handleIcon(options) {
 }
 async function downloadIcon(iconUrl) {
     try {
-        const iconResponse = await axios.get(iconUrl, {
-            responseType: 'arraybuffer',
-        });
+        const iconResponse = await axios.get(iconUrl, { responseType: 'arraybuffer' });
         const iconData = await iconResponse.data;
         if (!iconData) {
             return null;
@@ -347,9 +345,9 @@ const platformConfigs = {
     darwin: MacConf,
     linux: LinuxConf
 };
-const { platform } = process;
+const { platform: platform$1 } = process;
 // @ts-ignore
-const platformConfig = platformConfigs[platform];
+const platformConfig = platformConfigs[platform$1];
 let tauriConfig = {
     tauri: {
         ...CommonConf.tauri,
@@ -378,7 +376,8 @@ const ping = async (host) => {
     const lookup = promisify(dns.lookup);
     const ip = await lookup(host);
     const start = new Date();
-    return new Promise((resolve, reject) => {
+    // Prevent timeouts from affecting user experience.
+    const requestPromise = new Promise((resolve, reject) => {
         const req = http.get(`http://${ip.address}`, (res) => {
             const delay = new Date().getTime() - start.getTime();
             res.resume();
@@ -388,6 +387,12 @@ const ping = async (host) => {
             reject(err);
         });
     });
+    const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+            reject(new Error('Request timed out after 3 seconds'));
+        }, 3000);
+    });
+    return Promise.race([requestPromise, timeoutPromise]);
 };
 async function isChinaDomain(domain) {
     try {
@@ -395,18 +400,18 @@ async function isChinaDomain(domain) {
         return await isChinaIP(ip, domain);
     }
     catch (error) {
-        logger.info(`${domain} can't be parse!`);
+        logger.debug(`${domain} can't be parse!`);
         return false;
     }
 }
 async function isChinaIP(ip, domain) {
     try {
         const delay = await ping(ip);
-        logger.info(`${domain} latency is ${delay} ms`);
+        logger.debug(`${domain} latency is ${delay} ms`);
         return delay > 500;
     }
     catch (error) {
-        logger.info(`ping ${domain} failed!`);
+        logger.debug(`ping ${domain} failed!`);
         return false;
     }
 }
@@ -457,6 +462,8 @@ class BaseBuilder {
         }
     }
     async runBuildCommand(directory, command) {
+        const spinner = ora('Building...').start();
+        setTimeout(() => spinner.succeed(), 5000);
         const isChina = await isChinaDomain("www.npmjs.com");
         if (isChina) {
             logger.info("Located in China, using npm/Rust CN mirror.");
@@ -557,19 +564,19 @@ async function mergeConfig(url, options, tauriConf) {
     const platformIconMap = {
         win32: {
             fileExt: '.ico',
-            path: `png/${name.toLowerCase()}_32.ico`,
+            path: `png/${name.toLowerCase()}_256.ico`,
             defaultIcon: 'png/icon_256.ico',
             message: 'Windows icon must be .ico and 256x256px.',
         },
         linux: {
             fileExt: '.png',
-            path: `png/${name.toLowerCase()}_32.png`,
+            path: `png/${name.toLowerCase()}_512.png`,
             defaultIcon: 'png/icon_512.png',
             message: 'Linux icon must be .png and 512x512px.',
         },
         darwin: {
             fileExt: '.icns',
-            path: `icons/${name.toLowerCase()}_32.icns`,
+            path: `icons/${name.toLowerCase()}.icns`,
             defaultIcon: 'icons/icon.icns',
             message: 'MacOS icon must be .icns type.',
         },
@@ -718,23 +725,24 @@ class LinuxBuilder extends BaseBuilder {
     }
 }
 
+const { platform } = process;
+const buildersMap = {
+    darwin: MacBuilder,
+    win32: WinBuilder,
+    linux: LinuxBuilder,
+};
 class BuilderProvider {
     static create() {
-        if (IS_MAC) {
-            return new MacBuilder();
+        const Builder = buildersMap[platform];
+        if (!Builder) {
+            throw new Error('The current system is not supported!');
         }
-        if (IS_WIN) {
-            return new WinBuilder();
-        }
-        if (IS_LINUX) {
-            return new LinuxBuilder();
-        }
-        throw new Error('The current system is not supported!');
+        return new Builder();
     }
 }
 
 var name = "pake-cli";
-var version = "2.1.0";
+var version = "2.1.1";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -907,9 +915,11 @@ program
     if (options.debug) {
         log.setLevel('debug');
     }
+    const spinner = ora('Preparing...').start();
     const builder = BuilderProvider.create();
     await builder.prepare();
     const appOptions = await handleOptions(options, url);
+    spinner.succeed();
     log.debug('PakeAppOptions', appOptions);
     await builder.build(url, appOptions);
 });
