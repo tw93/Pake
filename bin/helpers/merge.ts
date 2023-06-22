@@ -127,19 +127,19 @@ export async function mergeConfig(
   const platformIconMap: PlatformMap = {
     win32: {
       fileExt: '.ico',
-      path: `png/${name.toLowerCase()}_32.ico`,
+      path: `png/${name.toLowerCase()}_256.ico`,
       defaultIcon: 'png/icon_256.ico',
       message: 'Windows icon must be .ico and 256x256px.',
     },
     linux: {
       fileExt: '.png',
-      path: `png/${name.toLowerCase()}_32.png`,
+      path: `png/${name.toLowerCase()}_512.png`,
       defaultIcon: 'png/icon_512.png',
       message: 'Linux icon must be .png and 512x512px.',
     },
     darwin: {
       fileExt: '.icns',
-      path: `icons/${name.toLowerCase()}_32.icns`,
+      path: `icons/${name.toLowerCase()}.icns`,
       defaultIcon: 'icons/icon.icns',
       message: 'MacOS icon must be .icns type.',
     },

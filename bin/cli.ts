@@ -1,3 +1,4 @@
+import ora from "ora";
 import log from 'loglevel';
 import { program } from 'commander';
 
@@ -46,10 +47,11 @@ program
       log.setLevel('debug');
     }
 
+    const spinner = ora('Preparing...').start();
     const builder = BuilderProvider.create();
     await builder.prepare();
-
     const appOptions = await handleInputOptions(options, url);
+    spinner.succeed();
 
     log.debug('PakeAppOptions', appOptions);
 

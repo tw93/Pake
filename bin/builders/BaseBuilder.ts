@@ -1,3 +1,4 @@
+import ora from "ora";
 import path from 'path';
 import fsExtra from "fs-extra";
 import prompts from 'prompts';
@@ -39,6 +40,8 @@ export default abstract class BaseBuilder {
   }
 
   protected async runBuildCommand(directory: string, command: string) {
+    const spinner = ora('Building...').start();
+    setTimeout(() => spinner.succeed(), 5000);
     const isChina = await isChinaDomain("www.npmjs.com");
     if (isChina) {
       logger.info("Located in China, using npm/Rust CN mirror.");
