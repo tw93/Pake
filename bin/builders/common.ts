@@ -1,33 +1,13 @@
-import { PakeAppOptions,TauriConfig } from '@/types.js';
-import prompts from 'prompts';
 import path from 'path';
-import fs from 'fs/promises';
-import fs2 from 'fs-extra';
-
+import fsExtra from 'fs-extra';
 import { npmDirectory } from '@/utils/dir.js';
 import logger from '@/options/logger.js';
+import { PakeAppOptions, PlatformMap } from '@/types.js';
 
-
-export async function promptText(message: string, initial?: string) {
-  const response = await prompts({
-    type: 'text',
-    name: 'content',
-    message,
-    initial,
-  });
-  return response.content;
-}
-
-function setSecurityConfigWithUrl(tauriConfig: TauriConfig, url: string) {
-  const myURL = new URL(url);
-  const hostname = myURL.hostname;
-  tauriConfig.tauri.security.dangerousRemoteDomainIpcAccess[0].domain = hostname;
-}
-
-export async function mergeTauriConfig(
+export async function mergeConfig(
   url: string,
   options: PakeAppOptions,
-  tauriConf: any
+  tauriConf: any,
 ) {
   const {
     width,
@@ -44,6 +24,9 @@ export async function mergeTauriConfig(
     name,
   } = options;
 
+  const { platform } = process;
+
+  // Set Windows parameters.
   const tauriConfWindowOptions = {
     width,
     height,
@@ -51,267 +34,190 @@ export async function mergeTauriConfig(
     transparent,
     resizable,
   };
-  // Package name is valid ?
-  // for Linux, package name must be a-z, 0-9 or "-", not allow to A-Z and other
-  if (process.platform === "linux") {
-    const reg = new RegExp(/[0-9]*[a-z]+[0-9]*\-?[0-9]*[a-z]*[0-9]*\-?[0-9]*[a-z]*[0-9]*/);
-    if (!reg.test(name) || reg.exec(name)[0].length != name.length) {
-      logger.error("package name is illegal， it must be lowercase letters, numbers, dashes, and it must contain the lowercase letters.")
-      logger.error("E.g com-123-xxx, 123pan, pan123,weread, we-read");
-      process.exit();
-    }
-  }
-  if (process.platform === "win32" || process.platform === "darwin" ) {
-    const reg = new RegExp(/([0-9]*[a-zA-Z]+[0-9]*)+/);
-    if (!reg.test(name) || reg.exec(name)[0].length != name.length) {
-      logger.error("package name is illegal， it must be letters, numbers, and it must contain the letters")
-      logger.error("E.g 123pan,123Pan Pan123,weread, WeRead, WERead");
-      process.exit();
-    }
-  }
-
-  // logger.warn(JSON.stringify(tauriConf.pake.windows, null, 4));
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
+
+  // Determine whether the package name is valid.
+  // for Linux, package name must be a-z, 0-9 or "-", not allow to A-Z and other
+  const platformRegexMapping: PlatformMap = {
+    linux: /[0-9]*[a-z]+[0-9]*\-?[0-9]*[a-z]*[0-9]*\-?[0-9]*[a-z]*[0-9]*/,
+    default: /([0-9]*[a-zA-Z]+[0-9]*)+/,
+  };
+
+  const reg = platformRegexMapping[platform] || platformRegexMapping.default;
+  const nameCheck = reg.test(name) && reg.exec(name)[0].length === name.length;
+
+  if (!nameCheck) {
+    const errorMsg =
+      platform === 'linux'
+        ? `Package name is invalid. It should only include lowercase letters, numbers, and dashes, and must contain at least one lowercase letter.\n Examples: com-123-xxx, 123pan, pan123, weread, we-read.`
+        : `Package name is invalid. It should only include letters and numbers, and must contain at least one letter.\n Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead.`;
+
+    logger.error(errorMsg);
+    process.exit();
+  }
   tauriConf.package.productName = name;
   tauriConf.tauri.bundle.identifier = identifier;
-  // 判断一下url类型，是文件还是网站
-  // 如果是文件，并且开启了递归拷贝功能，则需要将该文件以及所在文件夹下的所有文件拷贝到src目录下，否则只拷贝单个文件。
 
-  const url_exists = await fs.stat(url)
-    .then(() => true)
-    .catch(() => false);
-  if (url_exists) {
-    logger.warn("you input may a local file");
-    tauriConf.pake.windows[0].url_type = "local";
-    const file_name = path.basename(url);
-    const dir_name = path.dirname(url);
+  // Judge the type of URL, whether it is a file or a website.
+  // If it is a file and the recursive copy function is enabled then the file and all files in its parent folder need to be copied to the "src" directory. Otherwise, only the single file will be copied.
+  const urlExists = await fsExtra.pathExists(url);
+
+  if (urlExists) {
+    logger.warn('Your input might be a local file.');
+    tauriConf.pake.windows[0].url_type = 'local';
+
+    const fileName = path.basename(url);
+    const dirName = path.dirname(url);
+
+    const distDir = path.join(npmDirectory, 'dist');
+    const distBakDir = path.join(npmDirectory, 'dist_bak');
+
     if (!iterCopyFile) {
-      const url_path = path.join(npmDirectory,"dist/", file_name);
-      await fs.copyFile(url, url_path);
+      const urlPath = path.join(distDir, fileName);
+      await fsExtra.copy(url, urlPath);
     } else {
-      const old_dir = path.join(npmDirectory,"dist/");
-      const new_dir = path.join(npmDirectory,"dist_bak/");
-      fs2.moveSync(old_dir, new_dir, {"overwrite": true});
-      fs2.copySync(dir_name, old_dir, {"overwrite": true});
-      // logger.warn("dir name", dir_name);
-      // 将dist_bak里面的cli.js和about_pake.html拷贝回去
-      const cli_path = path.join(new_dir, "cli.js")
-      const cli_path_target = path.join(old_dir, "cli.js")
-      const about_pake_path = path.join(new_dir, "about_pake.html");
-      const about_pake_path_target = path.join(old_dir, "about_pake.html")
-      fs.copyFile(cli_path, cli_path_target);
-      fs.copyFile(about_pake_path, about_pake_path_target);
+      fsExtra.moveSync(distDir, distBakDir, { overwrite: true });
+      fsExtra.copySync(dirName, distDir, { overwrite: true });
+
+      const filesToCopyBack = ['cli.js', 'about_pake.html'];
+      await Promise.all(
+        filesToCopyBack.map((file) =>
+          fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file)),
+        ),
+      );
     }
-    tauriConf.pake.windows[0].url = file_name;
-    tauriConf.pake.windows[0].url_type = "local";
+
+    tauriConf.pake.windows[0].url = fileName;
+    tauriConf.pake.windows[0].url_type = 'local';
   } else {
-    tauriConf.pake.windows[0].url_type = "web";
+    tauriConf.pake.windows[0].url_type = 'web';
+    // Set the secure domain for calling window.__TAURI__ to the application domain that has been set.
+    tauriConf.tauri.security.dangerousRemoteDomainIpcAccess[0].domain =
+      new URL(url).hostname;
   }
 
-  // 处理user-agent
+  const platformMap: PlatformMap = {
+    win32: 'windows',
+    linux: 'linux',
+    darwin: 'macos',
+  };
+  const currentPlatform = platformMap[platform];
+
   if (userAgent.length > 0) {
-     if (process.platform === "win32") {
-      tauriConf.pake.user_agent.windows = userAgent;
-     }
-
-     if (process.platform === "linux") {
-      tauriConf.pake.user_agent.linux = userAgent;
-     }
-
-     if (process.platform === "darwin") {
-      tauriConf.pake.user_agent.macos = userAgent;
-     }
+    tauriConf.pake.user_agent[currentPlatform] = userAgent;
   }
 
-  // 处理菜单栏
-  if (showMenu) {
-    if (process.platform === "win32") {
-      tauriConf.pake.menu.windows = true;
-     }
+  tauriConf.pake.menu[currentPlatform] = showMenu;
+  tauriConf.pake.system_tray[currentPlatform] = showSystemTray;
 
-     if (process.platform === "linux") {
-      tauriConf.pake.menu.linux = true;
-     }
-
-     if (process.platform === "darwin") {
-      tauriConf.pake.menu.macos = true;
-     }
-  } else {
-    if (process.platform === "win32") {
-      tauriConf.pake.menu.windows = false;
-     }
-
-     if (process.platform === "linux") {
-      tauriConf.pake.menu.linux = false;
-     }
-
-     if (process.platform === "darwin") {
-      tauriConf.pake.menu.macos = false;
-     }
-  }
-
-  // 处理托盘
-  if (showSystemTray) {
-    if (process.platform === "win32") {
-      tauriConf.pake.system_tray.windows = true;
-     }
-
-     if (process.platform === "linux") {
-      tauriConf.pake.system_tray.linux = true;
-     }
-
-     if (process.platform === "darwin") {
-      tauriConf.pake.system_tray.macos = true;
-     }
-  } else {
-    if (process.platform === "win32") {
-      tauriConf.pake.system_tray.windows = false;
-     }
-
-     if (process.platform === "linux") {
-      tauriConf.pake.system_tray.linux = false;
-     }
-
-     if (process.platform === "darwin") {
-      tauriConf.pake.system_tray.macos = false;
-     }
-  }
-
-  // 处理targets 暂时只对linux开放
-  if (process.platform === "linux") {
+  // Processing targets are currently only open to Linux.
+  if (platform === 'linux') {
     delete tauriConf.tauri.bundle.deb.files;
-    if (["all", "deb", "appimage"].includes(options.targets)) {
-      if (options.targets === "all") {
-        tauriConf.tauri.bundle.targets = ["deb", "appimage"];
-      } else {
-        tauriConf.tauri.bundle.targets = [options.targets];
-      }
+    const validTargets = ['all', 'deb', 'appimage'];
+    if (validTargets.includes(options.targets)) {
+      tauriConf.tauri.bundle.targets = options.targets === 'all' ? ['deb', 'appimage'] : [options.targets];
     } else {
-      logger.warn("targets must be 'all', 'deb', 'appimage', we will use default 'all'");
+      logger.warn(
+        `The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`,
+      );
     }
   }
 
-  // 处理应用图标
-  const exists = await fs.stat(options.icon)
-    .then(() => true)
-    .catch(() => false);
+  // Set icon.
+  const platformIconMap: PlatformMap = {
+    win32: {
+      fileExt: '.ico',
+      path: `png/${name.toLowerCase()}_32.ico`,
+      defaultIcon: 'png/icon_256.ico',
+      message: 'Windows icon must be .ico and 256x256px.',
+    },
+    linux: {
+      fileExt: '.png',
+      path: `png/${name.toLowerCase()}_32.png`,
+      defaultIcon: 'png/icon_512.png',
+      message: 'Linux icon must be .png and 512x512px.',
+    },
+    darwin: {
+      fileExt: '.icns',
+      path: `icons/${name.toLowerCase()}_32.icns`,
+      defaultIcon: 'icons/icon.icns',
+      message: 'MacOS icon must be .icns type.',
+    },
+  };
+  const iconInfo = platformIconMap[platform];
+  const exists = await fsExtra.pathExists(options.icon);
   if (exists) {
     let updateIconPath = true;
     let customIconExt = path.extname(options.icon).toLowerCase();
-    if (process.platform === "win32") {
-      if (customIconExt === ".ico") {
-        const ico_path = path.join(npmDirectory, `src-tauri/png/${name.toLowerCase()}_32.ico`);
-        tauriConf.tauri.bundle.resources = [`png/${name.toLowerCase()}_32.ico`];
-        await fs.copyFile(options.icon, ico_path);
-      } else {
-        updateIconPath = false;
-        logger.warn(`icon file in Windows must be 256 * 256 pix with .ico type, but you give ${customIconExt}`);
-        tauriConf.tauri.bundle.icon = ["png/icon_256.ico"];
-      }
-    }
-    if (process.platform === "linux") {
-      if (customIconExt != ".png") {
-        updateIconPath = false;
-        logger.warn(`icon file in Linux must be 512 * 512 pix with .png type, but you give ${customIconExt}`);
-        tauriConf.tauri.bundle.icon = ["png/icon_512.png"];
-      }
+
+    if (customIconExt !== iconInfo.fileExt) {
+      updateIconPath = false;
+      logger.warn(`${iconInfo.message}, but you give ${customIconExt}`);
+      tauriConf.tauri.bundle.icon = [iconInfo.defaultIcon];
+    } else {
+      const iconPath = path.join(npmDirectory, 'src-tauri/', iconInfo.path);
+      tauriConf.tauri.bundle.resources = [iconInfo.path];
+      await fsExtra.copy(options.icon, iconPath);
     }
 
-    if (process.platform === "darwin" && customIconExt !== ".icns") {
-        updateIconPath = false;
-        logger.warn(`icon file in MacOS must be .icns type, but you give ${customIconExt}`);
-        tauriConf.tauri.bundle.icon = ["icons/icon.icns"];
-    }
     if (updateIconPath) {
       tauriConf.tauri.bundle.icon = [options.icon];
     } else {
-      logger.warn(`icon file will not change with default.`);
+      logger.warn(`Icon will remain as default.`);
     }
   } else {
-    logger.warn("the custom icon path may not exists. we will use default icon to replace it");
-    if (process.platform === "win32") {
-        tauriConf.tauri.bundle.icon = ["png/icon_256.ico"];
-    }
-    if (process.platform === "linux") {
-        tauriConf.tauri.bundle.icon = ["png/icon_512.png"];
-    }
-    if (process.platform === "darwin") {
-        tauriConf.tauri.bundle.icon = ["icons/icon.icns"];
-    }
+    logger.warn(
+      'Custom icon path may be invalid. Default icon will be used instead.',
+    );
+    tauriConf.tauri.bundle.icon = [iconInfo.defaultIcon];
   }
 
-  // 处理托盘自定义图标
-  let useDefaultIcon = true; // 是否使用默认托盘图标
+  // Set tray icon path.
+  let trayIconPath = platform === 'darwin' ? 'png/icon_512.png' : tauriConf.tauri.bundle.icon[0];
   if (systemTrayIcon.length > 0) {
-    const icon_exists = await fs.stat(systemTrayIcon)
-    .then(() => true)
-    .catch(() => false);
-    if (icon_exists) {
+    try {
+      await fsExtra.pathExists(systemTrayIcon);
       // 需要判断图标格式，默认只支持ico和png两种
       let iconExt = path.extname(systemTrayIcon).toLowerCase();
-      if (iconExt == ".png" || iconExt == ".ico") {
-        useDefaultIcon = false;
-        const trayIcoPath = path.join(npmDirectory, `src-tauri/png/${name.toLowerCase()}${iconExt}`);
-        tauriConf.tauri.systemTray.iconPath = `png/${name.toLowerCase()}${iconExt}`;
-        await fs.copyFile(systemTrayIcon, trayIcoPath);
+      if (iconExt == '.png' || iconExt == '.ico') {
+        const trayIcoPath = path.join(
+          npmDirectory,
+          `src-tauri/png/${name.toLowerCase()}${iconExt}`,
+        );
+        trayIconPath = `png/${name.toLowerCase()}${iconExt}`;
+        await fsExtra.copy(systemTrayIcon, trayIcoPath);
       } else {
-        logger.warn(`file type for system tray icon mut be .ico or .png , but you give ${iconExt}`);
-        logger.warn(`system tray icon file will not change with default.`);
+        logger.warn(
+          `System tray icon must be .ico or .png, but you provided ${iconExt}.`,
+        );
+        logger.warn(`Default system tray icon will be used.`);
       }
-    } else {
-      logger.warn(`${systemTrayIcon} not exists!`)
-      logger.warn(`system tray icon file will not change with default.`);
+    } catch {
+      logger.warn(`${systemTrayIcon} not exists!`);
+      logger.warn(`Default system tray icon will remain unchanged.`);
     }
   }
 
-  // 处理托盘默认图标
-  if (useDefaultIcon) {
-    if (process.platform === "linux" || process.platform === "win32") {
-      tauriConf.tauri.systemTray.iconPath = tauriConf.tauri.bundle.icon[0];
-    } else {
-      tauriConf.tauri.systemTray.iconPath = "png/icon_512.png";
-    }
-  }
+  tauriConf.tauri.systemTray.iconPath = trayIconPath;
 
-  // 设置安全调用 window.__TAURI__ 的安全域名为设置的应用域名
-  setSecurityConfigWithUrl(tauriConf, url);
+  // Save config file.
+  const platformConfigPaths: PlatformMap = {
+    win32: 'src-tauri/tauri.windows.conf.json',
+    darwin: 'src-tauri/tauri.macos.conf.json',
+    linux: 'src-tauri/tauri.linux.conf.json',
+  };
+  const configPath = path.join(npmDirectory, platformConfigPaths[platform]);
 
-  // 保存配置文件
-  let configPath = "";
-  switch (process.platform) {
-    case "win32": {
-      configPath = path.join(npmDirectory, 'src-tauri/tauri.windows.conf.json');
-      break;
-    }
-    case "darwin": {
-      configPath = path.join(npmDirectory, 'src-tauri/tauri.macos.conf.json');
-      break;
-    }
-    case "linux": {
-      configPath = path.join(npmDirectory, 'src-tauri/tauri.linux.conf.json');
-      break;
-    }
-  }
+  const bundleConf = { tauri: { bundle: tauriConf.tauri.bundle } };
+  await fsExtra.writeJson(configPath, bundleConf, { spaces: 4 });
 
-  let bundleConf = {tauri: {bundle: tauriConf.tauri.bundle}};
-  await fs.writeFile(
-    configPath,
-    Buffer.from(JSON.stringify(bundleConf, null, 4), 'utf-8')
-  );
+  const pakeConfigPath = path.join(npmDirectory, 'src-tauri/pake.json');
+  await fsExtra.writeJson(pakeConfigPath, tauriConf.pake, { spaces: 4 });
 
-  const pakeConfigPath = path.join(npmDirectory, 'src-tauri/pake.json')
-  await fs.writeFile(
-    pakeConfigPath,
-    Buffer.from(JSON.stringify(tauriConf.pake, null, 4), 'utf-8')
-  );
-  // logger.info("tauri config", JSON.stringify(tauriConf.build));
+
   let tauriConf2 = JSON.parse(JSON.stringify(tauriConf));
   delete tauriConf2.pake;
   delete tauriConf2.tauri.bundle;
-
-  const configJsonPath = path.join(npmDirectory, 'src-tauri/tauri.conf.json')
-  await fs.writeFile(
-    configJsonPath,
-    Buffer.from(JSON.stringify(tauriConf2, null, 4), 'utf-8')
-  );
+  const configJsonPath = path.join(npmDirectory, 'src-tauri/tauri.conf.json');
+  await fsExtra.writeJson(configJsonPath, tauriConf2, { spaces: 4 });
 }

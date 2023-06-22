@@ -1,23 +1,25 @@
-import * as Commander from 'commander';
-import { normalizeUrl } from './url.js';
 import fs from 'fs';
+import { InvalidArgumentError } from 'commander';
+import { normalizeUrl } from './url';
 
 export function validateNumberInput(value: string) {
   const parsedValue = Number(value);
   if (isNaN(parsedValue)) {
-    throw new Commander.InvalidArgumentError('Not a number.');
+    throw new InvalidArgumentError('Not a number.');
   }
   return parsedValue;
 }
 
 export function validateUrlInput(url: string) {
-  if(!fs.existsSync(url)) {
+  const isFile = fs.existsSync(url);
+
+  if (!isFile) {
     try {
-      return normalizeUrl(url)
+      return normalizeUrl(url);
     } catch (error) {
-      throw new Commander.InvalidArgumentError(error.message);
+      throw new InvalidArgumentError(error.message);
     }
-  } else {
-    return url;
   }
+
+  return url;
 }

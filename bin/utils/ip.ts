@@ -1,9 +1,9 @@
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import logger from '@/options/logger.js';
 import dns from 'dns';
 import http from 'http';
+import { promisify } from 'util';
+import logger from '@/options/logger';
 
+const resolve = promisify(dns.resolve);
 
 const ping = async (host: string) => {
   const lookup = promisify(dns.lookup);
@@ -23,32 +23,25 @@ const ping = async (host: string) => {
   });
 };
 
-
-const resolve = promisify(dns.resolve);
-
 async function isChinaDomain(domain: string): Promise<boolean> {
   try {
-    // 解析域名为IP地址
     const [ip] = await resolve(domain);
     return await isChinaIP(ip, domain);
   } catch (error) {
-    // 域名无法解析，返回false
     logger.info(`${domain} can't be parse!`);
     return false;
   }
 }
 
 async function isChinaIP(ip: string, domain: string): Promise<boolean> {
-    try {
-        const delay = await ping(ip);
-        logger.info(`${domain} latency is ${delay} ms`);
-        // 判断延迟是否超过500ms
-        return delay > 500;
-    } catch (error) {
-        // 命令执行出错，返回false
-        logger.info(`ping ${domain} failed!`);
-        return false;
-    }
+  try {
+    const delay = await ping(ip);
+    logger.info(`${domain} latency is ${delay} ms`);
+    return delay > 500;
+  } catch (error) {
+    logger.info(`ping ${domain} failed!`);
+    return false;
+  }
 }
 
 export { isChinaDomain, isChinaIP };

@@ -1,99 +1,36 @@
-import fs from 'fs/promises';
 import path from 'path';
-import prompts from 'prompts';
-import { checkRustInstalled, installRust } from '@/helpers/rust.js';
-import { PakeAppOptions } from '@/types.js';
-import { IBuilder } from './base.js';
-import { shellExec } from '@/utils/shell.js';
-// @ts-expect-error 加上resolveJsonModule rollup会打包报错
-// import tauriConf from '../../src-tauri/tauri.macos.conf.json';
-import tauriConf from './tauriConf.js';
-import log from 'loglevel';
-import { mergeTauriConfig } from './common.js';
-import { npmDirectory } from '@/utils/dir.js';
-import {isChinaDomain} from '@/utils/ip_addr.js';
-import logger from '@/options/logger.js';
+import fsExtra from "fs-extra";
 
-export default class MacBuilder implements IBuilder {
-  async prepare() {
-    if (checkRustInstalled()) {
-      return;
-    }
+import logger from '@/options/logger';
+import tauriConfig from '@/helpers/tauriConfig';
+import BaseBuilder from './BaseBuilder';
+import { npmDirectory } from '@/utils/dir';
+import { PakeAppOptions } from '@/types';
+import { mergeConfig } from "@/builders/common";
 
-    const res = await prompts({
-      type: 'confirm',
-      message: 'We detected that you have not installed Rust. Install it now?',
-      name: 'value',
-    });
-
-    if (res.value) {
-      // TODO 国内有可能会超时
-      await installRust();
-    } else {
-      log.error('Error: Pake need Rust to package your webapp!!!');
-      process.exit(2);
-    }
-  }
-
+export default class MacBuilder extends BaseBuilder {
   async build(url: string, options: PakeAppOptions) {
-    log.debug('PakeAppOptions', options);
     const { name } = options;
-
-    await mergeTauriConfig(url, options, tauriConf);
+    await mergeConfig(url, options, tauriConfig);
     let dmgName: string;
     if (options.multiArch) {
-      const isChina = await isChinaDomain("www.npmjs.com");
-      if (isChina) {
-        logger.info("it's in China, use npm/rust cn mirror")
-        const rust_project_dir = path.join(npmDirectory, 'src-tauri', ".cargo");
-        const e1 = fs.access(rust_project_dir);
-        if (e1) {
-          await fs.mkdir(rust_project_dir, { recursive: true });
-        }
-        const project_cn_conf = path.join(npmDirectory, "src-tauri", "cn_config.bak");
-        const project_conf = path.join(rust_project_dir, "config");
-        fs.copyFile(project_cn_conf, project_conf);
-
-        const _ = await shellExec(
-          `cd "${npmDirectory}" && npm install --registry=https://registry.npmmirror.com && npm run build:mac`
-        );
-      } else {
-        const _ = await shellExec(`cd "${npmDirectory}" && npm install && npm run build:mac`);
-      }
-      dmgName = `${name}_${tauriConf.package.version}_universal.dmg`;
+      await this.runBuildCommand(npmDirectory, 'npm run build:mac');
+      dmgName = `${name}_${tauriConfig.package.version}_universal.dmg`;
     } else {
-      const isChina = isChinaDomain("www.npmjs.com")
-      if (isChina) {
-        const _ = await shellExec(
-          `cd ${npmDirectory} && npm install --registry=https://registry.npmmirror.com && npm run build`
-        );
-      } else {
-        const _ = await shellExec(`cd ${npmDirectory} && npm install && npm run build`);
-      }
-      let arch  = "x64";
-      if (process.arch === "arm64") {
-        arch = "aarch64";
-      } else {
-        arch = process.arch;
-      }
-      dmgName = `${name}_${tauriConf.package.version}_${arch}.dmg`;
+      await this.runBuildCommand(npmDirectory, 'npm run build');
+      let arch = process.arch === "arm64" ? "aarch64" : process.arch;
+      dmgName = `${name}_${tauriConfig.package.version}_${arch}.dmg`;
     }
     const appPath = this.getBuildAppPath(npmDirectory, dmgName, options.multiArch);
     const distPath = path.resolve(`${name}.dmg`);
-    await fs.copyFile(appPath, distPath);
-    await fs.unlink(appPath);
-
+    await fsExtra.copy(appPath, distPath);
+    await fsExtra.remove(appPath);
     logger.success('Build success!');
-    logger.success('You can find the app installer in', distPath);
+    logger.success('App installer located in', distPath);
   }
 
   getBuildAppPath(npmDirectory: string, dmgName: string, multiArch: boolean) {
-    let dmgPath: string;
-    if (multiArch) {
-      dmgPath = 'src-tauri/target/universal-apple-darwin/release/bundle/dmg';
-    } else {
-      dmgPath = 'src-tauri/target/release/bundle/dmg';
-    }
+    const dmgPath = multiArch ? 'src-tauri/target/universal-apple-darwin/release/bundle/dmg' : 'src-tauri/target/release/bundle/dmg';
     return path.join(npmDirectory, dmgPath, dmgName);
   }
 }

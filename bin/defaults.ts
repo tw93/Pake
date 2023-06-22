@@ -16,5 +16,3 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   systemTrayIcon: '',
   debug: false,
 };
-
-export const DEFAULT_APP_NAME = 'Pake';

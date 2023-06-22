@@ -1,51 +1,43 @@
-import { program } from 'commander';
 import log from 'loglevel';
-import chalk from 'chalk';
-import { DEFAULT_PAKE_OPTIONS } from './defaults.js';
-import { PakeCliOptions } from './types.js';
-import { validateNumberInput, validateUrlInput } from './utils/validate.js';
-import handleInputOptions from './options/index.js';
-import BuilderFactory from './builders/BuilderFactory.js';
-import { checkUpdateTips } from './helpers/updater.js';
-// @ts-expect-error
-import packageJson from '../package.json';
-import logger from './options/logger.js';
+import { program } from 'commander';
 
-program.version(packageJson.version).description('A cli application can package a web page to desktop application.');
+import { PakeCliOptions } from './types';
+import handleInputOptions from './options/index';
+import BuilderProvider from './builders/BuilderProvider';
+import { checkUpdateTips } from './helpers/updater';
+import packageJson from '../package.json';
+import { validateNumberInput, validateUrlInput } from './utils/validate';
+import { DEFAULT_PAKE_OPTIONS } from './defaults';
 
 program
-  .showHelpAfterError()
-  .argument('[url]', 'the web url you want to package', validateUrlInput)
-  .option('--name <string>', 'application name')
-  .option('--icon <string>', 'application icon', DEFAULT_PAKE_OPTIONS.icon)
-  .option('--height <number>', 'window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
-  .option('--width <number>', 'window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
-  .option('--no-resizable', 'whether the window can be resizable', DEFAULT_PAKE_OPTIONS.resizable)
-  .option('--fullscreen', 'makes the packaged app start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
-  .option('--transparent', 'transparent title bar', DEFAULT_PAKE_OPTIONS.transparent)
-  .option('--user-agent <string>', 'custom user agent', DEFAULT_PAKE_OPTIONS.userAgent)
-  .option('--show-menu', 'show menu in app', DEFAULT_PAKE_OPTIONS.showMenu)
-  .option('--show-system-tray', 'show system tray in app', DEFAULT_PAKE_OPTIONS.showSystemTray)
-  .option('--system-tray-icon <string>', 'custom system tray icon', DEFAULT_PAKE_OPTIONS.systemTrayIcon)
-  .option('--iter-copy-file', 
-          'copy all static file to pake app when url is a local file',
-          DEFAULT_PAKE_OPTIONS.iterCopyFile)
-  .option(
-    '-m, --multi-arch',
-    "available for Mac only, and supports both Intel and M1",
-    DEFAULT_PAKE_OPTIONS.multiArch
-  )
-  .option(
-    '--targets <string>',
-    'only for linux, default is "deb", option "appaimge" or "all"(deb & appimage)',
-    DEFAULT_PAKE_OPTIONS.targets
-  )
-  .option('--debug', 'debug', DEFAULT_PAKE_OPTIONS.transparent)
-  .action(async (url: string, options: PakeCliOptions) => {
-    checkUpdateTips();
+  .version(packageJson.version)
+  .description('A CLI that can turn any webpage into a desktop app with Rust.')
+  .showHelpAfterError();
 
+program
+  .argument('[url]', 'The web URL you want to package', validateUrlInput)
+  .option('--name <string>', 'Application name')
+  .option('--icon <string>', 'Application icon', DEFAULT_PAKE_OPTIONS.icon)
+  .option('--height <number>', 'Window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
+  .option('--width <number>', 'Window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
+  .option('--no-resizable', 'Whether the window can be resizable', DEFAULT_PAKE_OPTIONS.resizable)
+  .option('--fullscreen', 'Start the packaged app in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
+  .option('--transparent', 'Transparent title bar', DEFAULT_PAKE_OPTIONS.transparent)
+  .option('--user-agent <string>', 'Custom user agent', DEFAULT_PAKE_OPTIONS.userAgent)
+  .option('--show-menu', 'Show menu in app', DEFAULT_PAKE_OPTIONS.showMenu)
+  .option('--show-system-tray', 'Show system tray in app', DEFAULT_PAKE_OPTIONS.showSystemTray)
+  .option('--system-tray-icon <string>', 'Custom system tray icon', DEFAULT_PAKE_OPTIONS.systemTrayIcon)
+  .option('--iter-copy-file', 'Copy all static files to pake app when URL is a local file', DEFAULT_PAKE_OPTIONS.iterCopyFile)
+  .option('--multi-arch', 'Available for Mac only, supports both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
+  .option('--targets <string>', 'Only for Linux, option "deb", "appimage" or "all"', DEFAULT_PAKE_OPTIONS.targets)
+  .option('--debug', 'Debug mode', DEFAULT_PAKE_OPTIONS.debug)
+  .action(async (url: string, options: PakeCliOptions) => {
+
+    //Check for update prompt
+    await checkUpdateTips();
+
+    // If no URL is provided, display help information
     if (!url) {
-      // 直接 pake 不需要出现url提示
       program.help();
     }
 
@@ -54,12 +46,14 @@ program
       log.setLevel('debug');
     }
 
-    const builder = BuilderFactory.create();
+    const builder = BuilderProvider.create();
     await builder.prepare();
-    // logger.warn("you input url is ", url);
+
     const appOptions = await handleInputOptions(options, url);
-    // logger.info(JSON.stringify(appOptions, null, 4));
-    builder.build(url, appOptions);
+
+    log.debug('PakeAppOptions', appOptions);
+
+    await builder.build(url, appOptions);
   });
 
 program.parse();
