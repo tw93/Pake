@@ -6,7 +6,7 @@ import logger from '@/options/logger';
 import tauriConfig from '@/helpers/tauriConfig';
 import { npmDirectory } from '@/utils/dir';
 import { PakeAppOptions } from '@/types';
-import { mergeConfig } from '@/builders/common';
+import { mergeConfig } from '@/helpers/merge';
 
 export default class WinBuilder extends BaseBuilder {
   async build(url: string, options: PakeAppOptions) {

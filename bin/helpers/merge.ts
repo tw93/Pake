@@ -1,8 +1,8 @@
 import path from 'path';
 import fsExtra from 'fs-extra';
-import { npmDirectory } from '@/utils/dir.js';
-import logger from '@/options/logger.js';
-import { PakeAppOptions, PlatformMap } from '@/types.js';
+import { npmDirectory } from '@/utils/dir';
+import logger from '@/options/logger';
+import { PakeAppOptions, PlatformMap } from '@/types';
 
 export async function mergeConfig(
   url: string,
