@@ -7,7 +7,7 @@ import BuilderProvider from './builders/BuilderProvider';
 import { checkUpdateTips } from './helpers/updater';
 import packageJson from '../package.json';
 import { validateNumberInput, validateUrlInput } from './utils/validate';
-import { DEFAULT_PAKE_OPTIONS } from './defaults';
+import { DEFAULT_PAKE_OPTIONS as DEFAULT } from './defaults';
 
 program
   .version(packageJson.version)
@@ -17,20 +17,20 @@ program
 program
   .argument('[url]', 'The web URL you want to package', validateUrlInput)
   .option('--name <string>', 'Application name')
-  .option('--icon <string>', 'Application icon', DEFAULT_PAKE_OPTIONS.icon)
-  .option('--height <number>', 'Window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
-  .option('--width <number>', 'Window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
-  .option('--no-resizable', 'Whether the window can be resizable', DEFAULT_PAKE_OPTIONS.resizable)
-  .option('--fullscreen', 'Start the packaged app in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
-  .option('--transparent', 'Transparent title bar', DEFAULT_PAKE_OPTIONS.transparent)
-  .option('--user-agent <string>', 'Custom user agent', DEFAULT_PAKE_OPTIONS.userAgent)
-  .option('--show-menu', 'Show menu in app', DEFAULT_PAKE_OPTIONS.showMenu)
-  .option('--show-system-tray', 'Show system tray in app', DEFAULT_PAKE_OPTIONS.showSystemTray)
-  .option('--system-tray-icon <string>', 'Custom system tray icon', DEFAULT_PAKE_OPTIONS.systemTrayIcon)
-  .option('--iter-copy-file', 'Copy files to app when URL is a local file', DEFAULT_PAKE_OPTIONS.iterCopyFile)
-  .option('--multi-arch', 'Available for Mac only, supports both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
-  .option('--targets <string>', 'Only for Linux, option "deb", "appimage" or "all"', DEFAULT_PAKE_OPTIONS.targets)
-  .option('--debug', 'Debug mode', DEFAULT_PAKE_OPTIONS.debug)
+  .option('--icon <string>', 'Application icon', DEFAULT.icon)
+  .option('--height <number>', 'Window height', validateNumberInput, DEFAULT.height)
+  .option('--width <number>', 'Window width', validateNumberInput, DEFAULT.width)
+  .option('--no-resizable', 'Whether the window can be resizable', DEFAULT.resizable)
+  .option('--fullscreen', 'Start the packaged app in full screen', DEFAULT.fullscreen)
+  .option('--transparent', 'Transparent title bar', DEFAULT.transparent)
+  .option('--user-agent <string>', 'Custom user agent', DEFAULT.userAgent)
+  .option('--show-menu', 'Show menu in app', DEFAULT.showMenu)
+  .option('--show-system-tray', 'Show system tray in app', DEFAULT.showSystemTray)
+  .option('--system-tray-icon <string>', 'Custom system tray icon', DEFAULT.systemTrayIcon)
+  .option('--iter-copy-file', 'Copy files to app when URL is a local file', DEFAULT.iterCopyFile)
+  .option('--multi-arch', 'Available for Mac only, supports both Intel and M1', DEFAULT.multiArch)
+  .option('--targets <string>', 'Only for Linux, option "deb", "appimage" or "all"', DEFAULT.targets)
+  .option('--debug', 'Debug mode', DEFAULT.debug)
   .action(async (url: string, options: PakeCliOptions) => {
 
     //Check for update prompt
