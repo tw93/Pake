@@ -20,24 +20,24 @@ on:
       icon:
         description: "[Icon, Optional]"
         required: false
-      height:
-        description: "[Height, Optional]"
-        required: false
-        default: "780"
       width:
         description: "[Width, Optional]"
         required: false
         default: "1200"
-      transparent:
-        description: "[Transparent, Optional]"
+      height:
+        description: "[Height, Optional]"
         required: false
-        type: boolean
-        default: false
+        default: "780"
       resize:
         description: "[Resize, Optional]"
         required: false
         type: boolean
         default: true
+      transparent:
+        description: "[Transparent, Optional, MacOS only]"
+        required: false
+        type: boolean
+        default: false
       multi_arch:
         description: "[MultiArch, Optional, MacOS only]"
         required: false
