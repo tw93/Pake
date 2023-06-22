@@ -28,13 +28,13 @@ export interface PakeCliOptions {
   // Custom User-Agent, default off
   userAgent: string;
 
-  // Enable menu bar, default on for MacOS, off for Windows and Linux
+  // Enable menu bar, default on for macOS, off for Windows and Linux
   showMenu: boolean;
 
-  // Enable system tray, default off for MacOS, on for Windows and Linux
+  // Enable system tray, default off for macOS, on for Windows and Linux
   showSystemTray: boolean;
 
-  // Tray icon, default same as app icon for Windows and Linux, MacOS requires separate png or ico
+  // Tray icon, default same as app icon for Windows and Linux, macOS requires separate png or ico
   systemTrayIcon: string;
 
   // Recursive copy, when url is a local file path, if this option is enabled, the url path file and all its subfiles will be copied to the pake static file folder, default off
