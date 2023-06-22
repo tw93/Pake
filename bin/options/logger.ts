@@ -1,5 +1,5 @@
-import log from 'loglevel';
 import chalk from 'chalk';
+import log from 'loglevel';
 
 const logger = {
   info(...msg: any[]) {

@@ -1,14 +1,14 @@
-import ora from "ora";
 import path from 'path';
+import ora from "ora";
 import fsExtra from "fs-extra";
 import prompts from 'prompts';
 
+import logger from '@/options/logger';
 import { shellExec } from '@/utils/shell';
 import { isChinaDomain } from '@/utils/ip';
-import logger from '@/options/logger';
-import { checkRustInstalled, installRust } from '@/helpers/rust';
 import { PakeAppOptions } from '@/types';
 import { IS_MAC } from "@/utils/platform";
+import { checkRustInstalled, installRust } from '@/helpers/rust';
 
 export default abstract class BaseBuilder {
   abstract build(url: string, options: PakeAppOptions): Promise<void>;

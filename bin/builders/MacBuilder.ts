@@ -1,12 +1,12 @@
 import path from 'path';
 import fsExtra from "fs-extra";
 
+import BaseBuilder from './BaseBuilder';
 import logger from '@/options/logger';
 import tauriConfig from '@/helpers/tauriConfig';
-import BaseBuilder from './BaseBuilder';
 import { npmDirectory } from '@/utils/dir';
-import { PakeAppOptions } from '@/types';
 import { mergeConfig } from "@/helpers/merge";
+import { PakeAppOptions } from '@/types';
 
 export default class MacBuilder extends BaseBuilder {
   async build(url: string, options: PakeAppOptions) {
