@@ -5,9 +5,9 @@ import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
 
 import logger from './logger';
-import { PakeAppOptions } from '@/types';
 import { npmDirectory } from '@/utils/dir';
 import { IS_LINUX, IS_WIN } from '@/utils/platform';
+import { PakeAppOptions } from '@/types';
 
 export async function handleIcon(options: PakeAppOptions) {
   if (options.icon) {

@@ -1,6 +1,7 @@
 import dns from 'dns';
 import http from 'http';
 import { promisify } from 'util';
+
 import logger from '@/options/logger';
 
 const resolve = promisify(dns.resolve);
