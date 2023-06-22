@@ -1,29 +1,25 @@
-import { promptText } from '@/builders/common.js';
-import { getDomain } from '@/utils/url.js';
-import { getIdentifier } from '../helpers/tauriConfig.js';
-import { PakeAppOptions, PakeCliOptions } from '../types.js';
-import { handleIcon } from './icon.js';
-import fs from 'fs/promises';
+import fsExtra from "fs-extra";
+
+import { handleIcon } from './icon';
+import { getDomain } from '@/utils/url';
+import { getIdentifier, promptText } from '@/utils/info';
+import { PakeAppOptions, PakeCliOptions } from '@/types';
 
 export default async function handleOptions(options: PakeCliOptions, url: string): Promise<PakeAppOptions> {
   const appOptions: PakeAppOptions = {
     ...options,
-    identifier: '',
+    identifier: getIdentifier(url),
   };
-  const url_exists = await fs.stat(url)
-    .then(() => true)
-    .catch(() => false);
+
+  let urlExists = await fsExtra.pathExists(url);
+
   if (!appOptions.name) {
-    if (!url_exists) {
-      appOptions.name = await promptText('please input your application name', getDomain(url));
-    } else {
-      appOptions.name = await promptText('please input your application name', "");
-    }
+    const defaultName = urlExists ? "" : getDomain(url);
+    const promptMessage = 'Enter your application name';
+    appOptions.name = await promptText(promptMessage, defaultName);
   }
 
-  appOptions.identifier = getIdentifier(appOptions.name, url);
-
-  appOptions.icon = await handleIcon(appOptions, url);
+  appOptions.icon = await handleIcon(appOptions);
 
   return appOptions;
 }
