@@ -49,8 +49,8 @@ export async function mergeConfig(
   if (!nameCheck) {
     const errorMsg =
       platform === 'linux'
-        ? `Package name is invalid. It should only include lowercase letters, numbers, and dashes, and must contain at least one lowercase letter.\n Examples: com-123-xxx, 123pan, pan123, weread, we-read.`
-        : `Package name is invalid. It should only include letters and numbers, and must contain at least one letter.\n Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead.`;
+        ? `Package name is invalid. It should only include lowercase letters, numbers, and dashes, and must contain at least one lowercase letter. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`
+        : `Package name is invalid. It should only include letters and numbers, and must contain at least one letter. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead.`;
 
     logger.error(errorMsg);
     process.exit();

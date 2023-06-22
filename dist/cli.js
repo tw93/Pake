@@ -1,24 +1,92 @@
 import log from 'loglevel';
 import { InvalidArgumentError, program } from 'commander';
-import fs from 'fs/promises';
-import psl from 'psl';
-import isUrl from 'is-url';
-import crypto from 'crypto';
-import prompts from 'prompts';
+import fsExtra from 'fs-extra';
 import path from 'path';
 import axios from 'axios';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
 import chalk from 'chalk';
 import { fileURLToPath } from 'url';
+import psl from 'psl';
+import isUrl from 'is-url';
+import crypto from 'crypto';
+import prompts from 'prompts';
 import shelljs from 'shelljs';
 import dns from 'dns';
 import http from 'http';
 import { promisify } from 'util';
 import ora from 'ora';
-import fs2 from 'fs-extra';
 import updateNotifier from 'update-notifier';
-import fs$1 from 'fs';
+import fs from 'fs';
+
+const logger = {
+    info(...msg) {
+        log.info(...msg.map((m) => chalk.blue.bold(m)));
+    },
+    debug(...msg) {
+        log.debug(...msg);
+    },
+    error(...msg) {
+        log.error(...msg.map((m) => chalk.red.bold(m)));
+    },
+    warn(...msg) {
+        log.info(...msg.map((m) => chalk.yellow.bold(m)));
+    },
+    success(...msg) {
+        log.info(...msg.map((m) => chalk.green.bold(m)));
+    }
+};
+
+// Convert the current module URL to a file path
+const currentModulePath = fileURLToPath(import.meta.url);
+// Resolve the parent directory of the current module
+const npmDirectory = path.join(path.dirname(currentModulePath), '..');
+
+const { platform: platform$1 } = process;
+const IS_MAC = platform$1 === 'darwin';
+const IS_WIN = platform$1 === 'win32';
+const IS_LINUX = platform$1 === 'linux';
+
+async function handleIcon(options) {
+    if (options.icon) {
+        if (options.icon.startsWith('http')) {
+            return downloadIcon(options.icon);
+        }
+        else {
+            return path.resolve(options.icon);
+        }
+    }
+    else {
+        logger.info('No app icon provided, default icon used. Use --icon option to assign an icon.');
+        const iconPath = IS_WIN ? 'src-tauri/png/icon_256.ico' : IS_LINUX ? 'src-tauri/png/icon_512.png' : 'src-tauri/icons/icon.icns';
+        return path.join(npmDirectory, iconPath);
+    }
+}
+async function downloadIcon(iconUrl) {
+    try {
+        const iconResponse = await axios.get(iconUrl, {
+            responseType: 'arraybuffer',
+        });
+        const iconData = await iconResponse.data;
+        if (!iconData) {
+            return null;
+        }
+        const fileDetails = await fileTypeFromBuffer(iconData);
+        if (!fileDetails) {
+            return null;
+        }
+        const { path: tempPath } = await dir();
+        const iconPath = `${tempPath}/icon.${fileDetails.ext}`;
+        await fsExtra.outputFile(iconPath, iconData);
+        return iconPath;
+    }
+    catch (error) {
+        if (error.response && error.response.status === 404) {
+            return null;
+        }
+        throw error;
+    }
+}
 
 // Extracts the domain from a given URL.
 function getDomain(inputUrl) {
@@ -77,97 +145,15 @@ async function promptText(message, initial) {
     return response.content;
 }
 
-function formatMessage(color, ...msg) {
-    return msg.map((m) => color(m));
-}
-const logger = {
-    info(...msg) {
-        log.info(...formatMessage(chalk.blue, ...msg));
-    },
-    debug(...msg) {
-        log.debug(...formatMessage(chalk.magenta, ...msg));
-    },
-    error(...msg) {
-        log.error(...formatMessage(chalk.red, ...msg));
-    },
-    warn(...msg) {
-        log.warn(...formatMessage(chalk.yellow, ...msg));
-    },
-    success(...msg) {
-        log.info(...formatMessage(chalk.green, ...msg));
-    }
-};
-
-// Convert the current module URL to a file path
-const currentModulePath = fileURLToPath(import.meta.url);
-// Resolve the parent directory of the current module
-const npmDirectory = path.join(path.dirname(currentModulePath), '..');
-
-const { platform: platform$1 } = process;
-const IS_MAC = platform$1 === 'darwin';
-const IS_WIN = platform$1 === 'win32';
-const IS_LINUX = platform$1 === 'linux';
-
-async function handleIcon(options, url) {
-    if (options.icon) {
-        if (options.icon.startsWith('http')) {
-            return downloadIcon(options.icon);
-        }
-        else {
-            return path.resolve(options.icon);
-        }
-    }
-    else {
-        return getDefaultIcon();
-    }
-}
-async function getDefaultIcon() {
-    logger.info('You have not provided an app icon, use the default icon.(use --icon option to assign an icon)');
-    const iconPath = IS_WIN ? 'src-tauri/png/icon_256.ico' : IS_LINUX ? 'src-tauri/png/icon_512.png' : 'src-tauri/icons/icon.icns';
-    return path.join(npmDirectory, iconPath);
-}
-async function downloadIcon(iconUrl) {
-    try {
-        const iconResponse = await axios.get(iconUrl, {
-            responseType: 'arraybuffer',
-        });
-        const iconData = await iconResponse.data;
-        if (!iconData) {
-            return null;
-        }
-        const fileDetails = await fileTypeFromBuffer(iconData);
-        if (!fileDetails) {
-            return null;
-        }
-        const { path: tempPath } = await dir();
-        const iconPath = `${tempPath}/icon.${fileDetails.ext}`;
-        await fs.writeFile(iconPath, iconData);
-        return iconPath;
-    }
-    catch (error) {
-        if (error.response && error.response.status === 404) {
-            return null;
-        }
-        throw error;
-    }
-}
-
 async function handleOptions(options, url) {
     const appOptions = {
         ...options,
         identifier: getIdentifier(url),
     };
-    let urlExists = false;
-    try {
-        await fs.stat(url);
-        urlExists = true;
-    }
-    catch (error) {
-        // URL does not exist
-    }
+    let urlExists = await fsExtra.pathExists(url);
     if (!appOptions.name) {
         const defaultName = urlExists ? "" : getDomain(url);
-        const promptMessage = 'Please input your application name';
+        const promptMessage = 'Enter your application name';
         appOptions.name = await promptText(promptMessage, defaultName);
     }
     appOptions.icon = await handleIcon(appOptions);
@@ -451,7 +437,7 @@ class BaseBuilder {
     async prepare() {
         // Windows and Linux need to install necessary build tools.
         if (!IS_MAC) {
-            logger.info('To build the app, you need to install Rust and necessary build tools.');
+            logger.info('Install Rust and required build tools to build the app.');
             logger.info('See more in https://tauri.app/v1/guides/getting-started/prerequisites#installing.');
         }
         if (checkRustInstalled()) {
@@ -459,32 +445,26 @@ class BaseBuilder {
         }
         const res = await prompts({
             type: 'confirm',
-            message: 'We detected that you have not installed Rust. Install it now?',
+            message: 'Rust not detected. Install now?',
             name: 'value',
         });
         if (res.value) {
             await installRust();
         }
         else {
-            logger.error('Error: Pake needs Rust to package your webapp!');
+            logger.error('Error: Rust required to package your webapp!');
             process.exit(2);
         }
     }
     async runBuildCommand(directory, command) {
         const isChina = await isChinaDomain("www.npmjs.com");
         if (isChina) {
-            logger.info("it's in China, use npm/rust cn mirror");
-            logger.debug("pake npm directory: ", directory);
+            logger.info("Located in China, using npm/Rust CN mirror.");
             const rustProjectDir = path.join(directory, 'src-tauri', ".cargo");
-            try {
-                await fs.access(rustProjectDir);
-            }
-            catch (e) {
-                await fs.mkdir(rustProjectDir, { recursive: true });
-            }
+            await fsExtra.ensureDir(rustProjectDir);
             const projectCnConf = path.join(directory, "src-tauri", "rust_proxy.toml");
             const projectConf = path.join(rustProjectDir, "config");
-            await fs.copyFile(projectCnConf, projectConf);
+            await fsExtra.copy(projectCnConf, projectConf);
             await shellExec(`cd "${directory}" && npm install --registry=https://registry.npmmirror.com && ${command}`);
         }
         else {
@@ -493,15 +473,10 @@ class BaseBuilder {
     }
 }
 
-function setSecurityConfigWithUrl(tauriConfig, url) {
-    tauriConfig.tauri.security.dangerousRemoteDomainIpcAccess[0].domain =
-        new URL(url).hostname;
-}
-async function writeFileAsJson(filePath, data) {
-    await fs.writeFile(filePath, JSON.stringify(data, null, 4), 'utf-8');
-}
 async function mergeConfig(url, options, tauriConf) {
     const { width, height, fullscreen, transparent, resizable, userAgent, showMenu, showSystemTray, systemTrayIcon, iterCopyFile, identifier, name, } = options;
+    const { platform } = process;
+    // Set Windows parameters.
     const tauriConfWindowOptions = {
         width,
         height,
@@ -509,9 +484,9 @@ async function mergeConfig(url, options, tauriConf) {
         transparent,
         resizable,
     };
-    // Package name is valid ?
+    Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
+    // Determine whether the package name is valid.
     // for Linux, package name must be a-z, 0-9 or "-", not allow to A-Z and other
-    const { platform } = process;
     const platformRegexMapping = {
         linux: /[0-9]*[a-z]+[0-9]*\-?[0-9]*[a-z]*[0-9]*\-?[0-9]*[a-z]*[0-9]*/,
         default: /([0-9]*[a-zA-Z]+[0-9]*)+/,
@@ -520,22 +495,18 @@ async function mergeConfig(url, options, tauriConf) {
     const nameCheck = reg.test(name) && reg.exec(name)[0].length === name.length;
     if (!nameCheck) {
         const errorMsg = platform === 'linux'
-            ? `Package name is illegal. It must be lowercase letters, numbers, dashes, and it must contain the lowercase letters. E.g com-123-xxx, 123pan, pan123,weread, we-read`
-            : `Package name is illegal. It must be letters, numbers, and it must contain the letters. E.g 123pan,123Pan Pan123,weread, WeRead, WERead`;
+            ? `Package name is invalid. It should only include lowercase letters, numbers, and dashes, and must contain at least one lowercase letter. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`
+            : `Package name is invalid. It should only include letters and numbers, and must contain at least one letter. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead.`;
         logger.error(errorMsg);
         process.exit();
     }
-    Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
     tauriConf.package.productName = name;
     tauriConf.tauri.bundle.identifier = identifier;
-    // 判断一下url类型，是文件还是网站
-    // 如果是文件，并且开启了递归拷贝功能，则需要将该文件以及所在文件夹下的所有文件拷贝到src目录下，否则只拷贝单个文件。
-    const urlExists = await fs
-        .stat(url)
-        .then(() => true)
-        .catch(() => false);
+    // Judge the type of URL, whether it is a file or a website.
+    // If it is a file and the recursive copy function is enabled then the file and all files in its parent folder need to be copied to the "src" directory. Otherwise, only the single file will be copied.
+    const urlExists = await fsExtra.pathExists(url);
     if (urlExists) {
-        logger.warn('You input may a local file');
+        logger.warn('Your input might be a local file.');
         tauriConf.pake.windows[0].url_type = 'local';
         const fileName = path.basename(url);
         const dirName = path.dirname(url);
@@ -543,19 +514,22 @@ async function mergeConfig(url, options, tauriConf) {
         const distBakDir = path.join(npmDirectory, 'dist_bak');
         if (!iterCopyFile) {
             const urlPath = path.join(distDir, fileName);
-            await fs.copyFile(url, urlPath);
+            await fsExtra.copy(url, urlPath);
         }
         else {
-            fs2.moveSync(distDir, distBakDir, { overwrite: true });
-            fs2.copySync(dirName, distDir, { overwrite: true });
+            fsExtra.moveSync(distDir, distBakDir, { overwrite: true });
+            fsExtra.copySync(dirName, distDir, { overwrite: true });
             const filesToCopyBack = ['cli.js', 'about_pake.html'];
-            await Promise.all(filesToCopyBack.map((file) => fs.copyFile(path.join(distBakDir, file), path.join(distDir, file))));
+            await Promise.all(filesToCopyBack.map((file) => fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file))));
         }
         tauriConf.pake.windows[0].url = fileName;
         tauriConf.pake.windows[0].url_type = 'local';
     }
     else {
         tauriConf.pake.windows[0].url_type = 'web';
+        // Set the secure domain for calling window.__TAURI__ to the application domain that has been set.
+        tauriConf.tauri.security.dangerousRemoteDomainIpcAccess[0].domain =
+            new URL(url).hostname;
     }
     const platformMap = {
         win32: 'windows',
@@ -568,7 +542,7 @@ async function mergeConfig(url, options, tauriConf) {
     }
     tauriConf.pake.menu[currentPlatform] = showMenu;
     tauriConf.pake.system_tray[currentPlatform] = showSystemTray;
-    // 处理targets 暂时只对linux开放
+    // Processing targets are currently only open to Linux.
     if (platform === 'linux') {
         delete tauriConf.tauri.bundle.deb.files;
         const validTargets = ['all', 'deb', 'appimage'];
@@ -576,34 +550,32 @@ async function mergeConfig(url, options, tauriConf) {
             tauriConf.tauri.bundle.targets = options.targets === 'all' ? ['deb', 'appimage'] : [options.targets];
         }
         else {
-            logger.warn(`Targets must be one of ${validTargets.join(', ')}, we will use default 'all'`);
+            logger.warn(`The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`);
         }
     }
+    // Set icon.
     const platformIconMap = {
         win32: {
             fileExt: '.ico',
             path: `png/${name.toLowerCase()}_32.ico`,
             defaultIcon: 'png/icon_256.ico',
-            message: 'Icon file in Windows must be 256 * 256 pix with .ico type',
+            message: 'Windows icon must be .ico and 256x256px.',
         },
         linux: {
             fileExt: '.png',
             path: `png/${name.toLowerCase()}_32.png`,
             defaultIcon: 'png/icon_512.png',
-            message: 'Icon file in Linux must be 512 * 512 pix with .png type',
+            message: 'Linux icon must be .png and 512x512px.',
         },
         darwin: {
             fileExt: '.icns',
             path: `icons/${name.toLowerCase()}_32.icns`,
             defaultIcon: 'icons/icon.icns',
-            message: 'Icon file in MacOS must be .icns type',
+            message: 'MacOS icon must be .icns type.',
         },
     };
-    const exists = await fs
-        .stat(options.icon)
-        .then(() => true)
-        .catch(() => false);
     const iconInfo = platformIconMap[platform];
+    const exists = await fsExtra.pathExists(options.icon);
     if (exists) {
         let updateIconPath = true;
         let customIconExt = path.extname(options.icon).toLowerCase();
@@ -615,48 +587,43 @@ async function mergeConfig(url, options, tauriConf) {
         else {
             const iconPath = path.join(npmDirectory, 'src-tauri/', iconInfo.path);
             tauriConf.tauri.bundle.resources = [iconInfo.path];
-            await fs.copyFile(options.icon, iconPath);
+            await fsExtra.copy(options.icon, iconPath);
         }
         if (updateIconPath) {
             tauriConf.tauri.bundle.icon = [options.icon];
         }
         else {
-            logger.warn(`Icon file will not change with default.`);
+            logger.warn(`Icon will remain as default.`);
         }
     }
     else {
-        logger.warn('The custom icon path may not exists. we will use default icon to replace it');
+        logger.warn('Custom icon path may be invalid. Default icon will be used instead.');
         tauriConf.tauri.bundle.icon = [iconInfo.defaultIcon];
     }
-    // 设定默认托盘图标路径
-    let trayIconPath = platform === 'linux' || platform === 'win32'
-        ? tauriConf.tauri.bundle.icon[0]
-        : 'png/icon_512.png';
+    // Set tray icon path.
+    let trayIconPath = platform === 'darwin' ? 'png/icon_512.png' : tauriConf.tauri.bundle.icon[0];
     if (systemTrayIcon.length > 0) {
         try {
-            await fs.stat(systemTrayIcon);
+            await fsExtra.pathExists(systemTrayIcon);
             // 需要判断图标格式，默认只支持ico和png两种
             let iconExt = path.extname(systemTrayIcon).toLowerCase();
             if (iconExt == '.png' || iconExt == '.ico') {
                 const trayIcoPath = path.join(npmDirectory, `src-tauri/png/${name.toLowerCase()}${iconExt}`);
                 trayIconPath = `png/${name.toLowerCase()}${iconExt}`;
-                await fs.copyFile(systemTrayIcon, trayIcoPath);
+                await fsExtra.copy(systemTrayIcon, trayIcoPath);
             }
             else {
-                logger.warn(`File type for system tray icon mut be .ico or .png , but you give ${iconExt}`);
-                logger.warn(`System tray icon file will not change with default.`);
+                logger.warn(`System tray icon must be .ico or .png, but you provided ${iconExt}.`);
+                logger.warn(`Default system tray icon will be used.`);
             }
         }
         catch {
             logger.warn(`${systemTrayIcon} not exists!`);
-            logger.warn(`System tray icon file will not change with default.`);
+            logger.warn(`Default system tray icon will remain unchanged.`);
         }
     }
-    // 设定托盘图标
     tauriConf.tauri.systemTray.iconPath = trayIconPath;
-    // 设置安全调用 window.__TAURI__ 的安全域名为设置的应用域名
-    setSecurityConfigWithUrl(tauriConf, url);
-    // 保存配置文件
+    // Save config file.
     const platformConfigPaths = {
         win32: 'src-tauri/tauri.windows.conf.json',
         darwin: 'src-tauri/tauri.macos.conf.json',
@@ -664,14 +631,14 @@ async function mergeConfig(url, options, tauriConf) {
     };
     const configPath = path.join(npmDirectory, platformConfigPaths[platform]);
     const bundleConf = { tauri: { bundle: tauriConf.tauri.bundle } };
-    await writeFileAsJson(configPath, bundleConf);
+    await fsExtra.writeJson(configPath, bundleConf, { spaces: 4 });
     const pakeConfigPath = path.join(npmDirectory, 'src-tauri/pake.json');
-    await writeFileAsJson(pakeConfigPath, tauriConf.pake);
+    await fsExtra.writeJson(pakeConfigPath, tauriConf.pake, { spaces: 4 });
     let tauriConf2 = JSON.parse(JSON.stringify(tauriConf));
     delete tauriConf2.pake;
     delete tauriConf2.tauri.bundle;
     const configJsonPath = path.join(npmDirectory, 'src-tauri/tauri.conf.json');
-    await writeFileAsJson(configJsonPath, tauriConf2);
+    await fsExtra.writeJson(configJsonPath, tauriConf2, { spaces: 4 });
 }
 
 class MacBuilder extends BaseBuilder {
@@ -690,10 +657,10 @@ class MacBuilder extends BaseBuilder {
         }
         const appPath = this.getBuildAppPath(npmDirectory, dmgName, options.multiArch);
         const distPath = path.resolve(`${name}.dmg`);
-        await fs.copyFile(appPath, distPath);
-        await fs.unlink(appPath);
+        await fsExtra.copy(appPath, distPath);
+        await fsExtra.remove(appPath);
         logger.success('Build success!');
-        logger.success('You can find the app installer in', distPath);
+        logger.success('App installer located in', distPath);
     }
     getBuildAppPath(npmDirectory, dmgName, multiArch) {
         const dmgPath = multiArch ? 'src-tauri/target/universal-apple-darwin/release/bundle/dmg' : 'src-tauri/target/release/bundle/dmg';
@@ -711,10 +678,10 @@ class WinBuilder extends BaseBuilder {
         const msiName = `${name}_${tauriConfig.package.version}_${arch}_${language}.msi`;
         const appPath = this.getBuildAppPath(npmDirectory, msiName);
         const distPath = path.resolve(`${name}.msi`);
-        await fs.copyFile(appPath, distPath);
-        await fs.unlink(appPath);
+        await fsExtra.copy(appPath, distPath);
+        await fsExtra.remove(appPath);
         logger.success('Build success!');
-        logger.success('You can find the app installer in', distPath);
+        logger.success('App installer located in', distPath);
     }
     getBuildAppPath(npmDirectory, msiName) {
         return path.join(npmDirectory, 'src-tauri/target/release/bundle/msi', msiName);
@@ -731,19 +698,19 @@ class LinuxBuilder extends BaseBuilder {
             const debName = `${name}_${tauriConfig.package.version}_${arch}.deb`;
             const appPath = this.getBuildAppPath(npmDirectory, "deb", debName);
             const distPath = path.resolve(`${name}.deb`);
-            await fs.copyFile(appPath, distPath);
-            await fs.unlink(appPath);
+            await fsExtra.copy(appPath, distPath);
+            await fsExtra.remove(appPath);
             logger.success('Build Deb success!');
-            logger.success('You can find the deb app installer in', distPath);
+            logger.success('Deb app installer located in', distPath);
         }
         if (options.targets === "appimage" || options.targets === "all") {
             const appImageName = `${name}_${tauriConfig.package.version}_${arch}.AppImage`;
             const appImagePath = this.getBuildAppPath(npmDirectory, "appimage", appImageName);
             const distAppPath = path.resolve(`${name}.AppImage`);
-            await fs.copyFile(appImagePath, distAppPath);
-            await fs.unlink(appImagePath);
+            await fsExtra.copy(appImagePath, distAppPath);
+            await fsExtra.remove(appImagePath);
             logger.success('Build AppImage success!');
-            logger.success('You can find the AppImage app installer in', distAppPath);
+            logger.success('AppImage installer located in', distAppPath);
         }
     }
     getBuildAppPath(npmDirectory, packageType, packageName) {
@@ -767,7 +734,7 @@ class BuilderProvider {
 }
 
 var name = "pake-cli";
-var version = "2.1.0-beta2";
+var version = "2.1.0";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -879,7 +846,7 @@ function validateNumberInput(value) {
     return parsedValue;
 }
 function validateUrlInput(url) {
-    const isFile = fs$1.existsSync(url);
+    const isFile = fs.existsSync(url);
     if (!isFile) {
         try {
             return normalizeUrl(url);
@@ -925,7 +892,7 @@ program
     .option('--show-menu', 'Show menu in app', DEFAULT_PAKE_OPTIONS.showMenu)
     .option('--show-system-tray', 'Show system tray in app', DEFAULT_PAKE_OPTIONS.showSystemTray)
     .option('--system-tray-icon <string>', 'Custom system tray icon', DEFAULT_PAKE_OPTIONS.systemTrayIcon)
-    .option('--iter-copy-file', 'Copy all static files to pake app when URL is a local file', DEFAULT_PAKE_OPTIONS.iterCopyFile)
+    .option('--iter-copy-file', 'Copy files to app when URL is a local file', DEFAULT_PAKE_OPTIONS.iterCopyFile)
     .option('--multi-arch', 'Available for Mac only, supports both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
     .option('--targets <string>', 'Only for Linux, option "deb", "appimage" or "all"', DEFAULT_PAKE_OPTIONS.targets)
     .option('--debug', 'Debug mode', DEFAULT_PAKE_OPTIONS.debug)
