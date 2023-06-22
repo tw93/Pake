@@ -27,7 +27,7 @@ program
   .option('--show-menu', 'Show menu in app', DEFAULT_PAKE_OPTIONS.showMenu)
   .option('--show-system-tray', 'Show system tray in app', DEFAULT_PAKE_OPTIONS.showSystemTray)
   .option('--system-tray-icon <string>', 'Custom system tray icon', DEFAULT_PAKE_OPTIONS.systemTrayIcon)
-  .option('--iter-copy-file', 'Copy all static files to pake app when URL is a local file', DEFAULT_PAKE_OPTIONS.iterCopyFile)
+  .option('--iter-copy-file', 'Copy files to app when URL is a local file', DEFAULT_PAKE_OPTIONS.iterCopyFile)
   .option('--multi-arch', 'Available for Mac only, supports both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
   .option('--targets <string>', 'Only for Linux, option "deb", "appimage" or "all"', DEFAULT_PAKE_OPTIONS.targets)
   .option('--debug', 'Debug mode', DEFAULT_PAKE_OPTIONS.debug)
