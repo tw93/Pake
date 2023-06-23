@@ -1,4 +1,4 @@
-name: Build App with Pake Cli
+name: Build App with Pake CLI
 on:
   workflow_dispatch:
     inputs:
