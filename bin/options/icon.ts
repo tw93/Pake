@@ -1,13 +1,15 @@
-import { getSpinner } from "@/utils/info";
 import path from 'path';
 import axios from 'axios';
 import fsExtra from "fs-extra";
+import chalk from 'chalk';
 import { dir } from 'tmp-promise';
-import { fileTypeFromBuffer } from 'file-type';
+
 
 import logger from './logger';
 import { npmDirectory } from '@/utils/dir';
 import { IS_LINUX, IS_WIN } from '@/utils/platform';
+import { getSpinner } from "@/utils/info";
+import { fileTypeFromBuffer } from 'file-type';
 import { PakeAppOptions } from '@/types';
 
 export async function handleIcon(options: PakeAppOptions) {
@@ -18,7 +20,7 @@ export async function handleIcon(options: PakeAppOptions) {
       return path.resolve(options.icon);
     }
   } else {
-    logger.info('No app icon provided, default icon used. Use --icon option to assign an icon.');
+    logger.warn('✼ No icon given, default in use. For a custom icon, use --icon option.');
     const iconPath = IS_WIN ? 'src-tauri/png/icon_256.ico' : IS_LINUX ? 'src-tauri/png/icon_512.png' : 'src-tauri/icons/icon.icns';
     return path.join(npmDirectory, iconPath);
   }
@@ -42,10 +44,10 @@ export async function downloadIcon(iconUrl: string) {
     const { path: tempPath } = await dir();
     const iconPath = `${tempPath}/icon.${fileDetails.ext}`;
     await fsExtra.outputFile(iconPath, iconData);
-    spinner.succeed('Icon downloaded successfully.');
+    spinner.succeed(chalk.green('Icon downloaded successfully!'));
     return iconPath;
   } catch (error) {
-    spinner.fail('Icon download failed.');
+    spinner.fail(chalk.red('Icon download failed!'));
     if (error.response && error.response.status === 404) {
       return null;
     }

@@ -1,3 +1,4 @@
+import chalk from "chalk";
 import shelljs from 'shelljs';
 
 import { getSpinner } from "@/utils/info";
@@ -16,10 +17,10 @@ export async function installRust() {
 
   try {
     await shellExec(IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac);
-    spinner.succeed('Rust installed successfully.');
+    spinner.succeed(chalk.green('Rust installed successfully!'));
   } catch (error) {
     console.error('Error installing Rust:', error.message);
-    spinner.fail('Rust installation failed.');
+    spinner.fail(chalk.red('Rust installation failed!'));
     process.exit(1);
   }
 }

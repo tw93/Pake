@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import prompts from "prompts";
 import ora from "ora";
+import chalk from 'chalk';
 
 // Generates an identifier based on the given URL.
 export function getIdentifier(url: string) {
@@ -29,14 +30,15 @@ export function getSpinner(text: string) {
   const loadingType = {
     "interval": 80,
     "frames": [
+      "✦",
       "✶",
+      "✺",
       "✵",
       "✸",
+      "✴︎",
       "✹",
       "✺",
-      "✹",
-      "✷",
     ]
   }
-  return ora({ text: `${text}\n`, spinner: loadingType }).start();
+  return ora({ text: `${chalk.blue(text)}\n`, spinner: loadingType, color: 'blue' }).start();
 }

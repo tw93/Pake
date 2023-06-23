@@ -1,5 +1,6 @@
 import path from 'path';
 import fsExtra from "fs-extra";
+import chalk from "chalk";
 import prompts from 'prompts';
 
 import { PakeAppOptions } from '@/types';
@@ -22,8 +23,8 @@ export default abstract class BaseBuilder {
 
   async prepare() {
     if (!IS_MAC) {
-      logger.info('The first use requires installing system dependencies.');
-      logger.info('See more in https://tauri.app/v1/guides/getting-started/prerequisites#installing.');
+      logger.info('⚙︎ The first use requires installing system dependencies.');
+      logger.info('⚙︎ See more in https://tauri.app/v1/guides/getting-started/prerequisites.');
     }
 
     if (!checkRustInstalled()) {
@@ -36,7 +37,7 @@ export default abstract class BaseBuilder {
       if (res.value) {
         await installRust();
       } else {
-        logger.error('Error: Rust required to package your webapp!');
+        logger.error('✕ Rust required to package your webapp.');
         process.exit(0);
       }
     }
@@ -44,7 +45,7 @@ export default abstract class BaseBuilder {
     const isChina = await isChinaDomain("www.npmjs.com");
     const spinner = getSpinner('Installing package...');
     if (isChina) {
-      logger.info("Located in China, using npm/rsProxy CN mirror.");
+      logger.info("⚙︎ Located in China, using npm/rsProxy CN mirror.");
       const rustProjectDir = path.join(npmDirectory, 'src-tauri', ".cargo");
       await fsExtra.ensureDir(rustProjectDir);
       const projectCnConf = path.join(npmDirectory, "src-tauri", "rust_proxy.toml");
@@ -54,7 +55,7 @@ export default abstract class BaseBuilder {
     } else {
       await shellExec(`cd "${npmDirectory}" && npm install`);
     }
-    spinner.succeed('Package installed.');
+    spinner.succeed(chalk.green('Package installed!'));
   }
 
   async build(url: string) {

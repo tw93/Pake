@@ -342,18 +342,19 @@ function capitalizeFirstLetter(string) {
 }
 function getSpinner(text) {
     const loadingType = {
-        "interval": 80,
+        "interval": 100,
         "frames": [
+            "✦",
             "✶",
+            "✺",
             "✵",
             "✸",
+            "✴︎",
             "✹",
             "✺",
-            "✹",
-            "✷",
         ]
     };
-    return ora({ text: `${text}\n`, spinner: loadingType }).start();
+    return ora({ text: `${chalk.blue(text)}\n`, spinner: loadingType, color: 'blue' }).start();
 }
 
 const { platform: platform$1 } = process;
@@ -381,19 +382,19 @@ function shellExec(command) {
 
 const logger = {
     info(...msg) {
-        log.info(...msg.map((m) => chalk.blue.bold(m)));
+        log.info(...msg.map((m) => chalk.white(m)));
     },
     debug(...msg) {
         log.debug(...msg);
     },
     error(...msg) {
-        log.error(...msg.map((m) => chalk.red.bold(m)));
+        log.error(...msg.map((m) => chalk.red(m)));
     },
     warn(...msg) {
-        log.info(...msg.map((m) => chalk.yellow.bold(m)));
+        log.info(...msg.map((m) => chalk.yellow(m)));
     },
     success(...msg) {
-        log.info(...msg.map((m) => chalk.green.bold(m)));
+        log.info(...msg.map((m) => chalk.green(m)));
     }
 };
 
@@ -451,11 +452,11 @@ async function installRust() {
     const spinner = getSpinner('Downloading Rust...');
     try {
         await shellExec(IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac);
-        spinner.succeed('Rust installed successfully.');
+        spinner.succeed(chalk.green('Rust installed successfully!'));
     }
     catch (error) {
         console.error('Error installing Rust:', error.message);
-        spinner.fail('Rust installation failed.');
+        spinner.fail(chalk.red('Rust installation failed!'));
         process.exit(1);
     }
 }
@@ -480,7 +481,7 @@ async function mergeConfig(url, options, tauriConf) {
     //Judge the type of URL, whether it is a file or a website.
     const pathExists = await fsExtra.pathExists(url);
     if (pathExists) {
-        logger.warn('Your input might be a local file.');
+        logger.warn('✼ Your input might be a local file.');
         tauriConf.pake.windows[0].url_type = 'local';
         const fileName = path.basename(url);
         const dirName = path.dirname(url);
@@ -524,7 +525,7 @@ async function mergeConfig(url, options, tauriConf) {
             tauriConf.tauri.bundle.targets = options.targets === 'all' ? ['deb', 'appimage'] : [options.targets];
         }
         else {
-            logger.warn(`The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`);
+            logger.warn(`✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`);
         }
     }
     // Set icon.
@@ -545,7 +546,7 @@ async function mergeConfig(url, options, tauriConf) {
             fileExt: '.icns',
             path: `icons/${name.toLowerCase()}.icns`,
             defaultIcon: 'icons/icon.icns',
-            message: 'MacOS icon must be .icns type.',
+            message: 'macOS icon must be .icns type.',
         },
     };
     const iconInfo = platformIconMap[platform];
@@ -555,7 +556,7 @@ async function mergeConfig(url, options, tauriConf) {
         let customIconExt = path.extname(options.icon).toLowerCase();
         if (customIconExt !== iconInfo.fileExt) {
             updateIconPath = false;
-            logger.warn(`${iconInfo.message}, but you give ${customIconExt}`);
+            logger.warn(`✼ ${iconInfo.message}, but you give ${customIconExt}`);
             tauriConf.tauri.bundle.icon = [iconInfo.defaultIcon];
         }
         else {
@@ -567,11 +568,11 @@ async function mergeConfig(url, options, tauriConf) {
             tauriConf.tauri.bundle.icon = [options.icon];
         }
         else {
-            logger.warn(`Icon will remain as default.`);
+            logger.warn(`✼ Icon will remain as default.`);
         }
     }
     else {
-        logger.warn('Custom icon path may be invalid. Default icon will be used instead.');
+        logger.warn('✼ Custom icon path may be invalid, default icon will be used instead.');
         tauriConf.tauri.bundle.icon = [iconInfo.defaultIcon];
     }
     // Set tray icon path.
@@ -587,13 +588,13 @@ async function mergeConfig(url, options, tauriConf) {
                 await fsExtra.copy(systemTrayIcon, trayIcoPath);
             }
             else {
-                logger.warn(`System tray icon must be .ico or .png, but you provided ${iconExt}.`);
-                logger.warn(`Default system tray icon will be used.`);
+                logger.warn(`✼ System tray icon must be .ico or .png, but you provided ${iconExt}.`);
+                logger.warn(`✼ Default system tray icon will be used.`);
             }
         }
         catch {
-            logger.warn(`${systemTrayIcon} not exists!`);
-            logger.warn(`Default system tray icon will remain unchanged.`);
+            logger.warn(`✼ ${systemTrayIcon} not exists!`);
+            logger.warn(`✼ Default system tray icon will remain unchanged.`);
         }
     }
     tauriConf.tauri.systemTray.iconPath = trayIconPath;
@@ -621,8 +622,8 @@ class BaseBuilder {
     }
     async prepare() {
         if (!IS_MAC) {
-            logger.info('The first use requires installing system dependencies.');
-            logger.info('See more in https://tauri.app/v1/guides/getting-started/prerequisites#installing.');
+            logger.info('⚙︎ The first use requires installing system dependencies.');
+            logger.info('⚙︎ See more in https://tauri.app/v1/guides/getting-started/prerequisites.');
         }
         if (!checkRustInstalled()) {
             const res = await prompts({
@@ -634,14 +635,14 @@ class BaseBuilder {
                 await installRust();
             }
             else {
-                logger.error('Error: Rust required to package your webapp!');
+                logger.error('✕ Rust required to package your webapp.');
                 process.exit(0);
             }
         }
         const isChina = await isChinaDomain("www.npmjs.com");
         const spinner = getSpinner('Installing package...');
         if (isChina) {
-            logger.info("Located in China, using npm/rsProxy CN mirror.");
+            logger.info("⚙︎ Located in China, using npm/rsProxy CN mirror.");
             const rustProjectDir = path.join(npmDirectory, 'src-tauri', ".cargo");
             await fsExtra.ensureDir(rustProjectDir);
             const projectCnConf = path.join(npmDirectory, "src-tauri", "rust_proxy.toml");
@@ -652,7 +653,7 @@ class BaseBuilder {
         else {
             await shellExec(`cd "${npmDirectory}" && npm install`);
         }
-        spinner.succeed('Package installed.');
+        spinner.succeed(chalk.green('Package installed!'));
     }
     async build(url) {
         await this.buildAndCopy(url, this.options.targets);
@@ -800,7 +801,7 @@ async function handleIcon(options) {
         }
     }
     else {
-        logger.info('No app icon provided, default icon used. Use --icon option to assign an icon.');
+        logger.warn('✼ No icon given, default in use. For a custom icon, use --icon option.');
         const iconPath = IS_WIN ? 'src-tauri/png/icon_256.ico' : IS_LINUX ? 'src-tauri/png/icon_512.png' : 'src-tauri/icons/icon.icns';
         return path.join(npmDirectory, iconPath);
     }
@@ -820,11 +821,11 @@ async function downloadIcon(iconUrl) {
         const { path: tempPath } = await dir();
         const iconPath = `${tempPath}/icon.${fileDetails.ext}`;
         await fsExtra.outputFile(iconPath, iconData);
-        spinner.succeed('Icon downloaded successfully.');
+        spinner.succeed(chalk.green('Icon downloaded successfully!'));
         return iconPath;
     }
     catch (error) {
-        spinner.fail('Icon download failed.');
+        spinner.fail(chalk.red('Icon download failed!'));
         if (error.response && error.response.status === 404) {
             return null;
         }
@@ -895,13 +896,13 @@ async function handleOptions(options, url) {
         name = namePrompt || defaultName;
     }
     if (!isValidName(name, platform)) {
-        const LINUX_NAME_ERROR = `Package name is invalid. It should only include lowercase letters, numbers, and dashes, and must contain at least one lowercase letter. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`;
-        const DEFAULT_NAME_ERROR = `Package name is invalid. It should only include letters and numbers, and must contain at least one letter. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead.`;
+        const LINUX_NAME_ERROR = `✕ Package name is invalid. It should only include lowercase letters, numbers, and dashes, and must contain at least one lowercase letter. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`;
+        const DEFAULT_NAME_ERROR = `✕ Package name is invalid. It should only include letters and numbers, and must contain at least one letter. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead.`;
         const errorMsg = platform === 'linux' ? LINUX_NAME_ERROR : DEFAULT_NAME_ERROR;
         logger.error(errorMsg);
         if (isActions) {
             name = resolveAppName(url, platform);
-            logger.warn(`Inside github actions, use the default name: ${name}`);
+            logger.warn(`✼ Inside github actions, use the default name: ${name}`);
         }
         else {
             process.exit(1);
