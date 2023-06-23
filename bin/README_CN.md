@@ -69,7 +69,7 @@ pake [url] [options]
 指定应用程序的图标，支持本地或远程文件。默认使用 Pake 的内置图标。您可以访问 [icon-icons](https://icon-icons.com)
 或 [macOSicons](https://macosicons.com/#/) 下载自定义图标。
 
-- MacOS 要求使用 `.icns` 格式。
+- macOS 要求使用 `.icns` 格式。
 - Windows 要求使用 `.ico` 格式。
 - Linux 要求使用 `.png` 格式。
 
@@ -95,7 +95,7 @@ pake [url] [options]
 
 #### [transparent]
 
-设置是否启用沉浸式头部，默认为 `false`（不启用）。在 MacOS 上推荐启用此选项。
+设置是否启用沉浸式头部，默认为 `false`（不启用）。当前只对 macOS 上有效。
 
 ```shell
 --transparent
@@ -111,7 +111,7 @@ pake [url] [options]
 
 #### [multi-arch]
 
-设置打包结果同时支持 Intel 和 M1 芯片，仅适用于 MacOS，默认为 `false`。
+设置打包结果同时支持 Intel 和 M1 芯片，仅适用于 macOS，默认为 `false`。
 
 ##### 准备工作
 
@@ -153,7 +153,7 @@ Linux，默认为 `all`。
 
 #### [show-menu]
 
-设置是否显示菜单栏，默认不显示。在 MacOS 上推荐启用此选项。
+设置是否显示菜单栏，默认不显示。在 macOS 上推荐启用此选项。
 
 ```shell
 --show-menu

@@ -121,7 +121,7 @@ export async function mergeConfig(
       fileExt: '.icns',
       path: `icons/${name.toLowerCase()}.icns`,
       defaultIcon: 'icons/icon.icns',
-      message: 'MacOS icon must be .icns type.',
+      message: 'macOS icon must be .icns type.',
     },
   };
   const iconInfo = platformIconMap[platform];
