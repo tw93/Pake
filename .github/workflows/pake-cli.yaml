@@ -28,11 +28,6 @@ on:
         description: "[Height, Optional]"
         required: false
         default: "780"
-      resize:
-        description: "[Resize, Optional]"
-        required: false
-        type: boolean
-        default: true
       transparent:
         description: "[Transparent, Optional, MacOS only]"
         required: false
