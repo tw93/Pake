@@ -15,7 +15,6 @@ export async function mergeConfig(
     height,
     fullscreen,
     transparent,
-    resizable,
     userAgent,
     showMenu,
     showSystemTray,
@@ -23,6 +22,7 @@ export async function mergeConfig(
     iterCopyFile,
     identifier,
     name,
+    resizable = true,
   } = options;
 
   const { platform } = process;
