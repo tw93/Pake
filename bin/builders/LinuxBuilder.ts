@@ -12,7 +12,7 @@ export default class LinuxBuilder extends BaseBuilder {
   async build(url: string, options: PakeAppOptions) {
     const { name } = options;
     await mergeConfig(url, options, tauriConfig);
-    await this.runBuildCommand(npmDirectory, 'npm run build');
+    await this.runBuildCommand();
 
     const arch = process.arch === "x64" ? "amd64" : process.arch;
 

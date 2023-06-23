@@ -1,6 +1,6 @@
-import ora from 'ora';
 import shelljs from 'shelljs';
 
+import { getSpinner } from "@/utils/info";
 import { IS_WIN } from '@/utils/platform';
 import { shellExec } from '@/utils/shell';
 import { isChinaDomain } from '@/utils/ip';
@@ -12,16 +12,14 @@ export async function installRust() {
     : "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
   const rustInstallScriptForWindows = 'winget install --id Rustlang.Rustup';
 
-  const spinner = ora('Downloading Rust').start();
+  const spinner = getSpinner('Downloading Rust.');
 
   try {
     await shellExec(IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac);
-    spinner.succeed();
+    spinner.succeed('Rust installed successfully.');
   } catch (error) {
     console.error('Error installing Rust:', error.message);
-    spinner.fail();
-
-    //@ts-ignore
+    spinner.fail('Rust installation failed.');
     process.exit(1);
   }
 }

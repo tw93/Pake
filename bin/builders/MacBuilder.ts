@@ -14,10 +14,10 @@ export default class MacBuilder extends BaseBuilder {
     await mergeConfig(url, options, tauriConfig);
     let dmgName: string;
     if (options.multiArch) {
-      await this.runBuildCommand(npmDirectory, 'npm run build:mac');
+      await this.runBuildCommand('npm run build:mac');
       dmgName = `${name}_${tauriConfig.package.version}_universal.dmg`;
     } else {
-      await this.runBuildCommand(npmDirectory, 'npm run build');
+      await this.runBuildCommand();
       let arch = process.arch === "arm64" ? "aarch64" : process.arch;
       dmgName = `${name}_${tauriConfig.package.version}_${arch}.dmg`;
     }

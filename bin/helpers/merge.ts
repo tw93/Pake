@@ -37,33 +37,12 @@ export async function mergeConfig(
   };
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
 
-  // Determine whether the package name is valid.
-  // for Linux, package name must be a-z, 0-9 or "-", not allow to A-Z and other
-  const platformRegexMapping: PlatformMap = {
-    linux: /[0-9]*[a-z]+[0-9]*\-?[0-9]*[a-z]*[0-9]*\-?[0-9]*[a-z]*[0-9]*/,
-    default: /([0-9]*[a-zA-Z]+[0-9]*)+/,
-  };
-
-  const reg = platformRegexMapping[platform] || platformRegexMapping.default;
-  const nameCheck = reg.test(name) && reg.exec(name)[0].length === name.length;
-
-  if (!nameCheck) {
-    const errorMsg =
-      platform === 'linux'
-        ? `Package name is invalid. It should only include lowercase letters, numbers, and dashes, and must contain at least one lowercase letter. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`
-        : `Package name is invalid. It should only include letters and numbers, and must contain at least one letter. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead.`;
-
-    logger.error(errorMsg);
-    process.exit();
-  }
   tauriConf.package.productName = name;
   tauriConf.tauri.bundle.identifier = identifier;
 
-  // Judge the type of URL, whether it is a file or a website.
-  // If it is a file and the recursive copy function is enabled then the file and all files in its parent folder need to be copied to the "src" directory. Otherwise, only the single file will be copied.
-  const urlExists = await fsExtra.pathExists(url);
-
-  if (urlExists) {
+  //Judge the type of URL, whether it is a file or a website.
+  const pathExists = await fsExtra.pathExists(url);
+  if (pathExists) {
     logger.warn('Your input might be a local file.');
     tauriConf.pake.windows[0].url_type = 'local';
 

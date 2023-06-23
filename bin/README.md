@@ -1,3 +1,5 @@
+<h4 align="right"><strong>English</strong> | <a href="https://github.com/tw93/Pake/blob/master/bin/README_CN.md">简体中文</a></h4>
+
 ## Installation
 
 Ensure that your Node.js version is 16.0 or higher (e.g., 16.8). Avoid using `sudo` for the installation. If you encounter permission issues with npm, refer to [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo).
@@ -38,14 +40,14 @@ npm install pake-cli -g
 ## Usage
 
 ```bash
-pake url [options]
+pake [url] [options]
 ```
 
 The packaged application will be located in the current working directory by default. The first packaging might take some time due to environment configuration. Please be patient.
 
 > **Note**: Packaging requires the Rust environment. If Rust is not installed, you will be prompted for installation confirmation. In case of installation failure or timeout, you can [install it manually](https://www.rust-lang.org/tools/install).
 
-### url
+### [url]
 
 The URL is the link to the web page you want to package or the path to a local HTML file. This is mandatory.
 
@@ -59,8 +61,6 @@ Specify the application name. If not provided, you will be prompted to enter it.
 
 ```shell
 --name <value>
-# or
--n <value>
 ```
 
 #### [icon]
@@ -95,8 +95,6 @@ Set the width of the application window. Default is `1200px`.
 
 Enable or disable immersive header. Default is `false`. Use the following command to enable this feature.
 
-```
-
 ```shell
 --transparent
 ```
@@ -114,7 +112,7 @@ Determine whether the application launches in full screen. Default is `false`. U
 Determine whether the window is resizable. Default is `true`. Use the following command to disable window resizing.
 
 ```shell
---no-resizable
+--resizable
 ```
 
 #### [multi-arch]

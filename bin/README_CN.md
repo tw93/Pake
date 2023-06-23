@@ -1,3 +1,5 @@
+<h4 align="right"><strong><a href="https://github.com/tw93/Pake/tree/master/bin">English</a></strong> | 简体中文</h4>
+
 ## 安装
 
 请确保您的 Node.js 版本为 16 或更高版本（例如 16.8）。请避免使用 `sudo` 进行安装。如果 npm 报告权限问题，请参考 [如何在不使用 sudo 的情况下修复 npm 报错](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo)。
@@ -39,14 +41,14 @@ npm install pake-cli -g
 ## 使用方法
 
 ```bash
-pake url [options]
+pake [url] [options]
 ```
 
 应用程序的打包结果将默认保存在当前工作目录。由于首次打包需要配置环境，这可能需要一些时间，请耐心等待。
 
 > **注意**：打包过程需要使用 `Rust` 环境。如果您没有安装 `Rust`，系统会提示您是否要安装。如果遇到安装失败或超时的问题，您可以 [手动安装](https://www.rust-lang.org/tools/install)。
 
-### url
+### [url]
 
 `url` 是您需要打包的网页链接 🔗 或本地 HTML 文件的路径，此参数为必填。
 
@@ -104,7 +106,7 @@ pake url [options]
 设置应用窗口是否可以调整大小，默认为 `true`（可调整）。使用以下命令可以禁止调整窗口大小。
 
 ```shell
---no-resizable
+--resizable
 ```
 
 #### [fullscreen]

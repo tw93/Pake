@@ -12,7 +12,7 @@ export default class WinBuilder extends BaseBuilder {
   async build(url: string, options: PakeAppOptions) {
     const { name } = options;
     await mergeConfig(url, options, tauriConfig);
-    await this.runBuildCommand(npmDirectory, 'npm run build');
+    await this.runBuildCommand();
 
     const language = tauriConfig.tauri.bundle.windows.wix.language[0];
     const arch = process.arch;

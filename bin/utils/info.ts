@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import prompts from "prompts";
+import ora from "ora";
 
 // Generates an identifier based on the given URL.
 export function getIdentifier(url: string) {
@@ -18,4 +19,24 @@ export async function promptText(message: string, initial?: string): Promise<str
     initial,
   });
   return response.content;
+}
+
+export function capitalizeFirstLetter(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+export function getSpinner(text: string) {
+  const loadingType = {
+    "interval": 100,
+    "frames": [
+      "✶",
+      "✵",
+      "✸",
+      "✹",
+      "✺",
+      "✹",
+      "✷",
+    ]
+  }
+  return ora({ text: `${text}\n`, spinner: loadingType }).start();
 }

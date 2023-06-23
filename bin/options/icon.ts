@@ -1,3 +1,4 @@
+import { getSpinner } from "@/utils/info";
 import path from 'path';
 import axios from 'axios';
 import fsExtra from "fs-extra";
@@ -24,9 +25,9 @@ export async function handleIcon(options: PakeAppOptions) {
 }
 
 export async function downloadIcon(iconUrl: string) {
+  const spinner = getSpinner('Downloading icon.');
   try {
     const iconResponse = await axios.get(iconUrl, { responseType: 'arraybuffer' });
-
     const iconData = await iconResponse.data;
 
     if (!iconData) {
@@ -41,9 +42,10 @@ export async function downloadIcon(iconUrl: string) {
     const { path: tempPath } = await dir();
     const iconPath = `${tempPath}/icon.${fileDetails.ext}`;
     await fsExtra.outputFile(iconPath, iconData);
-
+    spinner.succeed('Icon downloaded successfully.');
     return iconPath;
   } catch (error) {
+    spinner.fail('Icon download failed.');
     if (error.response && error.response.status === 404) {
       return null;
     }

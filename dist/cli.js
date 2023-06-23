@@ -1,17 +1,17 @@
-import ora from 'ora';
 import log from 'loglevel';
+import chalk from 'chalk';
 import { InvalidArgumentError, program } from 'commander';
 import fsExtra from 'fs-extra';
+import crypto from 'crypto';
+import prompts from 'prompts';
+import ora from 'ora';
 import path from 'path';
 import axios from 'axios';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
-import chalk from 'chalk';
 import { fileURLToPath } from 'url';
 import psl from 'psl';
 import isUrl from 'is-url';
-import crypto from 'crypto';
-import prompts from 'prompts';
 import shelljs from 'shelljs';
 import dns from 'dns';
 import http from 'http';
@@ -36,6 +36,42 @@ const logger = {
         log.info(...msg.map((m) => chalk.green.bold(m)));
     }
 };
+
+// Generates an identifier based on the given URL.
+function getIdentifier(url) {
+    const postFixHash = crypto.createHash('md5')
+        .update(url)
+        .digest('hex')
+        .substring(0, 6);
+    return `pake-${postFixHash}`;
+}
+async function promptText(message, initial) {
+    const response = await prompts({
+        type: 'text',
+        name: 'content',
+        message,
+        initial,
+    });
+    return response.content;
+}
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+function getSpinner(text) {
+    const loadingType = {
+        "interval": 100,
+        "frames": [
+            "✶",
+            "✵",
+            "✸",
+            "✹",
+            "✺",
+            "✹",
+            "✷",
+        ]
+    };
+    return ora({ text: `${text}\n`, spinner: loadingType }).start();
+}
 
 // Convert the current module URL to a file path
 const currentModulePath = fileURLToPath(import.meta.url);
@@ -63,6 +99,7 @@ async function handleIcon(options) {
     }
 }
 async function downloadIcon(iconUrl) {
+    const spinner = getSpinner('Downloading icon.');
     try {
         const iconResponse = await axios.get(iconUrl, { responseType: 'arraybuffer' });
         const iconData = await iconResponse.data;
@@ -76,9 +113,11 @@ async function downloadIcon(iconUrl) {
         const { path: tempPath } = await dir();
         const iconPath = `${tempPath}/icon.${fileDetails.ext}`;
         await fsExtra.outputFile(iconPath, iconData);
+        spinner.succeed('Icon downloaded successfully.');
         return iconPath;
     }
     catch (error) {
+        spinner.fail('Icon download failed.');
         if (error.response && error.response.status === 404) {
             return null;
         }
@@ -125,37 +164,172 @@ function normalizeUrl(urlToNormalize) {
     }
 }
 
-// Generates an identifier based on the given URL.
-function getIdentifier(url) {
-    const postFixHash = crypto.createHash('md5')
-        .update(url)
-        .digest('hex')
-        .substring(0, 6);
-    return `pake-${postFixHash}`;
+function resolveAppName(name, platform) {
+    const domain = getDomain(name) || 'pake';
+    return platform !== 'linux' ? capitalizeFirstLetter(domain) : domain;
 }
-async function promptText(message, initial) {
-    const response = await prompts({
-        type: 'text',
-        name: 'content',
-        message,
-        initial,
-    });
-    return response.content;
+function isValidName(name, platform) {
+    const platformRegexMapping = {
+        linux: /^[a-z0-9]+(-[a-z0-9]+)*$/,
+        default: /^[a-zA-Z0-9]+$/,
+    };
+    const reg = platformRegexMapping[platform] || platformRegexMapping.default;
+    return !!name && reg.test(name);
 }
-
 async function handleOptions(options, url) {
+    const { platform } = process;
+    const isActions = process.env.GITHUB_ACTIONS;
+    let name = options.name;
+    const pathExists = await fsExtra.pathExists(url);
+    if (!options.name) {
+        const defaultName = pathExists ? "" : resolveAppName(url, platform);
+        const promptMessage = 'Enter your application name';
+        const namePrompt = await promptText(promptMessage, defaultName);
+        name = namePrompt || defaultName;
+    }
+    if (!isValidName(name, platform)) {
+        const LINUX_NAME_ERROR = `Package name is invalid. It should only include lowercase letters, numbers, and dashes, and must contain at least one lowercase letter. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`;
+        const DEFAULT_NAME_ERROR = `Package name is invalid. It should only include letters and numbers, and must contain at least one letter. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead.`;
+        const errorMsg = platform === 'linux' ? LINUX_NAME_ERROR : DEFAULT_NAME_ERROR;
+        logger.error(errorMsg);
+        if (isActions) {
+            name = resolveAppName(url, platform);
+            logger.warn(`Inside github actions, use the default name: ${name}`);
+        }
+        else {
+            process.exit(1);
+        }
+    }
     const appOptions = {
         ...options,
+        name,
         identifier: getIdentifier(url),
     };
-    let urlExists = await fsExtra.pathExists(url);
-    if (!appOptions.name) {
-        const defaultName = urlExists ? "" : getDomain(url);
-        const promptMessage = 'Enter your application name';
-        appOptions.name = await promptText(promptMessage, defaultName);
-    }
     appOptions.icon = await handleIcon(appOptions);
     return appOptions;
+}
+
+function shellExec(command) {
+    return new Promise((resolve, reject) => {
+        shelljs.exec(command, { async: true, silent: false, cwd: npmDirectory }, (code) => {
+            if (code === 0) {
+                resolve(0);
+            }
+            else {
+                reject(new Error(`${code}`));
+            }
+        });
+    });
+}
+
+const resolve = promisify(dns.resolve);
+const ping = async (host) => {
+    const lookup = promisify(dns.lookup);
+    const ip = await lookup(host);
+    const start = new Date();
+    // Prevent timeouts from affecting user experience.
+    const requestPromise = new Promise((resolve, reject) => {
+        const req = http.get(`http://${ip.address}`, (res) => {
+            const delay = new Date().getTime() - start.getTime();
+            res.resume();
+            resolve(delay);
+        });
+        req.on('error', (err) => {
+            reject(err);
+        });
+    });
+    const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+            reject(new Error('Request timed out after 3 seconds'));
+        }, 1000);
+    });
+    return Promise.race([requestPromise, timeoutPromise]);
+};
+async function isChinaDomain(domain) {
+    try {
+        const [ip] = await resolve(domain);
+        return await isChinaIP(ip, domain);
+    }
+    catch (error) {
+        logger.debug(`${domain} can't be parse!`);
+        return true;
+    }
+}
+async function isChinaIP(ip, domain) {
+    try {
+        const delay = await ping(ip);
+        logger.debug(`${domain} latency is ${delay} ms`);
+        return delay > 1000;
+    }
+    catch (error) {
+        logger.debug(`ping ${domain} failed!`);
+        return true;
+    }
+}
+
+async function installRust() {
+    const isInChina = await isChinaDomain("sh.rustup.rs");
+    const rustInstallScriptForMac = isInChina
+        ? 'export RUSTUP_DIST_SERVER="https://rsproxy.cn" && export RUSTUP_UPDATE_ROOT="https://rsproxy.cn/rustup" && curl --proto "=https" --tlsv1.2 -sSf https://rsproxy.cn/rustup-init.sh | sh'
+        : "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
+    const rustInstallScriptForWindows = 'winget install --id Rustlang.Rustup';
+    const spinner = getSpinner('Downloading Rust');
+    try {
+        await shellExec(IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac);
+        spinner.succeed('Rust installed successfully');
+    }
+    catch (error) {
+        console.error('Error installing Rust:', error.message);
+        spinner.fail('Rust installation failed');
+        process.exit(1);
+    }
+}
+function checkRustInstalled() {
+    return shelljs.exec('rustc --version', { silent: true }).code === 0;
+}
+
+class BaseBuilder {
+    async prepare() {
+        // Windows and Linux need to install necessary build tools.
+        if (!IS_MAC) {
+            logger.info('The first use requires installing system dependencies.');
+            logger.info('See more in https://tauri.app/v1/guides/getting-started/prerequisites#installing.');
+        }
+        if (!checkRustInstalled()) {
+            const res = await prompts({
+                type: 'confirm',
+                message: 'Rust not detected. Install now?',
+                name: 'value',
+            });
+            if (res.value) {
+                await installRust();
+            }
+            else {
+                logger.error('Error: Rust required to package your webapp!');
+                process.exit(0);
+            }
+        }
+        const isChina = await isChinaDomain("www.npmjs.com");
+        const spinner = getSpinner('Installing package.');
+        if (isChina) {
+            logger.info("Located in China, using npm/rsProxy CN mirror.");
+            const rustProjectDir = path.join(npmDirectory, 'src-tauri', ".cargo");
+            await fsExtra.ensureDir(rustProjectDir);
+            const projectCnConf = path.join(npmDirectory, "src-tauri", "rust_proxy.toml");
+            const projectConf = path.join(rustProjectDir, "config");
+            await fsExtra.copy(projectCnConf, projectConf);
+            await shellExec(`cd "${npmDirectory}" && npm install --registry=https://registry.npmmirror.com`);
+        }
+        else {
+            await shellExec(`cd "${npmDirectory}" && npm install`);
+        }
+        spinner.succeed('Package installed.');
+    }
+    async runBuildCommand(command = "npm run build") {
+        const spinner = getSpinner('Building app.');
+        await shellExec(`cd "${npmDirectory}" && ${command}`);
+        spinner.stop();
+    }
 }
 
 var windows = [
@@ -358,128 +532,6 @@ let tauriConfig = {
     pake: pakeConf
 };
 
-function shellExec(command) {
-    return new Promise((resolve, reject) => {
-        shelljs.exec(command, { async: true, silent: false, cwd: npmDirectory }, (code) => {
-            if (code === 0) {
-                resolve(0);
-            }
-            else {
-                reject(new Error(`${code}`));
-            }
-        });
-    });
-}
-
-const resolve = promisify(dns.resolve);
-const ping = async (host) => {
-    const lookup = promisify(dns.lookup);
-    const ip = await lookup(host);
-    const start = new Date();
-    // Prevent timeouts from affecting user experience.
-    const requestPromise = new Promise((resolve, reject) => {
-        const req = http.get(`http://${ip.address}`, (res) => {
-            const delay = new Date().getTime() - start.getTime();
-            res.resume();
-            resolve(delay);
-        });
-        req.on('error', (err) => {
-            reject(err);
-        });
-    });
-    const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => {
-            reject(new Error('Request timed out after 3 seconds'));
-        }, 3000);
-    });
-    return Promise.race([requestPromise, timeoutPromise]);
-};
-async function isChinaDomain(domain) {
-    try {
-        const [ip] = await resolve(domain);
-        return await isChinaIP(ip, domain);
-    }
-    catch (error) {
-        logger.debug(`${domain} can't be parse!`);
-        return false;
-    }
-}
-async function isChinaIP(ip, domain) {
-    try {
-        const delay = await ping(ip);
-        logger.debug(`${domain} latency is ${delay} ms`);
-        return delay > 500;
-    }
-    catch (error) {
-        logger.debug(`ping ${domain} failed!`);
-        return false;
-    }
-}
-
-async function installRust() {
-    const isInChina = await isChinaDomain("sh.rustup.rs");
-    const rustInstallScriptForMac = isInChina
-        ? 'export RUSTUP_DIST_SERVER="https://rsproxy.cn" && export RUSTUP_UPDATE_ROOT="https://rsproxy.cn/rustup" && curl --proto "=https" --tlsv1.2 -sSf https://rsproxy.cn/rustup-init.sh | sh'
-        : "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
-    const rustInstallScriptForWindows = 'winget install --id Rustlang.Rustup';
-    const spinner = ora('Downloading Rust').start();
-    try {
-        await shellExec(IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac);
-        spinner.succeed();
-    }
-    catch (error) {
-        console.error('Error installing Rust:', error.message);
-        spinner.fail();
-        //@ts-ignore
-        process.exit(1);
-    }
-}
-function checkRustInstalled() {
-    return shelljs.exec('rustc --version', { silent: true }).code === 0;
-}
-
-class BaseBuilder {
-    async prepare() {
-        // Windows and Linux need to install necessary build tools.
-        if (!IS_MAC) {
-            logger.info('Install Rust and required build tools to build the app.');
-            logger.info('See more in https://tauri.app/v1/guides/getting-started/prerequisites#installing.');
-        }
-        if (checkRustInstalled()) {
-            return;
-        }
-        const res = await prompts({
-            type: 'confirm',
-            message: 'Rust not detected. Install now?',
-            name: 'value',
-        });
-        if (res.value) {
-            await installRust();
-        }
-        else {
-            logger.error('Error: Rust required to package your webapp!');
-            process.exit(2);
-        }
-    }
-    async runBuildCommand(directory, command) {
-        const spinner = ora('Building...').start();
-        setTimeout(() => spinner.succeed(), 5000);
-        const isChina = await isChinaDomain("www.npmjs.com");
-        if (isChina) {
-            logger.info("Located in China, using npm/Rust CN mirror.");
-            const rustProjectDir = path.join(directory, 'src-tauri', ".cargo");
-            await fsExtra.ensureDir(rustProjectDir);
-            const projectCnConf = path.join(directory, "src-tauri", "rust_proxy.toml");
-            const projectConf = path.join(rustProjectDir, "config");
-            await fsExtra.copy(projectCnConf, projectConf);
-            await shellExec(`cd "${directory}" && npm install --registry=https://registry.npmmirror.com && ${command}`);
-        }
-        else {
-            await shellExec(`cd "${directory}" && npm install && ${command}`);
-        }
-    }
-}
-
 async function mergeConfig(url, options, tauriConf) {
     const { width, height, fullscreen, transparent, resizable, userAgent, showMenu, showSystemTray, systemTrayIcon, iterCopyFile, identifier, name, } = options;
     const { platform } = process;
@@ -492,27 +544,11 @@ async function mergeConfig(url, options, tauriConf) {
         resizable,
     };
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
-    // Determine whether the package name is valid.
-    // for Linux, package name must be a-z, 0-9 or "-", not allow to A-Z and other
-    const platformRegexMapping = {
-        linux: /[0-9]*[a-z]+[0-9]*\-?[0-9]*[a-z]*[0-9]*\-?[0-9]*[a-z]*[0-9]*/,
-        default: /([0-9]*[a-zA-Z]+[0-9]*)+/,
-    };
-    const reg = platformRegexMapping[platform] || platformRegexMapping.default;
-    const nameCheck = reg.test(name) && reg.exec(name)[0].length === name.length;
-    if (!nameCheck) {
-        const errorMsg = platform === 'linux'
-            ? `Package name is invalid. It should only include lowercase letters, numbers, and dashes, and must contain at least one lowercase letter. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`
-            : `Package name is invalid. It should only include letters and numbers, and must contain at least one letter. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead.`;
-        logger.error(errorMsg);
-        process.exit();
-    }
     tauriConf.package.productName = name;
     tauriConf.tauri.bundle.identifier = identifier;
-    // Judge the type of URL, whether it is a file or a website.
-    // If it is a file and the recursive copy function is enabled then the file and all files in its parent folder need to be copied to the "src" directory. Otherwise, only the single file will be copied.
-    const urlExists = await fsExtra.pathExists(url);
-    if (urlExists) {
+    //Judge the type of URL, whether it is a file or a website.
+    const pathExists = await fsExtra.pathExists(url);
+    if (pathExists) {
         logger.warn('Your input might be a local file.');
         tauriConf.pake.windows[0].url_type = 'local';
         const fileName = path.basename(url);
@@ -654,11 +690,11 @@ class MacBuilder extends BaseBuilder {
         await mergeConfig(url, options, tauriConfig);
         let dmgName;
         if (options.multiArch) {
-            await this.runBuildCommand(npmDirectory, 'npm run build:mac');
+            await this.runBuildCommand('npm run build:mac');
             dmgName = `${name}_${tauriConfig.package.version}_universal.dmg`;
         }
         else {
-            await this.runBuildCommand(npmDirectory, 'npm run build');
+            await this.runBuildCommand();
             let arch = process.arch === "arm64" ? "aarch64" : process.arch;
             dmgName = `${name}_${tauriConfig.package.version}_${arch}.dmg`;
         }
@@ -679,7 +715,7 @@ class WinBuilder extends BaseBuilder {
     async build(url, options) {
         const { name } = options;
         await mergeConfig(url, options, tauriConfig);
-        await this.runBuildCommand(npmDirectory, 'npm run build');
+        await this.runBuildCommand();
         const language = tauriConfig.tauri.bundle.windows.wix.language[0];
         const arch = process.arch;
         const msiName = `${name}_${tauriConfig.package.version}_${arch}_${language}.msi`;
@@ -699,7 +735,7 @@ class LinuxBuilder extends BaseBuilder {
     async build(url, options) {
         const { name } = options;
         await mergeConfig(url, options, tauriConfig);
-        await this.runBuildCommand(npmDirectory, 'npm run build');
+        await this.runBuildCommand();
         const arch = process.arch === "x64" ? "amd64" : process.arch;
         if (options.targets === "deb" || options.targets === "all") {
             const debName = `${name}_${tauriConfig.package.version}_${arch}.deb`;
@@ -884,8 +920,7 @@ const DEFAULT_PAKE_OPTIONS = {
 };
 
 program
-    .version(packageJson.version)
-    .description('A CLI that can turn any webpage into a desktop app with Rust.')
+    .description(chalk.green('Pake: A CLI that can turn any webpage into a desktop app with Rust.'))
     .showHelpAfterError();
 program
     .argument('[url]', 'The web URL you want to package', validateUrlInput)
@@ -893,7 +928,7 @@ program
     .option('--icon <string>', 'Application icon', DEFAULT_PAKE_OPTIONS.icon)
     .option('--height <number>', 'Window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
     .option('--width <number>', 'Window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
-    .option('--no-resizable', 'Whether the window can be resizable', DEFAULT_PAKE_OPTIONS.resizable)
+    .option('--resizable', 'Whether the window can be resizable', DEFAULT_PAKE_OPTIONS.resizable)
     .option('--fullscreen', 'Start the packaged app in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
     .option('--transparent', 'Transparent title bar', DEFAULT_PAKE_OPTIONS.transparent)
     .option('--user-agent <string>', 'Custom user agent', DEFAULT_PAKE_OPTIONS.userAgent)
@@ -901,26 +936,30 @@ program
     .option('--show-system-tray', 'Show system tray in app', DEFAULT_PAKE_OPTIONS.showSystemTray)
     .option('--system-tray-icon <string>', 'Custom system tray icon', DEFAULT_PAKE_OPTIONS.systemTrayIcon)
     .option('--iter-copy-file', 'Copy files to app when URL is a local file', DEFAULT_PAKE_OPTIONS.iterCopyFile)
-    .option('--multi-arch', 'Available for Mac only, supports both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
+    .option('--multi-arch', 'Only for Mac, supports both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
     .option('--targets <string>', 'Only for Linux, option "deb", "appimage" or "all"', DEFAULT_PAKE_OPTIONS.targets)
     .option('--debug', 'Debug mode', DEFAULT_PAKE_OPTIONS.debug)
+    .version(packageJson.version, '-v, --version', 'Output the current version')
     .action(async (url, options) => {
-    //Check for update prompt
     await checkUpdateTips();
-    // If no URL is provided, display help information
     if (!url) {
-        program.help();
+        program.outputHelp((str) => {
+            const filteredOutput = str
+                .replace(/Usage:/g, '') // 隐藏 .usage 信息
+                .replace(/(-h,|--help)\s+.+\n/g, '') // 隐藏帮助信息
+                .replace(/\n\s*\n/g, '\n'); // 移除空行
+            return filteredOutput.trim(); // Trim any leading/trailing whitespace
+        });
+        process.exit(0);
     }
     log.setDefaultLevel('info');
     if (options.debug) {
         log.setLevel('debug');
     }
-    const spinner = ora('Preparing...').start();
+    const appOptions = await handleOptions(options, url);
+    log.debug('PakeAppOptions', appOptions);
     const builder = BuilderProvider.create();
     await builder.prepare();
-    const appOptions = await handleOptions(options, url);
-    spinner.succeed();
-    log.debug('PakeAppOptions', appOptions);
     await builder.build(url, appOptions);
 });
 program.parse();
