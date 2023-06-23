@@ -25,7 +25,7 @@ export async function handleIcon(options: PakeAppOptions) {
 }
 
 export async function downloadIcon(iconUrl: string) {
-  const spinner = getSpinner('Downloading icon.');
+  const spinner = getSpinner('Downloading icon...');
   try {
     const iconResponse = await axios.get(iconUrl, { responseType: 'arraybuffer' });
     const iconData = await iconResponse.data;

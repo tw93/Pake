@@ -1,23 +1,124 @@
-import log from 'loglevel';
 import chalk from 'chalk';
 import { InvalidArgumentError, program } from 'commander';
-import fsExtra from 'fs-extra';
-import crypto from 'crypto';
-import prompts from 'prompts';
-import ora from 'ora';
+import log from 'loglevel';
 import path from 'path';
-import axios from 'axios';
-import { dir } from 'tmp-promise';
-import { fileTypeFromBuffer } from 'file-type';
-import { fileURLToPath } from 'url';
-import psl from 'psl';
-import isUrl from 'is-url';
+import fsExtra from 'fs-extra';
+import prompts from 'prompts';
 import shelljs from 'shelljs';
+import { fileURLToPath } from 'url';
 import dns from 'dns';
 import http from 'http';
 import { promisify } from 'util';
+import crypto from 'crypto';
+import ora from 'ora';
 import updateNotifier from 'update-notifier';
+import axios from 'axios';
+import { dir } from 'tmp-promise';
+import { fileTypeFromBuffer } from 'file-type';
+import psl from 'psl';
+import isUrl from 'is-url';
 import fs from 'fs';
+
+var name = "pake-cli";
+var version = "2.1.2";
+var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
+var engines = {
+	node: ">=16.0.0"
+};
+var bin = {
+	pake: "./cli.js"
+};
+var repository = {
+	type: "git",
+	url: "https://github.com/tw93/pake.git"
+};
+var author = {
+	name: "Tw93",
+	email: "tw93@qq.com"
+};
+var keywords = [
+	"pake",
+	"pake-cli",
+	"rust",
+	"tauri",
+	"no-electron",
+	"productivity"
+];
+var files = [
+	"dist",
+	"src-tauri",
+	"cli.js"
+];
+var scripts = {
+	start: "npm run dev",
+	dev: "npm run tauri dev",
+	build: "npm run tauri build --release",
+	"build:mac": "npm run tauri build -- --target universal-apple-darwin",
+	"build:all-unix": "chmod +x ./script/build.sh && ./script/build.sh",
+	"build:all-windows": "pwsh ./script/build.ps1",
+	analyze: "cd src-tauri && cargo bloat --release --crates",
+	tauri: "tauri",
+	cli: "rollup -c rollup.config.js --watch",
+	"cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
+	prepublishOnly: "npm run cli:build"
+};
+var type = "module";
+var exports = "./dist/pake.js";
+var license = "MIT";
+var dependencies = {
+	"@tauri-apps/api": "^1.4.0",
+	"@tauri-apps/cli": "^1.4.0",
+	axios: "^1.1.3",
+	chalk: "^5.1.2",
+	commander: "^11.0.0",
+	"file-type": "^18.0.0",
+	"fs-extra": "^11.1.0",
+	"is-url": "^1.2.4",
+	loglevel: "^1.8.1",
+	ora: "^6.1.2",
+	prompts: "^2.4.2",
+	psl: "^1.9.0",
+	shelljs: "^0.8.5",
+	"tmp-promise": "^3.0.3",
+	"update-notifier": "^6.0.2"
+};
+var devDependencies = {
+	"@rollup/plugin-alias": "^4.0.2",
+	"@rollup/plugin-commonjs": "^23.0.2",
+	"@rollup/plugin-json": "^5.0.2",
+	"@rollup/plugin-terser": "^0.1.0",
+	"@types/fs-extra": "^9.0.13",
+	"@types/is-url": "^1.2.30",
+	"@types/page-icon": "^0.3.4",
+	"@types/prompts": "^2.4.1",
+	"@types/psl": "^1.1.0",
+	"@types/shelljs": "^0.8.11",
+	"@types/tmp": "^0.2.3",
+	"@types/update-notifier": "^6.0.1",
+	"app-root-path": "^3.1.0",
+	"cross-env": "^7.0.3",
+	rollup: "^3.3.0",
+	"rollup-plugin-typescript2": "^0.34.1",
+	tslib: "^2.4.1",
+	typescript: "^4.9.3"
+};
+var packageJson = {
+	name: name,
+	version: version,
+	description: description,
+	engines: engines,
+	bin: bin,
+	repository: repository,
+	author: author,
+	keywords: keywords,
+	files: files,
+	scripts: scripts,
+	type: type,
+	exports: exports,
+	license: license,
+	dependencies: dependencies,
+	devDependencies: devDependencies
+};
 
 const logger = {
     info(...msg) {
@@ -37,177 +138,10 @@ const logger = {
     }
 };
 
-// Generates an identifier based on the given URL.
-function getIdentifier(url) {
-    const postFixHash = crypto.createHash('md5')
-        .update(url)
-        .digest('hex')
-        .substring(0, 6);
-    return `pake-${postFixHash}`;
-}
-async function promptText(message, initial) {
-    const response = await prompts({
-        type: 'text',
-        name: 'content',
-        message,
-        initial,
-    });
-    return response.content;
-}
-function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
-function getSpinner(text) {
-    const loadingType = {
-        "interval": 100,
-        "frames": [
-            "✶",
-            "✵",
-            "✸",
-            "✹",
-            "✺",
-            "✹",
-            "✷",
-        ]
-    };
-    return ora({ text: `${text}\n`, spinner: loadingType }).start();
-}
-
 // Convert the current module URL to a file path
 const currentModulePath = fileURLToPath(import.meta.url);
 // Resolve the parent directory of the current module
 const npmDirectory = path.join(path.dirname(currentModulePath), '..');
-
-const { platform: platform$2 } = process;
-const IS_MAC = platform$2 === 'darwin';
-const IS_WIN = platform$2 === 'win32';
-const IS_LINUX = platform$2 === 'linux';
-
-async function handleIcon(options) {
-    if (options.icon) {
-        if (options.icon.startsWith('http')) {
-            return downloadIcon(options.icon);
-        }
-        else {
-            return path.resolve(options.icon);
-        }
-    }
-    else {
-        logger.info('No app icon provided, default icon used. Use --icon option to assign an icon.');
-        const iconPath = IS_WIN ? 'src-tauri/png/icon_256.ico' : IS_LINUX ? 'src-tauri/png/icon_512.png' : 'src-tauri/icons/icon.icns';
-        return path.join(npmDirectory, iconPath);
-    }
-}
-async function downloadIcon(iconUrl) {
-    const spinner = getSpinner('Downloading icon.');
-    try {
-        const iconResponse = await axios.get(iconUrl, { responseType: 'arraybuffer' });
-        const iconData = await iconResponse.data;
-        if (!iconData) {
-            return null;
-        }
-        const fileDetails = await fileTypeFromBuffer(iconData);
-        if (!fileDetails) {
-            return null;
-        }
-        const { path: tempPath } = await dir();
-        const iconPath = `${tempPath}/icon.${fileDetails.ext}`;
-        await fsExtra.outputFile(iconPath, iconData);
-        spinner.succeed('Icon downloaded successfully.');
-        return iconPath;
-    }
-    catch (error) {
-        spinner.fail('Icon download failed.');
-        if (error.response && error.response.status === 404) {
-            return null;
-        }
-        throw error;
-    }
-}
-
-// Extracts the domain from a given URL.
-function getDomain(inputUrl) {
-    try {
-        const url = new URL(inputUrl);
-        // Use PSL to parse domain names.
-        const parsed = psl.parse(url.hostname);
-        // If domain is available, split it and return the SLD.
-        if ("domain" in parsed && parsed.domain) {
-            return parsed.domain.split('.')[0];
-        }
-        else {
-            return null;
-        }
-    }
-    catch (error) {
-        return null;
-    }
-}
-// Appends 'https://' protocol to the URL if not present.
-function appendProtocol(inputUrl) {
-    try {
-        new URL(inputUrl);
-        return inputUrl;
-    }
-    catch {
-        return `https://${inputUrl}`;
-    }
-}
-// Normalizes the URL by ensuring it has a protocol and is valid.
-function normalizeUrl(urlToNormalize) {
-    const urlWithProtocol = appendProtocol(urlToNormalize);
-    if (isUrl(urlWithProtocol)) {
-        return urlWithProtocol;
-    }
-    else {
-        throw new Error(`Your url "${urlWithProtocol}" is invalid`);
-    }
-}
-
-function resolveAppName(name, platform) {
-    const domain = getDomain(name) || 'pake';
-    return platform !== 'linux' ? capitalizeFirstLetter(domain) : domain;
-}
-function isValidName(name, platform) {
-    const platformRegexMapping = {
-        linux: /^[a-z0-9]+(-[a-z0-9]+)*$/,
-        default: /^[a-zA-Z0-9]+$/,
-    };
-    const reg = platformRegexMapping[platform] || platformRegexMapping.default;
-    return !!name && reg.test(name);
-}
-async function handleOptions(options, url) {
-    const { platform } = process;
-    const isActions = process.env.GITHUB_ACTIONS;
-    let name = options.name;
-    const pathExists = await fsExtra.pathExists(url);
-    if (!options.name) {
-        const defaultName = pathExists ? "" : resolveAppName(url, platform);
-        const promptMessage = 'Enter your application name';
-        const namePrompt = await promptText(promptMessage, defaultName);
-        name = namePrompt || defaultName;
-    }
-    if (!isValidName(name, platform)) {
-        const LINUX_NAME_ERROR = `Package name is invalid. It should only include lowercase letters, numbers, and dashes, and must contain at least one lowercase letter. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`;
-        const DEFAULT_NAME_ERROR = `Package name is invalid. It should only include letters and numbers, and must contain at least one letter. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead.`;
-        const errorMsg = platform === 'linux' ? LINUX_NAME_ERROR : DEFAULT_NAME_ERROR;
-        logger.error(errorMsg);
-        if (isActions) {
-            name = resolveAppName(url, platform);
-            logger.warn(`Inside github actions, use the default name: ${name}`);
-        }
-        else {
-            process.exit(1);
-        }
-    }
-    const appOptions = {
-        ...options,
-        name,
-        identifier: getIdentifier(url),
-    };
-    appOptions.icon = await handleIcon(appOptions);
-    return appOptions;
-}
 
 function shellExec(command) {
     return new Promise((resolve, reject) => {
@@ -267,20 +201,61 @@ async function isChinaIP(ip, domain) {
     }
 }
 
+// Generates an identifier based on the given URL.
+function getIdentifier(url) {
+    const postFixHash = crypto.createHash('md5')
+        .update(url)
+        .digest('hex')
+        .substring(0, 6);
+    return `pake-${postFixHash}`;
+}
+async function promptText(message, initial) {
+    const response = await prompts({
+        type: 'text',
+        name: 'content',
+        message,
+        initial,
+    });
+    return response.content;
+}
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+function getSpinner(text) {
+    const loadingType = {
+        "interval": 100,
+        "frames": [
+            "✶",
+            "✵",
+            "✸",
+            "✹",
+            "✺",
+            "✹",
+            "✷",
+        ]
+    };
+    return ora({ text: `${text}\n`, spinner: loadingType }).start();
+}
+
+const { platform: platform$2 } = process;
+const IS_MAC = platform$2 === 'darwin';
+const IS_WIN = platform$2 === 'win32';
+const IS_LINUX = platform$2 === 'linux';
+
 async function installRust() {
     const isInChina = await isChinaDomain("sh.rustup.rs");
     const rustInstallScriptForMac = isInChina
         ? 'export RUSTUP_DIST_SERVER="https://rsproxy.cn" && export RUSTUP_UPDATE_ROOT="https://rsproxy.cn/rustup" && curl --proto "=https" --tlsv1.2 -sSf https://rsproxy.cn/rustup-init.sh | sh'
         : "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
     const rustInstallScriptForWindows = 'winget install --id Rustlang.Rustup';
-    const spinner = getSpinner('Downloading Rust');
+    const spinner = getSpinner('Downloading Rust...');
     try {
         await shellExec(IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac);
-        spinner.succeed('Rust installed successfully');
+        spinner.succeed('Rust installed successfully.');
     }
     catch (error) {
         console.error('Error installing Rust:', error.message);
-        spinner.fail('Rust installation failed');
+        spinner.fail('Rust installation failed.');
         process.exit(1);
     }
 }
@@ -310,7 +285,7 @@ class BaseBuilder {
             }
         }
         const isChina = await isChinaDomain("www.npmjs.com");
-        const spinner = getSpinner('Installing package.');
+        const spinner = getSpinner('Installing package...');
         if (isChina) {
             logger.info("Located in China, using npm/rsProxy CN mirror.");
             const rustProjectDir = path.join(npmDirectory, 'src-tauri', ".cargo");
@@ -326,9 +301,9 @@ class BaseBuilder {
         spinner.succeed('Package installed.');
     }
     async runBuildCommand(command = "npm run build") {
-        const spinner = getSpinner('Building app.');
+        const spinner = getSpinner('Building app...');
+        setTimeout(() => spinner.stop(), 2000);
         await shellExec(`cd "${npmDirectory}" && ${command}`);
-        spinner.stop();
     }
 }
 
@@ -702,8 +677,8 @@ class MacBuilder extends BaseBuilder {
         const distPath = path.resolve(`${name}.dmg`);
         await fsExtra.copy(appPath, distPath);
         await fsExtra.remove(appPath);
-        logger.success('Build success!');
-        logger.success('App installer located in', distPath);
+        logger.success('✔ Build success!');
+        logger.success('✔ App installer located in', distPath);
     }
     getBuildAppPath(npmDirectory, dmgName, multiArch) {
         const dmgPath = multiArch ? 'src-tauri/target/universal-apple-darwin/release/bundle/dmg' : 'src-tauri/target/release/bundle/dmg';
@@ -723,8 +698,8 @@ class WinBuilder extends BaseBuilder {
         const distPath = path.resolve(`${name}.msi`);
         await fsExtra.copy(appPath, distPath);
         await fsExtra.remove(appPath);
-        logger.success('Build success!');
-        logger.success('App installer located in', distPath);
+        logger.success('✔ Build success!');
+        logger.success('✔ App installer located in', distPath);
     }
     getBuildAppPath(npmDirectory, msiName) {
         return path.join(npmDirectory, 'src-tauri/target/release/bundle/msi', msiName);
@@ -743,8 +718,8 @@ class LinuxBuilder extends BaseBuilder {
             const distPath = path.resolve(`${name}.deb`);
             await fsExtra.copy(appPath, distPath);
             await fsExtra.remove(appPath);
-            logger.success('Build Deb success!');
-            logger.success('Deb app installer located in', distPath);
+            logger.success('✔ Build Deb success!');
+            logger.success('✔ Deb app installer located in', distPath);
         }
         if (options.targets === "appimage" || options.targets === "all") {
             const appImageName = `${name}_${tauriConfig.package.version}_${arch}.AppImage`;
@@ -752,8 +727,8 @@ class LinuxBuilder extends BaseBuilder {
             const distAppPath = path.resolve(`${name}.AppImage`);
             await fsExtra.copy(appImagePath, distAppPath);
             await fsExtra.remove(appImagePath);
-            logger.success('Build AppImage success!');
-            logger.success('AppImage installer located in', distAppPath);
+            logger.success('✔ Build AppImage success!');
+            logger.success('✔ AppImage installer located in', distAppPath);
         }
     }
     getBuildAppPath(npmDirectory, packageType, packageName) {
@@ -777,109 +752,151 @@ class BuilderProvider {
     }
 }
 
-var name = "pake-cli";
-var version = "2.1.1";
-var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
-var engines = {
-	node: ">=16.0.0"
-};
-var bin = {
-	pake: "./cli.js"
-};
-var repository = {
-	type: "git",
-	url: "https://github.com/tw93/pake.git"
-};
-var author = {
-	name: "Tw93",
-	email: "tw93@qq.com"
-};
-var keywords = [
-	"pake",
-	"pake-cli",
-	"rust",
-	"tauri",
-	"no-electron",
-	"productivity"
-];
-var files = [
-	"dist",
-	"src-tauri",
-	"cli.js"
-];
-var scripts = {
-	start: "npm run dev",
-	dev: "npm run tauri dev",
-	build: "npm run tauri build --release",
-	"build:mac": "npm run tauri build -- --target universal-apple-darwin",
-	"build:all-unix": "chmod +x ./script/build.sh && ./script/build.sh",
-	"build:all-windows": "pwsh ./script/build.ps1",
-	analyze: "cd src-tauri && cargo bloat --release --crates",
-	tauri: "tauri",
-	cli: "rollup -c rollup.config.js --watch",
-	"cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
-	prepublishOnly: "npm run cli:build"
-};
-var type = "module";
-var exports = "./dist/pake.js";
-var license = "MIT";
-var dependencies = {
-	"@tauri-apps/api": "^1.4.0",
-	"@tauri-apps/cli": "^1.4.0",
-	axios: "^1.1.3",
-	chalk: "^5.1.2",
-	commander: "^11.0.0",
-	"file-type": "^18.0.0",
-	"fs-extra": "^11.1.0",
-	"is-url": "^1.2.4",
-	loglevel: "^1.8.1",
-	ora: "^6.1.2",
-	prompts: "^2.4.2",
-	psl: "^1.9.0",
-	shelljs: "^0.8.5",
-	"tmp-promise": "^3.0.3",
-	"update-notifier": "^6.0.2"
-};
-var devDependencies = {
-	"@rollup/plugin-alias": "^4.0.2",
-	"@rollup/plugin-commonjs": "^23.0.2",
-	"@rollup/plugin-json": "^5.0.2",
-	"@rollup/plugin-terser": "^0.1.0",
-	"@types/fs-extra": "^9.0.13",
-	"@types/is-url": "^1.2.30",
-	"@types/page-icon": "^0.3.4",
-	"@types/prompts": "^2.4.1",
-	"@types/psl": "^1.1.0",
-	"@types/shelljs": "^0.8.11",
-	"@types/tmp": "^0.2.3",
-	"@types/update-notifier": "^6.0.1",
-	"app-root-path": "^3.1.0",
-	"cross-env": "^7.0.3",
-	rollup: "^3.3.0",
-	"rollup-plugin-typescript2": "^0.34.1",
-	tslib: "^2.4.1",
-	typescript: "^4.9.3"
-};
-var packageJson = {
-	name: name,
-	version: version,
-	description: description,
-	engines: engines,
-	bin: bin,
-	repository: repository,
-	author: author,
-	keywords: keywords,
-	files: files,
-	scripts: scripts,
-	type: type,
-	exports: exports,
-	license: license,
-	dependencies: dependencies,
-	devDependencies: devDependencies
+const DEFAULT_PAKE_OPTIONS = {
+    icon: '',
+    height: 780,
+    width: 1200,
+    fullscreen: false,
+    resizable: true,
+    transparent: false,
+    userAgent: '',
+    showMenu: false,
+    showSystemTray: false,
+    multiArch: false,
+    targets: 'deb',
+    iterCopyFile: false,
+    systemTrayIcon: '',
+    debug: false,
 };
 
 async function checkUpdateTips() {
     updateNotifier({ pkg: packageJson }).notify();
+}
+
+async function handleIcon(options) {
+    if (options.icon) {
+        if (options.icon.startsWith('http')) {
+            return downloadIcon(options.icon);
+        }
+        else {
+            return path.resolve(options.icon);
+        }
+    }
+    else {
+        logger.info('No app icon provided, default icon used. Use --icon option to assign an icon.');
+        const iconPath = IS_WIN ? 'src-tauri/png/icon_256.ico' : IS_LINUX ? 'src-tauri/png/icon_512.png' : 'src-tauri/icons/icon.icns';
+        return path.join(npmDirectory, iconPath);
+    }
+}
+async function downloadIcon(iconUrl) {
+    const spinner = getSpinner('Downloading icon...');
+    try {
+        const iconResponse = await axios.get(iconUrl, { responseType: 'arraybuffer' });
+        const iconData = await iconResponse.data;
+        if (!iconData) {
+            return null;
+        }
+        const fileDetails = await fileTypeFromBuffer(iconData);
+        if (!fileDetails) {
+            return null;
+        }
+        const { path: tempPath } = await dir();
+        const iconPath = `${tempPath}/icon.${fileDetails.ext}`;
+        await fsExtra.outputFile(iconPath, iconData);
+        spinner.succeed('Icon downloaded successfully.');
+        return iconPath;
+    }
+    catch (error) {
+        spinner.fail('Icon download failed.');
+        if (error.response && error.response.status === 404) {
+            return null;
+        }
+        throw error;
+    }
+}
+
+// Extracts the domain from a given URL.
+function getDomain(inputUrl) {
+    try {
+        const url = new URL(inputUrl);
+        // Use PSL to parse domain names.
+        const parsed = psl.parse(url.hostname);
+        // If domain is available, split it and return the SLD.
+        if ("domain" in parsed && parsed.domain) {
+            return parsed.domain.split('.')[0];
+        }
+        else {
+            return null;
+        }
+    }
+    catch (error) {
+        return null;
+    }
+}
+// Appends 'https://' protocol to the URL if not present.
+function appendProtocol(inputUrl) {
+    try {
+        new URL(inputUrl);
+        return inputUrl;
+    }
+    catch {
+        return `https://${inputUrl}`;
+    }
+}
+// Normalizes the URL by ensuring it has a protocol and is valid.
+function normalizeUrl(urlToNormalize) {
+    const urlWithProtocol = appendProtocol(urlToNormalize);
+    if (isUrl(urlWithProtocol)) {
+        return urlWithProtocol;
+    }
+    else {
+        throw new Error(`Your url "${urlWithProtocol}" is invalid`);
+    }
+}
+
+function resolveAppName(name, platform) {
+    const domain = getDomain(name) || 'pake';
+    return platform !== 'linux' ? capitalizeFirstLetter(domain) : domain;
+}
+function isValidName(name, platform) {
+    const platformRegexMapping = {
+        linux: /^[a-z0-9]+(-[a-z0-9]+)*$/,
+        default: /^[a-zA-Z0-9]+$/,
+    };
+    const reg = platformRegexMapping[platform] || platformRegexMapping.default;
+    return !!name && reg.test(name);
+}
+async function handleOptions(options, url) {
+    const { platform } = process;
+    const isActions = process.env.GITHUB_ACTIONS;
+    let name = options.name;
+    const pathExists = await fsExtra.pathExists(url);
+    if (!options.name) {
+        const defaultName = pathExists ? "" : resolveAppName(url, platform);
+        const promptMessage = 'Enter your application name';
+        const namePrompt = await promptText(promptMessage, defaultName);
+        name = namePrompt || defaultName;
+    }
+    if (!isValidName(name, platform)) {
+        const LINUX_NAME_ERROR = `Package name is invalid. It should only include lowercase letters, numbers, and dashes, and must contain at least one lowercase letter. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`;
+        const DEFAULT_NAME_ERROR = `Package name is invalid. It should only include letters and numbers, and must contain at least one letter. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead.`;
+        const errorMsg = platform === 'linux' ? LINUX_NAME_ERROR : DEFAULT_NAME_ERROR;
+        logger.error(errorMsg);
+        if (isActions) {
+            name = resolveAppName(url, platform);
+            logger.warn(`Inside github actions, use the default name: ${name}`);
+        }
+        else {
+            process.exit(1);
+        }
+    }
+    const appOptions = {
+        ...options,
+        name,
+        identifier: getIdentifier(url),
+    };
+    appOptions.icon = await handleIcon(appOptions);
+    return appOptions;
 }
 
 function validateNumberInput(value) {
@@ -902,25 +919,9 @@ function validateUrlInput(url) {
     return url;
 }
 
-const DEFAULT_PAKE_OPTIONS = {
-    icon: '',
-    height: 780,
-    width: 1200,
-    fullscreen: false,
-    resizable: true,
-    transparent: false,
-    userAgent: '',
-    showMenu: false,
-    showSystemTray: false,
-    multiArch: false,
-    targets: 'deb',
-    iterCopyFile: false,
-    systemTrayIcon: '',
-    debug: false,
-};
-
 program
-    .description(chalk.green('Pake: A CLI that can turn any webpage into a desktop app with Rust.'))
+    .description(chalk.green('Pake can turn any webpage into a desktop app with Rust.'))
+    .usage('[url] [options]')
     .showHelpAfterError();
 program
     .argument('[url]', 'The web URL you want to package', validateUrlInput)
@@ -944,11 +945,10 @@ program
     await checkUpdateTips();
     if (!url) {
         program.outputHelp((str) => {
-            const filteredOutput = str
-                .replace(/Usage:/g, '') // 隐藏 .usage 信息
-                .replace(/(-h,|--help)\s+.+\n/g, '') // 隐藏帮助信息
-                .replace(/\n\s*\n/g, '\n'); // 移除空行
-            return filteredOutput.trim(); // Trim any leading/trailing whitespace
+            return str
+                .split('\n')
+                .filter((line) => !/((-h,|--help)|((-v|-V),|--version))\s+.+$/.test(line))
+                .join('\n');
         });
         process.exit(0);
     }

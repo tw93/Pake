@@ -22,8 +22,8 @@ export default class LinuxBuilder extends BaseBuilder {
       const distPath = path.resolve(`${name}.deb`);
       await fsExtra.copy(appPath, distPath);
       await fsExtra.remove(appPath);
-      logger.success('Build Deb success!');
-      logger.success('Deb app installer located in', distPath);
+      logger.success('✔ Build Deb success!');
+      logger.success('✔ Deb app installer located in', distPath);
     }
 
     if (options.targets === "appimage" || options.targets === "all") {
@@ -32,8 +32,8 @@ export default class LinuxBuilder extends BaseBuilder {
       const distAppPath = path.resolve(`${name}.AppImage`);
       await fsExtra.copy(appImagePath, distAppPath);
       await fsExtra.remove(appImagePath);
-      logger.success('Build AppImage success!');
-      logger.success('AppImage installer located in', distAppPath);
+      logger.success('✔ Build AppImage success!');
+      logger.success('✔ AppImage installer located in', distAppPath);
     }
   }
 

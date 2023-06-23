@@ -12,7 +12,7 @@ export async function installRust() {
     : "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
   const rustInstallScriptForWindows = 'winget install --id Rustlang.Rustup';
 
-  const spinner = getSpinner('Downloading Rust.');
+  const spinner = getSpinner('Downloading Rust...');
 
   try {
     await shellExec(IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac);
