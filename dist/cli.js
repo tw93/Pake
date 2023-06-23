@@ -20,7 +20,7 @@ import isUrl from 'is-url';
 import fs from 'fs';
 
 var name = "pake-cli";
-var version = "2.1.3";
+var version = "2.1.4";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -464,7 +464,7 @@ function checkRustInstalled() {
 }
 
 async function mergeConfig(url, options, tauriConf) {
-    const { width, height, fullscreen, transparent, resizable, userAgent, showMenu, showSystemTray, systemTrayIcon, iterCopyFile, identifier, name, } = options;
+    const { width, height, fullscreen, transparent, userAgent, showMenu, showSystemTray, systemTrayIcon, iterCopyFile, identifier, name, resizable = true, } = options;
     const { platform } = process;
     // Set Windows parameters.
     const tauriConfWindowOptions = {
@@ -675,7 +675,7 @@ class BaseBuilder {
         logger.success('✔ App installer located in', distPath);
     }
     getFileType(target) {
-        return target.toLowerCase();
+        return target;
     }
     getBuildCommand() {
         return "npm run build";
@@ -684,7 +684,7 @@ class BaseBuilder {
         return 'src-tauri/target/release/bundle/';
     }
     getBuildAppPath(npmDirectory, fileName, fileType) {
-        return path.join(npmDirectory, this.getBasePath(), fileType, `${fileName}.${fileType}`);
+        return path.join(npmDirectory, this.getBasePath(), fileType.toLowerCase(), `${fileName}.${fileType}`);
     }
 }
 

@@ -82,7 +82,7 @@ export default abstract class BaseBuilder {
   }
 
   protected getFileType(target: string): string {
-    return target.toLowerCase();
+    return target;
   }
 
   abstract getFileName(): string;
@@ -99,7 +99,7 @@ export default abstract class BaseBuilder {
     return path.join(
       npmDirectory,
       this.getBasePath(),
-      fileType,
+      fileType.toLowerCase(),
       `${fileName}.${fileType}`
     );
   }
