@@ -1,4 +1,3 @@
 {
   "Exclude": ["Cargo\\.lock$", "dist", "*\\.md"]
 }
-
