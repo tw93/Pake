@@ -5,10 +5,7 @@ import BaseBuilder from './BaseBuilder';
 export default class MacBuilder extends BaseBuilder {
   constructor(options: PakeAppOptions) {
     super(options);
-  }
-
-  async build(url: string) {
-    await this.buildAndCopy(url);
+    this.options.targets = "dmg";
   }
 
   getFileName(): string {
@@ -20,10 +17,6 @@ export default class MacBuilder extends BaseBuilder {
       arch = process.arch === "arm64" ? "aarch64" : process.arch;
     }
     return `${name}_${tauriConfig.package.version}_${arch}`;
-  }
-
-  getExtension(): string {
-    return "dmg";
   }
 
   protected getBuildCommand(): string {
