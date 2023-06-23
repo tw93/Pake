@@ -27,7 +27,7 @@ const ping = async (host: string) => {
   const timeoutPromise = new Promise<number>((_, reject) => {
     setTimeout(() => {
       reject(new Error('Request timed out after 3 seconds'));
-    }, 3000);
+    }, 1000);
   });
 
   return Promise.race([requestPromise, timeoutPromise]);
@@ -40,7 +40,7 @@ async function isChinaDomain(domain: string): Promise<boolean> {
     return await isChinaIP(ip, domain);
   } catch (error) {
     logger.debug(`${domain} can't be parse!`);
-    return false;
+    return true;
   }
 }
 
@@ -48,10 +48,10 @@ async function isChinaIP(ip: string, domain: string): Promise<boolean> {
   try {
     const delay = await ping(ip);
     logger.debug(`${domain} latency is ${delay} ms`);
-    return delay > 500;
+    return delay > 1000;
   } catch (error) {
     logger.debug(`ping ${domain} failed!`);
-    return false;
+    return true;
   }
 }
 
