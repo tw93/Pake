@@ -107,14 +107,6 @@ Determine whether the application launches in full screen. Default is `false`. U
 --fullscreen
 ```
 
-#### [resize]
-
-Determine whether the window is resizable. Default is `true`. Use the following command to disable window resizing.
-
-```shell
---resizable
-```
-
 #### [multi-arch]
 
 Package the application to support both Intel and M1 chips, exclusively for macOS. Default is `false`.

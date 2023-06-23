@@ -27,7 +27,7 @@ export function capitalizeFirstLetter(string: string) {
 
 export function getSpinner(text: string) {
   const loadingType = {
-    "interval": 100,
+    "interval": 80,
     "frames": [
       "✶",
       "✵",
