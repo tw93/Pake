@@ -1,35 +1,24 @@
-import path from 'path';
-import fsExtra from 'fs-extra';
-
 import BaseBuilder from './BaseBuilder';
-import logger from '@/options/logger';
-import tauriConfig from '@/helpers/tauriConfig';
-import { npmDirectory } from '@/utils/dir';
-import { mergeConfig } from '@/helpers/merge';
 import { PakeAppOptions } from '@/types';
+import tauriConfig from '@/helpers/tauriConfig';
 
 export default class WinBuilder extends BaseBuilder {
-  async build(url: string, options: PakeAppOptions) {
-    const { name } = options;
-    await mergeConfig(url, options, tauriConfig);
-    await this.runBuildCommand();
-
-    const language = tauriConfig.tauri.bundle.windows.wix.language[0];
-    const arch = process.arch;
-    const msiName = `${name}_${tauriConfig.package.version}_${arch}_${language}.msi`;
-    const appPath = this.getBuildAppPath(npmDirectory, msiName);
-    const distPath = path.resolve(`${name}.msi`);
-    await fsExtra.copy(appPath, distPath);
-    await fsExtra.remove(appPath);
-    logger.success('✔ Build success!');
-    logger.success('✔ App installer located in', distPath);
+  constructor(options: PakeAppOptions) {
+    super(options);
   }
 
-  getBuildAppPath(npmDirectory: string, msiName: string) {
-    return path.join(
-      npmDirectory,
-      'src-tauri/target/release/bundle/msi',
-      msiName
-    );
+  async build(url: string) {
+    await this.buildAndCopy(url);
+  }
+
+  getFileName(): string {
+    const { name } = this.options;
+    const arch = this.getArch();
+    const language = tauriConfig.tauri.bundle.windows.wix.language[0];
+    return `${name}_${tauriConfig.package.version}_${arch}_${language}`;
+  }
+
+  getExtension(): string {
+    return "msi";
   }
 }

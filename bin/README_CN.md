@@ -101,14 +101,6 @@ pake [url] [options]
 --transparent
 ```
 
-#### [resize]
-
-设置应用窗口是否可以调整大小，默认为 `true`（可调整）。使用以下命令可以禁止调整窗口大小。
-
-```shell
---resizable
-```
-
 #### [fullscreen]
 
 设置应用程序是否在启动时自动全屏，默认为 `false`。使用以下命令可以设置应用程序启动时自动全屏。

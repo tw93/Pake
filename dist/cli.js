@@ -5,12 +5,12 @@ import path from 'path';
 import fsExtra from 'fs-extra';
 import prompts from 'prompts';
 import shelljs from 'shelljs';
+import crypto from 'crypto';
+import ora from 'ora';
 import { fileURLToPath } from 'url';
 import dns from 'dns';
 import http from 'http';
 import { promisify } from 'util';
-import crypto from 'crypto';
-import ora from 'ora';
 import updateNotifier from 'update-notifier';
 import axios from 'axios';
 import { dir } from 'tmp-promise';
@@ -119,193 +119,6 @@ var packageJson = {
 	dependencies: dependencies,
 	devDependencies: devDependencies
 };
-
-const logger = {
-    info(...msg) {
-        log.info(...msg.map((m) => chalk.blue.bold(m)));
-    },
-    debug(...msg) {
-        log.debug(...msg);
-    },
-    error(...msg) {
-        log.error(...msg.map((m) => chalk.red.bold(m)));
-    },
-    warn(...msg) {
-        log.info(...msg.map((m) => chalk.yellow.bold(m)));
-    },
-    success(...msg) {
-        log.info(...msg.map((m) => chalk.green.bold(m)));
-    }
-};
-
-// Convert the current module URL to a file path
-const currentModulePath = fileURLToPath(import.meta.url);
-// Resolve the parent directory of the current module
-const npmDirectory = path.join(path.dirname(currentModulePath), '..');
-
-function shellExec(command) {
-    return new Promise((resolve, reject) => {
-        shelljs.exec(command, { async: true, silent: false, cwd: npmDirectory }, (code) => {
-            if (code === 0) {
-                resolve(0);
-            }
-            else {
-                reject(new Error(`${code}`));
-            }
-        });
-    });
-}
-
-const resolve = promisify(dns.resolve);
-const ping = async (host) => {
-    const lookup = promisify(dns.lookup);
-    const ip = await lookup(host);
-    const start = new Date();
-    // Prevent timeouts from affecting user experience.
-    const requestPromise = new Promise((resolve, reject) => {
-        const req = http.get(`http://${ip.address}`, (res) => {
-            const delay = new Date().getTime() - start.getTime();
-            res.resume();
-            resolve(delay);
-        });
-        req.on('error', (err) => {
-            reject(err);
-        });
-    });
-    const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => {
-            reject(new Error('Request timed out after 3 seconds'));
-        }, 1000);
-    });
-    return Promise.race([requestPromise, timeoutPromise]);
-};
-async function isChinaDomain(domain) {
-    try {
-        const [ip] = await resolve(domain);
-        return await isChinaIP(ip, domain);
-    }
-    catch (error) {
-        logger.debug(`${domain} can't be parse!`);
-        return true;
-    }
-}
-async function isChinaIP(ip, domain) {
-    try {
-        const delay = await ping(ip);
-        logger.debug(`${domain} latency is ${delay} ms`);
-        return delay > 1000;
-    }
-    catch (error) {
-        logger.debug(`ping ${domain} failed!`);
-        return true;
-    }
-}
-
-// Generates an identifier based on the given URL.
-function getIdentifier(url) {
-    const postFixHash = crypto.createHash('md5')
-        .update(url)
-        .digest('hex')
-        .substring(0, 6);
-    return `pake-${postFixHash}`;
-}
-async function promptText(message, initial) {
-    const response = await prompts({
-        type: 'text',
-        name: 'content',
-        message,
-        initial,
-    });
-    return response.content;
-}
-function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
-function getSpinner(text) {
-    const loadingType = {
-        "interval": 100,
-        "frames": [
-            "✶",
-            "✵",
-            "✸",
-            "✹",
-            "✺",
-            "✹",
-            "✷",
-        ]
-    };
-    return ora({ text: `${text}\n`, spinner: loadingType }).start();
-}
-
-const { platform: platform$2 } = process;
-const IS_MAC = platform$2 === 'darwin';
-const IS_WIN = platform$2 === 'win32';
-const IS_LINUX = platform$2 === 'linux';
-
-async function installRust() {
-    const isInChina = await isChinaDomain("sh.rustup.rs");
-    const rustInstallScriptForMac = isInChina
-        ? 'export RUSTUP_DIST_SERVER="https://rsproxy.cn" && export RUSTUP_UPDATE_ROOT="https://rsproxy.cn/rustup" && curl --proto "=https" --tlsv1.2 -sSf https://rsproxy.cn/rustup-init.sh | sh'
-        : "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
-    const rustInstallScriptForWindows = 'winget install --id Rustlang.Rustup';
-    const spinner = getSpinner('Downloading Rust...');
-    try {
-        await shellExec(IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac);
-        spinner.succeed('Rust installed successfully.');
-    }
-    catch (error) {
-        console.error('Error installing Rust:', error.message);
-        spinner.fail('Rust installation failed.');
-        process.exit(1);
-    }
-}
-function checkRustInstalled() {
-    return shelljs.exec('rustc --version', { silent: true }).code === 0;
-}
-
-class BaseBuilder {
-    async prepare() {
-        // Windows and Linux need to install necessary build tools.
-        if (!IS_MAC) {
-            logger.info('The first use requires installing system dependencies.');
-            logger.info('See more in https://tauri.app/v1/guides/getting-started/prerequisites#installing.');
-        }
-        if (!checkRustInstalled()) {
-            const res = await prompts({
-                type: 'confirm',
-                message: 'Rust not detected. Install now?',
-                name: 'value',
-            });
-            if (res.value) {
-                await installRust();
-            }
-            else {
-                logger.error('Error: Rust required to package your webapp!');
-                process.exit(0);
-            }
-        }
-        const isChina = await isChinaDomain("www.npmjs.com");
-        const spinner = getSpinner('Installing package...');
-        if (isChina) {
-            logger.info("Located in China, using npm/rsProxy CN mirror.");
-            const rustProjectDir = path.join(npmDirectory, 'src-tauri', ".cargo");
-            await fsExtra.ensureDir(rustProjectDir);
-            const projectCnConf = path.join(npmDirectory, "src-tauri", "rust_proxy.toml");
-            const projectConf = path.join(rustProjectDir, "config");
-            await fsExtra.copy(projectCnConf, projectConf);
-            await shellExec(`cd "${npmDirectory}" && npm install --registry=https://registry.npmmirror.com`);
-        }
-        else {
-            await shellExec(`cd "${npmDirectory}" && npm install`);
-        }
-        spinner.succeed('Package installed.');
-    }
-    async runBuildCommand(command = "npm run build") {
-        const spinner = getSpinner('Building app...');
-        setTimeout(() => spinner.stop(), 2000);
-        await shellExec(`cd "${npmDirectory}" && ${command}`);
-    }
-}
 
 var windows = [
 	{
@@ -494,9 +307,9 @@ const platformConfigs = {
     darwin: MacConf,
     linux: LinuxConf
 };
-const { platform: platform$1 } = process;
+const { platform: platform$2 } = process;
 // @ts-ignore
-const platformConfig = platformConfigs[platform$1];
+const platformConfig = platformConfigs[platform$2];
 let tauriConfig = {
     tauri: {
         ...CommonConf.tauri,
@@ -506,6 +319,149 @@ let tauriConfig = {
     build: CommonConf.build,
     pake: pakeConf
 };
+
+// Generates an identifier based on the given URL.
+function getIdentifier(url) {
+    const postFixHash = crypto.createHash('md5')
+        .update(url)
+        .digest('hex')
+        .substring(0, 6);
+    return `pake-${postFixHash}`;
+}
+async function promptText(message, initial) {
+    const response = await prompts({
+        type: 'text',
+        name: 'content',
+        message,
+        initial,
+    });
+    return response.content;
+}
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+function getSpinner(text) {
+    const loadingType = {
+        "interval": 80,
+        "frames": [
+            "✶",
+            "✵",
+            "✸",
+            "✹",
+            "✺",
+            "✹",
+            "✷",
+        ]
+    };
+    return ora({ text: `${text}\n`, spinner: loadingType }).start();
+}
+
+const { platform: platform$1 } = process;
+const IS_MAC = platform$1 === 'darwin';
+const IS_WIN = platform$1 === 'win32';
+const IS_LINUX = platform$1 === 'linux';
+
+// Convert the current module URL to a file path
+const currentModulePath = fileURLToPath(import.meta.url);
+// Resolve the parent directory of the current module
+const npmDirectory = path.join(path.dirname(currentModulePath), '..');
+
+function shellExec(command) {
+    return new Promise((resolve, reject) => {
+        shelljs.exec(command, { async: true, silent: false, cwd: npmDirectory }, (code) => {
+            if (code === 0) {
+                resolve(0);
+            }
+            else {
+                reject(new Error(`${code}`));
+            }
+        });
+    });
+}
+
+const logger = {
+    info(...msg) {
+        log.info(...msg.map((m) => chalk.blue.bold(m)));
+    },
+    debug(...msg) {
+        log.debug(...msg);
+    },
+    error(...msg) {
+        log.error(...msg.map((m) => chalk.red.bold(m)));
+    },
+    warn(...msg) {
+        log.info(...msg.map((m) => chalk.yellow.bold(m)));
+    },
+    success(...msg) {
+        log.info(...msg.map((m) => chalk.green.bold(m)));
+    }
+};
+
+const resolve = promisify(dns.resolve);
+const ping = async (host) => {
+    const lookup = promisify(dns.lookup);
+    const ip = await lookup(host);
+    const start = new Date();
+    // Prevent timeouts from affecting user experience.
+    const requestPromise = new Promise((resolve, reject) => {
+        const req = http.get(`http://${ip.address}`, (res) => {
+            const delay = new Date().getTime() - start.getTime();
+            res.resume();
+            resolve(delay);
+        });
+        req.on('error', (err) => {
+            reject(err);
+        });
+    });
+    const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+            reject(new Error('Request timed out after 3 seconds'));
+        }, 1000);
+    });
+    return Promise.race([requestPromise, timeoutPromise]);
+};
+async function isChinaDomain(domain) {
+    try {
+        const [ip] = await resolve(domain);
+        return await isChinaIP(ip, domain);
+    }
+    catch (error) {
+        logger.debug(`${domain} can't be parse!`);
+        return true;
+    }
+}
+async function isChinaIP(ip, domain) {
+    try {
+        const delay = await ping(ip);
+        logger.debug(`${domain} latency is ${delay} ms`);
+        return delay > 1000;
+    }
+    catch (error) {
+        logger.debug(`ping ${domain} failed!`);
+        return true;
+    }
+}
+
+async function installRust() {
+    const isInChina = await isChinaDomain("sh.rustup.rs");
+    const rustInstallScriptForMac = isInChina
+        ? 'export RUSTUP_DIST_SERVER="https://rsproxy.cn" && export RUSTUP_UPDATE_ROOT="https://rsproxy.cn/rustup" && curl --proto "=https" --tlsv1.2 -sSf https://rsproxy.cn/rustup-init.sh | sh'
+        : "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
+    const rustInstallScriptForWindows = 'winget install --id Rustlang.Rustup';
+    const spinner = getSpinner('Downloading Rust...');
+    try {
+        await shellExec(IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac);
+        spinner.succeed('Rust installed successfully.');
+    }
+    catch (error) {
+        console.error('Error installing Rust:', error.message);
+        spinner.fail('Rust installation failed.');
+        process.exit(1);
+    }
+}
+function checkRustInstalled() {
+    return shelljs.exec('rustc --version', { silent: true }).code === 0;
+}
 
 async function mergeConfig(url, options, tauriConf) {
     const { width, height, fullscreen, transparent, resizable, userAgent, showMenu, showSystemTray, systemTrayIcon, iterCopyFile, identifier, name, } = options;
@@ -659,80 +615,147 @@ async function mergeConfig(url, options, tauriConf) {
     await fsExtra.writeJson(configJsonPath, tauriConf2, { spaces: 4 });
 }
 
-class MacBuilder extends BaseBuilder {
-    async build(url, options) {
-        const { name } = options;
-        await mergeConfig(url, options, tauriConfig);
-        let dmgName;
-        if (options.multiArch) {
-            await this.runBuildCommand('npm run build:mac');
-            dmgName = `${name}_${tauriConfig.package.version}_universal.dmg`;
+class BaseBuilder {
+    constructor(options) {
+        this.options = options;
+    }
+    async prepare() {
+        if (!IS_MAC) {
+            logger.info('The first use requires installing system dependencies.');
+            logger.info('See more in https://tauri.app/v1/guides/getting-started/prerequisites#installing.');
+        }
+        if (!checkRustInstalled()) {
+            const res = await prompts({
+                type: 'confirm',
+                message: 'Rust not detected. Install now?',
+                name: 'value',
+            });
+            if (res.value) {
+                await installRust();
+            }
+            else {
+                logger.error('Error: Rust required to package your webapp!');
+                process.exit(0);
+            }
+        }
+        const isChina = await isChinaDomain("www.npmjs.com");
+        const spinner = getSpinner('Installing package...');
+        if (isChina) {
+            logger.info("Located in China, using npm/rsProxy CN mirror.");
+            const rustProjectDir = path.join(npmDirectory, 'src-tauri', ".cargo");
+            await fsExtra.ensureDir(rustProjectDir);
+            const projectCnConf = path.join(npmDirectory, "src-tauri", "rust_proxy.toml");
+            const projectConf = path.join(rustProjectDir, "config");
+            await fsExtra.copy(projectCnConf, projectConf);
+            await shellExec(`cd "${npmDirectory}" && npm install --registry=https://registry.npmmirror.com`);
         }
         else {
-            await this.runBuildCommand();
-            let arch = process.arch === "arm64" ? "aarch64" : process.arch;
-            dmgName = `${name}_${tauriConfig.package.version}_${arch}.dmg`;
+            await shellExec(`cd "${npmDirectory}" && npm install`);
         }
-        const appPath = this.getBuildAppPath(npmDirectory, dmgName, options.multiArch);
-        const distPath = path.resolve(`${name}.dmg`);
+        spinner.succeed('Package installed.');
+    }
+    async buildAndCopy(url) {
+        const { name } = this.options;
+        await mergeConfig(url, this.options, tauriConfig);
+        await this.runBuildCommand();
+        const fileName = this.getFileName();
+        const appPath = this.getBuildAppPath(npmDirectory, fileName);
+        const distPath = path.resolve(`${name}.${this.getExtension()}`);
         await fsExtra.copy(appPath, distPath);
         await fsExtra.remove(appPath);
         logger.success('✔ Build success!');
         logger.success('✔ App installer located in', distPath);
     }
-    getBuildAppPath(npmDirectory, dmgName, multiArch) {
-        const dmgPath = multiArch ? 'src-tauri/target/universal-apple-darwin/release/bundle/dmg' : 'src-tauri/target/release/bundle/dmg';
-        return path.join(npmDirectory, dmgPath, dmgName);
+    getArch() {
+        return process.arch === "x64" ? "amd64" : process.arch;
+    }
+    getBuildCommand() {
+        return "npm run build";
+    }
+    runBuildCommand() {
+        const spinner = getSpinner('Building app...');
+        setTimeout(() => spinner.stop(), 3000);
+        return shellExec(`cd ${npmDirectory} && ${this.getBuildCommand()}`);
+    }
+    getBasePath() {
+        return 'src-tauri/target/release/bundle/';
+    }
+    getBuildAppPath(npmDirectory, fileName) {
+        return path.join(npmDirectory, this.getBasePath(), this.getExtension().toLowerCase(), `${fileName}.${this.getExtension()}`);
+    }
+}
+
+class MacBuilder extends BaseBuilder {
+    constructor(options) {
+        super(options);
+    }
+    async build(url) {
+        await this.buildAndCopy(url);
+    }
+    getFileName() {
+        const { name } = this.options;
+        let arch;
+        if (this.options.multiArch) {
+            arch = 'universal';
+        }
+        else {
+            arch = process.arch === "arm64" ? "aarch64" : process.arch;
+        }
+        return `${name}_${tauriConfig.package.version}_${arch}`;
+    }
+    getExtension() {
+        return "dmg";
+    }
+    getBuildCommand() {
+        return this.options.multiArch ? 'npm run build:mac' : super.getBuildCommand();
+    }
+    getBasePath() {
+        return this.options.multiArch
+            ? 'src-tauri/target/universal-apple-darwin/release/bundle'
+            : super.getBasePath();
     }
 }
 
 class WinBuilder extends BaseBuilder {
-    async build(url, options) {
-        const { name } = options;
-        await mergeConfig(url, options, tauriConfig);
-        await this.runBuildCommand();
-        const language = tauriConfig.tauri.bundle.windows.wix.language[0];
-        const arch = process.arch;
-        const msiName = `${name}_${tauriConfig.package.version}_${arch}_${language}.msi`;
-        const appPath = this.getBuildAppPath(npmDirectory, msiName);
-        const distPath = path.resolve(`${name}.msi`);
-        await fsExtra.copy(appPath, distPath);
-        await fsExtra.remove(appPath);
-        logger.success('✔ Build success!');
-        logger.success('✔ App installer located in', distPath);
+    constructor(options) {
+        super(options);
     }
-    getBuildAppPath(npmDirectory, msiName) {
-        return path.join(npmDirectory, 'src-tauri/target/release/bundle/msi', msiName);
+    async build(url) {
+        await this.buildAndCopy(url);
+    }
+    getFileName() {
+        const { name } = this.options;
+        const arch = this.getArch();
+        const language = tauriConfig.tauri.bundle.windows.wix.language[0];
+        return `${name}_${tauriConfig.package.version}_${arch}_${language}`;
+    }
+    getExtension() {
+        return "msi";
     }
 }
 
 class LinuxBuilder extends BaseBuilder {
-    async build(url, options) {
-        const { name } = options;
-        await mergeConfig(url, options, tauriConfig);
-        await this.runBuildCommand();
-        const arch = process.arch === "x64" ? "amd64" : process.arch;
-        if (options.targets === "deb" || options.targets === "all") {
-            const debName = `${name}_${tauriConfig.package.version}_${arch}.deb`;
-            const appPath = this.getBuildAppPath(npmDirectory, "deb", debName);
-            const distPath = path.resolve(`${name}.deb`);
-            await fsExtra.copy(appPath, distPath);
-            await fsExtra.remove(appPath);
-            logger.success('✔ Build Deb success!');
-            logger.success('✔ Deb app installer located in', distPath);
-        }
-        if (options.targets === "appimage" || options.targets === "all") {
-            const appImageName = `${name}_${tauriConfig.package.version}_${arch}.AppImage`;
-            const appImagePath = this.getBuildAppPath(npmDirectory, "appimage", appImageName);
-            const distAppPath = path.resolve(`${name}.AppImage`);
-            await fsExtra.copy(appImagePath, distAppPath);
-            await fsExtra.remove(appImagePath);
-            logger.success('✔ Build AppImage success!');
-            logger.success('✔ AppImage installer located in', distAppPath);
+    constructor(options) {
+        super(options);
+    }
+    async build(url) {
+        const targetTypes = ['deb', 'appimage'];
+        for (const type of targetTypes) {
+            if (this.options.targets === type || this.options.targets === "all") {
+                await this.buildAndCopy(url);
+            }
         }
     }
-    getBuildAppPath(npmDirectory, packageType, packageName) {
-        return path.join(npmDirectory, 'src-tauri/target/release/bundle/', packageType, packageName);
+    getFileName() {
+        const { name } = this.options;
+        const arch = this.getArch();
+        return `${name}_${tauriConfig.package.version}_${arch}`;
+    }
+    getExtension() {
+        if (this.options.targets === 'appimage') {
+            return 'AppImage';
+        }
+        return this.options.targets;
     }
 }
 
@@ -743,12 +766,12 @@ const buildersMap = {
     linux: LinuxBuilder,
 };
 class BuilderProvider {
-    static create() {
+    static create(options) {
         const Builder = buildersMap[platform];
         if (!Builder) {
             throw new Error('The current system is not supported!');
         }
-        return new Builder();
+        return new Builder(options);
     }
 }
 
@@ -929,7 +952,6 @@ program
     .option('--icon <string>', 'Application icon', DEFAULT_PAKE_OPTIONS.icon)
     .option('--height <number>', 'Window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
     .option('--width <number>', 'Window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
-    .option('--resizable', 'Whether the window can be resizable', DEFAULT_PAKE_OPTIONS.resizable)
     .option('--fullscreen', 'Start the packaged app in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
     .option('--transparent', 'Transparent title bar', DEFAULT_PAKE_OPTIONS.transparent)
     .option('--user-agent <string>', 'Custom user agent', DEFAULT_PAKE_OPTIONS.userAgent)
@@ -958,8 +980,8 @@ program
     }
     const appOptions = await handleOptions(options, url);
     log.debug('PakeAppOptions', appOptions);
-    const builder = BuilderProvider.create();
+    const builder = BuilderProvider.create(appOptions);
     await builder.prepare();
-    await builder.build(url, appOptions);
+    await builder.build(url);
 });
 program.parse();

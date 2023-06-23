@@ -21,7 +21,6 @@ program
   .option('--icon <string>', 'Application icon', DEFAULT.icon)
   .option('--height <number>', 'Window height', validateNumberInput, DEFAULT.height)
   .option('--width <number>', 'Window width', validateNumberInput, DEFAULT.width)
-  .option('--resizable', 'Whether the window can be resizable', DEFAULT.resizable)
   .option('--fullscreen', 'Start the packaged app in full screen', DEFAULT.fullscreen)
   .option('--transparent', 'Transparent title bar', DEFAULT.transparent)
   .option('--user-agent <string>', 'Custom user agent', DEFAULT.userAgent)
@@ -55,9 +54,9 @@ program
     const appOptions = await handleInputOptions(options, url);
     log.debug('PakeAppOptions', appOptions);
 
-    const builder = BuilderProvider.create();
+    const builder = BuilderProvider.create(appOptions);
     await builder.prepare();
-    await builder.build(url, appOptions);
+    await builder.build(url);
   });
 
 program.parse();
