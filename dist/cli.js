@@ -20,7 +20,7 @@ import isUrl from 'is-url';
 import fs from 'fs';
 
 var name = "pake-cli";
-var version = "2.1.4";
+var version = "2.1.5";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -342,7 +342,7 @@ function capitalizeFirstLetter(string) {
 }
 function getSpinner(text) {
     const loadingType = {
-        "interval": 100,
+        "interval": 80,
         "frames": [
             "✦",
             "✶",
@@ -896,8 +896,8 @@ async function handleOptions(options, url) {
         name = namePrompt || defaultName;
     }
     if (!isValidName(name, platform)) {
-        const LINUX_NAME_ERROR = `✕ Package name is invalid. It should only include lowercase letters, numbers, and dashes, and must contain at least one lowercase letter. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`;
-        const DEFAULT_NAME_ERROR = `✕ Package name is invalid. It should only include letters and numbers, and must contain at least one letter. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead.`;
+        const LINUX_NAME_ERROR = `✕ name should only include lowercase letters, numbers, and dashes, and must contain at least one lowercase letter. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`;
+        const DEFAULT_NAME_ERROR = `✕ Name should only include letters and numbers, and must contain at least one letter. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead.`;
         const errorMsg = platform === 'linux' ? LINUX_NAME_ERROR : DEFAULT_NAME_ERROR;
         logger.error(errorMsg);
         if (isActions) {
