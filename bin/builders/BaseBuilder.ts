@@ -57,50 +57,50 @@ export default abstract class BaseBuilder {
     spinner.succeed('Package installed.');
   }
 
-  async buildAndCopy(url: string) {
+  async build(url: string) {
+    await this.buildAndCopy(url, this.options.targets);
+  }
+
+  async buildAndCopy(url: string, target: string) {
     const { name } = this.options;
     await mergeConfig(url, this.options, tauriConfig);
-    await this.runBuildCommand();
 
+    // Build app
+    const spinner = getSpinner('Building app...');
+    setTimeout(() => spinner.stop(), 3000);
+    await shellExec(`cd ${npmDirectory} && ${this.getBuildCommand()}`);
+
+    // Copy app
     const fileName = this.getFileName();
-    const appPath = this.getBuildAppPath(npmDirectory, fileName);
-    const distPath = path.resolve(`${name}.${this.getExtension()}`);
+    const fileType = this.getFileType(target);
+    const appPath = this.getBuildAppPath(npmDirectory, fileName, fileType);
+    const distPath = path.resolve(`${name}.${fileType}`);
     await fsExtra.copy(appPath, distPath);
     await fsExtra.remove(appPath);
     logger.success('✔ Build success!');
     logger.success('✔ App installer located in', distPath);
   }
 
-  abstract build(url: string): Promise<void>;
+  protected getFileType(target: string): string {
+    return target.toLowerCase();
+  }
 
   abstract getFileName(): string;
 
-  abstract getExtension(): string;
-
-  protected getArch() {
-    return process.arch === "x64" ? "amd64" : process.arch;
-  }
-
   protected getBuildCommand(): string {
     return "npm run build";
-  }
-
-  protected runBuildCommand() {
-    const spinner = getSpinner('Building app...');
-    setTimeout(() => spinner.stop(), 3000);
-    return shellExec(`cd ${npmDirectory} && ${this.getBuildCommand()}`);
   }
 
   protected getBasePath(): string {
     return 'src-tauri/target/release/bundle/';
   }
 
-  protected getBuildAppPath(npmDirectory: string, fileName: string): string {
+  protected getBuildAppPath(npmDirectory: string, fileName: string, fileType: string): string {
     return path.join(
       npmDirectory,
       this.getBasePath(),
-      this.getExtension().toLowerCase(),
-      `${fileName}.${this.getExtension()}`
+      fileType,
+      `${fileName}.${fileType}`
     );
   }
 }

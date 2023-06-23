@@ -20,7 +20,7 @@ import isUrl from 'is-url';
 import fs from 'fs';
 
 var name = "pake-cli";
-var version = "2.1.2";
+var version = "2.1.3";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -654,43 +654,44 @@ class BaseBuilder {
         }
         spinner.succeed('Package installed.');
     }
-    async buildAndCopy(url) {
+    async build(url) {
+        await this.buildAndCopy(url, this.options.targets);
+    }
+    async buildAndCopy(url, target) {
         const { name } = this.options;
         await mergeConfig(url, this.options, tauriConfig);
-        await this.runBuildCommand();
+        // Build app
+        const spinner = getSpinner('Building app...');
+        setTimeout(() => spinner.stop(), 3000);
+        await shellExec(`cd ${npmDirectory} && ${this.getBuildCommand()}`);
+        // Copy app
         const fileName = this.getFileName();
-        const appPath = this.getBuildAppPath(npmDirectory, fileName);
-        const distPath = path.resolve(`${name}.${this.getExtension()}`);
+        const fileType = this.getFileType(target);
+        const appPath = this.getBuildAppPath(npmDirectory, fileName, fileType);
+        const distPath = path.resolve(`${name}.${fileType}`);
         await fsExtra.copy(appPath, distPath);
         await fsExtra.remove(appPath);
         logger.success('✔ Build success!');
         logger.success('✔ App installer located in', distPath);
     }
-    getArch() {
-        return process.arch === "x64" ? "amd64" : process.arch;
+    getFileType(target) {
+        return target.toLowerCase();
     }
     getBuildCommand() {
         return "npm run build";
     }
-    runBuildCommand() {
-        const spinner = getSpinner('Building app...');
-        setTimeout(() => spinner.stop(), 3000);
-        return shellExec(`cd ${npmDirectory} && ${this.getBuildCommand()}`);
-    }
     getBasePath() {
         return 'src-tauri/target/release/bundle/';
     }
-    getBuildAppPath(npmDirectory, fileName) {
-        return path.join(npmDirectory, this.getBasePath(), this.getExtension().toLowerCase(), `${fileName}.${this.getExtension()}`);
+    getBuildAppPath(npmDirectory, fileName, fileType) {
+        return path.join(npmDirectory, this.getBasePath(), fileType, `${fileName}.${fileType}`);
     }
 }
 
 class MacBuilder extends BaseBuilder {
     constructor(options) {
         super(options);
-    }
-    async build(url) {
-        await this.buildAndCopy(url);
+        this.options.targets = "dmg";
     }
     getFileName() {
         const { name } = this.options;
@@ -702,9 +703,6 @@ class MacBuilder extends BaseBuilder {
             arch = process.arch === "arm64" ? "aarch64" : process.arch;
         }
         return `${name}_${tauriConfig.package.version}_${arch}`;
-    }
-    getExtension() {
-        return "dmg";
     }
     getBuildCommand() {
         return this.options.multiArch ? 'npm run build:mac' : super.getBuildCommand();
@@ -719,18 +717,13 @@ class MacBuilder extends BaseBuilder {
 class WinBuilder extends BaseBuilder {
     constructor(options) {
         super(options);
-    }
-    async build(url) {
-        await this.buildAndCopy(url);
+        this.options.targets = "msi";
     }
     getFileName() {
         const { name } = this.options;
-        const arch = this.getArch();
+        const { arch } = process;
         const language = tauriConfig.tauri.bundle.windows.wix.language[0];
         return `${name}_${tauriConfig.package.version}_${arch}_${language}`;
-    }
-    getExtension() {
-        return "msi";
     }
 }
 
@@ -738,24 +731,25 @@ class LinuxBuilder extends BaseBuilder {
     constructor(options) {
         super(options);
     }
+    getFileName() {
+        const { name } = this.options;
+        const arch = process.arch === "x64" ? "amd64" : process.arch;
+        return `${name}_${tauriConfig.package.version}_${arch}`;
+    }
+    // Customize it, considering that there are all targets.
     async build(url) {
-        const targetTypes = ['deb', 'appimage'];
-        for (const type of targetTypes) {
-            if (this.options.targets === type || this.options.targets === "all") {
-                await this.buildAndCopy(url);
+        const targetTypes = ["deb", "appimage"];
+        for (const target of targetTypes) {
+            if (this.options.targets === target || this.options.targets === "all") {
+                await this.buildAndCopy(url, target);
             }
         }
     }
-    getFileName() {
-        const { name } = this.options;
-        const arch = this.getArch();
-        return `${name}_${tauriConfig.package.version}_${arch}`;
-    }
-    getExtension() {
-        if (this.options.targets === 'appimage') {
+    getFileType(target) {
+        if (target === 'appimage') {
             return 'AppImage';
         }
-        return this.options.targets;
+        return super.getFileType(target);
     }
 }
 
