@@ -7,9 +7,9 @@ import { shellExec } from '@/utils/shell';
 import { isChinaDomain } from '@/utils/ip';
 import { getSpinner } from "@/utils/info";
 import { npmDirectory } from '@/utils/dir';
-import { PakeAppOptions } from '@/types';
 import { IS_MAC } from "@/utils/platform";
 import { checkRustInstalled, installRust } from '@/helpers/rust';
+import { PakeAppOptions } from '@/types';
 
 export default abstract class BaseBuilder {
   abstract build(url: string, options: PakeAppOptions): Promise<void>;
@@ -37,7 +37,7 @@ export default abstract class BaseBuilder {
     }
 
     const isChina = await isChinaDomain("www.npmjs.com");
-    const spinner = getSpinner('Installing package.');
+    const spinner = getSpinner('Installing package...');
     if (isChina) {
       logger.info("Located in China, using npm/rsProxy CN mirror.");
       const rustProjectDir = path.join(npmDirectory, 'src-tauri', ".cargo");
@@ -53,8 +53,8 @@ export default abstract class BaseBuilder {
   }
 
   protected async runBuildCommand(command: string = "npm run build") {
-    const spinner = getSpinner('Building app.');
+    const spinner = getSpinner('Building app...');
+    setTimeout(() => spinner.stop(), 3000);
     await shellExec(`cd "${npmDirectory}" && ${command}`);
-    spinner.stop();
   }
 }

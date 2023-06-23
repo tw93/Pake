@@ -21,8 +21,8 @@ export default class WinBuilder extends BaseBuilder {
     const distPath = path.resolve(`${name}.msi`);
     await fsExtra.copy(appPath, distPath);
     await fsExtra.remove(appPath);
-    logger.success('Build success!');
-    logger.success('App installer located in', distPath);
+    logger.success('✔ Build success!');
+    logger.success('✔ App installer located in', distPath);
   }
 
   getBuildAppPath(npmDirectory: string, msiName: string) {

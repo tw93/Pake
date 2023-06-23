@@ -1,17 +1,17 @@
-import log from 'loglevel';
 import chalk from 'chalk';
 import { program } from 'commander';
+import log from 'loglevel';
+import packageJson from '../package.json';
+import BuilderProvider from './builders/BuilderProvider';
+import { DEFAULT_PAKE_OPTIONS as DEFAULT } from './defaults';
+import { checkUpdateTips } from './helpers/updater';
+import handleInputOptions from './options/index';
 
 import { PakeCliOptions } from './types';
-import handleInputOptions from './options/index';
-import BuilderProvider from './builders/BuilderProvider';
-import { checkUpdateTips } from './helpers/updater';
-import packageJson from '../package.json';
 import { validateNumberInput, validateUrlInput } from './utils/validate';
-import { DEFAULT_PAKE_OPTIONS as DEFAULT } from './defaults';
 
 program
-  .description(chalk.green('Pake: A CLI that can turn any webpage into a desktop app with Rust.'))
+  .description(chalk.green('Pake can turn any webpage into a desktop app with Rust.'))
   .usage('[url] [options]')
   .showHelpAfterError();
 
@@ -39,11 +39,10 @@ program
 
     if (!url) {
       program.outputHelp((str) => {
-        const filteredOutput = str
+        return str
           .split('\n')
           .filter((line) => !/((-h,|--help)|((-v|-V),|--version))\s+.+$/.test(line))
           .join('\n');
-        return filteredOutput.trim(); // Trim any leading/trailing whitespace
       });
       process.exit(0);
     }
