@@ -93,7 +93,7 @@ Set the width of the application window. Default is `1200px`.
 
 #### [transparent]
 
-Enable or disable immersive header. Default is `false`. Use the following command to enable this feature.
+Enable or disable immersive header. Default is `false`. Use the following command to enable this feature, macOS only.
 
 ```shell
 --transparent
