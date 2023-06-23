@@ -34,13 +34,13 @@ export default async function handleOptions(options: PakeCliOptions, url: string
   }
 
   if (!isValidName(name, platform)) {
-    const LINUX_NAME_ERROR = `Package name is invalid. It should only include lowercase letters, numbers, and dashes, and must contain at least one lowercase letter. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`;
-    const DEFAULT_NAME_ERROR = `Package name is invalid. It should only include letters and numbers, and must contain at least one letter. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead.`;
+    const LINUX_NAME_ERROR = `✕ name should only include lowercase letters, numbers, and dashes, and must contain at least one lowercase letter. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`;
+    const DEFAULT_NAME_ERROR = `✕ Name should only include letters and numbers, and must contain at least one letter. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead.`;
     const errorMsg = platform === 'linux' ? LINUX_NAME_ERROR : DEFAULT_NAME_ERROR;
     logger.error(errorMsg);
     if (isActions) {
       name = resolveAppName(url, platform);
-      logger.warn(`Inside github actions, use the default name: ${name}`);
+      logger.warn(`✼ Inside github actions, use the default name: ${name}`);
     } else {
       process.exit(1);
     }

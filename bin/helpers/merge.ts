@@ -43,7 +43,7 @@ export async function mergeConfig(
   //Judge the type of URL, whether it is a file or a website.
   const pathExists = await fsExtra.pathExists(url);
   if (pathExists) {
-    logger.warn('Your input might be a local file.');
+    logger.warn('✼ Your input might be a local file.');
     tauriConf.pake.windows[0].url_type = 'local';
 
     const fileName = path.basename(url);
@@ -98,7 +98,7 @@ export async function mergeConfig(
       tauriConf.tauri.bundle.targets = options.targets === 'all' ? ['deb', 'appimage'] : [options.targets];
     } else {
       logger.warn(
-        `The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`,
+        `✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`,
       );
     }
   }
@@ -132,7 +132,7 @@ export async function mergeConfig(
 
     if (customIconExt !== iconInfo.fileExt) {
       updateIconPath = false;
-      logger.warn(`${iconInfo.message}, but you give ${customIconExt}`);
+      logger.warn(`✼ ${iconInfo.message}, but you give ${customIconExt}`);
       tauriConf.tauri.bundle.icon = [iconInfo.defaultIcon];
     } else {
       const iconPath = path.join(npmDirectory, 'src-tauri/', iconInfo.path);
@@ -143,12 +143,10 @@ export async function mergeConfig(
     if (updateIconPath) {
       tauriConf.tauri.bundle.icon = [options.icon];
     } else {
-      logger.warn(`Icon will remain as default.`);
+      logger.warn(`✼ Icon will remain as default.`);
     }
   } else {
-    logger.warn(
-      'Custom icon path may be invalid. Default icon will be used instead.',
-    );
+    logger.warn('✼ Custom icon path may be invalid, default icon will be used instead.');
     tauriConf.tauri.bundle.icon = [iconInfo.defaultIcon];
   }
 
@@ -168,13 +166,13 @@ export async function mergeConfig(
         await fsExtra.copy(systemTrayIcon, trayIcoPath);
       } else {
         logger.warn(
-          `System tray icon must be .ico or .png, but you provided ${iconExt}.`,
+          `✼ System tray icon must be .ico or .png, but you provided ${iconExt}.`,
         );
-        logger.warn(`Default system tray icon will be used.`);
+        logger.warn(`✼ Default system tray icon will be used.`);
       }
     } catch {
-      logger.warn(`${systemTrayIcon} not exists!`);
-      logger.warn(`Default system tray icon will remain unchanged.`);
+      logger.warn(`✼ ${systemTrayIcon} not exists!`);
+      logger.warn(`✼ Default system tray icon will remain unchanged.`);
     }
   }
 
