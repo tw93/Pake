@@ -1,4 +1,4 @@
-window.addEventListener('DOMContentLoaded', (_event) => {
+window.addEventListener('DOMContentLoaded', _event => {
   const css = `
     #page #footer-wrapper,
     .drawing-board .toolbar .toolbar-action,

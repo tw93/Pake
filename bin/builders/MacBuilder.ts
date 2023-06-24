@@ -5,7 +5,7 @@ import BaseBuilder from './BaseBuilder';
 export default class MacBuilder extends BaseBuilder {
   constructor(options: PakeAppOptions) {
     super(options);
-    this.options.targets = "dmg";
+    this.options.targets = 'dmg';
   }
 
   getFileName(): string {
@@ -14,7 +14,7 @@ export default class MacBuilder extends BaseBuilder {
     if (this.options.multiArch) {
       arch = 'universal';
     } else {
-      arch = process.arch === "arm64" ? "aarch64" : process.arch;
+      arch = process.arch === 'arm64' ? 'aarch64' : process.arch;
     }
     return `${name}_${tauriConfig.package.version}_${arch}`;
   }

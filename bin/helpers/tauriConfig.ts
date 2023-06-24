@@ -7,10 +7,10 @@ import LinuxConf from '../../src-tauri/tauri.linux.conf.json';
 const platformConfigs = {
   win32: WinConf,
   darwin: MacConf,
-  linux: LinuxConf
+  linux: LinuxConf,
 };
 
-const {platform} = process;
+const { platform } = process;
 // @ts-ignore
 const platformConfig = platformConfigs[platform];
 
@@ -21,7 +21,7 @@ let tauriConfig = {
   },
   package: CommonConf.package,
   build: CommonConf.build,
-  pake: pakeConf
+  pake: pakeConf,
 };
 
 export default tauriConfig;

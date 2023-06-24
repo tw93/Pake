@@ -5,7 +5,7 @@ import tauriConfig from '@/helpers/tauriConfig';
 export default class WinBuilder extends BaseBuilder {
   constructor(options: PakeAppOptions) {
     super(options);
-    this.options.targets = "msi";
+    this.options.targets = 'msi';
   }
 
   getFileName(): string {

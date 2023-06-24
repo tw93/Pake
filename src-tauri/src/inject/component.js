@@ -136,8 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.appendChild(m);
     setTimeout(function () {
       const d = 0.5;
-      m.style.transition =
-        'transform ' + d + 's ease-in, opacity ' + d + 's ease-in';
+      m.style.transition = 'transform ' + d + 's ease-in, opacity ' + d + 's ease-in';
       m.style.opacity = '0';
       setTimeout(function () {
         document.body.removeChild(m);
@@ -151,14 +150,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.location.hostname === 'chat.openai.com') {
     const originFetch = fetch;
     window.fetch = (url, options) => {
-      return originFetch(url, options).then(async (response) => {
+      return originFetch(url, options).then(async response => {
         if (url.indexOf('/backend-api/models') === -1) {
           return response;
         }
         const responseClone = response.clone();
         let res = await responseClone.json();
-        res.models = res.models.map((m) => {
-          m.tags = m.tags.filter((t) => {
+        res.models = res.models.map(m => {
+          m.tags = m.tags.filter(t => {
             return t !== 'mobile';
           });
           if (m.slug === 'gpt-4-mobile') {

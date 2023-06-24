@@ -9,9 +9,7 @@
       "dangerousRemoteDomainIpcAccess": [
         {
           "domain": "weread.qq.com",
-          "windows": [
-            "pake"
-          ],
+          "windows": ["pake"],
           "enableTauriAPI": true
         }
       ]
@@ -27,9 +25,7 @@
       "all": true,
       "fs": {
         "all": true,
-        "scope": [
-          "$DOWNLOAD/*"
-        ]
+        "scope": ["$DOWNLOAD/*"]
       }
     }
   },
