@@ -20,7 +20,7 @@ import isUrl from 'is-url';
 import fs from 'fs';
 
 var name = "pake-cli";
-var version = "2.1.6";
+var version = "2.1.7";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -305,7 +305,7 @@ var LinuxConf = {
 const platformConfigs = {
     win32: WinConf,
     darwin: MacConf,
-    linux: LinuxConf
+    linux: LinuxConf,
 };
 const { platform: platform$2 } = process;
 // @ts-ignore
@@ -317,15 +317,12 @@ let tauriConfig = {
     },
     package: CommonConf.package,
     build: CommonConf.build,
-    pake: pakeConf
+    pake: pakeConf,
 };
 
 // Generates an identifier based on the given URL.
 function getIdentifier(url) {
-    const postFixHash = crypto.createHash('md5')
-        .update(url)
-        .digest('hex')
-        .substring(0, 6);
+    const postFixHash = crypto.createHash('md5').update(url).digest('hex').substring(0, 6);
     return `pake-${postFixHash}`;
 }
 async function promptText(message, initial) {
@@ -342,19 +339,14 @@ function capitalizeFirstLetter(string) {
 }
 function getSpinner(text) {
     const loadingType = {
-        "interval": 80,
-        "frames": [
-            "✦",
-            "✶",
-            "✺",
-            "✵",
-            "✸",
-            "✴︎",
-            "✹",
-            "✺",
-        ]
+        interval: 80,
+        frames: ['✦', '✶', '✺', '✵', '✸', '✹', '✺'],
     };
-    return ora({ text: `${chalk.blue(text)}\n`, spinner: loadingType, color: 'blue' }).start();
+    return ora({
+        text: `${chalk.cyan(text)}\n`,
+        spinner: loadingType,
+        color: 'cyan',
+    }).start();
 }
 
 const { platform: platform$1 } = process;
@@ -369,7 +361,7 @@ const npmDirectory = path.join(path.dirname(currentModulePath), '..');
 
 function shellExec(command) {
     return new Promise((resolve, reject) => {
-        shelljs.exec(command, { async: true, silent: false, cwd: npmDirectory }, (code) => {
+        shelljs.exec(command, { async: true, silent: false, cwd: npmDirectory }, code => {
             if (code === 0) {
                 resolve(0);
             }
@@ -382,20 +374,20 @@ function shellExec(command) {
 
 const logger = {
     info(...msg) {
-        log.info(...msg.map((m) => chalk.white(m)));
+        log.info(...msg.map(m => chalk.white(m)));
     },
     debug(...msg) {
         log.debug(...msg);
     },
     error(...msg) {
-        log.error(...msg.map((m) => chalk.red(m)));
+        log.error(...msg.map(m => chalk.red(m)));
     },
     warn(...msg) {
-        log.info(...msg.map((m) => chalk.yellow(m)));
+        log.info(...msg.map(m => chalk.yellow(m)));
     },
     success(...msg) {
-        log.info(...msg.map((m) => chalk.green(m)));
-    }
+        log.info(...msg.map(m => chalk.green(m)));
+    },
 };
 
 const resolve = promisify(dns.resolve);
@@ -405,12 +397,12 @@ const ping = async (host) => {
     const start = new Date();
     // Prevent timeouts from affecting user experience.
     const requestPromise = new Promise((resolve, reject) => {
-        const req = http.get(`http://${ip.address}`, (res) => {
+        const req = http.get(`http://${ip.address}`, res => {
             const delay = new Date().getTime() - start.getTime();
             res.resume();
             resolve(delay);
         });
-        req.on('error', (err) => {
+        req.on('error', err => {
             reject(err);
         });
     });
@@ -444,7 +436,7 @@ async function isChinaIP(ip, domain) {
 }
 
 async function installRust() {
-    const isInChina = await isChinaDomain("sh.rustup.rs");
+    const isInChina = await isChinaDomain('sh.rustup.rs');
     const rustInstallScriptForMac = isInChina
         ? 'export RUSTUP_DIST_SERVER="https://rsproxy.cn" && export RUSTUP_UPDATE_ROOT="https://rsproxy.cn/rustup" && curl --proto "=https" --tlsv1.2 -sSf https://rsproxy.cn/rustup-init.sh | sh'
         : "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
@@ -495,7 +487,7 @@ async function mergeConfig(url, options, tauriConf) {
             fsExtra.moveSync(distDir, distBakDir, { overwrite: true });
             fsExtra.copySync(dirName, distDir, { overwrite: true });
             const filesToCopyBack = ['cli.js', 'about_pake.html'];
-            await Promise.all(filesToCopyBack.map((file) => fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file))));
+            await Promise.all(filesToCopyBack.map(file => fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file))));
         }
         tauriConf.pake.windows[0].url = fileName;
         tauriConf.pake.windows[0].url_type = 'local';
@@ -503,8 +495,7 @@ async function mergeConfig(url, options, tauriConf) {
     else {
         tauriConf.pake.windows[0].url_type = 'web';
         // Set the secure domain for calling window.__TAURI__ to the application domain that has been set.
-        tauriConf.tauri.security.dangerousRemoteDomainIpcAccess[0].domain =
-            new URL(url).hostname;
+        tauriConf.tauri.security.dangerousRemoteDomainIpcAccess[0].domain = new URL(url).hostname;
     }
     const platformMap = {
         win32: 'windows',
@@ -522,7 +513,8 @@ async function mergeConfig(url, options, tauriConf) {
         delete tauriConf.tauri.bundle.deb.files;
         const validTargets = ['all', 'deb', 'appimage'];
         if (validTargets.includes(options.targets)) {
-            tauriConf.tauri.bundle.targets = options.targets === 'all' ? ['deb', 'appimage'] : [options.targets];
+            tauriConf.tauri.bundle.targets =
+                options.targets === 'all' ? ['deb', 'appimage'] : [options.targets];
         }
         else {
             logger.warn(`✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`);
@@ -622,8 +614,8 @@ class BaseBuilder {
     }
     async prepare() {
         if (!IS_MAC) {
-            logger.info('⚙︎ The first use requires installing system dependencies.');
-            logger.info('⚙︎ See more in https://tauri.app/v1/guides/getting-started/prerequisites.');
+            logger.info('✺ The first use requires installing system dependencies.');
+            logger.info('✺ See more in https://tauri.app/v1/guides/getting-started/prerequisites.');
         }
         if (!checkRustInstalled()) {
             const res = await prompts({
@@ -639,14 +631,14 @@ class BaseBuilder {
                 process.exit(0);
             }
         }
-        const isChina = await isChinaDomain("www.npmjs.com");
+        const isChina = await isChinaDomain('www.npmjs.com');
         const spinner = getSpinner('Installing package...');
         if (isChina) {
-            logger.info("⚙︎ Located in China, using npm/rsProxy CN mirror.");
-            const rustProjectDir = path.join(npmDirectory, 'src-tauri', ".cargo");
+            logger.info('✺ Located in China, using npm/rsProxy CN mirror.');
+            const rustProjectDir = path.join(npmDirectory, 'src-tauri', '.cargo');
             await fsExtra.ensureDir(rustProjectDir);
-            const projectCnConf = path.join(npmDirectory, "src-tauri", "rust_proxy.toml");
-            const projectConf = path.join(rustProjectDir, "config");
+            const projectCnConf = path.join(npmDirectory, 'src-tauri', 'rust_proxy.toml');
+            const projectConf = path.join(rustProjectDir, 'config');
             await fsExtra.copy(projectCnConf, projectConf);
             await shellExec(`cd "${npmDirectory}" && npm install --registry=https://registry.npmmirror.com`);
         }
@@ -679,7 +671,7 @@ class BaseBuilder {
         return target;
     }
     getBuildCommand() {
-        return "npm run build";
+        return 'npm run build';
     }
     getBasePath() {
         return 'src-tauri/target/release/bundle/';
@@ -692,7 +684,7 @@ class BaseBuilder {
 class MacBuilder extends BaseBuilder {
     constructor(options) {
         super(options);
-        this.options.targets = "dmg";
+        this.options.targets = 'dmg';
     }
     getFileName() {
         const { name } = this.options;
@@ -701,7 +693,7 @@ class MacBuilder extends BaseBuilder {
             arch = 'universal';
         }
         else {
-            arch = process.arch === "arm64" ? "aarch64" : process.arch;
+            arch = process.arch === 'arm64' ? 'aarch64' : process.arch;
         }
         return `${name}_${tauriConfig.package.version}_${arch}`;
     }
@@ -718,7 +710,7 @@ class MacBuilder extends BaseBuilder {
 class WinBuilder extends BaseBuilder {
     constructor(options) {
         super(options);
-        this.options.targets = "msi";
+        this.options.targets = 'msi';
     }
     getFileName() {
         const { name } = this.options;
@@ -734,14 +726,14 @@ class LinuxBuilder extends BaseBuilder {
     }
     getFileName() {
         const { name } = this.options;
-        const arch = process.arch === "x64" ? "amd64" : process.arch;
+        const arch = process.arch === 'x64' ? 'amd64' : process.arch;
         return `${name}_${tauriConfig.package.version}_${arch}`;
     }
     // Customize it, considering that there are all targets.
     async build(url) {
-        const targetTypes = ["deb", "appimage"];
+        const targetTypes = ['deb', 'appimage'];
         for (const target of targetTypes) {
-            if (this.options.targets === target || this.options.targets === "all") {
+            if (this.options.targets === target || this.options.targets === 'all') {
                 await this.buildAndCopy(url, target);
             }
         }
@@ -802,7 +794,11 @@ async function handleIcon(options) {
     }
     else {
         logger.warn('✼ No icon given, default in use. For a custom icon, use --icon option.');
-        const iconPath = IS_WIN ? 'src-tauri/png/icon_256.ico' : IS_LINUX ? 'src-tauri/png/icon_512.png' : 'src-tauri/icons/icon.icns';
+        const iconPath = IS_WIN
+            ? 'src-tauri/png/icon_256.ico'
+            : IS_LINUX
+                ? 'src-tauri/png/icon_512.png'
+                : 'src-tauri/icons/icon.icns';
         return path.join(npmDirectory, iconPath);
     }
 }
@@ -840,7 +836,7 @@ function getDomain(inputUrl) {
         // Use PSL to parse domain names.
         const parsed = psl.parse(url.hostname);
         // If domain is available, split it and return the SLD.
-        if ("domain" in parsed && parsed.domain) {
+        if ('domain' in parsed && parsed.domain) {
             return parsed.domain.split('.')[0];
         }
         else {
@@ -890,7 +886,7 @@ async function handleOptions(options, url) {
     let name = options.name;
     const pathExists = await fsExtra.pathExists(url);
     if (!options.name) {
-        const defaultName = pathExists ? "" : resolveAppName(url, platform);
+        const defaultName = pathExists ? '' : resolveAppName(url, platform);
         const promptMessage = 'Enter your application name';
         const namePrompt = await promptText(promptMessage, defaultName);
         name = namePrompt || defaultName;
@@ -961,10 +957,10 @@ program
     .action(async (url, options) => {
     await checkUpdateTips();
     if (!url) {
-        program.outputHelp((str) => {
+        program.outputHelp(str => {
             return str
                 .split('\n')
-                .filter((line) => !/((-h,|--help)|((-v|-V),|--version))\s+.+$/.test(line))
+                .filter(line => !/((-h,|--help)|((-v|-V),|--version))\s+.+$/.test(line))
                 .join('\n');
         });
         process.exit(0);
