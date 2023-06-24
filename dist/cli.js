@@ -20,7 +20,7 @@ import isUrl from 'is-url';
 import fs from 'fs';
 
 var name = "pake-cli";
-var version = "2.1.5";
+var version = "2.1.6";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -945,17 +945,17 @@ program
     .argument('[url]', 'The web URL you want to package', validateUrlInput)
     .option('--name <string>', 'Application name')
     .option('--icon <string>', 'Application icon', DEFAULT_PAKE_OPTIONS.icon)
-    .option('--height <number>', 'Window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
     .option('--width <number>', 'Window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
-    .option('--fullscreen', 'Start the packaged app in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
-    .option('--transparent', 'Transparent title bar', DEFAULT_PAKE_OPTIONS.transparent)
+    .option('--height <number>', 'Window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
+    .option('--transparent', 'Only for Mac, hide title bar', DEFAULT_PAKE_OPTIONS.transparent)
+    .option('--fullscreen', 'Start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
     .option('--user-agent <string>', 'Custom user agent', DEFAULT_PAKE_OPTIONS.userAgent)
     .option('--show-menu', 'Show menu in app', DEFAULT_PAKE_OPTIONS.showMenu)
     .option('--show-system-tray', 'Show system tray in app', DEFAULT_PAKE_OPTIONS.showSystemTray)
     .option('--system-tray-icon <string>', 'Custom system tray icon', DEFAULT_PAKE_OPTIONS.systemTrayIcon)
-    .option('--iter-copy-file', 'Copy files to app when URL is a local file', DEFAULT_PAKE_OPTIONS.iterCopyFile)
+    .option('--iter-copy-file', 'Copy files when URL is a local file', DEFAULT_PAKE_OPTIONS.iterCopyFile)
     .option('--multi-arch', 'Only for Mac, supports both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
-    .option('--targets <string>', 'Only for Linux, option "deb", "appimage" or "all"', DEFAULT_PAKE_OPTIONS.targets)
+    .option('--targets <string>', 'Only for Linux, option "deb" or "appimage"', DEFAULT_PAKE_OPTIONS.targets)
     .option('--debug', 'Debug mode', DEFAULT_PAKE_OPTIONS.debug)
     .version(packageJson.version, '-v, --version', 'Output the current version')
     .action(async (url, options) => {
