@@ -1,5 +1,5 @@
-import fsExtra from "fs-extra";
-import logger from "@/options/logger";
+import fsExtra from 'fs-extra';
+import logger from '@/options/logger';
 
 import { handleIcon } from './icon';
 import { getDomain } from '@/utils/url';
@@ -20,14 +20,17 @@ function isValidName(name: string, platform: NodeJS.Platform): boolean {
   return !!name && reg.test(name);
 }
 
-export default async function handleOptions(options: PakeCliOptions, url: string): Promise<PakeAppOptions> {
+export default async function handleOptions(
+  options: PakeCliOptions,
+  url: string,
+): Promise<PakeAppOptions> {
   const { platform } = process;
   const isActions = process.env.GITHUB_ACTIONS;
   let name = options.name;
 
   const pathExists = await fsExtra.pathExists(url);
   if (!options.name) {
-    const defaultName = pathExists ? "" : resolveAppName(url, platform);
+    const defaultName = pathExists ? '' : resolveAppName(url, platform);
     const promptMessage = 'Enter your application name';
     const namePrompt = await promptText(promptMessage, defaultName);
     name = namePrompt || defaultName;

@@ -9,7 +9,7 @@ export function getDomain(inputUrl: string): string | null {
     const parsed = psl.parse(url.hostname);
 
     // If domain is available, split it and return the SLD.
-    if ("domain" in parsed && parsed.domain) {
+    if ('domain' in parsed && parsed.domain) {
       return parsed.domain.split('.')[0];
     } else {
       return null;
@@ -18,7 +18,6 @@ export function getDomain(inputUrl: string): string | null {
     return null;
   }
 }
-
 
 // Appends 'https://' protocol to the URL if not present.
 export function appendProtocol(inputUrl: string): string {

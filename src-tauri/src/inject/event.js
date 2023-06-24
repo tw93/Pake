@@ -82,14 +82,14 @@ async function invoke(cmd, args) {
 
 // Judgment of file download.
 function isDownloadLink(url) {
-    const fileExtensions = [
-        '3gp', '7z', 'ai', 'apk', 'avi', 'bmp', 'csv', 'dmg', 'doc', 'docx', 'fla', 'flv', 'gif', 'gz', 'gzip',
-        'ico', 'iso', 'indd', 'jar', 'jpeg', 'jpg', 'm3u8', 'mov', 'mp3', 'mp4', 'mpa', 'mpg',
-        'mpeg', 'msi', 'odt', 'ogg', 'ogv', 'pdf', 'png', 'ppt', 'pptx', 'psd', 'rar', 'raw', 'rss', 'svg',
-        'swf', 'tar', 'tif', 'tiff', 'ts', 'txt', 'wav', 'webm', 'webp', 'wma', 'wmv', 'xls', 'xlsx', 'xml', 'zip'
-    ];
-    const downloadLinkPattern = new RegExp(`\\.(${fileExtensions.join('|')})$`, 'i');
-    return downloadLinkPattern.test(url);
+  const fileExtensions = [
+    '3gp', '7z', 'ai', 'apk', 'avi', 'bmp', 'csv', 'dmg', 'doc', 'docx', 'fla', 'flv', 'gif', 'gz', 'gzip',
+    'ico', 'iso', 'indd', 'jar', 'jpeg', 'jpg', 'm3u8', 'mov', 'mp3', 'mp4', 'mpa', 'mpg',
+    'mpeg', 'msi', 'odt', 'ogg', 'ogv', 'pdf', 'png', 'ppt', 'pptx', 'psd', 'rar', 'raw', 'rss', 'svg',
+    'swf', 'tar', 'tif', 'tiff', 'ts', 'txt', 'wav', 'webm', 'webp', 'wma', 'wmv', 'xls', 'xlsx', 'xml', 'zip',
+  ];
+  const downloadLinkPattern = new RegExp(`\\.(${fileExtensions.join('|')})$`, 'i');
+  return downloadLinkPattern.test(url);
 }
 
 // No need to go to the download link.
@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Rewrite the window.open function.
   const originalWindowOpen = window.open;
-  window.open = function (url, name, specs) {
+  window.open = function(url, name, specs) {
     // Apple login and google login
     if (name === 'AppleAuthentication') {
       //do nothing
@@ -278,7 +278,7 @@ function downloadFromBlobUrl(blobUrl, filename) {
 function detectDownloadByCreateAnchor() {
   const createEle = document.createElement;
   document.createElement = (el) => {
-    if (el !== "a") return createEle.call(document, el);
+    if (el !== 'a') return createEle.call(document, el);
     const anchorEle = createEle.call(document, el);
 
     // use addEventListener to avoid overriding the original click event.
@@ -290,5 +290,5 @@ function detectDownloadByCreateAnchor() {
     });
 
     return anchorEle;
-  }
+  };
 }

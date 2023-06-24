@@ -33,14 +33,13 @@ program
   .option('--debug', 'Debug mode', DEFAULT.debug)
   .version(packageJson.version, '-v, --version', 'Output the current version')
   .action(async (url: string, options: PakeCliOptions) => {
-
     await checkUpdateTips();
 
     if (!url) {
-      program.outputHelp((str) => {
+      program.outputHelp(str => {
         return str
           .split('\n')
-          .filter((line) => !/((-h,|--help)|((-v|-V),|--version))\s+.+$/.test(line))
+          .filter(line => !/((-h,|--help)|((-v|-V),|--version))\s+.+$/.test(line))
           .join('\n');
       });
       process.exit(0);

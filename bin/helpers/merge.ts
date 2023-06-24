@@ -5,11 +5,7 @@ import { npmDirectory } from '@/utils/dir';
 import logger from '@/options/logger';
 import { PakeAppOptions, PlatformMap } from '@/types';
 
-export async function mergeConfig(
-  url: string,
-  options: PakeAppOptions,
-  tauriConf: any,
-) {
+export async function mergeConfig(url: string, options: PakeAppOptions, tauriConf: any) {
   const {
     width,
     height,
@@ -61,7 +57,7 @@ export async function mergeConfig(
 
       const filesToCopyBack = ['cli.js', 'about_pake.html'];
       await Promise.all(
-        filesToCopyBack.map((file) =>
+        filesToCopyBack.map(file =>
           fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file)),
         ),
       );
@@ -72,8 +68,7 @@ export async function mergeConfig(
   } else {
     tauriConf.pake.windows[0].url_type = 'web';
     // Set the secure domain for calling window.__TAURI__ to the application domain that has been set.
-    tauriConf.tauri.security.dangerousRemoteDomainIpcAccess[0].domain =
-      new URL(url).hostname;
+    tauriConf.tauri.security.dangerousRemoteDomainIpcAccess[0].domain = new URL(url).hostname;
   }
 
   const platformMap: PlatformMap = {
@@ -95,7 +90,8 @@ export async function mergeConfig(
     delete tauriConf.tauri.bundle.deb.files;
     const validTargets = ['all', 'deb', 'appimage'];
     if (validTargets.includes(options.targets)) {
-      tauriConf.tauri.bundle.targets = options.targets === 'all' ? ['deb', 'appimage'] : [options.targets];
+      tauriConf.tauri.bundle.targets =
+        options.targets === 'all' ? ['deb', 'appimage'] : [options.targets];
     } else {
       logger.warn(
         `✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`,
@@ -165,9 +161,7 @@ export async function mergeConfig(
         trayIconPath = `png/${name.toLowerCase()}${iconExt}`;
         await fsExtra.copy(systemTrayIcon, trayIcoPath);
       } else {
-        logger.warn(
-          `✼ System tray icon must be .ico or .png, but you provided ${iconExt}.`,
-        );
+        logger.warn(`✼ System tray icon must be .ico or .png, but you provided ${iconExt}.`);
         logger.warn(`✼ Default system tray icon will be used.`);
       }
     } catch {
@@ -191,7 +185,6 @@ export async function mergeConfig(
 
   const pakeConfigPath = path.join(npmDirectory, 'src-tauri/pake.json');
   await fsExtra.writeJson(pakeConfigPath, tauriConf.pake, { spaces: 4 });
-
 
   let tauriConf2 = JSON.parse(JSON.stringify(tauriConf));
   delete tauriConf2.pake;

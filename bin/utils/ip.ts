@@ -13,13 +13,13 @@ const ping = async (host: string) => {
 
   // Prevent timeouts from affecting user experience.
   const requestPromise = new Promise<number>((resolve, reject) => {
-    const req = http.get(`http://${ip.address}`, (res) => {
+    const req = http.get(`http://${ip.address}`, res => {
       const delay = new Date().getTime() - start.getTime();
       res.resume();
       resolve(delay);
     });
 
-    req.on('error', (err) => {
+    req.on('error', err => {
       reject(err);
     });
   });
@@ -32,7 +32,6 @@ const ping = async (host: string) => {
 
   return Promise.race([requestPromise, timeoutPromise]);
 };
-
 
 async function isChinaDomain(domain: string): Promise<boolean> {
   try {

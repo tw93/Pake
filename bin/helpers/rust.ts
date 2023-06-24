@@ -1,13 +1,13 @@
-import chalk from "chalk";
+import chalk from 'chalk';
 import shelljs from 'shelljs';
 
-import { getSpinner } from "@/utils/info";
+import { getSpinner } from '@/utils/info';
 import { IS_WIN } from '@/utils/platform';
 import { shellExec } from '@/utils/shell';
 import { isChinaDomain } from '@/utils/ip';
 
 export async function installRust() {
-  const isInChina = await isChinaDomain("sh.rustup.rs");
+  const isInChina = await isChinaDomain('sh.rustup.rs');
   const rustInstallScriptForMac = isInChina
     ? 'export RUSTUP_DIST_SERVER="https://rsproxy.cn" && export RUSTUP_UPDATE_ROOT="https://rsproxy.cn/rustup" && curl --proto "=https" --tlsv1.2 -sSf https://rsproxy.cn/rustup-init.sh | sh'
     : "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";

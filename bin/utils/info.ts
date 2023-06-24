@@ -1,14 +1,11 @@
 import crypto from 'crypto';
-import prompts from "prompts";
-import ora from "ora";
+import prompts from 'prompts';
+import ora from 'ora';
 import chalk from 'chalk';
 
 // Generates an identifier based on the given URL.
 export function getIdentifier(url: string) {
-  const postFixHash = crypto.createHash('md5')
-    .update(url)
-    .digest('hex')
-    .substring(0, 6);
+  const postFixHash = crypto.createHash('md5').update(url).digest('hex').substring(0, 6);
   return `pake-${postFixHash}`;
 }
 
@@ -28,17 +25,12 @@ export function capitalizeFirstLetter(string: string) {
 
 export function getSpinner(text: string) {
   const loadingType = {
-    "interval": 80,
-    "frames": [
-      "✦",
-      "✶",
-      "✺",
-      "✵",
-      "✸",
-      "✴︎",
-      "✹",
-      "✺",
-    ]
-  }
-  return ora({ text: `${chalk.blue(text)}\n`, spinner: loadingType, color: 'blue' }).start();
+    interval: 80,
+    frames: ['✦', '✶', '✺', '✵', '✸', '✹', '✺'],
+  };
+  return ora({
+    text: `${chalk.cyan(text)}\n`,
+    spinner: loadingType,
+    color: 'cyan',
+  }).start();
 }

@@ -1,4 +1,3 @@
-
 export interface PlatformMap {
   [key: string]: any;
 }
