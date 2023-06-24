@@ -20,7 +20,7 @@ import isUrl from 'is-url';
 import fs from 'fs';
 
 var name = "pake-cli";
-var version = "2.1.7";
+var version = "2.1.8";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -613,7 +613,10 @@ class BaseBuilder {
         this.options = options;
     }
     async prepare() {
-        if (!IS_MAC) {
+        const tauriSrcPath = path.join(npmDirectory, 'src-tauri');
+        const tauriTargetPath = path.join(tauriSrcPath, 'target');
+        const tauriTargetPathExists = await fsExtra.pathExists(tauriTargetPath);
+        if (!IS_MAC && !tauriTargetPathExists) {
             logger.info('✺ The first use requires installing system dependencies.');
             logger.info('✺ See more in https://tauri.app/v1/guides/getting-started/prerequisites.');
         }
@@ -633,12 +636,12 @@ class BaseBuilder {
         }
         const isChina = await isChinaDomain('www.npmjs.com');
         const spinner = getSpinner('Installing package...');
+        const rustProjectDir = path.join(tauriSrcPath, '.cargo');
+        const projectConf = path.join(rustProjectDir, 'config');
+        await fsExtra.ensureDir(rustProjectDir);
         if (isChina) {
             logger.info('✺ Located in China, using npm/rsProxy CN mirror.');
-            const rustProjectDir = path.join(npmDirectory, 'src-tauri', '.cargo');
-            await fsExtra.ensureDir(rustProjectDir);
-            const projectCnConf = path.join(npmDirectory, 'src-tauri', 'rust_proxy.toml');
-            const projectConf = path.join(rustProjectDir, 'config');
+            const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
             await fsExtra.copy(projectCnConf, projectConf);
             await shellExec(`cd "${npmDirectory}" && npm install --registry=https://registry.npmmirror.com`);
         }
@@ -646,6 +649,9 @@ class BaseBuilder {
             await shellExec(`cd "${npmDirectory}" && npm install`);
         }
         spinner.succeed(chalk.green('Package installed!'));
+        if (!tauriTargetPathExists) {
+            logger.warn('✼ The first packaging may be slow, please be patient and wait, it will be faster afterwards.');
+        }
     }
     async build(url) {
         await this.buildAndCopy(url, this.options.targets);
@@ -780,7 +786,7 @@ const DEFAULT_PAKE_OPTIONS = {
 };
 
 async function checkUpdateTips() {
-    updateNotifier({ pkg: packageJson }).notify();
+    updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify();
 }
 
 async function handleIcon(options) {
