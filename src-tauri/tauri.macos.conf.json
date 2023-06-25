@@ -1,23 +1,29 @@
 {
-  "tauri": {
-    "bundle": {
-      "icon": ["icons/weread.icns"],
-      "identifier": "com.tw93.weread",
-      "active": true,
-      "category": "DeveloperTool",
-      "copyright": "",
-      "externalBin": [],
-      "longDescription": "",
-      "macOS": {
-        "entitlements": null,
-        "exceptionDomain": "",
-        "frameworks": [],
-        "providerShortName": null,
-        "signingIdentity": null
-      },
-      "resources": [],
-      "shortDescription": "",
-      "targets": ["dmg"]
+    "tauri": {
+        "bundle": {
+            "icon": [
+                "/Users/guyifeng/workspace/seeyon/Pake/src-tauri/icons/icon.icns"
+            ],
+            "identifier": "pake-4269dd",
+            "active": true,
+            "category": "DeveloperTool",
+            "copyright": "",
+            "externalBin": [],
+            "longDescription": "",
+            "macOS": {
+                "entitlements": null,
+                "exceptionDomain": "",
+                "frameworks": [],
+                "providerShortName": null,
+                "signingIdentity": null
+            },
+            "resources": [
+                "icons/zbook.icns"
+            ],
+            "shortDescription": "",
+            "targets": [
+                "dmg"
+            ]
+        }
     }
-  }
 }
