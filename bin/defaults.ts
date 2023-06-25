@@ -16,4 +16,5 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   systemTrayIcon: '',
   debug: false,
   inject: [],
+  safeDomain: [],
 };

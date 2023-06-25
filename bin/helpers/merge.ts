@@ -21,6 +21,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     name,
     resizable = true,
     inject,
+    safeDomain,
   } = options;
 
   const { platform } = process;
@@ -59,9 +60,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
 
       const filesToCopyBack = ['cli.js', 'about_pake.html'];
       await Promise.all(
-        filesToCopyBack.map(file =>
-          fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file)),
-        ),
+        filesToCopyBack.map(file => fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file))),
       );
     }
 
@@ -70,11 +69,24 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
   } else {
     tauriConf.pake.windows[0].url_type = 'web';
     // Set the secure domain for calling window.__TAURI__ to the application domain that has been set.
-    tauriConf.tauri.security.dangerousRemoteDomainIpcAccess = [{
-      domain: new URL(url).hostname,
-      windows: ["pake"],
-      enableTauriAPI: true,
-    }];
+    tauriConf.tauri.security.dangerousRemoteDomainIpcAccess = [
+      {
+        domain: new URL(url).hostname,
+        windows: ['pake'],
+        enableTauriAPI: true,
+      },
+    ];
+  }
+
+  if (safeDomain.length > 0) {
+    tauriConf.tauri.security.dangerousRemoteDomainIpcAccess = [
+      ...tauriConf.tauri.security.dangerousRemoteDomainIpcAccess,
+      ...safeDomain.map(domain => ({
+        domain,
+        windows: ['pake'],
+        enableTauriAPI: true,
+      })),
+    ];
   }
 
   const platformMap: PlatformMap = {
@@ -96,12 +108,9 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     delete tauriConf.tauri.bundle.deb.files;
     const validTargets = ['all', 'deb', 'appimage'];
     if (validTargets.includes(options.targets)) {
-      tauriConf.tauri.bundle.targets =
-        options.targets === 'all' ? ['deb', 'appimage'] : [options.targets];
+      tauriConf.tauri.bundle.targets = options.targets === 'all' ? ['deb', 'appimage'] : [options.targets];
     } else {
-      logger.warn(
-        `✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`,
-      );
+      logger.warn(`✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`);
     }
   }
 
@@ -160,10 +169,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
       // 需要判断图标格式，默认只支持ico和png两种
       let iconExt = path.extname(systemTrayIcon).toLowerCase();
       if (iconExt == '.png' || iconExt == '.ico') {
-        const trayIcoPath = path.join(
-          npmDirectory,
-          `src-tauri/png/${name.toLowerCase()}${iconExt}`,
-        );
+        const trayIcoPath = path.join(npmDirectory, `src-tauri/png/${name.toLowerCase()}${iconExt}`);
         trayIconPath = `png/${name.toLowerCase()}${iconExt}`;
         await fsExtra.copy(systemTrayIcon, trayIcoPath);
       } else {
@@ -181,12 +187,12 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
   // inject js or css files
   if (inject?.length > 0) {
     if (!inject.every(item => item.endsWith('.css') || item.endsWith('.js'))) {
-      logger.error("The injected file must be in either CSS or JS format.");
+      logger.error('The injected file must be in either CSS or JS format.');
       return;
     }
     const files = inject.map(relativePath => path.join(process.cwd(), relativePath));
     tauriConf.pake.inject = files;
-    combineFiles(files,  path.join(npmDirectory, `src-tauri/src/inject/_INJECT_.js`));
+    await combineFiles(files, path.join(npmDirectory, `src-tauri/src/inject/_INJECT_.js`));
   }
 
   // Save config file.
