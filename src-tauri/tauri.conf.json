@@ -1,34 +1,50 @@
 {
-  "package": {
-    "productName": "WeRead",
-    "version": "1.0.0"
-  },
-  "tauri": {
-    "security": {
-      "csp": null
+    "tauri": {
+        "security": {
+            "csp": null,
+            "dangerousRemoteDomainIpcAccess": [
+                {
+                    "domain": "zbook.lol",
+                    "windows": [
+                        "pake"
+                    ],
+                    "enableTauriAPI": true
+                },
+                {
+                    "domain": "zbook.eu.org",
+                    "windows": [
+                        "pake"
+                    ],
+                    "enableTauriAPI": true
+                }
+            ]
+        },
+        "updater": {
+            "active": false
+        },
+        "systemTray": {
+            "iconPath": "png/icon_512.png",
+            "iconAsTemplate": true
+        },
+        "allowlist": {
+            "all": true,
+            "fs": {
+                "all": true,
+                "scope": [
+                    "$DOWNLOAD/*"
+                ]
+            }
+        }
     },
-    "updater": {
-      "active": false
+    "package": {
+        "productName": "zBook",
+        "version": "1.0.0"
     },
-    "systemTray": {
-      "iconPath": "png/weread_512.png",
-      "iconAsTemplate": true
-    },
-    "allowlist": {
-      "all": true,
-      "fs": {
-        "all": true,
-        "scope": [
-          "$DOWNLOAD/*"
-        ]
-      }
+    "build": {
+        "withGlobalTauri": true,
+        "devPath": "../dist",
+        "distDir": "../dist",
+        "beforeBuildCommand": "",
+        "beforeDevCommand": ""
     }
-  },
-  "build": {
-    "withGlobalTauri": true,
-    "devPath": "../dist",
-    "distDir": "../dist",
-    "beforeBuildCommand": "",
-    "beforeDevCommand": ""
-  }
 }

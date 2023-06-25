@@ -41,7 +41,10 @@ pub fn run_app() {
 
     tauri_app
         .plugin(windowStatePlugin::default().build())
-        .invoke_handler(tauri::generate_handler![download_file, download_file_by_binary])
+        .invoke_handler(tauri::generate_handler![
+            download_file,
+            download_file_by_binary
+        ])
         .setup(|app| {
             let _window = get_window(app, pake_config, data_dir);
             // Prevent initial shaking
