@@ -1,7 +1,6 @@
 import updateNotifier from 'update-notifier';
-// @ts-expect-error
 import packageJson from '../../package.json';
 
 export async function checkUpdateTips() {
-  updateNotifier({ pkg: packageJson }).notify();
+  updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify();
 }

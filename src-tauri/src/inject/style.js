@@ -1,4 +1,4 @@
-window.addEventListener('DOMContentLoaded', (_event) => {
+window.addEventListener('DOMContentLoaded', _event => {
   const css = `
     #page #footer-wrapper,
     .drawing-board .toolbar .toolbar-action,
@@ -54,6 +54,10 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     .fui-FluentProvider .fui-Button[data-testid="HomeButton"],
     #__next > div.PageWithSidebarLayout_centeringDiv___L9br > aside .ChatPageSidebar_logo__9PIXq {
       padding-top: 20px;
+    }
+
+    #__next > div.overflow-hidden.w-full.h-full  .min-h-\\[20px\\].items-start.gap-4.whitespace-pre-wrap.break-words {
+      word-break: break-all;
     }
 
     #__next .PageWithSidebarLayout_mainSection__i1yOg {
@@ -312,7 +316,8 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     }
 
     @media (min-width:1024px){
-      #__next .text-base.lg\\:max-w-xl, #__next form.stretch.lg\\:max-w-2xl {
+      #__next .text-base.lg\\:max-w-xl, #__next form.stretch.lg\\:max-w-2xl,
+      #__next > .w-full.h-full .lg\\:max-w-\\[38rem\\] {
         max-width: 44rem;
       }
     }
@@ -326,6 +331,20 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     @media (max-width:767px){
       #__next .overflow-hidden.w-full .max-w-full>.sticky.top-0 {
         padding-top: 20px;
+      }
+
+      #__next .overflow-hidden.w-full main.relative.h-full.w-full.flex-1{
+        padding-bottom: 82px;
+      }
+
+      #__next > div.overflow-hidden.w-full.h-full  main.relative.h-full.w-full.flex-1 > .flex-1.overflow-hidden .h-32.md\\:h-48.flex-shrink-0{
+        height: 0px;
+      }
+    }
+
+    @media (max-width:565px){
+      #__next .overflow-hidden.w-full main.relative.h-full.w-full.flex-1{
+        padding-bottom: 98px;
       }
     }
 

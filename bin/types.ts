@@ -1,47 +1,51 @@
+export interface PlatformMap {
+  [key: string]: any;
+}
+
 export interface PakeCliOptions {
-  /** 应用名称 */
+  // Application name
   name?: string;
 
-  /** 应用icon */
+  // Application icon
   icon: string;
 
-  /** 应用窗口宽度，默认 1200px */
+  // Application window width, default 1200px
   width: number;
 
-  /** 应用窗口高度，默认 780px */
+  // Application window height, default 780px
   height: number;
 
-  /** 是否可以拖动，默认true */
+  // Whether the window is resizable, default true
   resizable: boolean;
 
-  /** 是否可以全屏，默认 false */
+  // Whether the window can be fullscreen, default false
   fullscreen: boolean;
 
-  /** 是否开启沉浸式头部，默认为 false 不开启 ƒ*/
+  // Enable immersive header, default false
   transparent: boolean;
 
-  /** 自定义UA，默认为不开启 ƒ*/
+  // Custom User-Agent, default off
   userAgent: string;
 
-  /** 开启菜单栏，MacOS默认开启，Windows,Linux默认不开启 ƒ*/
+  // Enable menu bar, default on for macOS, off for Windows and Linux
   showMenu: boolean;
 
-  /** 开启系统托盘，MacOS默认不开启，Windows,Linux默认开启 ƒ*/
+  // Enable system tray, default off for macOS, on for Windows and Linux
   showSystemTray: boolean;
 
-  /** 托盘图标, Windows、Linux默认和应用图标共用一样的，MacOS需要提别提供, 格式为png或者ico */
+  // Tray icon, default same as app icon for Windows and Linux, macOS requires separate png or ico
   systemTrayIcon: string;
 
-  // /** 递归拷贝，当url为本地文件路径时候，若开启该选项，则将url路径文件所在文件夹以及所有子文件都拷贝到pake静态文件夹，默认不开启 */
+  // Recursive copy, when url is a local file path, if this option is enabled, the url path file and all its subfiles will be copied to the pake static file folder, default off
   iterCopyFile: false;
 
-  /** mutli arch, Supports both Intel and m1 chips, only for Mac */
+  // Multi arch, supports both Intel and M1 chips, only for Mac
   multiArch: boolean;
 
-  // 包输出产物，对linux用户有效，默认为deb，可选appimage, 或者all（即同时输出deb和all）;
+  // Package output, valid for Linux users, default is deb, optional appimage, or all (i.e., output both deb and all);
   targets: string;
 
-  /** 调试模式，会输出更多日志 */
+  // Debug mode, outputs more logs
   debug: boolean;
 
   /** 需要注入页面的外部脚本 */

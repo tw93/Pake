@@ -10,7 +10,6 @@ except ImportError:
     os.system("pip install Pillow")
     from PIL import Image
 
-
 if __name__ == "__main__":
     now_dir = os.path.dirname(os.path.abspath(__file__))
     icons_dir = os.path.join(now_dir, "src-tauri", "icons")
@@ -34,5 +33,3 @@ if __name__ == "__main__":
         image_32.save(image_32_path, "ICO")
     print("png file write success.")
     print(f"There are {len(os.listdir(png_dir))} png picture in ", png_dir)
-
-
