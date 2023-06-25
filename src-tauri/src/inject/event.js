@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
           e.metaKey ||
           e.ctrlKey ||
           isDownloadLink(absoluteUrl)) &&
-        !externalDownLoadLink()
+        !externalDownLoadLink() && !url.startsWith("blob")
       ) {
         e.preventDefault();
         invoke('download_file', {
@@ -257,19 +257,18 @@ function convertBlobUrlToBinary(blobUrl) {
 
     reader.readAsArrayBuffer(blob);
     reader.onload = () => {
-      resolve(reader.result);
+      resolve(Array.from(new Uint8Array(reader.result)));
     };
   });
 }
 
 function downloadFromBlobUrl(blobUrl, filename) {
-  const tauri = window.__TAURI__;
   convertBlobUrlToBinary(blobUrl).then((binary) => {
-    console.log('binary', binary);
-    tauri.fs.writeBinaryFile(filename, binary, {
-      dir: tauri.fs.BaseDirectory.Download,
-    }).then(() => {
-      window.pakeToast('Download successful, saved to download directory~');
+    invoke('download_file_by_binary', {
+      params: {
+        filename,
+        binary
+      },
     });
   });
 }
@@ -277,7 +276,6 @@ function downloadFromBlobUrl(blobUrl, filename) {
 // detect blob download by createElement("a")
 function detectDownloadByCreateAnchor() {
   const createEle = document.createElement;
-  const tauri = window.__TAURI__;
   document.createElement = (el) => {
     if (el !== 'a') return createEle.call(document, el);
     const anchorEle = createEle.call(document, el);
@@ -286,9 +284,10 @@ function detectDownloadByCreateAnchor() {
     anchorEle.addEventListener('click', () => {
       const url = anchorEle.href;
       if (window.blobToUrlCaches.has(url)) {
+        
         downloadFromBlobUrl(url, anchorEle.download || getFilenameFromUrl(url));
       }
-    });
+    }, true);
 
     return anchorEle;
   };
