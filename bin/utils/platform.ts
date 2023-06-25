@@ -1,5 +1,5 @@
-export const IS_MAC = process.platform === 'darwin';
+const { platform } = process;
 
-export const IS_WIN = process.platform === 'win32';
-
-export const IS_LINUX = process.platform === 'linux';
+export const IS_MAC = platform === 'darwin';
+export const IS_WIN = platform === 'win32';
+export const IS_LINUX = platform === 'linux';

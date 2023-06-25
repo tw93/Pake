@@ -1,4 +1,4 @@
-name: Build App with Pake Cli
+name: Build App with Pake CLI
 on:
   workflow_dispatch:
     inputs:
@@ -20,29 +20,19 @@ on:
       icon:
         description: "[Icon, Optional]"
         required: false
-      height:
-        description: "[Height, Optional]"
-        required: false
-        default: "780"
       width:
         description: "[Width, Optional]"
         required: false
         default: "1200"
+      height:
+        description: "[Height, Optional]"
+        required: false
+        default: "780"
       transparent:
-        description: "[Transparent, Optional]"
+        description: "[Transparent, Optional, MacOS only]"
         required: false
         type: boolean
         default: false
-      # fullscreen:
-      #   description: "[FullScreen, Optional]"
-      #   required: false
-      #   type: boolean
-      #   default: false
-      resize:
-        description: "[Resize, Optional]"
-        required: false
-        type: boolean
-        default: true
       multi_arch:
         description: "[MultiArch, Optional, MacOS only]"
         required: false

@@ -1,17 +1,29 @@
 {
   "compilerOptions": {
-    "module": "Node16",
+    "module": "ESNext",
+    "target": "es2020",
+    "types": [
+      "node"
+    ],
+    "lib": [
+      "es2020",
+      "dom"
+    ],
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es6",
     "noImplicitAny": true,
-    "moduleResolution": "Node16",
+    "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["bin/*"]
+      "@/*": [
+        "bin/*"
+      ]
     }
   },
-  "include": ["bin/**/*"]
+  "include": [
+    "bin/**/*"
+  ]
 }

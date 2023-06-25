@@ -82,14 +82,14 @@ async function invoke(cmd, args) {
 
 // Judgment of file download.
 function isDownloadLink(url) {
-    const fileExtensions = [
-        '3gp', '7z', 'ai', 'apk', 'avi', 'bmp', 'csv', 'dmg', 'doc', 'docx', 'fla', 'flv', 'gif', 'gz', 'gzip',
-        'ico', 'iso', 'indd', 'jar', 'jpeg', 'jpg', 'm3u8', 'mov', 'mp3', 'mp4', 'mpa', 'mpg',
-        'mpeg', 'msi', 'odt', 'ogg', 'ogv', 'pdf', 'png', 'ppt', 'pptx', 'psd', 'rar', 'raw', 'rss', 'svg',
-        'swf', 'tar', 'tif', 'tiff', 'ts', 'txt', 'wav', 'webm', 'webp', 'wma', 'wmv', 'xls', 'xlsx', 'xml', 'zip'
-    ];
-    const downloadLinkPattern = new RegExp(`\\.(${fileExtensions.join('|')})$`, 'i');
-    return downloadLinkPattern.test(url);
+  const fileExtensions = [
+    '3gp', '7z', 'ai', 'apk', 'avi', 'bmp', 'csv', 'dmg', 'doc', 'docx', 'fla', 'flv', 'gif', 'gz', 'gzip',
+    'ico', 'iso', 'indd', 'jar', 'jpeg', 'jpg', 'm3u8', 'mov', 'mp3', 'mp4', 'mpa', 'mpg',
+    'mpeg', 'msi', 'odt', 'ogg', 'ogv', 'pdf', 'png', 'ppt', 'pptx', 'psd', 'rar', 'raw', 'rss', 'svg',
+    'swf', 'tar', 'tif', 'tiff', 'ts', 'txt', 'wav', 'webm', 'webp', 'wma', 'wmv', 'xls', 'xlsx', 'xml', 'zip',
+  ];
+  const downloadLinkPattern = new RegExp(`\\.(${fileExtensions.join('|')})$`, 'i');
+  return downloadLinkPattern.test(url);
 }
 
 // No need to go to the download link.
@@ -114,17 +114,17 @@ document.addEventListener('DOMContentLoaded', () => {
   domEl.addEventListener('mousedown', (e) => {
     e.preventDefault();
     if (e.buttons === 1 && e.detail !== 2) {
-      appWindow.startDragging();
+      appWindow.startDragging().then();
     }
   });
 
   domEl.addEventListener('touchstart', () => {
-    appWindow.startDragging();
+    appWindow.startDragging().then();
   });
 
   domEl.addEventListener('dblclick', () => {
     appWindow.isFullscreen().then((fullscreen) => {
-      appWindow.setFullscreen(!fullscreen);
+      appWindow.setFullscreen(!fullscreen).then();
     });
   });
 
@@ -156,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       let filename = anchorElement.download || getFilenameFromUrl(absoluteUrl);
+
       // Process download links for Rust to handle.
       // If the download attribute is set, the download attribute is used as the file name.
       if (
@@ -184,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Rewrite the window.open function.
   const originalWindowOpen = window.open;
-  window.open = function (url, name, specs) {
+  window.open = function(url, name, specs) {
     // Apple login and google login
     if (name === 'AppleAuthentication') {
       //do nothing
@@ -261,31 +262,34 @@ function convertBlobUrlToBinary(blobUrl) {
   });
 }
 
+function downloadFromBlobUrl(blobUrl, filename) {
+  const tauri = window.__TAURI__;
+  convertBlobUrlToBinary(blobUrl).then((binary) => {
+    console.log('binary', binary);
+    tauri.fs.writeBinaryFile(filename, binary, {
+      dir: tauri.fs.BaseDirectory.Download,
+    }).then(() => {
+      window.pakeToast('Download successful, saved to download directory~');
+    });
+  });
+}
+
 // detect blob download by createElement("a")
 function detectDownloadByCreateAnchor() {
   const createEle = document.createElement;
   const tauri = window.__TAURI__;
   document.createElement = (el) => {
-    if (el !== "a") return createEle.call(document, el);
+    if (el !== 'a') return createEle.call(document, el);
     const anchorEle = createEle.call(document, el);
-    const anchorClick = anchorEle.click;
 
-    Object.defineProperties(anchorEle, {
-      click: {
-        get: () => {
-          if (anchorEle.href && anchorEle.href.includes('blob:')) {
-            const url = anchorEle.href;
-            convertBlobUrlToBinary(url).then((binary) => {
-              tauri.fs.writeBinaryFile(anchorEle.download || getFilenameFromUrl(url), binary, {
-                dir: tauri.fs.BaseDirectory.Download,
-              });
-            });
-          }
-          return anchorClick.bind(anchorEle);
-        }
+    // use addEventListener to avoid overriding the original click event.
+    anchorEle.addEventListener('click', () => {
+      const url = anchorEle.href;
+      if (window.blobToUrlCaches.has(url)) {
+        downloadFromBlobUrl(url, anchorEle.download || getFilenameFromUrl(url));
       }
-    })
+    });
 
     return anchorEle;
-  }
+  };
 }

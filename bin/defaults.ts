@@ -17,5 +17,3 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   debug: false,
   inject: [],
 };
-
-export const DEFAULT_APP_NAME = 'Pake';
