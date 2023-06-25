@@ -2,6 +2,7 @@ import path from 'path';
 import fsExtra from 'fs-extra';
 
 import { npmDirectory } from '@/utils/dir';
+import combineFiles from '@/utils/combine';
 import logger from '@/options/logger';
 import { PakeAppOptions, PlatformMap } from '@/types';
 
@@ -19,6 +20,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     identifier,
     name,
     resizable = true,
+    inject,
   } = options;
 
   const { platform } = process;
@@ -68,7 +70,11 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
   } else {
     tauriConf.pake.windows[0].url_type = 'web';
     // Set the secure domain for calling window.__TAURI__ to the application domain that has been set.
-    tauriConf.tauri.security.dangerousRemoteDomainIpcAccess[0].domain = new URL(url).hostname;
+    tauriConf.tauri.security.dangerousRemoteDomainIpcAccess = [{
+      domain: new URL(url).hostname,
+      windows: ["pake"],
+      enableTauriAPI: true,
+    }];
   }
 
   const platformMap: PlatformMap = {
@@ -171,6 +177,17 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
   }
 
   tauriConf.tauri.systemTray.iconPath = trayIconPath;
+
+  // inject js or css files
+  if (inject?.length > 0) {
+    if (!inject.every(item => item.endsWith('.css') || item.endsWith('.js'))) {
+      logger.error("The injected file must be in either CSS or JS format.");
+      return;
+    }
+    const files = inject.map(relativePath => path.join(process.cwd(), relativePath));
+    tauriConf.pake.inject = files;
+    combineFiles(files);
+  }
 
   // Save config file.
   const platformConfigPaths: PlatformMap = {
