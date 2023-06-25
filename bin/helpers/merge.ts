@@ -186,7 +186,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     }
     const files = inject.map(relativePath => path.join(process.cwd(), relativePath));
     tauriConf.pake.inject = files;
-    combineFiles(files);
+    combineFiles(files,  path.join(npmDirectory, `src-tauri/src/inject/_INJECT_.js`));
   }
 
   // Save config file.

@@ -1,10 +1,6 @@
-import path from 'path';
 import fs from 'fs';
-import { npmDirectory } from '@/utils/dir.js';
 
-export default async function combineFiles(files: string[]) {
-  const output = path.join(npmDirectory, `src-tauri/src/inject/_INJECT_.js`);
-
+export default async function combineFiles(files: string[], output: string) {
   const contents = files.map(file => {
     const fileContent = fs.readFileSync(file);
     if (file.endsWith('.css')) {
