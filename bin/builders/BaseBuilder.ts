@@ -98,7 +98,8 @@ export default abstract class BaseBuilder {
   abstract getFileName(): string;
 
   protected getBuildCommand(): string {
-    return 'npm run build';
+    // the debug option should support `--debug` and `--release`
+    return this.options.debug ? 'npm run build:debug' : 'npm run build';
   }
 
   protected getBasePath(): string {
