@@ -20,7 +20,7 @@ import isUrl from 'is-url';
 import fs from 'fs';
 
 var name = "pake-cli";
-var version = "2.1.9";
+var version = "2.1.10";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -786,7 +786,7 @@ const DEFAULT_PAKE_OPTIONS = {
 };
 
 async function checkUpdateTips() {
-    updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify();
+    updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify({ isGlobal: true });
 }
 
 async function handleIcon(options) {
@@ -939,9 +939,16 @@ function validateUrlInput(url) {
     return url;
 }
 
+const { green, yellow } = chalk;
+const logo = `${chalk.green(' ____       _')}
+${green('|  _ \\ __ _| | _____')}
+${green('| |_) / _` | |/ / _ \\')}
+${green('|  __/ (_| |   <  __/')}  ${yellow('https://dub.sh/pake')}
+${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with Rust.')}
+`;
 program
-    .description(chalk.green('Pake can turn any webpage into a desktop app with Rust.'))
-    .usage('[url] [options]')
+    .addHelpText('beforeAll', logo)
+    .usage(`[url] [options]`)
     .showHelpAfterError();
 program
     .argument('[url]', 'The web URL you want to package', validateUrlInput)
