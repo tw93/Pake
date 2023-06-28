@@ -158,7 +158,7 @@
 ## 命令行一键打包
 
 <kbd>
-  <img src="https://gw.alipayobjects.com/zos/k/zd/pake.gif" width="100%">
+  <img src="https://gw.alipayobjects.com/zos/k/cb3egf/pake.gif" width="100%">
 </kbd>
 <br/><br/>
 
