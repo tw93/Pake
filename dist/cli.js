@@ -20,7 +20,7 @@ import isUrl from 'is-url';
 import fs from 'fs';
 
 var name = "pake-cli";
-var version = "2.1.11";
+var version = "2.1.12";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -662,7 +662,7 @@ class BaseBuilder {
         // Build app
         const spinner = getSpinner('Building app...');
         setTimeout(() => spinner.stop(), 3000);
-        await shellExec(`cd ${npmDirectory} && ${this.getBuildCommand()}`);
+        await shellExec(`cd "${npmDirectory}" && ${this.getBuildCommand()}`);
         // Copy app
         const fileName = this.getFileName();
         const fileType = this.getFileType(target);
