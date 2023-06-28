@@ -27,8 +27,8 @@ export default abstract class BaseBuilder {
     const tauriTargetPathExists = await fsExtra.pathExists(tauriTargetPath);
 
     if (!IS_MAC && !tauriTargetPathExists) {
-      logger.info('✺ The first use requires installing system dependencies.');
-      logger.info('✺ See more in https://tauri.app/v1/guides/getting-started/prerequisites.');
+      logger.warn('✼ The first use requires installing system dependencies.');
+      logger.warn('✼ See more in https://tauri.app/v1/guides/getting-started/prerequisites.');
     }
 
     if (!checkRustInstalled()) {
