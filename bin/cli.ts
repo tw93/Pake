@@ -10,9 +10,17 @@ import handleInputOptions from './options/index';
 import { PakeCliOptions } from './types';
 import { validateNumberInput, validateUrlInput } from './utils/validate';
 
+const { green, yellow }= chalk;
+const logo = `${chalk.green(' ____       _')}
+${green('|  _ \\ __ _| | _____')}
+${green('| |_) / _` | |/ / _ \\')}
+${green('|  __/ (_| |   <  __/')}  ${yellow('https://dub.sh/pake')}
+${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with Rust.')}
+`;
+
 program
-  .description(chalk.green('Pake can turn any webpage into a desktop app with Rust.'))
-  .usage('[url] [options]')
+  .addHelpText('beforeAll', logo)
+  .usage(`[url] [options]`)
   .showHelpAfterError();
 
 program
