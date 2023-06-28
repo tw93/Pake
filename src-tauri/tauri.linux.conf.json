@@ -2,14 +2,14 @@
   "tauri": {
     "bundle": {
       "icon": ["png/weread_512.png"],
-      "identifier": "com.tw93.weread",
+      "identifier": "com.pake.weread",
       "active": true,
       "category": "DeveloperTool",
       "copyright": "",
       "deb": {
         "depends": ["curl", "wget"],
         "files": {
-          "/usr/share/applications/com-tw93-weread.desktop": "assets/com-tw93-weread.desktop"
+          "/usr/share/applications/com-pake-weread.desktop": "assets/com-pake-weread.desktop"
         }
       },
       "externalBin": [],
