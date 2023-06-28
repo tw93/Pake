@@ -24,7 +24,7 @@ $PSVersionTable
 Write-Host "=======================`n"
 
 
-$identifier_prefix = "com.tw93"
+$identifier_prefix = "com.pake"
 
 # total package number
 $index = 1
