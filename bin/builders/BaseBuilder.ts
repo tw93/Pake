@@ -78,7 +78,7 @@ export default abstract class BaseBuilder {
     // Build app
     const spinner = getSpinner('Building app...');
     setTimeout(() => spinner.stop(), 3000);
-    await shellExec(`cd ${npmDirectory} && ${this.getBuildCommand()}`);
+    await shellExec(`cd "${npmDirectory}" && ${this.getBuildCommand()}`);
 
     // Copy app
     const fileName = this.getFileName();
