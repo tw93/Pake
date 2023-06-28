@@ -20,7 +20,7 @@ import isUrl from 'is-url';
 import fs from 'fs';
 
 var name = "pake-cli";
-var version = "2.1.10";
+var version = "2.1.11";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -943,7 +943,7 @@ const { green, yellow } = chalk;
 const logo = `${chalk.green(' ____       _')}
 ${green('|  _ \\ __ _| | _____')}
 ${green('| |_) / _` | |/ / _ \\')}
-${green('|  __/ (_| |   <  __/')}  ${yellow('https://dub.sh/pake')}
+${green('|  __/ (_| |   <  __/')}  ${yellow('https://github.com/tw93/pake')}
 ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with Rust.')}
 `;
 program
