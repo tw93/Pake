@@ -159,7 +159,7 @@ In addition, double-click the title bar to switch to full-screen mode. For Mac u
 
 ![Pake](https://gw.alipayobjects.com/zos/k/zd/pake.gif)
 
-**Pake provides a command line tool, making the flow of package customization quicker and easier. See [documentation](./bin/README_CN.md) for more information.**
+**Pake provides a command line tool, making the flow of package customization quicker and easier. See [documentation](./bin/README.md) for more information.**
 
 ```bash
 # Install with npm
