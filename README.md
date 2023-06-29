@@ -59,7 +59,7 @@
     </tr>
     <tr>
         <td><img src=https://cdn.fliggy.com/upic/Ld5ZCJ.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/7QUfi3.png width=600/></td>
+        <td><img src=https://gw.alipayobjects.com/zos/k/95/bcGBut.png width=600/></td>
     </tr>
     <tr>
       <td>YouTube Music
@@ -75,7 +75,7 @@
     </tr>
     <tr>
         <td><img src=https://cdn.fliggy.com/upic/iz3mtQ.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/s4ZLNC.jpg width=600/></td>
+        <td><img src=https://gw.alipayobjects.com/zos/k/9q/3fJ8yv.png width=600/></td>
     </tr>
     <tr>
         <td>LiZhi
@@ -91,7 +91,7 @@
     </tr>
     <tr>
         <td><img src=https://cdn.fliggy.com/upic/nYEKqN.jpg width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/0C9lju.jpg width=600/></td>
+        <td><img src=https://gw.alipayobjects.com/zos/k/r7/0C9lju.jpg width=600/></td>
     </tr>
     <tr>
         <td>Qwerty
@@ -123,7 +123,7 @@
     </tr>
     <tr>
         <td><img src=https://gw.alipayobjects.com/zos/k/30/RoUSUf.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/yJVwyi.png width=600/></td>
+        <td><img src=https://gw.alipayobjects.com/zos/k/89/yJVwyi.png width=600/></td>
     </tr>
 </table>
 
@@ -198,7 +198,7 @@ npm run build
 3. For configurations on window properties, you can modify the `pake.json` file to change the value of `width`, `height`, `fullscreen` (or not), `resizable` (or not) of the `windows` property. To adapt to the immersive header on Mac, change `transparent` to `true`, look for the `Header` element, and add the `padding-top` property.
 4. For advanced usages such as style rewriting, advertisement removal, JS injection, container message communication, and user-defined shortcut keys, see [Advanced Usage of Pake](https://github.com/tw93/Pake/wiki/Advanced-Usage-of-Pake).
 
-## Developer
+## Developers
 
 Pake's development can not be without these Hackers. They contributed a lot of capabilities for Pake. Also, welcome to follow them! ❤️
 
