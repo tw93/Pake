@@ -32,10 +32,8 @@ total=$(sed -n '$=' app.csv)
 export total=$((total-1))
 export index=1
 
-export package_prefix="com-tw93"
-export identifier_prefix="com.tw93"
-
-
+export package_prefix="com-pake"
+export identifier_prefix="com.pake"
 
 if [[ "$OSTYPE" =~ ^linux ]]; then
     echo "==============="

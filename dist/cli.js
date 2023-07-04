@@ -20,7 +20,7 @@ import isUrl from 'is-url';
 import fs from 'fs';
 
 var name = "pake-cli";
-var version = "2.1.8";
+var version = "2.1.12";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -205,7 +205,7 @@ var tauri$2 = {
 			"png/weread_256.ico",
 			"png/weread_32.ico"
 		],
-		identifier: "com.tw93.weread",
+		identifier: "com.pake.weread",
 		active: true,
 		category: "DeveloperTool",
 		copyright: "",
@@ -241,7 +241,7 @@ var tauri$1 = {
 		icon: [
 			"icons/weread.icns"
 		],
-		identifier: "com.tw93.weread",
+		identifier: "com.pake.weread",
 		active: true,
 		category: "DeveloperTool",
 		copyright: "",
@@ -273,7 +273,7 @@ var tauri = {
 		icon: [
 			"png/weread_512.png"
 		],
-		identifier: "com.tw93.weread",
+		identifier: "com.pake.weread",
 		active: true,
 		category: "DeveloperTool",
 		copyright: "",
@@ -283,7 +283,7 @@ var tauri = {
 				"wget"
 			],
 			files: {
-				"/usr/share/applications/com-tw93-weread.desktop": "assets/com-tw93-weread.desktop"
+				"/usr/share/applications/com-pake-weread.desktop": "assets/com-pake-weread.desktop"
 			}
 		},
 		externalBin: [
@@ -617,8 +617,8 @@ class BaseBuilder {
         const tauriTargetPath = path.join(tauriSrcPath, 'target');
         const tauriTargetPathExists = await fsExtra.pathExists(tauriTargetPath);
         if (!IS_MAC && !tauriTargetPathExists) {
-            logger.info('✺ The first use requires installing system dependencies.');
-            logger.info('✺ See more in https://tauri.app/v1/guides/getting-started/prerequisites.');
+            logger.warn('✼ The first use requires installing system dependencies.');
+            logger.warn('✼ See more in https://tauri.app/v1/guides/getting-started/prerequisites.');
         }
         if (!checkRustInstalled()) {
             const res = await prompts({
@@ -662,7 +662,7 @@ class BaseBuilder {
         // Build app
         const spinner = getSpinner('Building app...');
         setTimeout(() => spinner.stop(), 3000);
-        await shellExec(`cd ${npmDirectory} && ${this.getBuildCommand()}`);
+        await shellExec(`cd "${npmDirectory}" && ${this.getBuildCommand()}`);
         // Copy app
         const fileName = this.getFileName();
         const fileType = this.getFileType(target);
@@ -786,7 +786,7 @@ const DEFAULT_PAKE_OPTIONS = {
 };
 
 async function checkUpdateTips() {
-    updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify();
+    updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify({ isGlobal: true });
 }
 
 async function handleIcon(options) {
@@ -939,9 +939,16 @@ function validateUrlInput(url) {
     return url;
 }
 
+const { green, yellow } = chalk;
+const logo = `${chalk.green(' ____       _')}
+${green('|  _ \\ __ _| | _____')}
+${green('| |_) / _` | |/ / _ \\')}
+${green('|  __/ (_| |   <  __/')}  ${yellow('https://github.com/tw93/pake')}
+${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with Rust.')}
+`;
 program
-    .description(chalk.green('Pake can turn any webpage into a desktop app with Rust.'))
-    .usage('[url] [options]')
+    .addHelpText('beforeAll', logo)
+    .usage(`[url] [options]`)
     .showHelpAfterError();
 program
     .argument('[url]', 'The web URL you want to package', validateUrlInput)
