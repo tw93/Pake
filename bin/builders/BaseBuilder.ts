@@ -27,8 +27,8 @@ export default abstract class BaseBuilder {
     const tauriTargetPathExists = await fsExtra.pathExists(tauriTargetPath);
 
     if (!IS_MAC && !tauriTargetPathExists) {
-      logger.info('✺ The first use requires installing system dependencies.');
-      logger.info('✺ See more in https://tauri.app/v1/guides/getting-started/prerequisites.');
+      logger.warn('✼ The first use requires installing system dependencies.');
+      logger.warn('✼ See more in https://tauri.app/v1/guides/getting-started/prerequisites.');
     }
 
     if (!checkRustInstalled()) {
@@ -78,7 +78,7 @@ export default abstract class BaseBuilder {
     // Build app
     const spinner = getSpinner('Building app...');
     setTimeout(() => spinner.stop(), 3000);
-    await shellExec(`cd ${npmDirectory} && ${this.getBuildCommand()}`);
+    await shellExec(`cd "${npmDirectory}" && ${this.getBuildCommand()}`);
 
     // Copy app
     const fileName = this.getFileName();
