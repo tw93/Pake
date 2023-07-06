@@ -183,7 +183,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
   }
 
   tauriConf.tauri.systemTray.iconPath = trayIconPath;
-
+  const injectFilePath = path.join(npmDirectory, `src-tauri/src/inject/_INJECT_.js`);
   // inject js or css files
   if (inject?.length > 0) {
     if (!inject.every(item => item.endsWith('.css') || item.endsWith('.js'))) {
@@ -192,7 +192,10 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     }
     const files = inject.map(filepath => path.isAbsolute(filepath) ?  filepath : path.join(process.cwd(), filepath));
     tauriConf.pake.inject = files;
-    await combineFiles(files, path.join(npmDirectory, `src-tauri/src/inject/_INJECT_.js`));
+    await combineFiles(files, injectFilePath);
+  } else {
+    tauriConf.pake.inject = [];
+    await fsExtra.writeFile(injectFilePath, '');
   }
 
   // Save config file.
@@ -205,7 +208,6 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
 
   const bundleConf = { tauri: { bundle: tauriConf.tauri.bundle } };
   await fsExtra.writeJson(configPath, bundleConf, { spaces: 4 });
-
   const pakeConfigPath = path.join(npmDirectory, 'src-tauri/pake.json');
   await fsExtra.writeJson(pakeConfigPath, tauriConf.pake, { spaces: 4 });
 

@@ -71,6 +71,10 @@ export default abstract class BaseBuilder {
     await this.buildAndCopy(url, this.options.targets);
   }
 
+  async start(url: string) {
+    await mergeConfig(url, this.options, tauriConfig);
+  } 
+
   async buildAndCopy(url: string, target: string) {
     const { name } = this.options;
     await mergeConfig(url, this.options, tauriConfig);
