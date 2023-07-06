@@ -40,6 +40,7 @@
     "analyze": "cd src-tauri && cargo bloat --release --crates",
     "tauri": "tauri",
     "cli": "rollup -c rollup.config.js --watch",
+    "cli:dev": "cross-env DEV=true tsx watch ./bin/dev.ts & npm run dev",
     "cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
     "prepublishOnly": "npm run cli:build"
   },
