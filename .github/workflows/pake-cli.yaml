@@ -99,17 +99,8 @@ jobs:
         echo "install pake on local"
         npm install pake-cli
 
-    - name: rust cache restore
-      uses: actions/cache/restore@v3
-      id: cache_store
-      with:
-        path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          node_modules/pake-cli/src-tauri/target/
-        key: ${{ inputs.platform }}-cargo-${{ hashFiles('node_modules/pake-cli/src-tauri/Cargo.lock') }}
+    - name: rust cache
+      uses: Swatinem/rust-cache@v2
 
     - name: build with pake-cli
       shell: pwsh
@@ -133,15 +124,4 @@ jobs:
         name: output-${{ inputs.platform }}.zip
         path: node_modules/pake-cli/output/*
         retention-days: 3
-
-    - name: rust cache store
-      uses: actions/cache/save@v3
-      if: steps.cache_store.outputs.cache-hit != 'true'
-      with:
-        path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          node_modules/pake-cli/src-tauri/target/
-        key: ${{ inputs.platform }}-cargo-${{ hashFiles('node_modules/pake-cli/src-tauri/Cargo.lock') }}
+        
