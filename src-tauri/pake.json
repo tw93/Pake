@@ -1,8 +1,8 @@
 {
     "windows": [
         {
-            "url": "https://zbook.lol/",
-            "transparent": true,
+            "url": "https://weread.qq.com/",
+            "transparent": false,
             "fullscreen": false,
             "width": 1200,
             "height": 780,
@@ -25,8 +25,5 @@
         "linux": true,
         "windows": true
     },
-    "inject": [
-        "/Users/guyifeng/workspace/seeyon/pake-patch/index.js",
-        "/Users/guyifeng/workspace/seeyon/pake-patch/index.css"
-    ]
+    "inject": []
 }
