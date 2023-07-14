@@ -5,4 +5,6 @@ import { fileURLToPath } from 'url';
 const currentModulePath = fileURLToPath(import.meta.url);
 
 // Resolve the parent directory of the current module
-export const npmDirectory = process.env.DEV === 'true' ? process.cwd() : path.join(path.dirname(currentModulePath), '..');
+export const npmDirectory = path.join(path.dirname(currentModulePath), '..');
+
+export const tauriConfigDirectory = process.env.NODE_ENV === 'development' ? path.join(npmDirectory, 'src-tauri', '.pake') : path.join(npmDirectory, 'src-tauri');
