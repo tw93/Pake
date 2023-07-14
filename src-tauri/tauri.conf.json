@@ -4,14 +4,7 @@
             "csp": null,
             "dangerousRemoteDomainIpcAccess": [
                 {
-                    "domain": "zbook.lol",
-                    "windows": [
-                        "pake"
-                    ],
-                    "enableTauriAPI": true
-                },
-                {
-                    "domain": "zbook.eu.org",
+                    "domain": "weread.qq.com",
                     "windows": [
                         "pake"
                     ],
@@ -37,7 +30,7 @@
         }
     },
     "package": {
-        "productName": "zBook",
+        "productName": "WeRead",
         "version": "1.0.0"
     },
     "build": {

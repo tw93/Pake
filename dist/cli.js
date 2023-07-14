@@ -11,16 +11,16 @@ import { fileURLToPath } from 'url';
 import dns from 'dns';
 import http from 'http';
 import { promisify } from 'util';
+import fs from 'fs';
 import updateNotifier from 'update-notifier';
 import axios from 'axios';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
 import psl from 'psl';
 import isUrl from 'is-url';
-import fs from 'fs';
 
 var name = "pake-cli";
-var version = "2.1.12";
+var version = "2.1.12-beta.0";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -53,12 +53,14 @@ var scripts = {
 	start: "npm run dev",
 	dev: "npm run tauri dev",
 	build: "npm run tauri build --release",
+	"build:debug": "npm run tauri build -- --debug",
 	"build:mac": "npm run tauri build -- --target universal-apple-darwin",
 	"build:all-unix": "chmod +x ./script/build.sh && ./script/build.sh",
 	"build:all-windows": "pwsh ./script/build.ps1",
 	analyze: "cd src-tauri && cargo bloat --release --crates",
 	tauri: "tauri",
 	cli: "rollup -c rollup.config.js --watch",
+	"cli:dev": "cross-env DEV=true tsx watch ./bin/dev.ts & npm run dev",
 	"cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
 	prepublishOnly: "npm run cli:build"
 };
@@ -123,7 +125,7 @@ var packageJson = {
 var windows = [
 	{
 		url: "https://weread.qq.com/",
-		transparent: true,
+		transparent: false,
 		fullscreen: false,
 		width: 1200,
 		height: 780,
@@ -137,7 +139,7 @@ var user_agent = {
 	windows: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
 };
 var menu = {
-	macos: true,
+	macos: false,
 	linux: false,
 	windows: false
 };
@@ -146,11 +148,14 @@ var system_tray = {
 	linux: true,
 	windows: true
 };
+var inject = [
+];
 var pakeConf = {
 	windows: windows,
 	user_agent: user_agent,
 	menu: menu,
-	system_tray: system_tray
+	system_tray: system_tray,
+	inject: inject
 };
 
 var tauri$3 = {
@@ -170,7 +175,7 @@ var tauri$3 = {
 		active: false
 	},
 	systemTray: {
-		iconPath: "png/weread_512.png",
+		iconPath: "png/icon_512.png",
 		iconAsTemplate: true
 	},
 	allowlist: {
@@ -191,11 +196,11 @@ var build = {
 	beforeDevCommand: ""
 };
 var CommonConf = {
+	tauri: tauri$3,
 	"package": {
 	productName: "WeRead",
 	version: "1.0.0"
 },
-	tauri: tauri$3,
 	build: build
 };
 
@@ -239,9 +244,9 @@ var WinConf = {
 var tauri$1 = {
 	bundle: {
 		icon: [
-			"icons/weread.icns"
+			"icons/icon.icns"
 		],
-		identifier: "com.pake.weread",
+		identifier: "com.pake.5b8ae9",
 		active: true,
 		category: "DeveloperTool",
 		copyright: "",
@@ -323,7 +328,7 @@ let tauriConfig = {
 // Generates an identifier based on the given URL.
 function getIdentifier(url) {
     const postFixHash = crypto.createHash('md5').update(url).digest('hex').substring(0, 6);
-    return `pake-${postFixHash}`;
+    return `com.pake.${postFixHash}`;
 }
 async function promptText(message, initial) {
     const response = await prompts({
@@ -357,7 +362,7 @@ const IS_LINUX = platform$1 === 'linux';
 // Convert the current module URL to a file path
 const currentModulePath = fileURLToPath(import.meta.url);
 // Resolve the parent directory of the current module
-const npmDirectory = path.join(path.dirname(currentModulePath), '..');
+const npmDirectory = process.env.DEV === 'true' ? process.cwd() : path.join(path.dirname(currentModulePath), '..');
 
 function shellExec(command) {
     return new Promise((resolve, reject) => {
@@ -456,8 +461,20 @@ function checkRustInstalled() {
     return shelljs.exec('rustc --version', { silent: true }).code === 0;
 }
 
+async function combineFiles(files, output) {
+    const contents = files.map(file => {
+        const fileContent = fs.readFileSync(file);
+        if (file.endsWith('.css')) {
+            return "window.addEventListener('DOMContentLoaded', (_event) => { const css = `" + fileContent + "`; const style = document.createElement('style'); style.innerHTML = css; document.head.appendChild(style); });";
+        }
+        return "window.addEventListener('DOMContentLoaded', (_event) => { " + fileContent + " });";
+    });
+    fs.writeFileSync(output, contents.join('\n'));
+    return files;
+}
+
 async function mergeConfig(url, options, tauriConf) {
-    const { width, height, fullscreen, transparent, userAgent, showMenu, showSystemTray, systemTrayIcon, iterCopyFile, identifier, name, resizable = true, } = options;
+    const { width, height, fullscreen, transparent, userAgent, showMenu, showSystemTray, systemTrayIcon, iterCopyFile, identifier, name, resizable = true, inject, safeDomain, } = options;
     const { platform } = process;
     // Set Windows parameters.
     const tauriConfWindowOptions = {
@@ -495,7 +512,23 @@ async function mergeConfig(url, options, tauriConf) {
     else {
         tauriConf.pake.windows[0].url_type = 'web';
         // Set the secure domain for calling window.__TAURI__ to the application domain that has been set.
-        tauriConf.tauri.security.dangerousRemoteDomainIpcAccess[0].domain = new URL(url).hostname;
+        tauriConf.tauri.security.dangerousRemoteDomainIpcAccess = [
+            {
+                domain: new URL(url).hostname,
+                windows: ['pake'],
+                enableTauriAPI: true,
+            },
+        ];
+    }
+    if (safeDomain.length > 0) {
+        tauriConf.tauri.security.dangerousRemoteDomainIpcAccess = [
+            ...tauriConf.tauri.security.dangerousRemoteDomainIpcAccess,
+            ...safeDomain.map(domain => ({
+                domain,
+                windows: ['pake'],
+                enableTauriAPI: true,
+            })),
+        ];
     }
     const platformMap = {
         win32: 'windows',
@@ -513,8 +546,7 @@ async function mergeConfig(url, options, tauriConf) {
         delete tauriConf.tauri.bundle.deb.files;
         const validTargets = ['all', 'deb', 'appimage'];
         if (validTargets.includes(options.targets)) {
-            tauriConf.tauri.bundle.targets =
-                options.targets === 'all' ? ['deb', 'appimage'] : [options.targets];
+            tauriConf.tauri.bundle.targets = options.targets === 'all' ? ['deb', 'appimage'] : [options.targets];
         }
         else {
             logger.warn(`✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`);
@@ -590,6 +622,21 @@ async function mergeConfig(url, options, tauriConf) {
         }
     }
     tauriConf.tauri.systemTray.iconPath = trayIconPath;
+    const injectFilePath = path.join(npmDirectory, `src-tauri/src/inject/_INJECT_.js`);
+    // inject js or css files
+    if (inject?.length > 0) {
+        if (!inject.every(item => item.endsWith('.css') || item.endsWith('.js'))) {
+            logger.error('The injected file must be in either CSS or JS format.');
+            return;
+        }
+        const files = inject.map(filepath => path.isAbsolute(filepath) ? filepath : path.join(process.cwd(), filepath));
+        tauriConf.pake.inject = files;
+        await combineFiles(files, injectFilePath);
+    }
+    else {
+        tauriConf.pake.inject = [];
+        await fsExtra.writeFile(injectFilePath, '');
+    }
     // Save config file.
     const platformConfigPaths = {
         win32: 'src-tauri/tauri.windows.conf.json',
@@ -656,6 +703,9 @@ class BaseBuilder {
     async build(url) {
         await this.buildAndCopy(url, this.options.targets);
     }
+    async start(url) {
+        await mergeConfig(url, this.options, tauriConfig);
+    }
     async buildAndCopy(url, target) {
         const { name } = this.options;
         await mergeConfig(url, this.options, tauriConfig);
@@ -677,7 +727,8 @@ class BaseBuilder {
         return target;
     }
     getBuildCommand() {
-        return 'npm run build';
+        // the debug option should support `--debug` and `--release`
+        return this.options.debug ? 'npm run build:debug' : 'npm run build';
     }
     getBasePath() {
         return 'src-tauri/target/release/bundle/';
@@ -783,6 +834,8 @@ const DEFAULT_PAKE_OPTIONS = {
     iterCopyFile: false,
     systemTrayIcon: '',
     debug: false,
+    inject: [],
+    safeDomain: [],
 };
 
 async function checkUpdateTips() {
@@ -965,6 +1018,8 @@ program
     .option('--iter-copy-file', 'Copy files when URL is a local file', DEFAULT_PAKE_OPTIONS.iterCopyFile)
     .option('--multi-arch', 'Only for Mac, supports both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
     .option('--targets <string>', 'Only for Linux, option "deb" or "appimage"', DEFAULT_PAKE_OPTIONS.targets)
+    .option('--inject [injects...]', 'inject .js or .css for this app', DEFAULT_PAKE_OPTIONS.inject)
+    .option('--safe-domain [domains...]', 'domains that can call window.__TAURI__ and use ipc', DEFAULT_PAKE_OPTIONS.safeDomain)
     .option('--debug', 'Debug mode', DEFAULT_PAKE_OPTIONS.debug)
     .version(packageJson.version, '-v, --version', 'Output the current version')
     .action(async (url, options) => {
