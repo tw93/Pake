@@ -60,7 +60,7 @@ var scripts = {
 	analyze: "cd src-tauri && cargo bloat --release --crates",
 	tauri: "tauri",
 	cli: "rollup -c rollup.config.js --watch",
-	"cli:dev": "cross-env DEV=true tsx watch ./bin/dev.ts & npm run dev",
+	"cli:dev": "cross-env NODE_ENV=development rollup -c rollup.config.js -w",
 	"cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
 	prepublishOnly: "npm run cli:build"
 };
@@ -88,6 +88,7 @@ var devDependencies = {
 	"@rollup/plugin-alias": "^4.0.2",
 	"@rollup/plugin-commonjs": "^23.0.2",
 	"@rollup/plugin-json": "^5.0.2",
+	"@rollup/plugin-replace": "^5.0.2",
 	"@rollup/plugin-terser": "^0.1.0",
 	"@types/fs-extra": "^9.0.13",
 	"@types/is-url": "^1.2.30",
@@ -362,7 +363,8 @@ const IS_LINUX = platform$1 === 'linux';
 // Convert the current module URL to a file path
 const currentModulePath = fileURLToPath(import.meta.url);
 // Resolve the parent directory of the current module
-const npmDirectory = process.env.DEV === 'true' ? process.cwd() : path.join(path.dirname(currentModulePath), '..');
+const npmDirectory = path.join(path.dirname(currentModulePath), '..');
+const tauriConfigDirectory = path.join(npmDirectory, 'src-tauri');
 
 function shellExec(command) {
     return new Promise((resolve, reject) => {
@@ -639,20 +641,20 @@ async function mergeConfig(url, options, tauriConf) {
     }
     // Save config file.
     const platformConfigPaths = {
-        win32: 'src-tauri/tauri.windows.conf.json',
-        darwin: 'src-tauri/tauri.macos.conf.json',
-        linux: 'src-tauri/tauri.linux.conf.json',
+        win32: 'tauri.windows.conf.json',
+        darwin: 'tauri.macos.conf.json',
+        linux: 'tauri.linux.conf.json',
     };
-    const configPath = path.join(npmDirectory, platformConfigPaths[platform]);
+    const configPath = path.join(tauriConfigDirectory, platformConfigPaths[platform]);
     const bundleConf = { tauri: { bundle: tauriConf.tauri.bundle } };
-    await fsExtra.writeJson(configPath, bundleConf, { spaces: 4 });
-    const pakeConfigPath = path.join(npmDirectory, 'src-tauri/pake.json');
-    await fsExtra.writeJson(pakeConfigPath, tauriConf.pake, { spaces: 4 });
+    await fsExtra.outputJSON(configPath, bundleConf, { spaces: 4 });
+    const pakeConfigPath = path.join(tauriConfigDirectory, 'pake.json');
+    await fsExtra.outputJSON(pakeConfigPath, tauriConf.pake, { spaces: 4 });
     let tauriConf2 = JSON.parse(JSON.stringify(tauriConf));
     delete tauriConf2.pake;
     delete tauriConf2.tauri.bundle;
-    const configJsonPath = path.join(npmDirectory, 'src-tauri/tauri.conf.json');
-    await fsExtra.writeJson(configJsonPath, tauriConf2, { spaces: 4 });
+    const configJsonPath = path.join(tauriConfigDirectory, 'tauri.conf.json');
+    await fsExtra.outputJSON(configJsonPath, tauriConf2, { spaces: 4 });
 }
 
 class BaseBuilder {

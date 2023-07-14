@@ -37,3 +37,4 @@ dist
 src-tauri/.cargo/config
 src-tauri/.cargo/
 .next
+src-tauri/.pake/

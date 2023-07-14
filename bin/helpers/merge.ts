@@ -5,6 +5,7 @@ import { npmDirectory } from '@/utils/dir';
 import combineFiles from '@/utils/combine';
 import logger from '@/options/logger';
 import { PakeAppOptions, PlatformMap } from '@/types';
+import { tauriConfigDirectory } from '../utils/dir';
 
 export async function mergeConfig(url: string, options: PakeAppOptions, tauriConf: any) {
   const {
@@ -200,20 +201,23 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
 
   // Save config file.
   const platformConfigPaths: PlatformMap = {
-    win32: 'src-tauri/tauri.windows.conf.json',
-    darwin: 'src-tauri/tauri.macos.conf.json',
-    linux: 'src-tauri/tauri.linux.conf.json',
+    win32: 'tauri.windows.conf.json',
+    darwin: 'tauri.macos.conf.json',
+    linux: 'tauri.linux.conf.json',
   };
-  const configPath = path.join(npmDirectory, platformConfigPaths[platform]);
+  const configPath = path.join(tauriConfigDirectory, platformConfigPaths[platform]);
 
   const bundleConf = { tauri: { bundle: tauriConf.tauri.bundle } };
-  await fsExtra.writeJson(configPath, bundleConf, { spaces: 4 });
-  const pakeConfigPath = path.join(npmDirectory, 'src-tauri/pake.json');
-  await fsExtra.writeJson(pakeConfigPath, tauriConf.pake, { spaces: 4 });
+  await fsExtra.outputJSON(configPath, bundleConf, { spaces: 4 });
+  const pakeConfigPath = path.join(tauriConfigDirectory, 'pake.json');
+  await fsExtra.outputJSON(pakeConfigPath, tauriConf.pake, { spaces: 4 });
 
   let tauriConf2 = JSON.parse(JSON.stringify(tauriConf));
   delete tauriConf2.pake;
   delete tauriConf2.tauri.bundle;
-  const configJsonPath = path.join(npmDirectory, 'src-tauri/tauri.conf.json');
-  await fsExtra.writeJson(configJsonPath, tauriConf2, { spaces: 4 });
+  if (process.env.NODE_ENV === 'development') {
+    tauriConf2.tauri.bundle = bundleConf.tauri.bundle;
+  }
+  const configJsonPath = path.join(tauriConfigDirectory, 'tauri.conf.json');
+  await fsExtra.outputJSON(configJsonPath, tauriConf2, { spaces: 4 });
 }
