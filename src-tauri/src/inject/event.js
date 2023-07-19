@@ -279,7 +279,7 @@ function downladFromDataUri(dataURI) {
   invoke('download_file_by_binary', {
     params: {
       filename,
-      binary
+      binary: Array.from(binary)
     },
   });
 }
