@@ -262,6 +262,28 @@ function convertBlobUrlToBinary(blobUrl) {
   });
 }
 
+function downladFromDataUri(dataURI) {
+  const byteString = atob(dataURI.split(',')[1]);
+  // write the bytes of the string to an ArrayBuffer
+  const bufferArray = new ArrayBuffer(byteString.length);
+
+  // create a view into the buffer
+  const binary = new Uint8Array(bufferArray);
+
+  // set the bytes of the buffer to the correct values
+  for (var i = 0; i < byteString.length; i++) {
+    binary[i] = byteString.charCodeAt(i);
+  }
+
+  // write the ArrayBuffer to a binary, and you're done
+  invoke('download_file_by_binary', {
+    params: {
+      filename,
+      binary
+    },
+  });
+}
+
 function downloadFromBlobUrl(blobUrl, filename) {
   convertBlobUrlToBinary(blobUrl).then((binary) => {
     invoke('download_file_by_binary', {
@@ -284,8 +306,10 @@ function detectDownloadByCreateAnchor() {
     anchorEle.addEventListener('click', () => {
       const url = anchorEle.href;
       if (window.blobToUrlCaches.has(url)) {
-        
         downloadFromBlobUrl(url, anchorEle.download || getFilenameFromUrl(url));
+        // case: downoload from dataURL -> convert dataURL -> 
+      } else if (url.startsWith('data:')) {
+        downladFromDataUri(url);
       }
     }, true);
 
