@@ -163,6 +163,12 @@ document.addEventListener('DOMContentLoaded', () => {
   } catch (e) {
     console.log(e);
   }
+
+  // Fix Chinese input method "Enter" on Safari
+  document.addEventListener('keydown', (e) => {
+    if (e.keyCode === 229) e.stopPropagation();
+  }, true);
+
 });
 
 function setDefaultZoom() {
