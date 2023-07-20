@@ -1,17 +1,13 @@
 const shortcuts = {
-  ArrowUp: () => scrollTo(0, 0),
-  ArrowDown: () => scrollTo(0, document.body.scrollHeight),
-  // Don't use command + ArrowLeft or command + ArrowRight
-  // When editing text in page, it causes unintended page navigation.
-  // ArrowLeft: () => window.history.back(),
-  // ArrowRight: () => window.history.forward(),
+  'ArrowUp': () => scrollTo(0, 0),
+  'ArrowDown': () => scrollTo(0, document.body.scrollHeight),
   '[': () => window.history.back(),
   ']': () => window.history.forward(),
-  r: () => window.location.reload(),
+  'r': () => window.location.reload(),
   '-': () => zoomOut(),
   '=': () => zoomIn(),
   '+': () => zoomIn(),
-  0: () => setZoom('100%'),
+  '0': () => setZoom('100%'),
 };
 
 function setZoom(zoom) {
@@ -40,46 +36,6 @@ function handleShortcut(event) {
   }
 }
 
-//这里参考 ChatGPT 的代码
-const uid = () => window.crypto.getRandomValues(new Uint32Array(1))[0];
-
-function transformCallback(callback = () => {}, once = false) {
-  const identifier = uid();
-  const prop = `_${identifier}`;
-  Object.defineProperty(window, prop, {
-    value: (result) => {
-      if (once) {
-        Reflect.deleteProperty(window, prop);
-      }
-      return callback(result);
-    },
-    writable: false,
-    configurable: true,
-  });
-  return identifier;
-}
-
-async function invoke(cmd, args) {
-  return new Promise((resolve, reject) => {
-    if (!window.__TAURI_POST_MESSAGE__)
-      reject('__TAURI_POST_MESSAGE__ does not exist~');
-    const callback = transformCallback((e) => {
-      resolve(e);
-      Reflect.deleteProperty(window, `_${error}`);
-    }, true);
-    const error = transformCallback((e) => {
-      reject(e);
-      Reflect.deleteProperty(window, `_${callback}`);
-    }, true);
-    window.__TAURI_POST_MESSAGE__({
-      cmd,
-      callback,
-      error,
-      ...args,
-    });
-  });
-}
-
 // Judgment of file download.
 function isDownloadLink(url) {
   const fileExtensions = [
@@ -105,6 +61,7 @@ function externalTargetLink() {
 document.addEventListener('DOMContentLoaded', () => {
   const tauri = window.__TAURI__;
   const appWindow = tauri.window.appWindow;
+  const invoke = tauri.tauri.invoke;
 
   const topDom = document.createElement('div');
   topDom.id = 'pack-top-dom';
@@ -217,26 +174,7 @@ function setDefaultZoom() {
 
 function getFilenameFromUrl(url) {
   const urlPath = new URL(url).pathname;
-  const filename = urlPath.substring(urlPath.lastIndexOf('/') + 1);
-  return filename;
-}
-
-function removeUrlParameters(url) {
-  const parsedUrl = new URL(url);
-  parsedUrl.search = '';
-  return parsedUrl.toString();
-}
-
-// Toggle video playback when the window is hidden.
-function toggleVideoPlayback(pause) {
-  const videos = document.getElementsByTagName('video');
-  for (const video of videos) {
-    if (pause) {
-      video.pause();
-    } else {
-      video.play();
-    }
-  }
+  return urlPath.substring(urlPath.lastIndexOf('/') + 1);
 }
 
 // Collect blob urls to blob by overriding window.URL.createObjectURL
@@ -262,33 +200,49 @@ function convertBlobUrlToBinary(blobUrl) {
   });
 }
 
-function downloadFromBlobUrl(blobUrl, filename) {
-  const tauri = window.__TAURI__;
-  convertBlobUrlToBinary(blobUrl).then((binary) => {
-    console.log('binary', binary);
-    tauri.fs.writeBinaryFile(filename, binary, {
+async function downloadFromBlobUrl(blobUrl, filename) {
+  try {
+    const tauri = window.__TAURI__;
+    const binary = await convertBlobUrlToBinary(blobUrl);
+
+    await tauri.fs.writeBinaryFile(filename, binary, {
       dir: tauri.fs.BaseDirectory.Download,
-    }).then(() => {
-      window.pakeToast('Download successful, saved to download directory~');
     });
-  });
+
+    const lang = getSystemLanguage();
+    window.pakeToast(lang === 'en' ? 'Download successful, saved to download directory~' : '下载成功，已保存到下载目录~');
+  } catch (error) {
+    console.error('Error downloading from Blob URL:', error);
+  }
 }
+
 
 // detect blob download by createElement("a")
 function detectDownloadByCreateAnchor() {
-  const createEle = document.createElement;
-  document.createElement = (el) => {
-    if (el !== 'a') return createEle.call(document, el);
-    const anchorEle = createEle.call(document, el);
+  const originalCreateElement = document.createElement;
 
-    // use addEventListener to avoid overriding the original click event.
-    anchorEle.addEventListener('click', () => {
-      const url = anchorEle.href;
-      if (window.blobToUrlCaches.has(url)) {
-        downloadFromBlobUrl(url, anchorEle.download || getFilenameFromUrl(url));
-      }
-    });
+  document.createElement = function(el, ...args) {
+    const element = originalCreateElement.call(this, el, ...args);
 
-    return anchorEle;
+    if (el === 'a') {
+      element.addEventListener('click', (event) => {
+        const url = element.href;
+        if (window.blobToUrlCaches.has(url)) {
+          // Prevent default 'click' event if a blob URL is detected
+          event.preventDefault();
+          const filename = element.download || getFilenameFromUrl(url);
+          downloadFromBlobUrl(url, filename);
+        }
+      });
+    }
+
+    return element;
   };
+}
+
+
+// Determine the language of the current system.
+function getSystemLanguage() {
+  const lang = navigator.language.substr(0, 2);
+  return lang === 'ch' ? 'ch' : 'en';
 }
