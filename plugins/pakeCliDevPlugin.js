@@ -30,11 +30,7 @@ export default function pakeCliDevPlugin() {
         console.log(chalk.yellow(`cli running end with code: ${code}`));
         if (devHasStarted) return;
         devHasStarted = true;
-
-        const devCommand = 'npm';
-        const devArgs = ['run', 'tauri', 'dev', '--', '--config', './src-tauri/.pake/tauri.conf.json', '--features', 'cli-build'];
-        devChildProcess = spawn(devCommand, devArgs, {detached: true});
-
+        devChildProcess = await exec('npm run tauri dev -- --config ./src-tauri/.pake/tauri.conf.json --features cli-build');
 
         devChildProcess.stdout.on('data', (data) => {
           console.log(chalk.green(data.toString()));
