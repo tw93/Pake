@@ -151,7 +151,7 @@ do
         $sd "Icon=.*" "Icon=" "${new_desktop}"
         $sd "Name=.*" "Name=" "${new_desktop}"
         $sd "Name\[zh_CN\]=.*" "Name[zh_CN]=" "${new_desktop}"
-        # repleace dekstop content with no reg
+        # replace desktop content with no reg
         $sd -s "Exec=" "Exec=${package_prefix}-${package_name}" "${new_desktop}"
         $sd -s "Icon=" "Icon=${package_prefix}-${package_name}" "${new_desktop}"
         $sd -s "Name=" "Name=${package_title}" "${new_desktop}"
@@ -163,8 +163,8 @@ do
 
     if [[ "$OSTYPE" =~ ^linux ]]; then
         npm run tauri build
-        mv "src-tauri/target/release/bundle/deb/${package_prefix}-${package_name}"*.deb "output/linux/${package_title}_`arch`.deb"
-        mv "src-tauri/target/release/bundle/appimage/${package_prefix}-${package_name}"*.AppImage "output/linux/${package_title}_`arch`.AppImage"
+        mv src-tauri/target/release/bundle/deb/${package_prefix}-"${package_name}"*.deb output/linux/"${package_title}"_`arch`.deb
+        mv src-tauri/target/release/bundle/appimage/${package_prefix}-"${package_name}"*.AppImage output/linux/"${package_title}"_`arch`.AppImage
         echo clear cache
         rm src-tauri/target/release
         rm -rf src-tauri/target/release/bundle
