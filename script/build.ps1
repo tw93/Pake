@@ -38,7 +38,7 @@ $total = $total - 1
 
 # for windows, we need replace package name to title
 ForEach ($line in (Get-Content -Path .\app.csv | Select-Object -Skip 1)) {
-    $name, $title, $name_zh, $url = $line.Split(",")
+    $name, $title, $name_zh, $url = $line.Split(","), $domain = ([Uri]$url).Host
     Write-Host "building package ${index}/${total}"
     Write-Host "package name is ${name} ${name_zh}"
     Write-Host "=========================="
@@ -54,6 +54,9 @@ ForEach ($line in (Get-Content -Path .\app.csv | Select-Object -Skip 1)) {
     # replace url with no regex
     (Get-Content -Path $pake_conf_path -Raw) | ForEach-Object { $_.Replace('"url": ""', "`"url`": `"${url}`"") } | Set-Content $pake_conf_path
 
+    # -- replace domain -- #
+    (Get-Content -Path $common_conf_path -Raw) -replace '"domain":\s*"[^"]*"', '"domain": ""' | Set-Content -Path $common_conf_path
+    (Get-Content -Path $common_conf_path -Raw) | ForEach-Object { $_.Replace('"domain": ""', "`"domain`": `"${domain}`"") } | Set-Content $common_conf_path
 
     # -- replace package name -- #
     # clear package_name with regex

@@ -59,12 +59,18 @@ do
     package_title=${arr[1]}
     package_zh_name=${arr[2]}
     url=${arr[3]}
+    domain=${url//http*:\/\//}
+    domain=${domain%%/*}
 
     # replace package info
     # clear url with regex
     $sd "\"url\": \"(.*?)\"," "\"url\": \"\"," src-tauri/pake.json
     # replace url with no regex
     $sd -s "\"url\": \"\","  "\"url\": \"${url}\"," src-tauri/pake.json
+
+    # replace dangerousRemoteDomainIpcAccess  domain
+    $sd "\"domain\": \"(.*?)\"," "\"domain\": \"\","  src-tauri/tauri.conf.json
+    $sd -s "\"domain\": \"\","  "\"domain\": \"${domain}\"," src-tauri/tauri.conf.json
 
     # for apple, need replace title
     if [[ "$OSTYPE" =~ ^darwin ]]; then
@@ -157,8 +163,8 @@ do
 
     if [[ "$OSTYPE" =~ ^linux ]]; then
         npm run tauri build
-        mv src-tauri/target/release/bundle/deb/${package_prefix}-"${package_name}"*.deb output/linux/"${package_title}"_`arch`.deb
-        mv src-tauri/target/release/bundle/appimage/${package_prefix}-"${package_name}"*.AppImage output/linux/"${package_title}"_`arch`.AppImage
+        mv "src-tauri/target/release/bundle/deb/${package_prefix}-${package_name}"*.deb "output/linux/${package_title}_`arch`.deb"
+        mv "src-tauri/target/release/bundle/appimage/${package_prefix}-${package_name}"*.AppImage "output/linux/${package_title}_`arch`.AppImage"
         echo clear cache
         rm src-tauri/target/release
         rm -rf src-tauri/target/release/bundle
