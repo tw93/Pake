@@ -94,42 +94,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  const isExternalLink = (url, host) => window.location.host !== host;
+  const isDownloadRequired = (url, anchorElement, e) =>
+    anchorElement.download || e.metaKey || e.ctrlKey || isDownloadLink(url);
+
+  const handleExternalLink = (e, url) => {
+    e.preventDefault();
+    tauri.shell.open(url);
+  };
+
+  const handleDownloadLink = (e, url, filename) => {
+    e.preventDefault();
+    invoke('download_file', { params: { url, filename } });
+  };
+
   const detectAnchorElementClick = (e) => {
     const anchorElement = e.target.closest('a');
     if (anchorElement && anchorElement.href) {
-      const target = anchorElement.target;
-      anchorElement.target = '_self';
       const hrefUrl = new URL(anchorElement.href);
       const absoluteUrl = hrefUrl.href;
+      let filename = anchorElement.download || getFilenameFromUrl(absoluteUrl);
 
       // Handling external link redirection.
-      if (
-        window.location.host !== hrefUrl.host &&
-        (target === '_blank' || target === '_new' || externalTargetLink())
-      ) {
-        e.preventDefault && e.preventDefault();
-        tauri.shell.open(absoluteUrl);
+      if (isExternalLink(absoluteUrl, hrefUrl.host) && (['_blank', '_new'].includes(anchorElement.target) || externalTargetLink())) {
+        handleExternalLink(e, absoluteUrl);
         return;
       }
 
-      let filename = anchorElement.download || getFilenameFromUrl(absoluteUrl);
-
       // Process download links for Rust to handle.
-      // If the download attribute is set, the download attribute is used as the file name.
-      if (
-        (anchorElement.download ||
-          e.metaKey ||
-          e.ctrlKey ||
-          isDownloadLink(absoluteUrl)) &&
-        !externalDownLoadLink()
-      ) {
-        e.preventDefault();
-        invoke('download_file', {
-          params: {
-            url: absoluteUrl,
-            filename,
-          },
-        });
+      if (isDownloadRequired(absoluteUrl, anchorElement, e) && !externalDownLoadLink()) {
+        handleDownloadLink(e, absoluteUrl, filename);
       }
     }
   };
