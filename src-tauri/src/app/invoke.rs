@@ -19,11 +19,14 @@ pub async fn download_file(app: AppHandle, params: DownloadFileParams) -> Result
     let file_path = check_file_or_append(output_path.to_str().unwrap());
     let client = ClientBuilder::new().build().unwrap();
 
-    let response = client.send(
-        HttpRequestBuilder::new("GET", &params.url)
-            .unwrap()
-            .response_type(ResponseType::Binary)
-    ).await;
+    let response = client
+        .send(
+            HttpRequestBuilder::new("GET", &params.url)
+                .unwrap()
+                .response_type(ResponseType::Binary),
+        )
+        .await;
+
 
     match response {
         Ok(res) => {
