@@ -38,7 +38,8 @@ $total = $total - 1
 
 # for windows, we need replace package name to title
 ForEach ($line in (Get-Content -Path .\app.csv | Select-Object -Skip 1)) {
-    $name, $title, $name_zh, $url = $line.Split(","), $domain = ([Uri]$url).Host
+    $name, $title, $name_zh, $url = $line.Split(",")
+    $domain = ([Uri]$url).Host
     Write-Host "building package ${index}/${total}"
     Write-Host "package name is ${name} ${name_zh}"
     Write-Host "=========================="
