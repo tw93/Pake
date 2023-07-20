@@ -106,7 +106,7 @@
     </tr>
     <tr>
         <td><img src=https://cdn.fliggy.com/upic/i2eg6G.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/fS1lVi.jpg width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/mUzOek.jpg width=600/></td>
     </tr>
         <tr>
         <td>Flomo
