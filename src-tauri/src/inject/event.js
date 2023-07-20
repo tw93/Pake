@@ -137,6 +137,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  const specialDownloadProtocal = ['blob', 'data'];
+
   const detectAnchorElementClick = (e) => {
     const anchorElement = e.target.closest('a');
     if (anchorElement && anchorElement.href) {
@@ -164,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
           e.metaKey ||
           e.ctrlKey ||
           isDownloadLink(absoluteUrl)) &&
-        !externalDownLoadLink() && !url.startsWith("blob")
+        !externalDownLoadLink() && specialDownloadProtocal.every(protocal => !absoluteUrl.startsWith(protocal))
       ) {
         e.preventDefault();
         invoke('download_file', {
@@ -262,7 +264,7 @@ function convertBlobUrlToBinary(blobUrl) {
   });
 }
 
-function downladFromDataUri(dataURI) {
+function downladFromDataUri(dataURI, filename) {
   const byteString = atob(dataURI.split(',')[1]);
   // write the bytes of the string to an ArrayBuffer
   const bufferArray = new ArrayBuffer(byteString.length);
@@ -305,11 +307,12 @@ function detectDownloadByCreateAnchor() {
     // use addEventListener to avoid overriding the original click event.
     anchorEle.addEventListener('click', () => {
       const url = anchorEle.href;
+      const filename = anchorEle.download || getFilenameFromUrl(url);
       if (window.blobToUrlCaches.has(url)) {
-        downloadFromBlobUrl(url, anchorEle.download || getFilenameFromUrl(url));
+        downloadFromBlobUrl(url, filename);
         // case: downoload from dataURL -> convert dataURL -> 
       } else if (url.startsWith('data:')) {
-        downladFromDataUri(url);
+        downladFromDataUri(url, filename);
       }
     }, true);
 
