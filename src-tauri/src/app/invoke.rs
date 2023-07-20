@@ -1,8 +1,8 @@
-use crate::util::{check_file_or_append, get_download_message, MessageType, show_toast};
-use tauri::{api, command, AppHandle, Manager, Window};
-use tauri::api::http::{ClientBuilder, HttpRequestBuilder, ResponseType};
+use crate::util::{check_file_or_append, get_download_message, show_toast, MessageType};
 use std::fs::File;
 use std::io::Write;
+use tauri::api::http::{ClientBuilder, HttpRequestBuilder, ResponseType};
+use tauri::{api, command, AppHandle, Manager, Window};
 
 #[derive(serde::Deserialize)]
 pub struct DownloadFileParams {
@@ -26,7 +26,6 @@ pub async fn download_file(app: AppHandle, params: DownloadFileParams) -> Result
                 .response_type(ResponseType::Binary),
         )
         .await;
-
 
     match response {
         Ok(res) => {
