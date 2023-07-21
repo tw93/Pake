@@ -1,6 +1,6 @@
 {
   "name": "pake-cli",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。",
   "engines": {
     "node": ">=16.0.0"
@@ -59,6 +59,7 @@
     "prompts": "^2.4.2",
     "psl": "^1.9.0",
     "shelljs": "^0.8.5",
+    "tmp-promise": "^3.0.3",
     "update-notifier": "^6.0.2"
   },
   "devDependencies": {
