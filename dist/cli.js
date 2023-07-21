@@ -20,7 +20,7 @@ import isUrl from 'is-url';
 import fs from 'fs';
 
 var name = "pake-cli";
-var version = "2.2.4";
+var version = "2.2.5";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -822,7 +822,15 @@ async function downloadIcon(iconUrl) {
             return null;
         }
         const { path: tempPath } = await dir();
-        const iconPath = `${tempPath}/icon.${fileDetails.ext}`;
+        let iconPath = `${tempPath}/icon.${fileDetails.ext}`;
+        // Fix this for linux
+        if (IS_LINUX) {
+            iconPath = 'png/linux_temp.png';
+            await fsExtra.outputFile(`${npmDirectory}/src-tauri/${iconPath}`, iconData);
+        }
+        else {
+            await fsExtra.outputFile(iconPath, iconData);
+        }
         await fsExtra.outputFile(iconPath, iconData);
         spinner.succeed(chalk.green('Icon downloaded successfully!'));
         return iconPath;
