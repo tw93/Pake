@@ -171,6 +171,7 @@ window.addEventListener('DOMContentLoaded', _event => {
     #react-root [data-testid="AppTabBar_Explore_Link"],
     #react-root a[href*="/lists"][role="link"][aria-label],
     #react-root a[href*="/i/communitynotes"][role="link"][aria-label],
+    #react-root a[role="link"][aria-label="Communities"],
     #react-root a[href*="/i/verified-orgs-signup"][role="link"][aria-label] {
       display: none !important;
     }
