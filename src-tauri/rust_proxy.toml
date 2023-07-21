@@ -1,6 +1,6 @@
 [source.crates-io]
 # To use sparse index, change 'rsproxy' to 'rsproxy-sparse'
-replace-with = 'rsproxy-sparse'
+replace-with = 'rsproxy'
 
 [source.rsproxy]
 registry = "https://rsproxy.cn/crates.io-index"
