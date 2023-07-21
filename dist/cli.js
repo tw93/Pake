@@ -20,7 +20,7 @@ import isUrl from 'is-url';
 import fs from 'fs';
 
 var name = "pake-cli";
-var version = "2.2.0";
+var version = "2.2.1";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -436,8 +436,9 @@ async function isChinaIP(ip, domain) {
 }
 
 async function installRust() {
+    const isActions = process.env.GITHUB_ACTIONS;
     const isInChina = await isChinaDomain('sh.rustup.rs');
-    const rustInstallScriptForMac = isInChina
+    const rustInstallScriptForMac = isInChina && !isActions
         ? 'export RUSTUP_DIST_SERVER="https://rsproxy.cn" && export RUSTUP_UPDATE_ROOT="https://rsproxy.cn/rustup" && curl --proto "=https" --tlsv1.2 -sSf https://rsproxy.cn/rustup-init.sh | sh'
         : "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
     const rustInstallScriptForWindows = 'winget install --id Rustlang.Rustup';
