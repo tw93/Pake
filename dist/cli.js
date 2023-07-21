@@ -13,13 +13,14 @@ import http from 'http';
 import { promisify } from 'util';
 import updateNotifier from 'update-notifier';
 import axios from 'axios';
+import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
 import psl from 'psl';
 import isUrl from 'is-url';
 import fs from 'fs';
 
 var name = "pake-cli";
-var version = "2.2.2";
+var version = "2.2.3";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -78,6 +79,7 @@ var dependencies = {
 	prompts: "^2.4.2",
 	psl: "^1.9.0",
 	shelljs: "^0.8.5",
+	"tmp-promise": "^3.0.3",
 	"update-notifier": "^6.0.2"
 };
 var devDependencies = {
@@ -819,8 +821,8 @@ async function downloadIcon(iconUrl) {
         if (!fileDetails) {
             return null;
         }
-        const iconPath = `assets/icon.${fileDetails.ext}`;
-        await fsExtra.outputFile(`./src-tauri/${iconPath}`, iconData);
+        const { path: tempPath } = await dir();
+        const iconPath = `${tempPath}/icon.${fileDetails.ext}`;
         await fsExtra.outputFile(iconPath, iconData);
         spinner.succeed(chalk.green('Icon downloaded successfully!'));
         return iconPath;

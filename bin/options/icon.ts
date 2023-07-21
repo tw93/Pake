@@ -2,6 +2,7 @@ import path from 'path';
 import axios from 'axios';
 import fsExtra from 'fs-extra';
 import chalk from 'chalk';
+import { dir } from 'tmp-promise';
 
 import logger from './logger';
 import { npmDirectory } from '@/utils/dir';
@@ -43,8 +44,8 @@ export async function downloadIcon(iconUrl: string) {
       return null;
     }
 
-    const iconPath = `assets/icon.${fileDetails.ext}`;
-    await fsExtra.outputFile(`./src-tauri/${iconPath}`, iconData);
+    const { path: tempPath } = await dir();
+    const iconPath = `${tempPath}/icon.${fileDetails.ext}`;
     await fsExtra.outputFile(iconPath, iconData);
     spinner.succeed(chalk.green('Icon downloaded successfully!'));
     return iconPath;
