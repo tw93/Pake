@@ -40,19 +40,43 @@ pub fn show_toast(window: &Window, message: &str) {
     window.eval(&script).unwrap();
 }
 
-pub fn get_download_message() -> String {
-    let default_message = "Download successful, saved to download directory~";
-    let chinese_message = "下载成功，已保存到下载目录~";
+pub enum MessageType {
+    Start,
+    Success,
+    Failure,
+}
+
+pub fn get_download_message(message_type: MessageType) -> String {
+    let default_start_message = "Start downloading~";
+    let chinese_start_message = "开始下载中~";
+
+    let default_success_message = "Download successful, saved to download directory~";
+    let chinese_success_message = "下载成功，已保存到下载目录~";
+
+    let default_failure_message = "Download failed, please check your network connection~";
+    let chinese_failure_message = "下载失败，请检查你的网络连接~";
 
     env::var("LANG")
         .map(|lang| {
             if lang.starts_with("zh") {
-                chinese_message
+                match message_type {
+                    MessageType::Start => chinese_start_message,
+                    MessageType::Success => chinese_success_message,
+                    MessageType::Failure => chinese_failure_message,
+                }
             } else {
-                default_message
+                match message_type {
+                    MessageType::Start => default_start_message,
+                    MessageType::Success => default_success_message,
+                    MessageType::Failure => default_failure_message,
+                }
             }
         })
-        .unwrap_or(default_message)
+        .unwrap_or_else(|_| match message_type {
+            MessageType::Start => default_start_message,
+            MessageType::Success => default_success_message,
+            MessageType::Failure => default_failure_message,
+        })
         .to_string()
 }
 

@@ -1,17 +1,13 @@
 const shortcuts = {
-  ArrowUp: () => scrollTo(0, 0),
-  ArrowDown: () => scrollTo(0, document.body.scrollHeight),
-  // Don't use command + ArrowLeft or command + ArrowRight
-  // When editing text in page, it causes unintended page navigation.
-  // ArrowLeft: () => window.history.back(),
-  // ArrowRight: () => window.history.forward(),
+  'ArrowUp': () => scrollTo(0, 0),
+  'ArrowDown': () => scrollTo(0, document.body.scrollHeight),
   '[': () => window.history.back(),
   ']': () => window.history.forward(),
-  r: () => window.location.reload(),
+  'r': () => window.location.reload(),
   '-': () => zoomOut(),
   '=': () => zoomIn(),
   '+': () => zoomIn(),
-  0: () => setZoom('100%'),
+  '0': () => setZoom('100%'),
 };
 
 function setZoom(zoom) {
@@ -40,46 +36,6 @@ function handleShortcut(event) {
   }
 }
 
-//这里参考 ChatGPT 的代码
-const uid = () => window.crypto.getRandomValues(new Uint32Array(1))[0];
-
-function transformCallback(callback = () => {}, once = false) {
-  const identifier = uid();
-  const prop = `_${identifier}`;
-  Object.defineProperty(window, prop, {
-    value: (result) => {
-      if (once) {
-        Reflect.deleteProperty(window, prop);
-      }
-      return callback(result);
-    },
-    writable: false,
-    configurable: true,
-  });
-  return identifier;
-}
-
-async function invoke(cmd, args) {
-  return new Promise((resolve, reject) => {
-    if (!window.__TAURI_POST_MESSAGE__)
-      reject('__TAURI_POST_MESSAGE__ does not exist~');
-    const callback = transformCallback((e) => {
-      resolve(e);
-      Reflect.deleteProperty(window, `_${error}`);
-    }, true);
-    const error = transformCallback((e) => {
-      reject(e);
-      Reflect.deleteProperty(window, `_${callback}`);
-    }, true);
-    window.__TAURI_POST_MESSAGE__({
-      cmd,
-      callback,
-      error,
-      ...args,
-    });
-  });
-}
-
 // Judgment of file download.
 function isDownloadLink(url) {
   const fileExtensions = [
@@ -105,6 +61,7 @@ function externalTargetLink() {
 document.addEventListener('DOMContentLoaded', () => {
   const tauri = window.__TAURI__;
   const appWindow = tauri.window.appWindow;
+  const invoke = tauri.tauri.invoke;
 
   const topDom = document.createElement('div');
   topDom.id = 'pack-top-dom';
@@ -137,44 +94,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  const specialDownloadProtocal = ['blob', 'data'];
+  const isExternalLink = (url, host) => window.location.host !== host;
+  // process special download protocal['data:','blob:'] 
+  const isSpecialDownload = (url) => ['blob', 'data'].some(protocal => url.startsWith(protocal));
+
+  const isDownloadRequired = (url, anchorElement, e) =>
+    anchorElement.download || e.metaKey || e.ctrlKey || isDownloadLink(url);
+
+  const handleExternalLink = (e, url) => {
+    e.preventDefault();
+    tauri.shell.open(url);
+  };
+
+  const handleDownloadLink = (e, url, filename) => {
+    e.preventDefault();
+    invoke('download_file', { params: { url, filename } });
+  };
 
   const detectAnchorElementClick = (e) => {
     const anchorElement = e.target.closest('a');
     if (anchorElement && anchorElement.href) {
-      const target = anchorElement.target;
-      anchorElement.target = '_self';
       const hrefUrl = new URL(anchorElement.href);
       const absoluteUrl = hrefUrl.href;
+      let filename = anchorElement.download || getFilenameFromUrl(absoluteUrl);
 
       // Handling external link redirection.
-      if (
-        window.location.host !== hrefUrl.host &&
-        (target === '_blank' || target === '_new' || externalTargetLink())
-      ) {
-        e.preventDefault && e.preventDefault();
-        tauri.shell.open(absoluteUrl);
+      if (isExternalLink(absoluteUrl, hrefUrl.host) && (['_blank', '_new'].includes(anchorElement.target) || externalTargetLink())) {
+        handleExternalLink(e, absoluteUrl);
         return;
       }
 
-      let filename = anchorElement.download || getFilenameFromUrl(absoluteUrl);
-
       // Process download links for Rust to handle.
-      // If the download attribute is set, the download attribute is used as the file name.
-      if (
-        (anchorElement.download ||
-          e.metaKey ||
-          e.ctrlKey ||
-          isDownloadLink(absoluteUrl)) &&
-        !externalDownLoadLink() && specialDownloadProtocal.every(protocal => !absoluteUrl.startsWith(protocal))
-      ) {
-        e.preventDefault();
-        invoke('download_file', {
-          params: {
-            url: absoluteUrl,
-            filename,
-          },
-        });
+      if (isDownloadRequired(absoluteUrl, anchorElement, e) && !externalDownLoadLink() && !isSpecialDownload(absoluteUrl)) {
+        handleDownloadLink(e, absoluteUrl, filename);
       }
     }
   };
@@ -208,6 +160,12 @@ document.addEventListener('DOMContentLoaded', () => {
   } catch (e) {
     console.log(e);
   }
+
+  // Fix Chinese input method "Enter" on Safari
+  document.addEventListener('keydown', (e) => {
+    if (e.keyCode === 229) e.stopPropagation();
+  }, true);
+
 });
 
 function setDefaultZoom() {
@@ -219,26 +177,7 @@ function setDefaultZoom() {
 
 function getFilenameFromUrl(url) {
   const urlPath = new URL(url).pathname;
-  const filename = urlPath.substring(urlPath.lastIndexOf('/') + 1);
-  return filename;
-}
-
-function removeUrlParameters(url) {
-  const parsedUrl = new URL(url);
-  parsedUrl.search = '';
-  return parsedUrl.toString();
-}
-
-// Toggle video playback when the window is hidden.
-function toggleVideoPlayback(pause) {
-  const videos = document.getElementsByTagName('video');
-  for (const video of videos) {
-    if (pause) {
-      video.pause();
-    } else {
-      video.play();
-    }
-  }
+  return urlPath.substring(urlPath.lastIndexOf('/') + 1);
 }
 
 // Collect blob urls to blob by overriding window.URL.createObjectURL
@@ -297,6 +236,7 @@ function downloadFromBlobUrl(blobUrl, filename) {
   });
 }
 
+
 // detect blob download by createElement("a")
 function detectDownloadByCreateAnchor() {
   const createEle = document.createElement;
@@ -318,4 +258,11 @@ function detectDownloadByCreateAnchor() {
 
     return anchorEle;
   };
+}
+
+
+// Determine the language of the current system.
+function getSystemLanguage() {
+  const lang = navigator.language.substr(0, 2);
+  return lang === 'ch' ? 'ch' : 'en';
 }
