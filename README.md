@@ -169,7 +169,7 @@ npm install -g pake-cli
 pake url [OPTIONS]...
 
 # Feel free to play with Pake! It might take a while to prepare the environment the first time you launch Pake.
-pake https://weekly.tw93.fun --name Weekly --transparent
+pake https://weekly.tw93.fun --name weekly --transparent
 ```
 
 If you are new to the command line, you can compile packages online with _GitHub Actions_. See the [Tutorial](https://github.com/tw93/Pake/wiki/Online-Compilation-(used-by-ordinary-users)) for more information.
