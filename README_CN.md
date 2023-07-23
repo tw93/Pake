@@ -172,7 +172,7 @@ npm install -g pake-cli
 pake url [OPTIONS]...
 
 # 随便玩玩，首次由于安装环境会有些慢，后面就快了
-pake https://weekly.tw93.fun --name Weekly --transparent
+pake https://weekly.tw93.fun --name weekly --transparent
 ```
 
 假如你不太会使用命令行，或许使用 **GitHub Actions 在线编译多系统版本** 是一个不错的选择，可查看 [文档](https://github.com/tw93/Pake/wiki/%E5%9C%A8%E7%BA%BF%E7%BC%96%E8%AF%91%EF%BC%88%E6%99%AE%E9%80%9A%E7%94%A8%E6%88%B7%E4%BD%BF%E7%94%A8%EF%BC%89)。
