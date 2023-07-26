@@ -134,7 +134,7 @@ function detectDownloadByCreateAnchor() {
     const anchorEle = createEle.call(document, el);
 
     // use addEventListener to avoid overriding the original click event.
-    anchorEle.addEventListener('click', () => {
+    anchorEle.addEventListener('click', (e) => {
       const url = anchorEle.href;
       const filename = anchorEle.download || getFilenameFromUrl(url);
       if (window.blobToUrlCaches.has(url)) {
@@ -142,6 +142,8 @@ function detectDownloadByCreateAnchor() {
         // case: downoload from dataURL -> convert dataURL -> 
       } else if (url.startsWith('data:')) {
         downladFromDataUri(url, filename);
+      } else {
+        handleExternalLink(e, url);
       }
     }, true);
 
@@ -150,12 +152,6 @@ function detectDownloadByCreateAnchor() {
 }
 
 
-  domEl.addEventListener('mousedown', (e) => {
-    e.preventDefault();
-    if (e.buttons === 1 && e.detail !== 2) {
-      appWindow.startDragging().then();
-    }
-  });
 
   domEl.addEventListener('touchstart', () => {
     appWindow.startDragging().then();
