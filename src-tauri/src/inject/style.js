@@ -180,6 +180,11 @@ window.addEventListener('DOMContentLoaded', _event => {
       visibility: hidden !important;
     }
 
+    #__next > div.overflow-hidden.w-full.h-full .absolute.bottom-0.left-0.w-full > div.text-center.text-xs {
+      visibility: hidden !important;
+      height: 0px !important;
+    }
+
     #react-root [data-testid="primaryColumn"] > div > div {
       position: relative !important;
     }

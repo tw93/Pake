@@ -45,7 +45,14 @@ export async function downloadIcon(iconUrl: string) {
     }
 
     const { path: tempPath } = await dir();
-    const iconPath = `${tempPath}/icon.${fileDetails.ext}`;
+    let iconPath = `${tempPath}/icon.${fileDetails.ext}`;
+    // Fix this for linux
+    if (IS_LINUX) {
+      iconPath = 'png/linux_temp.png';
+      await fsExtra.outputFile(`${npmDirectory}/src-tauri/${iconPath}`, iconData);
+    } else {
+      await fsExtra.outputFile(iconPath, iconData);
+    }
     await fsExtra.outputFile(iconPath, iconData);
     spinner.succeed(chalk.green('Icon downloaded successfully!'));
     return iconPath;
