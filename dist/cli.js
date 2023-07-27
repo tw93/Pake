@@ -11,16 +11,16 @@ import { fileURLToPath } from 'url';
 import dns from 'dns';
 import http from 'http';
 import { promisify } from 'util';
-import fs from 'fs';
 import updateNotifier from 'update-notifier';
 import axios from 'axios';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
 import psl from 'psl';
 import isUrl from 'is-url';
+import fs from 'fs';
 
 var name = "pake-cli";
-var version = "2.2.0";
+var version = "2.2.5";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
 var engines = {
 	node: ">=16.0.0"
@@ -53,14 +53,12 @@ var scripts = {
 	start: "npm run dev",
 	dev: "npm run tauri dev",
 	build: "npm run tauri build --release",
-	"build:debug": "npm run tauri build -- --debug",
 	"build:mac": "npm run tauri build -- --target universal-apple-darwin",
 	"build:all-unix": "chmod +x ./script/build.sh && ./script/build.sh",
 	"build:all-windows": "pwsh ./script/build.ps1",
 	analyze: "cd src-tauri && cargo bloat --release --crates",
 	tauri: "tauri",
 	cli: "rollup -c rollup.config.js --watch",
-	"cli:dev": "cross-env NODE_ENV=development rollup -c rollup.config.js -w",
 	"cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
 	prepublishOnly: "npm run cli:build"
 };
@@ -88,7 +86,6 @@ var devDependencies = {
 	"@rollup/plugin-alias": "^4.0.2",
 	"@rollup/plugin-commonjs": "^23.0.2",
 	"@rollup/plugin-json": "^5.0.2",
-	"@rollup/plugin-replace": "^5.0.2",
 	"@rollup/plugin-terser": "^0.1.0",
 	"@types/fs-extra": "^9.0.13",
 	"@types/is-url": "^1.2.30",
@@ -126,7 +123,7 @@ var packageJson = {
 var windows = [
 	{
 		url: "https://weread.qq.com/",
-		transparent: false,
+		transparent: true,
 		fullscreen: false,
 		width: 1200,
 		height: 780,
@@ -140,7 +137,7 @@ var user_agent = {
 	windows: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
 };
 var menu = {
-	macos: false,
+	macos: true,
 	linux: false,
 	windows: false
 };
@@ -149,14 +146,11 @@ var system_tray = {
 	linux: true,
 	windows: true
 };
-var inject = [
-];
 var pakeConf = {
 	windows: windows,
 	user_agent: user_agent,
 	menu: menu,
-	system_tray: system_tray,
-	inject: inject
+	system_tray: system_tray
 };
 
 var tauri$3 = {
@@ -176,7 +170,7 @@ var tauri$3 = {
 		active: false
 	},
 	systemTray: {
-		iconPath: "png/icon_512.png",
+		iconPath: "png/weread_512.png",
 		iconAsTemplate: true
 	},
 	allowlist: {
@@ -197,11 +191,11 @@ var build = {
 	beforeDevCommand: ""
 };
 var CommonConf = {
-	tauri: tauri$3,
 	"package": {
 	productName: "WeRead",
 	version: "1.0.0"
 },
+	tauri: tauri$3,
 	build: build
 };
 
@@ -245,9 +239,9 @@ var WinConf = {
 var tauri$1 = {
 	bundle: {
 		icon: [
-			"icons/icon.icns"
+			"icons/weread.icns"
 		],
-		identifier: "com.pake.5b8ae9",
+		identifier: "com.pake.weread",
 		active: true,
 		category: "DeveloperTool",
 		copyright: "",
@@ -443,8 +437,9 @@ async function isChinaIP(ip, domain) {
 }
 
 async function installRust() {
+    const isActions = process.env.GITHUB_ACTIONS;
     const isInChina = await isChinaDomain('sh.rustup.rs');
-    const rustInstallScriptForMac = isInChina
+    const rustInstallScriptForMac = isInChina && !isActions
         ? 'export RUSTUP_DIST_SERVER="https://rsproxy.cn" && export RUSTUP_UPDATE_ROOT="https://rsproxy.cn/rustup" && curl --proto "=https" --tlsv1.2 -sSf https://rsproxy.cn/rustup-init.sh | sh'
         : "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
     const rustInstallScriptForWindows = 'winget install --id Rustlang.Rustup';
@@ -876,7 +871,15 @@ async function downloadIcon(iconUrl) {
             return null;
         }
         const { path: tempPath } = await dir();
-        const iconPath = `${tempPath}/icon.${fileDetails.ext}`;
+        let iconPath = `${tempPath}/icon.${fileDetails.ext}`;
+        // Fix this for linux
+        if (IS_LINUX) {
+            iconPath = 'png/linux_temp.png';
+            await fsExtra.outputFile(`${npmDirectory}/src-tauri/${iconPath}`, iconData);
+        }
+        else {
+            await fsExtra.outputFile(iconPath, iconData);
+        }
         await fsExtra.outputFile(iconPath, iconData);
         spinner.succeed(chalk.green('Icon downloaded successfully!'));
         return iconPath;
