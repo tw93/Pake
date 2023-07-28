@@ -184,7 +184,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
   }
 
   tauriConf.tauri.systemTray.iconPath = trayIconPath;
-  const injectFilePath = path.join(npmDirectory, `src-tauri/src/inject/_INJECT_.js`);
+  const injectFilePath = path.join(npmDirectory, `src-tauri/src/inject/custom.js`);
   // inject js or css files
   if (inject?.length > 0) {
     if (!inject.every(item => item.endsWith('.css') || item.endsWith('.js'))) {

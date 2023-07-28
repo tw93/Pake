@@ -38,8 +38,8 @@ program
   .option('--iter-copy-file', 'Copy files when URL is a local file', DEFAULT.iterCopyFile)
   .option('--multi-arch', 'Only for Mac, supports both Intel and M1', DEFAULT.multiArch)
   .option('--targets <string>', 'Only for Linux, option "deb" or "appimage"', DEFAULT.targets)
-  .option('--inject [injects...]', 'inject .js or .css for this app', DEFAULT.inject)
-  .option('--safe-domain [domains...]', 'domains that can call window.__TAURI__ and use ipc', DEFAULT.safeDomain)
+  .option('--inject [injects...]', 'Inject .js or .css for this app', DEFAULT.inject)
+  .option('--safe-domain [domains...]', 'Please enter the security domains that need to be configured', DEFAULT.safeDomain)
   .option('--debug', 'Debug mode', DEFAULT.debug)
   .version(packageJson.version, '-v, --version', 'Output the current version')
   .action(async (url: string, options: PakeCliOptions) => {

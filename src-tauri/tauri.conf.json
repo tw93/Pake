@@ -1,4 +1,8 @@
 {
+    "package": {
+        "productName": "WeRead",
+        "version": "1.0.0"
+    },
     "tauri": {
         "security": {
             "csp": null,
@@ -28,10 +32,6 @@
                 ]
             }
         }
-    },
-    "package": {
-        "productName": "WeRead",
-        "version": "1.0.0"
     },
     "build": {
         "withGlobalTauri": true,

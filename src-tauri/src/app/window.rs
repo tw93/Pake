@@ -30,7 +30,7 @@ pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Wind
         .initialization_script(include_str!("../inject/component.js"))
         .initialization_script(include_str!("../inject/event.js"))
         .initialization_script(include_str!("../inject/style.js"))
-        .initialization_script(include_str!("../inject/_INJECT_.js")); //Very annoying, otherwise dragging files to the window will not work.
+        .initialization_script(include_str!("../inject/custom.js")); //Very annoying, otherwise dragging files to the window will not work.
 
     #[cfg(target_os = "macos")]
     {
