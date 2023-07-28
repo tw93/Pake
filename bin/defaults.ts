@@ -22,7 +22,6 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
 // just for cli development
 export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & {url: string} = {
   ...DEFAULT_PAKE_OPTIONS,
-  url: 'https://zbook.lol',
-  name: 'Zbook',
-  safeDomain: ['zbook.eu.org']
+  url: 'https://weread.qq.com',
+  name: 'Weread',
 }
