@@ -47,6 +47,12 @@ export interface PakeCliOptions {
 
   // Debug mode, outputs more logs
   debug: boolean;
+
+  /** 需要注入页面的外部脚本 */
+  inject: string[];
+
+  /* the domain that can use ipc or tauri javascript sdk */
+  safeDomain: string[];
 }
 
 export interface PakeAppOptions extends PakeCliOptions {

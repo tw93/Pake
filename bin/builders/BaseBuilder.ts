@@ -71,6 +71,10 @@ export default abstract class BaseBuilder {
     await this.buildAndCopy(url, this.options.targets);
   }
 
+  async start(url: string) {
+    await mergeConfig(url, this.options, tauriConfig);
+  } 
+
   async buildAndCopy(url: string, target: string) {
     const { name } = this.options;
     await mergeConfig(url, this.options, tauriConfig);
@@ -98,7 +102,8 @@ export default abstract class BaseBuilder {
   abstract getFileName(): string;
 
   protected getBuildCommand(): string {
-    return 'npm run build';
+    // the debug option should support `--debug` and `--release`
+    return this.options.debug ? 'npm run build:debug' : 'npm run build';
   }
 
   protected getBasePath(): string {
