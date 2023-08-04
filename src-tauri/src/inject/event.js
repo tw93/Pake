@@ -68,93 +68,15 @@ document.addEventListener('DOMContentLoaded', () => {
   document.body.appendChild(topDom);
   const domEl = document.getElementById('pack-top-dom');
 
-
-// Collect blob urls to blob by overriding window.URL.createObjectURL
-function collectUrlToBlobs() {
-  const backupCreateObjectURL = window.URL.createObjectURL;
-  window.blobToUrlCaches = new Map();
-  window.URL.createObjectURL = (blob) => {
-    const url = backupCreateObjectURL.call(window.URL, blob);
-    window.blobToUrlCaches.set(url, blob);
-    return url;
-  };
-}
-
-function convertBlobUrlToBinary(blobUrl) {
-  return new Promise((resolve) => {
-    const blob = window.blobToUrlCaches.get(blobUrl);
-    const reader = new FileReader();
-
-    reader.readAsArrayBuffer(blob);
-    reader.onload = () => {
-      resolve(Array.from(new Uint8Array(reader.result)));
-    };
-  });
-}
-
-function downladFromDataUri(dataURI, filename) {
-  const byteString = atob(dataURI.split(',')[1]);
-  // write the bytes of the string to an ArrayBuffer
-  const bufferArray = new ArrayBuffer(byteString.length);
-
-  // create a view into the buffer
-  const binary = new Uint8Array(bufferArray);
-
-  // set the bytes of the buffer to the correct values
-  for (var i = 0; i < byteString.length; i++) {
-    binary[i] = byteString.charCodeAt(i);
-  }
-
-  // write the ArrayBuffer to a binary, and you're done
-  invoke('download_file_by_binary', {
-    params: {
-      filename,
-      binary: Array.from(binary)
-    },
-  });
-}
-
-function downloadFromBlobUrl(blobUrl, filename) {
-  convertBlobUrlToBinary(blobUrl).then((binary) => {
-    invoke('download_file_by_binary', {
-      params: {
-        filename,
-        binary
-      },
-    });
-  });
-}
-
-
-// detect blob download by createElement("a")
-function detectDownloadByCreateAnchor() {
-  const createEle = document.createElement;
-  document.createElement = (el) => {
-    if (el !== 'a') return createEle.call(document, el);
-    const anchorEle = createEle.call(document, el);
-
-    // use addEventListener to avoid overriding the original click event.
-    anchorEle.addEventListener('click', (e) => {
-      const url = anchorEle.href;
-      const filename = anchorEle.download || getFilenameFromUrl(url);
-      if (window.blobToUrlCaches.has(url)) {
-        downloadFromBlobUrl(url, filename);
-        // case: downoload from dataURL -> convert dataURL -> 
-      } else if (url.startsWith('data:')) {
-        downladFromDataUri(url, filename);
-      } else {
-        handleExternalLink(e, url);
-      }
-    }, true);
-
-    return anchorEle;
-  };
-}
-
-
-
   domEl.addEventListener('touchstart', () => {
     appWindow.startDragging().then();
+  });
+
+  domEl.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    if (e.buttons === 1 && e.detail !== 2) {
+      appWindow.startDragging().then();
+    }
   });
 
   domEl.addEventListener('dblclick', () => {
@@ -172,8 +94,90 @@ function detectDownloadByCreateAnchor() {
     }
   });
 
+  // Collect blob urls to blob by overriding window.URL.createObjectURL
+  function collectUrlToBlobs() {
+    const backupCreateObjectURL = window.URL.createObjectURL;
+    window.blobToUrlCaches = new Map();
+    window.URL.createObjectURL = (blob) => {
+      const url = backupCreateObjectURL.call(window.URL, blob);
+      window.blobToUrlCaches.set(url, blob);
+      return url;
+    };
+  }
+
+  function convertBlobUrlToBinary(blobUrl) {
+    return new Promise((resolve) => {
+      const blob = window.blobToUrlCaches.get(blobUrl);
+      const reader = new FileReader();
+
+      reader.readAsArrayBuffer(blob);
+      reader.onload = () => {
+        resolve(Array.from(new Uint8Array(reader.result)));
+      };
+    });
+  }
+
+  function downloadFromDataUri(dataURI, filename) {
+    const byteString = atob(dataURI.split(',')[1]);
+    // write the bytes of the string to an ArrayBuffer
+    const bufferArray = new ArrayBuffer(byteString.length);
+
+    // create a view into the buffer
+    const binary = new Uint8Array(bufferArray);
+
+    // set the bytes of the buffer to the correct values
+    for (let i = 0; i < byteString.length; i++) {
+      binary[i] = byteString.charCodeAt(i);
+    }
+
+    // write the ArrayBuffer to a binary, and you're done
+    invoke('download_file_by_binary', {
+      params: {
+        filename,
+        binary: Array.from(binary)
+      },
+    });
+  }
+
+  function downloadFromBlobUrl(blobUrl, filename) {
+    convertBlobUrlToBinary(blobUrl).then((binary) => {
+      invoke('download_file_by_binary', {
+        params: {
+          filename,
+          binary
+        },
+      });
+    });
+  }
+
+
+// detect blob download by createElement("a")
+  function detectDownloadByCreateAnchor() {
+    const createEle = document.createElement;
+    document.createElement = (el) => {
+      if (el !== 'a') return createEle.call(document, el);
+      const anchorEle = createEle.call(document, el);
+
+      // use addEventListener to avoid overriding the original click event.
+      anchorEle.addEventListener('click', (e) => {
+        const url = anchorEle.href;
+        const filename = anchorEle.download || getFilenameFromUrl(url);
+        if (window.blobToUrlCaches.has(url)) {
+          downloadFromBlobUrl(url, filename);
+          // case: download from dataURL -> convert dataURL ->
+        } else if (url.startsWith('data:')) {
+          downloadFromDataUri(url, filename);
+        } else {
+          handleExternalLink(e, url);
+        }
+      }, true);
+
+      return anchorEle;
+    };
+  }
+
   const isExternalLink = (url, host) => window.location.host !== host;
-  // process special download protocal['data:','blob:'] 
+  // process special download protocol['data:','blob:']
   const isSpecialDownload = (url) => ['blob', 'data'].some(protocal => url.startsWith(protocal));
 
   const isDownloadRequired = (url, anchorElement, e) =>
@@ -186,7 +190,7 @@ function detectDownloadByCreateAnchor() {
 
   const handleDownloadLink = (e, url, filename) => {
     e.preventDefault();
-    invoke('download_file', { params: { url, filename } });
+    invoke('download_file', {params: {url, filename}});
   };
 
   const detectAnchorElementClick = (e) => {
@@ -217,7 +221,7 @@ function detectDownloadByCreateAnchor() {
 
   // Rewrite the window.open function.
   const originalWindowOpen = window.open;
-  window.open = function(url, name, specs) {
+  window.open = function (url, name, specs) {
     // Apple login and google login
     if (name === 'AppleAuthentication') {
       //do nothing
@@ -256,11 +260,4 @@ function setDefaultZoom() {
 function getFilenameFromUrl(url) {
   const urlPath = new URL(url).pathname;
   return urlPath.substring(urlPath.lastIndexOf('/') + 1);
-}
-
-
-// Determine the language of the current system.
-function getSystemLanguage() {
-  const lang = navigator.language.substr(0, 2);
-  return lang === 'ch' ? 'ch' : 'en';
 }

@@ -25,12 +25,13 @@ export default {
   plugins: [
     json(),
     typescript({
-      tsconfig: "tsconfig.json",
-      clean: true, // 清理缓存
+      tsconfig: 'tsconfig.json',
+      clean: true, // Clear cache
     }),
     commonjs(),
     replace({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+      preventAssignment: true,
     }),
     alias({
       entries: [{ find: '@', replacement: path.join(appRootPath.path, 'bin') }],

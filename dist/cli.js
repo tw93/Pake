@@ -11,17 +11,17 @@ import { fileURLToPath } from 'url';
 import dns from 'dns';
 import http from 'http';
 import { promisify } from 'util';
+import fs from 'fs';
 import updateNotifier from 'update-notifier';
 import axios from 'axios';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
 import psl from 'psl';
 import isUrl from 'is-url';
-import fs from 'fs';
 
 var name = "pake-cli";
 var version = "2.2.5";
-var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 很简单的用 Rust 打包网页生成很小的桌面 App。";
+var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
 };
@@ -53,12 +53,14 @@ var scripts = {
 	start: "npm run dev",
 	dev: "npm run tauri dev",
 	build: "npm run tauri build --release",
+	"build:debug": "npm run tauri build -- --debug",
 	"build:mac": "npm run tauri build -- --target universal-apple-darwin",
 	"build:all-unix": "chmod +x ./script/build.sh && ./script/build.sh",
 	"build:all-windows": "pwsh ./script/build.ps1",
 	analyze: "cd src-tauri && cargo bloat --release --crates",
 	tauri: "tauri",
 	cli: "rollup -c rollup.config.js --watch",
+	"cli:dev": "cross-env NODE_ENV=development rollup -c rollup.config.js -w",
 	"cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
 	prepublishOnly: "npm run cli:build"
 };
@@ -86,6 +88,7 @@ var devDependencies = {
 	"@rollup/plugin-alias": "^4.0.2",
 	"@rollup/plugin-commonjs": "^23.0.2",
 	"@rollup/plugin-json": "^5.0.2",
+	"@rollup/plugin-replace": "^5.0.2",
 	"@rollup/plugin-terser": "^0.1.0",
 	"@types/fs-extra": "^9.0.13",
 	"@types/is-url": "^1.2.30",
@@ -137,7 +140,7 @@ var user_agent = {
 	windows: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
 };
 var menu = {
-	macos: true,
+	macos: false,
 	linux: false,
 	windows: false
 };
@@ -146,11 +149,14 @@ var system_tray = {
 	linux: true,
 	windows: true
 };
+var inject = [
+];
 var pakeConf = {
 	windows: windows,
 	user_agent: user_agent,
 	menu: menu,
-	system_tray: system_tray
+	system_tray: system_tray,
+	inject: inject
 };
 
 var tauri$3 = {
@@ -170,7 +176,7 @@ var tauri$3 = {
 		active: false
 	},
 	systemTray: {
-		iconPath: "png/weread_512.png",
+		iconPath: "png/icon_512.png",
 		iconAsTemplate: true
 	},
 	allowlist: {
@@ -619,7 +625,7 @@ async function mergeConfig(url, options, tauriConf) {
         }
     }
     tauriConf.tauri.systemTray.iconPath = trayIconPath;
-    const injectFilePath = path.join(npmDirectory, `src-tauri/src/inject/_INJECT_.js`);
+    const injectFilePath = path.join(npmDirectory, `src-tauri/src/inject/custom.js`);
     // inject js or css files
     if (inject?.length > 0) {
         if (!inject.every(item => item.endsWith('.css') || item.endsWith('.js'))) {
@@ -1023,8 +1029,8 @@ program
     .option('--iter-copy-file', 'Copy files when URL is a local file', DEFAULT_PAKE_OPTIONS.iterCopyFile)
     .option('--multi-arch', 'Only for Mac, supports both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
     .option('--targets <string>', 'Only for Linux, option "deb" or "appimage"', DEFAULT_PAKE_OPTIONS.targets)
-    .option('--inject [injects...]', 'inject .js or .css for this app', DEFAULT_PAKE_OPTIONS.inject)
-    .option('--safe-domain [domains...]', 'domains that can call window.__TAURI__ and use ipc', DEFAULT_PAKE_OPTIONS.safeDomain)
+    .option('--inject [injects...]', 'Injection of .js or .css Files', DEFAULT_PAKE_OPTIONS.inject)
+    .option('--safe-domain [domains...]', 'Domains that Require Security Configuration"', DEFAULT_PAKE_OPTIONS.safeDomain)
     .option('--debug', 'Debug mode', DEFAULT_PAKE_OPTIONS.debug)
     .version(packageJson.version, '-v, --version', 'Output the current version')
     .action(async (url, options) => {

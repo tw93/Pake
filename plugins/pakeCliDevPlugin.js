@@ -1,6 +1,5 @@
 import chalk from 'chalk';
-import {spawn, exec} from 'child_process';
-
+import { spawn, exec } from 'child_process';
 
 // just run in development mode
 export default function pakeCliDevPlugin() {
@@ -15,8 +14,8 @@ export default function pakeCliDevPlugin() {
 
       const command = 'node';
       const cliCmdArgs = ['./dist/dev.js'];
-      
-      cliChildProcess = spawn(command, cliCmdArgs, {detached: true});
+
+      cliChildProcess = spawn(command, cliCmdArgs, { detached: true });
 
       cliChildProcess.stdout.on('data', (data) => {
         console.log(chalk.green(data.toString()));
@@ -35,7 +34,7 @@ export default function pakeCliDevPlugin() {
         devChildProcess.stdout.on('data', (data) => {
           console.log(chalk.green(data.toString()));
         });
-  
+
         devChildProcess.stderr.on('data', (data) => {
           console.error(chalk.yellow(data.toString()));
         });
@@ -45,6 +44,6 @@ export default function pakeCliDevPlugin() {
           process.exit(code);
         });
       });
-    }
-  }
+    },
+  };
 }
