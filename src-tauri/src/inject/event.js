@@ -59,7 +59,7 @@ function externalTargetLink() {
 }
 
 function externalSelfLink() {
-  return ['twitter.com'].indexOf(location.hostname) > -1;
+  return ['twitter.com', 'www.zhihu.com'].indexOf(location.hostname) > -1;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
