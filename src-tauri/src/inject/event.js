@@ -58,6 +58,10 @@ function externalTargetLink() {
   return ['zbook.lol'].indexOf(location.hostname) > -1;
 }
 
+function externalSelfLink() {
+  return ['twitter.com'].indexOf(location.hostname) > -1;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const tauri = window.__TAURI__;
   const appWindow = tauri.window.appWindow;
@@ -134,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
     invoke('download_file_by_binary', {
       params: {
         filename,
-        binary: Array.from(binary)
+        binary: Array.from(binary),
       },
     });
   }
@@ -144,12 +148,11 @@ document.addEventListener('DOMContentLoaded', () => {
       invoke('download_file_by_binary', {
         params: {
           filename,
-          binary
+          binary,
         },
       });
     });
   }
-
 
 // detect blob download by createElement("a")
   function detectDownloadByCreateAnchor() {
@@ -167,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
           // case: download from dataURL -> convert dataURL ->
         } else if (url.startsWith('data:')) {
           downloadFromDataUri(url, filename);
-        } else {
+        } else if (!externalSelfLink()) {
           handleExternalLink(e, url);
         }
       }, true);
@@ -176,9 +179,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  const isExternalLink = (url, host) => window.location.host !== host;
+  const isExternalLink = (link) => window.location.host !== link.host;
   // process special download protocol['data:','blob:']
-  const isSpecialDownload = (url) => ['blob', 'data'].some(protocal => url.startsWith(protocal));
+  const isSpecialDownload = (url) => ['blob', 'data'].some(protocol => url.startsWith(protocol));
 
   const isDownloadRequired = (url, anchorElement, e) =>
     anchorElement.download || e.metaKey || e.ctrlKey || isDownloadLink(url);
@@ -190,18 +193,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const handleDownloadLink = (e, url, filename) => {
     e.preventDefault();
-    invoke('download_file', {params: {url, filename}});
+    invoke('download_file', { params: { url, filename } });
   };
 
   const detectAnchorElementClick = (e) => {
     const anchorElement = e.target.closest('a');
     if (anchorElement && anchorElement.href) {
+      anchorElement.target = '_self';
       const hrefUrl = new URL(anchorElement.href);
       const absoluteUrl = hrefUrl.href;
       let filename = anchorElement.download || getFilenameFromUrl(absoluteUrl);
 
       // Handling external link redirection.
-      if (isExternalLink(absoluteUrl, hrefUrl.host) && (['_blank', '_new'].includes(anchorElement.target) || externalTargetLink())) {
+      if (isExternalLink(absoluteUrl) && (['_blank', '_new'].includes(anchorElement.target) || externalTargetLink())) {
         handleExternalLink(e, absoluteUrl);
         return;
       }
@@ -221,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Rewrite the window.open function.
   const originalWindowOpen = window.open;
-  window.open = function (url, name, specs) {
+  window.open = function(url, name, specs) {
     // Apple login and google login
     if (name === 'AppleAuthentication') {
       //do nothing
