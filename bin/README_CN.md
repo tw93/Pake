@@ -39,6 +39,28 @@ npm install pake-cli -g
 
 ## 使用方法
 
+### 开发
+开发时可以修改 `bin/defaults.ts` 中 `DEFAULT_DEV_PAKE_OPTIONS` 配置，配置项和 `pake-cli` 配置说明保持一致
+
+```typescript
+export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & {url: string} = {
+  ...DEFAULT_PAKE_OPTIONS,
+  url: 'https://weread.qq.com',
+  name: 'Weread',
+}
+```
+
+之后运行
+
+```bash
+yarn cli:dev
+```
+
+脚本会读取上述配置并使用 `watch` 模式打包指定的 `app`，对 `pake-cli` 代码和 `pake` 的修改都会实时热更新。
+
+
+### 使用 CLI
+
 ```bash
 pake [url] [options]
 ```
@@ -182,6 +204,30 @@ Linux，默认为 `all`。
 
 ```shell
 --iter-copy-file
+```
+
+#### [inject]
+
+使用 `inject` 可以通过本地的绝对、相对路径的 `css` `js` 文件注入到你所指定 `url` 的页面中，从而为
+
+其做定制化改造。举个例子：一段可以通用到任何网页的广告屏蔽脚本，或者是优化页面 `UI` 展的 `css`，你
+
+只需要书写一次可以将其通用到任何其他网页打包的 `app`。
+
+```shell
+--inject ./tools/style.css,./tools/hotkey.js
+```
+
+#### [safe-domain]
+
+这个安全域名是除你当前配置的 `url` 之外可能会出现重定向或跳转到的其他域名，只有在已配置为安全的域名中，
+
+才能够使用 `tauri` 暴露到浏览器的 `api` ，保证 `pake` 内置增强功能的正确运行。
+
+PS: 安全域名不需要携带协议。
+
+```shell
+--safe-domain weread.qq.com,google.com
 ```
 
 ## 结语

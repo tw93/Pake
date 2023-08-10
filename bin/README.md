@@ -39,6 +39,29 @@ npm install pake-cli -g
 
 ## Usage
 
+### Development
+The `DEFAULT_DEV_PAKE_OPTIONS` configuration in `bin/defaults.ts` can be modified at development time to match the `pake-cli` configuration description.
+
+```typescript
+export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & {url: string} = {
+  ...DEFAULT_PAKE_OPTIONS,
+  url: 'https://weread.qq.com',
+  name: 'Weread',
+}
+```
+
+then
+
+
+```bash
+yarn cli:dev
+```
+
+The script will reads the above configuration and packages the specified `app` using `watch` mode, and changes to the `pake-cli` code and `pake` are hot updated in real time.
+
+
+### CLI Usage
+
 ```bash
 pake [url] [options]
 ```
@@ -178,6 +201,23 @@ Enable recursive copying. When the URL is a local file path, enabling this optio
 
 ```shell
 --iter-copy-file
+```
+
+#### [inject]
+Using `inject`, you can inject local absolute and relative path `css` and `js` files into the page you specify the `url` to customize it.  For example, an adblock script that can be applied to any web page, or a `css` that optimizes the `UI` of a page, you can write it once to customize it. would only need to write the `app` once to generalize it to any other page.
+
+```shell
+--inject ./tools/style.css,./tools/hotkey.js
+```
+
+#### [safe-domain]
+This secure domain is a domain other than your currently configured `url` to which you may be redirected or jumped to, and only in domains that have been configured as secure can you use `tauri` to expose `api` to browsers to ensure that pake's built-in enhancements work correctly. Only in a domain that has been configured as secure can you use the `tauri` to expose the `api` to the browser, ensuring that `pake's` built-in enhancements work correctly.
+
+PS: Secure domains do not need to carry protocols.
+
+
+```shell
+--safe-domain weread.qq.com,google.com
 ```
 
 ## Conclusion
