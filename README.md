@@ -5,6 +5,8 @@
 <h1 align="center">Pake</h1>
 <p align="center"><strong>Turn any webpage into a desktop app with Rust <em>with ease</em>.</strong></p>
 <div align="center">
+    <a href="https://colab.research.google.com/drive/1c3HrUOUgz54R23Q1YwaymleezP-eNky6?usp=sharing" target="_blank">
+    <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>
     <a href="https://twitter.com/HiTw93" target="_blank">
     <img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
     <a href="https://t.me/+GclQS9ZnxyI2ODQ1" target="_blank">
