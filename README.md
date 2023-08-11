@@ -220,17 +220,17 @@ Pake's development can not be without these Hackers. They contributed a lot of c
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/pan93412">
-            <img src="https://avatars.githubusercontent.com/u/28441561?v=4" width="90;" alt="pan93412"/>
-            <br />
-            <sub><b>Pan93412</b></sub>
-        </a>
-    </td>
-    <td align="center">
         <a href="https://github.com/jeasonnow">
             <img src="https://avatars.githubusercontent.com/u/16950207?v=4" width="90;" alt="jeasonnow"/>
             <br />
             <sub><b>Santree</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/pan93412">
+            <img src="https://avatars.githubusercontent.com/u/28441561?v=4" width="90;" alt="pan93412"/>
+            <br />
+            <sub><b>Pan93412</b></sub>
         </a>
     </td>
     <td align="center">
@@ -306,6 +306,13 @@ Pake's development can not be without these Hackers. They contributed a lot of c
     </td></tr>
 <tr>
     <td align="center">
+        <a href="https://github.com/imabutahersiddik">
+            <img src="https://avatars.githubusercontent.com/u/138387257?v=4" width="90;" alt="imabutahersiddik"/>
+            <br />
+            <sub><b>Abu Taher Siddik</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/nekomeowww">
             <img src="https://avatars.githubusercontent.com/u/11081491?v=4" width="90;" alt="nekomeowww"/>
             <br />
@@ -346,15 +353,15 @@ Pake's development can not be without these Hackers. They contributed a lot of c
             <br />
             <sub><b>Hyzhao</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/lakca">
             <img src="https://avatars.githubusercontent.com/u/16255922?v=4" width="90;" alt="lakca"/>
             <br />
             <sub><b>Null</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/liusishan">
             <img src="https://avatars.githubusercontent.com/u/33129823?v=4" width="90;" alt="liusishan"/>
