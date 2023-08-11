@@ -15,8 +15,8 @@
     <img alt="GitHub commit" src="https://img.shields.io/github/commit-activity/m/tw93/Pake?style=flat-square"></a>
     <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank">
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
-    <a href="https://colab.research.google.com/drive/1c3HrUOUgz54R23Q1YwaymleezP-eNky6?usp=sharing" target="_blank">
-    <img alt="在Colab中打开" src="https://colab.research.google.com/assets/colab-badge.svg"></a>
+    <a href="https://colab.research.google.com/drive/1bX345znvDZ30848xjRtpgtU8eypWwXrp?usp=sharing" target="_blank">
+    <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 </div>
 
 <div align="left">Pake supports Mac, Windows, and Linux. Check out README for <a href="#popular-packages">Popular Packages</a>, <a href="#command-line-packaging">Command-Line Packaging</a>, and <a href="#development">Customized Development</a> information. Feel free to share your suggestions in <a href=https://github.com/tw93/Pake/discussions>Discussions</a>.</div>
