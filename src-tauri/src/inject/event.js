@@ -59,7 +59,7 @@ function externalTargetLink() {
 }
 
 function externalSelfLink() {
-  return ['twitter.com', 'www.zhihu.com'].indexOf(location.hostname) > -1;
+  return ['chat.openai.com'].indexOf(location.hostname) > -1;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
           // case: download from dataURL -> convert dataURL ->
         } else if (url.startsWith('data:')) {
           downloadFromDataUri(url, filename);
-        } else if (!externalSelfLink()) {
+        } else if (isDownloadLink(url) || externalSelfLink()) {
           handleExternalLink(e, url);
         }
       }, true);
