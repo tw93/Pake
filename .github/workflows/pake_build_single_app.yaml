@@ -1,0 +1,160 @@
+name: Build Single App
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: "app name"
+        required: true
+        default: "twitter"
+      title:
+        description: "app title"
+        required: true
+        default: "Twitter"
+      name_zh:
+        description: "app name in Chinese"
+        required: true
+        default: "推特"
+      url:
+        description: "app url"
+        required: true
+        default: "https://twitter.com/"
+  workflow_call:
+    inputs:
+      name:
+        description: "app name"
+        type: string
+        required: true
+        default: "twitter"
+      title:
+        description: "app title"
+        required: true
+        type: string
+        default: "Twitter"
+      name_zh:
+        description: "app name in Chinese"
+        required: true
+        type: string
+        default: "推特"
+      url:
+        description: "app url"
+        required: true
+        type: string
+        default: "https://twitter.com/"
+
+jobs:
+  build_single_app:
+    name: ${{ inputs.title }} (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build: [linux, macos, windows]
+        include:
+          - build: linux
+            os: ubuntu-latest
+            rust: stable
+            target: x86_64-unknown-linux-musl
+          - build: windows
+            os: windows-latest
+            rust: stable-x86_64-msvc
+            target: x86_64-pc-windows-msvc
+          - build: macos
+            os: macos-latest
+            rust: stable
+            target: x86_64-apple-darwin
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.rust }}
+          target: ${{ matrix.target }}
+
+      - name: install dependencies (ubuntu only)
+        if: matrix.os == 'ubuntu-latest'
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: libwebkit2gtk-4.0-dev build-essential curl wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra
+          version: 1.1
+
+      - name: rust cache restore
+        id: cache_store
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            src-tauri/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Config App
+        env:
+          NAME: ${{ inputs.name }}
+          TITLE: ${{ inputs.title }}
+          NAME_ZH: ${{ inputs.name_zh }}
+          URL: ${{ inputs.url }}
+        run: |
+          npm install
+          npm run build:app:config
+
+
+      - name: Build for Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          npm run tauri build
+          mkdir -p output/linux
+          mv src-tauri/target/release/bundle/deb/*.deb output/linux/${{inputs.title}}_`arch`.deb
+          mv src-tauri/target/release/bundle/appimage/*.AppImage output/linux/"${{inputs.title}}"_`arch`.AppImage
+
+
+      - name: Build for Macos
+        if: matrix.os == 'macos-latest'
+        run: |
+          rustup target add aarch64-apple-darwin
+          rustup target add x86_64-apple-darwin
+          npm run tauri build -- --target universal-apple-darwin
+          mkdir -p output/macos
+          mv src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg output/macos/"${{inputs.title}}".dmg
+
+
+      - name: Build for Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          npm run tauri build -- --target x86_64-pc-windows-msvc
+          New-Item -Path "output\windows" -ItemType Directory
+          Move-Item -Path "src-tauri\target\x86_64-pc-windows-msvc\release\bundle\msi\*.msi" -Destination "output\windows\${{inputs.title}}_x64.msi"
+
+      - name: Restore Cargo Lock File(Windows Only)
+        if: matrix.os == 'windows-latest'
+        run: |
+          git checkout -- src-tauri/Cargo.lock
+
+      - name: rust cache store
+        uses: actions/cache/save@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            src-tauri/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+
+      - name: Upload For Single Build
+        uses: actions/upload-artifact@v3
+        if: startsWith(github.ref, 'refs/tags/') != true
+        with:
+          path: "output/*/*.*"
+
+      - name: Upload For Release
+        # arg info: https://github.com/ncipollo/release-action#release-action
+        uses: ncipollo/release-action@v1
+        if: startsWith(github.ref, 'refs/tags/') == true
+        with:
+          allowUpdates: true
+          artifacts: "output/*/*.*"
+          token: ${{ secrets.GITHUB_TOKEN }}
