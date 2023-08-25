@@ -1,6 +1,6 @@
 name: Feature
 description: Add new feature, improve code, and more
-labels: [ "enhancement" ]
+labels: ['enhancement']
 body:
   - type: markdown
     attributes:
@@ -43,4 +43,4 @@ body:
         - label: I'm willing to submit a PR!
   - type: markdown
     attributes:
-      value: "Thanks for completing our form!"
+      value: 'Thanks for completing our form!'

@@ -3,7 +3,7 @@ on:
   push:
     # Sequence of patterns matched against refs/tags
     tags:
-      - "V*"
+      - 'V*'
 
 jobs:
   build:
@@ -81,5 +81,5 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
-          artifacts: "output/*/*.*"
+          artifacts: 'output/*/*.*'
           token: ${{ secrets.GITHUB_TOKEN }}
