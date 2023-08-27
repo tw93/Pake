@@ -1,0 +1,36 @@
+name: Build App Next
+on:
+  push:
+    tags:
+      - "V*"
+
+jobs:
+
+  read_apps_config:
+    name: Read Apps Config
+    runs-on: ubuntu-latest
+    outputs:
+      apps_name: ${{ steps.read-apps-config.outputs.apps_name }}
+      apps_config: ${{ steps.read-apps-config.outputs.apps_config }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Get Apps Config
+        id: read-apps-config
+        run: |
+          echo "apps_name=$(jq -c '[.apps| .[] | .name]' apps.conf.json)" >> $GITHUB_OUTPUT
+          echo "apps_config=$(jq -c '[.apps | .[]]' apps.conf.json)" >> $GITHUB_OUTPUT
+
+  trigger_build:
+    needs: read_apps_config
+    name: ${{ matrix.title }}
+    strategy:
+      matrix:
+        name: ${{ fromJson(needs.read_apps_config.outputs.apps_name) }}
+        include: ${{ fromJSON(needs.read_apps_config.outputs.apps_config) }}
+    uses: ./.github/workflows/pake_build_single_app.yaml@master
+    with:
+      name: ${{ matrix.name }}
+      title: ${{ matrix.title }}
+      name_zh: ${{ matrix.name_zh }}
+      url: ${{ matrix.url }}

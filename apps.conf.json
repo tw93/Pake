@@ -1,0 +1,82 @@
+{
+    "apps": [
+        {
+            "name": "programmusic",
+            "title": "ProgramMusic",
+            "name_zh": "ProgramMusic",
+            "url": "https://musicforprogramming.net/"
+        },
+        {
+            "name": "twitter",
+            "title": "Twitter",
+            "name_zh": "推特",
+            "url": "https://twitter.com/"
+        },
+        {
+            "name": "youtube",
+            "title": "YouTube",
+            "name_zh": "YouTube",
+            "url": "https://www.youtube.com"
+        },
+        {
+            "name": "reference",
+            "title": "Reference",
+            "name_zh": "Reference",
+            "url": "https://quickref.me/zh-CN/"
+        },
+        {
+            "name": "coderunner",
+            "title": "CodeRunner",
+            "name_zh": "CodeRunner",
+            "url": "https://riju.codes/"
+        },
+        {
+            "name": "chatgpt",
+            "title": "ChatGPT",
+            "name_zh": "ChatGPT",
+            "url": "https://chat.openai.com/chat"
+        },
+        {
+            "name": "flomo",
+            "title": "Flomo",
+            "name_zh": "浮墨",
+            "url": "https://v.flomoapp.com/mine"
+        },
+        {
+            "name": "qwerty",
+            "title": "Qwerty",
+            "name_zh": "Qwerty",
+            "url": "https://qwerty.kaiyi.cool/"
+        },
+        {
+            "name": "lizhi",
+            "title": "LiZhi",
+            "name_zh": "李志",
+            "url": "https://lizhi.turkyden.com/?from=pake"
+        },
+        {
+            "name": "xiaohongshu",
+            "title": "XiaoHongShu",
+            "name_zh": "小红书",
+            "url": "https://www.xiaohongshu.com/explore"
+        },
+        {
+            "name": "poe",
+            "title": "Poe",
+            "name_zh": "Poe",
+            "url": "https://poe.com/"
+        },
+        {
+            "name": "youtubemusic",
+            "title": "YouTubeMusic",
+            "name_zh": "YouTubeMusic",
+            "url": "https://music.youtube.com/"
+        },
+        {
+            "name": "weread",
+            "title": "WeRead",
+            "name_zh": "微信阅读",
+            "url": "https://weread.qq.com/"
+        }
+    ]
+}
