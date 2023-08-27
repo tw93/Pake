@@ -315,6 +315,13 @@ Pake's development can not be without these Hackers. They contributed a lot of c
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/kidylee">
+            <img src="https://avatars.githubusercontent.com/u/841310?v=4" width="90;" alt="kidylee"/>
+            <br />
+            <sub><b>An Li</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/nekomeowww">
             <img src="https://avatars.githubusercontent.com/u/11081491?v=4" width="90;" alt="nekomeowww"/>
             <br />
@@ -348,15 +355,15 @@ Pake's development can not be without these Hackers. They contributed a lot of c
             <br />
             <sub><b>Po Chen</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/houhoz">
             <img src="https://avatars.githubusercontent.com/u/19684376?v=4" width="90;" alt="houhoz"/>
             <br />
             <sub><b>Hyzhao</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/lakca">
             <img src="https://avatars.githubusercontent.com/u/16255922?v=4" width="90;" alt="lakca"/>
