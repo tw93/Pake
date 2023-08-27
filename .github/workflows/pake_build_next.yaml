@@ -2,10 +2,9 @@ name: Build App Next
 on:
   push:
     tags:
-      - "V*"
+      - 'V*'
 
 jobs:
-
   read_apps_config:
     name: Read Apps Config
     runs-on: ubuntu-latest
@@ -28,7 +27,7 @@ jobs:
       matrix:
         name: ${{ fromJson(needs.read_apps_config.outputs.apps_name) }}
         include: ${{ fromJSON(needs.read_apps_config.outputs.apps_config) }}
-    uses: ./.github/workflows/pake_build_single_app.yaml@master
+    uses: ./.github/workflows/pake_build_single_app.yaml
     with:
       name: ${{ matrix.name }}
       title: ${{ matrix.title }}
