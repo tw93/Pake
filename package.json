@@ -35,6 +35,7 @@
     "build": "npm run tauri build --release",
     "build:debug": "npm run tauri build -- --debug",
     "build:mac": "npm run tauri build -- --target universal-apple-darwin",
+    "build:config": "chmod +x ./script/build_with_app_config.js && node ./script/build_with_app_config.js",
     "analyze": "cd src-tauri && cargo bloat --release --crates",
     "tauri": "tauri",
     "cli": "rollup -c rollup.config.js --watch",

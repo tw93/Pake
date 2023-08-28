@@ -98,7 +98,7 @@ jobs:
           URL: ${{ inputs.url }}
         run: |
           npm install
-          node ./script/build_with_pake_cli.js
+          npm run build:config
 
       - name: Build for Ubuntu
         if: matrix.os == 'ubuntu-latest'
@@ -108,7 +108,7 @@ jobs:
           mv src-tauri/target/release/bundle/deb/*.deb output/linux/${{inputs.title}}_`arch`.deb
           mv src-tauri/target/release/bundle/appimage/*.AppImage output/linux/"${{inputs.title}}"_`arch`.AppImage
 
-      - name: Build for Macos
+      - name: Build for macOS
         if: matrix.os == 'macos-latest'
         run: |
           rustup target add aarch64-apple-darwin
