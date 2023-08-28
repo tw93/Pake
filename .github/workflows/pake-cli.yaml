@@ -117,7 +117,7 @@ jobs:
 
       - name: Build with pake-cli
         run: |
-          node ./script/build_with_pake_cli.mjs
+          node ./script/build_with_pake_cli.js
         env:
           URL: ${{ inputs.url }}
           NAME: ${{ inputs.name }}

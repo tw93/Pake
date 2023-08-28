@@ -1,11 +1,11 @@
-import pakeJson from '../src-tauri/pake.json' assert { type: 'json' };
-import tauriJson from '../src-tauri/tauri.conf.json' assert { type: 'json' };
-import windowsJson from '../src-tauri/tauri.windows.conf.json' assert { type: 'json' };
-import macosJson from '../src-tauri/tauri.macos.conf.json' assert { type: 'json' };
-import linuxJson from '../src-tauri/tauri.linux.conf.json' assert { type: 'json' };
-
-import { writeFileSync, existsSync, copyFileSync } from 'fs';
+import { writeFileSync, existsSync, copyFileSync, readFileSync } from 'fs';
 import os from 'os';
+
+const pakeJson = JSON.parse(readFileSync('../src-tauri/pake.json', 'utf-8'));
+const tauriJson = JSON.parse(readFileSync('../src-tauri/tauri.conf.json', 'utf-8'));
+const windowsJson = JSON.parse(readFileSync('../src-tauri/tauri.windows.conf.json', 'utf-8'));
+const macosJson = JSON.parse(readFileSync('../src-tauri/tauri.macos.conf.json', 'utf-8'));
+const linuxJson = JSON.parse(readFileSync('../src-tauri/tauri.linux.conf.json', 'utf-8'));
 
 const desktopEntry = `[Desktop Entry]
 Encoding=UTF-8
@@ -55,8 +55,7 @@ const variables = {
     hdIconPath: `src-tauri/png/${process.env.NAME}_256.ico`,
     hdDefaultPath: 'src-tauri/png/icon_256.ico',
     icon: [`png/${process.env.NAME}_256.ico`, `png/${process.env.NAME}_32.ico`],
-    resources: [`png/${process.env.NAME}_32.ico`]
-
+    resources: [`png/${process.env.NAME}_32.ico`],
   },
 };
 
@@ -82,11 +81,10 @@ switch (os.platform()) {
   case 'win32':
     platformConfig = windowsJson;
     platformVariables = variables.windows;
-    updateResources()
+    updateResources();
     updateIconFile(platformVariables.hdIconPath, platformVariables.hdDefaultPath);
     break;
 }
-
 
 updateIconFile(platformVariables.iconPath, platformVariables.defaultIconPath);
 
@@ -149,7 +147,6 @@ function updatePlatformConfig(platformConfig, platformVariables) {
 }
 
 function save() {
-
   writeFileSync(variables.pakeConfigPath, JSON.stringify(pakeJson, null, 2));
   writeFileSync(variables.tauriConfigPath, JSON.stringify(tauriJson, null, 2));
 
@@ -159,16 +156,15 @@ function save() {
   writeFileSync(variables.macos.configFilePath, JSON.stringify(macosJson, null, 2));
 
   writeFileSync(variables.windows.configFilePath, JSON.stringify(windowsJson, null, 2));
-
 }
 
 function updateDesktopEntry() {
   linuxJson.tauri.bundle.deb.files = {};
   linuxJson.tauri.bundle.deb.files[variables.linux.desktopEntryConfig.configKey] =
-  variables.linux.desktopEntryConfig.configValue;
+    variables.linux.desktopEntryConfig.configValue;
   writeFileSync(variables.linux.desktopEntryPath, variables.linux.desktopEntry);
 }
 
-function updateResources(){
+function updateResources() {
   windowsJson.tauri.bundle.resources = variables.windows.resources;
 }
