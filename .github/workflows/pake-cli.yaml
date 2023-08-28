@@ -110,9 +110,14 @@ jobs:
             node_modules/pake-cli/src-tauri/target/
           key: ${{ inputs.platform }}-cargo-${{ hashFiles('node_modules/pake-cli/src-tauri/Cargo.lock') }}
 
+      - name: Install dependencies
+        run: |
+          npm install shelljs
+          npm install axios
+
       - name: build with pake-cli
         run: |
-          node ./script/build_with_pake_cli.js
+          node ./script/build_with_pake_cli.mjs
         env:
           URL: ${{ inputs.url }}
           NAME: ${{ inputs.name }}
