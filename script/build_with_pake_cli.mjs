@@ -9,9 +9,7 @@ const { exec, cd, mv } = shelljs;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-console.log('Welcome to use Pake Cli');
-console.log('\n=======================');
-console.log('build for app');
+console.log('Welcome to use pake-cli to build app~');
 console.log('Node.js info in your localhost ', process.version);
 console.log('\n=======================\n');
 console.log('Pake parameters is: ');
