@@ -1,7 +1,6 @@
 import shelljs from 'shelljs';
 import axios from 'axios';
 import fs from 'fs';
-import os from 'os';
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
 
@@ -31,19 +30,19 @@ let params = `node cli.js ${process.env.URL} --name ${process.env.NAME}`;
 // Download Icons
 if (process.env.ICON && process.env.ICON !== '') {
   let iconFile;
-  switch (os.type()) {
-    case 'Linux':
+  switch (process.platform) {
+    case 'linux':
       iconFile = 'icon.png';
       break;
-    case 'Darwin':
+    case 'darwin':
       iconFile = 'icon.icns';
       break;
-    case 'Windows_NT':
+    case 'win32':
       iconFile = 'icon.ico';
       break;
     default:
       console.log("Unable to detect your OS system, won't download the icon!");
-      return;
+      process.exit(1);
   }
 
   axios
