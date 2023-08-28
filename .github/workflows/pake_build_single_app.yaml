@@ -1,4 +1,4 @@
-name: Build Single App
+name: Build Single Popular App
 on:
   workflow_dispatch:
     inputs:
