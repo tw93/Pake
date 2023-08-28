@@ -1,8 +1,6 @@
 import shelljs from 'shelljs';
 import axios from 'axios';
 import fs from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 
 const { exec, cd, mv } = shelljs;
 

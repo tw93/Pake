@@ -1,11 +1,11 @@
-import { writeFileSync, existsSync, copyFileSync, readFileSync } from 'fs';
-import os from 'os';
+import pakeJson from '../src-tauri/pake.json' assert { type: 'json' };
+import tauriJson from '../src-tauri/tauri.conf.json' assert { type: 'json' };
+import windowsJson from '../src-tauri/tauri.windows.conf.json' assert { type: 'json' };
+import macosJson from '../src-tauri/tauri.macos.conf.json' assert { type: 'json' };
+import linuxJson from '../src-tauri/tauri.linux.conf.json' assert { type: 'json' };
 
-const pakeJson = JSON.parse(readFileSync('../src-tauri/pake.json', 'utf-8'));
-const tauriJson = JSON.parse(readFileSync('../src-tauri/tauri.conf.json', 'utf-8'));
-const windowsJson = JSON.parse(readFileSync('../src-tauri/tauri.windows.conf.json', 'utf-8'));
-const macosJson = JSON.parse(readFileSync('../src-tauri/tauri.macos.conf.json', 'utf-8'));
-const linuxJson = JSON.parse(readFileSync('../src-tauri/tauri.linux.conf.json', 'utf-8'));
+import { writeFileSync, existsSync, copyFileSync } from 'fs';
+import os from 'os';
 
 const desktopEntry = `[Desktop Entry]
 Encoding=UTF-8
@@ -86,6 +86,7 @@ switch (os.platform()) {
     break;
 }
 
+
 updateIconFile(platformVariables.iconPath, platformVariables.defaultIconPath);
 
 updatePlatformConfig(platformConfig, platformVariables);
@@ -93,28 +94,28 @@ updatePlatformConfig(platformConfig, platformVariables);
 save();
 
 function validate() {
-  if ('URL' in process.env === false) {
+  if (!('URL' in process.env)) {
     console.log('URL is not set');
     process.exit(1);
   }
 
   console.log(`URL: ${process.env.URL}`);
 
-  if ('NAME' in process.env === false) {
+  if (!('NAME' in process.env)) {
     console.log('NAME is not set');
     process.exit(1);
   }
 
   console.log(`NAME: ${process.env.NAME}`);
 
-  if ('TITLE' in process.env === false) {
+  if (!('TITLE' in process.env)) {
     console.log('TITLE is not set');
     process.exit(1);
   }
 
   console.log(`TITLE: ${process.env.TITLE}`);
 
-  if ('NAME_ZH' in process.env === false) {
+  if (!('NAME_ZH' in process.env)) {
     console.log('NAME_ZH is not set');
     process.exit(1);
   }
@@ -147,6 +148,7 @@ function updatePlatformConfig(platformConfig, platformVariables) {
 }
 
 function save() {
+
   writeFileSync(variables.pakeConfigPath, JSON.stringify(pakeJson, null, 2));
   writeFileSync(variables.tauriConfigPath, JSON.stringify(tauriJson, null, 2));
 
@@ -156,6 +158,7 @@ function save() {
   writeFileSync(variables.macos.configFilePath, JSON.stringify(macosJson, null, 2));
 
   writeFileSync(variables.windows.configFilePath, JSON.stringify(windowsJson, null, 2));
+
 }
 
 function updateDesktopEntry() {

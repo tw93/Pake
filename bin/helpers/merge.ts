@@ -5,7 +5,7 @@ import { npmDirectory } from '@/utils/dir';
 import combineFiles from '@/utils/combine';
 import logger from '@/options/logger';
 import { PakeAppOptions, PlatformMap } from '@/types';
-import { tauriConfigDirectory } from '../utils/dir';
+import { tauriConfigDirectory } from '@/utils/dir';
 
 export async function mergeConfig(url: string, options: PakeAppOptions, tauriConf: any) {
   const {
