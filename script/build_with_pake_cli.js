@@ -45,15 +45,19 @@ if (process.env.ICON && process.env.ICON !== '') {
       process.exit(1);
   }
 
-  axios
-    .get(process.env.ICON, { responseType: 'arraybuffer' })
-    .then(response => {
+  const downloadIcon = async () => {
+    try {
+      const response = await axios.get(process.env.ICON, { responseType: 'arraybuffer' });
+      console.log('>>>>>>> download icon response:', response);
       fs.writeFileSync(iconFile, response.data);
+      console.log('>>>>>>> download icon is:', iconFile);
       params = `${params} --icon ${iconFile}`;
-    })
-    .catch(error => {
+    } catch (error) {
       console.error('Error occurred during icon download: ', error);
-    });
+    }
+  };
+
+  downloadIcon();
 } else {
   console.log("Won't download the icon as ICON environment variable is not defined!");
 }
