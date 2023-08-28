@@ -111,9 +111,8 @@ jobs:
           key: ${{ inputs.platform }}-cargo-${{ hashFiles('node_modules/pake-cli/src-tauri/Cargo.lock') }}
 
       - name: build with pake-cli
-        shell: pwsh
         run: |
-          pwsh ./script/build_with_pake_cli.ps1
+          node ./script/build_with_pake_cli.js
         env:
           URL: ${{ inputs.url }}
           NAME: ${{ inputs.name }}

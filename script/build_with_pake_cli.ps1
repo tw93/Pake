@@ -1,4 +1,4 @@
-Write-Host "Welcome to use Powershell" 
+Write-Host "Welcome to use Powershell"
 Write-Host "`n======================="
 Write-Host "build for windows"
 Write-Host "make ture powershell == 7.2.10"
@@ -15,7 +15,6 @@ Write-Host "icon: " $env:ICON
 Write-Host "height: " $env:HEIGHT
 Write-Host "width: " $env:WIDTH
 Write-Host "transparent: " $env:TRANSPARENT
-# Write-Host "fullscreen: " $env:FULLSCREEN
 Write-Host "resize: " $env:RESIZE
 Write-Host "is multi arch? only for Mac: " $env:MULTI_ARCH
 Write-Host "targets type? only for Linux: " $env:TARGETS
@@ -49,11 +48,6 @@ ${Params}="${Params} --height $env:HEIGHT --width $env:WIDTH"
 if ("$env:TRANSPARENT" -eq "true") {
   ${Params}="${Params} --transparent"
 }
-
-# fullscreen
-# if ("$env:FULLSCREEN" -eq "true") {
-#   ${Params}="${Params} --fullscreen"
-# }
 
 # resize
 if ("$env:FULLSCREEN" -eq "true" ) {
