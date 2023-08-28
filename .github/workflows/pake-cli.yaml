@@ -56,7 +56,7 @@ jobs:
       fail-fast: false
 
     steps:
-      - name: Checkout repository
+      - name: checkout repository
         uses: actions/checkout@v3
 
       - name: install node
@@ -64,21 +64,21 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install Rust for ubuntu-20.04
+      - name: install Rust for ubuntu-20.04
         if: inputs.platform == 'ubuntu-20.04'
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
           target: x86_64-unknown-linux-musl
 
-      - name: Install Rust for windows-latest
+      - name: install Rust for windows-latest
         if: inputs.platform == 'windows-latest'
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable-x86_64-msvc
           target: x86_64-pc-windows-msvc
 
-      - name: Install Rust for macos-latest
+      - name: install Rust for macos-latest
         if: inputs.platform == 'macos-latest'
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -110,7 +110,7 @@ jobs:
             node_modules/pake-cli/src-tauri/target/
           key: ${{ inputs.platform }}-cargo-${{ hashFiles('node_modules/pake-cli/src-tauri/Cargo.lock') }}
 
-      - name: Install dependencies
+      - name: install dependencies
         run: |
           npm install shelljs
           npm install axios
@@ -130,7 +130,7 @@ jobs:
           MULTI_ARCH: ${{ inputs.multi_arch }}
           TARGETS: ${{ inputs.targets }}
 
-      - name: Upload archive
+      - name: upload archive
         uses: actions/upload-artifact@v3
         with:
           name: output-${{ inputs.platform }}.zip
