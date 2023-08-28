@@ -1,6 +1,7 @@
 import shelljs from 'shelljs';
 import axios from 'axios';
 import fs from 'fs';
+import os from 'os';
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
 
@@ -27,16 +28,35 @@ console.log('===========================\n');
 cd('node_modules/pake-cli');
 let params = `node cli.js ${process.env.URL} --name ${process.env.NAME}`;
 
-if (process.env.ICON) {
-  const iconPath = path.join(__dirname, 'icon');
-  axios({
-    method: 'get',
-    url: process.env.ICON,
-    responseType: 'stream',
-  }).then(function (response) {
-    response.data.pipe(fs.createWriteStream(iconPath));
-    params = `${params} --icon ${iconPath}`;
-  });
+// Download Icons
+if (process.env.ICON && process.env.ICON !== '') {
+  let iconFile;
+  switch (os.type()) {
+    case 'Linux':
+      iconFile = 'icon.png';
+      break;
+    case 'Darwin':
+      iconFile = 'icon.icns';
+      break;
+    case 'Windows_NT':
+      iconFile = 'icon.ico';
+      break;
+    default:
+      console.log("Unable to detect your OS system, won't download the icon!");
+      return;
+  }
+
+  axios
+    .get(process.env.ICON, { responseType: 'arraybuffer' })
+    .then(response => {
+      fs.writeFileSync(iconFile, response.data);
+      params = `${params} --icon ${iconFile}`;
+    })
+    .catch(error => {
+      console.error('Error occurred during icon download: ', error);
+    });
+} else {
+  console.log("Won't download the icon as ICON environment variable is not defined!");
 }
 
 params = `${params} --height ${process.env.HEIGHT} --width ${process.env.WIDTH}`;
