@@ -3,43 +3,43 @@ on:
   workflow_dispatch:
     inputs:
       name:
-        description: "app name"
+        description: 'app name'
         required: true
-        default: "twitter"
+        default: 'twitter'
       title:
-        description: "app title"
+        description: 'app title'
         required: true
-        default: "Twitter"
+        default: 'Twitter'
       name_zh:
-        description: "app name in Chinese"
+        description: 'app name in Chinese'
         required: true
-        default: "推特"
+        default: '推特'
       url:
-        description: "app url"
+        description: 'app url'
         required: true
-        default: "https://twitter.com/"
+        default: 'https://twitter.com/'
   workflow_call:
     inputs:
       name:
-        description: "app name"
+        description: 'app name'
         type: string
         required: true
-        default: "twitter"
+        default: 'twitter'
       title:
-        description: "app title"
+        description: 'app title'
         required: true
         type: string
-        default: "Twitter"
+        default: 'Twitter'
       name_zh:
-        description: "app name in Chinese"
+        description: 'app name in Chinese'
         required: true
         type: string
-        default: "推特"
+        default: '推特'
       url:
-        description: "app url"
+        description: 'app url'
         required: true
         type: string
-        default: "https://twitter.com/"
+        default: 'https://twitter.com/'
 
 jobs:
   build_single_app:
@@ -98,8 +98,7 @@ jobs:
           URL: ${{ inputs.url }}
         run: |
           npm install
-          npm run build:app:config
-
+          node ./script/build_with_pake_cli.mjs
 
       - name: Build for Ubuntu
         if: matrix.os == 'ubuntu-latest'
@@ -109,7 +108,6 @@ jobs:
           mv src-tauri/target/release/bundle/deb/*.deb output/linux/${{inputs.title}}_`arch`.deb
           mv src-tauri/target/release/bundle/appimage/*.AppImage output/linux/"${{inputs.title}}"_`arch`.AppImage
 
-
       - name: Build for Macos
         if: matrix.os == 'macos-latest'
         run: |
@@ -118,7 +116,6 @@ jobs:
           npm run tauri build -- --target universal-apple-darwin
           mkdir -p output/macos
           mv src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg output/macos/"${{inputs.title}}".dmg
-
 
       - name: Build for Windows
         if: matrix.os == 'windows-latest'
@@ -143,12 +140,11 @@ jobs:
             src-tauri/target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-
       - name: Upload For Single Build
         uses: actions/upload-artifact@v3
         if: startsWith(github.ref, 'refs/tags/') != true
         with:
-          path: "output/*/*.*"
+          path: 'output/*/*.*'
 
       - name: Upload For Release
         # arg info: https://github.com/ncipollo/release-action#release-action
@@ -156,5 +152,5 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') == true
         with:
           allowUpdates: true
-          artifacts: "output/*/*.*"
+          artifacts: 'output/*/*.*'
           token: ${{ secrets.GITHUB_TOKEN }}

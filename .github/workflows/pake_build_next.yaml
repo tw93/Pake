@@ -1,4 +1,4 @@
-name: Build Popular App
+name: Build All Popular Apps
 on:
   push:
     tags:
