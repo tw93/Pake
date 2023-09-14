@@ -15,7 +15,7 @@ export default function GlobalNav() {
             Pake
           </a>
           <p className="text-md mt-2 w-full text-gray-700">
-            很简单的用 Rust 打包网页生成很小的桌面 App
+            利用 Rust 轻松构建轻量级多端桌面应用
           </p>
         </div>
         <div className="navbar-center flex">

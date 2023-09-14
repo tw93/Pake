@@ -39,4 +39,6 @@ next-env.d.ts
 
 # tauri
 src-tauri
+dist
+package-lock.json
 

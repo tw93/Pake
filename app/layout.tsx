@@ -8,7 +8,7 @@ export const metadata = {
     default: 'Pake',
     template: '%s | Pake',
   },
-  description: '很简单的用 Rust 打包网页生成很小的桌面 App~',
+  description: '利用 Rust 轻松构建轻量级多端桌面应用~',
 };
 
 export default function RootLayout({
