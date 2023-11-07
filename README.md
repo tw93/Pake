@@ -384,6 +384,13 @@ Pake's development can not be without these Hackers. They contributed a lot of c
             <br />
             <sub><b>Ranger</b></sub>
         </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/hetz">
+            <img src="https://avatars.githubusercontent.com/u/820141?v=4" width="90;" alt="hetz"/>
+            <br />
+            <sub><b>贺天卓</b></sub>
+        </a>
     </td></tr>
 </table>
 <!-- readme: contributors -end -->

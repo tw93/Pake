@@ -215,7 +215,7 @@ Linux，默认为 `all`。
 只需要书写一次可以将其通用到任何其他网页打包的 `app`。
 
 ```shell
---inject ./tools/style.css,./tools/hotkey.js
+--inject ./tools/style.css --inject ./tools/hotkey.js
 ```
 
 #### [safe-domain]
