@@ -3,7 +3,7 @@ use tauri::MenuItem;
 use tauri::{CustomMenuItem, Menu, Submenu, WindowMenuEvent};
 
 #[cfg(any(target_os = "linux", target_os = "windows"))]
-use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, WindowBuilder, WindowUrl};
+use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu };
 
 #[cfg(any(target_os = "linux", target_os = "windows"))]
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
