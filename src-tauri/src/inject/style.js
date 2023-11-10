@@ -1,5 +1,6 @@
 window.addEventListener('DOMContentLoaded', _event => {
-  const css = `
+  // Customize and transform existing functions
+  const contentCSS = `
     #page #footer-wrapper,
     .drawing-board .toolbar .toolbar-action,
     .c-swiper-container,
@@ -33,27 +34,12 @@ window.addEventListener('DOMContentLoaded', _event => {
       opacity: 1;
     }
 
-    #layout > ytmusic-nav-bar{
-      padding: 6px 16px 0 72px;
-    }
-
     html::-webkit-scrollbar {
       display: none !important;
     }
 
-    #__next header.HeaderBar_header__jn5ju{
-      padding-top: 16px;
-    }
-
     #__next .ChatPageSidebar_menuFooter__E1KTY,#__next > div.PageWithSidebarLayout_centeringDiv___L9br > div > aside > div > menu > section:nth-child(6) {
       display: none;
-    }
-
-    #page .main_header, .cb-layout-basic--navbar,
-    #app .splitpanes.splitpanes--horizontal.no-splitter header,
-    .fui-FluentProvider .fui-Button[data-testid="HomeButton"],
-    #__next > div.PageWithSidebarLayout_centeringDiv___L9br > aside .ChatPageSidebar_logo__9PIXq {
-      padding-top: 20px;
     }
 
     #__next > div.overflow-hidden.w-full.h-full  .min-h-\\[20px\\].items-start.gap-4.whitespace-pre-wrap.break-words {
@@ -88,14 +74,6 @@ window.addEventListener('DOMContentLoaded', _event => {
       display: none;
     }
 
-    #__next .overflow-hidden>.overflow-x-hidden .scrollbar-trigger > nav {
-      padding-top: 30px;
-    }
-
-    #__next>div>div>.flex.h-screen.w-full.flex-col.items-center {
-      padding-top: 20px;
-    }
-
     #__next .absolute .px-3.pt-2.pb-3.text-center {
       visibility: hidden;
       padding-bottom: 4px;
@@ -110,46 +88,8 @@ window.addEventListener('DOMContentLoaded', _event => {
       width: 100%;
     }
 
-    #tabs-sidebar--tabpanel-0 > div.tw-flex.tw-items-center.tw-mb-\\[12px\\].tw-mt-\\[14px\\].tw-px-4 {
-      padding-top: 15px;
-    }
-
-    #tabs-sidebar--tabpanel-1 > div > div.tw-p-\\[16px\\].tw-flex.tw-flex-col.tw-gap-1\\.5{
-      padding-top: 30px;
-    }
-
-    #tabs-sidebar--tabpanel-2 > div > h2 {
-      padding-top: 20px;
-      height: 70px;
-    }
-
-    .lark > .dashboard-sidebar, .lark > .dashboard-sidebar > .sidebar-user-info , .lark > .dashboard-sidebar .index-module_wrapper_F-Wbq{
-      padding-top:15px;
-    }
-
-    .lark > .main-wrapper [data-testid="aside"] {
-      top: 15px;
-    }
-
     .panel.give_me .nav_view {
       top: 164px !important;
-    }
-
-    .columns .column #header,
-    .main > div > div.panel.give_me > div.header {
-      padding-top: 30px;
-    }
-
-    ytd-masthead>#container.style-scope.ytd-masthead {
-      padding-top: 12px;
-    }
-
-    #background.ytd-masthead {
-      height: 68px;
-    }
-
-    .wrap.h1body-exist.max-container > div.menu-tocs > div.menu-btn{
-      top: 28px;
     }
 
     #Wrapper{
@@ -160,20 +100,6 @@ window.addEventListener('DOMContentLoaded', _event => {
     #Top {
       border-bottom: none;
     }
-
-    .container-with-note #home, .container-with-note #switcher{
-      top: 30px;
-    }
-
-    .geist-page nav.dashboard_nav__PRmJv,
-    #app > div.layout > div.header-container.showSearchBoxOrHeaderFixed > header > a {
-      padding-top:10px;
-    }
-
-    .geist-page .submenu button{
-      margin-top:24px;
-    }
-
 
     #react-root [data-testid="placementTracking"] article,
     #react-root a[href*="quick_promote_web"],
@@ -343,19 +269,93 @@ window.addEventListener('DOMContentLoaded', _event => {
       }
     }
 
-    @media (max-width:767px){
-      #__next .overflow-hidden.w-full .max-w-full>.sticky.top-0 {
-        padding-top: 20px;
-      }
-
-      #__next > div.overflow-hidden.w-full.h-full  main.relative.h-full.w-full.flex-1 > .flex-1.overflow-hidden .h-32.md\\:h-48.flex-shrink-0{
-        height: 0px;
-      }
-    }
-
     #__next .prose ol li p {
       margin: 0;
       display: inline;
+    }
+  `;
+  const contentStyleElement = document.createElement('style');
+  contentStyleElement.innerHTML = contentCSS;
+  document.head.appendChild(contentStyleElement);
+
+  // Top spacing adapts to head-hiding scenarios
+  const topPaddingCSS = `
+    #layout > ytmusic-nav-bar{
+      padding-top: 20px;
+    }
+
+    .columns .column #header,
+    .main > div > div.panel.give_me > div.header {
+      padding-top: 30px;
+    }
+
+    ytd-masthead>#container.style-scope.ytd-masthead {
+      padding-top: 12px;
+    }
+
+    #__next header.HeaderBar_header__jn5ju{
+      padding-top: 16px;
+    }
+
+    .geist-page nav.dashboard_nav__PRmJv,
+    #app > div.layout > div.header-container.showSearchBoxOrHeaderFixed > header > a {
+      padding-top:10px;
+    }
+
+    .geist-page .submenu button{
+      margin-top:24px;
+    }
+
+    .container-with-note #home, .container-with-note #switcher{
+      top: 30px;
+    }
+
+    #__next .overflow-hidden>.overflow-x-hidden .scrollbar-trigger > nav {
+      padding-top: 30px;
+    }
+
+    #__next>div>div>.flex.h-screen.w-full.flex-col.items-center {
+      padding-top: 20px;
+    }
+
+    #__next .sticky.left-0.right-0.top-0.z-20.bg-black{
+      padding-top: 0px;
+    }
+
+    #page .main_header, .cb-layout-basic--navbar,
+    #app .splitpanes.splitpanes--horizontal.no-splitter header,
+    .fui-FluentProvider .fui-Button[data-testid="HomeButton"],
+    #__next > div.PageWithSidebarLayout_centeringDiv___L9br > aside .ChatPageSidebar_logo__9PIXq {
+      padding-top: 20px;
+    }
+
+    #tabs-sidebar--tabpanel-0 > div.tw-flex.tw-items-center.tw-mb-\\[12px\\].tw-mt-\\[14px\\].tw-px-4 {
+      padding-top: 15px;
+    }
+
+    #tabs-sidebar--tabpanel-1 > div > div.tw-p-\\[16px\\].tw-flex.tw-flex-col.tw-gap-1\\.5{
+      padding-top: 30px;
+    }
+
+    #tabs-sidebar--tabpanel-2 > div > h2 {
+      padding-top: 20px;
+      height: 70px;
+    }
+
+    .lark > .dashboard-sidebar, .lark > .dashboard-sidebar > .sidebar-user-info , .lark > .dashboard-sidebar .index-module_wrapper_F-Wbq{
+      padding-top:15px;
+    }
+
+    .lark > .main-wrapper [data-testid="aside"] {
+      top: 15px;
+    }
+
+    #background.ytd-masthead {
+      height: 68px;
+    }
+
+    .wrap.h1body-exist.max-container > div.menu-tocs > div.menu-btn{
+      top: 28px;
     }
 
     #pack-top-dom:active {
@@ -375,8 +375,21 @@ window.addEventListener('DOMContentLoaded', _event => {
       -webkit-user-select: none;
       z-index: 90000;
     }
+
+    @media (max-width:767px){
+      #__next .overflow-hidden.w-full .max-w-full>.sticky.top-0 {
+        padding-top: 20px;
+      }
+
+      #__next > div.overflow-hidden.w-full.h-full  main.relative.h-full.w-full.flex-1 > .flex-1.overflow-hidden .h-32.md\\:h-48.flex-shrink-0{
+        height: 0px;
+      }
+    }
   `;
-  const styleElement = document.createElement('style');
-  styleElement.innerHTML = css;
-  document.head.appendChild(styleElement);
+  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  if(window.pakeWindowTitleTransparent && isMac){
+    const topPaddingStyleElement = document.createElement('style');
+    topPaddingStyleElement.innerHTML = topPaddingCSS;
+    document.head.appendChild(topPaddingStyleElement);
+  }
 });
