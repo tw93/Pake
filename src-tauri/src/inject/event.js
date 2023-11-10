@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
           // case: download from dataURL -> convert dataURL ->
         } else if (url.startsWith('data:')) {
           downloadFromDataUri(url, filename);
-        } else if (isDownloadLink(url) || externalSelfLink()) {
+        } else if (isDownloadLink(url)) {
           handleExternalLink(e, url);
         }
       }, true);
