@@ -92,9 +92,18 @@ window.addEventListener('DOMContentLoaded', _event => {
       padding-top: 30px;
     }
 
+    #__next>div>div>.flex.h-screen.w-full.flex-col.items-center {
+      padding-top: 20px;
+    }
+
     #__next .absolute .px-3.pt-2.pb-3.text-center {
       visibility: hidden;
       padding-bottom: 4px;
+    }
+
+    #__next .h-full.w-full .text-center.text-xs.text-gray-600>span {
+      visibility: hidden;
+      height: 15px;
     }
 
     #__next > div.overflow-hidden.w-full.h-full.relative.flex > div.dark.hidden.flex-shrink-0.bg-gray-900.md\\:flex.md\\:w-\\[260px\\].md\\:flex-col > div > div > nav {
@@ -339,18 +348,8 @@ window.addEventListener('DOMContentLoaded', _event => {
         padding-top: 20px;
       }
 
-      #__next .overflow-hidden.w-full main.relative.h-full.w-full.flex-1{
-        padding-bottom: 82px;
-      }
-
       #__next > div.overflow-hidden.w-full.h-full  main.relative.h-full.w-full.flex-1 > .flex-1.overflow-hidden .h-32.md\\:h-48.flex-shrink-0{
         height: 0px;
-      }
-    }
-
-    @media (max-width:565px){
-      #__next .overflow-hidden.w-full main.relative.h-full.w-full.flex-1{
-        padding-bottom: 98px;
       }
     }
 

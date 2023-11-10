@@ -58,10 +58,6 @@ function externalTargetLink() {
   return ['zbook.lol'].indexOf(location.hostname) > -1;
 }
 
-function externalSelfLink() {
-  return ['chat.openai.com'].indexOf(location.hostname) > -1;
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   const tauri = window.__TAURI__;
   const appWindow = tauri.window.appWindow;
@@ -170,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
           // case: download from dataURL -> convert dataURL ->
         } else if (url.startsWith('data:')) {
           downloadFromDataUri(url, filename);
-        } else if (isDownloadLink(url) || externalSelfLink()) {
+        } else if (isDownloadLink(url) || anchorEle.hostname !== window.location.host) {
           handleExternalLink(e, url);
         }
       }, true);
