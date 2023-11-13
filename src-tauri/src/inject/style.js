@@ -256,13 +256,6 @@ window.addEventListener('DOMContentLoaded', _event => {
       }
     }
 
-    @media (min-width:1024px){
-      #__next .text-base.lg\\:max-w-xl, #__next form.stretch.lg\\:max-w-2xl,
-      #__next > .w-full.h-full .lg\\:max-w-\\[38rem\\] {
-        max-width: 44rem;
-      }
-    }
-
     @media (min-width:1280px){
       #__next .text-base.xl\\:max-w-3xl, #__next form.stretch.xl\\:max-w-3xl {
         max-width: 48rem;
@@ -312,6 +305,11 @@ window.addEventListener('DOMContentLoaded', _event => {
 
     #__next .overflow-hidden>.overflow-x-hidden .scrollbar-trigger > nav {
       padding-top: 30px;
+    }
+
+    #__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden > main > div.flex.h-full.flex-col > div.flex-1.overflow-hidden > div > div.absolute.left-0.right-0 > div > div.flex.items-center.gap-2 > button{
+      margin-left: 60px;
+      margin-right: -10px;
     }
 
     #__next>div>div>.flex.h-screen.w-full.flex-col.items-center {
@@ -387,7 +385,7 @@ window.addEventListener('DOMContentLoaded', _event => {
     }
   `;
   const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-  if(window.pakeWindowTitleTransparent && isMac){
+  if (window.pakeWindowTitleTransparent && isMac) {
     const topPaddingStyleElement = document.createElement('style');
     topPaddingStyleElement.innerHTML = topPaddingCSS;
     document.head.appendChild(topPaddingStyleElement);
