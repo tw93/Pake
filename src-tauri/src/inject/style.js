@@ -101,6 +101,14 @@ window.addEventListener('DOMContentLoaded', _event => {
       border-bottom: none;
     }
 
+    #global > div.header-container.showSearchBoxOrHeaderFixed > header > div.right > div > div.dropdown-nav{
+      display: none;
+    }
+
+    #__next > div.AnnouncementWrapper_container__Z51yh > div > aside > div > div > menu > section:nth-child(4) > section, #__next > div.AnnouncementWrapper_container__Z51yh > div > aside > div > div > menu > section:nth-child(4){
+      display: none;
+    }
+
     #react-root [data-testid="placementTracking"] article,
     #react-root a[href*="quick_promote_web"],
     #react-root [data-testid="AppTabBar_Explore_Link"],
@@ -318,6 +326,15 @@ window.addEventListener('DOMContentLoaded', _event => {
 
     #__next .sticky.left-0.right-0.top-0.z-20.bg-black{
       padding-top: 0px;
+    }
+
+    #header-area > div > .css-gtiexd > div:nth-child(1) > div, #header-area .logoIcon .user-info{
+      padding-top: 20px;
+    }
+
+    #__next > div.AnnouncementWrapper_container__Z51yh > div > aside.SidebarLayout_sidebar__SXeDJ.SidebarLayout_left__k163a > div > div > header{
+      padding-left: 84px;
+      padding-top: 10px;
     }
 
     #page .main_header, .cb-layout-basic--navbar,

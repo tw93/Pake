@@ -54,7 +54,5 @@ pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Wind
         window_builder = window_builder.data_directory(_data_dir);
     }
 
-    let window = window_builder.build().expect("Failed to build window");
-
-    window
+    window_builder.build().expect("Failed to build window")
 }
