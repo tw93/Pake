@@ -59,8 +59,8 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/Ld5ZCJ.png width=600/></td>
-        <td><img src=https://gw.alipayobjects.com/zos/k/95/bcGBut.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/5aO6yP.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/Ztsx23.png width=600/></td>
     </tr>
     <tr>
       <td>YouTube Music
@@ -75,7 +75,7 @@
       </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/iz3mtQ.png width=600/></td>
+        <td><img src=https://cdn.fliggy.com/upic/3UREAw.png width=600/></td>
         <td><img src=https://gw.alipayobjects.com/zos/k/pn/1.jpg width=600/></td>
     </tr>
     <tr>
