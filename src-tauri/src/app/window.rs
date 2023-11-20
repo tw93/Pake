@@ -33,6 +33,12 @@ pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Wind
         //This is necessary to allow for file injection by external developers for customization purposes.
         .initialization_script(include_str!("../inject/custom.js"));
 
+    // For dynamic display of header styles
+    if window_config.transparent {
+        let transparent_script = "window.pakeWindowTitleTransparent = true;";
+        window_builder = window_builder.initialization_script(transparent_script);
+    }
+
     #[cfg(target_os = "macos")]
     {
         let title_bar_style = if window_config.transparent {
@@ -48,5 +54,5 @@ pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Wind
         window_builder = window_builder.data_directory(_data_dir);
     }
 
-    window_builder.build().unwrap()
+    window_builder.build().expect("Failed to build window")
 }
