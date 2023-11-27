@@ -135,7 +135,7 @@
 <br/>
 
 | Mac                         | Windows/Linux                  | Function                      |
-|-----------------------------|--------------------------------|-------------------------------|
+| --------------------------- | ------------------------------ | ----------------------------- |
 | <kbd>⌘</kbd> + <kbd>[</kbd> | <kbd>Ctrl</kbd> + <kbd>←</kbd> | Return to the previous page   |
 | <kbd>⌘</kbd> + <kbd>]</kbd> | <kbd>Ctrl</kbd> + <kbd>→</kbd> | Go to the next page           |
 | <kbd>⌘</kbd> + <kbd>↑</kbd> | <kbd>Ctrl</kbd> + <kbd>↑</kbd> | Auto scroll to top of page    |
@@ -153,7 +153,7 @@ In addition, double-click the title bar to switch to full-screen mode. For Mac u
 
 ## Before starting
 
-1. **For beginners**: Play with Popular Packages to find out Pake's capabilities, or try to pack your application with [GitHub Actions](https://github.com/tw93/Pake/wiki/Online-Compilation-(used-by-ordinary-users)). Don't hesitate to reach for assistance at [Discussion](https://github.com/tw93/Pake/discussions)!
+1. **For beginners**: Play with Popular Packages to find out Pake's capabilities, or try to pack your application with [GitHub Actions](<https://github.com/tw93/Pake/wiki/Online-Compilation-(used-by-ordinary-users)>). Don't hesitate to reach for assistance at [Discussion](https://github.com/tw93/Pake/discussions)!
 2. **For developers**: “Command-Line Packaging” supports macOS fully. For Windows/Linux users, it requires some tinkering. [Configure your environment](https://tauri.app/v1/guides/getting-started/prerequisites) before getting started.
 3. **For hackers**: For people who are good at both front-end development and Rust, how about customizing your apps' function more with the following [Customized Development](#development)?
 
@@ -174,7 +174,7 @@ pake url [OPTIONS]...
 pake https://weekly.tw93.fun --name Weekly --transparent
 ```
 
-If you are new to the command line, you can compile packages online with _GitHub Actions_. See the [Tutorial](https://github.com/tw93/Pake/wiki/Online-Compilation-(used-by-ordinary-users)) for more information.
+If you are new to the command line, you can compile packages online with _GitHub Actions_. See the [Tutorial](<https://github.com/tw93/Pake/wiki/Online-Compilation-(used-by-ordinary-users)>) for more information.
 
 ## Development
 
@@ -394,6 +394,10 @@ Pake's development can not be without these Hackers. They contributed a lot of c
     </td></tr>
 </table>
 <!-- readme: contributors -end -->
+
+## Frequently Asked Questions
+
+1. Right-clicking on an image element in the page to open the menu and select download image or other events does not work (common in MacOS systems). This issue is due to the MacOS built-in webview not supporting this feature.
 
 ## Support
 
