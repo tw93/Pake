@@ -465,9 +465,11 @@ async function combineFiles(files, output) {
     const contents = files.map(file => {
         const fileContent = fs.readFileSync(file);
         if (file.endsWith('.css')) {
-            return "window.addEventListener('DOMContentLoaded', (_event) => { const css = `" + fileContent + "`; const style = document.createElement('style'); style.innerHTML = css; document.head.appendChild(style); });";
+            return ("window.addEventListener('DOMContentLoaded', (_event) => { const css = `" +
+                fileContent +
+                "`; const style = document.createElement('style'); style.innerHTML = css; document.head.appendChild(style); });");
         }
-        return "window.addEventListener('DOMContentLoaded', (_event) => { " + fileContent + " });";
+        return "window.addEventListener('DOMContentLoaded', (_event) => { " + fileContent + ' });';
     });
     fs.writeFileSync(output, contents.join('\n'));
     return files;
@@ -633,7 +635,7 @@ async function mergeConfig(url, options, tauriConf) {
             logger.error('The injected file must be in either CSS or JS format.');
             return;
         }
-        const files = inject.map(filepath => path.isAbsolute(filepath) ? filepath : path.join(process.cwd(), filepath));
+        const files = inject.map(filepath => (path.isAbsolute(filepath) ? filepath : path.join(process.cwd(), filepath)));
         tauriConf.pake.inject = files;
         await combineFiles(files, injectFilePath);
     }
@@ -722,10 +724,14 @@ class BaseBuilder {
         const fileType = this.getFileType(target);
         const appPath = this.getBuildAppPath(npmDirectory, fileName, fileType);
         const distPath = path.resolve(`${name}.${fileType}`);
+        const appBinaryPath = this.getBuildAppBinaryPath(npmDirectory, name);
+        const binaryExtension = process.platform === "win32" ? ".exe" : "";
+        const distBinaryPath = path.resolve(`${name}${binaryExtension}`);
         await fsExtra.copy(appPath, distPath);
+        await fsExtra.copy(appBinaryPath, distBinaryPath);
         await fsExtra.remove(appPath);
         logger.success('✔ Build success!');
-        logger.success('✔ App installer located in', distPath);
+        logger.success(`✔ App installer located in ${distPath}, App binary located in ${distBinaryPath}`);
     }
     getFileType(target) {
         return target;
@@ -738,8 +744,16 @@ class BaseBuilder {
         const basePath = this.options.debug ? 'debug' : 'release';
         return `src-tauri/target/${basePath}/bundle/`;
     }
+    getBaseBinaryPath() {
+        return 'src-tauri/target/release/';
+    }
     getBuildAppPath(npmDirectory, fileName, fileType) {
         return path.join(npmDirectory, this.getBasePath(), fileType.toLowerCase(), `${fileName}.${fileType}`);
+    }
+    getBuildAppBinaryPath(npmDirectory, fileName) {
+        // binary extension, ".exe" for windows, "" for *nix
+        const binaryExtension = process.platform === "win32" ? ".exe" : "";
+        return path.join(npmDirectory, this.getBaseBinaryPath(), `${fileName}${binaryExtension}`);
     }
 }
 
@@ -1014,10 +1028,7 @@ ${green('| |_) / _` | |/ / _ \\')}
 ${green('|  __/ (_| |   <  __/')}  ${yellow('https://github.com/tw93/pake')}
 ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with Rust.')}
 `;
-program
-    .addHelpText('beforeAll', logo)
-    .usage(`[url] [options]`)
-    .showHelpAfterError();
+program.addHelpText('beforeAll', logo).usage(`[url] [options]`).showHelpAfterError();
 program
     .argument('[url]', 'The web URL you want to package', validateUrlInput)
     .option('--name <string>', 'Application name')
@@ -1034,8 +1045,12 @@ program
     .addOption(new Option('--user-agent <string>', 'Custom user agent').default(DEFAULT_PAKE_OPTIONS.userAgent).hideHelp())
     .addOption(new Option('--targets <string>', 'Only for Linux, option "deb" or "appimage"').default(DEFAULT_PAKE_OPTIONS.targets).hideHelp())
     .addOption(new Option('--always-on-top', 'Always on the top level').default(DEFAULT_PAKE_OPTIONS.alwaysOnTop).hideHelp())
-    .addOption(new Option('--disabled-web-shortcuts', 'Disabled webPage shortcuts').default(DEFAULT_PAKE_OPTIONS.disabledWebShortcuts).hideHelp())
-    .addOption(new Option('--safe-domain [domains...]', 'Domains that Require Security Configuration').default(DEFAULT_PAKE_OPTIONS.safeDomain).hideHelp())
+    .addOption(new Option('--disabled-web-shortcuts', 'Disabled webPage shortcuts')
+    .default(DEFAULT_PAKE_OPTIONS.disabledWebShortcuts)
+    .hideHelp())
+    .addOption(new Option('--safe-domain [domains...]', 'Domains that Require Security Configuration')
+    .default(DEFAULT_PAKE_OPTIONS.safeDomain)
+    .hideHelp())
     .addOption(new Option('--show-system-tray', 'Show system tray in app').default(DEFAULT_PAKE_OPTIONS.showSystemTray).hideHelp())
     .addOption(new Option('--system-tray-icon <string>', 'Custom system tray icon').default(DEFAULT_PAKE_OPTIONS.systemTrayIcon).hideHelp())
     .version(packageJson.version, '-v, --version', 'Output the current version')
