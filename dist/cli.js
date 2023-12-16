@@ -150,12 +150,27 @@ var system_tray = {
 };
 var inject = [
 ];
+var show_hide = {
+	macos: "command+i",
+	linux: "alt+i",
+	windows: "alt+i"
+}
+var top = {
+	macos: "command+o",
+	linux: "alt+o",
+	windows: "alt+o"
+}
+var shortcut = {
+	show_hide: show_hide,
+	top: top
+}
 var pakeConf = {
 	windows: windows,
 	user_agent: user_agent,
 	menu: menu,
 	system_tray: system_tray,
-	inject: inject
+	inject: inject,
+	shortcut: shortcut,
 };
 
 var tauri$3 = {
@@ -476,7 +491,7 @@ async function combineFiles(files, output) {
 }
 
 async function mergeConfig(url, options, tauriConf) {
-    const { width, height, fullscreen, transparent, userAgent, showMenu, showSystemTray, systemTrayIcon, iterCopyFile, identifier, name, resizable = true, inject, safeDomain, } = options;
+    const { width, height, fullscreen, transparent, userAgent, showMenu, showSystemTray, systemTrayIcon, iterCopyFile, identifier, name, resizable = true, inject, safeDomain,showHide,top, } = options;
     const { platform } = process;
     // Set Windows parameters.
     const tauriConfWindowOptions = {
@@ -545,6 +560,22 @@ async function mergeConfig(url, options, tauriConf) {
     }
     tauriConf.pake.menu[currentPlatform] = showMenu;
     tauriConf.pake.system_tray[currentPlatform] = showSystemTray;
+
+    //hotkey
+    if (showHide === pakeConf.shortcut.show_hide[currentPlatform]) {
+      if ('macos' === currentPlatform) {
+        tauriConf.pake.shortcut.show_hide[currentPlatform] = 'command+i';
+      }
+    }else {
+      tauriConf.pake.shortcut.show_hide[currentPlatform] = showHide;
+    }
+    if (top === pakeConf.shortcut.top[currentPlatform]) {
+      if ('macos' === currentPlatform) {
+        tauriConf.pake.shortcut.show_hide[currentPlatform] = 'command+o';
+      }
+    }else {
+      tauriConf.pake.shortcut.top[currentPlatform] = top;
+    }
     // Processing targets are currently only open to Linux.
     if (platform === 'linux') {
         delete tauriConf.tauri.bundle.deb.files;
@@ -840,6 +871,8 @@ const DEFAULT_PAKE_OPTIONS = {
     debug: false,
     inject: [],
     safeDomain: [],
+	  showHide: 'alt+i / command+i',
+	  top: 'alt+o / command+o'
 };
 
 async function checkUpdateTips() {
@@ -1033,6 +1066,8 @@ program
     .option('--inject [injects...]', 'Injection of .js or .css Files', DEFAULT_PAKE_OPTIONS.inject)
     .option('--safe-domain [domains...]', 'Domains that Require Security Configuration"', DEFAULT_PAKE_OPTIONS.safeDomain)
     .option('--debug', 'Debug mode', DEFAULT_PAKE_OPTIONS.debug)
+    .option('--show-hide <string>', 'Show app or Hide app hotkey', DEFAULT_PAKE_OPTIONS.showHide)
+    .option('--top <string>', 'Top app hotkey', DEFAULT_PAKE_OPTIONS.top)
     .version(packageJson.version, '-v, --version', 'Output the current version')
     .action(async (url, options) => {
     await checkUpdateTips();

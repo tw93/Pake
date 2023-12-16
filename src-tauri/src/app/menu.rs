@@ -1,5 +1,6 @@
+use std::sync::atomic::Ordering;
 use tauri::MenuItem;
-
+use tauri::Manager;
 use tauri::{CustomMenuItem, Menu, Submenu, WindowMenuEvent};
 
 #[cfg(any(target_os = "linux", target_os = "windows"))]
@@ -7,6 +8,7 @@ use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu};
 
 #[cfg(any(target_os = "linux", target_os = "windows"))]
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
+use crate::IS_TOP;
 
 pub fn get_menu() -> Menu {
     let close = CustomMenuItem::new("close".to_string(), "Close Window").accelerator("CmdOrCtrl+W");
@@ -113,3 +115,25 @@ pub fn system_tray_handle(app: &tauri::AppHandle, event: SystemTrayEvent) {
         }
     };
 }
+
+pub fn windows_show_handle(app: &tauri::AppHandle) {
+    let window = app.get_window("pake").unwrap();
+    if window.is_visible().unwrap() { //判断窗口是否显示
+        window.hide().unwrap(); //显示窗口
+    } else {
+        window.show().unwrap(); //隐藏窗口
+        window.set_focus().unwrap();
+    }
+}
+
+pub fn windows_top_handle(app: &tauri::AppHandle) {
+    let window = app.get_window("pake").unwrap();
+    if IS_TOP.load(Ordering::SeqCst) {
+        IS_TOP.store(false, Ordering::SeqCst);
+        window.set_always_on_top(false).expect("top error");
+    } else {
+        IS_TOP.store(true, Ordering::SeqCst);
+        window.set_always_on_top(true).expect("top error");
+    }
+}
+

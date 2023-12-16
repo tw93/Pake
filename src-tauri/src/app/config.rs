@@ -12,6 +12,12 @@ pub struct WindowConfig {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct ShortcutConfig {
+    pub show_hide: PlatformSpecific<String>,
+    pub top: PlatformSpecific<String>,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct PlatformSpecific<T> {
     pub macos: T,
     pub linux: T,
@@ -49,6 +55,7 @@ pub struct PakeConfig {
     pub user_agent: UserAgent,
     pub menu: FunctionON,
     pub system_tray: FunctionON,
+    pub shortcut: ShortcutConfig,
 }
 
 impl PakeConfig {

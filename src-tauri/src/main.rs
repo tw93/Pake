@@ -6,12 +6,15 @@
 mod app;
 mod util;
 
+use std::sync::atomic::AtomicBool;
 use app::{invoke, menu, window};
 use invoke::{download_file, download_file_by_binary};
 use menu::{get_menu, menu_event_handle};
 use tauri_plugin_window_state::Builder as windowStatePlugin;
 use util::{get_data_dir, get_pake_config};
 use window::get_window;
+
+static IS_TOP: AtomicBool = AtomicBool::new(false);
 
 pub fn run_app() {
     let (pake_config, tauri_config) = get_pake_config();

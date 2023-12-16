@@ -25,5 +25,17 @@
     "linux": true,
     "windows": true
   },
-  "inject": []
+  "inject": [],
+    "shortcut": {
+        "show_hide": {
+            "macos": "command+i",
+            "linux": "alt+i",
+            "windows": "alt+i"
+        },
+        "top": {
+            "macos": "command+o",
+            "linux": "alt+o",
+            "windows": "alt+o"
+        }
+    }
 }
