@@ -1,18 +1,22 @@
 #![cfg_attr(
-    all(not(debug_assertions), target_os = "windows"),
-    windows_subsystem = "windows"
+all(not(debug_assertions), target_os = "windows"),
+windows_subsystem = "windows"
 )]
 
-mod app;
-mod util;
-
 use std::sync::atomic::AtomicBool;
+
+use tauri_plugin_window_state::Builder as windowStatePlugin;
+
 use app::{invoke, menu, window};
 use invoke::{download_file, download_file_by_binary};
 use menu::{get_menu, menu_event_handle};
-use tauri_plugin_window_state::Builder as windowStatePlugin;
 use util::{get_data_dir, get_pake_config};
 use window::get_window;
+
+use crate::app::menu::{get_system_tray, system_tray_handle};
+
+mod app;
+mod util;
 
 static IS_TOP: AtomicBool = AtomicBool::new(false);
 
@@ -28,18 +32,13 @@ pub fn run_app() {
         tauri_app = tauri_app.menu(menu).on_menu_event(menu_event_handle);
     }
 
-    #[cfg(not(target_os = "macos"))]
-    {
-        use menu::{get_system_tray, system_tray_handle};
+    let show_system_tray = pake_config.show_system_tray();
+    let system_tray = get_system_tray(show_menu);
 
-        let show_system_tray = pake_config.show_system_tray();
-        let system_tray = get_system_tray(show_menu);
-
-        if show_system_tray {
-            tauri_app = tauri_app
-                .system_tray(system_tray)
-                .on_system_tray_event(system_tray_handle);
-        }
+    if show_system_tray {
+        tauri_app = tauri_app
+            .system_tray(system_tray)
+            .on_system_tray_event(system_tray_handle);
     }
 
     tauri_app

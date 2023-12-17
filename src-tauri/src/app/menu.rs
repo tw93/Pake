@@ -1,13 +1,10 @@
 use std::sync::atomic::Ordering;
-use tauri::MenuItem;
-use tauri::Manager;
+
 use tauri::{CustomMenuItem, Menu, Submenu, WindowMenuEvent};
-
-#[cfg(any(target_os = "linux", target_os = "windows"))]
 use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu};
-
-#[cfg(any(target_os = "linux", target_os = "windows"))]
+use tauri::MenuItem;
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
+
 use crate::IS_TOP;
 
 pub fn get_menu() -> Menu {
@@ -48,7 +45,6 @@ pub fn menu_event_handle(event: WindowMenuEvent) {
     }
 }
 
-#[cfg(any(target_os = "linux", target_os = "windows"))]
 pub fn get_system_tray(show_menu: bool) -> SystemTray {
     let hide_app = CustomMenuItem::new("hide_app".to_string(), "Hide App");
     let show_app = CustomMenuItem::new("show_app".to_string(), "Show App");
@@ -70,7 +66,6 @@ pub fn get_system_tray(show_menu: bool) -> SystemTray {
     }
 }
 
-#[cfg(any(target_os = "linux", target_os = "windows"))]
 pub fn system_tray_handle(app: &tauri::AppHandle, event: SystemTrayEvent) {
     if let SystemTrayEvent::MenuItemClick { tray_id: _, id, .. } = event {
         match id.as_str() {

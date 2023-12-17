@@ -63,7 +63,7 @@ impl PakeConfig {
         self.menu.copied()
     }
 
-    #[cfg(not(target_os = "macos"))]
+    // #[cfg(not(target_os = "macos"))]
     pub fn show_system_tray(&self) -> bool {
         self.system_tray.copied()
     }

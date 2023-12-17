@@ -18,7 +18,7 @@
       "active": false
     },
     "systemTray": {
-      "iconPath": "png/icon_512.png",
+      "iconPath": "png/icon_512_lucency.png",
       "iconAsTemplate": true
     },
     "allowlist": {

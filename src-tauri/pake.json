@@ -21,7 +21,7 @@
     "windows": false
   },
   "system_tray": {
-    "macos": false,
+    "macos": true,
     "linux": true,
     "windows": true
   },
