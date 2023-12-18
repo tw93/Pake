@@ -562,16 +562,16 @@ async function mergeConfig(url, options, tauriConf) {
     tauriConf.pake.system_tray[currentPlatform] = showSystemTray;
 
     //hotkey
-    if (showHide === pakeConf.shortcut.show_hide[currentPlatform]) {
+    if (showHide === 'alt+i / command+i') {
       if ('macos' === currentPlatform) {
         tauriConf.pake.shortcut.show_hide[currentPlatform] = 'command+i';
       }
     }else {
       tauriConf.pake.shortcut.show_hide[currentPlatform] = showHide;
     }
-    if (top === pakeConf.shortcut.top[currentPlatform]) {
+    if (top === 'alt+o / command+o') {
       if ('macos' === currentPlatform) {
-        tauriConf.pake.shortcut.show_hide[currentPlatform] = 'command+o';
+        tauriConf.pake.shortcut.top[currentPlatform] = 'command+o';
       }
     }else {
       tauriConf.pake.shortcut.top[currentPlatform] = top;
