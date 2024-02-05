@@ -320,6 +320,15 @@ window.addEventListener('DOMContentLoaded', _event => {
       margin-right: -10px;
     }
 
+    #__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.dark.flex-shrink-0.overflow-x-hidden.bg-black > div > div > div > div > nav > div.flex.flex-col.pt-2.empty\\:hidden.dark\\:border-white\\/20 > a,
+    #__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden > main > div.group.fixed.bottom-3.right-3.z-10.hidden.gap-1.lg\\:flex > div {
+      display: none;
+    }
+
+    #__next .md\\:px-\\[60px\\].text-token-text-secondary.text-xs.text-center.py-2.px-2.relative{
+      visibility:hidden;
+    }
+
     #__next>div>div>.flex.h-screen.w-full.flex-col.items-center {
       padding-top: 20px;
     }
