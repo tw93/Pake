@@ -312,7 +312,7 @@ window.addEventListener('DOMContentLoaded', _event => {
     }
 
     #__next .overflow-hidden>.overflow-x-hidden .scrollbar-trigger > nav {
-      padding-top: 30px;
+      padding-top: 12px;
     }
 
     #__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden > main > div.flex.h-full.flex-col > div.flex-1.overflow-hidden > div > div.absolute.left-0.right-0 > div > div.flex.items-center.gap-2 > button{
@@ -321,7 +321,8 @@ window.addEventListener('DOMContentLoaded', _event => {
     }
 
     #__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.dark.flex-shrink-0.overflow-x-hidden.bg-black > div > div > div > div > nav > div.flex.flex-col.pt-2.empty\\:hidden.dark\\:border-white\\/20 > a,
-    #__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden > main > div.group.fixed.bottom-3.right-3.z-10.hidden.gap-1.lg\\:flex > div {
+    #__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden > main > div.group.fixed.bottom-3.right-3.z-10.hidden.gap-1.lg\\:flex > div,
+    #__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary > div > div > div > div > nav > div.flex.flex-col.pt-2.empty\\:hidden.dark\\:border-white\\/20 > a {
       display: none;
     }
 
