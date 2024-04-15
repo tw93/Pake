@@ -383,12 +383,12 @@ window.addEventListener('DOMContentLoaded', _event => {
       top: 28px;
     }
 
-    #pack-top-dom:active {
+    #pake-top-dom:active {
       cursor: grabbing;
       cursor: -webkit-grabbing;
     }
 
-    #pack-top-dom{
+    #pake-top-dom{
       position:fixed;
       background:transparent;
       top:0;
@@ -398,7 +398,7 @@ window.addEventListener('DOMContentLoaded', _event => {
       -webkit-app-region: drag;
       user-select: none;
       -webkit-user-select: none;
-      z-index: 90000;
+      z-index: 99999;
     }
 
     @media (max-width:767px){
