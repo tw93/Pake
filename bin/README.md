@@ -59,7 +59,6 @@ yarn cli:dev
 
 The script will reads the above configuration and packages the specified `app` using `watch` mode, and changes to the `pake-cli` code and `pake` are hot updated in real time.
 
-
 ### CLI Usage
 
 ```bash
@@ -169,14 +168,6 @@ Customize the browser user agent. Default is empty.
 
 ```shell
 --user-agent <value>
-```
-
-#### [show-menu]
-
-Display the menu bar. Default is not to display. Use the following command to enable the menu bar. Recommended for macOS users.
-
-```shell
---show-menu
 ```
 
 #### [show-system-tray]

@@ -19,7 +19,7 @@
     },
     "systemTray": {
       "iconPath": "png/icon_512.png",
-      "iconAsTemplate": true
+      "iconAsTemplate": false
     },
     "allowlist": {
       "all": true,

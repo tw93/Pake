@@ -14,7 +14,6 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     fullscreen,
     transparent,
     userAgent,
-    showMenu,
     showSystemTray,
     systemTrayIcon,
     iterCopyFile,
@@ -103,7 +102,6 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     tauriConf.pake.user_agent[currentPlatform] = userAgent;
   }
 
-  tauriConf.pake.menu[currentPlatform] = showMenu;
   tauriConf.pake.system_tray[currentPlatform] = showSystemTray;
 
   // Processing targets are currently only open to Linux.

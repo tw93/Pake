@@ -32,7 +32,6 @@ program
   .option('--transparent', 'Only for Mac, hide title bar', DEFAULT.transparent)
   .option('--fullscreen', 'Start in full screen', DEFAULT.fullscreen)
   .option('--user-agent <string>', 'Custom user agent', DEFAULT.userAgent)
-  .option('--show-menu', 'Show menu in app', DEFAULT.showMenu)
   .option('--show-system-tray', 'Show system tray in app', DEFAULT.showSystemTray)
   .option('--system-tray-icon <string>', 'Custom system tray icon', DEFAULT.systemTrayIcon)
   .option('--iter-copy-file', 'Copy files when URL is a local file', DEFAULT.iterCopyFile)

@@ -47,16 +47,10 @@ pub type FunctionON = PlatformSpecific<bool>;
 pub struct PakeConfig {
     pub windows: Vec<WindowConfig>,
     pub user_agent: UserAgent,
-    pub menu: FunctionON,
     pub system_tray: FunctionON,
 }
 
 impl PakeConfig {
-    pub fn show_menu(&self) -> bool {
-        self.menu.copied()
-    }
-
-    #[cfg(not(target_os = "macos"))]
     pub fn show_system_tray(&self) -> bool {
         self.system_tray.copied()
     }

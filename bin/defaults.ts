@@ -8,7 +8,6 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   resizable: true,
   transparent: false,
   userAgent: '',
-  showMenu: false,
   showSystemTray: false,
   multiArch: false,
   targets: 'deb',

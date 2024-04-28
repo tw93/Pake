@@ -20,7 +20,7 @@ import psl from 'psl';
 import isUrl from 'is-url';
 
 var name = "pake-cli";
-var version = "2.3.6";
+var version = "2.3.7";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
@@ -67,15 +67,15 @@ var type = "module";
 var exports = "./dist/pake.js";
 var license = "MIT";
 var dependencies = {
-	"@tauri-apps/api": "^1.5.1",
-	"@tauri-apps/cli": "^1.5.6",
-	axios: "^1.6.1",
+	"@tauri-apps/api": "^1.5.4",
+	"@tauri-apps/cli": "^1.5.12",
+	axios: "^1.6.8",
 	chalk: "^5.3.0",
 	commander: "^11.1.0",
-	"file-type": "^18.6.0",
-	"fs-extra": "^11.1.1",
+	"file-type": "^18.7.0",
+	"fs-extra": "^11.2.0",
 	"is-url": "^1.2.4",
-	loglevel: "^1.8.1",
+	loglevel: "^1.9.1",
 	ora: "^7.0.1",
 	prompts: "^2.4.2",
 	psl: "^1.9.0",
@@ -84,25 +84,25 @@ var dependencies = {
 	"update-notifier": "^7.0.0"
 };
 var devDependencies = {
-	"@rollup/plugin-alias": "^5.0.1",
+	"@rollup/plugin-alias": "^5.1.0",
 	"@rollup/plugin-commonjs": "^25.0.7",
-	"@rollup/plugin-json": "^6.0.1",
+	"@rollup/plugin-json": "^6.1.0",
 	"@rollup/plugin-replace": "^5.0.5",
 	"@rollup/plugin-terser": "^0.4.4",
 	"@types/fs-extra": "^11.0.4",
 	"@types/is-url": "^1.2.32",
 	"@types/page-icon": "^0.3.6",
-	"@types/prompts": "^2.4.8",
+	"@types/prompts": "^2.4.9",
 	"@types/psl": "^1.1.3",
 	"@types/shelljs": "^0.8.15",
 	"@types/tmp": "^0.2.6",
-	"@types/update-notifier": "^6.0.7",
+	"@types/update-notifier": "^6.0.8",
 	"app-root-path": "^3.1.0",
 	"cross-env": "^7.0.3",
-	rollup: "^4.3.0",
+	rollup: "^4.17.0",
 	"rollup-plugin-typescript2": "^0.36.0",
 	tslib: "^2.6.2",
-	typescript: "^5.2.2"
+	typescript: "^5.4.5"
 };
 var packageJson = {
 	name: name,
@@ -138,11 +138,6 @@ var user_agent = {
 	linux: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
 	windows: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
 };
-var menu = {
-	macos: false,
-	linux: false,
-	windows: false
-};
 var system_tray = {
 	macos: false,
 	linux: true,
@@ -153,7 +148,6 @@ var inject = [
 var pakeConf = {
 	windows: windows,
 	user_agent: user_agent,
-	menu: menu,
 	system_tray: system_tray,
 	inject: inject
 };
@@ -176,7 +170,7 @@ var tauri$3 = {
 	},
 	systemTray: {
 		iconPath: "png/icon_512.png",
-		iconAsTemplate: true
+		iconAsTemplate: false
 	},
 	allowlist: {
 		all: true,
@@ -476,7 +470,7 @@ async function combineFiles(files, output) {
 }
 
 async function mergeConfig(url, options, tauriConf) {
-    const { width, height, fullscreen, transparent, userAgent, showMenu, showSystemTray, systemTrayIcon, iterCopyFile, identifier, name, resizable = true, inject, safeDomain, } = options;
+    const { width, height, fullscreen, transparent, userAgent, showSystemTray, systemTrayIcon, iterCopyFile, identifier, name, resizable = true, inject, safeDomain, } = options;
     const { platform } = process;
     // Set Windows parameters.
     const tauriConfWindowOptions = {
@@ -543,7 +537,6 @@ async function mergeConfig(url, options, tauriConf) {
     if (userAgent.length > 0) {
         tauriConf.pake.user_agent[currentPlatform] = userAgent;
     }
-    tauriConf.pake.menu[currentPlatform] = showMenu;
     tauriConf.pake.system_tray[currentPlatform] = showSystemTray;
     // Processing targets are currently only open to Linux.
     if (platform === 'linux') {
@@ -831,7 +824,6 @@ const DEFAULT_PAKE_OPTIONS = {
     resizable: true,
     transparent: false,
     userAgent: '',
-    showMenu: false,
     showSystemTray: false,
     multiArch: false,
     targets: 'deb',
@@ -1024,7 +1016,6 @@ program
     .option('--transparent', 'Only for Mac, hide title bar', DEFAULT_PAKE_OPTIONS.transparent)
     .option('--fullscreen', 'Start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
     .option('--user-agent <string>', 'Custom user agent', DEFAULT_PAKE_OPTIONS.userAgent)
-    .option('--show-menu', 'Show menu in app', DEFAULT_PAKE_OPTIONS.showMenu)
     .option('--show-system-tray', 'Show system tray in app', DEFAULT_PAKE_OPTIONS.showSystemTray)
     .option('--system-tray-icon <string>', 'Custom system tray icon', DEFAULT_PAKE_OPTIONS.systemTrayIcon)
     .option('--iter-copy-file', 'Copy files when URL is a local file', DEFAULT_PAKE_OPTIONS.iterCopyFile)

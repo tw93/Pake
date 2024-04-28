@@ -172,14 +172,6 @@ Linux，默认为 `all`。
 --user-agent <value>
 ```
 
-#### [show-menu]
-
-设置是否显示菜单栏，默认不显示。在 macOS 上推荐启用此选项。
-
-```shell
---show-menu
-```
-
 #### [show-system-tray]
 
 设置是否显示通知栏托盘，默认不显示。

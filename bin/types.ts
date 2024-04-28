@@ -27,9 +27,6 @@ export interface PakeCliOptions {
   // Custom User-Agent, default off
   userAgent: string;
 
-  // Enable menu bar, default on for macOS, off for Windows and Linux
-  showMenu: boolean;
-
   // Enable system tray, default off for macOS, on for Windows and Linux
   showSystemTray: boolean;
 
