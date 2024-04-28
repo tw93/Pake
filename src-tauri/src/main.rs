@@ -1,42 +1,31 @@
 #![cfg_attr(
-    all(not(debug_assertions), target_os = "windows"),
-    windows_subsystem = "windows"
+all(not(debug_assertions), target_os = "windows"),
+windows_subsystem = "windows"
 )]
 
 mod app;
 mod util;
 
-use app::{invoke, menu, window};
+use app::{invoke, window, menu};
 use invoke::{download_file, download_file_by_binary};
-use menu::{get_menu, menu_event_handle};
+use menu::{get_system_tray, system_tray_handle};
 use tauri_plugin_window_state::Builder as windowStatePlugin;
 use util::{get_data_dir, get_pake_config};
 use window::get_window;
 
 pub fn run_app() {
     let (pake_config, tauri_config) = get_pake_config();
-    let show_menu = pake_config.show_menu();
-    let menu = get_menu();
     let data_dir = get_data_dir(tauri_config);
 
     let mut tauri_app = tauri::Builder::default();
 
-    if show_menu {
-        tauri_app = tauri_app.menu(menu).on_menu_event(menu_event_handle);
-    }
+    let show_system_tray = pake_config.show_system_tray();
+    let system_tray = get_system_tray();
 
-    #[cfg(not(target_os = "macos"))]
-    {
-        use menu::{get_system_tray, system_tray_handle};
-
-        let show_system_tray = pake_config.show_system_tray();
-        let system_tray = get_system_tray(show_menu);
-
-        if show_system_tray {
-            tauri_app = tauri_app
-                .system_tray(system_tray)
-                .on_system_tray_event(system_tray_handle);
-        }
+    if show_system_tray {
+        tauri_app = tauri_app
+            .system_tray(system_tray)
+            .on_system_tray_event(system_tray_handle);
     }
 
     tauri_app
@@ -57,6 +46,7 @@ pub fn run_app() {
                 #[cfg(target_os = "macos")]
                 {
                     event.window().minimize().unwrap();
+                    event.window().hide().unwrap();
                 }
 
                 #[cfg(not(target_os = "macos"))]

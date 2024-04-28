@@ -47,10 +47,6 @@ if (process.platform === 'linux') {
   params = `${params} --show-system-tray`;
 }
 
-if (process.platform === 'darwin') {
-  params = `${params} --show-menu`;
-}
-
 const downloadIcon = async iconFile => {
   try {
     const response = await axios.get(process.env.ICON, { responseType: 'arraybuffer' });
