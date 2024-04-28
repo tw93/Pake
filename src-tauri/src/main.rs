@@ -41,6 +41,7 @@ pub fn run_app() {
 
     tauri_app
         .plugin(windowStatePlugin::default().build())
+        .plugin(tauri_plugin_oauth::init())
         .invoke_handler(tauri::generate_handler![
             download_file,
             download_file_by_binary

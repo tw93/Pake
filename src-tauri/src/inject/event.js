@@ -63,10 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const appWindow = tauri.window.appWindow;
   const invoke = tauri.tauri.invoke;
 
-  const topDom = document.createElement('div');
-  topDom.id = 'pack-top-dom';
-  document.body.appendChild(topDom);
-  const domEl = document.getElementById('pack-top-dom');
+  if(!document.getElementById('pake-top-dom')){
+    const topDom = document.createElement('div');
+    topDom.id = 'pake-top-dom';
+    document.body.appendChild(topDom);
+  }
+
+  const domEl = document.getElementById('pake-top-dom');
 
   domEl.addEventListener('touchstart', () => {
     appWindow.startDragging().then();
