@@ -7,17 +7,17 @@ license = "MIT"
 repository = "https://github.com/tw93/Pake"
 default-run = "app"
 edition = "2021"
-rust-version = "1.63.0"
+rust-version = "1.78.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1.5.0", features = [] }
+tauri-build = { version = "1.5.2", features = [] }
 
 [dependencies]
-serde_json = "1.0.108"
-serde = { version = "1.0.192", features = ["derive"] }
-tauri = { version = "1.5.2", features = ["api-all", "system-tray"] }
+serde_json = "1.0.116"
+serde = { version = "1.0.200", features = ["derive"] }
+tauri = { version = "1.6.3", features = ["api-all", "system-tray"] }
 tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 tauri-plugin-oauth = { git = "https://github.com/FabianLars/tauri-plugin-oauth", branch = "main" }
 

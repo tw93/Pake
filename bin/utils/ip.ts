@@ -47,7 +47,7 @@ async function isChinaIP(ip: string, domain: string): Promise<boolean> {
   try {
     const delay = await ping(ip);
     logger.debug(`${domain} latency is ${delay} ms`);
-    return delay > 1000;
+    return delay > 500;
   } catch (error) {
     logger.debug(`ping ${domain} failed!`);
     return true;

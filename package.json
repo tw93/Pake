@@ -1,6 +1,6 @@
 {
   "name": "pake-cli",
-  "version": "2.3.7",
+  "version": "2.3.8",
   "description": "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。",
   "engines": {
     "node": ">=16.0.0"
@@ -48,7 +48,7 @@
   "license": "MIT",
   "dependencies": {
     "@tauri-apps/api": "^1.5.4",
-    "@tauri-apps/cli": "^1.5.12",
+    "@tauri-apps/cli": "^1.5.13",
     "axios": "^1.6.8",
     "chalk": "^5.3.0",
     "commander": "^11.1.0",
@@ -79,7 +79,7 @@
     "@types/update-notifier": "^6.0.8",
     "app-root-path": "^3.1.0",
     "cross-env": "^7.0.3",
-    "rollup": "^4.17.0",
+    "rollup": "^4.17.2",
     "rollup-plugin-typescript2": "^0.36.0",
     "tslib": "^2.6.2",
     "typescript": "^5.4.5"
