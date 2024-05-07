@@ -6,7 +6,7 @@ windows_subsystem = "windows"
 mod app;
 mod util;
 
-use app::{invoke, window, menu};
+use app::{invoke, menu, window};
 use invoke::{download_file, download_file_by_binary};
 use menu::{get_system_tray, system_tray_handle};
 use tauri_plugin_window_state::Builder as windowStatePlugin;
