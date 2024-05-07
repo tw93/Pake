@@ -20,7 +20,7 @@ import psl from 'psl';
 import isUrl from 'is-url';
 
 var name = "pake-cli";
-var version = "2.3.7";
+var version = "2.3.8";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
@@ -68,7 +68,7 @@ var exports = "./dist/pake.js";
 var license = "MIT";
 var dependencies = {
 	"@tauri-apps/api": "^1.5.4",
-	"@tauri-apps/cli": "^1.5.12",
+	"@tauri-apps/cli": "^1.5.13",
 	axios: "^1.6.8",
 	chalk: "^5.3.0",
 	commander: "^11.1.0",
@@ -91,6 +91,7 @@ var devDependencies = {
 	"@rollup/plugin-terser": "^0.4.4",
 	"@types/fs-extra": "^11.0.4",
 	"@types/is-url": "^1.2.32",
+	"@types/node": "^20.12.10",
 	"@types/page-icon": "^0.3.6",
 	"@types/prompts": "^2.4.9",
 	"@types/psl": "^1.1.3",
@@ -99,7 +100,7 @@ var devDependencies = {
 	"@types/update-notifier": "^6.0.8",
 	"app-root-path": "^3.1.0",
 	"cross-env": "^7.0.3",
-	rollup: "^4.17.0",
+	rollup: "^4.17.2",
 	"rollup-plugin-typescript2": "^0.36.0",
 	tslib: "^2.6.2",
 	typescript: "^5.4.5"
@@ -427,7 +428,7 @@ async function isChinaIP(ip, domain) {
     try {
         const delay = await ping(ip);
         logger.debug(`${domain} latency is ${delay} ms`);
-        return delay > 1000;
+        return delay > 500;
     }
     catch (error) {
         logger.debug(`ping ${domain} failed!`);

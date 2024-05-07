@@ -71,6 +71,7 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@types/fs-extra": "^11.0.4",
     "@types/is-url": "^1.2.32",
+    "@types/node": "^20.12.10",
     "@types/page-icon": "^0.3.6",
     "@types/prompts": "^2.4.9",
     "@types/psl": "^1.1.3",
