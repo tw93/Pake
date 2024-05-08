@@ -7,6 +7,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   fullscreen: false,
   resizable: true,
   transparent: false,
+  alwaysOnTop: false,
   userAgent: '',
   showSystemTray: false,
   multiArch: false,

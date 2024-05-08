@@ -24,6 +24,9 @@ export interface PakeCliOptions {
   // Enable immersive header, default false
   transparent: boolean;
 
+  // Enable windows always on top, default false
+  alwaysOnTop: boolean;
+
   // Custom User-Agent, default off
   userAgent: string;
 

@@ -13,6 +13,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     height,
     fullscreen,
     transparent,
+    alwaysOnTop,
     userAgent,
     showSystemTray,
     systemTrayIcon,
@@ -32,6 +33,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     height,
     fullscreen,
     transparent,
+    alwaysOnTop,
     resizable,
   };
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });

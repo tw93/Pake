@@ -122,6 +122,16 @@ pake [url] [options]
 --transparent
 ```
 
+#### [always-on-top]
+设置是否窗口一直在最顶层，默认为 `false`。
+
+```shell
+--always-on-top
+```
+
+
+```shell
+
 #### [fullscreen]
 
 设置应用程序是否在启动时自动全屏，默认为 `false`。使用以下命令可以设置应用程序启动时自动全屏。

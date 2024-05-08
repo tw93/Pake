@@ -121,6 +121,13 @@ Enable or disable immersive header. Default is `false`. Use the following comman
 --transparent
 ```
 
+#### [always-on-top]
+Enable the always-on-top feature. Default is `false`.
+
+```shell
+--always-on-top
+```
+
 #### [fullscreen]
 
 Determine whether the application launches in full screen. Default is `false`. Use the following command to enable full screen.

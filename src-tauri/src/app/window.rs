@@ -27,6 +27,7 @@ pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Wind
         .fullscreen(window_config.fullscreen)
         .inner_size(window_config.width, window_config.height)
         .disable_file_drop_handler()
+        .always_on_top(window_config.always_on_top)
         .initialization_script(include_str!("../inject/component.js"))
         .initialization_script(include_str!("../inject/event.js"))
         .initialization_script(include_str!("../inject/style.js"))
