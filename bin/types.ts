@@ -21,8 +21,8 @@ export interface PakeCliOptions {
   // Whether the window can be fullscreen, default false
   fullscreen: boolean;
 
-  // Enable immersive header, default false
-  transparent: boolean;
+  // Enable immersive header, default false.
+  hideTitleBar: boolean;
 
   // Enable windows always on top, default false
   alwaysOnTop: boolean;

@@ -3,7 +3,7 @@
     {
       "url": "https://weread.qq.com",
       "url_type": "web",
-      "transparent": true,
+      "hide_title_bar": true,
       "fullscreen": false,
       "width": 1200,
       "height": 780,

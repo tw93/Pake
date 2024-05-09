@@ -42,7 +42,7 @@ pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Wind
 
     #[cfg(target_os = "macos")]
     {
-        let title_bar_style = if window_config.transparent {
+        let title_bar_style = if window_config.hide_title_bar {
             TitleBarStyle::Overlay
         } else {
             TitleBarStyle::Visible

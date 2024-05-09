@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WindowConfig {
     pub url: String,
-    pub transparent: bool,
+    pub hide_title_bar: bool,
     pub fullscreen: bool,
     pub width: f64,
     pub height: f64,

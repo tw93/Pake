@@ -107,7 +107,8 @@ export default abstract class BaseBuilder {
   }
 
   protected getBasePath(): string {
-    return 'src-tauri/target/release/bundle/';
+    const basePath = this.options.debug ? 'debug' : 'release';
+    return `src-tauri/target/${basePath}/bundle/`;
   }
 
   protected getBuildAppPath(npmDirectory: string, fileName: string, fileType: string): string {

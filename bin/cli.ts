@@ -30,7 +30,7 @@ program
   .option('--width <number>', 'Window width', validateNumberInput, DEFAULT.width)
   .option('--height <number>', 'Window height', validateNumberInput, DEFAULT.height)
   .option('--fullscreen', 'Start in full screen', DEFAULT.fullscreen)
-  .option('--hide-title-bar', 'Only for Mac, hide title bar', DEFAULT.transparent)
+  .option('--hide-title-bar', 'Only for Mac, hide title bar', DEFAULT.hideTitleBar)
   .option('--activation-shortcut <string>', 'Shortcut key to active App', DEFAULT.activationShortcut)
   .option('--multi-arch', 'Only for Mac, supports both Intel and M1', DEFAULT.multiArch)
   .option('--inject [injects...]', 'Injection of .js or .css Files', DEFAULT.inject)
@@ -42,7 +42,6 @@ program
   .addOption(new Option('--disabled-web-shortcuts', 'Disabled webPage shortcuts').default(DEFAULT.disabledWebShortcuts).hideHelp())
   .addOption(new Option('--show-system-tray', 'Show system tray in app').default(DEFAULT.showSystemTray).hideHelp())
   .addOption(new Option('--system-tray-icon <string>', 'Custom system tray icon').default(DEFAULT.systemTrayIcon).hideHelp())
-  .addOption(new Option('--transparent', 'Only for Mac, hide title bar').default(DEFAULT.transparent).hideHelp())
   .version(packageJson.version, '-v, --version', 'Output the current version')
   .action(async (url: string, options: PakeCliOptions) => {
     await checkUpdateTips();
