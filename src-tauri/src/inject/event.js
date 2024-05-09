@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const appWindow = tauri.window.appWindow;
   const invoke = tauri.tauri.invoke;
 
-  if(!document.getElementById('pake-top-dom')){
+  if (!document.getElementById('pake-top-dom')) {
     const topDom = document.createElement('div');
     topDom.id = 'pake-top-dom';
     document.body.appendChild(topDom);
@@ -88,14 +88,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  document.addEventListener('keyup', (event) => {
-    if (/windows|linux/i.test(navigator.userAgent) && event.ctrlKey) {
-      handleShortcut(event);
-    }
-    if (/macintosh|mac os x/i.test(navigator.userAgent) && event.metaKey) {
-      handleShortcut(event);
-    }
-  });
+  if (window['pakeConfig']?.disabled_web_shortcuts !== true) {
+    document.addEventListener('keyup', (event) => {
+      if (/windows|linux/i.test(navigator.userAgent) && event.ctrlKey) {
+        handleShortcut(event);
+      }
+      if (/macintosh|mac os x/i.test(navigator.userAgent) && event.metaKey) {
+        handleShortcut(event);
+      }
+    });
+  }
 
   // Collect blob urls to blob by overriding window.URL.createObjectURL
   function collectUrlToBlobs() {

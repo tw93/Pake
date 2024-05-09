@@ -12,7 +12,10 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     width,
     height,
     fullscreen,
-    transparent,
+    hideTitleBar,
+    alwaysOnTop,
+    disabledWebShortcuts,
+    activationShortcut,
     userAgent,
     showSystemTray,
     systemTrayIcon,
@@ -31,8 +34,11 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     width,
     height,
     fullscreen,
-    transparent,
     resizable,
+    hide_title_bar: hideTitleBar,
+    activation_shortcut: activationShortcut,
+    always_on_top: alwaysOnTop,
+    disabled_web_shortcuts: disabledWebShortcuts,
   };
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
 
@@ -191,7 +197,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
       logger.error('The injected file must be in either CSS or JS format.');
       return;
     }
-    const files = inject.map(filepath => path.isAbsolute(filepath) ?  filepath : path.join(process.cwd(), filepath));
+    const files = inject.map(filepath => path.isAbsolute(filepath) ? filepath : path.join(process.cwd(), filepath));
     tauriConf.pake.inject = files;
     await combineFiles(files, injectFilePath);
   } else {

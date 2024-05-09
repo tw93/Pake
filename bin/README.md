@@ -2,7 +2,7 @@
 
 ## Installation
 
-Ensure that your Node.js version is 16.0 or higher (e.g., 16.8). Avoid using `sudo` for the installation. If you encounter permission issues with npm, refer to [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo).
+Ensure that your Node.js version is 18.0 or higher (e.g., 18.20.2). Avoid using `sudo` for the installation. If you encounter permission issues with npm, refer to [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo).
 
 ```bash
 npm install pake-cli -g 
@@ -52,12 +52,11 @@ export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & {url: string} = {
 
 then
 
-
 ```bash
 yarn cli:dev
 ```
 
-The script will reads the above configuration and packages the specified `app` using `watch` mode, and changes to the `pake-cli` code and `pake` are hot updated in real time.
+The script will read the above configuration and packages the specified `app` using `watch` mode, and changes to the `pake-cli` code and `pake` are hot updated in real time.
 
 ### CLI Usage
 
@@ -82,7 +81,7 @@ Various options are available for customization. You can pass corresponding argu
 Specify the application name. If not provided, you will be prompted to enter it. It is recommended to use English.
 
 ```shell
---name <value>
+--name <string>
 ```
 
 #### [icon]
@@ -113,20 +112,46 @@ Set the width of the application window. Default is `1200px`.
 --width <number>
 ```
 
-#### [transparent]
+#### [hide-title-bar]
 
 Enable or disable immersive header. Default is `false`. Use the following command to enable this feature, macOS only.
 
 ```shell
---transparent
+--hide-title-bar
 ```
 
 #### [fullscreen]
 
-Determine whether the application launches in full screen. Default is `false`. Use the following command to enable full screen.
+Determine whether the application launches in full screen. Default is `false`. Use the following command to enable full
+screen.
 
 ```shell
 --fullscreen
+```
+
+
+#### [activation-shortcut]
+
+Set the activation shortcut for the application. Default is ` `, it does not take effect, you can customize the activation shortcut with the following commands, e.g. `CmdOrControl+Shift+P`, use can refer to [available-modifiers](https://www.electronjs.org/docs/latest/api/accelerator#available-modifiers).
+
+```shell
+--activation-shortcut <string>
+```
+
+#### [always-on-top]
+
+Sets whether the window is always at the top level, defaults to `false`.
+
+```shell
+--always-on-top
+```
+
+#### [disabled-web-shortcuts]
+
+Sets whether to disable web shortcuts in the original Pake container, defaults to `false`.
+
+```shell
+--disabled-web-shortcuts
 ```
 
 #### [multi-arch]
@@ -138,15 +163,15 @@ Package the application to support both Intel and M1 chips, exclusively for macO
 - Note: After enabling this option, Rust must be installed using rustup from the official Rust website. Installation via brew is not supported.
 - For Intel chip users, install the arm64 cross-platform package to support M1 chips using the following command:
 
-```shell
-rustup target add aarch64-apple-darwin
-```
+  ```shell
+  rustup target add aarch64-apple-darwin
+  ```
 
 - For M1 chip users, install the x86 cross-platform package to support Intel chips using the following command:
 
-```shell
-rustup target add x86_64-apple-darwin
-```
+  ```shell
+  rustup target add x86_64-apple-darwin
+  ```
 
 ##### Usage
 
@@ -167,7 +192,7 @@ Select the output package format for Linux. Options include `deb`, `appimage`, o
 Customize the browser user agent. Default is empty.
 
 ```shell
---user-agent <value>
+--user-agent <string>
 ```
 
 #### [show-system-tray]
@@ -195,6 +220,7 @@ Enable recursive copying. When the URL is a local file path, enabling this optio
 ```
 
 #### [inject]
+
 Using `inject`, you can inject local absolute and relative path `css` and `js` files into the page you specify the `url` to customize it.  For example, an adblock script that can be applied to any web page, or a `css` that optimizes the `UI` of a page, you can write it once to customize it. would only need to write the `app` once to generalize it to any other page.
 
 ```shell
@@ -202,13 +228,21 @@ Using `inject`, you can inject local absolute and relative path `css` and `js` f
 ```
 
 #### [safe-domain]
+
 This secure domain is a domain other than your currently configured `url` to which you may be redirected or jumped to, and only in domains that have been configured as secure can you use `tauri` to expose `api` to browsers to ensure that pake's built-in enhancements work correctly. Only in a domain that has been configured as secure can you use the `tauri` to expose the `api` to the browser, ensuring that `pake's` built-in enhancements work correctly.
 
 PS: Secure domains do not need to carry protocols.
 
-
 ```shell
 --safe-domain weread.qq.com,google.com
+```
+
+#### [debug]
+
+The typed package has dev-tools for debugging, in addition to outputting more log messages for debugging.
+
+```shell
+--debug
 ```
 
 ## Conclusion

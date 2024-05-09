@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { InvalidArgumentError, program } from 'commander';
+import { InvalidArgumentError, program, Option } from 'commander';
 import log from 'loglevel';
 import path from 'path';
 import fsExtra from 'fs-extra';
@@ -20,7 +20,7 @@ import psl from 'psl';
 import isUrl from 'is-url';
 
 var name = "pake-cli";
-var version = "2.3.8";
+var version = "2.4.0";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
@@ -126,12 +126,15 @@ var packageJson = {
 var windows = [
 	{
 		url: "https://weread.qq.com",
-		transparent: true,
+		url_type: "web",
+		hide_title_bar: true,
 		fullscreen: false,
 		width: 1200,
 		height: 780,
 		resizable: true,
-		url_type: "web"
+		always_on_top: false,
+		activation_shortcut: "",
+		disabled_web_shortcuts: false
 	}
 ];
 var user_agent = {
@@ -471,15 +474,18 @@ async function combineFiles(files, output) {
 }
 
 async function mergeConfig(url, options, tauriConf) {
-    const { width, height, fullscreen, transparent, userAgent, showSystemTray, systemTrayIcon, iterCopyFile, identifier, name, resizable = true, inject, safeDomain, } = options;
+    const { width, height, fullscreen, hideTitleBar, alwaysOnTop, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, iterCopyFile, identifier, name, resizable = true, inject, safeDomain, } = options;
     const { platform } = process;
     // Set Windows parameters.
     const tauriConfWindowOptions = {
         width,
         height,
         fullscreen,
-        transparent,
         resizable,
+        hide_title_bar: hideTitleBar,
+        activation_shortcut: activationShortcut,
+        always_on_top: alwaysOnTop,
+        disabled_web_shortcuts: disabledWebShortcuts,
     };
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
     tauriConf.package.productName = name;
@@ -682,7 +688,7 @@ class BaseBuilder {
         const isChina = await isChinaDomain('www.npmjs.com');
         const spinner = getSpinner('Installing package...');
         const rustProjectDir = path.join(tauriSrcPath, '.cargo');
-        const projectConf = path.join(rustProjectDir, 'config');
+        const projectConf = path.join(rustProjectDir, 'config.toml');
         await fsExtra.ensureDir(rustProjectDir);
         if (isChina) {
             logger.info('✺ Located in China, using npm/rsProxy CN mirror.');
@@ -729,7 +735,8 @@ class BaseBuilder {
         return this.options.debug ? 'npm run build:debug' : 'npm run build';
     }
     getBasePath() {
-        return 'src-tauri/target/release/bundle/';
+        const basePath = this.options.debug ? 'debug' : 'release';
+        return `src-tauri/target/${basePath}/bundle/`;
     }
     getBuildAppPath(npmDirectory, fileName, fileType) {
         return path.join(npmDirectory, this.getBasePath(), fileType.toLowerCase(), `${fileName}.${fileType}`);
@@ -823,7 +830,10 @@ const DEFAULT_PAKE_OPTIONS = {
     width: 1200,
     fullscreen: false,
     resizable: true,
-    transparent: false,
+    hideTitleBar: false,
+    alwaysOnTop: false,
+    disabledWebShortcuts: false,
+    activationShortcut: '',
     userAgent: '',
     showSystemTray: false,
     multiArch: false,
@@ -1014,17 +1024,19 @@ program
     .option('--icon <string>', 'Application icon', DEFAULT_PAKE_OPTIONS.icon)
     .option('--width <number>', 'Window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
     .option('--height <number>', 'Window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
-    .option('--transparent', 'Only for Mac, hide title bar', DEFAULT_PAKE_OPTIONS.transparent)
     .option('--fullscreen', 'Start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
-    .option('--user-agent <string>', 'Custom user agent', DEFAULT_PAKE_OPTIONS.userAgent)
-    .option('--show-system-tray', 'Show system tray in app', DEFAULT_PAKE_OPTIONS.showSystemTray)
-    .option('--system-tray-icon <string>', 'Custom system tray icon', DEFAULT_PAKE_OPTIONS.systemTrayIcon)
-    .option('--iter-copy-file', 'Copy files when URL is a local file', DEFAULT_PAKE_OPTIONS.iterCopyFile)
+    .option('--hide-title-bar', 'Only for Mac, hide title bar', DEFAULT_PAKE_OPTIONS.hideTitleBar)
+    .option('--activation-shortcut <string>', 'Shortcut key to active App', DEFAULT_PAKE_OPTIONS.activationShortcut)
     .option('--multi-arch', 'Only for Mac, supports both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
-    .option('--targets <string>', 'Only for Linux, option "deb" or "appimage"', DEFAULT_PAKE_OPTIONS.targets)
     .option('--inject [injects...]', 'Injection of .js or .css Files', DEFAULT_PAKE_OPTIONS.inject)
     .option('--safe-domain [domains...]', 'Domains that Require Security Configuration"', DEFAULT_PAKE_OPTIONS.safeDomain)
-    .option('--debug', 'Debug mode', DEFAULT_PAKE_OPTIONS.debug)
+    .option('--debug', 'Debug build and more output', DEFAULT_PAKE_OPTIONS.debug)
+    .addOption(new Option('--user-agent <string>', 'Custom user agent').default(DEFAULT_PAKE_OPTIONS.userAgent).hideHelp())
+    .addOption(new Option('--targets <string>', 'Only for Linux, option "deb" or "appimage"').default(DEFAULT_PAKE_OPTIONS.targets).hideHelp())
+    .addOption(new Option('--always-on-top', 'Always on the top level').default(DEFAULT_PAKE_OPTIONS.alwaysOnTop).hideHelp())
+    .addOption(new Option('--disabled-web-shortcuts', 'Disabled webPage shortcuts').default(DEFAULT_PAKE_OPTIONS.disabledWebShortcuts).hideHelp())
+    .addOption(new Option('--show-system-tray', 'Show system tray in app').default(DEFAULT_PAKE_OPTIONS.showSystemTray).hideHelp())
+    .addOption(new Option('--system-tray-icon <string>', 'Custom system tray icon').default(DEFAULT_PAKE_OPTIONS.systemTrayIcon).hideHelp())
     .version(packageJson.version, '-v, --version', 'Output the current version')
     .action(async (url, options) => {
     await checkUpdateTips();

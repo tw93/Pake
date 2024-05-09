@@ -28,8 +28,8 @@ on:
         description: '[Height, Optional]'
         required: false
         default: '780'
-      transparent:
-        description: '[Transparent, Optional, MacOS only]'
+      hide_title_bar:
+        description: '[Hide TitleBar, Optional, MacOS only]'
         required: false
         type: boolean
         default: false
@@ -124,7 +124,7 @@ jobs:
           ICON: ${{ inputs.icon }}
           HEIGHT: ${{ inputs.height }}
           WIDTH: ${{ inputs.width }}
-          TRANSPARENT: ${{ inputs.transparent }}
+          HIDE_TITLE_BAR: ${{ inputs.hide_title_bar }}
           FULLSCREEN: ${{ inputs.fullscreen }}
           RESIZE: ${{ inputs.resize }}
           MULTI_ARCH: ${{ inputs.multi_arch }}

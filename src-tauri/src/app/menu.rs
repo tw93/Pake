@@ -1,4 +1,4 @@
-use tauri::{CustomMenuItem,Manager, SystemTray, SystemTrayEvent, SystemTrayMenu};
+use tauri::{CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
 pub fn get_system_tray() -> SystemTray {

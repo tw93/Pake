@@ -21,8 +21,17 @@ export interface PakeCliOptions {
   // Whether the window can be fullscreen, default false
   fullscreen: boolean;
 
-  // Enable immersive header, default false
-  transparent: boolean;
+  // Enable immersive header, default false.
+  hideTitleBar: boolean;
+
+  // Enable windows always on top, default false
+  alwaysOnTop: boolean;
+
+  // Disable web shortcuts, default false
+  disabledWebShortcuts: boolean;
+
+  // Set a shortcut key to wake up the app, default empty
+  activationShortcut: string;
 
   // Custom User-Agent, default off
   userAgent: string;

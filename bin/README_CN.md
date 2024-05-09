@@ -2,7 +2,7 @@
 
 ## 安装
 
-请确保您的 Node.js 版本为 16 或更高版本（例如 16.8）。请避免使用 `sudo` 进行安装。如果 npm 报告权限问题，请参考 [如何在不使用 sudo 的情况下修复 npm 报错](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo)。
+请确保您的 Node.js 版本为 18 或更高版本（例如 18.7）。请避免使用 `sudo` 进行安装。如果 npm 报告权限问题，请参考 [如何在不使用 sudo 的情况下修复 npm 报错](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo)。
 
 ```bash
 npm install pake-cli -g 
@@ -40,6 +40,7 @@ npm install pake-cli -g
 ## 使用方法
 
 ### 开发
+
 开发时可以修改 `bin/defaults.ts` 中 `DEFAULT_DEV_PAKE_OPTIONS` 配置，配置项和 `pake-cli` 配置说明保持一致
 
 ```typescript
@@ -57,7 +58,6 @@ yarn cli:dev
 ```
 
 脚本会读取上述配置并使用 `watch` 模式打包指定的 `app`，对 `pake-cli` 代码和 `pake` 的修改都会实时热更新。
-
 
 ### 使用 CLI
 
@@ -79,10 +79,10 @@ pake [url] [options]
 
 #### [name]
 
-指定应用程序的名称。如果在输入时未指定，系统会提示您输入。建议使用英文名称。
+指定应用程序的名称，如果在输入时未指定，系统会提示您输入，建议使用单个英文名称，不要出现下划线或者中文。
 
 ```shell
---name <value>
+--name <string>
 ```
 
 #### [icon]
@@ -114,12 +114,12 @@ pake [url] [options]
 --width <number>
 ```
 
-#### [transparent]
+#### [hide-title-bar]
 
 设置是否启用沉浸式头部，默认为 `false`（不启用）。当前只对 macOS 上有效。
 
 ```shell
---transparent
+--hide-title-bar
 ```
 
 #### [fullscreen]
@@ -128,6 +128,30 @@ pake [url] [options]
 
 ```shell
 --fullscreen
+```
+
+#### [activation-shortcut]
+
+设置应用程序的激活快捷键。默认为空，不生效，可以使用以下命令自定义激活快捷键，例如 `CmdOrControl+Shift+P`，使用可参考 [available-modifiers](https://www.electronjs.org/docs/latest/api/accelerator#available-modifiers)。
+
+```shell
+--activation-shortcut <string>
+```
+
+#### [always-on-top]
+
+设置是否窗口一直在最顶层，默认为 `false`。
+
+```shell
+--always-on-top
+```
+
+#### [disabled-web-shortcuts]
+
+设置是否禁用原有 Pake 容器里面的网页操作快捷键，默认为 `false`。
+
+```shell
+--disabled-web-shortcuts
 ```
 
 #### [multi-arch]
@@ -139,15 +163,15 @@ pake [url] [options]
 - 注意：启用此选项后，需要使用 rust 官网的 rustup 安装 rust，不支持通过 brew 安装。
 - 对于 Intel 芯片用户，需要安装 arm64 跨平台包，以使安装包支持 M1 芯片。使用以下命令安装：
 
-```shell
-rustup target add aarch64-apple-darwin
-```
+  ```shell
+  rustup target add aarch64-apple-darwin
+  ```
 
 - 对于 M1 芯片用户，需要安装 x86 跨平台包，以使安装包支持 Intel 芯片。使用以下命令安装：
 
-```shell
-rustup target add x86_64-apple-darwin
-```
+  ```shell
+  rustup target add x86_64-apple-darwin
+  ```
 
 ##### 使用方法
 
@@ -161,7 +185,7 @@ rustup target add x86_64-apple-darwin
 Linux，默认为 `all`。
 
 ```shell
---targets <value>
+--targets <string>
 ```
 
 #### [user-agent]
@@ -169,7 +193,7 @@ Linux，默认为 `all`。
 自定义浏览器的用户代理请求头，默认为空。
 
 ```shell
---user-agent <value>
+--user-agent <string>
 ```
 
 #### [show-system-tray]
@@ -220,6 +244,14 @@ PS: 安全域名不需要携带协议。
 
 ```shell
 --safe-domain weread.qq.com,google.com
+```
+
+#### [debug]
+
+打出来的包具备 deb-tools 的调试模式，此外还会输出更多的日志信息用于调试。
+
+```shell
+--debug
 ```
 
 ## 结语

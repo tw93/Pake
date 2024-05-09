@@ -2,12 +2,15 @@
   "windows": [
     {
       "url": "https://weread.qq.com",
-      "transparent": true,
+      "url_type": "web",
+      "hide_title_bar": true,
       "fullscreen": false,
       "width": 1200,
       "height": 780,
       "resizable": true,
-      "url_type": "web"
+      "always_on_top": false,
+      "activation_shortcut": "",
+      "disabled_web_shortcuts": false
     }
   ],
   "user_agent": {

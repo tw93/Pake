@@ -1,17 +1,20 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct WindowConfig {
     pub url: String,
-    pub transparent: bool,
+    pub hide_title_bar: bool,
     pub fullscreen: bool,
     pub width: f64,
     pub height: f64,
     pub resizable: bool,
     pub url_type: String,
+    pub always_on_top: bool,
+    pub disabled_web_shortcuts: bool,
+    pub activation_shortcut: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct PlatformSpecific<T> {
     pub macos: T,
     pub linux: T,
@@ -43,7 +46,7 @@ where
 pub type UserAgent = PlatformSpecific<String>;
 pub type FunctionON = PlatformSpecific<bool>;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct PakeConfig {
     pub windows: Vec<WindowConfig>,
     pub user_agent: UserAgent,
