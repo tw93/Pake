@@ -49,7 +49,7 @@ export default abstract class BaseBuilder {
     const isChina = await isChinaDomain('www.npmjs.com');
     const spinner = getSpinner('Installing package...');
     const rustProjectDir = path.join(tauriSrcPath, '.cargo');
-    const projectConf = path.join(rustProjectDir, 'config');
+    const projectConf = path.join(rustProjectDir, 'config.toml');
     await fsExtra.ensureDir(rustProjectDir);
 
     if (isChina) {
@@ -73,7 +73,7 @@ export default abstract class BaseBuilder {
 
   async start(url: string) {
     await mergeConfig(url, this.options, tauriConfig);
-  } 
+  }
 
   async buildAndCopy(url: string, target: string) {
     const { name } = this.options;
