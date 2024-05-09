@@ -43,7 +43,7 @@ export interface PakeCliOptions {
   systemTrayIcon: string;
 
   // Recursive copy, when url is a local file path, if this option is enabled, the url path file and all its subfiles will be copied to the pake static file folder, default off
-  iterCopyFile: false;
+  useLocalFile: false;
 
   // Multi arch, supports both Intel and M1 chips, only for Mac
   multiArch: boolean;

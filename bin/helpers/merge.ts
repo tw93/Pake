@@ -19,7 +19,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     userAgent,
     showSystemTray,
     systemTrayIcon,
-    iterCopyFile,
+    useLocalFile,
     identifier,
     name,
     resizable = true,
@@ -57,7 +57,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     const distDir = path.join(npmDirectory, 'dist');
     const distBakDir = path.join(npmDirectory, 'dist_bak');
 
-    if (!iterCopyFile) {
+    if (!useLocalFile) {
       const urlPath = path.join(distDir, fileName);
       await fsExtra.copy(url, urlPath);
     } else {

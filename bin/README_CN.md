@@ -212,14 +212,14 @@ Linux，默认为 `all`。
 --system-tray-icon <path>
 ```
 
-#### [iter-copy-file]
+#### [use-local-file]
 
 当 `url` 为本地文件路径时，如果启用此选项，则会递归地将 `url` 路径文件所在的文件夹及其所有子文件复
 
 制到 Pake 的静态文件夹。默认不启用。
 
 ```shell
---iter-copy-file
+--use-local-file
 ```
 
 #### [inject]

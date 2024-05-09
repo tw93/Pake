@@ -14,7 +14,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   showSystemTray: false,
   multiArch: false,
   targets: 'deb',
-  iterCopyFile: false,
+  useLocalFile: false,
   systemTrayIcon: '',
   debug: false,
   inject: [],
