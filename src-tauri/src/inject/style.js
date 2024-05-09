@@ -412,7 +412,7 @@ window.addEventListener('DOMContentLoaded', _event => {
     }
   `;
   const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-  if (window.pakeWindowTitleTransparent && isMac) {
+  if (window['pakeConfig']?.transparent && isMac) {
     const topPaddingStyleElement = document.createElement('style');
     topPaddingStyleElement.innerHTML = topPaddingCSS;
     document.head.appendChild(topPaddingStyleElement);

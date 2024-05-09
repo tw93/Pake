@@ -88,14 +88,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  document.addEventListener('keyup', (event) => {
-    if (/windows|linux/i.test(navigator.userAgent) && event.ctrlKey) {
-      handleShortcut(event);
-    }
-    if (/macintosh|mac os x/i.test(navigator.userAgent) && event.metaKey) {
-      handleShortcut(event);
-    }
-  });
+  if (window['pakeConfig']?.disabled_web_shortcuts !== true) {
+    document.addEventListener('keyup', (event) => {
+      if (/windows|linux/i.test(navigator.userAgent) && event.ctrlKey) {
+        handleShortcut(event);
+      }
+      if (/macintosh|mac os x/i.test(navigator.userAgent) && event.metaKey) {
+        handleShortcut(event);
+      }
+    });
+  }
 
   // Collect blob urls to blob by overriding window.URL.createObjectURL
   function collectUrlToBlobs() {
