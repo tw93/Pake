@@ -40,6 +40,7 @@ npm install pake-cli -g
 ## 使用方法
 
 ### 开发
+
 开发时可以修改 `bin/defaults.ts` 中 `DEFAULT_DEV_PAKE_OPTIONS` 配置，配置项和 `pake-cli` 配置说明保持一致
 
 ```typescript
@@ -57,7 +58,6 @@ yarn cli:dev
 ```
 
 脚本会读取上述配置并使用 `watch` 模式打包指定的 `app`，对 `pake-cli` 代码和 `pake` 的修改都会实时热更新。
-
 
 ### 使用 CLI
 
@@ -122,22 +122,28 @@ pake [url] [options]
 --transparent
 ```
 
-#### [always-on-top]
-设置是否窗口一直在最顶层，默认为 `false`。
-
-```shell
---always-on-top
-```
-
-
-```shell
-
 #### [fullscreen]
 
 设置应用程序是否在启动时自动全屏，默认为 `false`。使用以下命令可以设置应用程序启动时自动全屏。
 
 ```shell
 --fullscreen
+```
+
+#### [always-on-top]
+
+设置是否窗口一直在最顶层，默认为 `false`。
+
+```shell
+--always-on-top
+```
+
+#### [disabled-web-shortcuts]
+
+设置是否禁用原有 Pake 容器里面的网页操作快捷键，默认为 `false`。
+
+```shell
+--disabled-web-shortcuts
 ```
 
 #### [multi-arch]
@@ -230,6 +236,14 @@ PS: 安全域名不需要携带协议。
 
 ```shell
 --safe-domain weread.qq.com,google.com
+```
+
+#### [debug]
+
+打出来的包具备 deb-tools 的调试模式，此外还会输出更多的日志信息用于调试。
+
+```shell
+--debug
 ```
 
 ## 结语

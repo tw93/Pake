@@ -52,12 +52,11 @@ export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & {url: string} = {
 
 then
 
-
 ```bash
 yarn cli:dev
 ```
 
-The script will reads the above configuration and packages the specified `app` using `watch` mode, and changes to the `pake-cli` code and `pake` are hot updated in real time.
+The script will read the above configuration and packages the specified `app` using `watch` mode, and changes to the `pake-cli` code and `pake` are hot updated in real time.
 
 ### CLI Usage
 
@@ -121,19 +120,29 @@ Enable or disable immersive header. Default is `false`. Use the following comman
 --transparent
 ```
 
+#### [fullscreen]
+
+Determine whether the application launches in full screen. Default is `false`. Use the following command to enable full
+screen.
+
+```shell
+--fullscreen
+```
+
 #### [always-on-top]
-Enable the always-on-top feature. Default is `false`.
+
+Sets whether the window is always at the top level, defaults to `false`.
 
 ```shell
 --always-on-top
 ```
 
-#### [fullscreen]
+#### [disabled-web-shortcuts]
 
-Determine whether the application launches in full screen. Default is `false`. Use the following command to enable full screen.
+Sets whether to disable web shortcuts in the original Pake container, defaults to `false`.
 
 ```shell
---fullscreen
+--disabled-web-shortcuts
 ```
 
 #### [multi-arch]
@@ -202,6 +211,7 @@ Enable recursive copying. When the URL is a local file path, enabling this optio
 ```
 
 #### [inject]
+
 Using `inject`, you can inject local absolute and relative path `css` and `js` files into the page you specify the `url` to customize it.  For example, an adblock script that can be applied to any web page, or a `css` that optimizes the `UI` of a page, you can write it once to customize it. would only need to write the `app` once to generalize it to any other page.
 
 ```shell
@@ -209,13 +219,21 @@ Using `inject`, you can inject local absolute and relative path `css` and `js` f
 ```
 
 #### [safe-domain]
+
 This secure domain is a domain other than your currently configured `url` to which you may be redirected or jumped to, and only in domains that have been configured as secure can you use `tauri` to expose `api` to browsers to ensure that pake's built-in enhancements work correctly. Only in a domain that has been configured as secure can you use the `tauri` to expose the `api` to the browser, ensuring that `pake's` built-in enhancements work correctly.
 
 PS: Secure domains do not need to carry protocols.
 
-
 ```shell
 --safe-domain weread.qq.com,google.com
+```
+
+#### [debug]
+
+The typed package has dev-tools for debugging, in addition to outputting more log messages for debugging.
+
+```shell
+--debug
 ```
 
 ## Conclusion

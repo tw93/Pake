@@ -27,6 +27,9 @@ export interface PakeCliOptions {
   // Enable windows always on top, default false
   alwaysOnTop: boolean;
 
+  // Disable web shortcuts, default false
+  disabledWebShortcuts: boolean;
+
   // Custom User-Agent, default off
   userAgent: string;
 
