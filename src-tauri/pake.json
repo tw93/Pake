@@ -9,6 +9,7 @@
       "height": 780,
       "resizable": true,
       "always_on_top": false,
+      "activation_shortcut": "",
       "disabled_web_shortcuts": false
     }
   ],

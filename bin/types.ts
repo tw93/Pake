@@ -30,6 +30,9 @@ export interface PakeCliOptions {
   // Disable web shortcuts, default false
   disabledWebShortcuts: boolean;
 
+  // Set a shortcut key to wake up the app, default empty
+  activationShortcut: string;
+
   // Custom User-Agent, default off
   userAgent: string;
 

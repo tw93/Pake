@@ -11,6 +11,7 @@ pub struct WindowConfig {
     pub url_type: String,
     pub always_on_top: bool,
     pub disabled_web_shortcuts: bool,
+    pub activation_shortcut: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

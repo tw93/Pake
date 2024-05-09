@@ -2,7 +2,7 @@
 
 ## Installation
 
-Ensure that your Node.js version is 16.0 or higher (e.g., 16.8). Avoid using `sudo` for the installation. If you encounter permission issues with npm, refer to [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo).
+Ensure that your Node.js version is 18.0 or higher (e.g., 18.20.2). Avoid using `sudo` for the installation. If you encounter permission issues with npm, refer to [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo).
 
 ```bash
 npm install pake-cli -g 
@@ -81,7 +81,7 @@ Various options are available for customization. You can pass corresponding argu
 Specify the application name. If not provided, you will be prompted to enter it. It is recommended to use English.
 
 ```shell
---name <value>
+--name <string>
 ```
 
 #### [icon]
@@ -112,12 +112,12 @@ Set the width of the application window. Default is `1200px`.
 --width <number>
 ```
 
-#### [transparent]
+#### [hide-title-bar]
 
 Enable or disable immersive header. Default is `false`. Use the following command to enable this feature, macOS only.
 
 ```shell
---transparent
+--hide-title-bar
 ```
 
 #### [fullscreen]
@@ -127,6 +127,15 @@ screen.
 
 ```shell
 --fullscreen
+```
+
+
+#### [activation-shortcut]
+
+Set the activation shortcut for the application. Default is ` `, it does not take effect, you can customize the activation shortcut with the following commands, e.g. `CmdOrControl+Shift+P`, use can refer to [available-modifiers](https://www.electronjs.org/docs/latest/api/accelerator#available-modifiers).
+
+```shell
+--activation-shortcut <string>
 ```
 
 #### [always-on-top]
@@ -154,15 +163,15 @@ Package the application to support both Intel and M1 chips, exclusively for macO
 - Note: After enabling this option, Rust must be installed using rustup from the official Rust website. Installation via brew is not supported.
 - For Intel chip users, install the arm64 cross-platform package to support M1 chips using the following command:
 
-```shell
-rustup target add aarch64-apple-darwin
-```
+  ```shell
+  rustup target add aarch64-apple-darwin
+  ```
 
 - For M1 chip users, install the x86 cross-platform package to support Intel chips using the following command:
 
-```shell
-rustup target add x86_64-apple-darwin
-```
+  ```shell
+  rustup target add x86_64-apple-darwin
+  ```
 
 ##### Usage
 
@@ -183,7 +192,7 @@ Select the output package format for Linux. Options include `deb`, `appimage`, o
 Customize the browser user agent. Default is empty.
 
 ```shell
---user-agent <value>
+--user-agent <string>
 ```
 
 #### [show-system-tray]

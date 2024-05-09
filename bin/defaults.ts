@@ -9,6 +9,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   transparent: false,
   alwaysOnTop: false,
   disabledWebShortcuts: false,
+  activationShortcut: '',
   userAgent: '',
   showSystemTray: false,
   multiArch: false,
