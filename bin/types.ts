@@ -42,7 +42,7 @@ export interface PakeCliOptions {
   // Tray icon, default same as app icon for Windows and Linux, macOS requires separate png or ico
   systemTrayIcon: string;
 
-  // Recursive copy, when url is a local file path, if this option is enabled, the url path file and all its subfiles will be copied to the pake static file folder, default off
+  // Recursive copy, when url is a local file path, if this option is enabled, the url path file and all its subFiles will be copied to the pake static file folder, default off
   useLocalFile: false;
 
   // Multi arch, supports both Intel and M1 chips, only for Mac

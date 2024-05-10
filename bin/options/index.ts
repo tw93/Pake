@@ -20,10 +20,7 @@ function isValidName(name: string, platform: NodeJS.Platform): boolean {
   return !!name && reg.test(name);
 }
 
-export default async function handleOptions(
-  options: PakeCliOptions,
-  url: string,
-): Promise<PakeAppOptions> {
+export default async function handleOptions(options: PakeCliOptions, url: string): Promise<PakeAppOptions> {
   const { platform } = process;
   const isActions = process.env.GITHUB_ACTIONS;
   let name = options.name;

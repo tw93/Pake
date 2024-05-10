@@ -5,7 +5,7 @@
 请确保您的 Node.js 版本为 18 或更高版本（例如 18.7）。请避免使用 `sudo` 进行安装。如果 npm 报告权限问题，请参考 [如何在不使用 sudo 的情况下修复 npm 报错](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo)。
 
 ```bash
-npm install pake-cli -g 
+npm install pake-cli -g
 ```
 
 ## Windows/Linux 注意事项
@@ -44,11 +44,11 @@ npm install pake-cli -g
 开发时可以修改 `bin/defaults.ts` 中 `DEFAULT_DEV_PAKE_OPTIONS` 配置，配置项和 `pake-cli` 配置说明保持一致
 
 ```typescript
-export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & {url: string} = {
+export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
   ...DEFAULT_PAKE_OPTIONS,
   url: 'https://weread.qq.com',
   name: 'Weread',
-}
+};
 ```
 
 之后运行

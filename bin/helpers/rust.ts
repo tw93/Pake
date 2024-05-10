@@ -9,9 +9,10 @@ import { isChinaDomain } from '@/utils/ip';
 export async function installRust() {
   const isActions = process.env.GITHUB_ACTIONS;
   const isInChina = await isChinaDomain('sh.rustup.rs');
-  const rustInstallScriptForMac = isInChina && !isActions
-    ? 'export RUSTUP_DIST_SERVER="https://rsproxy.cn" && export RUSTUP_UPDATE_ROOT="https://rsproxy.cn/rustup" && curl --proto "=https" --tlsv1.2 -sSf https://rsproxy.cn/rustup-init.sh | sh'
-    : "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
+  const rustInstallScriptForMac =
+    isInChina && !isActions
+      ? 'export RUSTUP_DIST_SERVER="https://rsproxy.cn" && export RUSTUP_UPDATE_ROOT="https://rsproxy.cn/rustup" && curl --proto "=https" --tlsv1.2 -sSf https://rsproxy.cn/rustup-init.sh | sh'
+      : "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
   const rustInstallScriptForWindows = 'winget install --id Rustlang.Rustup';
 
   const spinner = getSpinner('Downloading Rust...');

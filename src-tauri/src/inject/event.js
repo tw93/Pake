@@ -1,13 +1,13 @@
 const shortcuts = {
-  'ArrowUp': () => scrollTo(0, 0),
-  'ArrowDown': () => scrollTo(0, document.body.scrollHeight),
   '[': () => window.history.back(),
   ']': () => window.history.forward(),
-  'r': () => window.location.reload(),
   '-': () => zoomOut(),
   '=': () => zoomIn(),
   '+': () => zoomIn(),
-  '0': () => setZoom('100%'),
+  0: () => setZoom('100%'),
+  r: () => window.location.reload(),
+  ArrowUp: () => scrollTo(0, 0),
+  ArrowDown: () => scrollTo(0, document.body.scrollHeight),
 };
 
 function setZoom(zoom) {
@@ -22,11 +22,11 @@ function zoomCommon(zoomChange) {
 }
 
 function zoomIn() {
-  zoomCommon((currentZoom) => `${Math.min(parseInt(currentZoom) + 10, 200)}%`);
+  zoomCommon(currentZoom => `${Math.min(parseInt(currentZoom) + 10, 200)}%`);
 }
 
 function zoomOut() {
-  zoomCommon((currentZoom) => `${Math.max(parseInt(currentZoom) - 10, 30)}%`);
+  zoomCommon(currentZoom => `${Math.max(parseInt(currentZoom) - 10, 30)}%`);
 }
 
 function handleShortcut(event) {
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     appWindow.startDragging().then();
   });
 
-  domEl.addEventListener('mousedown', (e) => {
+  domEl.addEventListener('mousedown', e => {
     e.preventDefault();
     if (e.buttons === 1 && e.detail !== 2) {
       appWindow.startDragging().then();
@@ -83,13 +83,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   domEl.addEventListener('dblclick', () => {
-    appWindow.isFullscreen().then((fullscreen) => {
+    appWindow.isFullscreen().then(fullscreen => {
       appWindow.setFullscreen(!fullscreen).then();
     });
   });
 
   if (window['pakeConfig']?.disabled_web_shortcuts !== true) {
-    document.addEventListener('keyup', (event) => {
+    document.addEventListener('keyup', event => {
       if (/windows|linux/i.test(navigator.userAgent) && event.ctrlKey) {
         handleShortcut(event);
       }
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function collectUrlToBlobs() {
     const backupCreateObjectURL = window.URL.createObjectURL;
     window.blobToUrlCaches = new Map();
-    window.URL.createObjectURL = (blob) => {
+    window.URL.createObjectURL = blob => {
       const url = backupCreateObjectURL.call(window.URL, blob);
       window.blobToUrlCaches.set(url, blob);
       return url;
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function convertBlobUrlToBinary(blobUrl) {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const blob = window.blobToUrlCaches.get(blobUrl);
       const reader = new FileReader();
 
@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function downloadFromBlobUrl(blobUrl, filename) {
-    convertBlobUrlToBinary(blobUrl).then((binary) => {
+    convertBlobUrlToBinary(blobUrl).then(binary => {
       invoke('download_file_by_binary', {
         params: {
           filename,
@@ -155,37 +155,40 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-// detect blob download by createElement("a")
+  // detect blob download by createElement("a")
   function detectDownloadByCreateAnchor() {
     const createEle = document.createElement;
-    document.createElement = (el) => {
+    document.createElement = el => {
       if (el !== 'a') return createEle.call(document, el);
       const anchorEle = createEle.call(document, el);
 
       // use addEventListener to avoid overriding the original click event.
-      anchorEle.addEventListener('click', (e) => {
-        const url = anchorEle.href;
-        const filename = anchorEle.download || getFilenameFromUrl(url);
-        if (window.blobToUrlCaches.has(url)) {
-          downloadFromBlobUrl(url, filename);
-          // case: download from dataURL -> convert dataURL ->
-        } else if (url.startsWith('data:')) {
-          downloadFromDataUri(url, filename);
-        } else if (isDownloadLink(url) || anchorEle.hostname !== window.location.host) {
-          handleExternalLink(e, url);
-        }
-      }, true);
+      anchorEle.addEventListener(
+        'click',
+        e => {
+          const url = anchorEle.href;
+          const filename = anchorEle.download || getFilenameFromUrl(url);
+          if (window.blobToUrlCaches.has(url)) {
+            downloadFromBlobUrl(url, filename);
+            // case: download from dataURL -> convert dataURL ->
+          } else if (url.startsWith('data:')) {
+            downloadFromDataUri(url, filename);
+          } else if (isDownloadLink(url) || anchorEle.hostname !== window.location.host) {
+            handleExternalLink(e, url);
+          }
+        },
+        true,
+      );
 
       return anchorEle;
     };
   }
 
-  const isExternalLink = (link) => window.location.host !== link.host;
+  const isExternalLink = link => window.location.host !== link.host;
   // process special download protocol['data:','blob:']
-  const isSpecialDownload = (url) => ['blob', 'data'].some(protocol => url.startsWith(protocol));
+  const isSpecialDownload = url => ['blob', 'data'].some(protocol => url.startsWith(protocol));
 
-  const isDownloadRequired = (url, anchorElement, e) =>
-    anchorElement.download || e.metaKey || e.ctrlKey || isDownloadLink(url);
+  const isDownloadRequired = (url, anchorElement, e) => anchorElement.download || e.metaKey || e.ctrlKey || isDownloadLink(url);
 
   const handleExternalLink = (e, url) => {
     e.preventDefault();
@@ -197,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
     invoke('download_file', { params: { url, filename } });
   };
 
-  const detectAnchorElementClick = (e) => {
+  const detectAnchorElementClick = e => {
     const anchorElement = e.target.closest('a');
     if (anchorElement && anchorElement.href) {
       anchorElement.target = '_self';
@@ -226,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Rewrite the window.open function.
   const originalWindowOpen = window.open;
-  window.open = function(url, name, specs) {
+  window.open = function (url, name, specs) {
     // Apple login and google login
     if (name === 'AppleAuthentication') {
       //do nothing
@@ -249,10 +252,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Fix Chinese input method "Enter" on Safari
-  document.addEventListener('keydown', (e) => {
-    if (e.keyCode === 229) e.stopPropagation();
-  }, true);
-
+  document.addEventListener(
+    'keydown',
+    e => {
+      if (e.keyCode === 229) e.stopPropagation();
+    },
+    true,
+  );
 });
 
 function setDefaultZoom() {

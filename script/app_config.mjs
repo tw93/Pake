@@ -86,7 +86,6 @@ switch (os.platform()) {
     break;
 }
 
-
 updateIconFile(platformVariables.iconPath, platformVariables.defaultIconPath);
 
 updatePlatformConfig(platformConfig, platformVariables);
@@ -148,7 +147,6 @@ function updatePlatformConfig(platformConfig, platformVariables) {
 }
 
 function save() {
-
   writeFileSync(variables.pakeConfigPath, JSON.stringify(pakeJson, null, 2));
   writeFileSync(variables.tauriConfigPath, JSON.stringify(tauriJson, null, 2));
 
@@ -158,13 +156,11 @@ function save() {
   writeFileSync(variables.macos.configFilePath, JSON.stringify(macosJson, null, 2));
 
   writeFileSync(variables.windows.configFilePath, JSON.stringify(windowsJson, null, 2));
-
 }
 
 function updateDesktopEntry() {
   linuxJson.tauri.bundle.deb.files = {};
-  linuxJson.tauri.bundle.deb.files[variables.linux.desktopEntryConfig.configKey] =
-    variables.linux.desktopEntryConfig.configValue;
+  linuxJson.tauri.bundle.deb.files[variables.linux.desktopEntryConfig.configKey] = variables.linux.desktopEntryConfig.configValue;
   writeFileSync(variables.linux.desktopEntryPath, variables.linux.desktopEntry);
 }
 

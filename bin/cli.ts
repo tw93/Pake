@@ -18,10 +18,7 @@ ${green('|  __/ (_| |   <  __/')}  ${yellow('https://github.com/tw93/pake')}
 ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with Rust.')}
 `;
 
-program
-  .addHelpText('beforeAll', logo)
-  .usage(`[url] [options]`)
-  .showHelpAfterError();
+program.addHelpText('beforeAll', logo).usage(`[url] [options]`).showHelpAfterError();
 
 program
   .argument('[url]', 'The web URL you want to package', validateUrlInput)
@@ -37,12 +34,24 @@ program
   .option('--inject [injects...]', 'Injection of .js or .css Files', DEFAULT.inject)
   .option('--debug', 'Debug build and more output', DEFAULT.debug)
   .addOption(new Option('--user-agent <string>', 'Custom user agent').default(DEFAULT.userAgent).hideHelp())
-  .addOption(new Option('--targets <string>', 'Only for Linux, option "deb" or "appimage"').default(DEFAULT.targets).hideHelp())
+  .addOption(
+    new Option('--targets <string>', 'Only for Linux, option "deb" or "appimage"').default(DEFAULT.targets).hideHelp(),
+  )
   .addOption(new Option('--always-on-top', 'Always on the top level').default(DEFAULT.alwaysOnTop).hideHelp())
-  .addOption(new Option('--disabled-web-shortcuts', 'Disabled webPage shortcuts').default(DEFAULT.disabledWebShortcuts).hideHelp())
-  .addOption(new Option('--safe-domain [domains...]', 'Domains that Require Security Configuration').default(DEFAULT.safeDomain).hideHelp())
+  .addOption(
+    new Option('--disabled-web-shortcuts', 'Disabled webPage shortcuts')
+      .default(DEFAULT.disabledWebShortcuts)
+      .hideHelp(),
+  )
+  .addOption(
+    new Option('--safe-domain [domains...]', 'Domains that Require Security Configuration')
+      .default(DEFAULT.safeDomain)
+      .hideHelp(),
+  )
   .addOption(new Option('--show-system-tray', 'Show system tray in app').default(DEFAULT.showSystemTray).hideHelp())
-  .addOption(new Option('--system-tray-icon <string>', 'Custom system tray icon').default(DEFAULT.systemTrayIcon).hideHelp())
+  .addOption(
+    new Option('--system-tray-icon <string>', 'Custom system tray icon').default(DEFAULT.systemTrayIcon).hideHelp(),
+  )
   .version(packageJson.version, '-v, --version', 'Output the current version')
   .action(async (url: string, options: PakeCliOptions) => {
     await checkUpdateTips();

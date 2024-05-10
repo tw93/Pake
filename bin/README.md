@@ -5,7 +5,7 @@
 Ensure that your Node.js version is 18.0 or higher (e.g., 18.20.2). Avoid using `sudo` for the installation. If you encounter permission issues with npm, refer to [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo).
 
 ```bash
-npm install pake-cli -g 
+npm install pake-cli -g
 ```
 
 ## Considerations for Windows & Linux Users
@@ -40,14 +40,15 @@ npm install pake-cli -g
 ## Usage
 
 ### Development
+
 The `DEFAULT_DEV_PAKE_OPTIONS` configuration in `bin/defaults.ts` can be modified at development time to match the `pake-cli` configuration description.
 
 ```typescript
-export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & {url: string} = {
+export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
   ...DEFAULT_PAKE_OPTIONS,
   url: 'https://weread.qq.com',
   name: 'Weread',
-}
+};
 ```
 
 then
@@ -128,7 +129,6 @@ screen.
 ```shell
 --fullscreen
 ```
-
 
 #### [activation-shortcut]
 
@@ -221,7 +221,7 @@ Enable recursive copying. When the URL is a local file path, enabling this optio
 
 #### [inject]
 
-Using `inject`, you can inject local absolute and relative path `css` and `js` files into the page you specify the `url` to customize it.  For example, an adblock script that can be applied to any web page, or a `css` that optimizes the `UI` of a page, you can write it once to customize it. would only need to write the `app` once to generalize it to any other page.
+Using `inject`, you can inject local absolute and relative path `css` and `js` files into the page you specify the `url` to customize it. For example, an adblock script that can be applied to any web page, or a `css` that optimizes the `UI` of a page, you can write it once to customize it. would only need to write the `app` once to generalize it to any other page.
 
 ```shell
 --inject ./tools/style.css,./tools/hotkey.js
@@ -248,4 +248,3 @@ The typed package has dev-tools for debugging, in addition to outputting more lo
 ## Conclusion
 
 After completing the above steps, your application should be successfully packaged. Please note that the packaging process may take some time depending on your system configuration and network conditions. Be patient, and once the packaging is complete, you can find the application installer in the specified directory.
-

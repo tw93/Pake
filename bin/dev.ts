@@ -1,5 +1,5 @@
 import log from 'loglevel';
-import {DEFAULT_DEV_PAKE_OPTIONS} from './defaults';
+import { DEFAULT_DEV_PAKE_OPTIONS } from './defaults';
 import handleInputOptions from './options/index';
 import BuilderProvider from './builders/BuilderProvider';
 
