@@ -38,11 +38,14 @@ function handleShortcut(event) {
 
 // Judgment of file download.
 function isDownloadLink(url) {
+  // prettier-ignore
   const fileExtensions = [
-    '3gp', '7z', 'ai', 'apk', 'avi', 'bmp', 'csv', 'dmg', 'doc', 'docx', 'fla', 'flv', 'gif', 'gz', 'gzip',
-    'ico', 'iso', 'indd', 'jar', 'jpeg', 'jpg', 'm3u8', 'mov', 'mp3', 'mp4', 'mpa', 'mpg',
-    'mpeg', 'msi', 'odt', 'ogg', 'ogv', 'pdf', 'png', 'ppt', 'pptx', 'psd', 'rar', 'raw', 'rss', 'svg',
-    'swf', 'tar', 'tif', 'tiff', 'ts', 'txt', 'wav', 'webm', 'webp', 'wma', 'wmv', 'xls', 'xlsx', 'xml', 'zip',
+    '3gp', '7z', 'ai', 'apk', 'avi', 'bmp', 'csv', 'dmg', 'doc', 'docx',
+    'fla', 'flv', 'gif', 'gz', 'gzip', 'ico', 'iso', 'indd', 'jar', 'jpeg',
+    'jpg', 'm3u8', 'mov', 'mp3', 'mp4', 'mpa', 'mpg', 'mpeg', 'msi', 'odt',
+    'ogg', 'ogv', 'pdf', 'png', 'ppt', 'pptx', 'psd', 'rar', 'raw', 'rss',
+    'svg', 'swf', 'tar', 'tif', 'tiff', 'ts', 'txt', 'wav', 'webm', 'webp',
+    'wma', 'wmv', 'xls', 'xlsx', 'xml', 'zip', 'json', 'yaml', '7zip', 'mkv'
   ];
   const downloadLinkPattern = new RegExp(`\\.(${fileExtensions.join('|')})$`, 'i');
   return downloadLinkPattern.test(url);

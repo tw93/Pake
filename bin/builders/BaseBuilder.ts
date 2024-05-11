@@ -66,7 +66,6 @@ export default abstract class BaseBuilder {
     }
   }
 
-
   async build(url: string) {
     await this.buildAndCopy(url, this.options.targets);
   }
