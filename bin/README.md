@@ -46,7 +46,7 @@ The `DEFAULT_DEV_PAKE_OPTIONS` configuration in `bin/defaults.ts` can be modifie
 ```typescript
 export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
   ...DEFAULT_PAKE_OPTIONS,
-  url: 'https://weread.qq.com',
+  url: 'https://ai.goviewlink.com',
   name: 'Weread',
 };
 ```

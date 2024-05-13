@@ -67,10 +67,10 @@
       "url": "https://music.youtube.com/"
     },
     {
-      "name": "weread",
-      "title": "WeRead",
-      "name_zh": "微信阅读",
-      "url": "https://weread.qq.com/"
+      "name": "goview",
+      "title": "goview",
+      "name_zh": "goview",
+      "url": "https://ai.goviewlink.com"
     }
   ]
 }

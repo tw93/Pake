@@ -6,10 +6,24 @@
   "tauri": {
     "security": {
       "csp": null,
+      "devCsp": null,
       "dangerousRemoteDomainIpcAccess": [
         {
-          "domain": "weread.qq.com",
+          "domain": "ai.goviewlink.com",
           "windows": ["pake"],
+          "plugins": ["*"],
+          "enableTauriAPI": true
+        },
+        {
+          "domain": "localhost",
+          "windows": ["pake"],
+          "plugins": ["*"],
+          "enableTauriAPI": true
+        },
+        {
+          "domain": "*",
+          "windows": ["pake"],
+          "plugins": ["*"],
           "enableTauriAPI": true
         }
       ]
@@ -23,6 +37,11 @@
     },
     "allowlist": {
       "all": true,
+      "http": {
+        "all": true,
+        "request": true,
+        "scope": ["https://**", "http://**"]
+      },
       "fs": {
         "all": true,
         "scope": ["$DOWNLOAD/*"]

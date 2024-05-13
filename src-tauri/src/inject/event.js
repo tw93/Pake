@@ -1,3 +1,4 @@
+
 const shortcuts = {
   '[': () => window.history.back(),
   ']': () => window.history.forward(),
@@ -232,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Rewrite the window.open function.
   const originalWindowOpen = window.open;
-  window.open = function (url, name, specs) {
+  window.open = async function(url, name, specs = '') {
     // Apple login and google login
     if (name === 'AppleAuthentication') {
       //do nothing
@@ -241,7 +242,10 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       const baseUrl = window.location.origin + window.location.pathname;
       const hrefUrl = new URL(url, baseUrl);
-      tauri.shell.open(hrefUrl.href);
+      // tauri.shell.open(hrefUrl.href);
+      window.location.href = hrefUrl;
+
+      return
     }
     // Call the original window.open function to maintain its normal functionality.
     return originalWindowOpen.call(window, url, name, specs);
@@ -275,3 +279,97 @@ function getFilenameFromUrl(url) {
   const urlPath = new URL(url).pathname;
   return urlPath.substring(urlPath.lastIndexOf('/') + 1);
 }
+
+
+function interceptXhrResponse(urlPattern, responseHandler, requestUrlModifier) {
+  let interceptionRules = [];
+  let oldUrl = '';
+
+  // 添加拦截规则
+  interceptionRules.push({ urlPattern, responseHandler, requestUrlModifier });
+  // 处理拦截后的响应内容
+  function handleInterceptedResponse(response, requestMethod, requestHeaders, requestBody, url) {
+    const interceptionRule = interceptionRules.find(({ urlPattern }) => {
+      return urlPattern.test(url)
+    });
+    if (interceptionRule) {
+      const { responseHandler, requestUrlModifier } = interceptionRule;
+      // 如果存在请求 URL 修改函数，先修改请求 URL
+      if (typeof requestUrlModifier === 'function') {
+        url = requestUrlModifier(url);
+      }
+
+      return responseHandler(requestMethod, requestHeaders, requestBody, url, oldUrl);
+    }
+    return response;
+  }
+  // 重写 XMLHttpRequest 对象
+  const OriginalXMLHttpRequest = window.XMLHttpRequest;
+  class XMLHttpRequest extends OriginalXMLHttpRequest {
+    constructor() {
+      super();
+      this._requestMethod = null;
+      this._requestHeaders = new Headers();
+      this._requestBody = null;
+    }
+
+    open(method, url, async) {
+      this._requestMethod = method;
+      this._requestHeaders = new Headers();
+
+      oldUrl = url
+      // 在发送请求前，检查是否有 URL 修改规则
+      const interceptionRule = interceptionRules.find(({ urlPattern }) =>
+        urlPattern.test(url)
+      );
+      if (interceptionRule && typeof interceptionRule.requestUrlModifier === 'function') {
+        url = interceptionRule.requestUrlModifier(url);
+      }
+      super.open(method, url, async);
+    }
+    setRequestHeader(header, value) {
+      this._requestHeaders.append(header, value);
+      return super.setRequestHeader(header, value);
+    }
+    send(body) {
+      this._requestBody = JSON.parse(body) || null;
+      return super.send(body);
+    }
+    get responseText() {
+      if (this.readyState !== 4) {
+        return super.responseText;
+      }
+      return handleInterceptedResponse(super.responseText, this._requestMethod,this._requestHeaders,this._requestBody, oldUrl);
+    }
+    get response() {
+      if (this.readyState !== 4) {
+        return super.response;
+      }
+      return handleInterceptedResponse(super.response, this._requestMethod,this._requestHeaders,this._requestBody, oldUrl);
+    }
+  }
+  window.XMLHttpRequest = XMLHttpRequest;
+}
+
+// 使用拦截函数来修改响应内容和请求 URL
+interceptXhrResponse(/^(https?:\/\/)?(localhost|127\.0\.0\.1|192\.168\.\d+).*/, 
+  async (requestMethod, requestHeaders, requestBody, url, oldUrl) => {
+    const tauri = window.__TAURI__;
+    const option = {
+      method: requestMethod,
+      Headers: requestHeaders,
+    }
+    if(requestMethod.toUpperCase() === 'GET') {
+      option.query = requestBody
+    } else {
+      option.body = requestBody
+    }
+    const res = await tauri.http.fetch(oldUrl, )
+
+    return res;
+  }, 
+  (originalUrl) => {
+    // 这里可以根据需要修改 URL，例如添加或删除某些参数
+    return 'https://ai.goviewlink.com/proxy/test';
+  }
+);
