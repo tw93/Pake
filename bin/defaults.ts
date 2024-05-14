@@ -24,8 +24,8 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
 // Just for cli development
 export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
   ...DEFAULT_PAKE_OPTIONS,
-  url: 'https://www.jdy.com',
-  name: 'jdy',
-  safeDomain: ['www.jdy.com'],
+  url: 'https://chatgpt.com/',
+  name: 'ChatGPT',
+  safeDomain: ['chatgpt.com/'],
   hideTitleBar: true,
 };

@@ -5,6 +5,12 @@
       "title": "jdy",
       "name_zh": "金蝶云星辰",
       "url": "https://www.jdy.com/"
+    },
+    {
+      "name": "ChatGPT",
+      "title": "ChatGPT",
+      "name_zh": "ChatGPT",
+      "url": "https://chatgpt.com/"
     }
   ]
 }
