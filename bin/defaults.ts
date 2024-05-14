@@ -25,7 +25,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
 export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
   ...DEFAULT_PAKE_OPTIONS,
   url: 'https://www.jdy.com',
-  name: 'JDY',
+  name: 'jdy',
   safeDomain: ['www.jdy.com'],
   hideTitleBar: true,
 };
