@@ -41,8 +41,6 @@ pub fn run_app() {
         ])
         .setup(move |app| {
             let _window = get_window(app, pake_config, data_dir);
-            // Prevent initial shaking
-            _window.show().unwrap();
 
             if !activation_shortcut.is_empty() {
                 let app_handle = app.app_handle().clone();

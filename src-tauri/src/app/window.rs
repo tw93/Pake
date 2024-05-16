@@ -27,7 +27,6 @@ pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Wind
     let mut window_builder = WindowBuilder::new(app, "pake", url)
         .title("")
         .user_agent(user_agent)
-        .visible(false) // Prevent initial shaking
         .resizable(window_config.resizable)
         .fullscreen(window_config.fullscreen)
         .inner_size(window_config.width, window_config.height)
