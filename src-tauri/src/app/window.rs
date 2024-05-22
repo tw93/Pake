@@ -5,7 +5,7 @@ use tauri::{App, Window, WindowBuilder, WindowUrl};
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
 
-pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Window {
+pub fn build_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Window {
     let window_config = config
         .windows
         .first()
@@ -26,17 +26,16 @@ pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Wind
 
     let mut window_builder = WindowBuilder::new(app, "pake", url)
         .title("")
+        .visible(false)
         .user_agent(user_agent)
         .resizable(window_config.resizable)
         .fullscreen(window_config.fullscreen)
         .inner_size(window_config.width, window_config.height)
-        .disable_file_drop_handler()
         .always_on_top(window_config.always_on_top)
         .initialization_script(&config_script)
         .initialization_script(include_str!("../inject/component.js"))
         .initialization_script(include_str!("../inject/event.js"))
         .initialization_script(include_str!("../inject/style.js"))
-        //This is necessary to allow for file injection by external developers for customization purposes.
         .initialization_script(include_str!("../inject/custom.js"));
 
     #[cfg(target_os = "macos")]

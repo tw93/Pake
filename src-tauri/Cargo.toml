@@ -16,8 +16,8 @@ tauri-build = { version = "1.5.2", features = [] }
 
 [dependencies]
 serde_json = "1.0.117"
-serde = { version = "1.0.201", features = ["derive"] }
-tauri = { version = "1.6.5", features = ["api-all", "system-tray"] }
+serde = { version = "1.0.202", features = ["derive"] }
+tauri = { version = "1.6.6", features = ["api-all", "system-tray"] }
 tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 tauri-plugin-oauth = { git = "https://github.com/FabianLars/tauri-plugin-oauth", branch = "main" }
 
