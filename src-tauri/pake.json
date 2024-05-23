@@ -1,19 +1,7 @@
 {
   "windows": [
     {
-      "url": "https://cn.ai0.cn",
-      "url_type": "web",
-      "hide_title_bar": true,
-      "fullscreen": false,
-      "width": 1200,
-      "height": 780,
-      "resizable": true,
-      "always_on_top": false,
-      "activation_shortcut": "",
-      "disabled_web_shortcuts": false
-    },
-    {
-      "url": "https://genshin.jerryz.com.cn",
+      "url": "https://weread.qq.com",
       "url_type": "web",
       "hide_title_bar": true,
       "fullscreen": false,
