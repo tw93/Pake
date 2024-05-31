@@ -19,7 +19,7 @@
     <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 </div>
 
-<div align="left">PakeはMac、Windows、Linuxをサポートしています。<a href="#popular-packages">人気のパッケージ</a>、<a href="#command-line-packaging">コマンドラインパッケージング</a>、<a href="#development">カスタマイズ開発</a>に関する情報はREADMEをご覧ください。<a href=https://github.com/tw93/Pake/discussions>ディスカッション</a>でご意見をお聞かせください。</div>
+<div align="left">PakeはMac、Windows、Linuxをサポートしています。<a href="#人気のパッケージ">人気のパッケージ</a>、<a href="#コマンドラインパッケージング">コマンドラインパッケージング</a>、<a href="#カスタマイズ開発">カスタマイズ開発</a>に関する情報はREADMEをご覧ください。<a href=https://github.com/tw93/Pake/discussions>ディスカッション</a>でご意見をお聞かせください。</div>
 
 ## 特徴
 
