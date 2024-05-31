@@ -1,4 +1,4 @@
-<h4 align="right"><strong>English</strong> | <a href="https://github.com/tw93/Pake/blob/master/README_CN.md">简体中文</a> | 日本語</h4>
+<h4 align="right"><a href="https://github.com/tw93/Pake">English</a> | <a href="https://github.com/tw93/Pake/blob/master/README_CN.md">简体中文</a> | <strong>日本語</strong></h4>
 <p align="center">
     <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
 </p>
@@ -23,10 +23,10 @@
 
 ## 特徴
 
-- 🎐 Electronパッケージと比較して約20倍小さい（約5M！）
-- 🚀 Rust Tauriを使用しているため、PakeはJSベースのフレームワークよりもはるかに軽量で高速です。
+- 🎐 Electron パッケージと比較して約 20 倍小さい（約 5M！）
+- 🚀 Rust Tauri を使用しているため、Pake は JS ベースのフレームワークよりもはるかに軽量で高速です。
 - 📦 パッケージにはショートカットの透過、没入型ウィンドウ、ミニマリストのカスタマイズが含まれています。
-- 👻 Pakeは単なるシンプルなツールです—Tauriを使用して古いバンドルアプローチを置き換えます（PWAも十分に良いです）。
+- 👻 Pake は単なるシンプルなツールです—Tauri を使用して古いバンドルアプローチを置き換えます（PWA も十分に良いです）。
 
 ## 人気のパッケージ
 
@@ -134,34 +134,34 @@
 
 <br/>
 
-| Mac                         | Windows/Linux                  | 機能                      |
-| --------------------------- | ------------------------------ | ----------------------------- |
-| <kbd>⌘</kbd> + <kbd>[</kbd> | <kbd>Ctrl</kbd> + <kbd>←</kbd> | 前のページに戻る   |
-| <kbd>⌘</kbd> + <kbd>]</kbd> | <kbd>Ctrl</kbd> + <kbd>→</kbd> | 次のページに進む           |
-| <kbd>⌘</kbd> + <kbd>↑</kbd> | <kbd>Ctrl</kbd> + <kbd>↑</kbd> | ページのトップに自動スクロール    |
-| <kbd>⌘</kbd> + <kbd>↓</kbd> | <kbd>Ctrl</kbd> + <kbd>↓</kbd> | ページの底に自動スクロール |
-| <kbd>⌘</kbd> + <kbd>r</kbd> | <kbd>Ctrl</kbd> + <kbd>r</kbd> | ページをリフレッシュ                  |
-| <kbd>⌘</kbd> + <kbd>w</kbd> | <kbd>Ctrl</kbd> + <kbd>w</kbd> | ウィンドウを隠す、終了しない        |
-| <kbd>⌘</kbd> + <kbd>-</kbd> | <kbd>Ctrl</kbd> + <kbd>-</kbd> | ページを縮小             |
-| <kbd>⌘</kbd> + <kbd>+</kbd> | <kbd>Ctrl</kbd> + <kbd>+</kbd> | ページを拡大              |
-| <kbd>⌘</kbd> + <kbd>=</kbd> | <kbd>Ctrl</kbd> + <kbd>=</kbd> | ページを拡大              |
-| <kbd>⌘</kbd> + <kbd>0</kbd> | <kbd>Ctrl</kbd> + <kbd>0</kbd> | ページのズームをリセット           |
+| Mac                         | Windows/Linux                  | 機能                           |
+| --------------------------- | ------------------------------ | ------------------------------ |
+| <kbd>⌘</kbd> + <kbd>[</kbd> | <kbd>Ctrl</kbd> + <kbd>←</kbd> | 前のページに戻る               |
+| <kbd>⌘</kbd> + <kbd>]</kbd> | <kbd>Ctrl</kbd> + <kbd>→</kbd> | 次のページに進む               |
+| <kbd>⌘</kbd> + <kbd>↑</kbd> | <kbd>Ctrl</kbd> + <kbd>↑</kbd> | ページのトップに自動スクロール |
+| <kbd>⌘</kbd> + <kbd>↓</kbd> | <kbd>Ctrl</kbd> + <kbd>↓</kbd> | ページの底に自動スクロール     |
+| <kbd>⌘</kbd> + <kbd>r</kbd> | <kbd>Ctrl</kbd> + <kbd>r</kbd> | ページをリフレッシュ           |
+| <kbd>⌘</kbd> + <kbd>w</kbd> | <kbd>Ctrl</kbd> + <kbd>w</kbd> | ウィンドウを隠す、終了しない   |
+| <kbd>⌘</kbd> + <kbd>-</kbd> | <kbd>Ctrl</kbd> + <kbd>-</kbd> | ページを縮小                   |
+| <kbd>⌘</kbd> + <kbd>+</kbd> | <kbd>Ctrl</kbd> + <kbd>+</kbd> | ページを拡大                   |
+| <kbd>⌘</kbd> + <kbd>=</kbd> | <kbd>Ctrl</kbd> + <kbd>=</kbd> | ページを拡大                   |
+| <kbd>⌘</kbd> + <kbd>0</kbd> | <kbd>Ctrl</kbd> + <kbd>0</kbd> | ページのズームをリセット       |
 
-さらに、タイトルバーをダブルクリックして全画面モードに切り替えることができます。Macユーザーは、ジェスチャーを使用して前のページまたは次のページに移動することもできます。ウィンドウを移動するには、タイトルバーをドラッグします。
+さらに、タイトルバーをダブルクリックして全画面モードに切り替えることができます。Mac ユーザーは、ジェスチャーを使用して前のページまたは次のページに移動することもできます。ウィンドウを移動するには、タイトルバーをドラッグします。
 
 </details>
 
 ## 始める前に
 
-1. **初心者の方へ**: 「人気のパッケージ」を使用してPakeの機能を試してみてください。または、[GitHub Actions](<https://github.com/tw93/Pake/wiki/Online-Compilation-(used-by-ordinary-users)>)を使用してアプリケーションをパッケージ化してみてください。[ディスカッション](https://github.com/tw93/Pake/discussions)で助けを求めることもできます！
-2. **開発者の方へ**: 「コマンドラインパッケージング」を使用してください。macOSでは完全にサポートされています。Windows/Linuxユーザーは、[環境を設定](https://tauri.app/v1/guides/getting-started/prerequisites)する必要があります。
-3. **ハッカーの方へ**: フロントエンド開発とRustの両方が得意な方は、以下の[カスタマイズ開発](#development)でアプリの機能をさらにカスタマイズしてみてください。
+1. **初心者の方へ**: 「人気のパッケージ」を使用して Pake の機能を試してみてください。または、[GitHub Actions](<https://github.com/tw93/Pake/wiki/Online-Compilation-(used-by-ordinary-users)>)を使用してアプリケーションをパッケージ化してみてください。[ディスカッション](https://github.com/tw93/Pake/discussions)で助けを求めることもできます！
+2. **開発者の方へ**: 「コマンドラインパッケージング」を使用してください。macOS では完全にサポートされています。Windows/Linux ユーザーは、[環境を設定](https://tauri.app/v1/guides/getting-started/prerequisites)する必要があります。
+3. **ハッカーの方へ**: フロントエンド開発と Rust の両方が得意な方は、以下の[カスタマイズ開発](#development)でアプリの機能をさらにカスタマイズしてみてください。
 
 ## コマンドラインパッケージング
 
 ![Pake](https://gw.alipayobjects.com/zos/k/zd/pake.gif)
 
-**Pakeはコマンドラインツールを提供しており、必要なパッケージをより迅速かつ簡単にカスタマイズすることができます。詳細は[ドキュメント](./bin/README.md)をご覧ください。**
+**Pake はコマンドラインツールを提供しており、必要なパッケージをより迅速かつ簡単にカスタマイズすることができます。詳細は[ドキュメント](./bin/README.md)をご覧ください。**
 
 ```bash
 # npmを使用してインストール
@@ -178,7 +178,7 @@ pake https://weekly.tw93.fun --name Weekly --hide-title-bar
 
 ## 開発
 
-開始する前に、Rust `>=1.63` と Node `>=16` (例: `16.18.1`) がコンピュータにインストールされていることを確認してください。インストールガイドについては、[Tauriドキュメント](https://tauri.app/v1/guides/getting-started/prerequisites)を参照してください。
+開始する前に、Rust `>=1.63` と Node `>=16` (例: `16.18.1`) がコンピュータにインストールされていることを確認してください。インストールガイドについては、[Tauri ドキュメント](https://tauri.app/v1/guides/getting-started/prerequisites)を参照してください。
 
 これらに不慣れな場合は、上記のツールを使用してワンクリックでパッケージを作成することをお勧めします。
 
@@ -197,12 +197,12 @@ npm run build
 
 1. [コードベースの構造](https://github.com/tw93/Pake/wiki/Description-of-Pake's-code-structure)を参照して、開発前により多くの情報を得ることができます。
 2. `src-tauri` ディレクトリ内の `pake.json` ファイルの `url` と `productName` フィールドを変更する場合は、`tauri.config.json` ファイル内の `domain` フィールド、および `tauri.xxx.conf.json` ファイル内の `icon` と `identifier` フィールドを同期して変更する必要があります。`icon` は `icons` ディレクトリから選択することも、[macOSicons](https://macosicons.com/#/) から効果に合ったものをダウンロードすることもできます。
-3. ウィンドウプロパティの設定については、`pake.json` ファイルを変更して `windows` プロパティの `width`、`height`、`fullscreen`（またはしない）、`resizable`（またはしない）の値を変更できます。Macの没入型ヘッダーに適応するには、`hideTitleBar` を `true` に設定し、`Header` 要素を見つけて `padding-top` プロパティを追加します。
-4. スタイルの書き換え、広告の除去、JSの注入、コンテナメッセージ通信、ユーザー定義のショートカットキーについては、[高度な使用法](https://github.com/tw93/Pake/wiki/Advanced-Usage-of-Pake)を参照してください。
+3. ウィンドウプロパティの設定については、`pake.json` ファイルを変更して `windows` プロパティの `width`、`height`、`fullscreen`（またはしない）、`resizable`（またはしない）の値を変更できます。Mac の没入型ヘッダーに適応するには、`hideTitleBar` を `true` に設定し、`Header` 要素を見つけて `padding-top` プロパティを追加します。
+4. スタイルの書き換え、広告の除去、JS の注入、コンテナメッセージ通信、ユーザー定義のショートカットキーについては、[高度な使用法](https://github.com/tw93/Pake/wiki/Advanced-Usage-of-Pake)を参照してください。
 
 ## 開発者
 
-Pakeの開発はこれらのハッカーたちなしにはあり得ませんでした。彼らはPakeのために多くの能力を貢献しました。彼らをフォローすることも歓迎します！❤️
+Pake の開発はこれらのハッカーたちなしにはあり得ませんでした。彼らは Pake のために多くの能力を貢献しました。彼らをフォローすることも歓迎します！❤️
 
 <!-- readme: contributors -start -->
 <table>
@@ -440,11 +440,11 @@ Pakeの開発はこれらのハッカーたちなしにはあり得ませんで�
 
 ## よくある質問
 
-1. ページ内の画像要素を右クリックしてメニューを開き、「画像をダウンロード」または他のイベントを選択しても機能しない（MacOSシステムで一般的）。この問題は、MacOSの組み込みwebviewがこの機能をサポートしていないためです。
+1. ページ内の画像要素を右クリックしてメニューを開き、「画像をダウンロード」または他のイベントを選択しても機能しない（MacOS システムで一般的）。この問題は、MacOS の組み込み webview がこの機能をサポートしていないためです。
 
 ## サポート
 
-1. 私には汤圆と可乐という2匹の猫がいます。Pakeがあなたの生活をより良くしてくれると思ったら、<a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">缶詰をあげてください 🥩</a>。
-2. Pakeが気に入ったら、GitHubでスターをつけてください。また、友達に<a href="https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=%23Pake%20-%20Rust%E3%82%92%E4%BD%BF%E3%81%A3%E3%81%A6%E3%80%81%E7%B0%A1%E5%8D%98%E3%81%AB%E3%82%A6%E3%82%A7%E3%83%96%E3%83%9A%E3%83%BC%E3%82%B8%E3%82%92%E3%83%87%E3%82%B9%E3%82%AF%E3%83%88%E3%83%83%E3%83%97%E3%82%A2%E3%83%97%E3%83%AA%E3%81%AB%E5%A4%89%E6%8F%9B%E3%81%99%E3%82%8B%E3%83%84%E3%83%BC%E3%83%AB%E3%80%82Electron%E3%83%91%E3%83%83%E3%82%B1%E3%83%BC%E3%82%B8%E3%81%A8%E6%AF%94%E8%BC%83%E3%81%97%E3%81%A6%E3%80%81%E7%B4%84%2040%E5%80%8D%E5%B0%8F%E3%81%95%E3%81%84%E3%80%81%E4%B8%80%E8%88%AC%E7%B4%842M%E3%80%81Tauri%E3%82%92%E4%BD%BF%E7%94%A8%E3%81%97%E3%81%A6%E3%81%84%E3%82%8B%E3%81%9F%E3%82%81%E3%80%81JS%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0%E3%83%AF%E3%83%BC%E3%82%AF%E3%82%88%E3%82%8A%E3%82%82%E3%81%AF%E3%82%8B%E3%81%8B%E3%81%AB%E8%BB%BD%E9%87%8F%E3%81%A7%E9%AB%98%E9%80%9F%E3%81%A7%E3%81%99%E3%80%82">推薦</a>することを歓迎します。
-3. 私の<a href="https://twitter.com/HiTw93">Twitter</a>をフォローして、Pakeの最新情報を入手することができます。また、<a href="https://t.me/+GclQS9ZnxyI2ODQ1">Telegram</a>のチャットグループに参加することもできます。
-4. 皆さんが楽しんでいただけることを願っています。Macアプリに適したウェブサイトを見つけたら、ぜひ教えてください。
+1. 私には汤圆と可乐という 2 匹の猫がいます。Pake があなたの生活をより良くしてくれると思ったら、<a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">缶詰をあげてください 🥩</a>。
+2. Pake が気に入ったら、GitHub でスターをつけてください。また、友達に<a href="https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=%23Pake%20-%20Rust%E3%82%92%E4%BD%BF%E3%81%A3%E3%81%A6%E3%80%81%E7%B0%A1%E5%8D%98%E3%81%AB%E3%82%A6%E3%82%A7%E3%83%96%E3%83%9A%E3%83%BC%E3%82%B8%E3%82%92%E3%83%87%E3%82%B9%E3%82%AF%E3%83%88%E3%83%83%E3%83%97%E3%82%A2%E3%83%97%E3%83%AA%E3%81%AB%E5%A4%89%E6%8F%9B%E3%81%99%E3%82%8B%E3%83%84%E3%83%BC%E3%83%AB%E3%80%82Electron%E3%83%91%E3%83%83%E3%82%B1%E3%83%BC%E3%82%B8%E3%81%A8%E6%AF%94%E8%BC%83%E3%81%97%E3%81%A6%E3%80%81%E7%B4%84%2040%E5%80%8D%E5%B0%8F%E3%81%95%E3%81%84%E3%80%81%E4%B8%80%E8%88%AC%E7%B4%842M%E3%80%81Tauri%E3%82%92%E4%BD%BF%E7%94%A8%E3%81%97%E3%81%A6%E3%81%84%E3%82%8B%E3%81%9F%E3%82%81%E3%80%81JS%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0%E3%83%AF%E3%83%BC%E3%82%AF%E3%82%88%E3%82%8A%E3%82%82%E3%81%AF%E3%82%8B%E3%81%8B%E3%81%AB%E8%BB%BD%E9%87%8F%E3%81%A7%E9%AB%98%E9%80%9F%E3%81%A7%E3%81%99%E3%80%82">推薦</a>することを歓迎します。
+3. 私の<a href="https://twitter.com/HiTw93">Twitter</a>をフォローして、Pake の最新情報を入手することができます。また、<a href="https://t.me/+GclQS9ZnxyI2ODQ1">Telegram</a>のチャットグループに参加することもできます。
+4. 皆さんが楽しんでいただけることを願っています。Mac アプリに適したウェブサイトを見つけたら、ぜひ教えてください。
