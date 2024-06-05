@@ -1,9 +1,9 @@
-<h4 align="right"><a href="https://github.com/tw93/Pake">English</a> | <strong>简体中文</strong> | <a href="https://github.com/tw93/Pake/blob/master/README_JP.md">日本語</a></h4>
+<h4 align="right"><a href="https://github.com/tw93/Pake">English</a> | <a href="https://github.com/tw93/Pake/blob/master/README_CN.md">简体中文</a> | <strong>日本語</strong></h4>
 <p align="center">
     <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
 </p>
 <h1 align="center">Pake</h1>
-<p align="center"><strong>利用 Rust 轻松构建轻量级多端桌面应用</strong></p>
+<p align="center"><strong>Rustを使って、簡単にウェブページをデスクトップアプリに変換します。</strong></p>
 <div align="center">
     <a href="https://twitter.com/HiTw93" target="_blank">
     <img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
@@ -15,19 +15,20 @@
     <img alt="GitHub commit" src="https://img.shields.io/github/commit-activity/m/tw93/Pake?style=flat-square"></a>
     <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank">
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
-    <a href="https://colab.research.google.com/drive/1bX345znvDZ30848xjRtpgtU8eypWwXrp?usp=sharingg" target="_blank">
-    <img alt="在 Colab 中打开" src="https://colab.research.google.com/assets/colab-badge.svg"></a>
+    <a href="https://colab.research.google.com/drive/1bX345znvDZ30848xjRtpgtU8eypWwXrp?usp=sharing" target="_blank">
+    <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 </div>
-<div align="left">支持 Mac / Windows / Linux，关于 <a href="#常用包下载">常用包下载</a>、<a href="#命令行一键打包">命令行一键打包</a>、<a href="#定制开发">定制开发</a> 可见下面文档，也欢迎去 <a href=https://github.com/tw93/Pake/discussions>讨论区</a> 交流。</div>
 
-## 特征
+<div align="left">PakeはMac、Windows、Linuxをサポートしています。<a href="#人気のパッケージ">人気のパッケージ</a>、<a href="#コマンドラインパッケージング">コマンドラインパッケージング</a>、<a href="#開発">カスタマイズ開発</a>に関する情報はREADMEをご覧ください。<a href=https://github.com/tw93/Pake/discussions>ディスカッション</a>でご意見をお聞かせください。</div>
 
-- 🎐 相比传统的 Electron 套壳打包，要小将近 20 倍，5M 上下。
-- 🚀 Pake 的底层使用的 Rust Tauri 框架，性能体验较 JS 框架要轻快不少，内存小很多。
-- 📦 不是单纯打包，实现了快捷键的透传、沉浸式的窗口、拖动、样式改写、去广告、产品的极简风格定制。
-- 👻 只是一个很简单的小玩具，用 Tauri 替代之前套壳网页打包的老思路，其实 PWA 也很好。
+## 特徴
 
-## 常用包下载
+- 🎐 Electron パッケージと比較して約 20 倍小さい（約 5M！）
+- 🚀 Rust Tauri を使用しているため、Pake は JS ベースのフレームワークよりもはるかに軽量で高速です。
+- 📦 パッケージにはショートカットの透過、没入型ウィンドウ、ミニマリストのカスタマイズが含まれています。
+- 👻 Pake は単なるシンプルなツールです—Tauri を使用して古いバンドルアプローチを置き換えます（PWA も十分に良いです）。
+
+## 人気のパッケージ
 
 <table>
     <tr>
@@ -75,8 +76,8 @@
       </td>
     </tr>
     <tr>
-        <td><img src=https://raw.githubusercontent.com/tw93/static/master/pic/12.png width=600 /></td>
-        <td><img src=https://gw.alipayobjects.com/zos/k/pn/1.jpg width=600 /></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/master/pic/12.png width=600/></td>
+        <td><img src=https://gw.alipayobjects.com/zos/k/pn/1.jpg width=600/></td>
     </tr>
     <tr>
         <td>LiZhi
@@ -129,82 +130,79 @@
 </table>
 
 <details>
-
-<summary>🏂 更多应用可去 <a href="https://github.com/tw93/Pake/releases">Release</a>下载，<b>此外点击可展开快捷键说明</b></summary>
+<summary>🏂 <a href="https://github.com/tw93/Pake/releases">リリース</a>からさらに多くのアプリケーションをダウンロードできます。<b>ここをクリックしてショートカットの参照を展開してください！</b></summary>
 
 <br/>
 
-| Mac                         | Windows/Linux                  | 功能               |
-| --------------------------- | ------------------------------ | ------------------ |
-| <kbd>⌘</kbd> + <kbd>[</kbd> | <kbd>Ctrl</kbd> + <kbd>←</kbd> | 返回上一个页面     |
-| <kbd>⌘</kbd> + <kbd>]</kbd> | <kbd>Ctrl</kbd> + <kbd>→</kbd> | 去下一个页面       |
-| <kbd>⌘</kbd> + <kbd>↑</kbd> | <kbd>Ctrl</kbd> + <kbd>↑</kbd> | 自动滚动到页面顶部 |
-| <kbd>⌘</kbd> + <kbd>↓</kbd> | <kbd>Ctrl</kbd> + <kbd>↓</kbd> | 自动滚动到页面底部 |
-| <kbd>⌘</kbd> + <kbd>r</kbd> | <kbd>Ctrl</kbd> + <kbd>r</kbd> | 刷新页面           |
-| <kbd>⌘</kbd> + <kbd>w</kbd> | <kbd>Ctrl</kbd> + <kbd>w</kbd> | 隐藏窗口，非退出   |
-| <kbd>⌘</kbd> + <kbd>-</kbd> | <kbd>Ctrl</kbd> + <kbd>-</kbd> | 缩小页面           |
-| <kbd>⌘</kbd> + <kbd>+</kbd> | <kbd>Ctrl</kbd> + <kbd>+</kbd> | 放大页面           |
-| <kbd>⌘</kbd> + <kbd>=</kbd> | <kbd>Ctrl</kbd> + <kbd>=</kbd> | 放大页面           |
-| <kbd>⌘</kbd> + <kbd>0</kbd> | <kbd>Ctrl</kbd> + <kbd>0</kbd> | 重置页面缩放       |
+| Mac                         | Windows/Linux                  | 機能                           |
+| --------------------------- | ------------------------------ | ------------------------------ |
+| <kbd>⌘</kbd> + <kbd>[</kbd> | <kbd>Ctrl</kbd> + <kbd>←</kbd> | 前のページに戻る               |
+| <kbd>⌘</kbd> + <kbd>]</kbd> | <kbd>Ctrl</kbd> + <kbd>→</kbd> | 次のページに進む               |
+| <kbd>⌘</kbd> + <kbd>↑</kbd> | <kbd>Ctrl</kbd> + <kbd>↑</kbd> | ページのトップに自動スクロール |
+| <kbd>⌘</kbd> + <kbd>↓</kbd> | <kbd>Ctrl</kbd> + <kbd>↓</kbd> | ページの底に自動スクロール     |
+| <kbd>⌘</kbd> + <kbd>r</kbd> | <kbd>Ctrl</kbd> + <kbd>r</kbd> | ページをリフレッシュ           |
+| <kbd>⌘</kbd> + <kbd>w</kbd> | <kbd>Ctrl</kbd> + <kbd>w</kbd> | ウィンドウを隠す、終了しない   |
+| <kbd>⌘</kbd> + <kbd>-</kbd> | <kbd>Ctrl</kbd> + <kbd>-</kbd> | ページを縮小                   |
+| <kbd>⌘</kbd> + <kbd>+</kbd> | <kbd>Ctrl</kbd> + <kbd>+</kbd> | ページを拡大                   |
+| <kbd>⌘</kbd> + <kbd>=</kbd> | <kbd>Ctrl</kbd> + <kbd>=</kbd> | ページを拡大                   |
+| <kbd>⌘</kbd> + <kbd>0</kbd> | <kbd>Ctrl</kbd> + <kbd>0</kbd> | ページのズームをリセット       |
 
-此外还支持双击头部进行全屏切换，拖拽头部进行移动窗口，Mac 用户支持手势方式返回和去下一页，还有其他需求，欢迎提过来。
+さらに、タイトルバーをダブルクリックして全画面モードに切り替えることができます。Mac ユーザーは、ジェスチャーを使用して前のページまたは次のページに移動することもできます。ウィンドウを移動するには、タイトルバーをドラッグします。
 
 </details>
 
-## 开始之前
+## 始める前に
 
-1. **小白用户**：使用 「常用包下载」 方式来把玩 Pake 的能力，可去 [讨论群](https://github.com/tw93/Pake/discussions) 寻求帮助，也可试试 [Action](https://github.com/tw93/Pake/wiki/%E5%9C%A8%E7%BA%BF%E7%BC%96%E8%AF%91%EF%BC%88%E6%99%AE%E9%80%9A%E7%94%A8%E6%88%B7%E4%BD%BF%E7%94%A8%EF%BC%89) 方式。
-2. **开发用户**：使用 「命令行一键打包」，对 Mac 比较友好，Windows / Linux 需折腾下 [环境配置](https://tauri.app/v1/guides/getting-started/prerequisites)。
-3. **折腾用户**：假如你前端和 Rust 都会，那可试试下面的 「[定制开发](#定制开发)」，可深度二次开发定制你的功能。
+1. **初心者の方へ**: 「人気のパッケージ」を使用して Pake の機能を試してみてください。または、[GitHub Actions](<https://github.com/tw93/Pake/wiki/Online-Compilation-(used-by-ordinary-users)>)を使用してアプリケーションをパッケージ化してみてください。[ディスカッション](https://github.com/tw93/Pake/discussions)で助けを求めることもできます！
+2. **開発者の方へ**: 「コマンドラインパッケージング」を使用してください。macOS では完全にサポートされています。Windows/Linux ユーザーは、[環境を設定](https://tauri.app/v1/guides/getting-started/prerequisites)する必要があります。
+3. **ハッカーの方へ**: フロントエンド開発と Rust の両方が得意な方は、以下の[カスタマイズ開発](#開発)でアプリの機能をさらにカスタマイズしてみてください。
 
-## 命令行一键打包
+## コマンドラインパッケージング
 
-<kbd>
-  <img src="https://gw.alipayobjects.com/zos/k/zd/pake.gif" width="100%">
-</kbd>
-<br/><br/>
+![Pake](https://gw.alipayobjects.com/zos/k/zd/pake.gif)
 
-**Pake 提供了命令行工具，可以更快捷方便地一键自定义打你需要的包，详细可见 [文档](./bin/README_CN.md)。**
+**Pake はコマンドラインツールを提供しており、必要なパッケージをより迅速かつ簡単にカスタマイズすることができます。詳細は[ドキュメント](./bin/README.md)をご覧ください。**
 
 ```bash
-# 使用 npm 进行安装
+# npmを使用してインストール
 npm install -g pake-cli
 
-# 命令使用
+# コマンドの使用
 pake url [OPTIONS]...
 
-# 随便玩玩，首次由于安装环境会有些慢，后面就快了
+# Pakeを自由に試してみてください！初めての起動時は環境の準備に時間がかかる場合があります。
 pake https://weekly.tw93.fun --name Weekly --hide-title-bar
 ```
 
-假如你不太会使用命令行，或许使用 **GitHub Actions 在线编译多系统版本** 是一个不错的选择，可查看 [文档](https://github.com/tw93/Pake/wiki/%E5%9C%A8%E7%BA%BF%E7%BC%96%E8%AF%91%EF%BC%88%E6%99%AE%E9%80%9A%E7%94%A8%E6%88%B7%E4%BD%BF%E7%94%A8%EF%BC%89)。
+コマンドラインの使用に不慣れな場合は、_GitHub Actions_ を使用してオンラインでパッケージをコンパイルすることができます。[チュートリアル](<https://github.com/tw93/Pake/wiki/Online-Compilation-(used-by-ordinary-users)>)をご覧ください。
 
-## 定制开发
+## 開発
 
-开始前请确保电脑已经安装了 Rust `>=1.63` 和 Node `>=16 如 16.18.1` 的环境，此外需参考 [Tauri 文档](https://tauri.app/v1/guides/getting-started/prerequisites) 快速配置好环境才可以开始使用，假如你太不懂，使用上面的命令行打包会更加合适。
+開始する前に、Rust `>=1.63` と Node `>=16` (例: `16.18.1`) がコンピュータにインストールされていることを確認してください。インストールガイドについては、[Tauri ドキュメント](https://tauri.app/v1/guides/getting-started/prerequisites)を参照してください。
+
+これらに不慣れな場合は、上記のツールを使用してワンクリックでパッケージを作成することをお勧めします。
 
 ```sh
-# 安装依赖
+# 依存関係のインストール
 npm i
 
-# 本地开发[右键可打开调试模式]
+# ローカル開発 [右クリックでデバッグモードを開く]
 npm run dev
 
-# 打包应用
+# アプリケーションのパッケージング
 npm run build
-
 ```
 
-## 高级使用
+## 高度な使用法
 
-1. 代码结构可参考 [文档](https://github.com/tw93/Pake/wiki/Pake-%E7%9A%84%E4%BB%A3%E7%A0%81%E7%BB%93%E6%9E%84%E8%AF%B4%E6%98%8E)，便于你在开发前了解更多。
-2. 修改 src-tauri 目录下 `pake.json` 中的 `url` 和 `productName` 字段，需同步修改下 `tauri.config.json` 中的 `domain` 字段，以及 `tauri.xxx.conf.json` 中的 `icon` 和 `identifier` 字段，其中 `icon` 可以从 icons 目录选择一个，也可以去 [macOSicons](https://macosicons.com/#/) 下载符合效果的。
-3. 关于窗口属性设置，可以在 `pake.json` 修改 windows 属性对应的 `width/height`，fullscreen 是否全屏，resizable 是否可以调整大小，假如想适配 Mac 沉浸式头部，可以将 hideTitleBar 设置成 `true`，找到 Header 元素加一个 padding-top 样式即可，不想适配改成 `false` 也行。
-4. 此外样式改写、屏蔽广告、逻辑代码注入、容器消息通信、自定义快捷键可见 [高级用法](https://github.com/tw93/Pake/wiki/Pake-%E7%9A%84%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95)。
+1. [コードベースの構造](https://github.com/tw93/Pake/wiki/Description-of-Pake's-code-structure)を参照して、開発前により多くの情報を得ることができます。
+2. `src-tauri` ディレクトリ内の `pake.json` ファイルの `url` と `productName` フィールドを変更する場合は、`tauri.config.json` ファイル内の `domain` フィールド、および `tauri.xxx.conf.json` ファイル内の `icon` と `identifier` フィールドを同期して変更する必要があります。`icon` は `icons` ディレクトリから選択することも、[macOSicons](https://macosicons.com/#/) から効果に合ったものをダウンロードすることもできます。
+3. ウィンドウプロパティの設定については、`pake.json` ファイルを変更して `windows` プロパティの `width`、`height`、`fullscreen`（またはしない）、`resizable`（またはしない）の値を変更できます。Mac の没入型ヘッダーに適応するには、`hideTitleBar` を `true` に設定し、`Header` 要素を見つけて `padding-top` プロパティを追加します。
+4. スタイルの書き換え、広告の除去、JS の注入、コンテナメッセージ通信、ユーザー定義のショートカットキーについては、[高度な使用法](https://github.com/tw93/Pake/wiki/Advanced-Usage-of-Pake)を参照してください。
 
-## 开发者
+## 開発者
 
-Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢迎关注他们 ❤️
+Pake の開発はこれらのハッカーたちなしにはあり得ませんでした。彼らは Pake のために多くの能力を貢献しました。彼らをフォローすることも歓迎します！❤️
 
 <!-- readme: contributors -start -->
 <table>
@@ -260,6 +258,13 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
     </td></tr>
 <tr>
     <td align="center">
+        <a href="https://github.com/YangguangZhou">
+            <img src="https://avatars.githubusercontent.com/u/61733195?v=4" width="90;" alt="YangguangZhou"/>
+            <br />
+            <sub><b>Jerry Zhou</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/AielloChan">
             <img src="https://avatars.githubusercontent.com/u/7900765?v=4" width="90;" alt="AielloChan"/>
             <br />
@@ -300,15 +305,15 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
             <br />
             <sub><b>2nthony</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/ACGNnsj">
             <img src="https://avatars.githubusercontent.com/u/22112141?v=4" width="90;" alt="ACGNnsj"/>
             <br />
             <sub><b>Null</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/imabutahersiddik">
             <img src="https://avatars.githubusercontent.com/u/138387257?v=4" width="90;" alt="imabutahersiddik"/>
@@ -345,6 +350,28 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/eltociear">
+            <img src="https://avatars.githubusercontent.com/u/22633385?v=4" width="90;" alt="eltociear"/>
+            <br />
+            <sub><b>Ikko Eltociear Ashimine</b></sub>
+        </a>
+    </td></tr>
+<tr>
+    <td align="center">
+        <a href="https://github.com/ImgBotApp">
+            <img src="https://avatars.githubusercontent.com/u/31427850?v=4" width="90;" alt="ImgBotApp"/>
+            <br />
+            <sub><b>Imgbot</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/droid-Q">
+            <img src="https://avatars.githubusercontent.com/u/708277?v=4" width="90;" alt="droid-Q"/>
+            <br />
+            <sub><b>Jiaqi Gu</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/Milo123459">
             <img src="https://avatars.githubusercontent.com/u/50248166?v=4" width="90;" alt="Milo123459"/>
             <br />
@@ -357,8 +384,14 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
             <br />
             <sub><b>Po Chen</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
+    <td align="center">
+        <a href="https://github.com/geekvest">
+            <img src="https://avatars.githubusercontent.com/u/126322776?v=4" width="90;" alt="geekvest"/>
+            <br />
+            <sub><b>Null</b></sub>
+        </a>
+    </td>
     <td align="center">
         <a href="https://github.com/houhoz">
             <img src="https://avatars.githubusercontent.com/u/19684376?v=4" width="90;" alt="houhoz"/>
@@ -371,6 +404,14 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
             <img src="https://avatars.githubusercontent.com/u/16255922?v=4" width="90;" alt="lakca"/>
             <br />
             <sub><b>Null</b></sub>
+        </a>
+    </td></tr>
+<tr>
+    <td align="center">
+        <a href="https://github.com/liudonghua123">
+            <img src="https://avatars.githubusercontent.com/u/2276718?v=4" width="90;" alt="liudonghua123"/>
+            <br />
+            <sub><b>Liudonghua</b></sub>
         </a>
     </td>
     <td align="center">
@@ -397,13 +438,13 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
 </table>
 <!-- readme: contributors -end -->
 
-## 常见问题
+## よくある質問
 
-1. 页面中对图片元素鼠标右键打开菜单中选择下载图片或者其他事件不生效（常见于 MacOS 系统）。该问题是因为 MacOS 内置的 webview 无法支持该功能。
+1. ページ内の画像要素を右クリックしてメニューを開き、「画像をダウンロード」または他のイベントを選択しても機能しない（MacOS システムで一般的）。この問題は、MacOS の組み込み webview がこの機能をサポートしていないためです。
 
-## 支持
+## サポート
 
-1. 我有两只猫，一只叫汤圆，一只叫可乐，假如 Pake 让你生活更美好，可以给汤圆可乐 <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">喂罐头 🥩</a>。
-2. 如果你喜欢 Pake，可以在 Github Star，更欢迎 [推荐](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=%23Pake%20%E4%B8%80%E4%B8%AA%E5%BE%88%E7%AE%80%E5%8D%95%E7%9A%84%E7%94%A8%20Rust%20%E6%89%93%E5%8C%85%E7%BD%91%E9%A1%B5%E7%94%9F%E6%88%90%20Mac%20App%20%E7%9A%84%E5%B7%A5%E5%85%B7%EF%BC%8C%E7%9B%B8%E6%AF%94%E4%BC%A0%E7%BB%9F%E7%9A%84%20Electron%20%E5%A5%97%E5%A3%B3%E6%89%93%E5%8C%85%EF%BC%8C%E5%A4%A7%E5%B0%8F%E8%A6%81%E5%B0%8F%E5%B0%86%E8%BF%91%2040%20%E5%80%8D%EF%BC%8C%E4%B8%80%E8%88%AC%202M%20%E5%B7%A6%E5%8F%B3%EF%BC%8C%E5%BA%95%E5%B1%82%E4%BD%BF%E7%94%A8Tauri%20%EF%BC%8C%E6%80%A7%E8%83%BD%E4%BD%93%E9%AA%8C%E8%BE%83%20JS%20%E6%A1%86%E6%9E%B6%E8%A6%81%E8%BD%BB%E5%BF%AB%E4%B8%8D%E5%B0%91%EF%BC%8C%E5%86%85%E5%AD%98%E5%B0%8F%E5%BE%88%E5%A4%9A%EF%BC%8C%E6%94%AF%E6%8C%81%E5%BE%AE%E4%BF%A1%E8%AF%BB%E4%B9%A6%E3%80%81Twitter%E3%80%81Youtube%E3%80%81RunCode%E3%80%81Flomo%E3%80%81%E8%AF%AD%E9%9B%80%E7%AD%89%EF%BC%8C%E5%8F%AF%E4%BB%A5%E5%BE%88%E6%96%B9%E4%BE%BF%E4%BA%8C%E6%AC%A1%E5%BC%80%E5%8F%91~) 给你志同道合的朋友使用。
-3. 可以关注我的 [Twitter](https://twitter.com/HiTw93) 获取到最新的 Pake 更新消息，也欢迎加入 [Telegram](https://t.me/+GclQS9ZnxyI2ODQ1) 聊天群。
-4. 希望大伙玩的过程中有一种学习新技术的喜悦感，假如你发现有很适合做成桌面 App 的网页也很欢迎告诉我。
+1. 私には汤圆と可乐という 2 匹の猫がいます。Pake があなたの生活をより良くしてくれると思ったら、<a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">缶詰をあげてください 🥩</a>。
+2. Pake が気に入ったら、GitHub でスターをつけてください。また、友達に<a href="https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=%23Pake%20-%20Rust%E3%82%92%E4%BD%BF%E3%81%A3%E3%81%A6%E3%80%81%E7%B0%A1%E5%8D%98%E3%81%AB%E3%82%A6%E3%82%A7%E3%83%96%E3%83%9A%E3%83%BC%E3%82%B8%E3%82%92%E3%83%87%E3%82%B9%E3%82%AF%E3%83%88%E3%83%83%E3%83%97%E3%82%A2%E3%83%97%E3%83%AA%E3%81%AB%E5%A4%89%E6%8F%9B%E3%81%99%E3%82%8B%E3%83%84%E3%83%BC%E3%83%AB%E3%80%82Electron%E3%83%91%E3%83%83%E3%82%B1%E3%83%BC%E3%82%B8%E3%81%A8%E6%AF%94%E8%BC%83%E3%81%97%E3%81%A6%E3%80%81%E7%B4%84%2040%E5%80%8D%E5%B0%8F%E3%81%95%E3%81%84%E3%80%81%E4%B8%80%E8%88%AC%E7%B4%842M%E3%80%81Tauri%E3%82%92%E4%BD%BF%E7%94%A8%E3%81%97%E3%81%A6%E3%81%84%E3%82%8B%E3%81%9F%E3%82%81%E3%80%81JS%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0%E3%83%AF%E3%83%BC%E3%82%AF%E3%82%88%E3%82%8A%E3%82%82%E3%81%AF%E3%82%8B%E3%81%8B%E3%81%AB%E8%BB%BD%E9%87%8F%E3%81%A7%E9%AB%98%E9%80%9F%E3%81%A7%E3%81%99%E3%80%82">推薦</a>することを歓迎します。
+3. 私の<a href="https://twitter.com/HiTw93">Twitter</a>をフォローして、Pake の最新情報を入手することができます。また、<a href="https://t.me/+GclQS9ZnxyI2ODQ1">Telegram</a>のチャットグループに参加することもできます。
+4. 皆さんが楽しんでいただけることを願っています。Mac アプリに適したウェブサイトを見つけたら、ぜひ教えてください。

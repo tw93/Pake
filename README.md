@@ -1,4 +1,4 @@
-<h4 align="right"><strong>English</strong> | <a href="https://github.com/tw93/Pake/blob/master/README_CN.md">简体中文</a></h4>
+<h4 align="right"><strong>English</strong> | <a href="https://github.com/tw93/Pake/blob/master/README_CN.md">简体中文</a> | <a href="https://github.com/tw93/Pake/blob/master/README_JP.md">日本語</a></h4>
 <p align="center">
     <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
 </p>
@@ -258,6 +258,13 @@ Pake's development can not be without these Hackers. They contributed a lot of c
     </td></tr>
 <tr>
     <td align="center">
+        <a href="https://github.com/YangguangZhou">
+            <img src="https://avatars.githubusercontent.com/u/61733195?v=4" width="90;" alt="YangguangZhou"/>
+            <br />
+            <sub><b>Jerry Zhou</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/AielloChan">
             <img src="https://avatars.githubusercontent.com/u/7900765?v=4" width="90;" alt="AielloChan"/>
             <br />
@@ -279,6 +286,13 @@ Pake's development can not be without these Hackers. They contributed a lot of c
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/eltociear">
+            <img src="https://avatars.githubusercontent.com/u/22633385?v=4" width="90;" alt="eltociear"/>
+            <br />
+            <sub><b>Ikko Eltociear Ashimine</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/QingZ11">
             <img src="https://avatars.githubusercontent.com/u/38887077?v=4" width="90;" alt="QingZ11"/>
             <br />
@@ -291,7 +305,8 @@ Pake's development can not be without these Hackers. They contributed a lot of c
             <br />
             <sub><b>孟世博</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/2nthony">
             <img src="https://avatars.githubusercontent.com/u/19513289?v=4" width="90;" alt="2nthony"/>
@@ -305,8 +320,7 @@ Pake's development can not be without these Hackers. They contributed a lot of c
             <br />
             <sub><b>Null</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/imabutahersiddik">
             <img src="https://avatars.githubusercontent.com/u/138387257?v=4" width="90;" alt="imabutahersiddik"/>
@@ -341,12 +355,13 @@ Pake's development can not be without these Hackers. They contributed a lot of c
             <br />
             <sub><b>Fechin</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
-        <a href="https://github.com/eltociear">
-            <img src="https://avatars.githubusercontent.com/u/22633385?v=4" width="90;" alt="eltociear"/>
+        <a href="https://github.com/ImgBotApp">
+            <img src="https://avatars.githubusercontent.com/u/31427850?v=4" width="90;" alt="ImgBotApp"/>
             <br />
-            <sub><b>Ikko Eltociear Ashimine</b></sub>
+            <sub><b>Imgbot</b></sub>
         </a>
     </td>
     <td align="center">
@@ -355,8 +370,7 @@ Pake's development can not be without these Hackers. They contributed a lot of c
             <br />
             <sub><b>Jiaqi Gu</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/Milo123459">
             <img src="https://avatars.githubusercontent.com/u/50248166?v=4" width="90;" alt="Milo123459"/>
@@ -391,7 +405,8 @@ Pake's development can not be without these Hackers. They contributed a lot of c
             <br />
             <sub><b>Null</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/liudonghua123">
             <img src="https://avatars.githubusercontent.com/u/2276718?v=4" width="90;" alt="liudonghua123"/>
@@ -405,8 +420,7 @@ Pake's development can not be without these Hackers. They contributed a lot of c
             <br />
             <sub><b>Liusishan</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/piaoyidage">
             <img src="https://avatars.githubusercontent.com/u/5135405?v=4" width="90;" alt="piaoyidage"/>
