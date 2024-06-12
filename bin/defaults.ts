@@ -19,6 +19,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   debug: false,
   inject: [],
   safeDomain: [],
+  installerLanguage: 'en-US',
 };
 
 // Just for cli development

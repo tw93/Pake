@@ -52,6 +52,9 @@ program
   .addOption(
     new Option('--system-tray-icon <string>', 'Custom system tray icon').default(DEFAULT.systemTrayIcon).hideHelp(),
   )
+  .addOption(
+    new Option('--installer-language <string>', 'Installer language').default(DEFAULT.installerLanguage).hideHelp(),
+  )
   .version(packageJson.version, '-v, --version', 'Output the current version')
   .action(async (url: string, options: PakeCliOptions) => {
     await checkUpdateTips();

@@ -59,6 +59,9 @@ export interface PakeCliOptions {
 
   /* the domain that can use ipc or tauri javascript sdk */
   safeDomain: string[];
+
+  // Installer language, valid for Windows users, default is en-US
+  installerLanguage: string;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {
