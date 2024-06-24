@@ -211,6 +211,14 @@ Specify the system tray icon. This is only effective when the system tray is ena
 --system-tray-icon <path>
 ```
 
+#### [installer-language]
+
+Set the Windows Installer language. Options include `zh-CN`, `ja-JP`, More at [Tauri Document](https://tauri.app/zh-cn/v1/guides/building/windows/#internationalization). Default is `en-US`.
+
+```shell
+--installer-language <language>
+```
+
 #### [use-local-file]
 
 Enable recursive copying. When the URL is a local file path, enabling this option will copy the folder containing the file specified in the URL, as well as all sub-files, to the Pake static folder. This is disabled by default.

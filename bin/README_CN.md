@@ -212,6 +212,14 @@ Linux，默认为 `all`。
 --system-tray-icon <path>
 ```
 
+#### [installer-language]
+
+设置 Windows 安装包语言。支持 `zh-CN`、`ja-JP`，更多在 [Tauri 文档](https://tauri.app/zh-cn/v1/guides/building/windows/#internationalization)。默认为 `en-US`。
+
+```shell
+--installer-language <language>
+```
+
 #### [use-local-file]
 
 当 `url` 为本地文件路径时，如果启用此选项，则会递归地将 `url` 路径文件所在的文件夹及其所有子文件复
