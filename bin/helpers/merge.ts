@@ -45,7 +45,9 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
 
   tauriConf.package.productName = name;
   tauriConf.tauri.bundle.identifier = identifier;
-  tauriConf.tauri.bundle.windows.wix.language[0] = installerLanguage
+  if (platform == "win32") {
+    tauriConf.tauri.bundle.windows.wix.language[0] = installerLanguage;
+  }
 
   //Judge the type of URL, whether it is a file or a website.
   const pathExists = await fsExtra.pathExists(url);
