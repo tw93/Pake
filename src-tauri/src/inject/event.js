@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Apple login and google login
     if (name === 'AppleAuthentication') {
       //do nothing
-    } else if (specs.includes('height=') || specs.includes('width=')) {
+    } else if (specs && (specs.includes('height=') || specs.includes('width='))) {
       location.href = url;
     } else {
       const baseUrl = window.location.origin + window.location.pathname;
