@@ -206,13 +206,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const detectAnchorElementClick = e => {
     const anchorElement = e.target.closest('a');
     if (anchorElement && anchorElement.href) {
-      anchorElement.target = '_self';
+      if (!anchorElement.target) {
+        anchorElement.target = '_self';
+      }
+
       const hrefUrl = new URL(anchorElement.href);
       const absoluteUrl = hrefUrl.href;
       let filename = anchorElement.download || getFilenameFromUrl(absoluteUrl);
 
       // Handling external link redirection.
-      if (isExternalLink(absoluteUrl) && (['_blank', '_new'].includes(anchorElement.target) || externalTargetLink())) {
+      if ((isExternalLink(absoluteUrl) && ['_blank', '_new'].includes(anchorElement.target)) || externalTargetLink()) {
         handleExternalLink(e, absoluteUrl);
         return;
       }
