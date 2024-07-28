@@ -10,8 +10,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     libdbus-1-dev libsoup2.4-dev libjavascriptcoregtk-4.0-dev \
     libwebkit2gtk-4.0-dev build-essential curl wget libssl-dev \
     libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev \
-    gnome-video-effects \
-    && rm -rf /var/lib/apt/lists/* # Clean up to reduce image size
+    gnome-video-effects
 
 COPY . /pake
 WORKDIR /pake/src-tauri
@@ -30,8 +29,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     libdbus-1-dev libsoup2.4-dev libjavascriptcoregtk-4.0-dev \
     libwebkit2gtk-4.0-dev build-essential curl wget libssl-dev \
     libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev \
-    gnome-video-effects \
-    && rm -rf /var/lib/apt/lists/*
+    gnome-video-effects
 
 # Install Node.js 19.x
 RUN --mount=type=cache,target=/var/cache/apt \
