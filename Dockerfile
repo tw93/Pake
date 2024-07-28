@@ -44,6 +44,8 @@ RUN --mount=type=cache,target=/root/.npm \
     npm install
 
 COPY --from=cargo-builder /pake/src-tauri /usr/lib/node_modules/pake-cli/src-tauri
+COPY --from=cargo-builder /usr/local/cargo/git /usr/local/cargo/git
+COPY --from=cargo-builder /usr/local/cargo/registry/cache /usr/local/cargo/registry/cache
 
 WORKDIR /app
 ENTRYPOINT ["pake"]
