@@ -23,9 +23,10 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
 # Main build stage
 FROM rust:1.80-slim AS builder
 
-# Install Node.js 19.x and Rust dependencies
+# Install Rust dependencies
 RUN --mount=type=cache,target=/var/cache/apt \
-    apt-get update && apt-get install -y \
+    --mount=type=cache,target=/usr/local/cargo/registry \
+    apt-get update && apt-get install -y --no-install-recommends \
     libdbus-1-dev libsoup2.4-dev libjavascriptcoregtk-4.0-dev \
     libwebkit2gtk-4.0-dev build-essential curl wget libssl-dev \
     libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev \
