@@ -15,10 +15,16 @@ RUN --mount=type=cache,target=/var/cache/apt \
 COPY . /pake
 WORKDIR /pake/src-tauri
 
-# Build cargo packages
+# Build cargo packages and store cache
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
     cargo fetch && \
-    cargo build --release
+    cargo build --release && \
+    mkdir -p /cargo-cache && \
+    cp -R /usr/local/cargo/registry /cargo-cache/ && \
+    cp -R /usr/local/cargo/git /cargo-cache/
+    
+# Ensure the content of /cargo-cache && clean unnecessary files
+RUN ls -la /cargo-cache/registry && ls -la /cargo-cache/git && rm -rfd /cargo-cache/registry/cache
 
 # Main build stage
 FROM rust:1.80-slim AS builder
@@ -44,8 +50,8 @@ RUN --mount=type=cache,target=/root/.npm \
     npm install
 
 COPY --from=cargo-builder /pake/src-tauri /usr/lib/node_modules/pake-cli/src-tauri
-COPY --from=cargo-builder /usr/local/cargo/git /usr/local/cargo/git
-COPY --from=cargo-builder /usr/local/cargo/registry/cache /usr/local/cargo/registry/cache
+COPY --from=cargo-builder /cargo-cache/git /usr/local/cargo/git
+COPY --from=cargo-builder /cargo-cache/registry /usr/local/cargo/registry
 
 WORKDIR /app
 ENTRYPOINT ["pake"]
