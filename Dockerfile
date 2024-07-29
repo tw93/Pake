@@ -44,7 +44,7 @@ WORKDIR /pake
 
 # Install dependencies and build pake-cli
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci && \
+    npm install && \
     npm run build
 
 # Copy Rust build artifacts
