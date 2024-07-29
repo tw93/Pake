@@ -53,5 +53,5 @@ COPY --from=cargo-builder /pake/src-tauri /usr/lib/node_modules/pake-cli/src-tau
 COPY --from=cargo-builder /cargo-cache/git /usr/local/cargo/git
 COPY --from=cargo-builder /cargo-cache/registry /usr/local/cargo/registry
 
-WORKDIR /app
+WORKDIR /output
 ENTRYPOINT ["pake"]
