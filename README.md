@@ -176,13 +176,13 @@ pake https://weekly.tw93.fun --name Weekly --hide-title-bar
 # On Linux, you can run the Pake CLI via Docker
 docker run -it --rm \ # Run interactively, remove container after exit
     -v YOUR_DIR:/output \ # Files from container's /output will be in YOU_DIR
-    ghcr.io/stone-w4tch3r/pakefork \
+    ghcr.io/tw93/Pake \
     <arguments>
 
 # For example:
 docker run -it --rm \
     -v ./packages:/output \
-    ghcr.io/stone-w4tch3r/pakefork \
+    ghcr.io/tw93/Pake \
     https://example.com --name MyApp --icon ./icon.png
 ```
 
