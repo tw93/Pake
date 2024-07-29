@@ -42,15 +42,15 @@ RUN --mount=type=cache,target=/var/cache/apt \
 COPY . /pake
 WORKDIR /pake
 
-# Install dependencies and build pake-cli
-RUN --mount=type=cache,target=/root/.npm \
-    npm install && \
-    npm run build
-
 # Copy Rust build artifacts
 COPY --from=cargo-builder /pake/src-tauri /pake/src-tauri
 COPY --from=cargo-builder /cargo-cache/git /usr/local/cargo/git
 COPY --from=cargo-builder /cargo-cache/registry /usr/local/cargo/registry
+
+# Install dependencies and build pake-cli
+RUN --mount=type=cache,target=/root/.npm \
+    npm install && \
+    npm run build
 
 # Set up the entrypoint
 WORKDIR /output
