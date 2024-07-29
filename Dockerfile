@@ -50,7 +50,7 @@ COPY --from=cargo-builder /cargo-cache/registry /usr/local/cargo/registry
 # Install dependencies and build pake-cli
 RUN --mount=type=cache,target=/root/.npm \
     npm install && \
-    npm run build
+    npm run cli:build
 
 # Set up the entrypoint
 WORKDIR /output
