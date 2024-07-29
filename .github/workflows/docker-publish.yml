@@ -2,7 +2,7 @@ name: Build and Publish Docker Image
 
 on:
   push:
-    branches: [ "master" ] # specify needed trigger
+    branches: [ "master" ] # TODO here you can specify needed trigger
 
 env:
   REGISTRY: ghcr.io
