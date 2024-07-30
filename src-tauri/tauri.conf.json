@@ -13,7 +13,8 @@
     },
     "trayIcon": {
       "iconPath": "png/icon_512.png",
-      "iconAsTemplate": false
+      "iconAsTemplate": false,
+      "id": "pake-tray"
     },
     "withGlobalTauri": true
   }

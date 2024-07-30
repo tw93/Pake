@@ -51,6 +51,7 @@ pub struct PakeConfig {
     pub windows: Vec<WindowConfig>,
     pub user_agent: UserAgent,
     pub system_tray: FunctionON,
+    pub system_tray_path: String,
 }
 
 impl PakeConfig {

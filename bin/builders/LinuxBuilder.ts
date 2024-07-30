@@ -10,7 +10,7 @@ export default class LinuxBuilder extends BaseBuilder {
   getFileName(): string {
     const { name } = this.options;
     const arch = process.arch === 'x64' ? 'amd64' : process.arch;
-    return `${name}_${tauriConfig.package.version}_${arch}`;
+    return `${name}_${tauriConfig.version}_${arch}`;
   }
 
   // Customize it, considering that there are all targets.

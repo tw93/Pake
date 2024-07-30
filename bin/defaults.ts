@@ -11,7 +11,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   disabledWebShortcuts: false,
   activationShortcut: '',
   userAgent: '',
-  showSystemTray: false,
+  showSystemTray: true,
   multiArch: false,
   targets: 'deb',
   useLocalFile: false,
@@ -24,8 +24,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
 // Just for cli development
 export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
   ...DEFAULT_PAKE_OPTIONS,
-  url: 'https://weread.qq.com',
-  name: 'WeRead',
-  safeDomain: ['weread.qq.com'],
+  url: 'https://www.xiaoyuzhoufm.com/',
+  name: 'XiaoYuZhou',
   hideTitleBar: true,
 };

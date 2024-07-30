@@ -20,7 +20,7 @@ import psl from 'psl';
 import isUrl from 'is-url';
 
 var name = "pake-cli";
-var version = "2.5.2";
+var version$1 = "2.5.2";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
@@ -68,7 +68,7 @@ var exports = "./dist/pake.js";
 var license = "MIT";
 var dependencies = {
 	"@tauri-apps/api": "^1.5.4",
-	"@tauri-apps/cli": "^1.5.13",
+	"@tauri-apps/cli": "^2.0.0-beta.22",
 	axios: "^1.6.8",
 	chalk: "^5.3.0",
 	commander: "^11.1.0",
@@ -107,7 +107,7 @@ var devDependencies = {
 };
 var packageJson = {
 	name: name,
-	version: version,
+	version: version$1,
 	description: description,
 	engines: engines,
 	bin: bin,
@@ -156,130 +156,109 @@ var pakeConf = {
 	inject: inject
 };
 
-var tauri$3 = {
+var build = {
+	beforeBuildCommand: "",
+	frontendDist: "../dist",
+	beforeDevCommand: ""
+};
+var plugins = {
+};
+var productName = "WeRead";
+var version = "1.0.0";
+var app = {
 	security: {
-		csp: null,
-		dangerousRemoteDomainIpcAccess: [
-			{
-				domain: "weread.qq.com",
-				windows: [
-					"pake"
-				],
-				enableTauriAPI: true
-			}
-		]
+		csp: null
 	},
-	updater: {
-		active: false
-	},
-	systemTray: {
+	trayIcon: {
 		iconPath: "png/icon_512.png",
 		iconAsTemplate: false
 	},
-	allowlist: {
-		all: true,
-		fs: {
-			all: true,
-			scope: [
-				"$DOWNLOAD/*"
-			]
-		}
-	}
-};
-var build = {
-	withGlobalTauri: true,
-	devPath: "../dist",
-	distDir: "../dist",
-	beforeBuildCommand: "",
-	beforeDevCommand: ""
+	withGlobalTauri: true
 };
 var CommonConf = {
-	"package": {
-	productName: "WeRead",
-	version: "1.0.0"
-},
-	tauri: tauri$3,
-	build: build
+	build: build,
+	plugins: plugins,
+	productName: productName,
+	version: version,
+	app: app
 };
 
-var tauri$2 = {
-	bundle: {
-		icon: [
-			"png/weread_256.ico",
-			"png/weread_32.ico"
-		],
-		identifier: "com.pake.weread",
-		active: true,
-		category: "DeveloperTool",
-		copyright: "",
-		externalBin: [
-		],
-		longDescription: "",
-		resources: [
-			"png/weread_32.ico"
-		],
-		shortDescription: "",
-		targets: [
-			"msi"
-		],
-		windows: {
-			certificateThumbprint: null,
-			digestAlgorithm: "sha256",
-			timestampUrl: "",
-			wix: {
-				language: [
-					"en-US"
-				],
-				template: "assets/main.wxs"
-			}
+var identifier$2 = "com.pake.weread";
+var bundle$2 = {
+	icon: [
+		"png/weread_256.ico",
+		"png/weread_32.ico"
+	],
+	active: true,
+	category: "DeveloperTool",
+	copyright: "",
+	externalBin: [
+	],
+	longDescription: "",
+	resources: [
+		"png/weread_32.ico"
+	],
+	shortDescription: "",
+	targets: [
+		"msi"
+	],
+	windows: {
+		certificateThumbprint: null,
+		digestAlgorithm: "sha256",
+		timestampUrl: "",
+		wix: {
+			language: [
+				"en-US"
+			],
+			template: "assets/main.wxs"
 		}
 	}
 };
 var WinConf = {
-	tauri: tauri$2
+	identifier: identifier$2,
+	bundle: bundle$2
 };
 
-var tauri$1 = {
-	bundle: {
-		icon: [
-			"icons/weread.icns"
+var identifier$1 = "com.pake.weread";
+var bundle$1 = {
+	icon: [
+		"icons/weread.icns"
+	],
+	active: true,
+	category: "DeveloperTool",
+	copyright: "",
+	externalBin: [
+	],
+	longDescription: "",
+	macOS: {
+		entitlements: null,
+		exceptionDomain: null,
+		frameworks: [
 		],
-		identifier: "com.pake.weread",
-		active: true,
-		category: "DeveloperTool",
-		copyright: "",
-		externalBin: [
-		],
-		longDescription: "",
-		macOS: {
-			entitlements: null,
-			exceptionDomain: "",
-			frameworks: [
-			],
-			providerShortName: null,
-			signingIdentity: null
-		},
-		resources: [
-		],
-		shortDescription: "",
-		targets: [
-			"dmg"
-		]
-	}
+		providerShortName: null,
+		signingIdentity: null
+	},
+	resources: [
+	],
+	shortDescription: "",
+	targets: [
+		"dmg"
+	]
 };
 var MacConf = {
-	tauri: tauri$1
+	identifier: identifier$1,
+	bundle: bundle$1
 };
 
-var tauri = {
-	bundle: {
-		icon: [
-			"png/weread_512.png"
-		],
-		identifier: "com.pake.weread",
-		active: true,
-		category: "DeveloperTool",
-		copyright: "",
+var identifier = "com.pake.weread";
+var bundle = {
+	icon: [
+		"png/weread_512.png"
+	],
+	active: true,
+	category: "DeveloperTool",
+	copyright: "",
+	linux: {
 		deb: {
 			depends: [
 				"curl",
@@ -288,21 +267,22 @@ var tauri = {
 			files: {
 				"/usr/share/applications/com-pake-weread.desktop": "assets/com-pake-weread.desktop"
 			}
-		},
-		externalBin: [
-		],
-		longDescription: "",
-		resources: [
-		],
-		shortDescription: "",
-		targets: [
-			"deb",
-			"appimage"
-		]
-	}
+		}
+	},
+	externalBin: [
+	],
+	longDescription: "",
+	resources: [
+	],
+	shortDescription: "",
+	targets: [
+		"deb",
+		"appimage"
+	]
 };
 var LinuxConf = {
-	tauri: tauri
+	identifier: identifier,
+	bundle: bundle
 };
 
 const platformConfigs = {
@@ -314,11 +294,15 @@ const { platform: platform$2 } = process;
 // @ts-ignore
 const platformConfig = platformConfigs[platform$2];
 let tauriConfig = {
-    tauri: {
-        ...CommonConf.tauri,
-        bundle: platformConfig.tauri.bundle,
+    ...CommonConf,
+    bundle: platformConfig.bundle,
+    app: {
+        ...CommonConf.app,
+        trayIcon: {
+            ...CommonConf.app.trayIcon,
+            ...platformConfig.app.trayIcon,
+        },
     },
-    package: CommonConf.package,
     build: CommonConf.build,
     pake: pakeConf,
 };
@@ -476,7 +460,7 @@ async function combineFiles(files, output) {
 }
 
 async function mergeConfig(url, options, tauriConf) {
-    const { width, height, fullscreen, hideTitleBar, alwaysOnTop, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, safeDomain, } = options;
+    const { width, height, fullscreen, hideTitleBar, alwaysOnTop, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, } = options;
     const { platform } = process;
     // Set Windows parameters.
     const tauriConfWindowOptions = {
@@ -490,8 +474,8 @@ async function mergeConfig(url, options, tauriConf) {
         disabled_web_shortcuts: disabledWebShortcuts,
     };
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
-    tauriConf.package.productName = name;
-    tauriConf.tauri.bundle.identifier = identifier;
+    tauriConf.productName = name;
+    tauriConf.identifier = identifier;
     //Judge the type of URL, whether it is a file or a website.
     const pathExists = await fsExtra.pathExists(url);
     if (pathExists) {
@@ -518,24 +502,6 @@ async function mergeConfig(url, options, tauriConf) {
     }
     else {
         tauriConf.pake.windows[0].url_type = 'web';
-        // Set the secure domain for calling window.__TAURI__ to the application domain that has been set.
-        tauriConf.tauri.security.dangerousRemoteDomainIpcAccess = [
-            {
-                domain: new URL(url).hostname,
-                windows: ['pake'],
-                enableTauriAPI: true,
-            },
-        ];
-    }
-    if (safeDomain.length > 0) {
-        tauriConf.tauri.security.dangerousRemoteDomainIpcAccess = [
-            ...tauriConf.tauri.security.dangerousRemoteDomainIpcAccess,
-            ...safeDomain.map(domain => ({
-                domain,
-                windows: ['pake'],
-                enableTauriAPI: true,
-            })),
-        ];
     }
     const platformMap = {
         win32: 'windows',
@@ -549,10 +515,10 @@ async function mergeConfig(url, options, tauriConf) {
     tauriConf.pake.system_tray[currentPlatform] = showSystemTray;
     // Processing targets are currently only open to Linux.
     if (platform === 'linux') {
-        delete tauriConf.tauri.bundle.deb.files;
+        delete tauriConf.bundle.linux.deb.files;
         const validTargets = ['all', 'deb', 'appimage'];
         if (validTargets.includes(options.targets)) {
-            tauriConf.tauri.bundle.targets = options.targets === 'all' ? ['deb', 'appimage'] : [options.targets];
+            tauriConf.bundle.targets = options.targets === 'all' ? ['deb', 'appimage'] : [options.targets];
         }
         else {
             logger.warn(`✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`);
@@ -587,15 +553,15 @@ async function mergeConfig(url, options, tauriConf) {
         if (customIconExt !== iconInfo.fileExt) {
             updateIconPath = false;
             logger.warn(`✼ ${iconInfo.message}, but you give ${customIconExt}`);
-            tauriConf.tauri.bundle.icon = [iconInfo.defaultIcon];
+            tauriConf.bundle.icon = [iconInfo.defaultIcon];
         }
         else {
             const iconPath = path.join(npmDirectory, 'src-tauri/', iconInfo.path);
-            tauriConf.tauri.bundle.resources = [iconInfo.path];
+            tauriConf.bundle.resources = [iconInfo.path];
             await fsExtra.copy(options.icon, iconPath);
         }
         if (updateIconPath) {
-            tauriConf.tauri.bundle.icon = [options.icon];
+            tauriConf.bundle.icon = [options.icon];
         }
         else {
             logger.warn(`✼ Icon will remain as default.`);
@@ -603,10 +569,10 @@ async function mergeConfig(url, options, tauriConf) {
     }
     else {
         logger.warn('✼ Custom icon path may be invalid, default icon will be used instead.');
-        tauriConf.tauri.bundle.icon = [iconInfo.defaultIcon];
+        tauriConf.bundle.icon = [iconInfo.defaultIcon];
     }
     // Set tray icon path.
-    let trayIconPath = platform === 'darwin' ? 'png/icon_512.png' : tauriConf.tauri.bundle.icon[0];
+    let trayIconPath = platform === 'darwin' ? 'png/icon_512.png' : tauriConf.bundle.icon[0];
     if (systemTrayIcon.length > 0) {
         try {
             await fsExtra.pathExists(systemTrayIcon);
@@ -627,7 +593,7 @@ async function mergeConfig(url, options, tauriConf) {
             logger.warn(`✼ Default system tray icon will remain unchanged.`);
         }
     }
-    tauriConf.tauri.systemTray.iconPath = trayIconPath;
+    tauriConf.app.trayIcon.iconPath = trayIconPath;
     const injectFilePath = path.join(npmDirectory, `src-tauri/src/inject/custom.js`);
     // inject js or css files
     if (inject?.length > 0) {
@@ -650,13 +616,12 @@ async function mergeConfig(url, options, tauriConf) {
         linux: 'tauri.linux.conf.json',
     };
     const configPath = path.join(tauriConfigDirectory, platformConfigPaths[platform]);
-    const bundleConf = { tauri: { bundle: tauriConf.tauri.bundle } };
+    const bundleConf = { bundle: tauriConf.bundle };
     await fsExtra.outputJSON(configPath, bundleConf, { spaces: 4 });
     const pakeConfigPath = path.join(tauriConfigDirectory, 'pake.json');
     await fsExtra.outputJSON(pakeConfigPath, tauriConf.pake, { spaces: 4 });
     let tauriConf2 = JSON.parse(JSON.stringify(tauriConf));
     delete tauriConf2.pake;
-    delete tauriConf2.tauri.bundle;
     const configJsonPath = path.join(tauriConfigDirectory, 'tauri.conf.json');
     await fsExtra.outputJSON(configJsonPath, tauriConf2, { spaces: 4 });
 }
@@ -759,7 +724,7 @@ class MacBuilder extends BaseBuilder {
         else {
             arch = process.arch === 'arm64' ? 'aarch64' : process.arch;
         }
-        return `${name}_${tauriConfig.package.version}_${arch}`;
+        return `${name}_${tauriConfig.version}_${arch}`;
     }
     getBuildCommand() {
         return this.options.multiArch ? 'npm run build:mac' : super.getBuildCommand();
@@ -779,8 +744,8 @@ class WinBuilder extends BaseBuilder {
     getFileName() {
         const { name } = this.options;
         const { arch } = process;
-        const language = tauriConfig.tauri.bundle.windows.wix.language[0];
-        return `${name}_${tauriConfig.package.version}_${arch}_${language}`;
+        const language = tauriConfig.bundle.windows.wix.language[0];
+        return `${name}_${tauriConfig.version}_${arch}_${language}`;
     }
 }
 
@@ -791,7 +756,7 @@ class LinuxBuilder extends BaseBuilder {
     getFileName() {
         const { name } = this.options;
         const arch = process.arch === 'x64' ? 'amd64' : process.arch;
-        return `${name}_${tauriConfig.package.version}_${arch}`;
+        return `${name}_${tauriConfig.version}_${arch}`;
     }
     // Customize it, considering that there are all targets.
     async build(url) {

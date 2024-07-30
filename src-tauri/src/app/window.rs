@@ -5,7 +5,7 @@ use tauri::{App, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
 
-pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> WebviewWindow {
+pub fn get_window(app: &mut App, config: &PakeConfig, _data_dir: PathBuf) -> WebviewWindow {
     let window_config = config
         .windows
         .first()

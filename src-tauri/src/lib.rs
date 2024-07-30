@@ -8,14 +8,14 @@ use app::{invoke, menu::set_system_tray, window};
 use invoke::{download_file, download_file_by_binary};
 use tauri::Manager;
 use tauri_plugin_window_state::Builder as windowStatePlugin;
-use tauri_plugin_global_shortcut::Shortcut;
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 use util::{get_data_dir, get_pake_config};
 use window::get_window;
 
 pub fn run_app() {
     let (pake_config, tauri_config) = get_pake_config();
 
-    let mut tauri_app = tauri::Builder::default();
+    let tauri_app = tauri::Builder::default();
 
     let show_system_tray = pake_config.show_system_tray();
 
@@ -31,24 +31,26 @@ pub fn run_app() {
             download_file_by_binary
         ])
         .setup(move |app| {
-            let data_dir = get_data_dir(&app.app_handle(), tauri_config);
+            let data_dir = get_data_dir(&app.app_handle(), tauri_config.clone());
 
-            let _window = get_window(app, pake_config, data_dir);
+            let _window = get_window(app, &pake_config, data_dir);
             // Prevent initial shaking
             _window.show().unwrap();
 
             if show_system_tray {
-                let _ = set_system_tray(&app.app_handle());
+                let _ = set_system_tray(&app.app_handle(), &pake_config);
+            } else {
+                app.app_handle().remove_tray_by_id("pake-tray");
             }
 
             if !activation_shortcut.is_empty() {
                 let app_handle = app.app_handle().clone();
+                let shortcut_hotkey = Shortcut::from_str(&activation_shortcut.as_str()).unwrap();
+
                 app_handle
                     .plugin(
                         tauri_plugin_global_shortcut::Builder::new()
-                            .with_shortcut(activation_shortcut.as_str())
-                            ?.with_handler(move |app, event, _shortcut| {
-                                let shortcut_hotkey = Shortcut::from_str(&activation_shortcut.as_str()).unwrap();
+                            .with_handler(move |app, event, _shortcut| {
 
                                 if shortcut_hotkey.eq(event) {
                                     let window = app.get_webview_window("pake").unwrap();
@@ -63,6 +65,8 @@ pub fn run_app() {
                             }
                     ).build())
                     .expect("Error registering global evoke shortcuts!");
+
+                app.global_shortcut().register(shortcut_hotkey)?;
             }
 
             Ok(())
