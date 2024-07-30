@@ -1,23 +1,21 @@
 {
-  "tauri": {
-    "bundle": {
-      "icon": ["icons/weread.icns"],
-      "identifier": "com.pake.weread",
-      "active": true,
-      "category": "DeveloperTool",
-      "copyright": "",
-      "externalBin": [],
-      "longDescription": "",
-      "macOS": {
-        "entitlements": null,
-        "exceptionDomain": "",
-        "frameworks": [],
-        "providerShortName": null,
-        "signingIdentity": null
-      },
-      "resources": [],
-      "shortDescription": "",
-      "targets": ["dmg"]
-    }
+  "identifier": "com.pake.weread",
+  "bundle": {
+    "icon": ["icons/weread.icns"],
+    "active": true,
+    "category": "DeveloperTool",
+    "copyright": "",
+    "externalBin": [],
+    "longDescription": "",
+    "macOS": {
+      "entitlements": null,
+      "exceptionDomain": null,
+      "frameworks": [],
+      "providerShortName": null,
+      "signingIdentity": null
+    },
+    "resources": [],
+    "shortDescription": "",
+    "targets": ["dmg"]
   }
 }
