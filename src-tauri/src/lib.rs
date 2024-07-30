@@ -7,8 +7,8 @@ use std::str::FromStr;
 use app::{invoke, menu::set_system_tray, window};
 use invoke::{download_file, download_file_by_binary};
 use tauri::Manager;
-use tauri_plugin_window_state::Builder as windowStatePlugin;
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
+use tauri_plugin_window_state::Builder as windowStatePlugin;
 use util::{get_data_dir, get_pake_config};
 use window::get_window;
 
@@ -51,7 +51,6 @@ pub fn run_app() {
                     .plugin(
                         tauri_plugin_global_shortcut::Builder::new()
                             .with_handler(move |app, event, _shortcut| {
-
                                 if shortcut_hotkey.eq(event) {
                                     let window = app.get_webview_window("pake").unwrap();
                                     match window.is_visible().unwrap() {
@@ -62,8 +61,9 @@ pub fn run_app() {
                                         }
                                     }
                                 }
-                            }
-                    ).build())
+                            })
+                            .build(),
+                    )
                     .expect("Error registering global evoke shortcuts!");
 
                 app.global_shortcut().register(shortcut_hotkey)?;

@@ -1,5 +1,8 @@
 use tauri::{
-    image::Image, include_image, menu::{ContextMenu, MenuBuilder, MenuItemBuilder}, tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent}, AppHandle, Config, Manager
+    image::Image,
+    menu::{MenuBuilder, MenuItemBuilder},
+    tray::{MouseButtonState, TrayIconBuilder, TrayIconEvent, MouseButton},
+    AppHandle, Manager,
 };
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
@@ -9,21 +12,23 @@ pub fn set_system_tray(app: &AppHandle, pake_config: &PakeConfig) -> tauri::Resu
     let hide_app = MenuItemBuilder::with_id("hide_app", "Hide").build(app)?;
     let show_app = MenuItemBuilder::with_id("show_app", "Show").build(app)?;
     let quit = MenuItemBuilder::with_id("quit", "Quit").build(app)?;
-    let menu = MenuBuilder::new(app).items(&[&hide_app, &show_app, &quit]).build()?;
+    let menu = MenuBuilder::new(app)
+        .items(&[&hide_app, &show_app, &quit])
+        .build()?;
     app.app_handle().remove_tray_by_id("pake-tray");
     let tray = TrayIconBuilder::new()
         .icon(Image::from_path(pake_config.system_tray_path.as_str())?)
         .menu(&menu)
         .on_tray_icon_event(move |tray, event| {
             if let TrayIconEvent::Click {
-                    button: MouseButton::Left,
-                    button_state: MouseButtonState::Up,
-                    ..
-            } = event {
+                button: MouseButton::Left,
+                button_state: MouseButtonState::Up,
+                ..
+            } = event
+            {
                 println!("click");
 
                 let app = tray.app_handle();
-
 
                 #[cfg(not(target_os = "macos"))]
                 {
@@ -37,7 +42,6 @@ pub fn set_system_tray(app: &AppHandle, pake_config: &PakeConfig) -> tauri::Resu
                     tauri::AppHandle::show(&app.app_handle()).unwrap();
                 }
             }
-
         })
         .on_menu_event(move |app, event| match event.id().as_ref() {
             "hide_app" => {

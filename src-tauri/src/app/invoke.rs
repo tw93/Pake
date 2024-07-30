@@ -29,9 +29,10 @@ pub async fn download_file(app: AppHandle, params: DownloadFileParams) -> Result
     let client = ClientBuilder::new().build().unwrap();
 
     let response = client
-        .execute(
-            Request::new(Method::GET, Url::from_str(&params.url).unwrap())
-        )
+        .execute(Request::new(
+            Method::GET,
+            Url::from_str(&params.url).unwrap(),
+        ))
         .await;
 
     match response {

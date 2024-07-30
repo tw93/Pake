@@ -52,7 +52,7 @@ pub struct PakeConfig {
     pub user_agent: UserAgent,
     pub system_tray: FunctionON,
     pub system_tray_path: String,
-    pub proxy_url: String
+    pub proxy_url: String,
 }
 
 impl PakeConfig {

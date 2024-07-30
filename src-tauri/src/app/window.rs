@@ -42,7 +42,8 @@ pub fn get_window(app: &mut App, config: &PakeConfig, _data_dir: PathBuf) -> Web
 
     if config.proxy_url != "" {
         println!("{}", &config.proxy_url);
-        window_builder = window_builder.proxy_url(Url::from_str(&config.proxy_url.as_str()).unwrap());
+        window_builder =
+            window_builder.proxy_url(Url::from_str(&config.proxy_url.as_str()).unwrap());
     }
 
     #[cfg(target_os = "macos")]
