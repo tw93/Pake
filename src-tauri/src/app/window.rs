@@ -1,6 +1,6 @@
 use crate::app::config::PakeConfig;
-use std::path::PathBuf;
-use tauri::{App, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
+use std::{path::PathBuf, str::FromStr};
+use tauri::{App, Url, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
@@ -39,6 +39,11 @@ pub fn get_window(app: &mut App, config: &PakeConfig, _data_dir: PathBuf) -> Web
         .initialization_script(include_str!("../inject/style.js"))
         //This is necessary to allow for file injection by external developers for customization purposes.
         .initialization_script(include_str!("../inject/custom.js"));
+
+    if config.proxy_url != "" {
+        println!("{}", &config.proxy_url);
+        window_builder = window_builder.proxy_url(Url::from_str(&config.proxy_url.as_str()).unwrap());
+    }
 
     #[cfg(target_os = "macos")]
     {

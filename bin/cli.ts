@@ -33,6 +33,7 @@ program
   .option('--multi-arch', 'Only for Mac, supports both Intel and M1', DEFAULT.multiArch)
   .option('--inject [injects...]', 'Injection of .js or .css Files', DEFAULT.inject)
   .option('--debug', 'Debug build and more output', DEFAULT.debug)
+  .option('--proxy-url', "Proxy URL", DEFAULT.proxyUrl)
   .addOption(new Option('--user-agent <string>', 'Custom user agent').default(DEFAULT.userAgent).hideHelp())
   .addOption(
     new Option('--targets <string>', 'Only for Linux, option "deb" or "appimage"').default(DEFAULT.targets).hideHelp(),

@@ -59,6 +59,9 @@ export interface PakeCliOptions {
 
   /* the domain that can use ipc or tauri javascript sdk */
   safeDomain: string[];
+
+  // Proxy
+  proxyUrl: string;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {

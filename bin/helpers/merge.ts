@@ -24,6 +24,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     name,
     resizable = true,
     inject,
+    proxyUrl,
   } = options;
 
   const { platform } = process;
@@ -188,6 +189,8 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     tauriConf.pake.inject = [];
     await fsExtra.writeFile(injectFilePath, '');
   }
+
+  tauriConf.pake.proxy_url = proxyUrl || "";
 
   // Save config file.
   const platformConfigPaths: PlatformMap = {
