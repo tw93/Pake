@@ -94,9 +94,9 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
   // Processing targets are currently only open to Linux.
   if (platform === 'linux') {
     delete tauriConf.bundle.linux.deb.files;
-    const validTargets = ['all', 'deb', 'appimage'];
+    const validTargets = ['all', 'deb', 'appimage', 'rpm'];
     if (validTargets.includes(options.targets)) {
-      tauriConf.bundle.targets = options.targets === 'all' ? ['deb', 'appimage'] : [options.targets];
+      tauriConf.bundle.targets = options.targets === 'all' ? ['deb', 'appimage', 'rpm'] : [options.targets];
     } else {
       logger.warn(`✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`);
     }
