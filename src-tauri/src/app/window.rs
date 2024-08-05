@@ -54,7 +54,7 @@ pub fn get_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Wind
     {
         window_builder = window_builder
             .data_directory(_data_dir)
-            .title(app.package_info().name)
+            .title(app.package_info().name.clone())
     }
 
     window_builder.build().expect("Failed to build window")
