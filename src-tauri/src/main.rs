@@ -2,6 +2,9 @@
     all(not(debug_assertions), target_os = "windows"),
     windows_subsystem = "windows"
 )]
+#![cfg(target_os = "macos")]
+#[macro_use]
+extern crate objc;
 
 mod app;
 mod util;
@@ -67,8 +70,36 @@ pub fn run_app() {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event.event() {
                 #[cfg(target_os = "macos")]
                 {
-                    event.window().minimize().unwrap();
-                    event.window().hide().unwrap();
+                    use cocoa::base::id;
+                    use cocoa::appkit::NSWindow;
+                    use cocoa::delegate;
+                    use objc::runtime::{Object, Sel};
+
+                    let ns_window = event.window().ns_window().unwrap() as id;
+
+                    extern fn on_exit_fullscreen(this: &Object, _cmd: Sel, _notification: id) {
+                        unsafe {
+                            let window: id = *this.get_ivar("window");
+                            window.miniaturize_(window);
+                        }
+                    }
+
+                    unsafe {
+                        ns_window.setDelegate_(delegate!("PakeWindowDelegate", {
+                            window: id = ns_window,
+                            (windowDidExitFullScreen:) => on_exit_fullscreen as extern fn(&Object, Sel, id)
+                        }));
+                    }
+
+                    if event.window().is_fullscreen().unwrap() {
+                        let ns_window = event.window().ns_window().unwrap() as id;
+                        unsafe {
+                            ns_window.toggleFullScreen_(ns_window);
+                        }
+                    } else {
+                        event.window().minimize().unwrap();
+                        event.window().hide().unwrap();
+                    }
                 }
 
                 #[cfg(not(target_os = "macos"))]

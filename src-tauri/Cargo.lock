@@ -67,6 +67,8 @@ name = "app"
 version = "0.1.0"
 dependencies = [
  "cargo-bloat",
+ "cocoa 0.25.0",
+ "objc",
  "serde",
  "serde_json",
  "tauri",
@@ -569,6 +571,22 @@ dependencies = [
  "core-foundation",
  "core-graphics 0.22.3",
  "foreign-types 0.3.2",
+ "libc",
+ "objc",
+]
+
+[[package]]
+name = "cocoa"
+version = "0.25.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f6140449f97a6e97f9511815c5632d84c8aacf8ac271ad77c559218161a1373c"
+dependencies = [
+ "bitflags 1.3.2",
+ "block",
+ "cocoa-foundation",
+ "core-foundation",
+ "core-graphics 0.23.2",
+ "foreign-types 0.5.0",
  "libc",
  "objc",
 ]
@@ -3705,7 +3723,7 @@ dependencies = [
  "bitflags 1.3.2",
  "cairo-rs",
  "cc",
- "cocoa",
+ "cocoa 0.24.1",
  "core-foundation",
  "core-graphics 0.22.3",
  "crossbeam-channel",
@@ -3781,7 +3799,7 @@ checksum = "7a4fab012dcf1e72762561cef2c08a6538aec2ca44d282158128117f79eb9d39"
 dependencies = [
  "anyhow",
  "bytes",
- "cocoa",
+ "cocoa 0.24.1",
  "dirs-next",
  "dunce",
  "embed_plist",
@@ -3944,7 +3962,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a777eaa0d88ae47d8081cdc667eba8941b3a18af0f0ccb22640d8f0c3431d6d1"
 dependencies = [
  "arboard",
- "cocoa",
+ "cocoa 0.24.1",
  "gtk",
  "percent-encoding",
  "rand 0.8.5",
@@ -5267,7 +5285,7 @@ checksum = "a04e72739ee84a218e3dbf8625888eadc874285637003ed21ab96a1bbbb538ec"
 dependencies = [
  "base64 0.13.1",
  "block",
- "cocoa",
+ "cocoa 0.24.1",
  "core-graphics 0.22.3",
  "crossbeam-channel",
  "dunce",
