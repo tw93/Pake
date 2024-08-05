@@ -393,20 +393,27 @@ Pake's development can not be without these Hackers. They contributed a lot of c
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/Tianj0o">
+            <img src="https://avatars.githubusercontent.com/u/68584284?v=4" width="90;" alt="Tianj0o"/>
+            <br />
+            <sub><b>Qitianjia</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/geekvest">
             <img src="https://avatars.githubusercontent.com/u/126322776?v=4" width="90;" alt="geekvest"/>
             <br />
             <sub><b>Null</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/houhoz">
             <img src="https://avatars.githubusercontent.com/u/19684376?v=4" width="90;" alt="houhoz"/>
             <br />
             <sub><b>Hyzhao</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/lakca">
             <img src="https://avatars.githubusercontent.com/u/16255922?v=4" width="90;" alt="lakca"/>
