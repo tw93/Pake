@@ -1,8 +1,7 @@
 name: Build and Publish Docker Image
 
 on:
-  push:
-    branches: [ "master" ] # TODO here you can specify needed trigger
+  workflow_dispatch:  # Manual
 
 env:
   REGISTRY: ghcr.io
@@ -47,3 +46,4 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
