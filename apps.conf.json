@@ -1,5 +1,11 @@
 {
   "apps": [
+     {
+      "name": "EcoDigital",
+      "title": "EcoDigital",
+      "name_zh": "万生数ChatGPT",
+      "url": "https://musicforprogramming.net/"
+    },
     {
       "name": "programmusic",
       "title": "ProgramMusic",
