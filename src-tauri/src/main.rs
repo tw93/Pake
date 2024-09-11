@@ -9,6 +9,7 @@ mod util;
 use app::{invoke, menu, window};
 use invoke::{download_file, download_file_by_binary};
 use menu::{get_system_tray, system_tray_handle};
+use std::time::Duration;
 use tauri::{GlobalShortcutManager, Manager};
 use util::{get_data_dir, get_pake_config};
 use window::build_window;
@@ -61,14 +62,24 @@ pub fn run_app() {
         })
         .on_window_event(|event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event.event() {
+                let window = event.window();
+
                 #[cfg(target_os = "macos")]
                 {
-                    event.window().minimize().unwrap();
-                    event.window().hide().unwrap();
+                    let window_handle = window.clone();
+                    tauri::async_runtime::spawn(async move {
+                        if window_handle.is_fullscreen().unwrap_or(false) {
+                            window_handle.set_fullscreen(false).unwrap();
+                            // Give a small delay to ensure the full-screen exit operation is completed.
+                            tokio::time::sleep(Duration::from_millis(900)).await;
+                        }
+                        window_handle.minimize().unwrap();
+                        window_handle.hide().unwrap();
+                    });
                 }
 
                 #[cfg(not(target_os = "macos"))]
-                event.window().close().unwrap();
+                window.close().unwrap();
 
                 api.prevent_close();
             }

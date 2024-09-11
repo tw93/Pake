@@ -20,6 +20,7 @@ serde = { version = "1.0.202", features = ["derive"] }
 tauri = { version = "1.6.6", features = ["api-all", "system-tray"] }
 tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 tauri-plugin-oauth = { git = "https://github.com/FabianLars/tauri-plugin-oauth", branch = "main" }
+tokio = { version = "1", features = ["full"] }
 
 [dev-dependencies]
 cargo-bloat = "0.11.1"
