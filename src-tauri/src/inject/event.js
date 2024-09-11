@@ -43,7 +43,7 @@ function isDownloadLink(url) {
     '3gp', '7z', 'ai', 'apk', 'avi', 'bmp', 'csv', 'dmg', 'doc', 'docx',
     'fla', 'flv', 'gif', 'gz', 'gzip', 'ico', 'iso', 'indd', 'jar', 'jpeg',
     'jpg', 'm3u8', 'mov', 'mp3', 'mp4', 'mpa', 'mpg', 'mpeg', 'msi', 'odt',
-    'ogg', 'ogv', 'pdf', 'png', 'ppt', 'pptx', 'psd', 'rar', 'raw', 'rss',
+    'ogg', 'ogv', 'pdf', 'png', 'ppt', 'pptx', 'psd', 'rar', 'raw',
     'svg', 'swf', 'tar', 'tif', 'tiff', 'ts', 'txt', 'wav', 'webm', 'webp',
     'wma', 'wmv', 'xls', 'xlsx', 'xml', 'zip', 'json', 'yaml', '7zip', 'mkv'
   ];
@@ -56,10 +56,6 @@ function externalDownLoadLink() {
   return ['quickref.me'].indexOf(location.hostname) > -1;
 }
 
-// Directly jumping out without hostname address.
-function externalTargetLink() {
-  return ['zbook.lol'].indexOf(location.hostname) > -1;
-}
 
 document.addEventListener('DOMContentLoaded', () => {
   const tauri = window.__TAURI__;
@@ -176,8 +172,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // case: download from dataURL -> convert dataURL ->
           } else if (url.startsWith('data:')) {
             downloadFromDataUri(url, filename);
-          } else if (isDownloadLink(url) || anchorEle.host !== window.location.host) {
-            handleExternalLink(e, url);
           }
         },
         true,
@@ -187,7 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  const isExternalLink = link => window.location.host !== link.host;
   // process special download protocol['data:','blob:']
   const isSpecialDownload = url => ['blob', 'data'].some(protocol => url.startsWith(protocol));
 
@@ -213,12 +206,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const hrefUrl = new URL(anchorElement.href);
       const absoluteUrl = hrefUrl.href;
       let filename = anchorElement.download || getFilenameFromUrl(absoluteUrl);
-
-      // Handling external link redirection.
-      if ((isExternalLink(absoluteUrl) && ['_blank', '_new'].includes(anchorElement.target)) || externalTargetLink()) {
-        handleExternalLink(e, absoluteUrl);
-        return;
-      }
 
       // Process download links for Rust to handle.
       if (isDownloadRequired(absoluteUrl, anchorElement, e) && !externalDownLoadLink() && !isSpecialDownload(absoluteUrl)) {
