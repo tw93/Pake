@@ -146,6 +146,14 @@ pake [url] [options]
 --always-on-top
 ```
 
+#### [dark-mode]
+
+强制 Mac 打包应用使用黑暗模式，默认为 `false`。
+
+```shell
+--dark-mode
+```
+
 #### [disabled-web-shortcuts]
 
 设置是否禁用原有 Pake 容器里面的网页操作快捷键，默认为 `false`。

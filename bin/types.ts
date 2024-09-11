@@ -27,6 +27,10 @@ export interface PakeCliOptions {
   // Enable windows always on top, default false
   alwaysOnTop: boolean;
 
+
+  // Force Mac to use dark mode, default false
+  darkMode: boolean;
+
   // Disable web shortcuts, default false
   disabledWebShortcuts: boolean;
 

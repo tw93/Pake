@@ -146,6 +146,14 @@ Sets whether the window is always at the top level, defaults to `false`.
 --always-on-top
 ```
 
+#### [dark-mode]
+
+Force Mac to package applications using dark mode, default is `false`.
+
+```shell
+--dark-mode
+```
+
 #### [disabled-web-shortcuts]
 
 Sets whether to disable web shortcuts in the original Pake container, defaults to `false`.

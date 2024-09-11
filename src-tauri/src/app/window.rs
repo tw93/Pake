@@ -1,6 +1,6 @@
 use crate::app::config::PakeConfig;
 use std::path::PathBuf;
-use tauri::{App, Window, WindowBuilder, WindowUrl};
+use tauri::{App, Theme, Window, WindowBuilder, WindowUrl};
 
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
@@ -45,7 +45,12 @@ pub fn build_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Wi
         } else {
             TitleBarStyle::Visible
         };
-        window_builder = window_builder.title_bar_style(title_bar_style)
+
+        window_builder = window_builder.title_bar_style(title_bar_style);
+
+        if window_config.dark_mode {
+            window_builder = window_builder.theme(Some(Theme::Dark));
+        }
     }
 
     #[cfg(not(target_os = "macos"))]

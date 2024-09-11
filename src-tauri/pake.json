@@ -8,6 +8,7 @@
       "width": 1200,
       "height": 780,
       "resizable": true,
+      "dark_mode": false,
       "always_on_top": false,
       "activation_shortcut": "",
       "disabled_web_shortcuts": false

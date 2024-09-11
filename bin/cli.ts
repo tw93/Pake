@@ -38,6 +38,7 @@ program
     new Option('--targets <string>', 'Only for Linux, option "deb" or "appimage"').default(DEFAULT.targets).hideHelp(),
   )
   .addOption(new Option('--always-on-top', 'Always on the top level').default(DEFAULT.alwaysOnTop).hideHelp())
+  .addOption(new Option('--dark-mode', 'Force Mac app to use dark mode').default(DEFAULT.darkMode).hideHelp())
   .addOption(
     new Option('--disabled-web-shortcuts', 'Disabled webPage shortcuts')
       .default(DEFAULT.disabledWebShortcuts)

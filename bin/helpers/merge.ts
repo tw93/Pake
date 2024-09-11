@@ -14,6 +14,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     fullscreen,
     hideTitleBar,
     alwaysOnTop,
+    darkMode,
     disabledWebShortcuts,
     activationShortcut,
     userAgent,
@@ -39,6 +40,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     hide_title_bar: hideTitleBar,
     activation_shortcut: activationShortcut,
     always_on_top: alwaysOnTop,
+    dark_mode: darkMode,
     disabled_web_shortcuts: disabledWebShortcuts,
   };
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
