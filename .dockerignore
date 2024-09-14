@@ -1,0 +1,11 @@
+.git
+.gitignore
+
+**/target
+**/node_modules
+
+**/*.log
+**/*.md
+**/tmp
+
+Dockerfile
