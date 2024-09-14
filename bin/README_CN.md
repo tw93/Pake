@@ -273,3 +273,20 @@ PS: 安全域名不需要携带协议。
 ## 结语
 
 完成上述步骤后，您的应用程序应该已经成功打包。请注意，根据您的系统配置和网络状况，打包过程可能需要一些时间。请耐心等待，一旦打包完成，您就可以在指定的目录中找到应用程序安装包。
+
+## Docker
+
+```shell
+# 在Linux上，您可以通过 Docker 运行 Pake CLI。
+docker run -it --rm \ # Run interactively, remove container after exit
+    -v YOUR_DIR:/output \ # Files from container's /output will be in YOU_DIR
+    ghcr.io/tw93/pake \
+    <arguments>
+
+# For example:
+docker run -it --rm \
+    -v ./packages:/output \
+    ghcr.io/tw93/pake \
+    https://example.com --name myapp --icon ./icon.png
+
+```

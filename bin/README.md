@@ -264,3 +264,20 @@ The typed package has dev-tools for debugging, in addition to outputting more lo
 ## Conclusion
 
 After completing the above steps, your application should be successfully packaged. Please note that the packaging process may take some time depending on your system configuration and network conditions. Be patient, and once the packaging is complete, you can find the application installer in the specified directory.
+
+## Docker
+
+```shell
+# On Linux, you can run the Pake CLI via Docker
+docker run -it --rm \ # Run interactively, remove container after exit
+    -v YOUR_DIR:/output \ # Files from container's /output will be in YOU_DIR
+    ghcr.io/tw93/pake \
+    <arguments>
+
+# For example:
+docker run -it --rm \
+    -v ./packages:/output \
+    ghcr.io/tw93/pake \
+    https://example.com --name myapp --icon ./icon.png
+
+```
