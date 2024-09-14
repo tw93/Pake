@@ -257,6 +257,13 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
     </td></tr>
 <tr>
     <td align="center">
+        <a href="https://github.com/YangguangZhou">
+            <img src="https://avatars.githubusercontent.com/u/61733195?v=4" width="90;" alt="YangguangZhou"/>
+            <br />
+            <sub><b>Jerry Zhou</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/AielloChan">
             <img src="https://avatars.githubusercontent.com/u/7900765?v=4" width="90;" alt="AielloChan"/>
             <br />
@@ -278,6 +285,13 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/eltociear">
+            <img src="https://avatars.githubusercontent.com/u/22633385?v=4" width="90;" alt="eltociear"/>
+            <br />
+            <sub><b>Ikko Eltociear Ashimine</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/QingZ11">
             <img src="https://avatars.githubusercontent.com/u/38887077?v=4" width="90;" alt="QingZ11"/>
             <br />
@@ -290,7 +304,8 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
             <br />
             <sub><b>孟世博</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/2nthony">
             <img src="https://avatars.githubusercontent.com/u/19513289?v=4" width="90;" alt="2nthony"/>
@@ -304,8 +319,7 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
             <br />
             <sub><b>Null</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/imabutahersiddik">
             <img src="https://avatars.githubusercontent.com/u/138387257?v=4" width="90;" alt="imabutahersiddik"/>
@@ -340,6 +354,28 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
             <br />
             <sub><b>Fechin</b></sub>
         </a>
+    </td></tr>
+<tr>
+    <td align="center">
+        <a href="https://github.com/ImgBotApp">
+            <img src="https://avatars.githubusercontent.com/u/31427850?v=4" width="90;" alt="ImgBotApp"/>
+            <br />
+            <sub><b>Imgbot</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/droid-Q">
+            <img src="https://avatars.githubusercontent.com/u/708277?v=4" width="90;" alt="droid-Q"/>
+            <br />
+            <sub><b>Jiaqi Gu</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/mattbajorek">
+            <img src="https://avatars.githubusercontent.com/u/17235301?v=4" width="90;" alt="mattbajorek"/>
+            <br />
+            <sub><b>Matt Bajorek</b></sub>
+        </a>
     </td>
     <td align="center">
         <a href="https://github.com/Milo123459">
@@ -353,6 +389,20 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
             <img src="https://avatars.githubusercontent.com/u/1329716?v=4" width="90;" alt="princemaple"/>
             <br />
             <sub><b>Po Chen</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/Tianj0o">
+            <img src="https://avatars.githubusercontent.com/u/68584284?v=4" width="90;" alt="Tianj0o"/>
+            <br />
+            <sub><b>Qitianjia</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/geekvest">
+            <img src="https://avatars.githubusercontent.com/u/126322776?v=4" width="90;" alt="geekvest"/>
+            <br />
+            <sub><b>Null</b></sub>
         </a>
     </td></tr>
 <tr>
@@ -368,6 +418,13 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
             <img src="https://avatars.githubusercontent.com/u/16255922?v=4" width="90;" alt="lakca"/>
             <br />
             <sub><b>Null</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/liudonghua123">
+            <img src="https://avatars.githubusercontent.com/u/2276718?v=4" width="90;" alt="liudonghua123"/>
+            <br />
+            <sub><b>Liudonghua</b></sub>
         </a>
     </td>
     <td align="center">
