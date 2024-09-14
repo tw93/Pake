@@ -248,13 +248,6 @@ Pake's development can not be without these Hackers. They contributed a lot of c
         </a>
     </td>
     <td align="center">
-        <a href="https://github.com/stone-w4tch3r">
-            <img src="https://avatars.githubusercontent.com/u/100294019?v=4" width="90;" alt="stone-w4tch3r"/>
-            <br />
-            <sub><b>Null</b></sub>
-        </a>
-    </td>
-    <td align="center">
         <a href="https://github.com/wanghanzhen">
             <img src="https://avatars.githubusercontent.com/u/25301012?v=4" width="90;" alt="wanghanzhen"/>
             <br />
@@ -267,15 +260,15 @@ Pake's development can not be without these Hackers. They contributed a lot of c
             <br />
             <sub><b>Bryan Lee</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/essesoul">
             <img src="https://avatars.githubusercontent.com/u/58624474?v=4" width="90;" alt="essesoul"/>
             <br />
             <sub><b>Essesoul</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/YangguangZhou">
             <img src="https://avatars.githubusercontent.com/u/61733195?v=4" width="90;" alt="YangguangZhou"/>
@@ -317,15 +310,15 @@ Pake's development can not be without these Hackers. They contributed a lot of c
             <br />
             <sub><b>Matt Bajorek</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/QingZ11">
             <img src="https://avatars.githubusercontent.com/u/38887077?v=4" width="90;" alt="QingZ11"/>
             <br />
             <sub><b>Steam</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/Tianj0o">
             <img src="https://avatars.githubusercontent.com/u/68584284?v=4" width="90;" alt="Tianj0o"/>
@@ -367,15 +360,15 @@ Pake's development can not be without these Hackers. They contributed a lot of c
             <br />
             <sub><b>Abu Taher Siddik</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/kidylee">
             <img src="https://avatars.githubusercontent.com/u/841310?v=4" width="90;" alt="kidylee"/>
             <br />
             <sub><b>An Li</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/nekomeowww">
             <img src="https://avatars.githubusercontent.com/u/11081491?v=4" width="90;" alt="nekomeowww"/>
@@ -417,15 +410,15 @@ Pake's development can not be without these Hackers. They contributed a lot of c
             <br />
             <sub><b>Milo</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/princemaple">
             <img src="https://avatars.githubusercontent.com/u/1329716?v=4" width="90;" alt="princemaple"/>
             <br />
             <sub><b>Po Chen</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/geekvest">
             <img src="https://avatars.githubusercontent.com/u/126322776?v=4" width="90;" alt="geekvest"/>
@@ -467,8 +460,7 @@ Pake's development can not be without these Hackers. They contributed a lot of c
             <br />
             <sub><b>Ranger</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/hetz">
             <img src="https://avatars.githubusercontent.com/u/820141?v=4" width="90;" alt="hetz"/>
