@@ -43,8 +43,8 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/17dC9I.jpg width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/mc41xq.jpg width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/WeRead.jpg width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/Twitter.jpg width=600/></td>
     </tr>
     <tr>
         <td>ChatGPT
@@ -59,8 +59,8 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/5aO6yP.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/Ztsx23.png width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/ChatGPT.png width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/Poe.png width=600/></td>
     </tr>
     <tr>
       <td>YouTube Music
@@ -75,8 +75,8 @@
       </td>
     </tr>
     <tr>
-        <td><img src=https://raw.githubusercontent.com/tw93/static/master/pic/12.png width=600 /></td>
-        <td><img src=https://gw.alipayobjects.com/zos/k/pn/1.jpg width=600 /></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/YouTubeMusic.png width=600 /></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/YouTube.jpg width=600 /></td>
     </tr>
     <tr>
         <td>LiZhi
@@ -91,8 +91,8 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/nYEKqN.jpg width=600/></td>
-        <td><img src=https://gw.alipayobjects.com/zos/k/r7/0C9lju.jpg width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/LiZhi.jpg width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/ProgramMusic.jpg width=600/></td>
     </tr>
     <tr>
         <td>Qwerty
@@ -107,8 +107,8 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/i2eg6G.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/mUzOek.jpg width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/Qwerty.png width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/CodeRunner.jpg width=600/></td>
     </tr>
         <tr>
         <td>Flomo
@@ -123,8 +123,8 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://gw.alipayobjects.com/zos/k/30/RoUSUf.png width=600/></td>
-        <td><img src=https://gw.alipayobjects.com/zos/k/89/yJVwyi.png width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/Flomo.png width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/XiaoHongShu.png width=600/></td>
     </tr>
 </table>
 
@@ -159,10 +159,7 @@
 
 ## 命令行一键打包
 
-<kbd>
-  <img src="https://gw.alipayobjects.com/zos/k/zd/pake.gif" width="100%">
-</kbd>
-<br/><br/>
+![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake.gif)
 
 **Pake 提供了命令行工具，可以更快捷方便地一键自定义打你需要的包，详细可见 [文档](./bin/README_CN.md)。**
 
