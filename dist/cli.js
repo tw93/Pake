@@ -20,7 +20,7 @@ import psl from 'psl';
 import isUrl from 'is-url';
 
 var name = "pake-cli";
-var version = "2.5.2";
+var version = "2.6.0";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
@@ -67,31 +67,31 @@ var type = "module";
 var exports = "./dist/pake.js";
 var license = "MIT";
 var dependencies = {
-	"@tauri-apps/api": "^1.5.4",
-	"@tauri-apps/cli": "^1.5.13",
-	axios: "^1.6.8",
+	"@tauri-apps/api": "^1.6.0",
+	"@tauri-apps/cli": "^1.6.1",
+	axios: "^1.7.7",
 	chalk: "^5.3.0",
 	commander: "^11.1.0",
 	"file-type": "^18.7.0",
 	"fs-extra": "^11.2.0",
 	"is-url": "^1.2.4",
-	loglevel: "^1.9.1",
+	loglevel: "^1.9.2",
 	ora: "^7.0.1",
 	prompts: "^2.4.2",
 	psl: "^1.9.0",
 	shelljs: "^0.8.5",
 	"tmp-promise": "^3.0.3",
-	"update-notifier": "^7.0.0"
+	"update-notifier": "^7.3.1"
 };
 var devDependencies = {
 	"@rollup/plugin-alias": "^5.1.0",
-	"@rollup/plugin-commonjs": "^25.0.7",
+	"@rollup/plugin-commonjs": "^25.0.8",
 	"@rollup/plugin-json": "^6.1.0",
-	"@rollup/plugin-replace": "^5.0.5",
+	"@rollup/plugin-replace": "^5.0.7",
 	"@rollup/plugin-terser": "^0.4.4",
 	"@types/fs-extra": "^11.0.4",
 	"@types/is-url": "^1.2.32",
-	"@types/node": "^20.12.10",
+	"@types/node": "^20.16.5",
 	"@types/page-icon": "^0.3.6",
 	"@types/prompts": "^2.4.9",
 	"@types/psl": "^1.1.3",
@@ -100,10 +100,10 @@ var devDependencies = {
 	"@types/update-notifier": "^6.0.8",
 	"app-root-path": "^3.1.0",
 	"cross-env": "^7.0.3",
-	rollup: "^4.17.2",
+	rollup: "^4.21.3",
 	"rollup-plugin-typescript2": "^0.36.0",
-	tslib: "^2.6.2",
-	typescript: "^5.4.5"
+	tslib: "^2.7.0",
+	typescript: "^5.6.2"
 };
 var packageJson = {
 	name: name,
@@ -132,6 +132,7 @@ var windows = [
 		width: 1200,
 		height: 780,
 		resizable: true,
+		dark_mode: false,
 		always_on_top: false,
 		activation_shortcut: "",
 		disabled_web_shortcuts: false
@@ -476,7 +477,7 @@ async function combineFiles(files, output) {
 }
 
 async function mergeConfig(url, options, tauriConf) {
-    const { width, height, fullscreen, hideTitleBar, alwaysOnTop, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, safeDomain, installerLanguage, } = options;
+    const { width, height, fullscreen, hideTitleBar, alwaysOnTop, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, safeDomain, installerLanguage, } = options;
     const { platform } = process;
     // Set Windows parameters.
     const tauriConfWindowOptions = {
@@ -487,6 +488,7 @@ async function mergeConfig(url, options, tauriConf) {
         hide_title_bar: hideTitleBar,
         activation_shortcut: activationShortcut,
         always_on_top: alwaysOnTop,
+        dark_mode: darkMode,
         disabled_web_shortcuts: disabledWebShortcuts,
     };
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
@@ -837,6 +839,7 @@ const DEFAULT_PAKE_OPTIONS = {
     resizable: true,
     hideTitleBar: false,
     alwaysOnTop: false,
+    darkMode: false,
     disabledWebShortcuts: false,
     activationShortcut: '',
     userAgent: '',
@@ -1037,6 +1040,7 @@ program
     .addOption(new Option('--user-agent <string>', 'Custom user agent').default(DEFAULT_PAKE_OPTIONS.userAgent).hideHelp())
     .addOption(new Option('--targets <string>', 'Only for Linux, option "deb" or "appimage"').default(DEFAULT_PAKE_OPTIONS.targets).hideHelp())
     .addOption(new Option('--always-on-top', 'Always on the top level').default(DEFAULT_PAKE_OPTIONS.alwaysOnTop).hideHelp())
+    .addOption(new Option('--dark-mode', 'Force Mac app to use dark mode').default(DEFAULT_PAKE_OPTIONS.darkMode).hideHelp())
     .addOption(new Option('--disabled-web-shortcuts', 'Disabled webPage shortcuts')
     .default(DEFAULT_PAKE_OPTIONS.disabledWebShortcuts)
     .hideHelp())
