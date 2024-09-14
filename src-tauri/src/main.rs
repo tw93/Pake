@@ -9,10 +9,12 @@ mod util;
 use app::{invoke, menu, window};
 use invoke::{download_file, download_file_by_binary};
 use menu::{get_system_tray, system_tray_handle};
-use std::time::Duration;
 use tauri::{GlobalShortcutManager, Manager};
 use util::{get_data_dir, get_pake_config};
 use window::build_window;
+
+#[cfg(target_os = "macos")]
+use std::time::Duration;
 
 pub fn run_app() {
     let (pake_config, tauri_config) = get_pake_config();

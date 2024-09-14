@@ -1,9 +1,9 @@
 use crate::app::config::PakeConfig;
 use std::path::PathBuf;
-use tauri::{App, Theme, Window, WindowBuilder, WindowUrl};
+use tauri::{App, Window, WindowBuilder, WindowUrl};
 
 #[cfg(target_os = "macos")]
-use tauri::TitleBarStyle;
+use tauri::{Theme, TitleBarStyle};
 
 pub fn build_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Window {
     let window_config = config
