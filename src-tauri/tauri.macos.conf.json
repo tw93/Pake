@@ -1,7 +1,7 @@
 {
   "tauri": {
     "bundle": {
-      "icon": ["icons/weread.icns"],
+      "icon": ["icons/chat.icns"],
       "identifier": "com.pake.chat",
       "active": true,
       "category": "DeveloperTool",
