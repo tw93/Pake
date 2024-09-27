@@ -12,10 +12,10 @@ on:
           - 'macos-latest'
           - 'ubuntu-20.04'
       url:
-        description: '[URL]'
+        description: '[https://fxg.jinritemai.com/login/common]'
         required: true
       name:
-        description: '[Name]'
+        description: '[doudian]'
         required: true
       icon:
         description: '[Icon, Optional]'
