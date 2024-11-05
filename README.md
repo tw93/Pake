@@ -171,7 +171,7 @@ npm install -g pake-cli
 pake url [OPTIONS]...
 
 # Feel free to play with Pake! It might take a while to prepare the environment the first time you launch Pake.
-pake https://weekly.tw93.fun --name Weekly --hide-title-bar
+pake https://weekly.tw93.fun --name weekly --hide-title-bar
 
 ```
 
