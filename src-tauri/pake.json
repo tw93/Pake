@@ -23,5 +23,7 @@
     "linux": true,
     "windows": true
   },
-  "inject": []
+  "system_tray_path": "icons/icon.png",
+  "inject": [],
+  "proxy_url": ""
 }

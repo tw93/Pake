@@ -6,6 +6,7 @@
   },
   "plugins": {},
   "productName": "WeRead",
+  "identifier":"com.pake.weread",
   "version": "1.0.0",
   "app": {
     "security": {
