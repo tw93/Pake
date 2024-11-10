@@ -1,7 +1,7 @@
 use tauri::{
     image::Image,
     menu::{MenuBuilder, MenuItemBuilder},
-    tray::{MouseButtonState, TrayIconBuilder, TrayIconEvent, MouseButton},
+    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     AppHandle, Manager,
 };
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};

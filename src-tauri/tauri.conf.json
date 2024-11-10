@@ -1,13 +1,8 @@
 {
-  "build": {
-    "beforeBuildCommand": "",
-    "frontendDist": "../dist",
-    "beforeDevCommand": ""
-  },
-  "plugins": {},
   "productName": "WeRead",
-  "identifier":"com.pake.weread",
+  "identifier": "com.pake.weread",
   "version": "1.0.0",
+  "plugins": {},
   "app": {
     "security": {
       "csp": null
@@ -18,5 +13,10 @@
       "id": "pake-tray"
     },
     "withGlobalTauri": true
+  },
+  "build": {
+    "beforeBuildCommand": "",
+    "frontendDist": "../dist",
+    "beforeDevCommand": ""
   }
 }

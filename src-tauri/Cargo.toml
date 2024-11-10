@@ -16,21 +16,21 @@ crate-type = ["staticlib", "cdylib", "lib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "2.0.0-rc.0", features = [] }
+tauri-build = { version = "2.0.3", features = [] }
 
 [dependencies]
-serde_json = "1.0.116"
-serde = { version = "1.0.200", features = ["derive"] }
-tauri = { version = "2.0.0-rc.0", features = ["tray-icon", "image-ico", "image-png", "macos-proxy"] }
-tauri-plugin-window-state = "2.0.0"
+serde_json = "1.0.132"
+serde = { version = "1.0.214", features = ["derive"] }
+tauri = { version = "2.1.0", features = ["tray-icon", "image-ico", "image-png", "macos-proxy"] }
+tauri-plugin-window-state = "2.0.2"
 tauri-plugin-oauth = "2"
-tauri-plugin-clipboard-manager = "2.0.0"
-tauri-plugin-http = "2.0.0"
+tauri-plugin-clipboard-manager = "2.0.2"
+tauri-plugin-http = "2.0.3"
 [target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
-tauri-plugin-global-shortcut = { version = "2.0.0" }
+tauri-plugin-global-shortcut = { version = "2.0.1" }
 
 [dev-dependencies]
-cargo-bloat = "0.11.1"
+cargo-bloat = "0.12.1"
 
 [features]
 # this feature is used for development builds from development cli

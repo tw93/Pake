@@ -1,21 +1,21 @@
 {
+  "productName": "weread",
   "identifier": "com.pake.weread",
-
-    "bundle": {
-      "icon": ["png/weread_512.png"],
-      "active": true,
-      "category": "DeveloperTool",
-      "copyright": "",
-      "linux": {
-        "deb": {
-          "depends": ["curl", "wget"],
-          "files": { "/usr/share/applications/com-pake-weread.desktop": "assets/com-pake-weread.desktop" }
-        }
-      },
-      "externalBin": [],
-      "longDescription": "",
-      "resources": [],
-      "shortDescription": "",
-      "targets": ["deb", "appimage"]
-    }
+  "bundle": {
+    "icon": ["png/weread_512.png"],
+    "active": true,
+    "category": "DeveloperTool",
+    "copyright": "",
+    "linux": {
+      "deb": {
+        "depends": ["curl", "wget"],
+        "files": { "/usr/share/applications/com-pake-weread.desktop": "assets/com-pake-weread.desktop" }
+      }
+    },
+    "externalBin": [],
+    "longDescription": "",
+    "resources": [],
+    "shortDescription": "",
+    "targets": ["deb", "appimage"]
+  }
 }

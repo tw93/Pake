@@ -293,9 +293,9 @@ dependencies = [
 
 [[package]]
 name = "cargo-bloat"
-version = "0.11.1"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac0d2f3bae7849957392be201f47a0f70409a2e1b335b17a7c85e3ce48a6e092"
+checksum = "56e2c483ab55e38021c2c701061e078cc6c28d563932cbdf6bc4efaa28ab117e"
 dependencies = [
  "binfarce",
  "json",
@@ -363,7 +363,7 @@ checksum = "d38f2da7a0a2c4ccf0065be06397cc26a81f4e528be095826eee9d4adbb8c60f"
 dependencies = [
  "byteorder",
  "fnv",
- "uuid 1.11.0",
+ "uuid",
 ]
 
 [[package]]
@@ -2030,9 +2030,9 @@ checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
 
 [[package]]
 name = "memmap2"
-version = "0.5.10"
+version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83faa42c0a078c393f6b29d5db232d8be22776a891f8f56e5284faee4a20b327"
+checksum = "fd3f7eed9d3848f8b98834af67102b720745c4ec028fcd0aa0239277e7de374f"
 dependencies = [
  "libc",
 ]
@@ -2096,9 +2096,9 @@ dependencies = [
 
 [[package]]
 name = "multimap"
-version = "0.8.3"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5ce46fe64a9d73be07dcbe690a38ce1b293be448fd8ce1e6c1b8062c9f72c6a"
+checksum = "defc4c55412d89136f966bbb339008b474350e5e6e78d2714439c386b3137a03"
 
 [[package]]
 name = "ndk"
@@ -2476,13 +2476,13 @@ dependencies = [
 
 [[package]]
 name = "pdb"
-version = "0.7.0"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13f4d162ecaaa1467de5afbe62d597757b674b51da8bb4e587430c5fdb2af7aa"
+checksum = "82040a392923abe6279c00ab4aff62d5250d1c8555dc780e4b02783a7aa74863"
 dependencies = [
  "fallible-iterator",
  "scroll",
- "uuid 0.8.2",
+ "uuid",
 ]
 
 [[package]]
@@ -3139,7 +3139,7 @@ dependencies = [
  "serde",
  "serde_json",
  "url",
- "uuid 1.11.0",
+ "uuid",
 ]
 
 [[package]]
@@ -3162,9 +3162,9 @@ checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 
 [[package]]
 name = "scroll"
-version = "0.10.2"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fda28d4b4830b807a8b43f7b0e6b5df875311b3e7621d84577188c175b6ec1ec"
+checksum = "04c565b551bafbef4157586fa379538366e4385d42082f255bfd96e4fe8519da"
 
 [[package]]
 name = "selectors"
@@ -3734,7 +3734,7 @@ dependencies = [
  "thiserror 2.0.2",
  "time",
  "url",
- "uuid 1.11.0",
+ "uuid",
  "walkdir",
 ]
 
@@ -3802,7 +3802,7 @@ dependencies = [
  "tauri-plugin",
  "thiserror 1.0.69",
  "url",
- "uuid 1.11.0",
+ "uuid",
 ]
 
 [[package]]
@@ -3950,7 +3950,7 @@ dependencies = [
  "toml 0.8.2",
  "url",
  "urlpattern",
- "uuid 1.11.0",
+ "uuid",
  "walkdir",
 ]
 
@@ -4387,12 +4387,6 @@ name = "utf8_iter"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6c140620e7ffbb22c2dee59cafe6084a59b5ffc27a8859a5f0d494b5d52b6be"
-
-[[package]]
-name = "uuid"
-version = "0.8.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
 
 [[package]]
 name = "uuid"
