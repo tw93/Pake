@@ -12,7 +12,7 @@ on:
           - 'macos-latest'
           - 'ubuntu-20.04'
       url:
-        description: '[URL]'
+        description: '[http://49.232.250.102/]'
         required: true
       name:
         description: '[Name]'
