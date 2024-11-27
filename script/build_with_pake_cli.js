@@ -11,8 +11,7 @@ console.log('Pake parameters is: ');
 console.log('url: ', process.env.URL);
 console.log('name: ', process.env.NAME);
 console.log('icon: ', process.env.ICON);
-console.log('height: ', process.env.HEIGHT);
-console.log('width: ', process.env.WIDTH);
+console.log('width and height: ', process.env.WIDTH_AND_HEIGHT);
 console.log('hide-title-bar: ', process.env.HIDE_TITLE_BAR);
 console.log('resize: ', process.env.RESIZE);
 console.log('is multi arch? only for Mac: ', process.env.MULTI_ARCH);
@@ -22,7 +21,12 @@ console.log('debug: ', process.env.DEBUG);
 console.log('===========================\n');
 
 cd('node_modules/pake-cli');
-let params = `node cli.js ${process.env.URL} --name ${process.env.NAME} --height ${process.env.HEIGHT} --width ${process.env.WIDTH}`;
+const [WIDTH, HEIGHT] = process.env.WIDTH_AND_HEIGHT.split('x');
+if (!WIDTH || !HEIGHT) {
+  console.error('Width and height are not defined! please check your environment variables!');
+  process.exit(1);
+}
+let params = `node cli.js ${process.env.URL} --name ${process.env.NAME} --height ${HEIGHT} --width ${WIDTH}`;
 
 if (process.env.HIDE_TITLE_BAR === 'true') {
   params = `${params} --hide-title-bar`;

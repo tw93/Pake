@@ -20,14 +20,10 @@ on:
       icon:
         description: '[Icon, Optional]'
         required: false
-      width:
-        description: '[Width, Optional]'
+      width_and_height:
+        description: '[Width and Height, Optional, Please use format like 1200x780]'
         required: false
-        default: '1200'
-      height:
-        description: '[Height, Optional]'
-        required: false
-        default: '780'
+        default: '1200x780'
       safe_domain:
         description: '[Safe Domain, Optional]'
         required: false
@@ -130,8 +126,7 @@ jobs:
           URL: ${{ inputs.url }}
           NAME: ${{ inputs.name }}
           ICON: ${{ inputs.icon }}
-          HEIGHT: ${{ inputs.height }}
-          WIDTH: ${{ inputs.width }}
+          WIDTH_AND_HEIGHT: ${{ inputs.width_and_height }}
           HIDE_TITLE_BAR: ${{ inputs.hide_title_bar }}
           FULLSCREEN: ${{ inputs.fullscreen }}
           RESIZE: ${{ inputs.resize }}
