@@ -50,6 +50,11 @@ on:
           - 'deb'
           - 'appimage'
           - 'all'
+      debug:
+        description: '[Debug, Optional]'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -133,7 +138,7 @@ jobs:
           MULTI_ARCH: ${{ inputs.multi_arch }}
           TARGETS: ${{ inputs.targets }}
           SAFE_DOMAIN: ${{ inputs.safe_domain }}
-
+          DEBUG: ${{ inputs.debug }}
       - name: Upload archive
         uses: actions/upload-artifact@v3
         with:
