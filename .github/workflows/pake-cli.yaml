@@ -24,6 +24,15 @@ on:
         description: '[Width and Height, Optional, Please use format like 1200x780]'
         required: false
         default: '1200x780'
+      targets:
+        description: '[Targets, Optional, Linux only]'
+        required: false
+        default: 'deb'
+        type: choice
+        options:
+          - 'deb'
+          - 'appimage'
+          - 'all'
       safe_domain:
         description: '[Safe Domain, Optional]'
         required: false
@@ -37,15 +46,6 @@ on:
         required: false
         type: boolean
         default: false
-      targets:
-        description: '[Targets, Optional, Linux only]'
-        required: false
-        default: 'deb'
-        type: choice
-        options:
-          - 'deb'
-          - 'appimage'
-          - 'all'
       debug:
         description: '[Debug, Optional]'
         required: false
