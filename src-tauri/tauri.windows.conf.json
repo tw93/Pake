@@ -1,6 +1,4 @@
 {
-  "identifier": "com.pake.weread",
-  "productName": "WeRead",
   "bundle": {
     "icon": ["png/weread_256.ico", "png/weread_32.ico"],
     "active": true,

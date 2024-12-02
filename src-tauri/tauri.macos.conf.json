@@ -1,6 +1,4 @@
 {
-  "productName": "WeRead",
-  "identifier": "com.pake.weread",
   "bundle": {
     "icon": ["icons/weread.icns"],
     "active": true,

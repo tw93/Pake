@@ -1,11 +1,10 @@
 [package]
-name = "app"
+name = "pake"
 version = "0.1.0"
 description = "🤱🏻 Turn any webpage into a desktop app with Rust."
 authors = ["Tw93"]
 license = "MIT"
 repository = "https://github.com/tw93/Pake"
-default-run = "app"
 edition = "2021"
 rust-version = "1.78.0"
 
