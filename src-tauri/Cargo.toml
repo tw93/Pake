@@ -19,9 +19,9 @@ crate-type = ["staticlib", "cdylib", "lib"]
 tauri-build = { version = "2.0.3", features = [] }
 
 [dependencies]
-serde_json = "1.0.132"
-serde = { version = "1.0.214", features = ["derive"] }
-tauri = { version = "2.1.0", features = ["tray-icon", "image-ico", "image-png", "macos-proxy"] }
+serde_json = "1.0.133"
+serde = { version = "1.0.215", features = ["derive"] }
+tauri = { version = "2.1.1", features = ["tray-icon", "image-ico", "image-png", "macos-proxy"] }
 tauri-plugin-window-state = "2.0.2"
 tauri-plugin-oauth = "2"
 tauri-plugin-clipboard-manager = "2.0.2"
