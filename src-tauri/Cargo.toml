@@ -27,6 +27,7 @@ tauri-plugin-clipboard-manager = "2.0.2"
 tauri-plugin-http = "2.0.3"
 [target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
 tauri-plugin-global-shortcut = { version = "2.0.1" }
+tauri-plugin-shell = "2.0.0"
 
 [dev-dependencies]
 cargo-bloat = "0.12.1"

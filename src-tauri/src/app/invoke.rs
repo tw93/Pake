@@ -4,7 +4,6 @@ use std::io::Write;
 use std::str::FromStr;
 use tauri::http::Method;
 use tauri_plugin_http::reqwest::{ClientBuilder, Request};
-// use tauri::http::{ClientBuilder, HttpRequestBuilder, ResponseType};
 use tauri::{command, AppHandle, Manager, Url, WebviewWindow};
 
 #[derive(serde::Deserialize)]
