@@ -342,6 +342,10 @@ window.addEventListener('DOMContentLoaded', _event => {
       padding-top: 20px;
     }
 
+    #__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary > div > div > div > div > nav, #__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden > main {
+      padding-top: 6px;
+    }
+
     #__next > div.AnnouncementWrapper_container__Z51yh > div > aside.SidebarLayout_sidebar__SXeDJ.SidebarLayout_left__k163a > div > div > header{
       padding-left: 84px;
       padding-top: 10px;

@@ -39,19 +39,18 @@ program
     new Option('--targets <string>', 'Only for Linux, option "deb" or "appimage"').default(DEFAULT.targets).hideHelp(),
   )
   .addOption(new Option('--always-on-top', 'Always on the top level').default(DEFAULT.alwaysOnTop).hideHelp())
+  .addOption(new Option('--dark-mode', 'Force Mac app to use dark mode').default(DEFAULT.darkMode).hideHelp())
   .addOption(
     new Option('--disabled-web-shortcuts', 'Disabled webPage shortcuts')
       .default(DEFAULT.disabledWebShortcuts)
       .hideHelp(),
   )
-  .addOption(
-    new Option('--safe-domain [domains...]', 'Domains that Require Security Configuration')
-      .default(DEFAULT.safeDomain)
-      .hideHelp(),
-  )
   .addOption(new Option('--show-system-tray', 'Show system tray in app').default(DEFAULT.showSystemTray).hideHelp())
   .addOption(
     new Option('--system-tray-icon <string>', 'Custom system tray icon').default(DEFAULT.systemTrayIcon).hideHelp(),
+  )
+  .addOption(
+    new Option('--installer-language <string>', 'Installer language').default(DEFAULT.installerLanguage).hideHelp(),
   )
   .version(packageJson.version, '-v, --version', 'Output the current version')
   .action(async (url: string, options: PakeCliOptions) => {

@@ -146,6 +146,14 @@ Sets whether the window is always at the top level, defaults to `false`.
 --always-on-top
 ```
 
+#### [dark-mode]
+
+Force Mac to package applications using dark mode, default is `false`.
+
+```shell
+--dark-mode
+```
+
 #### [disabled-web-shortcuts]
 
 Sets whether to disable web shortcuts in the original Pake container, defaults to `false`.
@@ -211,6 +219,14 @@ Specify the system tray icon. This is only effective when the system tray is ena
 --system-tray-icon <path>
 ```
 
+#### [installer-language]
+
+Set the Windows Installer language. Options include `zh-CN`, `ja-JP`, More at [Tauri Document](https://tauri.app/zh-cn/v1/guides/building/windows/#internationalization). Default is `en-US`.
+
+```shell
+--installer-language <language>
+```
+
 #### [use-local-file]
 
 Enable recursive copying. When the URL is a local file path, enabling this option will copy the folder containing the file specified in the URL, as well as all sub-files, to the Pake static folder. This is disabled by default.
@@ -227,14 +243,12 @@ Using `inject`, you can inject local absolute and relative path `css` and `js` f
 --inject ./tools/style.css,./tools/hotkey.js
 ```
 
-#### [safe-domain]
+#### [proxy-url]
 
-This secure domain is a domain other than your currently configured `url` to which you may be redirected or jumped to, and only in domains that have been configured as secure can you use `tauri` to expose `api` to browsers to ensure that pake's built-in enhancements work correctly. Only in a domain that has been configured as secure can you use the `tauri` to expose the `api` to the browser, ensuring that `pake's` built-in enhancements work correctly.
-
-PS: Secure domains do not need to carry protocols.
+If you need to proxy requests for some reason, you can set the proxy address using the `proxy-url` option.
 
 ```shell
---safe-domain weread.qq.com,google.com
+--proxy-url <url>
 ```
 
 #### [debug]
@@ -248,3 +262,20 @@ The typed package has dev-tools for debugging, in addition to outputting more lo
 ## Conclusion
 
 After completing the above steps, your application should be successfully packaged. Please note that the packaging process may take some time depending on your system configuration and network conditions. Be patient, and once the packaging is complete, you can find the application installer in the specified directory.
+
+## Docker
+
+```shell
+# On Linux, you can run the Pake CLI via Docker
+docker run -it --rm \ # Run interactively, remove container after exit
+    -v YOUR_DIR:/output \ # Files from container's /output will be in YOU_DIR
+    ghcr.io/tw93/pake \
+    <arguments>
+
+# For example:
+docker run -it --rm \
+    -v ./packages:/output \
+    ghcr.io/tw93/pake \
+    https://example.com --name myapp --icon ./icon.png
+
+```

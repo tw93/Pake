@@ -27,6 +27,10 @@ export interface PakeCliOptions {
   // Enable windows always on top, default false
   alwaysOnTop: boolean;
 
+
+  // Force Mac to use dark mode, default false
+  darkMode: boolean;
+
   // Disable web shortcuts, default false
   disabledWebShortcuts: boolean;
 
@@ -57,11 +61,11 @@ export interface PakeCliOptions {
   /** 需要注入页面的外部脚本 */
   inject: string[];
 
-  /* the domain that can use ipc or tauri javascript sdk */
-  safeDomain: string[];
+   // Proxy
+   proxyUrl: string;
 
-  // Proxy
-  proxyUrl: string;
+  // Installer language, valid for Windows users, default is en-US
+  installerLanguage: string;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {

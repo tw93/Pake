@@ -3,8 +3,8 @@ use std::fs::{self, File};
 use std::io::Write;
 use std::str::FromStr;
 use tauri::http::Method;
-use tauri_plugin_http::reqwest::{ClientBuilder, Request};
 use tauri::{command, AppHandle, Manager, Url, WebviewWindow};
+use tauri_plugin_http::reqwest::{ClientBuilder, Request};
 
 #[derive(serde::Deserialize)]
 pub struct DownloadFileParams {

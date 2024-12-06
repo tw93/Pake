@@ -12,6 +12,9 @@ use tauri_plugin_window_state::Builder as windowStatePlugin;
 use util::{get_data_dir, get_pake_config};
 use window::get_window;
 
+#[cfg(target_os = "macos")]
+use std::time::Duration;
+
 pub fn run_app() {
     let (pake_config, tauri_config) = get_pake_config();
 
@@ -39,7 +42,7 @@ pub fn run_app() {
             _window.show().unwrap();
 
             if show_system_tray {
-                let _ = set_system_tray(&app.app_handle(), &pake_config);
+                let _ = set_system_tray(&app.app_handle());
             } else {
                 app.app_handle().remove_tray_by_id("pake-tray");
             }
@@ -74,14 +77,24 @@ pub fn run_app() {
         })
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                let window = window.clone();
+
                 #[cfg(target_os = "macos")]
                 {
-                    window.minimize().unwrap();
-                    window.hide().unwrap();
+                    let window_handle = window.clone();
+                    tauri::async_runtime::spawn(async move {
+                        if window_handle.is_fullscreen().unwrap_or(false) {
+                            window_handle.set_fullscreen(false).unwrap();
+                            // Give a small delay to ensure the full-screen exit operation is completed.
+                            tokio::time::sleep(Duration::from_millis(900)).await;
+                        }
+                        window_handle.minimize().unwrap();
+                        window_handle.hide().unwrap();
+                    });
                 }
 
                 #[cfg(not(target_os = "macos"))]
-                event.window().close().unwrap();
+                window.close().unwrap();
 
                 api.prevent_close();
             }

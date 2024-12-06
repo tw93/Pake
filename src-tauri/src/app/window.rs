@@ -3,7 +3,7 @@ use std::{path::PathBuf, str::FromStr};
 use tauri::{App, Url, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 
 #[cfg(target_os = "macos")]
-use tauri::TitleBarStyle;
+use tauri::{Theme, TitleBarStyle};
 
 pub fn get_window(app: &mut App, config: &PakeConfig, _data_dir: PathBuf) -> WebviewWindow {
     let window_config = config
@@ -31,7 +31,6 @@ pub fn get_window(app: &mut App, config: &PakeConfig, _data_dir: PathBuf) -> Web
         .resizable(window_config.resizable)
         .fullscreen(window_config.fullscreen)
         .inner_size(window_config.width, window_config.height)
-        .disable_drag_drop_handler()
         .always_on_top(window_config.always_on_top)
         .initialization_script(&config_script)
         .initialization_script(include_str!("../inject/component.js"))
@@ -41,7 +40,6 @@ pub fn get_window(app: &mut App, config: &PakeConfig, _data_dir: PathBuf) -> Web
         .initialization_script(include_str!("../inject/custom.js"));
 
     if config.proxy_url != "" {
-        println!("{}", &config.proxy_url);
         window_builder =
             window_builder.proxy_url(Url::from_str(&config.proxy_url.as_str()).unwrap());
     }
@@ -53,12 +51,18 @@ pub fn get_window(app: &mut App, config: &PakeConfig, _data_dir: PathBuf) -> Web
         } else {
             TitleBarStyle::Visible
         };
-        window_builder = window_builder.title_bar_style(title_bar_style)
+        window_builder = window_builder.title_bar_style(title_bar_style);
+
+        if window_config.dark_mode {
+            window_builder = window_builder.theme(Some(Theme::Dark));
+        }
     }
 
     #[cfg(not(target_os = "macos"))]
     {
-        window_builder = window_builder.data_directory(_data_dir);
+        window_builder = window_builder
+            .data_directory(_data_dir)
+            .title(app.package_info().name.clone());
     }
 
     window_builder.build().expect("Failed to build window")
