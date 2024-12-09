@@ -45,7 +45,7 @@ function isDownloadLink(url) {
     'jpg', 'm3u8', 'mov', 'mp3', 'mp4', 'mpa', 'mpg', 'mpeg', 'msi', 'odt',
     'ogg', 'ogv', 'pdf', 'png', 'ppt', 'pptx', 'psd', 'rar', 'raw',
     'svg', 'swf', 'tar', 'tif', 'tiff', 'ts', 'txt', 'wav', 'webm', 'webp',
-    'wma', 'wmv', 'xls', 'xlsx', 'xml', 'zip', 'json', 'yaml', '7zip', 'mkv'
+    'wma', 'wmv', 'xls', 'xlsx', 'xml', 'zip', 'json', 'yaml', '7zip', 'mkv',
   ];
   const downloadLinkPattern = new RegExp(`\\.(${fileExtensions.join('|')})$`, 'i');
   return downloadLinkPattern.test(url);
@@ -55,7 +55,6 @@ function isDownloadLink(url) {
 function externalDownLoadLink() {
   return ['quickref.me'].indexOf(location.hostname) > -1;
 }
-
 
 document.addEventListener('DOMContentLoaded', () => {
   const tauri = window.__TAURI__;
@@ -181,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
+  const isExternalLink = link => window.location.host !== link.host;
   // process special download protocol['data:','blob:']
   const isSpecialDownload = url => ['blob', 'data'].some(protocol => url.startsWith(protocol));
 
@@ -188,7 +188,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const handleExternalLink = (e, url) => {
     e.preventDefault();
-    tauri.shell.open(url);
+    invoke('plugin:shell|open', {
+      path: url,
+    });
   };
 
   const handleDownloadLink = (e, url, filename) => {
@@ -207,6 +209,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const absoluteUrl = hrefUrl.href;
       let filename = anchorElement.download || getFilenameFromUrl(absoluteUrl);
 
+      // Handling external link redirection, _blank will automatically open.
+      if (isExternalLink(absoluteUrl) && (['_new'].includes(anchorElement.target))) {
+        handleExternalLink(e, absoluteUrl);
+        return;
+      }
+
       // Process download links for Rust to handle.
       if (isDownloadRequired(absoluteUrl, anchorElement, e) && !externalDownLoadLink() && !isSpecialDownload(absoluteUrl)) {
         handleDownloadLink(e, absoluteUrl, filename);
@@ -222,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Rewrite the window.open function.
   const originalWindowOpen = window.open;
-  window.open = function (url, name, specs) {
+  window.open = function(url, name, specs) {
     // Apple login and google login
     if (name === 'AppleAuthentication') {
       //do nothing
@@ -231,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       const baseUrl = window.location.origin + window.location.pathname;
       const hrefUrl = new URL(url, baseUrl);
-      tauri.shell.open(hrefUrl.href);
+      handleExternalLink(e, hrefUrl.href);
     }
     // Call the original window.open function to maintain its normal functionality.
     return originalWindowOpen.call(window, url, name, specs);

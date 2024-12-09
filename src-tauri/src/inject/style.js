@@ -333,6 +333,14 @@ window.addEventListener('DOMContentLoaded', _event => {
     #__next>div>div>.flex.h-screen.w-full.flex-col.items-center {
       padding-top: 20px;
     }
+    
+    body > div.relative.flex.h-full.w-full.overflow-hidden.transition-colors.z-0 > div.z-\\[21\\].flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary.max-md\\:\\!w-0 > div > div > div > nav > div.flex.justify-between.h-\\[60px\\].items-center.md\\:h-header-height {
+       padding-top: 25px;
+    }
+    
+    body > div.relative.flex.h-full.w-full.overflow-hidden.transition-colors.z-0 > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden > main > div.composer-parent.flex.h-full.flex-col.focus-visible\\:outline-0 > div.flex-1.overflow-hidden.\\@container\\/thread > div > div.absolute.left-0.right-0 > div{
+      padding-top: 35px;
+    }
 
     #__next .sticky.left-0.right-0.top-0.z-20.bg-black{
       padding-top: 0px;
