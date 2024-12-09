@@ -51,11 +51,6 @@ function isDownloadLink(url) {
   return downloadLinkPattern.test(url);
 }
 
-// No need to go to the download link.
-function externalDownLoadLink() {
-  return ['quickref.me'].indexOf(location.hostname) > -1;
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   const tauri = window.__TAURI__;
   const appWindow = tauri.window.getCurrentWindow();
@@ -192,35 +187,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  const handleDownloadLink = (e, url, filename) => {
-    e.preventDefault();
-    invoke('download_file', { params: { url, filename } });
-  };
-
   const detectAnchorElementClick = e => {
     const anchorElement = e.target.closest('a');
 
     if (anchorElement && anchorElement.href) {
-
+      const target = anchorElement.target;
       const hrefUrl = new URL(anchorElement.href);
       const absoluteUrl = hrefUrl.href;
       let filename = anchorElement.download || getFilenameFromUrl(absoluteUrl);
 
       // Handling external link redirection, _blank will automatically open.
-      if (isExternalLink(absoluteUrl) && (['_new'].includes(anchorElement.target))) {
+      if (target === '_blank') {
+        e.preventDefault();
+        return;
+      }
+
+      if (target === '_new') {
+        e.preventDefault();
         handleExternalLink(absoluteUrl);
         return;
       }
 
       // Process download links for Rust to handle.
-      if (isDownloadRequired(absoluteUrl, anchorElement, e) && !externalDownLoadLink() && !isSpecialDownload(absoluteUrl)) {
-        handleDownloadLink(e, absoluteUrl, filename);
-        return;
-      }
-
-      // App internal jump.
-      if (!anchorElement.target) {
-        location.href = anchorElement.href;
+      if (isDownloadRequired(absoluteUrl, anchorElement, e) && !isSpecialDownload(absoluteUrl)) {
+        e.preventDefault();
+        invoke('download_file', { params: { url: absoluteUrl, filename } });
       }
     }
   };

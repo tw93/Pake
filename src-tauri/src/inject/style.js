@@ -119,7 +119,8 @@ window.addEventListener('DOMContentLoaded', _event => {
       display: none !important;
     }
 
-    #react-root [data-testid="DMDrawer"] {
+    #react-root [data-testid="DMDrawer"],
+    #root > main > footer.justify-center.ease-in {
       visibility: hidden !important;
     }
 
@@ -385,6 +386,10 @@ window.addEventListener('DOMContentLoaded', _event => {
 
     .lark > .main-wrapper [data-testid="aside"] {
       top: 15px;
+    }
+    
+    #global > div.header-container > .mask-paper {
+      padding-top: 20px;
     }
 
     #background.ytd-masthead {
