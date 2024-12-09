@@ -186,8 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const isDownloadRequired = (url, anchorElement, e) => anchorElement.download || e.metaKey || e.ctrlKey || isDownloadLink(url);
 
-  const handleExternalLink = (e, url) => {
-    e.preventDefault();
+  const handleExternalLink = (url) => {
     invoke('plugin:shell|open', {
       path: url,
     });
@@ -200,10 +199,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const detectAnchorElementClick = e => {
     const anchorElement = e.target.closest('a');
+
     if (anchorElement && anchorElement.href) {
-      if (!anchorElement.target) {
-        anchorElement.target = '_self';
-      }
 
       const hrefUrl = new URL(anchorElement.href);
       const absoluteUrl = hrefUrl.href;
@@ -211,13 +208,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Handling external link redirection, _blank will automatically open.
       if (isExternalLink(absoluteUrl) && (['_new'].includes(anchorElement.target))) {
-        handleExternalLink(e, absoluteUrl);
+        handleExternalLink(absoluteUrl);
         return;
       }
 
       // Process download links for Rust to handle.
       if (isDownloadRequired(absoluteUrl, anchorElement, e) && !externalDownLoadLink() && !isSpecialDownload(absoluteUrl)) {
         handleDownloadLink(e, absoluteUrl, filename);
+        return;
+      }
+
+      // App internal jump.
+      if (!anchorElement.target) {
+        location.href = anchorElement.href;
       }
     }
   };
@@ -239,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       const baseUrl = window.location.origin + window.location.pathname;
       const hrefUrl = new URL(url, baseUrl);
-      handleExternalLink(e, hrefUrl.href);
+      handleExternalLink(hrefUrl.href);
     }
     // Call the original window.open function to maintain its normal functionality.
     return originalWindowOpen.call(window, url, name, specs);
