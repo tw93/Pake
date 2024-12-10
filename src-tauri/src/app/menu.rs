@@ -28,6 +28,7 @@ pub fn set_system_tray(app: &AppHandle) -> tauri::Result<()> {
             }
             _ => (),
         })
+        .icon(app.default_window_icon().unwrap().clone())
         .build(app)?;
 
     tray.set_icon_as_template(false)?;
