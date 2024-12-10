@@ -7,6 +7,11 @@
     "security": {
       "csp": null
     },
+    "trayIcon": {
+      "iconPath": "png/weread_512.png",
+      "iconAsTemplate": false,
+      "id": "pake-tray"
+    },
     "withGlobalTauri": true
   },
   "build": {
