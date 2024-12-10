@@ -18,12 +18,6 @@
     "url": "https://www.youtube.com"
   },
   {
-    "name": "coderunner",
-    "title": "CodeRunner",
-    "name_zh": "CodeRunner",
-    "url": "https://riju.codes/"
-  },
-  {
     "name": "chatgpt",
     "title": "ChatGPT",
     "name_zh": "ChatGPT",
@@ -52,12 +46,6 @@
     "title": "XiaoHongShu",
     "name_zh": "小红书",
     "url": "https://www.xiaohongshu.com/explore"
-  },
-  {
-    "name": "poe",
-    "title": "Poe",
-    "name_zh": "Poe",
-    "url": "https://poe.com/"
   },
   {
     "name": "youtubemusic",
