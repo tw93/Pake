@@ -479,10 +479,10 @@ async function mergeConfig(url, options, tauriConf) {
         disabled_web_shortcuts: disabledWebShortcuts,
     };
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
-    tauriConf.package.productName = name;
-    tauriConf.tauri.bundle.identifier = identifier;
+    tauriConf.productName = name;
+    tauriConf.identifier = identifier;
     if (platform == "win32") {
-        tauriConf.tauri.bundle.windows.wix.language[0] = installerLanguage;
+        tauriConf.bundle.windows.wix.language[0] = installerLanguage;
     }
     //Judge the type of URL, whether it is a file or a website.
     const pathExists = await fsExtra.pathExists(url);
