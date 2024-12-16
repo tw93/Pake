@@ -222,7 +222,7 @@ Linux，默认为 `all`。
 
 #### [installer-language]
 
-设置 Windows 安装包语言。支持 `zh-CN`、`ja-JP`，更多在 [Tauri 文档](https://tauri.app/zh-cn/v1/guides/building/windows/#internationalization)。默认为 `en-US`。
+设置 Windows 安装包语言。支持 `zh-CN`、`ja-JP`，更多在 [Tauri 文档](https://tauri.app/distribute/windows-installer/#internationalization)。默认为 `en-US`。
 
 ```shell
 --installer-language <language>

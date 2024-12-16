@@ -221,7 +221,7 @@ Specify the system tray icon. This is only effective when the system tray is ena
 
 #### [installer-language]
 
-Set the Windows Installer language. Options include `zh-CN`, `ja-JP`, More at [Tauri Document](https://tauri.app/zh-cn/v1/guides/building/windows/#internationalization). Default is `en-US`.
+Set the Windows Installer language. Options include `zh-CN`, `ja-JP`, More at [Tauri Document](https://tauri.app/distribute/windows-installer/#internationalization). Default is `en-US`.
 
 ```shell
 --installer-language <language>
