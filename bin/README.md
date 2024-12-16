@@ -10,7 +10,7 @@ npm install pake-cli -g
 
 ## Considerations for Windows & Linux Users
 
-- **CRITICAL**: Consult [Tauri prerequisites](https://tauri.app/v1/guides/getting-started/prerequisites) before proceeding.
+- **CRITICAL**: Consult [Tauri prerequisites](https://tauri.app/start/prerequisites/) before proceeding.
 - For Windows users (ensure that `Win10 SDK (10.0.19041.0)` and `Visual Studio build tool 2022 (>=17.2)` are installed), additional installations are required:
 
   1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
