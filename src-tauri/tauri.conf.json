@@ -1,22 +1,16 @@
 {
   "productName": "WeRead",
   "identifier": "com.pake.weread",
-  "version": "2.0.0",
-  "plugins": {},
+  "version": "1.0.0",
   "app": {
-    "security": {
-      "csp": null
-    },
+    "withGlobalTauri": true,
     "trayIcon": {
       "iconPath": "png/weread_512.png",
       "iconAsTemplate": false,
       "id": "pake-tray"
-    },
-    "withGlobalTauri": true
+    }
   },
   "build": {
-    "beforeBuildCommand": "",
-    "frontendDist": "../dist",
-    "beforeDevCommand": ""
+    "frontendDist": "../dist"
   }
 }

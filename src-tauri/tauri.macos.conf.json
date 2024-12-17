@@ -2,19 +2,7 @@
   "bundle": {
     "icon": ["icons/weread.icns"],
     "active": true,
-    "category": "DeveloperTool",
-    "copyright": "",
-    "externalBin": [],
-    "longDescription": "",
-    "macOS": {
-      "entitlements": null,
-      "exceptionDomain": null,
-      "frameworks": [],
-      "providerShortName": null,
-      "signingIdentity": null
-    },
-    "resources": [],
-    "shortDescription": "",
+    "macOS": {},
     "targets": ["dmg"]
   }
 }
