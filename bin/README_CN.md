@@ -1,4 +1,4 @@
-<h4 align="right"><strong><a href="https://github.com/tw93/Pake/tree/master/bin">English</a></strong> | 简体中文</h4>
+<h4 align="right"><strong><a href="https://github.com/tw93/Pake/tree/main/bin">English</a></strong> | 简体中文</h4>
 
 ## 安装
 
