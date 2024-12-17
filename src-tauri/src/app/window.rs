@@ -39,9 +39,9 @@ pub fn get_window(app: &mut App, config: &PakeConfig, _data_dir: PathBuf) -> Web
         //This is necessary to allow for file injection by external developers for customization purposes.
         .initialization_script(include_str!("../inject/custom.js"));
 
-    if config.proxy_url != "" {
+    if !config.proxy_url.is_empty() {
         window_builder =
-            window_builder.proxy_url(Url::from_str(&config.proxy_url.as_str()).unwrap());
+            window_builder.proxy_url(Url::from_str(config.proxy_url.as_str()).unwrap());
     }
 
     #[cfg(target_os = "macos")]

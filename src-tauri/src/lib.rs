@@ -23,7 +23,7 @@ pub fn run_app() {
 
     // Save the value of toggle_app_shortcut before pake_config is moved
     let activation_shortcut = pake_config.windows[0].activation_shortcut.clone();
-    let init_fullscreen = pake_config.windows[0].fullscreen.clone();
+    let init_fullscreen = pake_config.windows[0].fullscreen;
 
     let window_state_plugin = if init_fullscreen {
         windowStatePlugin::default()
@@ -43,7 +43,7 @@ pub fn run_app() {
             download_file_by_binary
         ])
         .setup(move |app| {
-            let data_dir = get_data_dir(&app.app_handle(), tauri_config.clone());
+            let data_dir = get_data_dir(app.app_handle(), tauri_config.clone());
 
             let _window = get_window(app, &pake_config, data_dir);
 
@@ -51,14 +51,14 @@ pub fn run_app() {
             _window.show().unwrap();
 
             if show_system_tray {
-                let _ = set_system_tray(&app.app_handle());
+                let _ = set_system_tray(app.app_handle());
             } else {
                 app.app_handle().remove_tray_by_id("pake-tray");
             }
 
             if !activation_shortcut.is_empty() {
                 let app_handle = app.app_handle().clone();
-                let shortcut_hotkey = Shortcut::from_str(&activation_shortcut.as_str()).unwrap();
+                let shortcut_hotkey = Shortcut::from_str(activation_shortcut.as_str()).unwrap();
                 let last_triggered = Arc::new(Mutex::new(Instant::now()));
 
                 app_handle
