@@ -8,7 +8,8 @@
 npm install pake-cli -g
 ```
 
-## Windows/Linux 注意事项
+<details>
+<summary><strong>Windows/Linux 注意事项</strong></summary>
 
 - **非常重要**：请参阅 Tauri 的 [依赖项指南](https://tauri.app/start/prerequisites/)。
 - 对于 Windows 用户，请确保至少安装了 `Win10 SDK(10.0.19041.0)` 和 `Visual Studio Build Tools 2022（版本 17.2 或更高）`，此外还需要安装以下组件：
@@ -37,29 +38,9 @@ npm install pake-cli -g
       gnome-video-effects-extra
   ```
 
-## 使用方法
+</details>
 
-### 开发
-
-开发时可以修改 `bin/defaults.ts` 中 `DEFAULT_DEV_PAKE_OPTIONS` 配置，配置项和 `pake-cli` 配置说明保持一致
-
-```typescript
-export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
-  ...DEFAULT_PAKE_OPTIONS,
-  url: 'https://weread.qq.com',
-  name: 'Weread',
-};
-```
-
-之后运行
-
-```bash
-yarn cli:dev
-```
-
-脚本会读取上述配置并使用 `watch` 模式打包指定的 `app`，对 `pake-cli` 代码和 `pake` 的修改都会实时热更新。
-
-### 使用 CLI
+## 命令行使用
 
 ```bash
 pake [url] [options]
@@ -266,11 +247,31 @@ Linux，默认为 `all`。
 --debug
 ```
 
-## 结语
+### 稍等片刻
 
 完成上述步骤后，您的应用程序应该已经成功打包。请注意，根据您的系统配置和网络状况，打包过程可能需要一些时间。请耐心等待，一旦打包完成，您就可以在指定的目录中找到应用程序安装包。
 
-## Docker
+## 开发调试
+
+开发时可以修改 `bin/defaults.ts` 中 `DEFAULT_DEV_PAKE_OPTIONS` 配置，配置项和 `pake-cli` 配置说明保持一致
+
+```typescript
+export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
+  ...DEFAULT_PAKE_OPTIONS,
+  url: 'https://weread.qq.com',
+  name: 'Weread',
+};
+```
+
+之后运行
+
+```bash
+npm run cli:dev
+```
+
+脚本会读取上述配置并使用 `watch` 模式打包指定的 `app`，对 `pake-cli` 代码和 `pake` 的修改都会实时热更新。
+
+## Docker 使用
 
 ```shell
 # 在Linux上，您可以通过 Docker 运行 Pake CLI。

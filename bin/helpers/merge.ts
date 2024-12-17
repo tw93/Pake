@@ -47,7 +47,8 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
 
   tauriConf.productName = name;
   tauriConf.identifier = identifier;
-  if (platform == "win32") {
+
+  if (platform == 'win32') {
     tauriConf.bundle.windows.wix.language[0] = installerLanguage;
   }
 
@@ -73,9 +74,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
       // ignore it, because about_pake.html have be erased.
       // const filesToCopyBack = ['cli.js', 'about_pake.html'];
       const filesToCopyBack = ['cli.js'];
-      await Promise.all(
-        filesToCopyBack.map(file => fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file))),
-      );
+      await Promise.all(filesToCopyBack.map(file => fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file))));
     }
 
     tauriConf.pake.windows[0].url = fileName;
@@ -182,6 +181,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
   delete tauriConf.app.trayIcon;
 
   const injectFilePath = path.join(npmDirectory, `src-tauri/src/inject/custom.js`);
+
   // inject js or css files
   if (inject?.length > 0) {
     if (!inject.every(item => item.endsWith('.css') || item.endsWith('.js'))) {
@@ -195,13 +195,15 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     tauriConf.pake.inject = [];
     await fsExtra.writeFile(injectFilePath, '');
   }
-  tauriConf.pake.proxy_url = proxyUrl || "";
+  tauriConf.pake.proxy_url = proxyUrl || '';
+
   // Save config file.
   const platformConfigPaths: PlatformMap = {
     win32: 'tauri.windows.conf.json',
     darwin: 'tauri.macos.conf.json',
     linux: 'tauri.linux.conf.json',
   };
+
   const configPath = path.join(tauriConfigDirectory, platformConfigPaths[platform]);
 
   const bundleConf = { bundle: tauriConf.bundle };
@@ -212,6 +214,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
 
   let tauriConf2 = JSON.parse(JSON.stringify(tauriConf));
   delete tauriConf2.pake;
+
   // delete tauriConf2.bundle;
   if (process.env.NODE_ENV === 'development') {
     tauriConf2.bundle = bundleConf.bundle;

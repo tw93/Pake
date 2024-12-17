@@ -8,7 +8,8 @@ Ensure that your Node.js version is 18.0 or higher (e.g., 18.20.2). Avoid using 
 npm install pake-cli -g
 ```
 
-## Considerations for Windows & Linux Users
+<details>
+<summary><strong>Considerations for Windows & Linux Users</strong></summary>
 
 - **CRITICAL**: Consult [Tauri prerequisites](https://tauri.app/start/prerequisites/) before proceeding.
 - For Windows users (ensure that `Win10 SDK (10.0.19041.0)` and `Visual Studio build tool 2022 (>=17.2)` are installed), additional installations are required:
@@ -37,29 +38,9 @@ npm install pake-cli -g
       gnome-video-effects-extra
   ```
 
-## Usage
+</details>
 
-### Development
-
-The `DEFAULT_DEV_PAKE_OPTIONS` configuration in `bin/defaults.ts` can be modified at development time to match the `pake-cli` configuration description.
-
-```typescript
-export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
-  ...DEFAULT_PAKE_OPTIONS,
-  url: 'https://weread.qq.com',
-  name: 'Weread',
-};
-```
-
-then
-
-```bash
-yarn cli:dev
-```
-
-The script will read the above configuration and packages the specified `app` using `watch` mode, and changes to the `pake-cli` code and `pake` are hot updated in real time.
-
-### CLI Usage
+## CLI Usage
 
 ```bash
 pake [url] [options]
@@ -259,9 +240,29 @@ The typed package has dev-tools for debugging, in addition to outputting more lo
 --debug
 ```
 
-## Conclusion
+### Wait a moment
 
 After completing the above steps, your application should be successfully packaged. Please note that the packaging process may take some time depending on your system configuration and network conditions. Be patient, and once the packaging is complete, you can find the application installer in the specified directory.
+
+## Development
+
+The `DEFAULT_DEV_PAKE_OPTIONS` configuration in `bin/defaults.ts` can be modified at development time to match the `pake-cli` configuration description.
+
+```typescript
+export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
+  ...DEFAULT_PAKE_OPTIONS,
+  url: 'https://weread.qq.com',
+  name: 'Weread',
+};
+```
+
+then
+
+```bash
+npm run cli:dev
+```
+
+The script will read the above configuration and packages the specified `app` using `watch` mode, and changes to the `pake-cli` code and `pake` are hot updated in real time.
 
 ## Docker
 
