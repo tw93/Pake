@@ -18,7 +18,6 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
     mkdir -p /cargo-cache && \
     cp -R /usr/local/cargo/registry /cargo-cache/ && \
     cp -R /usr/local/cargo/git /cargo-cache/
-
 # Verify the content of /cargo-cache && clean unnecessary files
 RUN ls -la /cargo-cache/registry && ls -la /cargo-cache/git && rm -rfd /cargo-cache/registry/src
 

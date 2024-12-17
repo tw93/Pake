@@ -132,6 +132,7 @@ var windows = [
 		width: 1200,
 		height: 780,
 		resizable: true,
+		dark_mode: false,
 		always_on_top: false,
 		dark_mode: false,
 		activation_shortcut: "",

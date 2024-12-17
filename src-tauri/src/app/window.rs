@@ -26,8 +26,8 @@ pub fn get_window(app: &mut App, config: &PakeConfig, _data_dir: PathBuf) -> Web
 
     let mut window_builder = WebviewWindowBuilder::new(app, "pake", url)
         .title("")
+        .visible(false)
         .user_agent(user_agent)
-        .visible(false) // Prevent initial shaking
         .resizable(window_config.resizable)
         .fullscreen(window_config.fullscreen)
         .inner_size(window_config.width, window_config.height)
@@ -36,7 +36,6 @@ pub fn get_window(app: &mut App, config: &PakeConfig, _data_dir: PathBuf) -> Web
         .initialization_script(include_str!("../inject/component.js"))
         .initialization_script(include_str!("../inject/event.js"))
         .initialization_script(include_str!("../inject/style.js"))
-        //This is necessary to allow for file injection by external developers for customization purposes.
         .initialization_script(include_str!("../inject/custom.js"));
 
     if !config.proxy_url.is_empty() {
