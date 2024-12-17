@@ -20,7 +20,7 @@ import * as psl from 'psl';
 import isUrl from 'is-url';
 
 var name = "pake-cli";
-var version$1 = "3.0.0-beta";
+var version$1 = "3.0.0";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
@@ -69,7 +69,7 @@ var license = "MIT";
 var dependencies = {
 	"@tauri-apps/api": "^1.6.0",
 	"@tauri-apps/cli": "^2.1.0",
-	axios: "^1.7.8",
+	axios: "^1.7.9",
 	chalk: "^5.3.0",
 	commander: "^11.1.0",
 	"file-type": "^18.7.0",
@@ -91,7 +91,7 @@ var devDependencies = {
 	"@rollup/plugin-terser": "^0.4.4",
 	"@types/fs-extra": "^11.0.4",
 	"@types/is-url": "^1.2.32",
-	"@types/node": "^20.17.9",
+	"@types/node": "^20.17.10",
 	"@types/page-icon": "^0.3.6",
 	"@types/prompts": "^2.4.9",
 	"@types/psl": "^1.1.3",
@@ -100,7 +100,7 @@ var devDependencies = {
 	"@types/update-notifier": "^6.0.8",
 	"app-root-path": "^3.1.0",
 	"cross-env": "^7.0.3",
-	rollup: "^4.28.0",
+	rollup: "^4.28.1",
 	"rollup-plugin-typescript2": "^0.36.0",
 	tslib: "^2.8.1",
 	typescript: "^5.7.2"
@@ -132,7 +132,6 @@ var windows = [
 		width: 1200,
 		height: 780,
 		resizable: true,
-		dark_mode: false,
 		always_on_top: false,
 		dark_mode: false,
 		activation_shortcut: "",
@@ -164,30 +163,22 @@ var pakeConf = {
 
 var productName$1 = "WeRead";
 var identifier = "com.pake.weread";
-var version = "2.0.0";
-var plugins = {
-};
+var version = "1.0.0";
 var app = {
-	security: {
-		csp: null
-	},
+	withGlobalTauri: true,
 	trayIcon: {
 		iconPath: "png/weread_512.png",
 		iconAsTemplate: false,
 		id: "pake-tray"
-	},
-	withGlobalTauri: true
+	}
 };
 var build = {
-	beforeBuildCommand: "",
-	frontendDist: "../dist",
-	beforeDevCommand: ""
+	frontendDist: "../dist"
 };
 var CommonConf = {
 	productName: productName$1,
 	identifier: identifier,
 	version: version,
-	plugins: plugins,
 	app: app,
 	build: build
 };
@@ -198,22 +189,14 @@ var bundle$2 = {
 		"png/weread_32.ico"
 	],
 	active: true,
-	category: "DeveloperTool",
-	copyright: "",
-	externalBin: [
-	],
-	longDescription: "",
 	resources: [
 		"png/weread_32.ico"
 	],
-	shortDescription: "",
 	targets: [
 		"msi"
 	],
 	windows: {
-		certificateThumbprint: null,
 		digestAlgorithm: "sha256",
-		timestampUrl: "",
 		wix: {
 			language: [
 				"en-US"
@@ -231,22 +214,8 @@ var bundle$1 = {
 		"icons/weread.icns"
 	],
 	active: true,
-	category: "DeveloperTool",
-	copyright: "",
-	externalBin: [
-	],
-	longDescription: "",
 	macOS: {
-		entitlements: null,
-		exceptionDomain: null,
-		frameworks: [
-		],
-		providerShortName: null,
-		signingIdentity: null
 	},
-	resources: [
-	],
-	shortDescription: "",
 	targets: [
 		"dmg"
 	]
@@ -255,14 +224,12 @@ var MacConf = {
 	bundle: bundle$1
 };
 
-var productName = "weread";
+var productName = "we-read";
 var bundle = {
 	icon: [
 		"png/weread_512.png"
 	],
 	active: true,
-	category: "DeveloperTool",
-	copyright: "",
 	linux: {
 		deb: {
 			depends: [
@@ -274,12 +241,6 @@ var bundle = {
 			}
 		}
 	},
-	externalBin: [
-	],
-	longDescription: "",
-	resources: [
-	],
-	shortDescription: "",
 	targets: [
 		"deb",
 		"appimage"
@@ -482,7 +443,7 @@ async function mergeConfig(url, options, tauriConf) {
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
     tauriConf.productName = name;
     tauriConf.identifier = identifier;
-    if (platform == "win32") {
+    if (platform == 'win32') {
         tauriConf.bundle.windows.wix.language[0] = installerLanguage;
     }
     //Judge the type of URL, whether it is a file or a website.
@@ -620,7 +581,7 @@ async function mergeConfig(url, options, tauriConf) {
         tauriConf.pake.inject = [];
         await fsExtra.writeFile(injectFilePath, '');
     }
-    tauriConf.pake.proxy_url = proxyUrl || "";
+    tauriConf.pake.proxy_url = proxyUrl || '';
     // Save config file.
     const platformConfigPaths = {
         win32: 'tauri.windows.conf.json',
@@ -1007,10 +968,10 @@ program
     .option('--fullscreen', 'Start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
     .option('--hide-title-bar', 'Only for Mac, hide title bar', DEFAULT_PAKE_OPTIONS.hideTitleBar)
     .option('--activation-shortcut <string>', 'Shortcut key to active App', DEFAULT_PAKE_OPTIONS.activationShortcut)
-    .option('--multi-arch', 'Only for Mac, supports both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
-    .option('--inject [injects...]', 'Injection of .js or .css Files', DEFAULT_PAKE_OPTIONS.inject)
+    .option('--inject <url>', 'Injection of .js or .css files', DEFAULT_PAKE_OPTIONS.inject)
+    .option('--proxy-url <url>', "Proxy URL for all network requests", DEFAULT_PAKE_OPTIONS.proxyUrl)
     .option('--debug', 'Debug build and more output', DEFAULT_PAKE_OPTIONS.debug)
-    .option('--proxy-url', "Proxy URL", DEFAULT_PAKE_OPTIONS.proxyUrl)
+    .option('--multi-arch', 'Only for Mac, supports both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
     .addOption(new Option('--user-agent <string>', 'Custom user agent').default(DEFAULT_PAKE_OPTIONS.userAgent).hideHelp())
     .addOption(new Option('--targets <string>', 'Only for Linux, option "deb" or "appimage"').default(DEFAULT_PAKE_OPTIONS.targets).hideHelp())
     .addOption(new Option('--always-on-top', 'Always on the top level').default(DEFAULT_PAKE_OPTIONS.alwaysOnTop).hideHelp())

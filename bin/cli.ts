@@ -30,10 +30,10 @@ program
   .option('--fullscreen', 'Start in full screen', DEFAULT.fullscreen)
   .option('--hide-title-bar', 'Only for Mac, hide title bar', DEFAULT.hideTitleBar)
   .option('--activation-shortcut <string>', 'Shortcut key to active App', DEFAULT.activationShortcut)
-  .option('--multi-arch', 'Only for Mac, supports both Intel and M1', DEFAULT.multiArch)
-  .option('--inject [injects...]', 'Injection of .js or .css Files', DEFAULT.inject)
+  .option('--inject <url>', 'Injection of .js or .css files', DEFAULT.inject)
+  .option('--proxy-url <url>', "Proxy URL for all network requests", DEFAULT.proxyUrl)
   .option('--debug', 'Debug build and more output', DEFAULT.debug)
-  .option('--proxy-url', "Proxy URL", DEFAULT.proxyUrl)
+  .option('--multi-arch', 'Only for Mac, supports both Intel and M1', DEFAULT.multiArch)
   .addOption(new Option('--user-agent <string>', 'Custom user agent').default(DEFAULT.userAgent).hideHelp())
   .addOption(
     new Option('--targets <string>', 'Only for Linux, option "deb" or "appimage"').default(DEFAULT.targets).hideHelp(),
