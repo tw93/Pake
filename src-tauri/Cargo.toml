@@ -29,9 +29,6 @@ tauri-plugin-global-shortcut = { version = "2.2.0" }
 tauri-plugin-shell = "2.2.0"
 tokio = { version = "1", features = ["full"] }
 
-[dev-dependencies]
-cargo-bloat = "0.12.1"
-
 [features]
 # this feature is used for development builds from development cli
 cli-build = []

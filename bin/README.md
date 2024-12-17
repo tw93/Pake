@@ -25,8 +25,8 @@ npm install pake-cli -g
   ```bash
   sudo apt install libdbus-1-dev \
       libsoup2.4-dev \
-      libjavascriptcoregtk-4.0-dev \
-      libwebkit2gtk-4.0-dev \
+      libjavascriptcoregtk-4.1-dev \
+      libwebkit2gtk-4.1-dev \
       build-essential \
       curl \
       wget \

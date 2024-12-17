@@ -125,12 +125,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
-name = "binfarce"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18464ccbb85e5dede30d70cc7676dc9950a0fb7dbf595a43d765be9123c616a2"
-
-[[package]]
 name = "bitflags"
 version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -255,22 +249,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b96ec4966b5813e2c0507c1f86115c8c5abaadc3980879c3424042a02fd1ad3"
 dependencies = [
  "serde",
-]
-
-[[package]]
-name = "cargo-bloat"
-version = "0.12.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56e2c483ab55e38021c2c701061e078cc6c28d563932cbdf6bc4efaa28ab117e"
-dependencies = [
- "binfarce",
- "json",
- "memmap2",
- "multimap",
- "pdb",
- "pico-args",
- "regex",
- "term_size",
 ]
 
 [[package]]
@@ -796,12 +774,6 @@ dependencies = [
  "serde",
  "typeid",
 ]
-
-[[package]]
-name = "fallible-iterator"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4443176a9f2c162692bd3d352d745ef9413eec5782a80d8fd6f8a1ac692a07f7"
 
 [[package]]
 name = "fdeflate"
@@ -1752,12 +1724,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "json"
-version = "0.12.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "078e285eafdfb6c4b434e0d31e8cfcb5115b651496faca5749b88fafd4f23bfd"
-
-[[package]]
 name = "json-patch"
 version = "3.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1929,15 +1895,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
 
 [[package]]
-name = "memmap2"
-version = "0.9.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd3f7eed9d3848f8b98834af67102b720745c4ec028fcd0aa0239277e7de374f"
-dependencies = [
- "libc",
-]
-
-[[package]]
 name = "memoffset"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1992,12 +1949,6 @@ dependencies = [
  "thiserror 1.0.69",
  "windows-sys 0.59.0",
 ]
-
-[[package]]
-name = "multimap"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "defc4c55412d89136f966bbb339008b474350e5e6e78d2714439c386b3137a03"
 
 [[package]]
 name = "ndk"
@@ -2350,7 +2301,6 @@ dependencies = [
 name = "pake"
 version = "3.0.0"
 dependencies = [
- "cargo-bloat",
  "serde",
  "serde_json",
  "tauri",
@@ -2416,17 +2366,6 @@ name = "pathdiff"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df94ce210e5bc13cb6651479fa48d14f601d9858cfe0467f43ae157023b938d3"
-
-[[package]]
-name = "pdb"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "82040a392923abe6279c00ab4aff62d5250d1c8555dc780e4b02783a7aa74863"
-dependencies = [
- "fallible-iterator",
- "scroll",
- "uuid",
-]
 
 [[package]]
 name = "percent-encoding"
@@ -2567,12 +2506,6 @@ checksum = "90fcb95eef784c2ac79119d1dd819e162b5da872ce6f3c3abe1e8ca1c082f72b"
 dependencies = [
  "siphasher",
 ]
-
-[[package]]
-name = "pico-args"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5be167a7af36ee22fe3115051bc51f6e6c7054c9348e28deb4f49bd6f705a315"
 
 [[package]]
 name = "pin-project-lite"
@@ -3095,12 +3028,6 @@ name = "scopeguard"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
-
-[[package]]
-name = "scroll"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "04c565b551bafbef4157586fa379538366e4385d42082f255bfd96e4fe8519da"
 
 [[package]]
 name = "selectors"
@@ -3936,16 +3863,6 @@ dependencies = [
  "futf",
  "mac",
  "utf-8",
-]
-
-[[package]]
-name = "term_size"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e4129646ca0ed8f45d09b929036bafad5377103edd06e50bf574b353d2b08d9"
-dependencies = [
- "libc",
- "winapi",
 ]
 
 [[package]]
