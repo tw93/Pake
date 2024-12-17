@@ -175,19 +175,19 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  const isExternalLink = link => window.location.host !== link.host;
   // process special download protocol['data:','blob:']
   const isSpecialDownload = url => ['blob', 'data'].some(protocol => url.startsWith(protocol));
 
   const isDownloadRequired = (url, anchorElement, e) => anchorElement.download || e.metaKey || e.ctrlKey || isDownloadLink(url);
 
-  const handleExternalLink = (url) => {
+  const handleExternalLink = url => {
     invoke('plugin:shell|open', {
       path: url,
     });
   };
 
   const detectAnchorElementClick = e => {
+
     const anchorElement = e.target.closest('a');
 
     if (anchorElement && anchorElement.href) {
@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Rewrite the window.open function.
   const originalWindowOpen = window.open;
-  window.open = function(url, name, specs) {
+  window.open = function (url, name, specs) {
     // Apple login and google login
     if (name === 'AppleAuthentication') {
       //do nothing
