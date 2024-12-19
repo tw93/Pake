@@ -20,7 +20,7 @@ import * as psl from 'psl';
 import isUrl from 'is-url';
 
 var name = "pake-cli";
-var version$1 = "3.0.0";
+var version$1 = "3.0.1";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
