@@ -45,22 +45,16 @@ function isDownloadLink(url) {
     'jpg', 'm3u8', 'mov', 'mp3', 'mp4', 'mpa', 'mpg', 'mpeg', 'msi', 'odt',
     'ogg', 'ogv', 'pdf', 'png', 'ppt', 'pptx', 'psd', 'rar', 'raw',
     'svg', 'swf', 'tar', 'tif', 'tiff', 'ts', 'txt', 'wav', 'webm', 'webp',
-    'wma', 'wmv', 'xls', 'xlsx', 'xml', 'zip', 'json', 'yaml', '7zip', 'mkv'
+    'wma', 'wmv', 'xls', 'xlsx', 'xml', 'zip', 'json', 'yaml', '7zip', 'mkv',
   ];
   const downloadLinkPattern = new RegExp(`\\.(${fileExtensions.join('|')})$`, 'i');
   return downloadLinkPattern.test(url);
 }
 
-// No need to go to the download link.
-function externalDownLoadLink() {
-  return ['quickref.me'].indexOf(location.hostname) > -1;
-}
-
-
 document.addEventListener('DOMContentLoaded', () => {
   const tauri = window.__TAURI__;
-  const appWindow = tauri.window.appWindow;
-  const invoke = tauri.tauri.invoke;
+  const appWindow = tauri.window.getCurrentWindow();
+  const invoke = tauri.core.invoke;
 
   if (!document.getElementById('pake-top-dom')) {
     const topDom = document.createElement('div');
@@ -71,19 +65,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const domEl = document.getElementById('pake-top-dom');
 
   domEl.addEventListener('touchstart', () => {
-    appWindow.startDragging().then();
+    appWindow.startDragging();
   });
 
   domEl.addEventListener('mousedown', e => {
     e.preventDefault();
     if (e.buttons === 1 && e.detail !== 2) {
-      appWindow.startDragging().then();
+      appWindow.startDragging();
     }
   });
 
   domEl.addEventListener('dblclick', () => {
     appWindow.isFullscreen().then(fullscreen => {
-      appWindow.setFullscreen(!fullscreen).then();
+      appWindow.setFullscreen(!fullscreen);
     });
   });
 
@@ -186,30 +180,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const isDownloadRequired = (url, anchorElement, e) => anchorElement.download || e.metaKey || e.ctrlKey || isDownloadLink(url);
 
-  const handleExternalLink = (e, url) => {
-    e.preventDefault();
-    tauri.shell.open(url);
-  };
-
-  const handleDownloadLink = (e, url, filename) => {
-    e.preventDefault();
-    invoke('download_file', { params: { url, filename } });
+  const handleExternalLink = url => {
+    invoke('plugin:shell|open', {
+      path: url,
+    });
   };
 
   const detectAnchorElementClick = e => {
-    const anchorElement = e.target.closest('a');
-    if (anchorElement && anchorElement.href) {
-      if (!anchorElement.target) {
-        anchorElement.target = '_self';
-      }
 
+    const anchorElement = e.target.closest('a');
+
+    if (anchorElement && anchorElement.href) {
+      const target = anchorElement.target;
       const hrefUrl = new URL(anchorElement.href);
       const absoluteUrl = hrefUrl.href;
       let filename = anchorElement.download || getFilenameFromUrl(absoluteUrl);
 
+      // Handling external link redirection, _blank will automatically open.
+      if (target === '_blank') {
+        e.preventDefault();
+        return;
+      }
+
+      if (target === '_new') {
+        e.preventDefault();
+        handleExternalLink(absoluteUrl);
+        return;
+      }
+
       // Process download links for Rust to handle.
-      if (isDownloadRequired(absoluteUrl, anchorElement, e) && !externalDownLoadLink() && !isSpecialDownload(absoluteUrl)) {
-        handleDownloadLink(e, absoluteUrl, filename);
+      if (isDownloadRequired(absoluteUrl, anchorElement, e) && !isSpecialDownload(absoluteUrl)) {
+        e.preventDefault();
+        invoke('download_file', { params: { url: absoluteUrl, filename } });
       }
     }
   };
@@ -231,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       const baseUrl = window.location.origin + window.location.pathname;
       const hrefUrl = new URL(url, baseUrl);
-      tauri.shell.open(hrefUrl.href);
+      handleExternalLink(hrefUrl.href);
     }
     // Call the original window.open function to maintain its normal functionality.
     return originalWindowOpen.call(window, url, name, specs);

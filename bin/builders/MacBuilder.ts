@@ -16,7 +16,7 @@ export default class MacBuilder extends BaseBuilder {
     } else {
       arch = process.arch === 'arm64' ? 'aarch64' : process.arch;
     }
-    return `${name}_${tauriConfig.package.version}_${arch}`;
+    return `${name}_${tauriConfig.version}_${arch}`;
   }
 
   protected getBuildCommand(): string {

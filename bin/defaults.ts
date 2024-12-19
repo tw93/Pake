@@ -17,9 +17,9 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   targets: 'deb',
   useLocalFile: false,
   systemTrayIcon: '',
+  proxyUrl: "",
   debug: false,
   inject: [],
-  safeDomain: [],
   installerLanguage: 'en-US',
 };
 
@@ -28,6 +28,5 @@ export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
   ...DEFAULT_PAKE_OPTIONS,
   url: 'https://weread.qq.com',
   name: 'WeRead',
-  safeDomain: ['weread.qq.com'],
   hideTitleBar: true,
 };

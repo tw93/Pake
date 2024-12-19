@@ -1,29 +1,33 @@
 [package]
-name = "app"
-version = "0.1.0"
+name = "pake"
+version = "3.0.0"
 description = "🤱🏻 Turn any webpage into a desktop app with Rust."
 authors = ["Tw93"]
 license = "MIT"
 repository = "https://github.com/tw93/Pake"
-default-run = "app"
 edition = "2021"
 rust-version = "1.78.0"
+
+[lib]
+name = "app_lib"
+crate-type = ["staticlib", "cdylib", "lib"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1.5.2", features = [] }
+tauri-build = { version = "2.0.3", features = [] }
 
 [dependencies]
-serde_json = "1.0.117"
-serde = { version = "1.0.202", features = ["derive"] }
-tauri = { version = "1.6.6", features = ["api-all", "system-tray"] }
-tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
-tauri-plugin-oauth = { git = "https://github.com/FabianLars/tauri-plugin-oauth", branch = "main" }
+serde_json = "1.0.133"
+serde = { version = "1.0.215", features = ["derive"] }
+tauri = { version = "2.1.1", features = ["tray-icon", "image-ico", "image-png", "macos-proxy"] }
+tauri-plugin-window-state = "2.2.0"
+tauri-plugin-oauth = "2"
+tauri-plugin-http = "2.2.0"
+[target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
+tauri-plugin-global-shortcut = { version = "2.2.0" }
+tauri-plugin-shell = "2.2.0"
 tokio = { version = "1", features = ["full"] }
-
-[dev-dependencies]
-cargo-bloat = "0.11.1"
 
 [features]
 # this feature is used for development builds from development cli

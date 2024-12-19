@@ -18,7 +18,6 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
     mkdir -p /cargo-cache && \
     cp -R /usr/local/cargo/registry /cargo-cache/ && \
     cp -R /usr/local/cargo/git /cargo-cache/
-    
 # Verify the content of /cargo-cache && clean unnecessary files
 RUN ls -la /cargo-cache/registry && ls -la /cargo-cache/git && rm -rfd /cargo-cache/registry/src
 
@@ -28,8 +27,8 @@ FROM rust:1.80-slim AS builder
 RUN --mount=type=cache,target=/var/cache/apt \
     --mount=type=cache,target=/usr/local/cargo/registry \
     apt-get update && apt-get install -y --no-install-recommends \
-    libdbus-1-dev libsoup2.4-dev libjavascriptcoregtk-4.0-dev \
-    libwebkit2gtk-4.0-dev build-essential curl wget libssl-dev \
+    libdbus-1-dev libsoup2.4-dev libjavascriptcoregtk-4.1-dev \
+    libwebkit2gtk-4.1-dev build-essential curl wget libssl-dev \
     libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev \
     gnome-video-effects
 

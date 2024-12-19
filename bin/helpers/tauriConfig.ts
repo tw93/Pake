@@ -15,11 +15,15 @@ const { platform } = process;
 const platformConfig = platformConfigs[platform];
 
 let tauriConfig = {
-  tauri: {
-    ...CommonConf.tauri,
-    bundle: platformConfig.tauri.bundle,
+  ...CommonConf,
+  bundle: platformConfig.bundle,
+  app: {
+    ...CommonConf.app,
+    trayIcon: {
+      ...CommonConf.app.trayIcon,
+      ...(platformConfig?.app?.trayIcon ?? {}),
+    },
   },
-  package: CommonConf.package,
   build: CommonConf.build,
   pake: pakeConf,
 };

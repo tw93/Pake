@@ -1,11 +1,11 @@
 use crate::app::config::PakeConfig;
-use std::path::PathBuf;
-use tauri::{App, Window, WindowBuilder, WindowUrl};
+use std::{path::PathBuf, str::FromStr};
+use tauri::{App, Url, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 
 #[cfg(target_os = "macos")]
 use tauri::{Theme, TitleBarStyle};
 
-pub fn build_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Window {
+pub fn get_window(app: &mut App, config: &PakeConfig, _data_dir: PathBuf) -> WebviewWindow {
     let window_config = config
         .windows
         .first()
@@ -14,8 +14,8 @@ pub fn build_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Wi
     let user_agent = config.user_agent.get();
 
     let url = match window_config.url_type.as_str() {
-        "web" => WindowUrl::App(window_config.url.parse().unwrap()),
-        "local" => WindowUrl::App(PathBuf::from(&window_config.url)),
+        "web" => WebviewUrl::App(window_config.url.parse().unwrap()),
+        "local" => WebviewUrl::App(PathBuf::from(&window_config.url)),
         _ => panic!("url type can only be web or local"),
     };
 
@@ -24,7 +24,7 @@ pub fn build_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Wi
         serde_json::to_string(&window_config).unwrap()
     );
 
-    let mut window_builder = WindowBuilder::new(app, "pake", url)
+    let mut window_builder = WebviewWindowBuilder::new(app, "pake", url)
         .title("")
         .visible(false)
         .user_agent(user_agent)
@@ -32,11 +32,17 @@ pub fn build_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Wi
         .fullscreen(window_config.fullscreen)
         .inner_size(window_config.width, window_config.height)
         .always_on_top(window_config.always_on_top)
+        .disable_drag_drop_handler()
         .initialization_script(&config_script)
         .initialization_script(include_str!("../inject/component.js"))
         .initialization_script(include_str!("../inject/event.js"))
         .initialization_script(include_str!("../inject/style.js"))
         .initialization_script(include_str!("../inject/custom.js"));
+
+    if !config.proxy_url.is_empty() {
+        window_builder =
+            window_builder.proxy_url(Url::from_str(config.proxy_url.as_str()).unwrap());
+    }
 
     #[cfg(target_os = "macos")]
     {
@@ -45,7 +51,6 @@ pub fn build_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Wi
         } else {
             TitleBarStyle::Visible
         };
-
         window_builder = window_builder.title_bar_style(title_bar_style);
 
         if window_config.dark_mode {
@@ -57,7 +62,7 @@ pub fn build_window(app: &mut App, config: PakeConfig, _data_dir: PathBuf) -> Wi
     {
         window_builder = window_builder
             .data_directory(_data_dir)
-            .title(app.package_info().name.clone())
+            .title(app.package_info().name.clone());
     }
 
     window_builder.build().expect("Failed to build window")
