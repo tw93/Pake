@@ -101,8 +101,8 @@ pub fn run_app() {
             Ok(())
         })
         .on_window_event(|window, event| {
+            #[cfg(target_os = "macos")]
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                #[cfg(target_os = "macos")]
                 {
                     let window_handle = window.clone();
                     tauri::async_runtime::spawn(async move {
