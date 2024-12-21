@@ -102,8 +102,6 @@ pub fn run_app() {
         })
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                let window = window.clone();
-
                 #[cfg(target_os = "macos")]
                 {
                     let window_handle = window.clone();
@@ -116,12 +114,8 @@ pub fn run_app() {
                         window_handle.minimize().unwrap();
                         window_handle.hide().unwrap();
                     });
+                    api.prevent_close();
                 }
-
-                #[cfg(not(target_os = "macos"))]
-                window.close().unwrap();
-
-                api.prevent_close();
             }
         })
         .run(tauri::generate_context!())
