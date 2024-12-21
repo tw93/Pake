@@ -27,6 +27,7 @@ tauri-plugin-http = "2.2.0"
 [target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
 tauri-plugin-global-shortcut = { version = "2.2.0" }
 tauri-plugin-shell = "2.2.0"
+tauri-plugin-single-instance = "2"
 tokio = { version = "1", features = ["full"] }
 
 [features]
