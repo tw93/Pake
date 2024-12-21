@@ -101,10 +101,10 @@ pub fn run_app() {
 
             Ok(())
         })
-        .on_window_event(|window, event| {
+        .on_window_event(|_window, _event| {
             #[cfg(target_os = "macos")]
-            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                let window = window.clone();
+            if let tauri::WindowEvent::CloseRequested { api, .. } = _event {
+                let window = _window.clone();
                 {
                     tauri::async_runtime::spawn(async move {
                         if window.is_fullscreen().unwrap_or(false) {
