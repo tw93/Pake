@@ -120,7 +120,7 @@ pub fn run_app() {
                 }
 
                 #[cfg(not(target_os = "macos"))]
-                window.destroy().unwrap();
+                std::process::exit(0);
             }
         })
         .run(tauri::generate_context!())
