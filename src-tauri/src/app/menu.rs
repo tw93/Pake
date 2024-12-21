@@ -24,7 +24,7 @@ pub fn set_system_tray(app: &AppHandle) -> tauri::Result<()> {
             }
             "quit" => {
                 let _res = app.save_window_state(StateFlags::all());
-                app.get_webview_window("pake").unwrap().close().unwrap();
+                std::process::exit(0);
             }
             _ => (),
         })

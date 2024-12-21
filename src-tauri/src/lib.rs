@@ -102,11 +102,9 @@ pub fn run_app() {
             Ok(())
         })
         .on_window_event(|window, event| {
+            #[cfg(target_os = "macos")]
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 let window = window.clone();
-                api.prevent_close();
-
-                #[cfg(target_os = "macos")]
                 {
                     tauri::async_runtime::spawn(async move {
                         if window.is_fullscreen().unwrap_or(false) {
@@ -118,9 +116,7 @@ pub fn run_app() {
                         window.hide().unwrap();
                     });
                 }
-
-                #[cfg(not(target_os = "macos"))]
-                std::process::exit(0);
+                api.prevent_close();
             }
         })
         .run(tauri::generate_context!())
