@@ -131,7 +131,7 @@ jobs:
           TARGETS: ${{ inputs.targets }}
 
       - name: Upload archive
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: output-${{ inputs.platform }}.zip
           path: node_modules/pake-cli/output/*

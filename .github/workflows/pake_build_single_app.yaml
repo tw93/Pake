@@ -141,7 +141,7 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Upload For Single Build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: startsWith(github.ref, 'refs/tags/') != true
         with:
           path: 'output/*/*.*'
