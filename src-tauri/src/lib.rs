@@ -100,24 +100,24 @@ pub fn run_app() {
 
             Ok(())
         })
-        .on_window_event(|window, event| {
-            #[cfg(target_os = "macos")]
-            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                {
-                    let window_handle = window.clone();
-                    tauri::async_runtime::spawn(async move {
-                        if window_handle.is_fullscreen().unwrap_or(false) {
-                            window_handle.set_fullscreen(false).unwrap();
-                            // Give a small delay to ensure the full-screen exit operation is completed.
-                            tokio::time::sleep(Duration::from_millis(900)).await;
-                        }
-                        window_handle.minimize().unwrap();
-                        window_handle.hide().unwrap();
-                    });
-                    api.prevent_close();
-                }
-            }
-        })
+        // .on_window_event(|window, event| {
+        //     #[cfg(target_os = "macos")]
+        //     if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+        //         {
+        //             let window_handle = window.clone();
+        //             tauri::async_runtime::spawn(async move {
+        //                 if window_handle.is_fullscreen().unwrap_or(false) {
+        //                     window_handle.set_fullscreen(false).unwrap();
+        //                     // Give a small delay to ensure the full-screen exit operation is completed.
+        //                     tokio::time::sleep(Duration::from_millis(900)).await;
+        //                 }
+        //                 window_handle.minimize().unwrap();
+        //                 window_handle.hide().unwrap();
+        //             });
+        //             api.prevent_close();
+        //         }
+        //     }
+        // })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
