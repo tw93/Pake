@@ -18,7 +18,7 @@ on:
         description: 'Name, English, Linux no capital'
         required: true
       icon:
-        description: 'Icon, Optional, Image URL'
+        description: 'Icon, Image URL, Optional'
         required: false
       width:
         description: 'Width, Optional'
@@ -28,18 +28,23 @@ on:
         description: 'Height, Optional'
         required: false
         default: '780'
+      fullscreen:
+        description: 'Fullscreen, At startup, Optional'
+        required: false
+        type: boolean
+        default: false
       hide_title_bar:
-        description: 'Hide TitleBar, Optional, MacOS only'
+        description: 'Hide TitleBar, MacOS only, Optional'
         required: false
         type: boolean
         default: false
       multi_arch:
-        description: 'MultiArch, Optional, MacOS only'
+        description: 'MultiArch, MacOS only, Optional'
         required: false
         type: boolean
         default: false
       targets:
-        description: 'Targets, Optional, Linux only'
+        description: 'Targets, Linux only, Optional'
         required: false
         default: 'deb'
         type: choice
@@ -126,7 +131,6 @@ jobs:
           WIDTH: ${{ inputs.width }}
           HIDE_TITLE_BAR: ${{ inputs.hide_title_bar }}
           FULLSCREEN: ${{ inputs.fullscreen }}
-          RESIZE: ${{ inputs.resize }}
           MULTI_ARCH: ${{ inputs.multi_arch }}
           TARGETS: ${{ inputs.targets }}
 
