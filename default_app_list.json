@@ -1,5 +1,17 @@
 [
   {
+    "name": "gemini",
+    "title": "Gemini",
+    "name_zh": "Gemini",
+    "url": "https://gemini.google.com/"
+  },
+  {
+    "name": "excalidraw",
+    "title": "Excalidraw",
+    "name_zh": "Excalidraw",
+    "url": "https://excalidraw.com/"
+  },
+  {
     "name": "programmusic",
     "title": "ProgramMusic",
     "name_zh": "ProgramMusic",
