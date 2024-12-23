@@ -127,6 +127,14 @@ Sets whether the window is always at the top level, defaults to `false`.
 --always-on-top
 ```
 
+#### [app-version]
+
+Set the version number of the packaged application to be consistent with the naming format of version in package.json, defaulting to `1.0.0`.
+
+```shell
+--app-version <string>
+```
+
 #### [dark-mode]
 
 Force Mac to package applications using dark mode, default is `false`.

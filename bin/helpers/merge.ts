@@ -14,6 +14,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     fullscreen,
     hideTitleBar,
     alwaysOnTop,
+    appVersion,
     darkMode,
     disabledWebShortcuts,
     activationShortcut,
@@ -47,6 +48,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
 
   tauriConf.productName = name;
   tauriConf.identifier = identifier;
+  tauriConf.version = appVersion;
 
   if (platform == 'win32') {
     tauriConf.bundle.windows.wix.language[0] = installerLanguage;

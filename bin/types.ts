@@ -27,6 +27,9 @@ export interface PakeCliOptions {
   // Enable windows always on top, default false
   alwaysOnTop: boolean;
 
+  // App version, the same as package.json version, default 1.0.0
+  appVersion: string;
+
   // Force Mac to use dark mode, default false
   darkMode: boolean;
 

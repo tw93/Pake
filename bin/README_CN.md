@@ -127,6 +127,14 @@ pake [url] [options]
 --always-on-top
 ```
 
+#### [app-version]
+
+设置打包应用的版本号，和 package.json 里面 version 命名格式一致，默认为 `1.0.0`。
+
+```shell
+--app-version <string>
+```
+
 #### [dark-mode]
 
 强制 Mac 打包应用使用黑暗模式，默认为 `false`。
