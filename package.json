@@ -1,6 +1,6 @@
 {
   "name": "pake-cli",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。",
   "engines": {
     "node": ">=16.0.0"
@@ -50,7 +50,7 @@
     "@tauri-apps/api": "^1.6.0",
     "@tauri-apps/cli": "^2.1.0",
     "axios": "^1.7.9",
-    "chalk": "^5.4.0",
+    "chalk": "^5.4.1",
     "commander": "^11.1.0",
     "file-type": "^18.7.0",
     "fs-extra": "^11.2.0",

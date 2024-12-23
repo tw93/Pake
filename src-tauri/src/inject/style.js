@@ -295,8 +295,12 @@ window.addEventListener('DOMContentLoaded', _event => {
       padding-top: 12px;
     }
 
-    #__next header.HeaderBar_header__jn5ju{
+    #__next header.HeaderBar_header__jn5ju {
       padding-top: 16px;
+    }
+
+    #root > .excalidraw-app> .excalidraw-container .App-menu.App-menu_top{
+       margin-top: 15px;
     }
 
     .geist-page nav.dashboard_nav__PRmJv,
@@ -334,11 +338,11 @@ window.addEventListener('DOMContentLoaded', _event => {
     #__next>div>div>.flex.h-screen.w-full.flex-col.items-center {
       padding-top: 20px;
     }
-    
+
     body > div.relative.flex.h-full.w-full.overflow-hidden.transition-colors.z-0 > div.z-\\[21\\].flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary.max-md\\:\\!w-0 > div > div > div > nav > div.flex.justify-between.h-\\[60px\\].items-center.md\\:h-header-height {
        padding-top: 25px;
     }
-    
+
     body > div.relative.flex.h-full.w-full.overflow-hidden.transition-colors.z-0 > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden > main > div.composer-parent.flex.h-full.flex-col.focus-visible\\:outline-0 > div.flex-1.overflow-hidden.\\@container\\/thread > div > div.absolute.left-0.right-0 > div{
       padding-top: 35px;
     }
@@ -384,10 +388,14 @@ window.addEventListener('DOMContentLoaded', _event => {
       padding-top:15px;
     }
 
+    #app-root .mat-mdc-tooltip-trigger.main-menu-button.mdc-icon-button {
+      margin-top: 15px;
+    }
+
     .lark > .main-wrapper [data-testid="aside"] {
       top: 15px;
     }
-    
+
     #global > div.header-container > .mask-paper {
       padding-top: 20px;
     }
