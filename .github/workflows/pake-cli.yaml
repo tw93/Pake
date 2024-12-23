@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       platform:
-        description: 'platform'
+        description: 'Platform'
         required: true
         default: 'macos-latest'
         type: choice
@@ -12,34 +12,34 @@ on:
           - 'macos-latest'
           - 'ubuntu-20.04'
       url:
-        description: '[URL]'
+        description: 'URL'
         required: true
       name:
-        description: '[Name]'
+        description: 'Name, English, Linux no capital'
         required: true
       icon:
-        description: '[Icon, Optional]'
+        description: 'Icon, Optional, Image URL'
         required: false
       width:
-        description: '[Width, Optional]'
+        description: 'Width, Optional'
         required: false
         default: '1200'
       height:
-        description: '[Height, Optional]'
+        description: 'Height, Optional'
         required: false
         default: '780'
       hide_title_bar:
-        description: '[Hide TitleBar, Optional, MacOS only]'
+        description: 'Hide TitleBar, Optional, MacOS only'
         required: false
         type: boolean
         default: false
       multi_arch:
-        description: '[MultiArch, Optional, MacOS only]'
+        description: 'MultiArch, Optional, MacOS only'
         required: false
         type: boolean
         default: false
       targets:
-        description: '[Targets, Optional, Linux only]'
+        description: 'Targets, Optional, Linux only'
         required: false
         default: 'deb'
         type: choice

@@ -3,40 +3,40 @@ on:
   workflow_dispatch:
     inputs:
       name:
-        description: 'app name'
+        description: 'App Name'
         required: true
         default: 'twitter'
       title:
-        description: 'app title'
+        description: 'App Title'
         required: true
         default: 'Twitter'
       name_zh:
-        description: 'app name in Chinese'
+        description: 'App Name in Chinese'
         required: true
         default: '推特'
       url:
-        description: 'app url'
+        description: 'App URL'
         required: true
         default: 'https://twitter.com/'
   workflow_call:
     inputs:
       name:
-        description: 'app name'
+        description: 'App Name'
         type: string
         required: true
         default: 'twitter'
       title:
-        description: 'app title'
+        description: 'App Title'
         required: true
         type: string
         default: 'Twitter'
       name_zh:
-        description: 'app name in Chinese'
+        description: 'App Name in Chinese'
         required: true
         type: string
         default: '推特'
       url:
-        description: 'app url'
+        description: 'App URL'
         required: true
         type: string
         default: 'https://twitter.com/'
