@@ -22,7 +22,9 @@ program.addHelpText('beforeAll', logo).usage(`[url] [options]`).showHelpAfterErr
 
 program
   .argument('[url]', 'The web URL you want to package', validateUrlInput)
-  .option('--name <string>', 'Application name')
+  .option('--name <string...>', 'Application name', (value, previous) => {
+    return previous === undefined ? value : `${previous} ${value}`
+  }) // Refer to https://github.com/tj/commander.js#custom-option-processing, turn string array into a string connected with spaces.
   .option('--icon <string>', 'Application icon', DEFAULT.icon)
   .option('--width <number>', 'Window width', validateNumberInput, DEFAULT.width)
   .option('--height <number>', 'Window height', validateNumberInput, DEFAULT.height)
