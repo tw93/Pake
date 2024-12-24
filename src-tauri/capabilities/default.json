@@ -7,12 +7,18 @@
     "urls": ["https://*.*"]
   },
   "permissions": [
+    "shell:allow-open",
     "core:window:allow-theme",
     "core:window:allow-start-dragging",
     "core:window:allow-toggle-maximize",
     "core:window:allow-is-fullscreen",
     "core:window:allow-set-fullscreen",
     "core:webview:allow-internal-toggle-devtools",
-    "shell:allow-open"
+    "notification:allow-is-permission-granted",
+    "notification:allow-notify",
+    "notification:allow-get-active",
+    "notification:allow-register-listener",
+    "notification:allow-register-action-types",
+    "notification:default"
   ]
 }

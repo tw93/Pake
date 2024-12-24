@@ -3,7 +3,7 @@ mod app;
 mod util;
 
 use app::{invoke, menu::set_system_tray, window};
-use invoke::{download_file, download_file_by_binary};
+use invoke::{download_file, download_file_by_binary, send_notification};
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
@@ -38,10 +38,12 @@ pub fn run_app() {
         .plugin(tauri_plugin_oauth::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_single_instance::init(|_, _, _| ()))
         .invoke_handler(tauri::generate_handler![
             download_file,
-            download_file_by_binary
+            download_file_by_binary,
+            send_notification,
         ])
         .setup(move |app| {
             let data_dir = get_data_dir(app.app_handle(), tauri_config.clone());

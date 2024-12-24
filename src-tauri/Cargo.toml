@@ -20,6 +20,7 @@ tauri-build = { version = "2.0.3", features = [] }
 [dependencies]
 serde_json = "1.0.133"
 serde = { version = "1.0.216", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
 tauri = { version = "2.1.1", features = ["tray-icon", "image-ico", "image-png", "macos-proxy"] }
 tauri-plugin-window-state = "2.2.0"
 tauri-plugin-oauth = "2"
@@ -28,7 +29,7 @@ tauri-plugin-http = "2.2.0"
 tauri-plugin-global-shortcut = { version = "2.2.0" }
 tauri-plugin-shell = "2.2.0"
 tauri-plugin-single-instance = "2"
-tokio = { version = "1", features = ["full"] }
+tauri-plugin-notification = "2.2.0"
 
 [features]
 # this feature is used for development builds from development cli

@@ -187,7 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const detectAnchorElementClick = e => {
-
     const anchorElement = e.target.closest('a');
 
     if (anchorElement && anchorElement.href) {
@@ -254,6 +253,38 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     true,
   );
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+  let permVal = 'granted';
+  window.Notification = function (title, options) {
+    const { invoke } = window.__TAURI__.core;
+    const body = options?.body || '';
+    let icon = options?.icon || '';
+
+    // If the icon is a relative path, convert to full path using URI
+    if (icon.startsWith('/')) {
+      icon = window.location.origin + icon;
+    }
+
+    invoke('send_notification', {
+      params: {
+        title,
+        body,
+        icon,
+      },
+    });
+  };
+
+  window.Notification.requestPermission = async () => 'granted';
+
+  Object.defineProperty(window.Notification, 'permission', {
+    enumerable: true,
+    get: () => permVal,
+    set: v => {
+      permVal = v;
+    },
+  });
 });
 
 function setDefaultZoom() {

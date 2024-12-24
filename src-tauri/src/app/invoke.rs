@@ -18,6 +18,13 @@ pub struct BinaryDownloadParams {
     binary: Vec<u8>,
 }
 
+#[derive(serde::Deserialize)]
+pub struct NotificationParams {
+    title: String,
+    body: String,
+    icon: String,
+}
+
 #[command]
 pub async fn download_file(app: AppHandle, params: DownloadFileParams) -> Result<(), String> {
     let window: WebviewWindow = app.get_webview_window("pake").unwrap();
@@ -70,4 +77,17 @@ pub async fn download_file_by_binary(
             Err(e.to_string())
         }
     }
+}
+
+#[command]
+pub fn send_notification(app: AppHandle, params: NotificationParams) -> Result<(), String> {
+    use tauri_plugin_notification::NotificationExt;
+    app.notification()
+        .builder()
+        .title(&params.title)
+        .body(&params.body)
+        .icon(&params.icon)
+        .show()
+        .unwrap();
+    Ok(())
 }
