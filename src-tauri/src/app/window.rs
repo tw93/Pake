@@ -1,11 +1,15 @@
 use crate::app::config::PakeConfig;
+use crate::util::get_data_dir;
 use std::{path::PathBuf, str::FromStr};
-use tauri::{App, Url, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
+use tauri::{App, Config, Url, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 
 #[cfg(target_os = "macos")]
 use tauri::{Theme, TitleBarStyle};
 
-pub fn get_window(app: &mut App, config: &PakeConfig, _data_dir: PathBuf) -> WebviewWindow {
+pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> WebviewWindow {
+    let package_name = tauri_config.clone().product_name.unwrap();
+    let _data_dir = get_data_dir(app.handle(), package_name);
+
     let window_config = config
         .windows
         .first()

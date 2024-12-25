@@ -2,17 +2,17 @@
 mod app;
 mod util;
 
-use app::{invoke, menu::set_system_tray, window};
+use app::{
+    invoke,
+    setup::{set_global_shortcut, set_system_tray},
+    window::set_window,
+};
 use invoke::{download_file, download_file_by_binary, send_notification};
-use std::str::FromStr;
-use std::sync::{Arc, Mutex};
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use tauri::Manager;
-use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 use tauri_plugin_window_state::Builder as windowStatePlugin;
-use util::{get_data_dir, get_pake_config};
-use window::get_window;
+use util::get_pake_config;
 
 pub fn run_app() {
     let (pake_config, tauri_config) = get_pake_config();
@@ -46,60 +46,11 @@ pub fn run_app() {
             send_notification,
         ])
         .setup(move |app| {
-            let data_dir = get_data_dir(app.app_handle(), tauri_config.clone());
+            set_window(app, &pake_config, &tauri_config);
 
-            let _window = get_window(app, &pake_config, data_dir);
+            set_system_tray(app.app_handle(), show_system_tray).unwrap();
 
-            // Prevent initial shaking
-            _window.show().unwrap();
-
-            if show_system_tray {
-                let _ = set_system_tray(app.app_handle());
-            } else {
-                app.app_handle().remove_tray_by_id("pake-tray");
-            }
-
-            if !activation_shortcut.is_empty() {
-                let app_handle = app.app_handle().clone();
-                let shortcut_hotkey = Shortcut::from_str(activation_shortcut.as_str()).unwrap();
-                let last_triggered = Arc::new(Mutex::new(Instant::now()));
-
-                app_handle
-                    .plugin(
-                        tauri_plugin_global_shortcut::Builder::new()
-                            .with_handler({
-                                let last_triggered = Arc::clone(&last_triggered);
-                                move |app, event, _shortcut| {
-                                    // Fixed the bug of tauri's hidden call, which caused repeated execution
-                                    let now = Instant::now();
-                                    let mut last = last_triggered.lock().unwrap();
-                                    if now.duration_since(*last) < Duration::from_millis(500) {
-                                        return;
-                                    }
-                                    *last = now;
-
-                                    if shortcut_hotkey.eq(event) {
-                                        let window = app.get_webview_window("pake").unwrap();
-                                        let is_visible = window.is_visible().unwrap();
-
-                                        match is_visible {
-                                            true => {
-                                                window.minimize().unwrap();
-                                            }
-                                            false => {
-                                                window.unminimize().unwrap();
-                                                window.set_focus().unwrap();
-                                            }
-                                        }
-                                    }
-                                }
-                            })
-                            .build(),
-                    )
-                    .expect("Error registering global evoke shortcuts!");
-
-                app.global_shortcut().register(shortcut_hotkey)?;
-            }
+            set_global_shortcut(app.app_handle(), activation_shortcut).unwrap();
 
             Ok(())
         })

@@ -23,9 +23,8 @@ pub fn get_pake_config() -> (PakeConfig, Config) {
     (pake_config, tauri_config)
 }
 
-pub fn get_data_dir(app: &AppHandle, _tauri_config: Config) -> PathBuf {
+pub fn get_data_dir(app: &AppHandle, package_name: String) -> PathBuf {
     {
-        let package_name = _tauri_config.product_name.unwrap();
         let data_dir = app
             .path()
             .config_dir()
