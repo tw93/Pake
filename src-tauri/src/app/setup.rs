@@ -18,21 +18,28 @@ pub fn set_system_tray(app: &AppHandle, show_system_tray: bool) -> tauri::Result
     let hide_app = MenuItemBuilder::with_id("hide_app", "Hide").build(app)?;
     let show_app = MenuItemBuilder::with_id("show_app", "Show").build(app)?;
     let quit = MenuItemBuilder::with_id("quit", "Quit").build(app)?;
+
     let menu = MenuBuilder::new(app)
         .items(&[&hide_app, &show_app, &quit])
         .build()?;
+
     app.app_handle().remove_tray_by_id("pake-tray");
+
     let tray = TrayIconBuilder::new()
         .menu(&menu)
         .on_menu_event(move |app, event| match event.id().as_ref() {
             "hide_app" => {
-                app.get_webview_window("pake").unwrap().minimize().unwrap();
+                if let Some(window) = app.get_webview_window("pake") {
+                    window.minimize().unwrap();
+                }
             }
             "show_app" => {
-                app.get_webview_window("pake").unwrap().show().unwrap();
+                if let Some(window) = app.get_webview_window("pake") {
+                    window.show().unwrap();
+                }
             }
             "quit" => {
-                let _res = app.save_window_state(StateFlags::all());
+                app.save_window_state(StateFlags::all()).unwrap();
                 std::process::exit(0);
             }
             _ => (),
@@ -48,8 +55,9 @@ pub fn set_global_shortcut(app: &AppHandle, shortcut: String) -> tauri::Result<(
     if shortcut.is_empty() {
         return Ok(());
     }
+
     let app_handle = app.clone();
-    let shortcut_hotkey = Shortcut::from_str(shortcut.as_str()).unwrap();
+    let shortcut_hotkey = Shortcut::from_str(&shortcut).unwrap();
     let last_triggered = Arc::new(Mutex::new(Instant::now()));
 
     app_handle
@@ -59,21 +67,17 @@ pub fn set_global_shortcut(app: &AppHandle, shortcut: String) -> tauri::Result<(
                     let last_triggered = Arc::clone(&last_triggered);
                     move |app, event, _shortcut| {
                         let mut last_triggered = last_triggered.lock().unwrap();
-                        if Instant::now().duration_since(*last_triggered)
-                            < Duration::from_millis(300)
-                        {
+                        if Instant::now().duration_since(*last_triggered) < Duration::from_millis(300) {
                             return;
                         }
                         *last_triggered = Instant::now();
-                        if shortcut_hotkey.eq(event) {
-                            let window = app.get_webview_window("pake").unwrap();
-                            let is_visible = window.is_visible().unwrap();
 
-                            match is_visible {
-                                true => {
+                        if shortcut_hotkey.eq(event) {
+                            if let Some(window) = app.get_webview_window("pake") {
+                                let is_visible = window.is_visible().unwrap();
+                                if is_visible {
                                     window.hide().unwrap();
-                                }
-                                false => {
+                                } else {
                                     window.show().unwrap();
                                     window.set_focus().unwrap();
                                 }
@@ -84,6 +88,7 @@ pub fn set_global_shortcut(app: &AppHandle, shortcut: String) -> tauri::Result<(
                 .build(),
         )
         .expect("Failed to set global shortcut");
+
     app.global_shortcut().register(shortcut_hotkey).unwrap();
 
     Ok(())

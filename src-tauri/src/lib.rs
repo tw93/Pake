@@ -2,36 +2,34 @@
 mod app;
 mod util;
 
+use std::time::Duration;
+use tauri::Manager;
+use tauri_plugin_window_state::Builder as WindowStatePlugin;
+use tauri_plugin_window_state::StateFlags;
+
 use app::{
-    invoke,
+    invoke::{download_file, download_file_by_binary, send_notification},
     setup::{set_global_shortcut, set_system_tray},
     window::set_window,
 };
-use invoke::{download_file, download_file_by_binary, send_notification};
-use std::time::Duration;
-
-use tauri::Manager;
-use tauri_plugin_window_state::Builder as windowStatePlugin;
 use util::get_pake_config;
 
 pub fn run_app() {
     let (pake_config, tauri_config) = get_pake_config();
-
     let tauri_app = tauri::Builder::default();
 
     let show_system_tray = pake_config.show_system_tray();
-
-    // Save the value of toggle_app_shortcut before pake_config is moved
     let activation_shortcut = pake_config.windows[0].activation_shortcut.clone();
     let init_fullscreen = pake_config.windows[0].fullscreen;
 
-    let window_state_plugin = if init_fullscreen {
-        windowStatePlugin::default()
-            .with_state_flags(tauri_plugin_window_state::StateFlags::FULLSCREEN)
-            .build()
-    } else {
-        windowStatePlugin::default().build()
-    };
+    let window_state_plugin = WindowStatePlugin::default()
+        .with_state_flags(if init_fullscreen {
+            StateFlags::FULLSCREEN
+        } else {
+            // Prevent flickering on the first open.
+            StateFlags::all() & !StateFlags::VISIBLE
+        })
+        .build();
 
     tauri_app
         .plugin(window_state_plugin)
@@ -46,29 +44,25 @@ pub fn run_app() {
             send_notification,
         ])
         .setup(move |app| {
-            set_window(app, &pake_config, &tauri_config);
-
+            let window = set_window(app, &pake_config, &tauri_config);
             set_system_tray(app.app_handle(), show_system_tray).unwrap();
-
             set_global_shortcut(app.app_handle(), activation_shortcut).unwrap();
-
+            // Prevent flickering on the first open.
+            window.show().unwrap();
             Ok(())
         })
         .on_window_event(|_window, _event| {
             #[cfg(target_os = "macos")]
             if let tauri::WindowEvent::CloseRequested { api, .. } = _event {
                 let window = _window.clone();
-                {
-                    tauri::async_runtime::spawn(async move {
-                        if window.is_fullscreen().unwrap_or(false) {
-                            window.set_fullscreen(false).unwrap();
-                            // Give a small delay to ensure the full-screen exit operation is completed.
-                            tokio::time::sleep(Duration::from_millis(900)).await;
-                        }
-                        window.minimize().unwrap();
-                        window.hide().unwrap();
-                    });
-                }
+                tauri::async_runtime::spawn(async move {
+                    if window.is_fullscreen().unwrap_or(false) {
+                        window.set_fullscreen(false).unwrap();
+                        tokio::time::sleep(Duration::from_millis(900)).await;
+                    }
+                    window.minimize().unwrap();
+                    window.hide().unwrap();
+                });
                 api.prevent_close();
             }
         })
