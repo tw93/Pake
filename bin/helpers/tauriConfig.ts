@@ -20,7 +20,6 @@ let tauriConfig = {
   app: {
     ...CommonConf.app,
     trayIcon: {
-      ...CommonConf.app.trayIcon,
       ...(platformConfig?.app?.trayIcon ?? {}),
     },
   },
