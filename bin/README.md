@@ -178,7 +178,7 @@ Package the application to support both Intel and M1 chips, exclusively for macO
 
 #### [targets]
 
-Select the output package format for Linux. Options include `deb`, `appimage`, or `all`. If `all` is selected, both `deb` and `appimage` will be packaged. Default is `all`.
+Select the output package format for Linux. Options include `deb`, `appimage`, or `all`. If `all` is selected, both `deb` and `appimage` will be packaged. Default is `deb`.
 
 ```shell
 --targets <format>

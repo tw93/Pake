@@ -7,7 +7,7 @@ export function shellExec(command: string) {
       if (code === 0) {
         resolve(0);
       } else {
-        reject(new Error(`${code}`));
+        reject(new Error(`Error occurred while executing command "${command}". Exit code: ${code}`));
       }
     });
   });

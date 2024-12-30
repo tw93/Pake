@@ -265,7 +265,6 @@ let tauriConfig = {
     app: {
         ...CommonConf.app,
         trayIcon: {
-            ...CommonConf.app.trayIcon,
             ...(platformConfig?.app?.trayIcon ?? {}),
         },
     },
@@ -320,7 +319,7 @@ function shellExec(command) {
                 resolve(0);
             }
             else {
-                reject(new Error(`${code}`));
+                reject(new Error(`Error occurred while executing command "${command}". Exit code: ${code}`));
             }
         });
     });
@@ -443,7 +442,6 @@ async function mergeConfig(url, options, tauriConf) {
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
     tauriConf.productName = name;
     tauriConf.identifier = identifier;
-    console.log('tauriConf appVersion>>>>>>>>>>>>>>>>>>>>>>>', appVersion);
     tauriConf.version = appVersion;
     if (platform == 'win32') {
         tauriConf.bundle.windows.wix.language[0] = installerLanguage;

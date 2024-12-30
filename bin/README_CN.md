@@ -178,8 +178,7 @@ pake [url] [options]
 
 #### [targets]
 
-选择输出的包格式，支持 `deb`、`appimage` 或 `all`。如果选择 `all`，则会同时打包 `deb` 和 `appimage`。此选项仅适用于
-Linux，默认为 `all`。
+选择输出的包格式，支持 `deb`、`appimage` 或 `all`，如果选择 `all`，则会同时打包 `deb` 和 `appimage`，此选项仅适用于 Linux，默认为 `deb`。
 
 ```shell
 --targets <string>
