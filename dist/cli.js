@@ -960,9 +960,15 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
 program.addHelpText('beforeAll', logo).usage(`[url] [options]`).showHelpAfterError();
 program
     .argument('[url]', 'The web URL you want to package', validateUrlInput)
+    // Refer to https://github.com/tj/commander.js#custom-option-processing, turn string array into a string connected with custom connectors.
+    // If the platform is Linux, use `-` as the connector, and convert all characters to lowercase.
+    // For example, Google Translate will become google-translate.
     .option('--name <string...>', 'Application name', (value, previous) => {
-    return previous === undefined ? value : `${previous} ${value}`;
-}) // Refer to https://github.com/tj/commander.js#custom-option-processing, turn string array into a string connected with spaces.
+    const platform = process.platform;
+    const connector = platform === 'linux' ? '-' : ' ';
+    const name = previous === undefined ? value : `${previous}${connector}${value}`;
+    return platform === 'linux' ? name.toLowerCase() : name;
+})
     .option('--icon <string>', 'Application icon', DEFAULT_PAKE_OPTIONS.icon)
     .option('--width <number>', 'Window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
     .option('--height <number>', 'Window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
