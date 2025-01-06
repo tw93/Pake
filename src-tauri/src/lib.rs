@@ -2,10 +2,12 @@
 mod app;
 mod util;
 
-use std::time::Duration;
 use tauri::Manager;
 use tauri_plugin_window_state::Builder as WindowStatePlugin;
 use tauri_plugin_window_state::StateFlags;
+
+#[cfg(target_os = "macos")]
+use std::time::Duration;
 
 use app::{
     invoke::{download_file, download_file_by_binary, send_notification},
@@ -31,6 +33,7 @@ pub fn run_app() {
         })
         .build();
 
+    #[allow(deprecated)]
     tauri_app
         .plugin(window_state_plugin)
         .plugin(tauri_plugin_oauth::init())
