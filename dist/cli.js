@@ -20,7 +20,7 @@ import * as psl from 'psl';
 import isUrl from 'is-url';
 
 var name = "pake-cli";
-var version$1 = "3.1.0";
+var version$1 = "3.1.1";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
@@ -486,9 +486,9 @@ async function mergeConfig(url, options, tauriConf) {
     // Processing targets are currently only open to Linux.
     if (platform === 'linux') {
         delete tauriConf.bundle.linux.deb.files;
-        const validTargets = ['all', 'deb', 'appimage', 'rpm'];
+        const validTargets = ['deb', 'appimage', 'rpm'];
         if (validTargets.includes(options.targets)) {
-            tauriConf.bundle.targets = options.targets === 'all' ? ['deb', 'appimage', 'rpm'] : [options.targets];
+            tauriConf.bundle.targets = [options.targets];
         }
         else {
             logger.warn(`✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`);
@@ -744,7 +744,7 @@ class LinuxBuilder extends BaseBuilder {
     async build(url) {
         const targetTypes = ['deb', 'appimage', 'rpm'];
         for (const target of targetTypes) {
-            if (this.options.targets === target || this.options.targets === 'all') {
+            if (this.options.targets === target) {
                 await this.buildAndCopy(url, target);
             }
         }
