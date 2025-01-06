@@ -51,7 +51,7 @@ on:
         options:
           - 'deb'
           - 'appimage'
-          - 'all'
+          - 'rpm'
 
 jobs:
   build:
