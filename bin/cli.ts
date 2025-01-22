@@ -30,7 +30,7 @@ program
   .option('--fullscreen', 'Start in full screen', DEFAULT.fullscreen)
   .option('--hide-title-bar', 'For Mac, hide title bar', DEFAULT.hideTitleBar)
   .option('--multi-arch', 'For Mac, both Intel and M1', DEFAULT.multiArch)
-  .option('--inject <url>', 'Injection of .js or .css files', DEFAULT.inject)
+  .option('--inject <url...>', 'Injection of .js or .css files', DEFAULT.inject)
   .option('--debug', 'Debug build and more output', DEFAULT.debug)
   .addOption(new Option('--proxy-url <url>', 'Proxy URL for all network requests').default(DEFAULT_PAKE_OPTIONS.proxyUrl).hideHelp())
   .addOption(new Option('--user-agent <string>', 'Custom user agent').default(DEFAULT.userAgent).hideHelp())

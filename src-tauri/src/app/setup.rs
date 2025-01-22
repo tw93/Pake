@@ -67,7 +67,9 @@ pub fn set_global_shortcut(app: &AppHandle, shortcut: String) -> tauri::Result<(
                     let last_triggered = Arc::clone(&last_triggered);
                     move |app, event, _shortcut| {
                         let mut last_triggered = last_triggered.lock().unwrap();
-                        if Instant::now().duration_since(*last_triggered) < Duration::from_millis(300) {
+                        if Instant::now().duration_since(*last_triggered)
+                            < Duration::from_millis(300)
+                        {
                             return;
                         }
                         *last_triggered = Instant::now();
