@@ -4,7 +4,7 @@ import log from 'loglevel';
 import path from 'path';
 import fsExtra from 'fs-extra';
 import prompts from 'prompts';
-import shelljs from 'shelljs';
+import { execa, execaSync } from 'execa';
 import crypto from 'crypto';
 import ora from 'ora';
 import { fileURLToPath } from 'url';
@@ -20,7 +20,7 @@ import * as psl from 'psl';
 import isUrl from 'is-url';
 
 var name = "pake-cli";
-var version$1 = "3.1.1";
+var version$1 = "3.1.2";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
@@ -67,43 +67,42 @@ var type = "module";
 var exports = "./dist/pake.js";
 var license = "MIT";
 var dependencies = {
-	"@tauri-apps/api": "^1.6.0",
-	"@tauri-apps/cli": "^2.1.0",
+	"@tauri-apps/api": "^2.2.0",
+	"@tauri-apps/cli": "^2.2.5",
 	axios: "^1.7.9",
 	chalk: "^5.4.1",
-	commander: "^11.1.0",
-	"file-type": "^18.7.0",
-	"fs-extra": "^11.2.0",
+	commander: "^13.1.0",
+	execa: "^9.5.2",
+	"file-type": "^20.0.0",
+	"fs-extra": "^11.3.0",
 	"is-url": "^1.2.4",
 	loglevel: "^1.9.2",
-	ora: "^7.0.1",
+	ora: "^8.1.1",
 	prompts: "^2.4.2",
 	psl: "^1.15.0",
-	shelljs: "^0.8.5",
 	"tmp-promise": "^3.0.3",
 	"update-notifier": "^7.3.1"
 };
 var devDependencies = {
 	"@rollup/plugin-alias": "^5.1.1",
-	"@rollup/plugin-commonjs": "^25.0.8",
+	"@rollup/plugin-commonjs": "^28.0.2",
 	"@rollup/plugin-json": "^6.1.0",
-	"@rollup/plugin-replace": "^5.0.7",
+	"@rollup/plugin-replace": "^6.0.2",
 	"@rollup/plugin-terser": "^0.4.4",
 	"@types/fs-extra": "^11.0.4",
 	"@types/is-url": "^1.2.32",
-	"@types/node": "^20.17.10",
+	"@types/node": "^22.10.8",
 	"@types/page-icon": "^0.3.6",
 	"@types/prompts": "^2.4.9",
 	"@types/psl": "^1.1.3",
-	"@types/shelljs": "^0.8.15",
 	"@types/tmp": "^0.2.6",
 	"@types/update-notifier": "^6.0.8",
 	"app-root-path": "^3.1.0",
 	"cross-env": "^7.0.3",
-	rollup: "^4.29.1",
+	rollup: "^4.31.0",
 	"rollup-plugin-typescript2": "^0.36.0",
 	tslib: "^2.8.1",
-	typescript: "^5.7.2"
+	typescript: "^5.7.3"
 };
 var packageJson = {
 	name: name,
@@ -312,17 +311,17 @@ const currentModulePath = fileURLToPath(import.meta.url);
 const npmDirectory = path.join(path.dirname(currentModulePath), '..');
 const tauriConfigDirectory = path.join(npmDirectory, 'src-tauri');
 
-function shellExec(command) {
-    return new Promise((resolve, reject) => {
-        shelljs.exec(command, { async: true, silent: false, cwd: npmDirectory }, code => {
-            if (code === 0) {
-                resolve(0);
-            }
-            else {
-                reject(new Error(`Error occurred while executing command "${command}". Exit code: ${code}`));
-            }
+async function shellExec(command) {
+    try {
+        const { exitCode } = await execa(command, {
+            cwd: npmDirectory,
+            stdio: 'inherit'
         });
-    });
+        return exitCode;
+    }
+    catch (error) {
+        throw new Error(`Error occurred while executing command "${command}". Exit code: ${error.exitCode}`);
+    }
 }
 
 const logger = {
@@ -407,7 +406,13 @@ async function installRust() {
     }
 }
 function checkRustInstalled() {
-    return shelljs.exec('rustc --version', { silent: true }).code === 0;
+    try {
+        execaSync('rustc', ['--version']);
+        return true;
+    }
+    catch {
+        return false;
+    }
 }
 
 async function combineFiles(files, output) {
@@ -977,7 +982,7 @@ program
     .option('--fullscreen', 'Start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
     .option('--hide-title-bar', 'For Mac, hide title bar', DEFAULT_PAKE_OPTIONS.hideTitleBar)
     .option('--multi-arch', 'For Mac, both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
-    .option('--inject <url>', 'Injection of .js or .css files', DEFAULT_PAKE_OPTIONS.inject)
+    .option('--inject <url...>', 'Injection of .js or .css files', DEFAULT_PAKE_OPTIONS.inject)
     .option('--debug', 'Debug build and more output', DEFAULT_PAKE_OPTIONS.debug)
     .addOption(new Option('--proxy-url <url>', 'Proxy URL for all network requests').default(DEFAULT_PAKE_OPTIONS.proxyUrl).hideHelp())
     .addOption(new Option('--user-agent <string>', 'Custom user agent').default(DEFAULT_PAKE_OPTIONS.userAgent).hideHelp())
