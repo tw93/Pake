@@ -117,7 +117,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install shelljs
+          npm install execa
           npm install axios
 
       - name: Build with pake-cli
