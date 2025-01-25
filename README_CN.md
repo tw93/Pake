@@ -68,15 +68,15 @@
             <a href="https://github.com/tw93/Pake/releases/latest/download/Excalidraw_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Excalidraw_x86_64.deb">Linux</a>
         </td>
-        <td>Qwerty
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x86_64.deb">Linux</a>
+        <td>DeepSeek
+            <a href="https://github.com/tw93/Pake/releases/latest/download/DeepSeek.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/DeepSeek_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/DeepSeek_x86_64.deb">Linux</a>
         </td>
     </tr>
     <tr>
         <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/Excalidraw.png width=600/></td>
-        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/Qwerty.png width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/DeepSeek.png width=600/></td>
     </tr>
     <tr>
       <td>YouTube Music

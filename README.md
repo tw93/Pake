@@ -69,15 +69,15 @@
             <a href="https://github.com/tw93/Pake/releases/latest/download/Excalidraw_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Excalidraw_x86_64.deb">Linux</a>
         </td>
-        <td>Qwerty
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x86_64.deb">Linux</a>
+        <td>DeepSeek
+            <a href="https://github.com/tw93/Pake/releases/latest/download/DeepSeek.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/DeepSeek_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/DeepSeek_x86_64.deb">Linux</a>
         </td>
     </tr>
     <tr>
         <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/Excalidraw.png width=600/></td>
-        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/Qwerty.png width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/DeepSeek.png width=600/></td>
     </tr>
     <tr>
       <td>YouTube Music
@@ -294,20 +294,27 @@ Pake's development can not be without these Hackers. They contributed a lot of c
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/GoodbyeNJN">
+            <img src="https://avatars.githubusercontent.com/u/6856639?v=4" width="90;" alt="GoodbyeNJN"/>
+            <br />
+            <sub><b>GoodbyeNJN</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/eltociear">
             <img src="https://avatars.githubusercontent.com/u/22633385?v=4" width="90;" alt="eltociear"/>
             <br />
             <sub><b>Ikko Eltociear Ashimine</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/mattbajorek">
             <img src="https://avatars.githubusercontent.com/u/17235301?v=4" width="90;" alt="mattbajorek"/>
             <br />
             <sub><b>Matt Bajorek</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/QingZ11">
             <img src="https://avatars.githubusercontent.com/u/38887077?v=4" width="90;" alt="QingZ11"/>
@@ -349,15 +356,15 @@ Pake's development can not be without these Hackers. They contributed a lot of c
             <br />
             <sub><b>Null</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/imabutahersiddik">
             <img src="https://avatars.githubusercontent.com/u/138387257?v=4" width="90;" alt="imabutahersiddik"/>
             <br />
             <sub><b>Abu Taher Siddik</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/kidylee">
             <img src="https://avatars.githubusercontent.com/u/841310?v=4" width="90;" alt="kidylee"/>
@@ -384,13 +391,6 @@ Pake's development can not be without these Hackers. They contributed a lot of c
             <img src="https://avatars.githubusercontent.com/u/2541482?v=4" width="90;" alt="Fechin"/>
             <br />
             <sub><b>Fechin</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/GoodbyeNJN">
-            <img src="https://avatars.githubusercontent.com/u/6856639?v=4" width="90;" alt="GoodbyeNJN"/>
-            <br />
-            <sub><b>GoodbyeNJN</b></sub>
         </a>
     </td>
     <td align="center">
