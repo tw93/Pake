@@ -61,6 +61,14 @@ window.addEventListener('DOMContentLoaded', _event => {
       margin-left: 10px;
     }
 
+    .a7f3a288.f0d4f23d {
+      padding-top: 34px;
+    }
+
+    .ec92d1d3 {
+      padding-top: 48px;
+    }
+
     .chakra-ui-light #app .chakra-heading,
     .chakra-ui-dark #app .chakra-heading,
     .chakra-ui-light #app .chakra-stack,
