@@ -1,5 +1,11 @@
 [
   {
+    "name": "deepseek",
+    "title": "DeepSeek",
+    "name_zh": "DeepSeek",
+    "url": "https://chat.deepseek.com/"
+  },
+  {
     "name": "gemini",
     "title": "Gemini",
     "name_zh": "Gemini",
