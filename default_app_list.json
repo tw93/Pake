@@ -1,5 +1,11 @@
 [
   {
+    "name": "grok",
+    "title": "Grok",
+    "name_zh": "Grok",
+    "url": "https://grok.com/"
+  },
+  {
     "name": "gemini",
     "title": "Gemini",
     "name_zh": "Gemini",
