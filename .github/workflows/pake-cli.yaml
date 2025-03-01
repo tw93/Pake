@@ -10,7 +10,7 @@ on:
         options:
           - 'windows-latest'
           - 'macos-latest'
-          - 'ubuntu-20.04'
+          - 'ubuntu-24.04'
       url:
         description: 'URL'
         required: true
@@ -69,8 +69,8 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install Rust for ubuntu-20.04
-        if: inputs.platform == 'ubuntu-20.04'
+      - name: Install Rust for ubuntu-24.04
+        if: inputs.platform == 'ubuntu-24.04'
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
@@ -91,7 +91,7 @@ jobs:
           target: x86_64-apple-darwin
 
       - name: Install dependencies (ubuntu only)
-        if: inputs.platform == 'ubuntu-20.04'
+        if: inputs.platform == 'ubuntu-24.04'
         uses: awalsh128/cache-apt-pkgs-action@v1.4.3
         with:
           packages: libsoup3.0-dev libdbus-1-dev libjavascriptcoregtk-4.1-dev libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra
