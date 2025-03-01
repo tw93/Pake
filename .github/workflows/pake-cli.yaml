@@ -92,10 +92,18 @@ jobs:
 
       - name: Install dependencies (ubuntu only)
         if: inputs.platform == 'ubuntu-20.04'
-        uses: awalsh128/cache-apt-pkgs-action@v1.4.3
-        with:
-          packages: libjavascriptcoregtk-4.1-dev libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra libglib2.0-dev libglib2.0-0 libgobject-2.0-0 pkg-config
-          version: 1.1
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libjavascriptcoregtk-4.1-dev libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra libglib2.0-dev libgobject-2.0-dev libglib2.0-0 libgobject-2.0-0 pkg-config libatk1.0-dev libcairo2-dev libpango1.0-dev libgdk-pixbuf2.0-dev
+
+      - name: Set up PKG_CONFIG_PATH (ubuntu only)
+        if: inputs.platform == 'ubuntu-20.04'
+        run: |
+          echo "PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig" >> $GITHUB_ENV
+          pkg-config --list-all | grep -i glib
+          pkg-config --list-all | grep -i gobject
+          ls -la /usr/lib/x86_64-linux-gnu/pkgconfig/ | grep -i glib
+          ls -la /usr/lib/x86_64-linux-gnu/pkgconfig/ | grep -i gobject
 
       - name: Install pake-cli local
         shell: bash
