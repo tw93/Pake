@@ -74,7 +74,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-          target: x86_64-unknown-linux-gnu
+          target: x86_64-unknown-linux-musl
 
       - name: Install Rust for windows-latest
         if: inputs.platform == 'windows-latest'
@@ -92,17 +92,10 @@ jobs:
 
       - name: Install dependencies (ubuntu only)
         if: inputs.platform == 'ubuntu-20.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y software-properties-common
-          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-          sudo apt-get update
-          sudo apt-get install -y libjavascriptcoregtk-4.1-dev libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra pkg-config libglib2.0-dev
-
-      - name: Set PKG_CONFIG_PATH (ubuntu only)
-        if: inputs.platform == 'ubuntu-20.04'
-        run: |
-          echo "PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig" >> $GITHUB_ENV
+        uses: awalsh128/cache-apt-pkgs-action@v1.4.3
+        with:
+          packages: libjavascriptcoregtk-4.1-dev libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra
+          version: 1.1
 
       - name: Install pake-cli local
         shell: bash
