@@ -778,7 +778,6 @@ const DEFAULT_PAKE_OPTIONS = {
     height: 780,
     width: 1200,
     fullscreen: false,
-    resizable: true,
     hideTitleBar: false,
     alwaysOnTop: false,
     appVersion: '1.0.0',
@@ -977,7 +976,7 @@ program
     .option('--fullscreen', 'Start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
     .option('--hide-title-bar', 'For Mac, hide title bar', DEFAULT_PAKE_OPTIONS.hideTitleBar)
     .option('--multi-arch', 'For Mac, both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
-    .option('--inject <url>', 'Injection of .js or .css files', DEFAULT_PAKE_OPTIONS.inject)
+    .option('--inject <./style.css,./script.js,...>', 'Injection of .js or .css files', (val, previous) => (val ? val.split(',').map(item => item.trim()) : DEFAULT_PAKE_OPTIONS.inject), DEFAULT_PAKE_OPTIONS.inject)
     .option('--debug', 'Debug build and more output', DEFAULT_PAKE_OPTIONS.debug)
     .addOption(new Option('--proxy-url <url>', 'Proxy URL for all network requests').default(DEFAULT_PAKE_OPTIONS.proxyUrl).hideHelp())
     .addOption(new Option('--user-agent <string>', 'Custom user agent').default(DEFAULT_PAKE_OPTIONS.userAgent).hideHelp())
