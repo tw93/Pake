@@ -185,7 +185,14 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
   const injectFilePath = path.join(npmDirectory, `src-tauri/src/inject/custom.js`);
 
   // inject js or css files
-  if (inject?.length > 0) {
+  let injects = []
+  if (inject && typeof inject === 'string') {
+		injects.push(inject);
+	}
+	if (inject && Array.isArray(inject)) {
+		injects = [...inject, ...injects]
+	}
+	if (injects.length > 0) {
     if (!inject.every(item => item.endsWith('.css') || item.endsWith('.js'))) {
       logger.error('The injected file must be in either CSS or JS format.');
       return;
