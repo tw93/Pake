@@ -1,0 +1,23 @@
+{
+    "productName": "Pake",
+    "identifier": "com.pake.app",
+    "version": "1.0.0",
+    "app": {
+        "withGlobalTauri": true
+    },
+    "build": {
+        "frontendDist": "../dist"
+    },
+    "bundle": {
+        "icon": [
+            "icons/icon.png"
+        ],
+        "active": true,
+        "android": {
+            "minSdkVersion": 24
+        },
+        "targets": [
+            "app"
+        ]
+    }
+}
