@@ -3,7 +3,7 @@
     <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
 </p>
 <h1 align="center">Pake</h1>
-<p align="center"><strong>Turn any webpage into a desktop app with Rust <em>with ease</em>.</strong></p>
+<p align="center"><strong>Turn any webpage into a desktop and mobile app with Rust <em>with ease</em>.</strong></p>
 <div align="center">
     <a href="https://twitter.com/HiTw93" target="_blank">
     <img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
@@ -19,13 +19,14 @@
     <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 </div>
 
-<div align="left">Pake supports Mac, Windows, and Linux. Check out README for <a href="#popular-packages">Popular Packages</a>, <a href="#command-line-packaging">Command-Line Packaging</a>, and <a href="#development">Customized Development</a> information. Feel free to share your suggestions in <a href=https://github.com/tw93/Pake/discussions>Discussions</a>.</div>
+<div align="left">Pake supports Mac, Windows, Linux, Android, and iOS. Check out README for <a href="#popular-packages">Popular Packages</a>, <a href="#command-line-packaging">Command-Line Packaging</a>, and <a href="#development">Customized Development</a> information. Feel free to share your suggestions in <a href=https://github.com/tw93/Pake/discussions>Discussions</a>.</div>
 
 ## Features
 
 - 🎐 Nearly 20 times smaller than an Electron package (around 5M!)
 - 🚀 With Rust Tauri, Pake is much more lightweight and faster than JS-based frameworks.
 - 📦 Battery-included package — shortcut pass-through, immersive windows, and minimalist customization.
+- 📱 Built on Tauri 2.x with native mobile (Android/iOS) support, one-command cross-platform app generation.
 - 👻 Pake is just a simple tool — replace the old bundle approach with Tauri (though PWA is good enough).
 
 ## Popular Packages
@@ -161,7 +162,7 @@ In addition, double-click the title bar to switch to full-screen mode. For Mac u
 
 ![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake.gif)
 
-**Pake provides a command line tool, making the flow of package customization quicker and easier. See [documentation](./bin/README.md) for more information.**
+**Pake provides a command line tool, making the flow of package customization quicker and easier for both desktop and mobile platforms. See [documentation](./bin/README.md) for more information.**
 
 ```bash
 # Install with npm
@@ -170,10 +171,31 @@ npm install -g pake-cli
 # Command usage
 pake url [OPTIONS]...
 
-# Feel free to play with Pake! It might take a while to prepare the environment the first time you launch Pake.
+# Desktop packaging (default)
 pake https://weekly.tw93.fun --name Weekly --hide-title-bar
 
+# Mobile packaging - Android
+pake https://www.baidu.com --name BaiduSearch --platform android --width 390 --height 844
+
+# Mobile packaging - iOS
+pake https://www.github.com --name GitHubApp --platform ios --width 390 --height 844
+
+# Cross-platform packaging (desktop + mobile)
+pake https://www.google.com --name GoogleApp --platform all
 ```
+
+### 📱 Mobile Support
+
+Based on Tauri 2.x capabilities, Pake now supports Android and iOS platforms:
+
+- **Android**: Generates APK files that can be directly installed on Android devices
+- **iOS**: Generates IPA files that require developer certificates for signing
+- **Cross-platform**: One command to build desktop and mobile apps simultaneously
+
+**Mobile Environment Requirements:**
+
+- Android: Requires Android SDK and NDK
+- iOS: Requires Xcode and Apple Developer Account (for code signing)
 
 If you are new to the command line, you can compile packages online with _GitHub Actions_. See the [Tutorial](<https://github.com/tw93/Pake/wiki/Online-Compilation-(used-by-ordinary-users)>) for more information.
 
@@ -190,8 +212,40 @@ npm i
 # Local development [Right-click to open debug mode.]
 npm run dev
 
-# Pack application
+# Pack desktop application
 npm run build
+
+# Pack mobile applications
+npm run cli:build  # Build CLI first
+tauri android init  # Initialize Android platform
+tauri android build # Build Android APK
+
+tauri ios init      # Initialize iOS platform
+tauri ios build     # Build iOS IPA
+```
+
+### 📱 Mobile Development Environment Setup
+
+**Android Development Environment:**
+
+```bash
+# 1. Install Android Studio or Android Command Line Tools
+brew install --cask android-commandlinetools
+
+# 2. Set environment variables
+export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
+export NDK_HOME=$ANDROID_HOME/ndk/25.2.9519653
+
+# 3. Install NDK
+sdkmanager "ndk;25.2.9519653"
+```
+
+**iOS Development Environment:**
+
+```bash
+# 1. Install Xcode (from App Store)
+# 2. Install iOS toolchain (automatically installed)
+# 3. Configure developer certificates (requires Apple Developer Account)
 ```
 
 ## Advanced Usage
@@ -199,7 +253,53 @@ npm run build
 1. You can refer to the [codebase structure](https://github.com/tw93/Pake/wiki/Description-of-Pake's-code-structure) before working on Pake, which will help you much in development.
 2. Modify the `url` and `productName` fields in the `pake.json` file under the src-tauri directory, the "domain" field in the `tauri.config.json` file needs to be modified synchronously, as well as the `icon` and `identifier` fields in the `tauri.xxx.conf.json` file. You can select an `icon` from the `icons` directory or download one from [macOSicons](https://macosicons.com/#/) to match your product needs.
 3. For configurations on window properties, you can modify the `pake.json` file to change the value of `width`, `height`, `fullscreen` (or not), `resizable` (or not) of the `windows` property. To adapt to the immersive header on Mac, change `hideTitleBar` to `true`, look for the `Header` element, and add the `padding-top` property.
-4. For advanced usages such as style rewriting, advertisement removal, JS injection, container message communication, and user-defined shortcut keys, see [Advanced Usage of Pake](https://github.com/tw93/Pake/wiki/Advanced-Usage-of-Pake).
+4. **Mobile Configuration**: Support creating `tauri.android.conf.json` and `tauri.ios.conf.json` to separately configure mobile options, including minimum SDK version, app permissions, icon adaptation, etc.
+5. For advanced usages such as style rewriting, advertisement removal, JS injection, container message communication, and user-defined shortcut keys, see [Advanced Usage of Pake](https://github.com/tw93/Pake/wiki/Advanced-Usage-of-Pake).
+
+## 📱 Mobile Usage Examples
+
+Pake now supports packaging webpages as native mobile applications. Here are some practical examples:
+
+### Quick Start
+
+```bash
+# Package Baidu Search as Android app
+pake https://www.baidu.com --name BaiduSearch --platform android --width 390 --height 844
+
+# Package GitHub as iOS app
+pake https://github.com --name GitHubApp --platform ios --width 390 --height 844
+
+# Generate both desktop and mobile apps
+pake https://music.163.com --name NetEaseMusic --platform all
+```
+
+### Recommended Mobile App Scenarios
+
+| Use Case         | Command Example                                                      | Description                         |
+| ---------------- | -------------------------------------------------------------------- | ----------------------------------- |
+| 🔍 Search Engine | `pake https://www.google.com --platform android --name GoogleSearch` | Package Google Search as mobile app |
+| 🎵 Music Player  | `pake https://music.163.com --platform ios --name NetEaseMusic`      | NetEase Music mobile version        |
+| 📱 Social Media  | `pake https://twitter.com --platform android --name TwitterApp`      | Twitter native experience           |
+| 📰 News Reader   | `pake https://news.ycombinator.com --platform ios --name HackerNews` | Hacker News mobile reader           |
+| 🛠️ Dev Tools     | `pake https://github.com --platform android --name GitHubMobile`     | GitHub mobile client                |
+
+### Mobile Configuration Tips
+
+```bash
+# Common parameters optimized for mobile
+pake <URL> \
+  --platform android \
+  --width 390 \        # Mobile width
+  --height 844 \       # Mobile height
+  --name AppName \     # App name
+  --identifier com.yourcompany.appname  # Package identifier
+```
+
+### Build Artifacts
+
+- **Android**: Generates `.apk` files that can be directly installed on Android devices
+- **iOS**: Generates `.ipa` files that require developer certificate signing for installation
+- **Output Location**: `src-tauri/gen/android/` or `src-tauri/gen/apple/`
 
 ## Developers
 

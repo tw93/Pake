@@ -60,6 +60,9 @@ export interface PakeCliOptions {
   // Debug mode, outputs more logs
   debug: boolean;
 
+  // Target platform: desktop, android, ios, all
+  platform: string;
+
   /** External scripts that need to be injected into the page. */
   inject: string[];
 

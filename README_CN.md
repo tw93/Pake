@@ -3,7 +3,7 @@
     <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
 </p>
 <h1 align="center">Pake</h1>
-<p align="center"><strong>利用 Rust 轻松构建轻量级多端桌面应用</strong></p>
+<p align="center"><strong>利用 Rust 轻松构建轻量级多端桌面和移动应用</strong></p>
 <div align="center">
     <a href="https://twitter.com/HiTw93" target="_blank">
     <img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
@@ -18,14 +18,15 @@
     <a href="https://colab.research.google.com/drive/1bX345znvDZ30848xjRtpgtU8eypWwXrp?usp=sharingg" target="_blank">
     <img alt="在 Colab 中打开" src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 </div>
-<div align="left">支持 Mac / Windows / Linux，关于 <a href="#常用包下载">常用包下载</a>、<a href="#命令行一键打包">命令行一键打包</a>、<a href="#定制开发">定制开发</a> 可见下面文档，也欢迎去 <a href=https://github.com/tw93/Pake/discussions>讨论区</a> 交流。</div>
+<div align="left">支持 Mac / Windows / Linux / Android / iOS，关于 <a href="#常用包下载">常用包下载</a>、<a href="#命令行一键打包">命令行一键打包</a>、<a href="#定制开发">定制开发</a> 可见下面文档，也欢迎去 <a href=https://github.com/tw93/Pake/discussions>讨论区</a> 交流。</div>
 
 ## 特征
 
 - 🎐 相比传统的 Electron 套壳打包，要小将近 20 倍，5M 上下。
 - 🚀 Pake 的底层使用的 Rust Tauri 框架，性能体验较 JS 框架要轻快不少，内存小很多。
 - 📦 不是单纯打包，实现了快捷键的透传、沉浸式的窗口、拖动、样式改写、去广告、产品的极简风格定制。
-- 👻 只是一个很简单的小玩具，用 Tauri 替代之前套壳网页打包的老思路，其实 PWA 也很好。
+- � 基于 Tauri 2.x，原生支持移动端 (Android/iOS) 打包，一键生成跨平台应用。
+- �👻 只是一个很简单的小玩具，用 Tauri 替代之前套壳网页打包的老思路，其实 PWA 也很好。
 
 ## 常用包下载
 
@@ -161,7 +162,7 @@
 
 ![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake.gif)
 
-**Pake 提供了命令行工具，可以更快捷方便地一键自定义打你需要的包，详细可见 [文档](./bin/README_CN.md)。**
+**Pake 提供了命令行工具，可以更快捷方便地一键自定义打你需要的包，支持桌面端和移动端，详细可见 [文档](./bin/README_CN.md)。**
 
 ```bash
 # 使用 npm 进行安装
@@ -170,9 +171,31 @@ npm install -g pake-cli
 # 命令使用
 pake url [OPTIONS]...
 
-# 随便玩玩，首次由于安装环境会有些慢，后面就快了
+# 桌面端打包（默认）
 pake https://weekly.tw93.fun --name Weekly --hide-title-bar
+
+# 移动端打包 - Android
+pake https://www.baidu.com --name BaiduSearch --platform android --width 390 --height 844
+
+# 移动端打包 - iOS
+pake https://www.github.com --name GitHubApp --platform ios --width 390 --height 844
+
+# 全平台打包（桌面端 + 移动端）
+pake https://www.google.com --name GoogleApp --platform all
 ```
+
+### 📱 移动端支持
+
+基于 Tauri 2.x 的强大能力，Pake 现已支持 Android 和 iOS 平台：
+
+- **Android**: 生成 APK 文件，可直接安装到 Android 设备
+- **iOS**: 生成 IPA 文件，需要 Xcode 和开发者证书用于签名
+- **跨平台**: 一条命令同时构建桌面端和移动端应用
+
+**移动端环境要求：**
+
+- Android: 需要 Android SDK 和 NDK
+- iOS: 需要 Xcode 和 Apple 开发者账户（用于代码签名）
 
 假如你不太会使用命令行，或许使用 **GitHub Actions 在线编译多系统版本** 是一个不错的选择，可查看 [文档](https://github.com/tw93/Pake/wiki/%E5%9C%A8%E7%BA%BF%E7%BC%96%E8%AF%91%EF%BC%88%E6%99%AE%E9%80%9A%E7%94%A8%E6%88%B7%E4%BD%BF%E7%94%A8%EF%BC%89)。
 
@@ -187,9 +210,40 @@ npm i
 # 本地开发[右键可打开调试模式]
 npm run dev
 
-# 打包应用
+# 打包桌面应用
 npm run build
 
+# 打包移动端应用
+npm run cli:build  # 先构建 CLI
+tauri android init  # 初始化 Android 平台
+tauri android build # 构建 Android APK
+
+tauri ios init      # 初始化 iOS 平台
+tauri ios build     # 构建 iOS IPA
+```
+
+### 📱 移动端开发环境配置
+
+**Android 开发环境：**
+
+```bash
+# 1. 安装 Android Studio 或 Android Command Line Tools
+brew install --cask android-commandlinetools
+
+# 2. 设置环境变量
+export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
+export NDK_HOME=$ANDROID_HOME/ndk/25.2.9519653
+
+# 3. 安装 NDK
+sdkmanager "ndk;25.2.9519653"
+```
+
+**iOS 开发环境：**
+
+```bash
+# 1. 安装 Xcode（从 App Store）
+# 2. 安装 iOS 工具链（自动安装）
+# 3. 配置开发者证书（需要 Apple 开发者账户）
 ```
 
 ## 高级使用
@@ -197,7 +251,8 @@ npm run build
 1. 代码结构可参考 [文档](https://github.com/tw93/Pake/wiki/Pake-%E7%9A%84%E4%BB%A3%E7%A0%81%E7%BB%93%E6%9E%84%E8%AF%B4%E6%98%8E)，便于你在开发前了解更多。
 2. 修改 src-tauri 目录下 `pake.json` 中的 `url` 和 `productName` 字段，需同步修改下 `tauri.config.json` 中的 `domain` 字段，以及 `tauri.xxx.conf.json` 中的 `icon` 和 `identifier` 字段，其中 `icon` 可以从 icons 目录选择一个，也可以去 [macOSicons](https://macosicons.com/#/) 下载符合效果的。
 3. 关于窗口属性设置，可以在 `pake.json` 修改 windows 属性对应的 `width/height`，fullscreen 是否全屏，resizable 是否可以调整大小，假如想适配 Mac 沉浸式头部，可以将 hideTitleBar 设置成 `true`，找到 Header 元素加一个 padding-top 样式即可，不想适配改成 `false` 也行。
-4. 此外样式改写、屏蔽广告、逻辑代码注入、容器消息通信、自定义快捷键可见 [高级用法](https://github.com/tw93/Pake/wiki/Pake-%E7%9A%84%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95)。
+4. **移动端配置**：支持创建 `tauri.android.conf.json` 和 `tauri.ios.conf.json` 来单独配置移动端选项，包括最小 SDK 版本、应用权限、图标适配等。
+5. 此外样式改写、屏蔽广告、逻辑代码注入、容器消息通信、自定义快捷键可见 [高级用法](https://github.com/tw93/Pake/wiki/Pake-%E7%9A%84%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95)。
 
 ## 开发者
 
@@ -465,6 +520,51 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
     </td></tr>
 </table>
 <!-- readme: contributors -end -->
+
+## 📱 移动端使用示例
+
+Pake 现已支持将网页打包为原生移动端应用，以下是一些实用示例：
+
+### 快速开始
+
+```bash
+# 打包百度搜索为 Android 应用
+pake https://www.baidu.com --name BaiduSearch --platform android --width 390 --height 844
+
+# 打包 GitHub 为 iOS 应用
+pake https://github.com --name GitHubApp --platform ios --width 390 --height 844
+
+# 同时生成桌面端和移动端应用
+pake https://music.163.com --name NetEaseMusic --platform all
+```
+
+### 移动端特色应用推荐
+
+| 应用场景    | 命令示例                                                             | 说明                         |
+| ----------- | -------------------------------------------------------------------- | ---------------------------- |
+| 🔍 搜索引擎 | `pake https://www.google.com --platform android --name GoogleSearch` | 将 Google 搜索打包为移动应用 |
+| 🎵 音乐播放 | `pake https://music.163.com --platform ios --name NetEaseMusic`      | 网易云音乐移动版             |
+| 📱 社交媒体 | `pake https://twitter.com --platform android --name TwitterApp`      | Twitter 原生体验             |
+| 📰 新闻阅读 | `pake https://news.ycombinator.com --platform ios --name HackerNews` | Hacker News 移动阅读器       |
+| 🛠️ 开发工具 | `pake https://github.com --platform android --name GitHubMobile`     | GitHub 移动端                |
+
+### 移动端配置技巧
+
+```bash
+# 为移动端优化的常用参数
+pake <URL> \
+  --platform android \
+  --width 390 \        # 移动端宽度
+  --height 844 \       # 移动端高度
+  --name AppName \     # 应用名称
+  --identifier com.yourcompany.appname  # 包标识符
+```
+
+### 构建产物
+
+- **Android**: 生成 `.apk` 文件，可直接安装到 Android 设备
+- **iOS**: 生成 `.ipa` 文件，需要开发者证书签名后安装
+- **输出位置**: `src-tauri/gen/android/` 或 `src-tauri/gen/apple/`
 
 ## 常见问题
 

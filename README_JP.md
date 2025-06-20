@@ -3,7 +3,7 @@
     <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
 </p>
 <h1 align="center">Pake</h1>
-<p align="center"><strong>Rustを使って、簡単にウェブページをデスクトップアプリに変換します。</strong></p>
+<p align="center"><strong>Rustを使って、簡単にウェブページをデスクトップとモバイル（Android/iOS）アプリに変換します。</strong></p>
 <div align="center">
     <a href="https://twitter.com/HiTw93" target="_blank">
     <img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
@@ -19,14 +19,15 @@
     <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 </div>
 
-<div align="left">PakeはMac、Windows、Linuxをサポートしています。<a href="#人気のパッケージ">人気のパッケージ</a>、<a href="#コマンドラインパッケージング">コマンドラインパッケージング</a>、<a href="#開発">カスタマイズ開発</a>に関する情報はREADMEをご覧ください。<a href=https://github.com/tw93/Pake/discussions>ディスカッション</a>でご意見をお聞かせください。</div>
+<div align="left">PakeはMac、Windows、Linux、Android、iOSをサポートしています。<a href="#人気のパッケージ">人気のパッケージ</a>、<a href="#コマンドラインパッケージング">コマンドラインパッケージング</a>、<a href="#開発">カスタマイズ開発</a>に関する情報はREADMEをご覧ください。<a href=https://github.com/tw93/Pake/discussions>ディスカッション</a>でご意見をお聞かせください。</div>
 
 ## 特徴
 
 - 🎐 Electron パッケージと比較して約 20 倍小さい（約 5M！）
 - 🚀 Rust Tauri を使用しているため、Pake は JS ベースのフレームワークよりもはるかに軽量で高速です。
 - 📦 パッケージにはショートカットの透過、没入型ウィンドウ、ミニマリストのカスタマイズが含まれています。
-- 👻 Pake は単なるシンプルなツールです—Tauri を使用して古いバンドルアプローチを置き換えます（PWA も十分に良いです）。
+- � Android と iOS 向けのモバイルアプリパッケージングをサポートしています。
+- �👻 Pake は単なるシンプルなツールです—Tauri を使用して古いバンドルアプローチを置き換えます（PWA も十分に良いです）。
 
 ## 人気のパッケージ
 
@@ -167,8 +168,13 @@
 # npmを使用してインストール
 npm install -g pake-cli
 
-# コマンドの使用
+# コマンドの使用 - デスクトップアプリケーション
 pake url [OPTIONS]...
+
+# モバイルアプリケーション（Android/iOS）のパッケージング
+pake url --platform android  # Android アプリ
+pake url --platform ios      # iOS アプリ
+pake url --platform all      # デスクトップ + モバイル
 
 # Pakeを自由に試してみてください！初めての起動時は環境の準備に時間がかかる場合があります。
 pake https://weekly.tw93.fun --name Weekly --hide-title-bar
@@ -180,6 +186,11 @@ pake https://weekly.tw93.fun --name Weekly --hide-title-bar
 
 開始する前に、Rust `>=1.63` と Node `>=16` (例: `16.18.1`) がコンピュータにインストールされていることを確認してください。インストールガイドについては、[Tauri ドキュメント](https://tauri.app/start/prerequisites/)を参照してください。
 
+**モバイル開発環境（オプション）:**
+
+- **Android 開発:** Android Studio/SDK（API 33+）、NDK（21 以上）、Java 11+
+- **iOS 開発:** Xcode 12+（macOS のみ）
+
 これらに不慣れな場合は、上記のツールを使用してワンクリックでパッケージを作成することをお勧めします。
 
 ```sh
@@ -189,8 +200,16 @@ npm i
 # ローカル開発 [右クリックでデバッグモードを開く]
 npm run dev
 
-# アプリケーションのパッケージング
+# デスクトップアプリケーションのパッケージング
 npm run build
+
+# モバイル開発の初期化（一度だけ実行）
+npx tauri android init
+npx tauri ios init  # macOS のみ
+
+# モバイルアプリケーションのパッケージング
+npx tauri android build
+npx tauri ios build  # macOS のみ
 ```
 
 ## 高度な使用法
@@ -199,6 +218,18 @@ npm run build
 2. `src-tauri` ディレクトリ内の `pake.json` ファイルの `url` と `productName` フィールドを変更する場合は、`tauri.config.json` ファイル内の `domain` フィールド、および `tauri.xxx.conf.json` ファイル内の `icon` と `identifier` フィールドを同期して変更する必要があります。`icon` は `icons` ディレクトリから選択することも、[macOSicons](https://macosicons.com/#/) から効果に合ったものをダウンロードすることもできます。
 3. ウィンドウプロパティの設定については、`pake.json` ファイルを変更して `windows` プロパティの `width`、`height`、`fullscreen`（またはしない）、`resizable`（またはしない）の値を変更できます。Mac の没入型ヘッダーに適応するには、`hideTitleBar` を `true` に設定し、`Header` 要素を見つけて `padding-top` プロパティを追加します。
 4. スタイルの書き換え、広告の除去、JS の注入、コンテナメッセージ通信、ユーザー定義のショートカットキーについては、[高度な使用法](https://github.com/tw93/Pake/wiki/Advanced-Usage-of-Pake)を参照してください。
+5. **モバイル端末の使用例:**
+
+   ```bash
+   # ChatGPT の Android アプリをパッケージング
+   pake https://chat.openai.com --platform android --name ChatGPT
+
+   # YouTube Music の iOS アプリをパッケージング
+   pake https://music.youtube.com --platform ios --name YouTubeMusic
+
+   # すべてのプラットフォーム（デスクトップ + モバイル）用にパッケージング
+   pake https://web.telegram.org --platform all --name Telegram
+   ```
 
 ## 開発者
 

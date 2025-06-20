@@ -5,6 +5,7 @@ import packageJson from '../package.json';
 import BuilderProvider from './builders/BuilderProvider';
 import { DEFAULT_PAKE_OPTIONS as DEFAULT, DEFAULT_PAKE_OPTIONS } from './defaults';
 import { checkUpdateTips } from './helpers/updater';
+import { buildMobileApp } from './helpers/mobile';
 import handleInputOptions from './options/index';
 
 import { PakeCliOptions } from './types';
@@ -32,6 +33,7 @@ program
   .option('--multi-arch', 'For Mac, both Intel and M1', DEFAULT.multiArch)
   .option('--inject <url...>', 'Injection of .js or .css files', DEFAULT.inject)
   .option('--debug', 'Debug build and more output', DEFAULT.debug)
+  .option('--platform <string>', 'Target platform: desktop, android, ios, all', 'desktop')
   .addOption(new Option('--proxy-url <url>', 'Proxy URL for all network requests').default(DEFAULT_PAKE_OPTIONS.proxyUrl).hideHelp())
   .addOption(new Option('--user-agent <string>', 'Custom user agent').default(DEFAULT.userAgent).hideHelp())
   .addOption(new Option('--targets <string>', 'For Linux, option "deb" or "appimage"').default(DEFAULT.targets).hideHelp())
@@ -64,12 +66,35 @@ program
       log.setLevel('debug');
     }
 
-    const appOptions = await handleInputOptions(options, url);
-    log.debug('PakeAppOptions', appOptions);
+    // 检查是否为移动端构建
+    if (options.platform && options.platform !== 'desktop') {
+      // 先进行桌面端构建准备（创建基础项目）
+      const appOptions = await handleInputOptions(options, url);
+      log.debug('PakeAppOptions', appOptions);
 
-    const builder = BuilderProvider.create(appOptions);
-    await builder.prepare();
-    await builder.build(url);
+      const builder = BuilderProvider.create(appOptions);
+      await builder.prepare();
+
+      // 如果是桌面+移动端，先构建桌面版
+      if (options.platform === 'all') {
+        await builder.build(url);
+      }
+
+      // 然后进行移动端构建
+      const mobileHandled = await buildMobileApp(url, options);
+      if (!mobileHandled) {
+        // 如果移动端构建失败，回退到桌面端构建
+        await builder.build(url);
+      }
+    } else {
+      // 桌面端构建
+      const appOptions = await handleInputOptions(options, url);
+      log.debug('PakeAppOptions', appOptions);
+
+      const builder = BuilderProvider.create(appOptions);
+      await builder.prepare();
+      await builder.build(url);
+    }
   });
 
 program.parse();

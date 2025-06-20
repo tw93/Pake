@@ -20,6 +20,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   systemTrayIcon: '',
   proxyUrl: "",
   debug: false,
+  platform: 'desktop',
   inject: [],
   installerLanguage: 'en-US',
 };
