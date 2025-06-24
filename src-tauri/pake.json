@@ -1,7 +1,7 @@
 {
   "windows": [
     {
-      "url": "https://weread.qq.com",
+      "url": "https://login.cptinternational.com",
       "url_type": "web",
       "hide_title_bar": true,
       "fullscreen": false,
@@ -26,5 +26,5 @@
   },
   "system_tray_path": "icons/icon.png",
   "inject": [],
-  "proxy_url": ""
+  "proxy_url": "http://cus-sslfast666.fastsdwan.com:447"
 }
