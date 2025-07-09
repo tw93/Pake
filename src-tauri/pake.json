@@ -1,10 +1,10 @@
 {
   "windows": [
     {
-      "url": "https://weread.qq.com",
+      "url": "https://ai.goviewlink.com",
       "url_type": "web",
-      "hide_title_bar": true,
-      "fullscreen": false,
+      "hide_title_bar": false,
+      "fullscreen": true,
       "width": 1200,
       "height": 780,
       "resizable": true,
