@@ -1,6 +1,6 @@
 {
-  "productName": "WeRead",
-  "identifier": "com.pake.weread",
+  "productName": "GoviewPro",
+  "identifier": "com.pake.GoviewPro",
   "version": "1.0.0",
   "app": {
     "withGlobalTauri": true,
@@ -8,6 +8,9 @@
       "iconPath": "png/weread_512.png",
       "iconAsTemplate": false,
       "id": "pake-tray"
+    },
+    "security": {
+      "csp": null
     }
   },
   "build": {
