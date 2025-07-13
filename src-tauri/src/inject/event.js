@@ -1,4 +1,3 @@
-
 const shortcuts = {
   '[': () => window.history.back(),
   ']': () => window.history.forward(),
@@ -225,6 +224,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Rewrite the window.open function.
   const originalWindowOpen = window.open;
   window.open = async function(url, name, specs = '') {
+    const tauri = window.__TAURI__;
+    const Window = tauri.window.Window;
+    const WebviewWindow = tauri.webviewWindow.WebviewWindow;
+    
     // Apple login and google login
     if (name === 'AppleAuthentication') {
       //do nothing
@@ -233,9 +236,29 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       const baseUrl = window.location.origin + window.location.pathname;
       const hrefUrl = new URL(url, baseUrl);
+      
       // handleExternalLink(hrefUrl.href);
       
-      window.location.href = hrefUrl;
+      // 不直接打开浏览器，在本地切换url
+      // window.location.href = hrefUrl;
+
+      // 获取当前窗口的 URL
+      const webview = new WebviewWindow('GoView' + url, {
+        center: true,
+        width: 1200,
+        height: 780,
+        url: window.location.origin + url,
+        title: '',
+        closable: true
+      })
+      const isVisible = await webview.isVisible();
+      if (isVisible) {
+        await webview.setFocus();
+      } else {
+        await webview.show();
+        await webview.setFocus();
+      }
+      webview.onCloseRequested(async (event) => {});
     }
     // Call the original window.open function to maintain its normal functionality.
     return originalWindowOpen.call(window, url, name, specs);

@@ -1,10 +1,12 @@
 {
   "windows": [
     {
+      "label": "GoView",
+      "title": "GoView",
       "url": "https://ai.goviewlink.com",
       "url_type": "web",
       "hide_title_bar": false,
-      "fullscreen": true,
+      "fullscreen": false,
       "width": 1200,
       "height": 780,
       "resizable": true,
