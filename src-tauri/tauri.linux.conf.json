@@ -1,7 +1,7 @@
 {
   "productName": "we-read",
   "bundle": {
-    "icon": ["png/weread_512.png"],
+    "icon": ["png/goview_32.png"],
     "active": true,
     "linux": {
       "deb": {

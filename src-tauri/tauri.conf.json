@@ -5,7 +5,7 @@
   "app": {
     "withGlobalTauri": true,
     "trayIcon": {
-      "iconPath": "png/weread_512.png",
+      "iconPath": "png/goview_32.png",
       "iconAsTemplate": false,
       "id": "pake-tray"
     },
