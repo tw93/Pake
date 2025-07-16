@@ -47,8 +47,8 @@
   "exports": "./dist/pake.js",
   "license": "MIT",
   "dependencies": {
-    "@tauri-apps/api": "^1.6.0",
-    "@tauri-apps/cli": "^2.1.0",
+    "@tauri-apps/api": "^2.6.0",
+    "@tauri-apps/cli": "^2.6.2",
     "axios": "^1.7.9",
     "chalk": "^5.4.1",
     "commander": "^11.1.0",

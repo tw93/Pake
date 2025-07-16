@@ -16,6 +16,8 @@ use app::{
 };
 use util::get_pake_config;
 
+use crate::app::invoke::window_run_label;
+
 pub fn run_app() {
     let (pake_config, tauri_config) = get_pake_config();
     let tauri_app = tauri::Builder::default();
@@ -45,9 +47,10 @@ pub fn run_app() {
             download_file,
             download_file_by_binary,
             send_notification,
+            window_run_label
         ])
         .setup(move |app| {
-            let window = set_window(app, &pake_config, &tauri_config);
+            let window = set_window(app, &pake_config, &tauri_config, &"pake".to_string());
             set_system_tray(app.app_handle(), show_system_tray).unwrap();
             set_global_shortcut(app.app_handle(), activation_shortcut).unwrap();
             // Prevent flickering on the first open.
@@ -66,7 +69,12 @@ pub fn run_app() {
                     window.minimize().unwrap();
                     window.hide().unwrap();
                 });
-                api.prevent_close();
+
+                // 获取当前窗口的 label
+                let label = _window.label();
+                if label == "pake" {
+                    api.prevent_close();
+                }
             }
         })
         .run(tauri::generate_context!())

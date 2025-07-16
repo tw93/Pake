@@ -21,7 +21,7 @@ tauri-build = { version = "2.0.4", features = [] }
 serde_json = "1.0.134"
 serde = { version = "1.0.217", features = ["derive"] }
 tokio = { version = "1.42.0", features = ["full"] }
-tauri = { version = "2.2.0", features = ["tray-icon", "image-ico", "image-png", "macos-proxy"] }
+tauri = { version = "2.2.0", features = ["tray-icon", "image-ico", "image-png", "macos-proxy", "unstable"] }
 tauri-plugin-window-state = "2.2.0"
 tauri-plugin-oauth = "2.0.0"
 tauri-plugin-http = "2.2.0"

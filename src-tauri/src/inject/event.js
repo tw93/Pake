@@ -225,9 +225,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const originalWindowOpen = window.open;
   window.open = async function(url, name, specs = '') {
     const tauri = window.__TAURI__;
-    const Window = tauri.window.Window;
-    const WebviewWindow = tauri.webviewWindow.WebviewWindow;
-    
+    const invoke = tauri.core.invoke;
+
     // Apple login and google login
     if (name === 'AppleAuthentication') {
       //do nothing
@@ -242,23 +241,14 @@ document.addEventListener('DOMContentLoaded', () => {
       // 不直接打开浏览器，在本地切换url
       // window.location.href = hrefUrl;
 
-      // 获取当前窗口的 URL
-      const webview = new WebviewWindow('GoView' + url, {
-        center: true,
-        width: 1200,
-        height: 780,
-        url: window.location.origin + url,
-        title: '',
-        closable: true
-      })
-      const isVisible = await webview.isVisible();
-      if (isVisible) {
-        await webview.setFocus();
+      if(url.includes('/chart/preview')) {
+        // 获取当前窗口的 URL
+        const key = 'GoView' + new Date().getTime()
+        invoke('window_run_label', { label: key, url: hrefUrl.href })
+
       } else {
-        await webview.show();
-        await webview.setFocus();
+        window.location.href = hrefUrl;
       }
-      webview.onCloseRequested(async (event) => {});
     }
     // Call the original window.open function to maintain its normal functionality.
     return originalWindowOpen.call(window, url, name, specs);
@@ -324,7 +314,6 @@ function getFilenameFromUrl(url) {
   const urlPath = new URL(url).pathname;
   return urlPath.substring(urlPath.lastIndexOf('/') + 1);
 }
-
 
 function interceptXhrResponse(urlPattern, responseHandler, requestUrlModifier) {
   let interceptionRules = [];
