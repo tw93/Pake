@@ -241,14 +241,14 @@ document.addEventListener('DOMContentLoaded', () => {
       // 不直接打开浏览器，在本地切换url
       // window.location.href = hrefUrl;
 
-      if(url.includes('/chart/preview')) {
+      // if(url.includes('/chart/preview')) {
         // 获取当前窗口的 URL
-        const key = 'GoView' + new Date().getTime()
-        invoke('window_run_label', { label: key, url: hrefUrl.href })
-
-      } else {
-        window.location.href = hrefUrl;
-      }
+      // } else {
+      //   window.location.href = hrefUrl;
+      // }
+      
+      const key = 'GoView' + new Date().getTime()
+      invoke('window_run_label', { label: key, url: hrefUrl.href })
     }
     // Call the original window.open function to maintain its normal functionality.
     return originalWindowOpen.call(window, url, name, specs);
