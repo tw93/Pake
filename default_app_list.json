@@ -3,6 +3,6 @@
     "name": "GoViewPro",
     "title": "GoViewPro",
     "name_zh": "GoViewPro",
-    "url": "https://ai.goviewlink.com/"
+    "url": "../dist"
   }
 ]

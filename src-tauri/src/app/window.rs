@@ -6,7 +6,12 @@ use tauri::{App, Config, Url, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 #[cfg(target_os = "macos")]
 use tauri::{Theme, TitleBarStyle};
 
-pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config, label: &String) -> WebviewWindow {
+pub fn set_window(
+    app: &mut App,
+    config: &PakeConfig,
+    tauri_config: &Config,
+    label: &String,
+) -> WebviewWindow {
     let package_name = tauri_config.clone().product_name.unwrap();
     let _data_dir = get_data_dir(app.handle(), package_name);
 

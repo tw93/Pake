@@ -1,10 +1,10 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
-  "identifier": "com.pake.GoviewPro",
-  "description": "Capability for the pake app.",
+  "identifier": "com.goviewpro.example",
+  "description": "GoViewPro.",
   "webviews": ["GoView*", "pake"],
   "remote": {
-    "urls": ["https://*.*"]
+    "urls": ["https://*.*", "http://*.*"]
   },
   "permissions": [
     "core:default",
@@ -204,6 +204,18 @@
     "window-state:default",
     "window-state:allow-filename",
     "window-state:allow-restore-state",
-    "window-state:allow-save-window-state"
+    "window-state:allow-save-window-state",
+    {
+      "identifier": "http:default",
+      "allow": [
+          { "url": "https://*:*/*" }, 
+          { "url": "http://*:*/*" }, 
+          
+          { "url": "http://127.0.0.1:*/*" }, 
+          { "url": "https://127.0.0.1:*/*" },
+          { "url": "http://192.168.*.*:*/*" },
+          { "url": "https://192.168.*.*:*/*" }
+      ]
+    }
   ]
 }

@@ -92,7 +92,6 @@ pub fn send_notification(app: AppHandle, params: NotificationParams) -> Result<(
     Ok(())
 }
 
-
 use crate::util::get_pake_config;
 
 #[command]
@@ -100,7 +99,8 @@ pub async fn window_run_label(app: AppHandle, label: String, url: String) {
     // 创建一个新窗口
     let (pake_config, _tauri_config) = get_pake_config();
     let user_agent = pake_config.user_agent.get();
-    let window_config = pake_config.windows
+    let window_config = pake_config
+        .windows
         .first()
         .expect("At least one window configuration is required");
 
@@ -108,22 +108,22 @@ pub async fn window_run_label(app: AppHandle, label: String, url: String) {
         "window.pakeConfig = {}",
         serde_json::to_string(&window_config).unwrap()
     );
-    
+
     let _window = tauri::WebviewWindowBuilder::new(
         &app,
         label.clone(),
         tauri::WebviewUrl::App(url.parse().unwrap()),
     )
-        .title("GoViewPro")
-        .user_agent(user_agent)
-        .resizable(window_config.resizable)
-        .fullscreen(window_config.fullscreen)
-        .inner_size(window_config.width, window_config.height)
-        .initialization_script(&config_script)
-        .initialization_script(include_str!("../inject/component.js"))
-        .initialization_script(include_str!("../inject/event.js"))
-        .initialization_script(include_str!("../inject/style.js"))
-        .initialization_script(include_str!("../inject/custom.js"))
-        .build()
-        .expect("Failed to create new window");
+    .title("GoViewPro")
+    .user_agent(user_agent)
+    .resizable(window_config.resizable)
+    .fullscreen(window_config.fullscreen)
+    .inner_size(window_config.width, window_config.height)
+    .initialization_script(&config_script)
+    .initialization_script(include_str!("../inject/component.js"))
+    .initialization_script(include_str!("../inject/event.js"))
+    .initialization_script(include_str!("../inject/style.js"))
+    .initialization_script(include_str!("../inject/custom.js"))
+    .build()
+    .expect("Failed to create new window");
 }

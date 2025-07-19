@@ -46,8 +46,8 @@ npm install pake-cli -g
 ```typescript
 export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
   ...DEFAULT_PAKE_OPTIONS,
-  url: 'https://ai.goviewlink.com',
-  name: 'Weread',
+  url: '',
+  name: '',
 };
 ```
 

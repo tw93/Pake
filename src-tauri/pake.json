@@ -3,7 +3,7 @@
     {
       "label": "GoView",
       "title": "GoView",
-      "url": "https://ai.goviewlink.com",
+      "url": "../dist",
       "url_type": "web",
       "hide_title_bar": false,
       "fullscreen": false,

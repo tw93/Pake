@@ -7,7 +7,7 @@
     "trayIcon": {
       "iconPath": "png/goview_32.png",
       "iconAsTemplate": false,
-      "id": "pake-tray"
+      "id": "goviewpro-tray"
     },
     "security": {
       "csp": null
