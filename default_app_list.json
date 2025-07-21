@@ -3,6 +3,7 @@
     "name": "GoViewPro",
     "title": "GoViewPro",
     "name_zh": "GoViewPro",
-    "url": "../dist"
+    "url": "../dist",
+    "url_type": "web"
   }
 ]

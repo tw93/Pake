@@ -1,8 +1,8 @@
 {
   "windows": [
     {
-      "label": "GoView",
-      "title": "GoView",
+      "label": "GoViewPro",
+      "title": "GoViewPro",
       "url": "../dist",
       "url_type": "web",
       "hide_title_bar": false,

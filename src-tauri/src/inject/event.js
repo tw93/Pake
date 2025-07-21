@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
       //   window.location.href = hrefUrl;
       // }
       
-      const key = 'GoView' + new Date().getTime()
+      const key = 'GoViewPro' + new Date().getTime()
       invoke('window_run_label', { label: key, url: hrefUrl.href })
     }
     // Call the original window.open function to maintain its normal functionality.

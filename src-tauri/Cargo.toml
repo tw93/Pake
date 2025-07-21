@@ -29,6 +29,7 @@ tauri-plugin-global-shortcut = { version = "2.2.0" }
 tauri-plugin-shell = "2.2.0"
 tauri-plugin-single-instance = "2.2.0"
 tauri-plugin-notification = "2.2.0"
+tauri-plugin-localhost = "2"
 
 [features]
 # this feature is used for development builds from development cli

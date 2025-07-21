@@ -20,7 +20,8 @@ use crate::app::invoke::window_run_label;
 
 pub fn run_app() {
     let (pake_config, tauri_config) = get_pake_config();
-    let tauri_app = tauri::Builder::default();
+    let tauri_app =
+        tauri::Builder::default().plugin(tauri_plugin_localhost::Builder::new(9527).build());
 
     let show_system_tray = pake_config.show_system_tray();
     let activation_shortcut = pake_config.windows[0].activation_shortcut.clone();
