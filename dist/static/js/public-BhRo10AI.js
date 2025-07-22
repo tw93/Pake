@@ -1,1 +1,0 @@
-const t={star:"热度",updateAt:"更新时间",createdAt:"创建时间"},e=[{type:"group",label:"排序方式",key:"sort",children:[{label:t.star,key:"star"},{label:t.updateAt,key:"updateAt"},{label:t.createdAt,key:"createdAt"}]}];export{t as a,e as s};

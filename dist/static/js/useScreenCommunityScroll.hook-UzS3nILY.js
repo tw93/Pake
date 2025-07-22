@@ -1,1 +1,0 @@
-import{r as e,cb as u}from"./index-DzJUk-4s.js";const a=e(0),s=e([]),l=e(!1),t=e(!1),c=e(12);let n=e(0);const i=(r=200,f)=>(s.value=[],a.value=0,l.value=!1,t.value=!1,c.value=u(r),{list:s,page:a,pageSize:c,bottom:l,inBottom:t,handleScroll:o=>{o<50?l.value=!0:l.value=!1},setTop:o=>{n.value=o},scrollTop:n});export{i as u};

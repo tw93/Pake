@@ -1,8 +1,0 @@
-{
-  "CDN": {
-  },
-  "使用说明": {
-    "tip": "请在上面的CDN添加自己要替换的配置:参考如下",
-    "https://cdn.jsdelivr.net/npm/vue@3.4.15/dist/vue.runtime.esm-browser.prod.js": "/cdn/runtime-dom.esm-browser.js"
-  }
-}
