@@ -1,8 +1,8 @@
 [package]
-name = "pake"
+name = "GoViewPro"
 version = "3.1.0"
 description = "🤱🏻 Turn any webpage into a desktop app with Rust."
-authors = ["Tw93"]
+authors = ["xstxhjh"]
 license = "MIT"
 repository = "https://github.com/tw93/Pake"
 edition = "2021"
