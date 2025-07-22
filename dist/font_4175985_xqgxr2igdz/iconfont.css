@@ -1,0 +1,143 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 4175985 */
+  src: url('iconfont.woff2?t=1714031375529') format('woff2'),
+       url('iconfont.woff?t=1714031375529') format('woff'),
+       url('iconfont.ttf?t=1714031375529') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.file-excel:before {
+  content: "\e601";
+}
+
+.file-folder:before {
+  content: "\e60d";
+}
+
+.file-word:before {
+  content: "\e60e";
+}
+
+.file-ppt:before {
+  content: "\e60f";
+}
+
+.file-music:before {
+  content: "\e610";
+}
+
+.file-code:before {
+  content: "\e611";
+}
+
+.file-video:before {
+  content: "\e612";
+}
+
+.file-link:before {
+  content: "\e613";
+}
+
+.file-photo:before {
+  content: "\e614";
+}
+
+.file-zip:before {
+  content: "\e615";
+}
+
+.file-unknow:before {
+  content: "\e616";
+}
+
+.file-gif:before {
+  content: "\e617";
+}
+
+.file-exe:before {
+  content: "\e618";
+}
+
+.file-pdf:before {
+  content: "\e619";
+}
+
+.file-txt:before {
+  content: "\e61a";
+}
+
+.file-sql:before {
+  content: "\e61d";
+}
+
+.file-3d:before {
+  content: "\e61e";
+}
+
+.file-email:before {
+  content: "\e61f";
+}
+
+.file-config:before {
+  content: "\e620";
+}
+
+.global-data:before {
+  content: "\e60c";
+}
+
+.zhendonghua:before {
+  content: "\e60b";
+}
+
+.save_edit_json:before {
+  content: "\e60a";
+}
+
+.yunxiazai:before {
+  content: "\e685";
+}
+
+.tongbu:before {
+  content: "\e609";
+}
+
+.fabu:before {
+  content: "\e608";
+}
+
+.yulan:before {
+  content: "\e607";
+}
+
+.questionnaire:before {
+  content: "\e606";
+}
+
+.huang-guan:before {
+  content: "\e605";
+}
+
+.card-hot:before {
+  content: "\e604";
+}
+
+.apache:before {
+  content: "\e603";
+}
+
+.role:before {
+  content: "\e602";
+}
+
+.plus:before {
+  content: "\e692";
+}
+

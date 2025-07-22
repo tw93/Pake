@@ -1,0 +1,1 @@
+import{_ as o,U as t,t as n,o as r}from"./index-DzJUk-4s.js";const c={};function _(a,s){const e=t("router-view");return r(),n(e)}const u=o(c,[["render",_],["__file","indexParentLayout.vue"]]);export{u as default};

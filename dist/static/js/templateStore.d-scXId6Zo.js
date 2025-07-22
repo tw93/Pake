@@ -1,0 +1,1 @@
+import{br as o}from"./index-DzJUk-4s.js";const m=o({id:"templateStore",state:()=>({homeSort:{sortKey:"star",sortValue:"desc"}}),getters:{getHomeSort(){return this.homeSort}},actions:{setItem(t,e){this.$patch(r=>{r[t]=e})}}});var s=(t=>(t.HOME_SORT="homeSort",t))(s||{});export{s as T,m as u};
