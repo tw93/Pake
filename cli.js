@@ -126,12 +126,12 @@ var packageJson = {
 
 var windows = [
 	{
-		url: "https://weread.qq.com",
+		url: "https://ai.goviewlink.com/",
 		url_type: "web",
 		hide_title_bar: true,
 		fullscreen: false,
 		width: 1200,
-		height: 780,
+		height: 832,
 		resizable: true,
 		always_on_top: false,
 		dark_mode: false,
@@ -186,12 +186,11 @@ var CommonConf = {
 
 var bundle$2 = {
 	icon: [
-		"png/weread_256.ico",
-		"png/weread_32.ico"
+		"png/goview_32.ico",
 	],
 	active: true,
 	resources: [
-		"png/weread_32.ico"
+		"png/goview_32.ico"
 	],
 	targets: [
 		"msi"
@@ -225,10 +224,10 @@ var MacConf = {
 	bundle: bundle$1
 };
 
-var productName = "we-read";
+var productName = "GoViewPro";
 var bundle = {
 	icon: [
-		"png/weread_512.png"
+		"png/goview_32.png"
 	],
 	active: true,
 	linux: {
@@ -238,7 +237,7 @@ var bundle = {
 				"wget"
 			],
 			files: {
-				"/usr/share/applications/com-pake-weread.desktop": "assets/com-pake-weread.desktop"
+				"/usr/share/applications/com-pake-GoviewPro.desktop": "assets/com-pake-GoviewPro.desktop"
 			}
 		}
 	},
@@ -543,7 +542,7 @@ async function mergeConfig(url, options, tauriConf) {
         tauriConf.bundle.icon = [iconInfo.defaultIcon];
     }
     // Set tray icon path.
-    let trayIconPath = platform === 'darwin' ? 'png/icon_512.png' : tauriConf.bundle.icon[0];
+    let trayIconPath = platform === 'darwin' ? 'png/goview_32.png' : tauriConf.bundle.icon[0];
     if (systemTrayIcon.length > 0) {
         try {
             await fsExtra.pathExists(systemTrayIcon);
@@ -776,8 +775,8 @@ class BuilderProvider {
 
 const DEFAULT_PAKE_OPTIONS = {
     icon: '',
-    height: 780,
-    width: 1200,
+    height: 832,
+    width: 1280,
     fullscreen: false,
     resizable: true,
     hideTitleBar: false,
@@ -919,8 +918,8 @@ async function handleOptions(options, url) {
         name = namePrompt || defaultName;
     }
     if (!isValidName(name, platform)) {
-        const LINUX_NAME_ERROR = `✕ name should only include lowercase letters, numbers, and dashes, and must contain at least one lowercase letter. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`;
-        const DEFAULT_NAME_ERROR = `✕ Name should only include letters and numbers, and dashes (dashes must not at the beginning), and must contain at least one letter. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read.`;
+        const LINUX_NAME_ERROR = `✕ name should only include lowercase letters, numbers, and dashes, and must contain at least one lowercase letter. Examples: GoViewPro.`;
+        const DEFAULT_NAME_ERROR = `✕ Name should only include letters and numbers, and dashes (dashes must not at the beginning), and must contain at least one letter. Examples: GoViewPro.`;
         const errorMsg = platform === 'linux' ? LINUX_NAME_ERROR : DEFAULT_NAME_ERROR;
         logger.error(errorMsg);
         if (isActions) {

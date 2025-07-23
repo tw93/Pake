@@ -1,9 +1,9 @@
 [Desktop Entry]
 Encoding=UTF-8
 Categories=Office
-Exec=com-pake-goviewpro
-Icon=com-pake-goviewpro
-Name=com-pake-goviewpro
+Exec=com-pake-GoviewPro
+Icon=com-pake-GoviewPro
+Name=com-pake-GoviewPro
 Name[zh_CN]=goviewpro
 StartupNotify=true
 Terminal=false

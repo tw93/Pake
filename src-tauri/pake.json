@@ -4,7 +4,7 @@
       "label": "GoViewPro",
       "title": "GoViewPro",
       "url": "../dist",
-      "url_type": "web",
+      "url_type": "local",
       "hide_title_bar": false,
       "fullscreen": false,
       "width": 1280,

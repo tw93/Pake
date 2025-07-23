@@ -27,7 +27,7 @@ on:
       height:
         description: 'Height, Optional'
         required: false
-        default: '780'
+        default: '832'
       fullscreen:
         description: 'Fullscreen, At startup, Optional'
         required: false
