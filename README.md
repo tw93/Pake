@@ -1,9 +1,9 @@
 # PakePro
 ## 项目介绍 Project introduction
-一个超级简单,基于 [Pake](https://github.com/tw93/Pake/#) 项目改造的将前端项目打包成桌面端的工具.
+一个超级简单,基于 [Pake](https://github.com/tw93/Pake/#) 项目改造的将前端项目打包成桌面端的工具. <br>
 A super simple, based on [Pake](https://github.com/tw93/Pake/#) project that can package front-end projects into desktop applications.
 
-这个项目每次打开新的页面,都会创建一个新的窗口.(如果前端逻辑是路由跳转,则不会创建新的窗口)
+这个项目每次打开新的页面,都会创建一个新的窗口.(如果前端逻辑是路由跳转,则不会创建新的窗口) <br>
 This project will create a new window each time it opens a new page. (If the front-end logic is route jump, it will not create a new window)
 
 ```sh
@@ -22,20 +22,21 @@ npm run build
 
 ## 项目修改 Project modification
 
-1. /Users/jia/Documents/GitHub/Pake/src-tauri/src/app/invoke.rs
-  window_run_label 函数是每次创建新窗口的主要逻辑.
-  The window_run_label function is the main logic for creating a new window each time.
+1. /Users/jia/Documents/GitHub/Pake/src-tauri/src/app/invoke.rs <br>
+  window_run_label 函数是每次创建新窗口的主要逻辑. <br>
+  The window_run_label function is the main logic for creating a new window each time. <br>
 
-2. /Users/jia/Documents/GitHub/Pake/src-tauri/src/inject/event.js
-  你可以通过修改 window.open 去自定义创建新窗口的逻辑.
-  You can modify window.open to customize the logic for creating a new window.
+2. /Users/jia/Documents/GitHub/Pake/src-tauri/src/inject/event.js <br>
+  你可以通过修改 window.open 去自定义创建新窗口的逻辑. <br>
+  You can modify window.open to customize the logic for creating a new window. <br>
   
-3. /Users/jia/Documents/GitHub/Pake/src-tauri/src/lib.rs
-  项目采用的是 tauri_plugin_localhost 插件, http://localhost:9527 提供的本地服务器, tauri:// 协议会导致一些服务无法使用, 你们可以根据自己的需求修改这里的逻辑.
-  The project uses the tauri_plugin_localhost plugin, which provides a local server at http://localhost:9527. The tauri:// protocol will cause some services to not work, so you can modify the logic here according to your own needs.
+3. /Users/jia/Documents/GitHub/Pake/src-tauri/src/lib.rs <br>
+  项目采用的是 tauri_plugin_localhost 插件, http://localhost:9527 提供的本地服务器, tauri:// 协议会导致一些服务无法使用, 你们可以根据自己的需求修改这里的逻辑. <br>
+  The project uses the tauri_plugin_localhost plugin, which provides a local server at http://localhost:9527. The tauri:// protocol will cause some services to not work, so you can modify the logic here according to your own needs. <br>
 
-## ⚠️注意安全
-  /Users/jia/Documents/GitHub/Pake/src-tauri/capabilities/default.json
-  为了方便使用, 安全权限采用的是最宽松的, 你可以根据自己的需求修改这里的逻辑.
+## ⚠️ 注意安全 Caution!
+  /Users/jia/Documents/GitHub/Pake/src-tauri/capabilities/default.json <br>
+  为了方便使用, 安全权限采用的是最宽松的, 你可以根据自己的需求修改这里的逻辑. <br>
   To facilitate use, the security permissions are set to the most relaxed. You can modify the logic here according to your own needs.
 
+## [GoViewPro](https://ai.goviewlink.com/saas/)
