@@ -31,12 +31,12 @@ npm run build
   You can modify window.open to customize the logic for creating a new window. <br>
   
 3. /Users/jia/Documents/GitHub/Pake/src-tauri/src/lib.rs <br>
-  项目采用的是 tauri_plugin_localhost 插件, http://localhost:9527 提供的本地服务器, tauri:// 协议会导致一些服务无法使用, 你们可以根据自己的需求修改这里的逻辑. <br>
-  The project uses the tauri_plugin_localhost plugin, which provides a local server at http://localhost:9527. The tauri:// protocol will cause some services to not work, so you can modify the logic here according to your own needs. <br>
+  项目采用的是 tauri_plugin_localhost 插件, `http://localhost:9527` 提供的本地服务器, `tauri://` 协议会导致一些服务无法使用, 你们可以根据自己的需求修改这里的逻辑. <br>
+  The project uses the tauri_plugin_localhost plugin, which provides a local server at `http://localhost:9527`. The tauri:// protocol will cause some services to not work, so you can modify the logic here according to your own needs. <br>
 
 ## ⚠️ 注意安全 Caution!
   /Users/jia/Documents/GitHub/Pake/src-tauri/capabilities/default.json <br>
   为了方便使用, 安全权限采用的是最宽松的, 你可以根据自己的需求修改这里的逻辑. <br>
   To facilitate use, the security permissions are set to the most relaxed. You can modify the logic here according to your own needs.
 
-## [GoViewPro](https://ai.goviewlink.com/saas/)
+## Support [GoViewPro](https://ai.goviewlink.com/saas/)
