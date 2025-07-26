@@ -186,6 +186,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
+  // Check if URL belongs to the same domain (including subdomains)
+  const isSameDomain = (url) => {
+    try {
+      const linkUrl = new URL(url);
+      const currentUrl = new URL(window.location.href);
+      
+      if (linkUrl.hostname === currentUrl.hostname) return true;
+      
+      // Extract root domain (e.g., bilibili.com from www.bilibili.com)
+      const getRootDomain = (hostname) => {
+        const parts = hostname.split('.');
+        return parts.length >= 2 ? parts.slice(-2).join('.') : hostname;
+      };
+      
+      return getRootDomain(currentUrl.hostname) === getRootDomain(linkUrl.hostname);
+    } catch (e) {
+      return false;
+    }
+  };
+
   const detectAnchorElementClick = e => {
     const anchorElement = e.target.closest('a');
 
@@ -195,9 +215,17 @@ document.addEventListener('DOMContentLoaded', () => {
       const absoluteUrl = hrefUrl.href;
       let filename = anchorElement.download || getFilenameFromUrl(absoluteUrl);
 
-      // Handling external link redirection, _blank will automatically open.
+      // Handle _blank links: same domain navigates in-app, cross-domain opens new window
       if (target === '_blank') {
         e.preventDefault();
+        e.stopImmediatePropagation();
+        
+        if (isSameDomain(absoluteUrl)) {
+          window.location.href = absoluteUrl;
+        } else {
+          const newWindow = originalWindowOpen.call(window, absoluteUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+          if (!newWindow) handleExternalLink(absoluteUrl);
+        }
         return;
       }
 
@@ -210,7 +238,19 @@ document.addEventListener('DOMContentLoaded', () => {
       // Process download links for Rust to handle.
       if (isDownloadRequired(absoluteUrl, anchorElement, e) && !isSpecialDownload(absoluteUrl)) {
         e.preventDefault();
+        e.stopImmediatePropagation();
         invoke('download_file', { params: { url: absoluteUrl, filename } });
+        return;
+      }
+
+      // Handle regular links: same domain allows normal navigation, cross-domain opens new window
+      if (!target || target === '_self') {
+        if (!isSameDomain(absoluteUrl)) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          const newWindow = originalWindowOpen.call(window, absoluteUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+          if (!newWindow) handleExternalLink(absoluteUrl);
+        }
       }
     }
   };
@@ -232,7 +272,20 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       const baseUrl = window.location.origin + window.location.pathname;
       const hrefUrl = new URL(url, baseUrl);
-      handleExternalLink(hrefUrl.href);
+      const absoluteUrl = hrefUrl.href;
+      
+      // Apply same domain logic as anchor links
+      if (isSameDomain(absoluteUrl)) {
+        // Same domain: navigate in app or open new window based on specs
+        if (name === '_blank' || !name) {
+          return originalWindowOpen.call(window, absoluteUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+        } else {
+          location.href = absoluteUrl;
+        }
+      } else {
+        // Cross domain: open in external browser
+        handleExternalLink(absoluteUrl);
+      }
     }
     // Call the original window.open function to maintain its normal functionality.
     return originalWindowOpen.call(window, url, name, specs);
