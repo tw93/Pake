@@ -900,8 +900,8 @@ function resolveAppName(name, platform) {
 }
 function isValidName(name, platform) {
     const platformRegexMapping = {
-        linux: /^[a-z0-9]+(-[a-z0-9]+)*$/,
-        default: /^[a-zA-Z0-9]+([-a-zA-Z0-9])*$/,
+        linux: /^[a-z0-9][a-z0-9-]*$/,
+        default: /^[a-zA-Z0-9][a-zA-Z0-9- ]*$/,
     };
     const reg = platformRegexMapping[platform] || platformRegexMapping.default;
     return !!name && reg.test(name);
@@ -918,8 +918,8 @@ async function handleOptions(options, url) {
         name = namePrompt || defaultName;
     }
     if (!isValidName(name, platform)) {
-        const LINUX_NAME_ERROR = `✕ name should only include lowercase letters, numbers, and dashes, and must contain at least one lowercase letter. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`;
-        const DEFAULT_NAME_ERROR = `✕ Name should only include letters and numbers, and dashes (dashes must not at the beginning), and must contain at least one letter. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read.`;
+        const LINUX_NAME_ERROR = `✕ Name should only include lowercase letters, numbers, and dashes (not leading dashes), and must contain at least one lowercase letter or number. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`;
+        const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dashes, and spaces (not leading dashes and spaces), and must contain at least one letter or number. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read.`;
         const errorMsg = platform === 'linux' ? LINUX_NAME_ERROR : DEFAULT_NAME_ERROR;
         logger.error(errorMsg);
         if (isActions) {
@@ -969,7 +969,15 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
 program.addHelpText('beforeAll', logo).usage(`[url] [options]`).showHelpAfterError();
 program
     .argument('[url]', 'The web URL you want to package', validateUrlInput)
-    .option('--name <string>', 'Application name')
+    // Refer to https://github.com/tj/commander.js#custom-option-processing, turn string array into a string connected with custom connectors.
+    // If the platform is Linux, use `-` as the connector, and convert all characters to lowercase.
+    // For example, Google Translate will become google-translate.
+    .option('--name <string...>', 'Application name', (value, previous) => {
+    const platform = process.platform;
+    const connector = platform === 'linux' ? '-' : ' ';
+    const name = previous === undefined ? value : `${previous}${connector}${value}`;
+    return platform === 'linux' ? name.toLowerCase() : name;
+})
     .option('--icon <string>', 'Application icon', DEFAULT_PAKE_OPTIONS.icon)
     .option('--width <number>', 'Window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
     .option('--height <number>', 'Window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
