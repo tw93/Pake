@@ -49,6 +49,9 @@ npm install -g pake-cli
 # Package a webpage
 pake https://example.com --name MyApp --width 1200 --height 800
 
+# Also supports names with spaces (cross-platform compatible)
+# pake https://translate.google.com --name "Google Translate" --hide-title-bar
+
 # Development with custom options
 # Modify DEFAULT_DEV_PAKE_OPTIONS in bin/defaults.ts
 npm run cli:dev

@@ -134,7 +134,8 @@ var windows = [
 		always_on_top: false,
 		dark_mode: false,
 		activation_shortcut: "",
-		disabled_web_shortcuts: false
+		disabled_web_shortcuts: false,
+		hide_on_close: false
 	}
 ];
 var user_agent = {
@@ -147,7 +148,6 @@ var system_tray = {
 	linux: true,
 	windows: true
 };
-var hide_on_close = true;
 var system_tray_path = "icons/icon.png";
 var inject = [
 ];
@@ -156,7 +156,6 @@ var pakeConf = {
 	windows: windows,
 	user_agent: user_agent,
 	system_tray: system_tray,
-	hide_on_close: hide_on_close,
 	system_tray_path: system_tray_path,
 	inject: inject,
 	proxy_url: proxy_url
@@ -445,6 +444,7 @@ async function mergeConfig(url, options, tauriConf) {
         always_on_top: alwaysOnTop,
         dark_mode: darkMode,
         disabled_web_shortcuts: disabledWebShortcuts,
+        hide_on_close: hideOnClose,
     };
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
     tauriConf.productName = name;
@@ -490,7 +490,6 @@ async function mergeConfig(url, options, tauriConf) {
         tauriConf.pake.user_agent[currentPlatform] = userAgent;
     }
     tauriConf.pake.system_tray[currentPlatform] = showSystemTray;
-    tauriConf.pake.hide_on_close = hideOnClose;
     // Processing targets are currently only open to Linux.
     if (platform === 'linux') {
         delete tauriConf.bundle.linux.deb.files;

@@ -62,8 +62,17 @@ Various options are available for customization. You can pass corresponding argu
 
 Specify the application name. If not provided, you will be prompted to enter it. It is recommended to use English.
 
+**Note**: Also supports multiple words with automatic platform-specific handling:
+
+- **Windows/macOS**: Preserves spaces and case (e.g., `"Google Translate"`)
+- **Linux**: Converts to lowercase with hyphens (e.g., `"google-translate"`)
+
 ```shell
 --name <string>
+--name MyApp
+
+# Multiple words (if needed):
+--name "Google Translate"
 ```
 
 #### [icon]

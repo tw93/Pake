@@ -60,10 +60,19 @@ pake [url] [options]
 
 #### [name]
 
-指定应用程序的名称，如果在输入时未指定，系统会提示您输入，建议使用单个英文名称，不要出现下划线或者中文。
+指定应用程序的名称，如果未指定，系统会提示您输入，建议使用英文单词。
+
+**注意**: 也支持多个单词，会自动处理不同平台的命名规范:
+
+- **Windows/macOS**: 保持空格和大小写（如 `"Google Translate"`）
+- **Linux**: 转换为小写并用连字符连接（如 `"google-translate"`）
 
 ```shell
 --name <string>
+--name MyApp
+
+# 多个单词（如需要）:
+--name "Google Translate"
 ```
 
 #### [icon]
