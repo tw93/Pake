@@ -29,7 +29,6 @@ output
 
 package-lock.json
 yarn.lock
-pnpm-lock.yaml
 dist
 !dist/about_pake.html
 !dist/cli.js
