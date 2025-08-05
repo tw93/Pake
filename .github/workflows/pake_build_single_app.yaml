@@ -63,7 +63,7 @@ jobs:
             target: x86_64-apple-darwin
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -80,7 +80,7 @@ jobs:
 
       - name: Rust cache restore
         id: cache_store
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4.2.0
         with:
           path: |
             ~/.cargo/bin/
@@ -130,7 +130,7 @@ jobs:
           git checkout -- src-tauri/Cargo.lock
 
       - name: Rust cache store
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@v4.2.0
         with:
           path: |
             ~/.cargo/bin/

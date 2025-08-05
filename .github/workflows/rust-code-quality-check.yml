@@ -30,7 +30,7 @@ jobs:
           - macos-latest
       fail-fast: false
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - uses: rui314/setup-mold@v1
       - uses: taiki-e/install-action@v1
@@ -56,7 +56,7 @@ jobs:
           - macos-latest
       fail-fast: false
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           components: clippy
@@ -76,7 +76,7 @@ jobs:
     name: Enforce codebase style (cargo fmt)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           components: rustfmt

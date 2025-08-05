@@ -13,7 +13,7 @@ jobs:
       apps_config: ${{ steps.read-apps-config.outputs.apps_config }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Get Apps Config
         id: read-apps-config
         run: |
