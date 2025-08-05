@@ -1,7 +1,7 @@
 name: Build and Publish Docker Image
 
 on:
-  workflow_dispatch:  # Manual
+  workflow_dispatch: # Manual
 
 env:
   REGISTRY: ghcr.io

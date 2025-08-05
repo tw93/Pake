@@ -6,7 +6,10 @@ import { PakeAppOptions } from '@/types';
 
 const { platform } = process;
 
-const buildersMap: Record<string, new (options: PakeAppOptions) => BaseBuilder> = {
+const buildersMap: Record<
+  string,
+  new (options: PakeAppOptions) => BaseBuilder
+> = {
   darwin: MacBuilder,
   win32: WinBuilder,
   linux: LinuxBuilder,

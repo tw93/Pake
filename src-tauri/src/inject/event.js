@@ -1,32 +1,32 @@
 const shortcuts = {
-  '[': () => window.history.back(),
-  ']': () => window.history.forward(),
-  '-': () => zoomOut(),
-  '=': () => zoomIn(),
-  '+': () => zoomIn(),
-  0: () => setZoom('100%'),
+  "[": () => window.history.back(),
+  "]": () => window.history.forward(),
+  "-": () => zoomOut(),
+  "=": () => zoomIn(),
+  "+": () => zoomIn(),
+  0: () => setZoom("100%"),
   r: () => window.location.reload(),
   ArrowUp: () => scrollTo(0, 0),
   ArrowDown: () => scrollTo(0, document.body.scrollHeight),
 };
 
 function setZoom(zoom) {
-  const html = document.getElementsByTagName('html')[0];
+  const html = document.getElementsByTagName("html")[0];
   html.style.zoom = zoom;
-  window.localStorage.setItem('htmlZoom', zoom);
+  window.localStorage.setItem("htmlZoom", zoom);
 }
 
 function zoomCommon(zoomChange) {
-  const currentZoom = window.localStorage.getItem('htmlZoom') || '100%';
+  const currentZoom = window.localStorage.getItem("htmlZoom") || "100%";
   setZoom(zoomChange(currentZoom));
 }
 
 function zoomIn() {
-  zoomCommon(currentZoom => `${Math.min(parseInt(currentZoom) + 10, 200)}%`);
+  zoomCommon((currentZoom) => `${Math.min(parseInt(currentZoom) + 10, 200)}%`);
 }
 
 function zoomOut() {
-  zoomCommon(currentZoom => `${Math.max(parseInt(currentZoom) - 10, 30)}%`);
+  zoomCommon((currentZoom) => `${Math.max(parseInt(currentZoom) - 10, 30)}%`);
 }
 
 function handleShortcut(event) {
@@ -47,42 +47,45 @@ function isDownloadLink(url) {
     'svg', 'swf', 'tar', 'tif', 'tiff', 'ts', 'txt', 'wav', 'webm', 'webp',
     'wma', 'wmv', 'xls', 'xlsx', 'xml', 'zip', 'json', 'yaml', '7zip', 'mkv',
   ];
-  const downloadLinkPattern = new RegExp(`\\.(${fileExtensions.join('|')})$`, 'i');
+  const downloadLinkPattern = new RegExp(
+    `\\.(${fileExtensions.join("|")})$`,
+    "i",
+  );
   return downloadLinkPattern.test(url);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   const tauri = window.__TAURI__;
   const appWindow = tauri.window.getCurrentWindow();
   const invoke = tauri.core.invoke;
 
-  if (!document.getElementById('pake-top-dom')) {
-    const topDom = document.createElement('div');
-    topDom.id = 'pake-top-dom';
+  if (!document.getElementById("pake-top-dom")) {
+    const topDom = document.createElement("div");
+    topDom.id = "pake-top-dom";
     document.body.appendChild(topDom);
   }
 
-  const domEl = document.getElementById('pake-top-dom');
+  const domEl = document.getElementById("pake-top-dom");
 
-  domEl.addEventListener('touchstart', () => {
+  domEl.addEventListener("touchstart", () => {
     appWindow.startDragging();
   });
 
-  domEl.addEventListener('mousedown', e => {
+  domEl.addEventListener("mousedown", (e) => {
     e.preventDefault();
     if (e.buttons === 1 && e.detail !== 2) {
       appWindow.startDragging();
     }
   });
 
-  domEl.addEventListener('dblclick', () => {
-    appWindow.isFullscreen().then(fullscreen => {
+  domEl.addEventListener("dblclick", () => {
+    appWindow.isFullscreen().then((fullscreen) => {
       appWindow.setFullscreen(!fullscreen);
     });
   });
 
-  if (window['pakeConfig']?.disabled_web_shortcuts !== true) {
-    document.addEventListener('keyup', event => {
+  if (window["pakeConfig"]?.disabled_web_shortcuts !== true) {
+    document.addEventListener("keyup", (event) => {
       if (/windows|linux/i.test(navigator.userAgent) && event.ctrlKey) {
         handleShortcut(event);
       }
@@ -96,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function collectUrlToBlobs() {
     const backupCreateObjectURL = window.URL.createObjectURL;
     window.blobToUrlCaches = new Map();
-    window.URL.createObjectURL = blob => {
+    window.URL.createObjectURL = (blob) => {
       const url = backupCreateObjectURL.call(window.URL, blob);
       window.blobToUrlCaches.set(url, blob);
       return url;
@@ -104,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function convertBlobUrlToBinary(blobUrl) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const blob = window.blobToUrlCaches.get(blobUrl);
       const reader = new FileReader();
 
@@ -116,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function downloadFromDataUri(dataURI, filename) {
-    const byteString = atob(dataURI.split(',')[1]);
+    const byteString = atob(dataURI.split(",")[1]);
     // write the bytes of the string to an ArrayBuffer
     const bufferArray = new ArrayBuffer(byteString.length);
 
@@ -129,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // write the ArrayBuffer to a binary, and you're done
-    invoke('download_file_by_binary', {
+    invoke("download_file_by_binary", {
       params: {
         filename,
         binary: Array.from(binary),
@@ -138,8 +141,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function downloadFromBlobUrl(blobUrl, filename) {
-    convertBlobUrlToBinary(blobUrl).then(binary => {
-      invoke('download_file_by_binary', {
+    convertBlobUrlToBinary(blobUrl).then((binary) => {
+      invoke("download_file_by_binary", {
         params: {
           filename,
           binary,
@@ -151,20 +154,20 @@ document.addEventListener('DOMContentLoaded', () => {
   // detect blob download by createElement("a")
   function detectDownloadByCreateAnchor() {
     const createEle = document.createElement;
-    document.createElement = el => {
-      if (el !== 'a') return createEle.call(document, el);
+    document.createElement = (el) => {
+      if (el !== "a") return createEle.call(document, el);
       const anchorEle = createEle.call(document, el);
 
       // use addEventListener to avoid overriding the original click event.
       anchorEle.addEventListener(
-        'click',
-        e => {
+        "click",
+        (e) => {
           const url = anchorEle.href;
           const filename = anchorEle.download || getFilenameFromUrl(url);
           if (window.blobToUrlCaches.has(url)) {
             downloadFromBlobUrl(url, filename);
             // case: download from dataURL -> convert dataURL ->
-          } else if (url.startsWith('data:')) {
+          } else if (url.startsWith("data:")) {
             downloadFromDataUri(url, filename);
           }
         },
@@ -176,12 +179,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // process special download protocol['data:','blob:']
-  const isSpecialDownload = url => ['blob', 'data'].some(protocol => url.startsWith(protocol));
+  const isSpecialDownload = (url) =>
+    ["blob", "data"].some((protocol) => url.startsWith(protocol));
 
-  const isDownloadRequired = (url, anchorElement, e) => anchorElement.download || e.metaKey || e.ctrlKey || isDownloadLink(url);
+  const isDownloadRequired = (url, anchorElement, e) =>
+    anchorElement.download || e.metaKey || e.ctrlKey || isDownloadLink(url);
 
-  const handleExternalLink = url => {
-    invoke('plugin:shell|open', {
+  const handleExternalLink = (url) => {
+    invoke("plugin:shell|open", {
       path: url,
     });
   };
@@ -191,23 +196,25 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const linkUrl = new URL(url);
       const currentUrl = new URL(window.location.href);
-      
+
       if (linkUrl.hostname === currentUrl.hostname) return true;
-      
+
       // Extract root domain (e.g., bilibili.com from www.bilibili.com)
       const getRootDomain = (hostname) => {
-        const parts = hostname.split('.');
-        return parts.length >= 2 ? parts.slice(-2).join('.') : hostname;
+        const parts = hostname.split(".");
+        return parts.length >= 2 ? parts.slice(-2).join(".") : hostname;
       };
-      
-      return getRootDomain(currentUrl.hostname) === getRootDomain(linkUrl.hostname);
+
+      return (
+        getRootDomain(currentUrl.hostname) === getRootDomain(linkUrl.hostname)
+      );
     } catch (e) {
       return false;
     }
   };
 
-  const detectAnchorElementClick = e => {
-    const anchorElement = e.target.closest('a');
+  const detectAnchorElementClick = (e) => {
+    const anchorElement = e.target.closest("a");
 
     if (anchorElement && anchorElement.href) {
       const target = anchorElement.target;
@@ -216,39 +223,52 @@ document.addEventListener('DOMContentLoaded', () => {
       let filename = anchorElement.download || getFilenameFromUrl(absoluteUrl);
 
       // Handle _blank links: same domain navigates in-app, cross-domain opens new window
-      if (target === '_blank') {
+      if (target === "_blank") {
         e.preventDefault();
         e.stopImmediatePropagation();
-        
+
         if (isSameDomain(absoluteUrl)) {
           window.location.href = absoluteUrl;
         } else {
-          const newWindow = originalWindowOpen.call(window, absoluteUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+          const newWindow = originalWindowOpen.call(
+            window,
+            absoluteUrl,
+            "_blank",
+            "width=1200,height=800,scrollbars=yes,resizable=yes",
+          );
           if (!newWindow) handleExternalLink(absoluteUrl);
         }
         return;
       }
 
-      if (target === '_new') {
+      if (target === "_new") {
         e.preventDefault();
         handleExternalLink(absoluteUrl);
         return;
       }
 
       // Process download links for Rust to handle.
-      if (isDownloadRequired(absoluteUrl, anchorElement, e) && !isSpecialDownload(absoluteUrl)) {
+      if (
+        isDownloadRequired(absoluteUrl, anchorElement, e) &&
+        !isSpecialDownload(absoluteUrl)
+      ) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        invoke('download_file', { params: { url: absoluteUrl, filename } });
+        invoke("download_file", { params: { url: absoluteUrl, filename } });
         return;
       }
 
       // Handle regular links: same domain allows normal navigation, cross-domain opens new window
-      if (!target || target === '_self') {
+      if (!target || target === "_self") {
         if (!isSameDomain(absoluteUrl)) {
           e.preventDefault();
           e.stopImmediatePropagation();
-          const newWindow = originalWindowOpen.call(window, absoluteUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+          const newWindow = originalWindowOpen.call(
+            window,
+            absoluteUrl,
+            "_blank",
+            "width=1200,height=800,scrollbars=yes,resizable=yes",
+          );
           if (!newWindow) handleExternalLink(absoluteUrl);
         }
       }
@@ -256,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Prevent some special websites from executing in advance, before the click event is triggered.
-  document.addEventListener('click', detectAnchorElementClick, true);
+  document.addEventListener("click", detectAnchorElementClick, true);
 
   collectUrlToBlobs();
   detectDownloadByCreateAnchor();
@@ -265,20 +285,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const originalWindowOpen = window.open;
   window.open = function (url, name, specs) {
     // Apple login and google login
-    if (name === 'AppleAuthentication') {
+    if (name === "AppleAuthentication") {
       //do nothing
-    } else if (specs && (specs.includes('height=') || specs.includes('width='))) {
+    } else if (
+      specs &&
+      (specs.includes("height=") || specs.includes("width="))
+    ) {
       location.href = url;
     } else {
       const baseUrl = window.location.origin + window.location.pathname;
       const hrefUrl = new URL(url, baseUrl);
       const absoluteUrl = hrefUrl.href;
-      
+
       // Apply same domain logic as anchor links
       if (isSameDomain(absoluteUrl)) {
         // Same domain: navigate in app or open new window based on specs
-        if (name === '_blank' || !name) {
-          return originalWindowOpen.call(window, absoluteUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+        if (name === "_blank" || !name) {
+          return originalWindowOpen.call(
+            window,
+            absoluteUrl,
+            "_blank",
+            "width=1200,height=800,scrollbars=yes,resizable=yes",
+          );
         } else {
           location.href = absoluteUrl;
         }
@@ -300,27 +328,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Fix Chinese input method "Enter" on Safari
   document.addEventListener(
-    'keydown',
-    e => {
+    "keydown",
+    (e) => {
       if (e.keyCode === 229) e.stopPropagation();
     },
     true,
   );
 });
 
-document.addEventListener('DOMContentLoaded', function () {
-  let permVal = 'granted';
+document.addEventListener("DOMContentLoaded", function () {
+  let permVal = "granted";
   window.Notification = function (title, options) {
     const { invoke } = window.__TAURI__.core;
-    const body = options?.body || '';
-    let icon = options?.icon || '';
+    const body = options?.body || "";
+    let icon = options?.icon || "";
 
     // If the icon is a relative path, convert to full path using URI
-    if (icon.startsWith('/')) {
+    if (icon.startsWith("/")) {
       icon = window.location.origin + icon;
     }
 
-    invoke('send_notification', {
+    invoke("send_notification", {
       params: {
         title,
         body,
@@ -329,19 +357,19 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   };
 
-  window.Notification.requestPermission = async () => 'granted';
+  window.Notification.requestPermission = async () => "granted";
 
-  Object.defineProperty(window.Notification, 'permission', {
+  Object.defineProperty(window.Notification, "permission", {
     enumerable: true,
     get: () => permVal,
-    set: v => {
+    set: (v) => {
       permVal = v;
     },
   });
 });
 
 function setDefaultZoom() {
-  const htmlZoom = window.localStorage.getItem('htmlZoom');
+  const htmlZoom = window.localStorage.getItem("htmlZoom");
   if (htmlZoom) {
     setZoom(htmlZoom);
   }
@@ -349,5 +377,5 @@ function setDefaultZoom() {
 
 function getFilenameFromUrl(url) {
   const urlPath = new URL(url).pathname;
-  return urlPath.substring(urlPath.lastIndexOf('/') + 1);
+  return urlPath.substring(urlPath.lastIndexOf("/") + 1);
 }

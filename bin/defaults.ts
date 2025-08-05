@@ -18,7 +18,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   targets: 'deb',
   useLocalFile: false,
   systemTrayIcon: '',
-  proxyUrl: "",
+  proxyUrl: '',
   debug: false,
   inject: [],
   installerLanguage: 'en-US',

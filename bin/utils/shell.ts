@@ -5,10 +5,12 @@ export async function shellExec(command: string) {
   try {
     const { exitCode } = await execa(command, {
       cwd: npmDirectory,
-      stdio: 'inherit'
+      stdio: 'inherit',
     });
     return exitCode;
   } catch (error) {
-    throw new Error(`Error occurred while executing command "${command}". Exit code: ${error.exitCode}`);
+    throw new Error(
+      `Error occurred while executing command "${command}". Exit code: ${error.exitCode}`,
+    );
   }
 }

@@ -20,7 +20,9 @@ export default class MacBuilder extends BaseBuilder {
   }
 
   protected getBuildCommand(): string {
-    return this.options.multiArch ? 'npm run build:mac' : super.getBuildCommand();
+    return this.options.multiArch
+      ? 'npm run build:mac'
+      : super.getBuildCommand();
   }
 
   protected getBasePath(): string {

@@ -19,12 +19,14 @@ export async function handleIcon(options: PakeAppOptions) {
       return path.resolve(options.icon);
     }
   } else {
-    logger.warn('✼ No icon given, default in use. For a custom icon, use --icon option.');
+    logger.warn(
+      '✼ No icon given, default in use. For a custom icon, use --icon option.',
+    );
     const iconPath = IS_WIN
       ? 'src-tauri/png/icon_256.ico'
       : IS_LINUX
-      ? 'src-tauri/png/icon_512.png'
-      : 'src-tauri/icons/icon.icns';
+        ? 'src-tauri/png/icon_512.png'
+        : 'src-tauri/icons/icon.icns';
     return path.join(npmDirectory, iconPath);
   }
 }
@@ -32,7 +34,9 @@ export async function handleIcon(options: PakeAppOptions) {
 export async function downloadIcon(iconUrl: string) {
   const spinner = getSpinner('Downloading icon...');
   try {
-    const iconResponse = await axios.get(iconUrl, { responseType: 'arraybuffer' });
+    const iconResponse = await axios.get(iconUrl, {
+      responseType: 'arraybuffer',
+    });
     const iconData = await iconResponse.data;
 
     if (!iconData) {
@@ -49,7 +53,10 @@ export async function downloadIcon(iconUrl: string) {
     // Fix this for linux
     if (IS_LINUX) {
       iconPath = 'png/linux_temp.png';
-      await fsExtra.outputFile(`${npmDirectory}/src-tauri/${iconPath}`, iconData);
+      await fsExtra.outputFile(
+        `${npmDirectory}/src-tauri/${iconPath}`,
+        iconData,
+      );
     } else {
       await fsExtra.outputFile(iconPath, iconData);
     }

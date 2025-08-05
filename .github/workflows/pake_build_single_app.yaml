@@ -3,43 +3,43 @@ on:
   workflow_dispatch:
     inputs:
       name:
-        description: 'App Name'
+        description: "App Name"
         required: true
-        default: 'twitter'
+        default: "twitter"
       title:
-        description: 'App Title'
+        description: "App Title"
         required: true
-        default: 'Twitter'
+        default: "Twitter"
       name_zh:
-        description: 'App Name in Chinese'
+        description: "App Name in Chinese"
         required: true
-        default: '推特'
+        default: "推特"
       url:
-        description: 'App URL'
+        description: "App URL"
         required: true
-        default: 'https://twitter.com/'
+        default: "https://twitter.com/"
   workflow_call:
     inputs:
       name:
-        description: 'App Name'
+        description: "App Name"
         type: string
         required: true
-        default: 'twitter'
+        default: "twitter"
       title:
-        description: 'App Title'
+        description: "App Title"
         required: true
         type: string
-        default: 'Twitter'
+        default: "Twitter"
       name_zh:
-        description: 'App Name in Chinese'
+        description: "App Name in Chinese"
         required: true
         type: string
-        default: '推特'
+        default: "推特"
       url:
-        description: 'App URL'
+        description: "App URL"
         required: true
         type: string
-        default: 'https://twitter.com/'
+        default: "https://twitter.com/"
 
 jobs:
   build_single_app:
@@ -144,7 +144,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: startsWith(github.ref, 'refs/tags/') != true
         with:
-          path: 'output/*/*.*'
+          path: "output/*/*.*"
 
       - name: Upload For Release
         # arg info: https://github.com/ncipollo/release-action#release-action
@@ -152,5 +152,5 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') == true
         with:
           allowUpdates: true
-          artifacts: 'output/*/*.*'
+          artifacts: "output/*/*.*"
           token: ${{ secrets.GITHUB_TOKEN }}

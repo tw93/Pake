@@ -18,7 +18,9 @@ export async function installRust() {
   const spinner = getSpinner('Downloading Rust...');
 
   try {
-    await shellExec(IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac);
+    await shellExec(
+      IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac,
+    );
     spinner.succeed(chalk.green('Rust installed successfully!'));
   } catch (error) {
     console.error('Error installing Rust:', error.message);

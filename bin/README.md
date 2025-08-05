@@ -13,7 +13,6 @@ npm install pake-cli -g
 
 - **CRITICAL**: Consult [Tauri prerequisites](https://tauri.app/start/prerequisites/) before proceeding.
 - For Windows users (ensure that `Win10 SDK (10.0.19041.0)` and `Visual Studio build tool 2022 (>=17.2)` are installed), additional installations are required:
-
   1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
   2. Microsoft Visual C++ 2015-2022 Redistributable (x86)
   3. Microsoft Visual C++ 2012 Redistributable (x86) (optional)
@@ -251,7 +250,7 @@ Supports both comma-separated and multiple option formats:
 # Comma-separated (recommended)
 --inject ./tools/style.css,./tools/hotkey.js
 
-# Multiple options  
+# Multiple options
 --inject ./tools/style.css --inject ./tools/hotkey.js
 
 # Single file
@@ -285,8 +284,8 @@ The `DEFAULT_DEV_PAKE_OPTIONS` configuration in `bin/defaults.ts` can be modifie
 ```typescript
 export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
   ...DEFAULT_PAKE_OPTIONS,
-  url: 'https://weread.qq.com',
-  name: 'Weread',
+  url: "https://weread.qq.com",
+  name: "Weread",
 };
 ```
 

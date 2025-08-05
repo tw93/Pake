@@ -20,7 +20,10 @@ function isValidName(name: string, platform: NodeJS.Platform): boolean {
   return !!name && reg.test(name);
 }
 
-export default async function handleOptions(options: PakeCliOptions, url: string): Promise<PakeAppOptions> {
+export default async function handleOptions(
+  options: PakeCliOptions,
+  url: string,
+): Promise<PakeAppOptions> {
   const { platform } = process;
   const isActions = process.env.GITHUB_ACTIONS;
   let name = options.name;
@@ -36,7 +39,8 @@ export default async function handleOptions(options: PakeCliOptions, url: string
   if (!isValidName(name, platform)) {
     const LINUX_NAME_ERROR = `✕ Name should only include lowercase letters, numbers, and dashes (not leading dashes), and must contain at least one lowercase letter or number. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`;
     const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dashes, and spaces (not leading dashes and spaces), and must contain at least one letter or number. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read.`;
-    const errorMsg = platform === 'linux' ? LINUX_NAME_ERROR : DEFAULT_NAME_ERROR;
+    const errorMsg =
+      platform === 'linux' ? LINUX_NAME_ERROR : DEFAULT_NAME_ERROR;
     logger.error(errorMsg);
     if (isActions) {
       name = resolveAppName(url, platform);

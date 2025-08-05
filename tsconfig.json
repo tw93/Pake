@@ -2,13 +2,8 @@
   "compilerOptions": {
     "module": "ESNext",
     "target": "es2020",
-    "types": [
-      "node"
-    ],
-    "lib": [
-      "es2020",
-      "dom"
-    ],
+    "types": ["node"],
+    "lib": ["es2020", "dom"],
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
@@ -18,12 +13,8 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "bin/*"
-      ]
+      "@/*": ["bin/*"]
     }
   },
-  "include": [
-    "bin/**/*"
-  ]
+  "include": ["bin/**/*"]
 }

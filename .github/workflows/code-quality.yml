@@ -1,0 +1,77 @@
+name: Code Quality Check
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  formatting:
+    name: Code Formatting Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check EditorConfig compliance
+        uses: editorconfig-checker/action-editorconfig-checker@main
+
+      - name: Run EditorConfig checker with exclusions
+        run: editorconfig-checker -exclude 'Cargo\.lock|dist/.*|.*\.(md|icns|ico|png|jpg|jpeg|gif|svg|desktop|wxs|plist|toml)$|cli\.js$|node_modules/.*|target/.*|src-tauri/(target|icons|png)/.*'
+
+      - name: Check Prettier formatting
+        run: npx prettier --check . --ignore-unknown
+
+  rust-quality:
+    name: Rust Code Quality
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false
+    defaults:
+      run:
+        shell: bash
+        working-directory: src-tauri
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: rustfmt, clippy
+
+      - uses: rui314/setup-mold@v1
+        if: matrix.os == 'ubuntu-latest'
+
+      - uses: taiki-e/install-action@v1
+        with:
+          tool: cargo-hack
+
+      - name: Install Ubuntu dependencies
+        if: matrix.os == 'ubuntu-latest'
+        uses: awalsh128/cache-apt-pkgs-action@v1.4.3
+        with:
+          packages: libdbus-1-dev libsoup3.0-dev libjavascriptcoregtk-4.1-dev libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra
+          version: 1.0
+
+      - name: Check Rust formatting
+        run: cargo fmt --all -- --color=always --check
+
+      - name: Run Clippy lints
+        run: cargo hack --feature-powerset --exclude-features cli-build --no-dev-deps clippy

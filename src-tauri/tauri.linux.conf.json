@@ -6,7 +6,9 @@
     "linux": {
       "deb": {
         "depends": ["curl", "wget"],
-        "files": { "/usr/share/applications/com-pake-weread.desktop": "assets/com-pake-weread.desktop" }
+        "files": {
+          "/usr/share/applications/com-pake-weread.desktop": "assets/com-pake-weread.desktop"
+        }
       }
     },
     "targets": ["deb", "appimage"]

@@ -1,7 +1,7 @@
 import fs from 'fs';
 
 export default async function combineFiles(files: string[], output: string) {
-  const contents = files.map(file => {
+  const contents = files.map((file) => {
     const fileContent = fs.readFileSync(file);
     if (file.endsWith('.css')) {
       return (
@@ -11,7 +11,11 @@ export default async function combineFiles(files: string[], output: string) {
       );
     }
 
-    return "window.addEventListener('DOMContentLoaded', (_event) => { " + fileContent + ' });';
+    return (
+      "window.addEventListener('DOMContentLoaded', (_event) => { " +
+      fileContent +
+      ' });'
+    );
   });
   fs.writeFileSync(output, contents.join('\n'));
   return files;

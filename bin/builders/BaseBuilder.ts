@@ -56,13 +56,17 @@ export default abstract class BaseBuilder {
       logger.info('✺ Located in China, using npm/rsProxy CN mirror.');
       const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
       await fsExtra.copy(projectCnConf, projectConf);
-      await shellExec(`cd "${npmDirectory}" && npm install --registry=https://registry.npmmirror.com`);
+      await shellExec(
+        `cd "${npmDirectory}" && npm install --registry=https://registry.npmmirror.com`,
+      );
     } else {
       await shellExec(`cd "${npmDirectory}" && npm install`);
     }
     spinner.succeed(chalk.green('Package installed!'));
     if (!tauriTargetPathExists) {
-      logger.warn('✼ The first packaging may be slow, please be patient and wait, it will be faster afterwards.');
+      logger.warn(
+        '✼ The first packaging may be slow, please be patient and wait, it will be faster afterwards.',
+      );
     }
   }
 
@@ -110,7 +114,16 @@ export default abstract class BaseBuilder {
     return `src-tauri/target/${basePath}/bundle/`;
   }
 
-  protected getBuildAppPath(npmDirectory: string, fileName: string, fileType: string): string {
-    return path.join(npmDirectory, this.getBasePath(), fileType.toLowerCase(), `${fileName}.${fileType}`);
+  protected getBuildAppPath(
+    npmDirectory: string,
+    fileName: string,
+    fileType: string,
+  ): string {
+    return path.join(
+      npmDirectory,
+      this.getBasePath(),
+      fileType.toLowerCase(),
+      `${fileName}.${fileType}`,
+    );
   }
 }

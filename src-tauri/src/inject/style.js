@@ -1,4 +1,4 @@
-window.addEventListener('DOMContentLoaded', _event => {
+window.addEventListener("DOMContentLoaded", (_event) => {
   // Customize and transform existing functions
   const contentCSS = `
     #page #footer-wrapper,
@@ -293,7 +293,7 @@ window.addEventListener('DOMContentLoaded', _event => {
       margin-top: 15px;
     }
   `;
-  const contentStyleElement = document.createElement('style');
+  const contentStyleElement = document.createElement("style");
   contentStyleElement.innerHTML = contentCSS;
   document.head.appendChild(contentStyleElement);
 
@@ -317,7 +317,7 @@ window.addEventListener('DOMContentLoaded', _event => {
     }
 
     #root > .excalidraw-app> .excalidraw-container .App-menu.App-menu_top{
-       margin-top: 15px;
+      margin-top: 15px;
     }
 
     .geist-page nav.dashboard_nav__PRmJv,
@@ -361,7 +361,7 @@ window.addEventListener('DOMContentLoaded', _event => {
     }
 
     body > div.relative.flex.h-full.w-full.overflow-hidden.transition-colors.z-0 > div.z-\\[21\\].flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary.max-md\\:\\!w-0 > div > div > div > nav > div.flex.justify-between.h-\\[60px\\].items-center.md\\:h-header-height {
-       padding-top: 25px;
+      padding-top: 25px;
     }
 
     body > div.relative.flex.h-full.w-full.overflow-hidden.transition-colors.z-0 > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden > main > div.composer-parent.flex.h-full.flex-col.focus-visible\\:outline-0 > div.flex-1.overflow-hidden.\\@container\\/thread > div > div.absolute.left-0.right-0 > div{
@@ -457,9 +457,9 @@ window.addEventListener('DOMContentLoaded', _event => {
       }
     }
   `;
-  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-  if (window['pakeConfig']?.hide_title_bar && isMac) {
-    const topPaddingStyleElement = document.createElement('style');
+  const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+  if (window["pakeConfig"]?.hide_title_bar && isMac) {
+    const topPaddingStyleElement = document.createElement("style");
     topPaddingStyleElement.innerHTML = topPaddingCSS;
     document.head.appendChild(topPaddingStyleElement);
   }

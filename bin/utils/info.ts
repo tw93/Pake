@@ -5,11 +5,18 @@ import chalk from 'chalk';
 
 // Generates an identifier based on the given URL.
 export function getIdentifier(url: string) {
-  const postFixHash = crypto.createHash('md5').update(url).digest('hex').substring(0, 6);
+  const postFixHash = crypto
+    .createHash('md5')
+    .update(url)
+    .digest('hex')
+    .substring(0, 6);
   return `com.pake.${postFixHash}`;
 }
 
-export async function promptText(message: string, initial?: string): Promise<string> {
+export async function promptText(
+  message: string,
+  initial?: string,
+): Promise<string> {
   const response = await prompts({
     type: 'text',
     name: 'content',

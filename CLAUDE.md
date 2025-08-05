@@ -70,17 +70,17 @@ npm run analyze
 
 1. **CLI Tool** (`bin/`): Node.js/TypeScript-based command-line interface
 
-   - `bin/cli.ts` - Main CLI entry point with Commander.js
-   - `bin/builders/` - Platform-specific builders (Mac, Windows, Linux)
-   - `bin/options/` - CLI option processing and validation
-   - `bin/utils/` - Utility functions for URL validation, platform detection
+- `bin/cli.ts` - Main CLI entry point with Commander.js
+- `bin/builders/` - Platform-specific builders (Mac, Windows, Linux)
+- `bin/options/` - CLI option processing and validation
+- `bin/utils/` - Utility functions for URL validation, platform detection
 
 2. **Tauri Application** (`src-tauri/`): Rust-based desktop app framework
 
-   - `src-tauri/src/lib.rs` - Main application entry point
-   - `src-tauri/src/app/` - Application modules (config, window, system tray, shortcuts)
-   - `src-tauri/src/inject/` - JavaScript/CSS injection for web pages
-   - `src-tauri/pake.json` - Default app configuration
+- `src-tauri/src/lib.rs` - Main application entry point
+- `src-tauri/src/app/` - Application modules (config, window, system tray, shortcuts)
+- `src-tauri/src/inject/` - JavaScript/CSS injection for web pages
+- `src-tauri/pake.json` - Default app configuration
 
 3. **Build System**: Uses Rollup for CLI bundling and Tauri for app packaging
 
