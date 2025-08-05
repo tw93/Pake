@@ -42,7 +42,17 @@ program
   .option(
     '--inject <./style.css,./script.js,...>',
     'Injection of .js or .css files',
-    (val, previous) => (val ? val.split(',').map(item => item.trim()) : DEFAULT.inject),
+    (val, previous) => {
+      if (!val) return DEFAULT.inject;
+      
+      // Split by comma and trim whitespace, filter out empty strings
+      const files = val.split(',')
+        .map(item => item.trim())
+        .filter(item => item.length > 0);
+      
+      // If previous values exist (from multiple --inject options), merge them
+      return previous ? [...previous, ...files] : files;
+    },
     DEFAULT.inject,
   )
   .option('--debug', 'Debug build and more output', DEFAULT.debug)

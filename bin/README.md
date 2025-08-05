@@ -245,8 +245,17 @@ Enable recursive copying. When the URL is a local file path, enabling this optio
 
 Using `inject`, you can inject local absolute and relative path `css` and `js` files into the page you specify the `url` to customize it. For example, an adblock script that can be applied to any web page, or a `css` that optimizes the `UI` of a page, you can write it once to customize it. would only need to write the `app` once to generalize it to any other page.
 
+Supports both comma-separated and multiple option formats:
+
 ```shell
+# Comma-separated (recommended)
 --inject ./tools/style.css,./tools/hotkey.js
+
+# Multiple options  
+--inject ./tools/style.css --inject ./tools/hotkey.js
+
+# Single file
+--inject ./tools/style.css
 ```
 
 #### [proxy-url]

@@ -245,14 +245,19 @@ pake [url] [options]
 
 #### [inject]
 
-使用 `inject` 可以通过本地的绝对、相对路径的 `css` `js` 文件注入到你所指定 `url` 的页面中，从而为
+使用 `inject` 可以通过本地的绝对、相对路径的 `css` `js` 文件注入到你所指定 `url` 的页面中，从而为其做定制化改造。举个例子：一段可以通用到任何网页的广告屏蔽脚本，或者是优化页面 `UI` 展示的 `css`，你只需要书写一次可以将其通用到任何其他网页打包的 `app`。
 
-其做定制化改造。举个例子：一段可以通用到任何网页的广告屏蔽脚本，或者是优化页面 `UI` 展的 `css`，你
-
-只需要书写一次可以将其通用到任何其他网页打包的 `app`。
+支持逗号分隔和多个选项两种格式：
 
 ```shell
+# 逗号分隔（推荐）
+--inject ./tools/style.css,./tools/hotkey.js
+
+# 多个选项
 --inject ./tools/style.css --inject ./tools/hotkey.js
+
+# 单个文件
+--inject ./tools/style.css
 ```
 
 #### [proxy-url]
