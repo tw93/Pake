@@ -88,10 +88,14 @@ export default abstract class BaseBuilder {
     const fileType = this.getFileType(target);
     const appPath = this.getBuildAppPath(npmDirectory, fileName, fileType);
     const distPath = path.resolve(`${name}.${fileType}`);
+    const appBinaryPath = this.getBuildAppBinaryPath(npmDirectory, name);
+    const binaryExtension = process.platform === "win32" ? ".exe" : "";
+    const distBinaryPath = path.resolve(`${name}${binaryExtension}`);
     await fsExtra.copy(appPath, distPath);
+    await fsExtra.copy(appBinaryPath, distBinaryPath);
     await fsExtra.remove(appPath);
     logger.success('✔ Build success!');
-    logger.success('✔ App installer located in', distPath);
+    logger.success(`✔ App installer located in ${distPath}, App binary located in ${distBinaryPath}`);
   }
 
   protected getFileType(target: string): string {
@@ -110,7 +114,17 @@ export default abstract class BaseBuilder {
     return `src-tauri/target/${basePath}/bundle/`;
   }
 
+  protected getBaseBinaryPath(): string {
+    return 'src-tauri/target/release/';
+  }
+
   protected getBuildAppPath(npmDirectory: string, fileName: string, fileType: string): string {
     return path.join(npmDirectory, this.getBasePath(), fileType.toLowerCase(), `${fileName}.${fileType}`);
+  }
+
+  protected getBuildAppBinaryPath(npmDirectory: string, fileName: string): string {
+    // binary extension, ".exe" for windows, "" for *nix
+    const binaryExtension = process.platform === "win32" ? ".exe" : "";
+    return path.join(npmDirectory, this.getBaseBinaryPath(), `${fileName}${binaryExtension}`);
   }
 }
