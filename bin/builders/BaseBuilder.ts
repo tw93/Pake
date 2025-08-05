@@ -28,7 +28,7 @@ export default abstract class BaseBuilder {
 
     if (!IS_MAC && !tauriTargetPathExists) {
       logger.warn('✼ The first use requires installing system dependencies.');
-      logger.warn('✼ See more in https://tauri.app/v1/guides/getting-started/prerequisites.');
+      logger.warn('✼ See more in https://tauri.app/start/prerequisites/.');
     }
 
     if (!checkRustInstalled()) {

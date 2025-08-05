@@ -1,4 +1,4 @@
-import psl from 'psl';
+import * as psl from 'psl';
 import isUrl from 'is-url';
 
 // Extracts the domain from a given URL.

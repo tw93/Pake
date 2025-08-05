@@ -1,14 +1,14 @@
-import shelljs from 'shelljs';
+import { execa } from 'execa';
 import { npmDirectory } from './dir';
 
-export function shellExec(command: string) {
-  return new Promise<number>((resolve, reject) => {
-    shelljs.exec(command, { async: true, silent: false, cwd: npmDirectory }, code => {
-      if (code === 0) {
-        resolve(0);
-      } else {
-        reject(new Error(`${code}`));
-      }
+export async function shellExec(command: string) {
+  try {
+    const { exitCode } = await execa(command, {
+      cwd: npmDirectory,
+      stdio: 'inherit'
     });
-  });
+    return exitCode;
+  } catch (error) {
+    throw new Error(`Error occurred while executing command "${command}". Exit code: ${error.exitCode}`);
+  }
 }

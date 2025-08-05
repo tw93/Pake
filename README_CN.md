@@ -1,4 +1,4 @@
-<h4 align="right"><strong><a href="https://github.com/tw93/Pake">English</a></strong> | 简体中文</h4>
+<h4 align="right"><a href="https://github.com/tw93/Pake">English</a> | <strong>简体中文</strong> | <a href="https://github.com/tw93/Pake/blob/main/README_JP.md">日本語</a></h4>
 <p align="center">
     <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
 </p>
@@ -43,8 +43,24 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/17dC9I.jpg width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/mc41xq.jpg width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/WeRead.jpg width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/Twitter.jpg width=600/></td>
+    </tr>
+     <tr>
+        <td>Grok
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Grok.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Grok_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Grok_x86_64.deb">Linux</a>
+        </td>
+        <td>DeepSeek
+            <a href="https://github.com/tw93/Pake/releases/latest/download/DeepSeek.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/DeepSeek_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/DeepSeek_x86_64.deb">Linux</a>
+        </td>
+    </tr>
+    <tr>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/Grok.png width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/DeepSeek.png width=600/></td>
     </tr>
     <tr>
         <td>ChatGPT
@@ -52,15 +68,15 @@
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x86_64.deb">Linux</a>
         </td>
-        <td>Poe
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Poe.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Poe_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Poe_x86_64.deb">Linux</a>
+        <td>Gemini
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Gemini.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Gemini_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Gemini_x86_64.deb">Linux</a>
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/5aO6yP.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/Ztsx23.png width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/ChatGPT.png width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/Gemini.png width=600/></td>
     </tr>
     <tr>
       <td>YouTube Music
@@ -75,8 +91,8 @@
       </td>
     </tr>
     <tr>
-        <td><img src=https://raw.githubusercontent.com/tw93/static/master/pic/12.png width=600 /></td>
-        <td><img src=https://gw.alipayobjects.com/zos/k/pn/1.jpg width=600 /></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/YouTubeMusic.png width=600 /></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/YouTube.jpg width=600 /></td>
     </tr>
     <tr>
         <td>LiZhi
@@ -91,30 +107,14 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://cdn.fliggy.com/upic/nYEKqN.jpg width=600/></td>
-        <td><img src=https://gw.alipayobjects.com/zos/k/r7/0C9lju.jpg width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/LiZhi.jpg width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/ProgramMusic.jpg width=600/></td>
     </tr>
     <tr>
-        <td>Qwerty
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Qwerty_x86_64.deb">Linux</a>
-        </td>
-        <td>CodeRunner
-            <a href="https://github.com/tw93/Pake/releases/latest/download/CodeRunner.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/CodeRunner_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/CodeRunner_x86_64.deb">Linux</a>
-        </td>
-    </tr>
-    <tr>
-        <td><img src=https://cdn.fliggy.com/upic/i2eg6G.png width=600/></td>
-        <td><img src=https://cdn.fliggy.com/upic/mUzOek.jpg width=600/></td>
-    </tr>
-        <tr>
-        <td>Flomo
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x86_64.deb">Linux</a>
+         <td>Excalidraw
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Excalidraw.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Excalidraw_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Excalidraw_x86_64.deb">Linux</a>
         </td>
         <td>XiaoHongShu
             <a href="https://github.com/tw93/Pake/releases/latest/download/XiaoHongShu.dmg">Mac</a>
@@ -123,8 +123,8 @@
         </td>
     </tr>
     <tr>
-        <td><img src=https://gw.alipayobjects.com/zos/k/30/RoUSUf.png width=600/></td>
-        <td><img src=https://gw.alipayobjects.com/zos/k/89/yJVwyi.png width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/Excalidraw.png width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/XiaoHongShu.png width=600/></td>
     </tr>
 </table>
 
@@ -154,15 +154,12 @@
 ## 开始之前
 
 1. **小白用户**：使用 「常用包下载」 方式来把玩 Pake 的能力，可去 [讨论群](https://github.com/tw93/Pake/discussions) 寻求帮助，也可试试 [Action](https://github.com/tw93/Pake/wiki/%E5%9C%A8%E7%BA%BF%E7%BC%96%E8%AF%91%EF%BC%88%E6%99%AE%E9%80%9A%E7%94%A8%E6%88%B7%E4%BD%BF%E7%94%A8%EF%BC%89) 方式。
-2. **开发用户**：使用 「命令行一键打包」，对 Mac 比较友好，Windows / Linux 需折腾下 [环境配置](https://tauri.app/v1/guides/getting-started/prerequisites)。
+2. **开发用户**：使用 「命令行一键打包」，对 Mac 比较友好，Windows / Linux 需折腾下 [环境配置](https://tauri.app/start/prerequisites/)。
 3. **折腾用户**：假如你前端和 Rust 都会，那可试试下面的 「[定制开发](#定制开发)」，可深度二次开发定制你的功能。
 
 ## 命令行一键打包
 
-<kbd>
-  <img src="https://gw.alipayobjects.com/zos/k/zd/pake.gif" width="100%">
-</kbd>
-<br/><br/>
+![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake.gif)
 
 **Pake 提供了命令行工具，可以更快捷方便地一键自定义打你需要的包，详细可见 [文档](./bin/README_CN.md)。**
 
@@ -181,7 +178,7 @@ pake https://weekly.tw93.fun --name Weekly --hide-title-bar
 
 ## 定制开发
 
-开始前请确保电脑已经安装了 Rust `>=1.63` 和 Node `>=16 如 16.18.1` 的环境，此外需参考 [Tauri 文档](https://tauri.app/v1/guides/getting-started/prerequisites) 快速配置好环境才可以开始使用，假如你太不懂，使用上面的命令行打包会更加合适。
+开始前请确保电脑已经安装了 Rust `>=1.63` 和 Node `>=16 如 16.18.1` 的环境，此外需参考 [Tauri 文档](https://tauri.app/start/prerequisites/) 快速配置好环境才可以开始使用，假如你太不懂，使用上面的命令行打包会更加合适。
 
 ```sh
 # 安装依赖
@@ -199,7 +196,7 @@ npm run build
 
 1. 代码结构可参考 [文档](https://github.com/tw93/Pake/wiki/Pake-%E7%9A%84%E4%BB%A3%E7%A0%81%E7%BB%93%E6%9E%84%E8%AF%B4%E6%98%8E)，便于你在开发前了解更多。
 2. 修改 src-tauri 目录下 `pake.json` 中的 `url` 和 `productName` 字段，需同步修改下 `tauri.config.json` 中的 `domain` 字段，以及 `tauri.xxx.conf.json` 中的 `icon` 和 `identifier` 字段，其中 `icon` 可以从 icons 目录选择一个，也可以去 [macOSicons](https://macosicons.com/#/) 下载符合效果的。
-3. 关于窗口属性设置，可以在 `pake.json` 修改 windows 属性对应的 `width/height`，fullscreen 是否全屏，resizable 是否可以调整大小，假如想适配 Mac 沉浸式头部，可以将 hideTitleBar 设置成 `true`，找到 Header 元素加一个 padding-top 样式即可，不想适配改成 `false` 也行。
+3. 关于窗口属性设置，可以在 `pake.json` 修改 windows 属性对应的 `width/height`，fullscreen 是否全屏，resizable 是否可以调整大小，hide_on_close 关闭时是否隐藏窗口而不是退出，假如想适配 Mac 沉浸式头部，可以将 hideTitleBar 设置成 `true`，找到 Header 元素加一个 padding-top 样式即可，不想适配改成 `false` 也行。
 4. 此外样式改写、屏蔽广告、逻辑代码注入、容器消息通信、自定义快捷键可见 [高级用法](https://github.com/tw93/Pake/wiki/Pake-%E7%9A%84%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95)。
 
 ## 开发者
@@ -238,6 +235,13 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/stone-w4tch3r">
+            <img src="https://avatars.githubusercontent.com/u/100294019?v=4" width="90;" alt="stone-w4tch3r"/>
+            <br />
+            <sub><b>Данил Бизимов</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/wanghanzhen">
             <img src="https://avatars.githubusercontent.com/u/25301012?v=4" width="90;" alt="wanghanzhen"/>
             <br />
@@ -250,15 +254,22 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
             <br />
             <sub><b>Bryan Lee</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/essesoul">
             <img src="https://avatars.githubusercontent.com/u/58624474?v=4" width="90;" alt="essesoul"/>
             <br />
             <sub><b>Essesoul</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
+    <td align="center">
+        <a href="https://github.com/YangguangZhou">
+            <img src="https://avatars.githubusercontent.com/u/61733195?v=4" width="90;" alt="YangguangZhou"/>
+            <br />
+            <sub><b>Jerry Zhou</b></sub>
+        </a>
+    </td>
     <td align="center">
         <a href="https://github.com/AielloChan">
             <img src="https://avatars.githubusercontent.com/u/7900765?v=4" width="90;" alt="AielloChan"/>
@@ -281,10 +292,39 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/eltociear">
+            <img src="https://avatars.githubusercontent.com/u/22633385?v=4" width="90;" alt="eltociear"/>
+            <br />
+            <sub><b>Ikko Eltociear Ashimine</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/mattbajorek">
+            <img src="https://avatars.githubusercontent.com/u/17235301?v=4" width="90;" alt="mattbajorek"/>
+            <br />
+            <sub><b>Matt Bajorek</b></sub>
+        </a>
+    </td></tr>
+<tr>
+    <td align="center">
         <a href="https://github.com/QingZ11">
             <img src="https://avatars.githubusercontent.com/u/38887077?v=4" width="90;" alt="QingZ11"/>
             <br />
             <sub><b>Steam</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/Tianj0o">
+            <img src="https://avatars.githubusercontent.com/u/68584284?v=4" width="90;" alt="Tianj0o"/>
+            <br />
+            <sub><b>Qitianjia</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/xinyii">
+            <img src="https://avatars.githubusercontent.com/u/17895104?v=4" width="90;" alt="xinyii"/>
+            <br />
+            <sub><b>Yi Xin</b></sub>
         </a>
     </td>
     <td align="center">
@@ -307,15 +347,15 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
             <br />
             <sub><b>Null</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/imabutahersiddik">
             <img src="https://avatars.githubusercontent.com/u/138387257?v=4" width="90;" alt="imabutahersiddik"/>
             <br />
             <sub><b>Abu Taher Siddik</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/kidylee">
             <img src="https://avatars.githubusercontent.com/u/841310?v=4" width="90;" alt="kidylee"/>
@@ -345,20 +385,41 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/ImgBotApp">
+            <img src="https://avatars.githubusercontent.com/u/31427850?v=4" width="90;" alt="ImgBotApp"/>
+            <br />
+            <sub><b>Imgbot</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/droid-Q">
+            <img src="https://avatars.githubusercontent.com/u/708277?v=4" width="90;" alt="droid-Q"/>
+            <br />
+            <sub><b>Jiaqi Gu</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/Milo123459">
             <img src="https://avatars.githubusercontent.com/u/50248166?v=4" width="90;" alt="Milo123459"/>
             <br />
             <sub><b>Milo</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/princemaple">
             <img src="https://avatars.githubusercontent.com/u/1329716?v=4" width="90;" alt="princemaple"/>
             <br />
             <sub><b>Po Chen</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
+    <td align="center">
+        <a href="https://github.com/geekvest">
+            <img src="https://avatars.githubusercontent.com/u/126322776?v=4" width="90;" alt="geekvest"/>
+            <br />
+            <sub><b>Null</b></sub>
+        </a>
+    </td>
     <td align="center">
         <a href="https://github.com/houhoz">
             <img src="https://avatars.githubusercontent.com/u/19684376?v=4" width="90;" alt="houhoz"/>
@@ -374,6 +435,13 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/liudonghua123">
+            <img src="https://avatars.githubusercontent.com/u/2276718?v=4" width="90;" alt="liudonghua123"/>
+            <br />
+            <sub><b>Liudonghua</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/liusishan">
             <img src="https://avatars.githubusercontent.com/u/33129823?v=4" width="90;" alt="liusishan"/>
             <br />
@@ -386,7 +454,8 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
             <br />
             <sub><b>Ranger</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/hetz">
             <img src="https://avatars.githubusercontent.com/u/820141?v=4" width="90;" alt="hetz"/>

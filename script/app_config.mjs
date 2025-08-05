@@ -127,10 +127,7 @@ function updatePakeJson() {
 }
 
 function updateTauriJson() {
-  const url = new URL(variables.url);
-  tauriJson.tauri.security.dangerousRemoteDomainIpcAccess[0].domain = url.hostname;
-  tauriJson.package.productName = variables.title;
-
+  tauriJson.productName = variables.title;
   writeFileSync('src-tauri/tauri.conf.json', JSON.stringify(tauriJson, null, 2));
 }
 
@@ -142,8 +139,8 @@ function updateIconFile(iconPath, defaultIconPath) {
 }
 
 function updatePlatformConfig(platformConfig, platformVariables) {
-  platformConfig.tauri.bundle['icon'] = platformVariables.icon;
-  platformConfig.tauri.bundle['identifier'] = variables.identifier;
+  platformConfig.bundle['icon'] = platformVariables.icon;
+  platformConfig.identifier = variables.identifier;
 }
 
 function save() {
@@ -159,11 +156,11 @@ function save() {
 }
 
 function updateDesktopEntry() {
-  linuxJson.tauri.bundle.deb.files = {};
-  linuxJson.tauri.bundle.deb.files[variables.linux.desktopEntryConfig.configKey] = variables.linux.desktopEntryConfig.configValue;
+  linuxJson.bundle.linux.deb.files = {};
+  linuxJson.bundle.linux.deb.files[variables.linux.desktopEntryConfig.configKey] = variables.linux.desktopEntryConfig.configValue;
   writeFileSync(variables.linux.desktopEntryPath, variables.linux.desktopEntry);
 }
 
 function updateResources() {
-  windowsJson.tauri.bundle.resources = variables.windows.resources;
+  windowsJson.bundle.resources = variables.windows.resources;
 }

@@ -38,3 +38,4 @@ src-tauri/.cargo/config.toml
 src-tauri/.cargo/
 .next
 src-tauri/.pake/
+src-tauri/gen

@@ -28,7 +28,7 @@ body:
     attributes:
       label: Pake version
       description: >
-        Please provide the version of Pake you are using. If you are using the master/dev branch, please provide the commit id.
+        Please provide the version of Pake you are using. If you are using the main/dev branch, please provide the commit id.
     validations:
       required: true
   - type: textarea

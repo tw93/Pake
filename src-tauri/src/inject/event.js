@@ -43,28 +43,18 @@ function isDownloadLink(url) {
     '3gp', '7z', 'ai', 'apk', 'avi', 'bmp', 'csv', 'dmg', 'doc', 'docx',
     'fla', 'flv', 'gif', 'gz', 'gzip', 'ico', 'iso', 'indd', 'jar', 'jpeg',
     'jpg', 'm3u8', 'mov', 'mp3', 'mp4', 'mpa', 'mpg', 'mpeg', 'msi', 'odt',
-    'ogg', 'ogv', 'pdf', 'png', 'ppt', 'pptx', 'psd', 'rar', 'raw', 'rss',
+    'ogg', 'ogv', 'pdf', 'png', 'ppt', 'pptx', 'psd', 'rar', 'raw',
     'svg', 'swf', 'tar', 'tif', 'tiff', 'ts', 'txt', 'wav', 'webm', 'webp',
-    'wma', 'wmv', 'xls', 'xlsx', 'xml', 'zip', 'json', 'yaml', '7zip', 'mkv'
+    'wma', 'wmv', 'xls', 'xlsx', 'xml', 'zip', 'json', 'yaml', '7zip', 'mkv',
   ];
   const downloadLinkPattern = new RegExp(`\\.(${fileExtensions.join('|')})$`, 'i');
   return downloadLinkPattern.test(url);
 }
 
-// No need to go to the download link.
-function externalDownLoadLink() {
-  return ['quickref.me'].indexOf(location.hostname) > -1;
-}
-
-// Directly jumping out without hostname address.
-function externalTargetLink() {
-  return ['zbook.lol'].indexOf(location.hostname) > -1;
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   const tauri = window.__TAURI__;
-  const appWindow = tauri.window.appWindow;
-  const invoke = tauri.tauri.invoke;
+  const appWindow = tauri.window.getCurrentWindow();
+  const invoke = tauri.core.invoke;
 
   if (!document.getElementById('pake-top-dom')) {
     const topDom = document.createElement('div');
@@ -75,19 +65,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const domEl = document.getElementById('pake-top-dom');
 
   domEl.addEventListener('touchstart', () => {
-    appWindow.startDragging().then();
+    appWindow.startDragging();
   });
 
   domEl.addEventListener('mousedown', e => {
     e.preventDefault();
     if (e.buttons === 1 && e.detail !== 2) {
-      appWindow.startDragging().then();
+      appWindow.startDragging();
     }
   });
 
   domEl.addEventListener('dblclick', () => {
     appWindow.isFullscreen().then(fullscreen => {
-      appWindow.setFullscreen(!fullscreen).then();
+      appWindow.setFullscreen(!fullscreen);
     });
   });
 
@@ -176,8 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // case: download from dataURL -> convert dataURL ->
           } else if (url.startsWith('data:')) {
             downloadFromDataUri(url, filename);
-          } else if (isDownloadLink(url) || anchorEle.hostname !== window.location.host) {
-            handleExternalLink(e, url);
           }
         },
         true,
@@ -187,39 +175,82 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  const isExternalLink = link => window.location.host !== link.host;
   // process special download protocol['data:','blob:']
   const isSpecialDownload = url => ['blob', 'data'].some(protocol => url.startsWith(protocol));
 
   const isDownloadRequired = (url, anchorElement, e) => anchorElement.download || e.metaKey || e.ctrlKey || isDownloadLink(url);
 
-  const handleExternalLink = (e, url) => {
-    e.preventDefault();
-    tauri.shell.open(url);
+  const handleExternalLink = url => {
+    invoke('plugin:shell|open', {
+      path: url,
+    });
   };
 
-  const handleDownloadLink = (e, url, filename) => {
-    e.preventDefault();
-    invoke('download_file', { params: { url, filename } });
+  // Check if URL belongs to the same domain (including subdomains)
+  const isSameDomain = (url) => {
+    try {
+      const linkUrl = new URL(url);
+      const currentUrl = new URL(window.location.href);
+      
+      if (linkUrl.hostname === currentUrl.hostname) return true;
+      
+      // Extract root domain (e.g., bilibili.com from www.bilibili.com)
+      const getRootDomain = (hostname) => {
+        const parts = hostname.split('.');
+        return parts.length >= 2 ? parts.slice(-2).join('.') : hostname;
+      };
+      
+      return getRootDomain(currentUrl.hostname) === getRootDomain(linkUrl.hostname);
+    } catch (e) {
+      return false;
+    }
   };
 
   const detectAnchorElementClick = e => {
     const anchorElement = e.target.closest('a');
+
     if (anchorElement && anchorElement.href) {
-      anchorElement.target = '_self';
+      const target = anchorElement.target;
       const hrefUrl = new URL(anchorElement.href);
       const absoluteUrl = hrefUrl.href;
       let filename = anchorElement.download || getFilenameFromUrl(absoluteUrl);
 
-      // Handling external link redirection.
-      if (isExternalLink(absoluteUrl) && (['_blank', '_new'].includes(anchorElement.target) || externalTargetLink())) {
-        handleExternalLink(e, absoluteUrl);
+      // Handle _blank links: same domain navigates in-app, cross-domain opens new window
+      if (target === '_blank') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        
+        if (isSameDomain(absoluteUrl)) {
+          window.location.href = absoluteUrl;
+        } else {
+          const newWindow = originalWindowOpen.call(window, absoluteUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+          if (!newWindow) handleExternalLink(absoluteUrl);
+        }
+        return;
+      }
+
+      if (target === '_new') {
+        e.preventDefault();
+        handleExternalLink(absoluteUrl);
         return;
       }
 
       // Process download links for Rust to handle.
-      if (isDownloadRequired(absoluteUrl, anchorElement, e) && !externalDownLoadLink() && !isSpecialDownload(absoluteUrl)) {
-        handleDownloadLink(e, absoluteUrl, filename);
+      if (isDownloadRequired(absoluteUrl, anchorElement, e) && !isSpecialDownload(absoluteUrl)) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        invoke('download_file', { params: { url: absoluteUrl, filename } });
+        return;
+      }
+
+      // Handle regular links: same domain allows normal navigation, cross-domain opens new window
+      if (!target || target === '_self') {
+        if (!isSameDomain(absoluteUrl)) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          const newWindow = originalWindowOpen.call(window, absoluteUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+          if (!newWindow) handleExternalLink(absoluteUrl);
+        }
       }
     }
   };
@@ -236,12 +267,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // Apple login and google login
     if (name === 'AppleAuthentication') {
       //do nothing
-    } else if (specs.includes('height=') || specs.includes('width=')) {
+    } else if (specs && (specs.includes('height=') || specs.includes('width='))) {
       location.href = url;
     } else {
       const baseUrl = window.location.origin + window.location.pathname;
       const hrefUrl = new URL(url, baseUrl);
-      tauri.shell.open(hrefUrl.href);
+      const absoluteUrl = hrefUrl.href;
+      
+      // Apply same domain logic as anchor links
+      if (isSameDomain(absoluteUrl)) {
+        // Same domain: navigate in app or open new window based on specs
+        if (name === '_blank' || !name) {
+          return originalWindowOpen.call(window, absoluteUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+        } else {
+          location.href = absoluteUrl;
+        }
+      } else {
+        // Cross domain: open in external browser
+        handleExternalLink(absoluteUrl);
+      }
     }
     // Call the original window.open function to maintain its normal functionality.
     return originalWindowOpen.call(window, url, name, specs);
@@ -262,6 +306,38 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     true,
   );
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+  let permVal = 'granted';
+  window.Notification = function (title, options) {
+    const { invoke } = window.__TAURI__.core;
+    const body = options?.body || '';
+    let icon = options?.icon || '';
+
+    // If the icon is a relative path, convert to full path using URI
+    if (icon.startsWith('/')) {
+      icon = window.location.origin + icon;
+    }
+
+    invoke('send_notification', {
+      params: {
+        title,
+        body,
+        icon,
+      },
+    });
+  };
+
+  window.Notification.requestPermission = async () => 'granted';
+
+  Object.defineProperty(window.Notification, 'permission', {
+    enumerable: true,
+    get: () => permVal,
+    set: v => {
+      permVal = v;
+    },
+  });
 });
 
 function setDefaultZoom() {

@@ -1,23 +1,8 @@
 {
-  "tauri": {
-    "bundle": {
-      "icon": ["icons/weread.icns"],
-      "identifier": "com.pake.weread",
-      "active": true,
-      "category": "DeveloperTool",
-      "copyright": "",
-      "externalBin": [],
-      "longDescription": "",
-      "macOS": {
-        "entitlements": null,
-        "exceptionDomain": "",
-        "frameworks": [],
-        "providerShortName": null,
-        "signingIdentity": null
-      },
-      "resources": [],
-      "shortDescription": "",
-      "targets": ["dmg"]
-    }
+  "bundle": {
+    "icon": ["icons/weread.icns"],
+    "active": true,
+    "macOS": {},
+    "targets": ["dmg"]
   }
 }

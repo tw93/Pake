@@ -8,6 +8,8 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   resizable: true,
   hideTitleBar: false,
   alwaysOnTop: false,
+  appVersion: '1.0.0',
+  darkMode: false,
   disabledWebShortcuts: false,
   activationShortcut: '',
   userAgent: '',
@@ -16,9 +18,11 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   targets: 'deb',
   useLocalFile: false,
   systemTrayIcon: '',
+  proxyUrl: "",
   debug: false,
   inject: [],
-  safeDomain: [],
+  installerLanguage: 'en-US',
+  hideOnClose: true,
 };
 
 // Just for cli development
@@ -26,6 +30,5 @@ export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
   ...DEFAULT_PAKE_OPTIONS,
   url: 'https://weread.qq.com',
   name: 'WeRead',
-  safeDomain: ['weread.qq.com'],
   hideTitleBar: true,
 };

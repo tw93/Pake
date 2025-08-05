@@ -1,0 +1,24 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "pake-capability",
+  "description": "Capability for the pake app.",
+  "webviews": ["pake"],
+  "remote": {
+    "urls": ["https://*.*"]
+  },
+  "permissions": [
+    "shell:allow-open",
+    "core:window:allow-theme",
+    "core:window:allow-start-dragging",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-is-fullscreen",
+    "core:window:allow-set-fullscreen",
+    "core:webview:allow-internal-toggle-devtools",
+    "notification:allow-is-permission-granted",
+    "notification:allow-notify",
+    "notification:allow-get-active",
+    "notification:allow-register-listener",
+    "notification:allow-register-action-types",
+    "notification:default"
+  ]
+}

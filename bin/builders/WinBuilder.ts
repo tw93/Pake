@@ -11,7 +11,7 @@ export default class WinBuilder extends BaseBuilder {
   getFileName(): string {
     const { name } = this.options;
     const { arch } = process;
-    const language = tauriConfig.tauri.bundle.windows.wix.language[0];
-    return `${name}_${tauriConfig.package.version}_${arch}_${language}`;
+    const language = tauriConfig.bundle.windows.wix.language[0];
+    return `${name}_${tauriConfig.version}_${arch}_${language}`;
   }
 }

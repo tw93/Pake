@@ -3,50 +3,55 @@ on:
   workflow_dispatch:
     inputs:
       platform:
-        description: 'platform'
+        description: 'Platform'
         required: true
         default: 'macos-latest'
         type: choice
         options:
           - 'windows-latest'
           - 'macos-latest'
-          - 'ubuntu-20.04'
+          - 'ubuntu-24.04'
       url:
-        description: '[URL]'
+        description: 'URL'
         required: true
       name:
-        description: '[Name]'
+        description: 'Name, English, Linux no capital'
         required: true
       icon:
-        description: '[Icon, Optional]'
+        description: 'Icon, Image URL, Optional'
         required: false
       width:
-        description: '[Width, Optional]'
+        description: 'Width, Optional'
         required: false
         default: '1200'
       height:
-        description: '[Height, Optional]'
+        description: 'Height, Optional'
         required: false
         default: '780'
+      fullscreen:
+        description: 'Fullscreen, At startup, Optional'
+        required: false
+        type: boolean
+        default: false
       hide_title_bar:
-        description: '[Hide TitleBar, Optional, MacOS only]'
+        description: 'Hide TitleBar, MacOS only, Optional'
         required: false
         type: boolean
         default: false
       multi_arch:
-        description: '[MultiArch, Optional, MacOS only]'
+        description: 'MultiArch, MacOS only, Optional'
         required: false
         type: boolean
         default: false
       targets:
-        description: '[Targets, Optional, Linux only]'
+        description: 'Targets, Linux only, Optional'
         required: false
         default: 'deb'
         type: choice
         options:
           - 'deb'
           - 'appimage'
-          - 'all'
+          - 'rpm'
 
 jobs:
   build:
@@ -64,8 +69,8 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install Rust for ubuntu-20.04
-        if: inputs.platform == 'ubuntu-20.04'
+      - name: Install Rust for ubuntu-24.04
+        if: inputs.platform == 'ubuntu-24.04'
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
@@ -86,10 +91,10 @@ jobs:
           target: x86_64-apple-darwin
 
       - name: Install dependencies (ubuntu only)
-        if: inputs.platform == 'ubuntu-20.04'
-        uses: awalsh128/cache-apt-pkgs-action@latest
+        if: inputs.platform == 'ubuntu-24.04'
+        uses: awalsh128/cache-apt-pkgs-action@v1.4.3
         with:
-          packages: libwebkit2gtk-4.0-dev build-essential curl wget libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra
+          packages: libsoup3.0-dev libdbus-1-dev libjavascriptcoregtk-4.1-dev libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra
           version: 1.1
 
       - name: Install pake-cli local
@@ -112,7 +117,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install shelljs
+          npm install execa
           npm install axios
 
       - name: Build with pake-cli
@@ -126,12 +131,14 @@ jobs:
           WIDTH: ${{ inputs.width }}
           HIDE_TITLE_BAR: ${{ inputs.hide_title_bar }}
           FULLSCREEN: ${{ inputs.fullscreen }}
-          RESIZE: ${{ inputs.resize }}
           MULTI_ARCH: ${{ inputs.multi_arch }}
           TARGETS: ${{ inputs.targets }}
+          PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig
+          PKG_CONFIG_ALLOW_SYSTEM_LIBS: 1
+          PKG_CONFIG_ALLOW_SYSTEM_CFLAGS: 1
 
       - name: Upload archive
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: output-${{ inputs.platform }}.zip
           path: node_modules/pake-cli/output/*

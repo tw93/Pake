@@ -1,7 +1,7 @@
 use crate::app::config::PakeConfig;
 use std::env;
 use std::path::PathBuf;
-use tauri::{api, Config, Window};
+use tauri::{AppHandle, Config, Manager, WebviewWindow};
 
 pub fn get_pake_config() -> (PakeConfig, Config) {
     #[cfg(feature = "cli-build")]
@@ -23,10 +23,11 @@ pub fn get_pake_config() -> (PakeConfig, Config) {
     (pake_config, tauri_config)
 }
 
-pub fn get_data_dir(_tauri_config: Config) -> PathBuf {
+pub fn get_data_dir(app: &AppHandle, package_name: String) -> PathBuf {
     {
-        let package_name = _tauri_config.package.product_name.unwrap();
-        let data_dir = api::path::config_dir()
+        let data_dir = app
+            .path()
+            .config_dir()
             .expect("Failed to get data dirname")
             .join(package_name);
 
@@ -38,7 +39,7 @@ pub fn get_data_dir(_tauri_config: Config) -> PathBuf {
     }
 }
 
-pub fn show_toast(window: &Window, message: &str) {
+pub fn show_toast(window: &WebviewWindow, message: &str) {
     let script = format!(r#"pakeToast("{}");"#, message);
     window.eval(&script).unwrap();
 }

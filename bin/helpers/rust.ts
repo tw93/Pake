@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import shelljs from 'shelljs';
+import { execaSync } from 'execa';
 
 import { getSpinner } from '@/utils/info';
 import { IS_WIN } from '@/utils/platform';
@@ -28,5 +28,10 @@ export async function installRust() {
 }
 
 export function checkRustInstalled() {
-  return shelljs.exec('rustc --version', { silent: true }).code === 0;
+  try {
+    execaSync('rustc', ['--version']);
+    return true;
+  } catch {
+    return false;
+  }
 }

@@ -1,7 +1,7 @@
 {
   "windows": [
     {
-      "url": "https://weread.qq.com",
+      "url": "https://weread.qq.com/",
       "url_type": "web",
       "hide_title_bar": true,
       "fullscreen": false,
@@ -9,8 +9,10 @@
       "height": 780,
       "resizable": true,
       "always_on_top": false,
+      "dark_mode": false,
       "activation_shortcut": "",
-      "disabled_web_shortcuts": false
+      "disabled_web_shortcuts": false,
+      "hide_on_close": true
     }
   ],
   "user_agent": {
@@ -23,5 +25,7 @@
     "linux": true,
     "windows": true
   },
-  "inject": []
+  "system_tray_path": "icons/icon.png",
+  "inject": [],
+  "proxy_url": ""
 }

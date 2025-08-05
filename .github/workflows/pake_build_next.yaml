@@ -17,8 +17,8 @@ jobs:
       - name: Get Apps Config
         id: read-apps-config
         run: |
-          echo "apps_name=$(jq -c '[.apps| .[] | .name]' apps.conf.json)" >> $GITHUB_OUTPUT
-          echo "apps_config=$(jq -c '[.apps | .[]]' apps.conf.json)" >> $GITHUB_OUTPUT
+          echo "apps_name=$(jq -c '[.[] | .name]' default_app_list.json)" >> $GITHUB_OUTPUT
+          echo "apps_config=$(jq -c '[.[]]' default_app_list.json)" >> $GITHUB_OUTPUT
 
   trigger_build:
     needs: read_apps_config
