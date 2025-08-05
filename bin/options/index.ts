@@ -13,8 +13,8 @@ function resolveAppName(name: string, platform: NodeJS.Platform): string {
 
 function isValidName(name: string, platform: NodeJS.Platform): boolean {
   const platformRegexMapping: PlatformMap = {
-    linux: /^[a-z0-9]+(-[a-z0-9]+)*$/,
-    default: /^[a-zA-Z0-9]+([-a-zA-Z0-9])*$/,
+    linux: /^[a-z0-9][a-z0-9-]*$/,
+    default: /^[a-zA-Z0-9][a-zA-Z0-9- ]*$/,
   };
   const reg = platformRegexMapping[platform] || platformRegexMapping.default;
   return !!name && reg.test(name);
@@ -34,8 +34,8 @@ export default async function handleOptions(options: PakeCliOptions, url: string
   }
 
   if (!isValidName(name, platform)) {
-    const LINUX_NAME_ERROR = `✕ name should only include lowercase letters, numbers, and dashes, and must contain at least one lowercase letter. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`;
-    const DEFAULT_NAME_ERROR = `✕ Name should only include letters and numbers, and dashes (dashes must not at the beginning), and must contain at least one letter. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read.`;
+    const LINUX_NAME_ERROR = `✕ Name should only include lowercase letters, numbers, and dashes (not leading dashes), and must contain at least one lowercase letter or number. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`;
+    const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dashes, and spaces (not leading dashes and spaces), and must contain at least one letter or number. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read.`;
     const errorMsg = platform === 'linux' ? LINUX_NAME_ERROR : DEFAULT_NAME_ERROR;
     logger.error(errorMsg);
     if (isActions) {
