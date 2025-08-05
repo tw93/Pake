@@ -40,7 +40,7 @@ pub fn get_data_dir(app: &AppHandle, package_name: String) -> PathBuf {
 }
 
 pub fn show_toast(window: &WebviewWindow, message: &str) {
-    let script = format!(r#"pakeToast("{}");"#, message);
+    let script = format!(r#"pakeToast("{message}");"#);
     window.eval(&script).unwrap();
 }
 
@@ -98,15 +98,15 @@ pub fn check_file_or_append(file_path: &str) -> String {
             Some(index) if file_stem[index + 1..].parse::<u32>().is_ok() => {
                 let base_name = &file_stem[..index];
                 counter = file_stem[index + 1..].parse::<u32>().unwrap() + 1;
-                format!("{}-{}", base_name, counter)
+                format!("{base_name}-{counter}")
             }
             _ => {
                 counter += 1;
-                format!("{}-{}", file_stem, counter)
+                format!("{file_stem}-{counter}")
             }
         };
 
-        new_path = parent_dir.join(format!("{}.{}", new_file_stem, extension));
+        new_path = parent_dir.join(format!("{new_file_stem}.{extension}"));
     }
 
     new_path.to_string_lossy().into_owned()
