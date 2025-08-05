@@ -41,7 +41,7 @@
     "cli": "rollup -c rollup.config.js --watch",
     "cli:dev": "cross-env NODE_ENV=development rollup -c rollup.config.js -w",
     "cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
-    "format": "npx prettier --write . --ignore-unknown && cd src-tauri && cargo fmt",
+    "format": "npx prettier --write . --ignore-unknown && cd src-tauri && cargo fmt --verbose",
     "prepublishOnly": "npm run cli:build"
   },
   "type": "module",
