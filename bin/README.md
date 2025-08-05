@@ -208,6 +208,14 @@ Specify the system tray icon. This is only effective when the system tray is ena
 --system-tray-icon <path>
 ```
 
+#### [hide-on-close]
+
+Hide the window instead of exiting when clicking the close button. Default is `true`. When enabled, the application will be minimized to the system tray (if available) or hidden when the close button is clicked, rather than actually closing the application.
+
+```shell
+--hide-on-close
+```
+
 #### [installer-language]
 
 Set the Windows Installer language. Options include `zh-CN`, `ja-JP`, More at [Tauri Document](https://tauri.app/distribute/windows-installer/#internationalization). Default is `en-US`.

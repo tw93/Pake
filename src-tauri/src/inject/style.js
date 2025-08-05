@@ -284,6 +284,14 @@ window.addEventListener('DOMContentLoaded', _event => {
       margin: 0;
       display: inline;
     }
+
+    .AppHeader .AppHeader-globalBar.js-global-bar {
+      padding-top: 35px;
+    }
+
+    .header-overlay .header-logged-out {
+      margin-top: 15px;
+    }
   `;
   const contentStyleElement = document.createElement('style');
   contentStyleElement.innerHTML = contentCSS;

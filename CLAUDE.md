@@ -91,6 +91,7 @@ npm run analyze
 
 - **Window Management**: `src-tauri/src/app/window.rs` - Window creation, sizing, title bar handling
 - **System Tray**: `src-tauri/src/app/setup.rs` - Cross-platform system tray integration
+- **Window Close Behavior**: `src-tauri/src/lib.rs` - Configurable close behavior (hide vs exit)
 - **Global Shortcuts**: Activation shortcuts for bringing app to foreground
 - **Web Integration**: Custom user agents, proxy support, CSS/JS injection
 - **Multi-platform**: Builds for macOS (Intel/M1), Windows, Linux (deb/appimage/rpm)

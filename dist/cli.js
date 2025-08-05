@@ -124,7 +124,7 @@ var packageJson = {
 
 var windows = [
 	{
-		url: "https://weread.qq.com",
+		url: "https://weread.qq.com/",
 		url_type: "web",
 		hide_title_bar: true,
 		fullscreen: false,
@@ -147,6 +147,7 @@ var system_tray = {
 	linux: true,
 	windows: true
 };
+var hide_on_close = true;
 var system_tray_path = "icons/icon.png";
 var inject = [
 ];
@@ -155,6 +156,7 @@ var pakeConf = {
 	windows: windows,
 	user_agent: user_agent,
 	system_tray: system_tray,
+	hide_on_close: hide_on_close,
 	system_tray_path: system_tray_path,
 	inject: inject,
 	proxy_url: proxy_url
@@ -430,7 +432,7 @@ async function combineFiles(files, output) {
 }
 
 async function mergeConfig(url, options, tauriConf) {
-    const { width, height, fullscreen, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, proxyUrl, installerLanguage, } = options;
+    const { width, height, fullscreen, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, } = options;
     const { platform } = process;
     // Set Windows parameters.
     const tauriConfWindowOptions = {
@@ -488,6 +490,7 @@ async function mergeConfig(url, options, tauriConf) {
         tauriConf.pake.user_agent[currentPlatform] = userAgent;
     }
     tauriConf.pake.system_tray[currentPlatform] = showSystemTray;
+    tauriConf.pake.hide_on_close = hideOnClose;
     // Processing targets are currently only open to Linux.
     if (platform === 'linux') {
         delete tauriConf.bundle.linux.deb.files;
@@ -800,6 +803,7 @@ const DEFAULT_PAKE_OPTIONS = {
     debug: false,
     inject: [],
     installerLanguage: 'en-US',
+    hideOnClose: true,
 };
 
 async function checkUpdateTips() {
@@ -994,6 +998,7 @@ program
     .addOption(new Option('--activation-shortcut <string>', 'Shortcut key to active App').default(DEFAULT_PAKE_OPTIONS.activationShortcut).hideHelp())
     .addOption(new Option('--show-system-tray', 'Show system tray in app').default(DEFAULT_PAKE_OPTIONS.showSystemTray).hideHelp())
     .addOption(new Option('--system-tray-icon <string>', 'Custom system tray icon').default(DEFAULT_PAKE_OPTIONS.systemTrayIcon).hideHelp())
+    .addOption(new Option('--hide-on-close', 'Hide window on close instead of exiting').default(DEFAULT_PAKE_OPTIONS.hideOnClose).hideHelp())
     .addOption(new Option('--installer-language <string>', 'Installer language').default(DEFAULT_PAKE_OPTIONS.installerLanguage).hideHelp())
     .version(packageJson.version, '-v, --version', 'Output the current version')
     .action(async (url, options) => {

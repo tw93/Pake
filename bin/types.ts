@@ -68,6 +68,9 @@ export interface PakeCliOptions {
 
   // Installer language, valid for Windows users, default is en-US
   installerLanguage: string;
+
+  // Hide window on close instead of exiting, default false
+  hideOnClose: boolean;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {

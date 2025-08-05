@@ -208,6 +208,14 @@ pake [url] [options]
 --system-tray-icon <path>
 ```
 
+#### [hide-on-close]
+
+设置点击关闭按钮时隐藏窗口而不是退出应用。默认为 `true`。启用后，点击关闭按钮时应用会最小化到系统托盘（如果可用）或隐藏窗口，而不是直接关闭应用程序。
+
+```shell
+--hide-on-close
+```
+
 #### [installer-language]
 
 设置 Windows 安装包语言。支持 `zh-CN`、`ja-JP`，更多在 [Tauri 文档](https://tauri.app/distribute/windows-installer/#internationalization)。默认为 `en-US`。

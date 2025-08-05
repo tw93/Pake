@@ -44,6 +44,7 @@ program
   )
   .addOption(new Option('--show-system-tray', 'Show system tray in app').default(DEFAULT.showSystemTray).hideHelp())
   .addOption(new Option('--system-tray-icon <string>', 'Custom system tray icon').default(DEFAULT.systemTrayIcon).hideHelp())
+  .addOption(new Option('--hide-on-close', 'Hide window on close instead of exiting').default(DEFAULT.hideOnClose).hideHelp())
   .addOption(new Option('--installer-language <string>', 'Installer language').default(DEFAULT.installerLanguage).hideHelp())
   .version(packageJson.version, '-v, --version', 'Output the current version')
   .action(async (url: string, options: PakeCliOptions) => {
