@@ -23,232 +23,233 @@ var name = "pake-cli";
 var version$1 = "3.1.2";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
-  node: ">=16.0.0"
+	node: ">=16.0.0"
 };
 var bin = {
-  pake: "./cli.js"
+	pake: "./cli.js"
 };
 var repository = {
-  type: "git",
-  url: "https://github.com/tw93/pake.git"
+	type: "git",
+	url: "https://github.com/tw93/pake.git"
 };
 var author = {
-  name: "Tw93",
-  email: "tw93@qq.com"
+	name: "Tw93",
+	email: "tw93@qq.com"
 };
 var keywords = [
-  "pake",
-  "pake-cli",
-  "rust",
-  "tauri",
-  "no-electron",
-  "productivity"
+	"pake",
+	"pake-cli",
+	"rust",
+	"tauri",
+	"no-electron",
+	"productivity"
 ];
 var files = [
-  "dist",
-  "src-tauri",
-  "cli.js"
+	"dist",
+	"src-tauri",
+	"cli.js"
 ];
 var scripts = {
-  start: "npm run dev",
-  dev: "npm run tauri dev",
-  build: "npm run tauri build --release",
-  "build:debug": "npm run tauri build -- --debug",
-  "build:mac": "npm run tauri build -- --target universal-apple-darwin",
-  "build:config": "chmod +x script/app_config.mjs && node script/app_config.mjs",
-  analyze: "cd src-tauri && cargo bloat --release --crates",
-  tauri: "tauri",
-  cli: "rollup -c rollup.config.js --watch",
-  "cli:dev": "cross-env NODE_ENV=development rollup -c rollup.config.js -w",
-  "cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
-  prepublishOnly: "npm run cli:build"
+	start: "npm run dev",
+	dev: "npm run tauri dev",
+	build: "npm run tauri build --release",
+	"build:debug": "npm run tauri build -- --debug",
+	"build:mac": "npm run tauri build -- --target universal-apple-darwin",
+	"build:config": "chmod +x script/app_config.mjs && node script/app_config.mjs",
+	analyze: "cd src-tauri && cargo bloat --release --crates",
+	tauri: "tauri",
+	cli: "rollup -c rollup.config.js --watch",
+	"cli:dev": "cross-env NODE_ENV=development rollup -c rollup.config.js -w",
+	"cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
+	format: "npx prettier --write . --ignore-unknown && cd src-tauri && cargo fmt --verbose",
+	prepublishOnly: "npm run cli:build"
 };
 var type = "module";
 var exports = "./dist/pake.js";
 var license = "MIT";
 var dependencies = {
-  "@tauri-apps/api": "^2.2.0",
-  "@tauri-apps/cli": "^2.2.5",
-  axios: "^1.7.9",
-  chalk: "^5.4.1",
-  commander: "^13.1.0",
-  execa: "^9.5.2",
-  "file-type": "^20.0.0",
-  "fs-extra": "^11.3.0",
-  "is-url": "^1.2.4",
-  loglevel: "^1.9.2",
-  ora: "^8.1.1",
-  prompts: "^2.4.2",
-  psl: "^1.15.0",
-  "tmp-promise": "^3.0.3",
-  "update-notifier": "^7.3.1"
+	"@tauri-apps/api": "^2.2.0",
+	"@tauri-apps/cli": "^2.2.5",
+	axios: "^1.7.9",
+	chalk: "^5.4.1",
+	commander: "^13.1.0",
+	execa: "^9.5.2",
+	"file-type": "^20.0.0",
+	"fs-extra": "^11.3.0",
+	"is-url": "^1.2.4",
+	loglevel: "^1.9.2",
+	ora: "^8.1.1",
+	prompts: "^2.4.2",
+	psl: "^1.15.0",
+	"tmp-promise": "^3.0.3",
+	"update-notifier": "^7.3.1"
 };
 var devDependencies = {
-  "@rollup/plugin-alias": "^5.1.1",
-  "@rollup/plugin-commonjs": "^28.0.2",
-  "@rollup/plugin-json": "^6.1.0",
-  "@rollup/plugin-replace": "^6.0.2",
-  "@rollup/plugin-terser": "^0.4.4",
-  "@types/fs-extra": "^11.0.4",
-  "@types/is-url": "^1.2.32",
-  "@types/node": "^22.10.8",
-  "@types/page-icon": "^0.3.6",
-  "@types/prompts": "^2.4.9",
-  "@types/psl": "^1.1.3",
-  "@types/tmp": "^0.2.6",
-  "@types/update-notifier": "^6.0.8",
-  "app-root-path": "^3.1.0",
-  "cross-env": "^7.0.3",
-  rollup: "^4.31.0",
-  "rollup-plugin-typescript2": "^0.36.0",
-  tslib: "^2.8.1",
-  typescript: "^5.7.3"
+	"@rollup/plugin-alias": "^5.1.1",
+	"@rollup/plugin-commonjs": "^28.0.2",
+	"@rollup/plugin-json": "^6.1.0",
+	"@rollup/plugin-replace": "^6.0.2",
+	"@rollup/plugin-terser": "^0.4.4",
+	"@types/fs-extra": "^11.0.4",
+	"@types/is-url": "^1.2.32",
+	"@types/node": "^22.10.8",
+	"@types/page-icon": "^0.3.6",
+	"@types/prompts": "^2.4.9",
+	"@types/psl": "^1.1.3",
+	"@types/tmp": "^0.2.6",
+	"@types/update-notifier": "^6.0.8",
+	"app-root-path": "^3.1.0",
+	"cross-env": "^7.0.3",
+	rollup: "^4.31.0",
+	"rollup-plugin-typescript2": "^0.36.0",
+	tslib: "^2.8.1",
+	typescript: "^5.7.3"
 };
 var packageJson = {
-  name: name,
-  version: version$1,
-  description: description,
-  engines: engines,
-  bin: bin,
-  repository: repository,
-  author: author,
-  keywords: keywords,
-  files: files,
-  scripts: scripts,
-  type: type,
-  exports: exports,
-  license: license,
-  dependencies: dependencies,
-  devDependencies: devDependencies
+	name: name,
+	version: version$1,
+	description: description,
+	engines: engines,
+	bin: bin,
+	repository: repository,
+	author: author,
+	keywords: keywords,
+	files: files,
+	scripts: scripts,
+	type: type,
+	exports: exports,
+	license: license,
+	dependencies: dependencies,
+	devDependencies: devDependencies
 };
 
 var windows = [
-  {
-    url: "https://weread.qq.com/",
-    url_type: "web",
-    hide_title_bar: true,
-    fullscreen: false,
-    width: 1200,
-    height: 780,
-    resizable: true,
-    always_on_top: false,
-    dark_mode: false,
-    activation_shortcut: "",
-    disabled_web_shortcuts: false,
-    hide_on_close: true
-  }
+	{
+		url: "https://weread.qq.com/",
+		url_type: "web",
+		hide_title_bar: true,
+		fullscreen: false,
+		width: 1200,
+		height: 780,
+		resizable: true,
+		always_on_top: false,
+		dark_mode: false,
+		activation_shortcut: "",
+		disabled_web_shortcuts: false,
+		hide_on_close: true
+	}
 ];
 var user_agent = {
-  macos: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15",
-  linux: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
-  windows: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
+	macos: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15",
+	linux: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+	windows: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
 };
 var system_tray = {
-  macos: false,
-  linux: true,
-  windows: true
+	macos: false,
+	linux: true,
+	windows: true
 };
 var system_tray_path = "icons/icon.png";
 var inject = [
 ];
 var proxy_url = "";
 var pakeConf = {
-  windows: windows,
-  user_agent: user_agent,
-  system_tray: system_tray,
-  system_tray_path: system_tray_path,
-  inject: inject,
-  proxy_url: proxy_url
+	windows: windows,
+	user_agent: user_agent,
+	system_tray: system_tray,
+	system_tray_path: system_tray_path,
+	inject: inject,
+	proxy_url: proxy_url
 };
 
 var productName$1 = "WeRead";
 var identifier = "com.pake.weread";
 var version = "1.0.0";
 var app = {
-  withGlobalTauri: true,
-  trayIcon: {
-    iconPath: "png/weread_512.png",
-    iconAsTemplate: false,
-    id: "pake-tray"
-  }
+	withGlobalTauri: true,
+	trayIcon: {
+		iconPath: "png/weread_512.png",
+		iconAsTemplate: false,
+		id: "pake-tray"
+	}
 };
 var build = {
-  frontendDist: "../dist"
+	frontendDist: "../dist"
 };
 var CommonConf = {
-  productName: productName$1,
-  identifier: identifier,
-  version: version,
-  app: app,
-  build: build
+	productName: productName$1,
+	identifier: identifier,
+	version: version,
+	app: app,
+	build: build
 };
 
 var bundle$2 = {
-  icon: [
-    "png/weread_256.ico",
-    "png/weread_32.ico"
-  ],
-  active: true,
-  resources: [
-    "png/weread_32.ico"
-  ],
-  targets: [
-    "msi"
-  ],
-  windows: {
-    digestAlgorithm: "sha256",
-    wix: {
-      language: [
-        "en-US"
-      ],
-      template: "assets/main.wxs"
-    }
-  }
+	icon: [
+		"png/weread_256.ico",
+		"png/weread_32.ico"
+	],
+	active: true,
+	resources: [
+		"png/weread_32.ico"
+	],
+	targets: [
+		"msi"
+	],
+	windows: {
+		digestAlgorithm: "sha256",
+		wix: {
+			language: [
+				"en-US"
+			],
+			template: "assets/main.wxs"
+		}
+	}
 };
 var WinConf = {
-  bundle: bundle$2
+	bundle: bundle$2
 };
 
 var bundle$1 = {
-  icon: [
-    "icons/weread.icns"
-  ],
-  active: true,
-  macOS: {
-  },
-  targets: [
-    "dmg"
-  ]
+	icon: [
+		"icons/weread.icns"
+	],
+	active: true,
+	macOS: {
+	},
+	targets: [
+		"dmg"
+	]
 };
 var MacConf = {
-  bundle: bundle$1
+	bundle: bundle$1
 };
 
 var productName = "we-read";
 var bundle = {
-  icon: [
-    "png/weread_512.png"
-  ],
-  active: true,
-  linux: {
-    deb: {
-      depends: [
-        "curl",
-        "wget"
-      ],
-      files: {
-        "/usr/share/applications/com-pake-weread.desktop": "assets/com-pake-weread.desktop"
-      }
-    }
-  },
-  targets: [
-    "deb",
-    "appimage"
-  ]
+	icon: [
+		"png/weread_512.png"
+	],
+	active: true,
+	linux: {
+		deb: {
+			depends: [
+				"curl",
+				"wget"
+			],
+			files: {
+				"/usr/share/applications/com-pake-weread.desktop": "assets/com-pake-weread.desktop"
+			}
+		}
+	},
+	targets: [
+		"deb",
+		"appimage"
+	]
 };
 var LinuxConf = {
-  productName: productName,
-  bundle: bundle
+	productName: productName,
+	bundle: bundle
 };
 
 const platformConfigs = {
@@ -274,7 +275,11 @@ let tauriConfig = {
 
 // Generates an identifier based on the given URL.
 function getIdentifier(url) {
-    const postFixHash = crypto.createHash('md5').update(url).digest('hex').substring(0, 6);
+    const postFixHash = crypto
+        .createHash('md5')
+        .update(url)
+        .digest('hex')
+        .substring(0, 6);
     return `com.pake.${postFixHash}`;
 }
 async function promptText(message, initial) {
@@ -316,7 +321,7 @@ async function shellExec(command) {
     try {
         const { exitCode } = await execa(command, {
             cwd: npmDirectory,
-            stdio: 'inherit'
+            stdio: 'inherit',
         });
         return exitCode;
     }
@@ -327,19 +332,19 @@ async function shellExec(command) {
 
 const logger = {
     info(...msg) {
-        log.info(...msg.map(m => chalk.white(m)));
+        log.info(...msg.map((m) => chalk.white(m)));
     },
     debug(...msg) {
         log.debug(...msg);
     },
     error(...msg) {
-        log.error(...msg.map(m => chalk.red(m)));
+        log.error(...msg.map((m) => chalk.red(m)));
     },
     warn(...msg) {
-        log.info(...msg.map(m => chalk.yellow(m)));
+        log.info(...msg.map((m) => chalk.yellow(m)));
     },
     success(...msg) {
-        log.info(...msg.map(m => chalk.green(m)));
+        log.info(...msg.map((m) => chalk.green(m)));
     },
 };
 
@@ -350,12 +355,12 @@ const ping = async (host) => {
     const start = new Date();
     // Prevent timeouts from affecting user experience.
     const requestPromise = new Promise((resolve, reject) => {
-        const req = http.get(`http://${ip.address}`, res => {
+        const req = http.get(`http://${ip.address}`, (res) => {
             const delay = new Date().getTime() - start.getTime();
             res.resume();
             resolve(delay);
         });
-        req.on('error', err => {
+        req.on('error', (err) => {
             reject(err);
         });
     });
@@ -417,14 +422,16 @@ function checkRustInstalled() {
 }
 
 async function combineFiles(files, output) {
-    const contents = files.map(file => {
+    const contents = files.map((file) => {
         const fileContent = fs.readFileSync(file);
         if (file.endsWith('.css')) {
             return ("window.addEventListener('DOMContentLoaded', (_event) => { const css = `" +
                 fileContent +
                 "`; const style = document.createElement('style'); style.innerHTML = css; document.head.appendChild(style); });");
         }
-        return "window.addEventListener('DOMContentLoaded', (_event) => { " + fileContent + ' });';
+        return ("window.addEventListener('DOMContentLoaded', (_event) => { " +
+            fileContent +
+            ' });');
     });
     fs.writeFileSync(output, contents.join('\n'));
     return files;
@@ -472,7 +479,7 @@ async function mergeConfig(url, options, tauriConf) {
             // ignore it, because about_pake.html have be erased.
             // const filesToCopyBack = ['cli.js', 'about_pake.html'];
             const filesToCopyBack = ['cli.js'];
-            await Promise.all(filesToCopyBack.map(file => fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file))));
+            await Promise.all(filesToCopyBack.map((file) => fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file))));
         }
         tauriConf.pake.windows[0].url = fileName;
         tauriConf.pake.windows[0].url_type = 'local';
@@ -576,11 +583,11 @@ async function mergeConfig(url, options, tauriConf) {
     const injectFilePath = path.join(npmDirectory, `src-tauri/src/inject/custom.js`);
     // inject js or css files
     if (inject?.length > 0) {
-        if (!inject.every(item => item.endsWith('.css') || item.endsWith('.js'))) {
+        if (!inject.every((item) => item.endsWith('.css') || item.endsWith('.js'))) {
             logger.error('The injected file must be in either CSS or JS format.');
             return;
         }
-        const files = inject.map(filepath => (path.isAbsolute(filepath) ? filepath : path.join(process.cwd(), filepath)));
+        const files = inject.map((filepath) => path.isAbsolute(filepath) ? filepath : path.join(process.cwd(), filepath));
         tauriConf.pake.inject = files;
         await combineFiles(files, injectFilePath);
     }
@@ -708,7 +715,9 @@ class MacBuilder extends BaseBuilder {
         return `${name}_${tauriConfig.version}_${arch}`;
     }
     getBuildCommand() {
-        return this.options.multiArch ? 'npm run build:mac' : super.getBuildCommand();
+        return this.options.multiArch
+            ? 'npm run build:mac'
+            : super.getBuildCommand();
     }
     getBasePath() {
         return this.options.multiArch
@@ -798,7 +807,7 @@ const DEFAULT_PAKE_OPTIONS = {
     targets: 'deb',
     useLocalFile: false,
     systemTrayIcon: '',
-    proxyUrl: "",
+    proxyUrl: '',
     debug: false,
     inject: [],
     installerLanguage: 'en-US',
@@ -806,7 +815,9 @@ const DEFAULT_PAKE_OPTIONS = {
 };
 
 async function checkUpdateTips() {
-    updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify({ isGlobal: true });
+    updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify({
+        isGlobal: true,
+    });
 }
 
 async function handleIcon(options) {
@@ -831,7 +842,9 @@ async function handleIcon(options) {
 async function downloadIcon(iconUrl) {
     const spinner = getSpinner('Downloading icon...');
     try {
-        const iconResponse = await axios.get(iconUrl, { responseType: 'arraybuffer' });
+        const iconResponse = await axios.get(iconUrl, {
+            responseType: 'arraybuffer',
+        });
         const iconData = await iconResponse.data;
         if (!iconData) {
             return null;
@@ -926,8 +939,8 @@ async function handleOptions(options, url) {
         name = namePrompt || defaultName;
     }
     if (!isValidName(name, platform)) {
-        const LINUX_NAME_ERROR = `✕ Name should only include lowercase letters, numbers, and dashes (not leading dashes), and must contain at least one lowercase letter or number. Examples: com-123-xxx, 123pan, pan123, weread, we-read.`;
-        const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dashes, and spaces (not leading dashes and spaces), and must contain at least one letter or number. Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read.`;
+        const LINUX_NAME_ERROR = `✕ Name should only include lowercase letters, numbers, and dashes (not leading dashes). Examples: com-123-xxx, 123pan, pan123, weread, we-read, 123.`;
+        const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dashes, and spaces (not leading dashes and spaces). Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read, 123.`;
         const errorMsg = platform === 'linux' ? LINUX_NAME_ERROR : DEFAULT_NAME_ERROR;
         logger.error(errorMsg);
         if (isActions) {
@@ -974,7 +987,10 @@ ${green('| |_) / _` | |/ / _ \\')}
 ${green('|  __/ (_| |   <  __/')}  ${yellow('https://github.com/tw93/pake')}
 ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with Rust.')}
 `;
-program.addHelpText('beforeAll', logo).usage(`[url] [options]`).showHelpAfterError();
+program
+    .addHelpText('beforeAll', logo)
+    .usage(`[url] [options]`)
+    .showHelpAfterError();
 program
     .argument('[url]', 'The web URL you want to package', validateUrlInput)
     // Refer to https://github.com/tj/commander.js#custom-option-processing, turn string array into a string connected with custom connectors.
@@ -997,33 +1013,58 @@ program
     if (!val)
         return DEFAULT_PAKE_OPTIONS.inject;
     // Split by comma and trim whitespace, filter out empty strings
-    const files = val.split(',')
-        .map(item => item.trim())
-        .filter(item => item.length > 0);
+    const files = val
+        .split(',')
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0);
     // If previous values exist (from multiple --inject options), merge them
     return previous ? [...previous, ...files] : files;
 }, DEFAULT_PAKE_OPTIONS.inject)
     .option('--debug', 'Debug build and more output', DEFAULT_PAKE_OPTIONS.debug)
-    .addOption(new Option('--proxy-url <url>', 'Proxy URL for all network requests').default(DEFAULT_PAKE_OPTIONS.proxyUrl).hideHelp())
-    .addOption(new Option('--user-agent <string>', 'Custom user agent').default(DEFAULT_PAKE_OPTIONS.userAgent).hideHelp())
-    .addOption(new Option('--targets <string>', 'For Linux, option "deb" or "appimage"').default(DEFAULT_PAKE_OPTIONS.targets).hideHelp())
-    .addOption(new Option('--app-version <string>', 'App version, the same as package.json version').default(DEFAULT_PAKE_OPTIONS.appVersion).hideHelp())
-    .addOption(new Option('--always-on-top', 'Always on the top level').default(DEFAULT_PAKE_OPTIONS.alwaysOnTop).hideHelp())
-    .addOption(new Option('--dark-mode', 'Force Mac app to use dark mode').default(DEFAULT_PAKE_OPTIONS.darkMode).hideHelp())
-    .addOption(new Option('--disabled-web-shortcuts', 'Disabled webPage shortcuts').default(DEFAULT_PAKE_OPTIONS.disabledWebShortcuts).hideHelp())
-    .addOption(new Option('--activation-shortcut <string>', 'Shortcut key to active App').default(DEFAULT_PAKE_OPTIONS.activationShortcut).hideHelp())
-    .addOption(new Option('--show-system-tray', 'Show system tray in app').default(DEFAULT_PAKE_OPTIONS.showSystemTray).hideHelp())
-    .addOption(new Option('--system-tray-icon <string>', 'Custom system tray icon').default(DEFAULT_PAKE_OPTIONS.systemTrayIcon).hideHelp())
-    .addOption(new Option('--hide-on-close', 'Hide window on close instead of exiting').default(DEFAULT_PAKE_OPTIONS.hideOnClose).hideHelp())
-    .addOption(new Option('--installer-language <string>', 'Installer language').default(DEFAULT_PAKE_OPTIONS.installerLanguage).hideHelp())
+    .addOption(new Option('--proxy-url <url>', 'Proxy URL for all network requests')
+    .default(DEFAULT_PAKE_OPTIONS.proxyUrl)
+    .hideHelp())
+    .addOption(new Option('--user-agent <string>', 'Custom user agent')
+    .default(DEFAULT_PAKE_OPTIONS.userAgent)
+    .hideHelp())
+    .addOption(new Option('--targets <string>', 'For Linux, option "deb" or "appimage"')
+    .default(DEFAULT_PAKE_OPTIONS.targets)
+    .hideHelp())
+    .addOption(new Option('--app-version <string>', 'App version, the same as package.json version')
+    .default(DEFAULT_PAKE_OPTIONS.appVersion)
+    .hideHelp())
+    .addOption(new Option('--always-on-top', 'Always on the top level')
+    .default(DEFAULT_PAKE_OPTIONS.alwaysOnTop)
+    .hideHelp())
+    .addOption(new Option('--dark-mode', 'Force Mac app to use dark mode')
+    .default(DEFAULT_PAKE_OPTIONS.darkMode)
+    .hideHelp())
+    .addOption(new Option('--disabled-web-shortcuts', 'Disabled webPage shortcuts')
+    .default(DEFAULT_PAKE_OPTIONS.disabledWebShortcuts)
+    .hideHelp())
+    .addOption(new Option('--activation-shortcut <string>', 'Shortcut key to active App')
+    .default(DEFAULT_PAKE_OPTIONS.activationShortcut)
+    .hideHelp())
+    .addOption(new Option('--show-system-tray', 'Show system tray in app')
+    .default(DEFAULT_PAKE_OPTIONS.showSystemTray)
+    .hideHelp())
+    .addOption(new Option('--system-tray-icon <string>', 'Custom system tray icon')
+    .default(DEFAULT_PAKE_OPTIONS.systemTrayIcon)
+    .hideHelp())
+    .addOption(new Option('--hide-on-close', 'Hide window on close instead of exiting')
+    .default(DEFAULT_PAKE_OPTIONS.hideOnClose)
+    .hideHelp())
+    .addOption(new Option('--installer-language <string>', 'Installer language')
+    .default(DEFAULT_PAKE_OPTIONS.installerLanguage)
+    .hideHelp())
     .version(packageJson.version, '-v, --version', 'Output the current version')
     .action(async (url, options) => {
     await checkUpdateTips();
     if (!url) {
-        program.outputHelp(str => {
+        program.outputHelp((str) => {
             return str
                 .split('\n')
-                .filter(line => !/((-h,|--help)|((-v|-V),|--version))\s+.+$/.test(line))
+                .filter((line) => !/((-h,|--help)|((-v|-V),|--version))\s+.+$/.test(line))
                 .join('\n');
         });
         process.exit(0);
