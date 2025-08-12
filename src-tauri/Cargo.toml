@@ -30,6 +30,7 @@ tauri-plugin-shell = "2.2.1"
 tauri-plugin-single-instance = "2.2.4"
 tauri-plugin-notification = "2.2.2"
 tauri-plugin-localhost = "2"
+tauri-plugin-process = "2.0.0"
 
 [features]
 # this feature is used for development builds from development cli
@@ -40,3 +41,6 @@ default = ["custom-protocol"]
 # this feature is used for production builds where `devPath` points to the filesystem
 # DO NOT remove this
 custom-protocol = ["tauri/custom-protocol"]
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-updater = "2"

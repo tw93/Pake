@@ -1,0 +1,19 @@
+{
+  "version": "v1.0.0",
+  "notes": "Test version",
+  "pub_date": "2025-08-12T19:25:57Z",
+  "platforms": {
+    "darwin-x86_64": {
+      "signature": "rw.65712.GoviewPro_2.0.0_universal",
+      "url": "https://goviewpro.oss-cn-hangzhou.aliyuncs.com/pake/rw.65712.GoviewPro_2.0.0_universal.dmg"
+    },
+    "darwin-aarch64": {
+      "signature": "rw.65712.GoviewPro_2.0.0_universal",
+      "url": "https://goviewpro.oss-cn-hangzhou.aliyuncs.com/pake/rw.65712.GoviewPro_2.0.0_universal.dmg"
+    },
+    "windows-x86_64": {
+      "signature": "Content of app.msi.sig",
+      "url": "https://github.com/username/reponame/releases/download/v1.0.0/app-x64.msi.zip"
+    }
+  }
+}

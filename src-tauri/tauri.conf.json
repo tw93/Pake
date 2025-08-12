@@ -1,7 +1,7 @@
 {
   "productName": "GoviewPro",
   "identifier": "com.pake.GoviewPro",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "app": {
     "withGlobalTauri": true,
     "trayIcon": {
@@ -16,5 +16,16 @@
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:8080"
+  },
+  "bundle": {
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IERCMzJBMkVBOTk1RDc2MkMKUldRc2RsMlo2cUl5MjBrOEsybXdZNjlvb1hZTHdiQlZFQU85b2NDZjNiSjVhcWpPdlRkRFovK1gK%",
+      "endpoints": [
+        "https://goviewpro.oss-cn-hangzhou.aliyuncs.com/pake/latest.json"
+      ]
+    }
   }
 }

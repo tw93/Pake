@@ -20,7 +20,8 @@ npm run dev
 
 # 将前端项目打包到 dist 目录 , 并将 dist 目录复制到 PakePro 项目的 根目录.
 # Package the front-end project into the dist directory and copy the dist directory to the root directory of the PakePro project.
-npm run build
+npm run tauri build -- --target x86_64-pc-windows-msvc
+npm run tauri build -- --target universal-apple-darwin  
 ```
 
 ## 项目修改 Project modification

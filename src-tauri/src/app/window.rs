@@ -1,7 +1,7 @@
 use crate::app::config::PakeConfig;
 use crate::util::get_data_dir;
 // use std::{path::PathBuf, str::FromStr};
-use std::{str::FromStr};
+use std::str::FromStr;
 use tauri::{App, Config, Url, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 
 #[cfg(target_os = "macos")]
@@ -28,7 +28,7 @@ pub fn set_window(
     //     "local" => WebviewUrl::App(PathBuf::from(&window_config.url)),
     //     _ => panic!("url type can only be web or local"),
     // };
-    
+
     // 启用本地服务
     let dev_url = tauri_config.clone().build.dev_url;
     let url = if let Some(dev_url) = dev_url {
