@@ -22,7 +22,16 @@ program.addHelpText('beforeAll', logo).usage(`[url] [options]`).showHelpAfterErr
 
 program
   .argument('[url]', 'The web URL you want to package', validateUrlInput)
-  .option('--name <string>', 'Application name')
+  // Refer to https://github.com/tj/commander.js#custom-option-processing, turn string array into a string connected with custom connectors.
+  // If the platform is Linux, use `-` as the connector, and convert all characters to lowercase.
+  // For example, Google Translate will become google-translate.
+  .option('--name <string...>', 'Application name', (value, previous) => {
+    const platform = process.platform
+    const connector = platform === 'linux' ? '-' : ' '
+    const name = previous === undefined ? value : `${previous}${connector}${value}`
+    
+    return platform === 'linux' ? name.toLowerCase() : name
+  })
   .option('--icon <string>', 'Application icon', DEFAULT.icon)
   .option('--width <number>', 'Window width', validateNumberInput, DEFAULT.width)
   .option('--height <number>', 'Window height', validateNumberInput, DEFAULT.height)
@@ -30,7 +39,12 @@ program
   .option('--fullscreen', 'Start in full screen', DEFAULT.fullscreen)
   .option('--hide-title-bar', 'For Mac, hide title bar', DEFAULT.hideTitleBar)
   .option('--multi-arch', 'For Mac, both Intel and M1', DEFAULT.multiArch)
-  .option('--inject <url...>', 'Injection of .js or .css files', DEFAULT.inject)
+  .option(
+    '--inject <./style.css,./script.js,...>',
+    'Injection of .js or .css files',
+    (val, previous) => (val ? val.split(',').map(item => item.trim()) : DEFAULT.inject),
+    DEFAULT.inject,
+  )
   .option('--debug', 'Debug build and more output', DEFAULT.debug)
   .addOption(new Option('--proxy-url <url>', 'Proxy URL for all network requests').default(DEFAULT_PAKE_OPTIONS.proxyUrl).hideHelp())
   .addOption(new Option('--user-agent <string>', 'Custom user agent').default(DEFAULT.userAgent).hideHelp())
