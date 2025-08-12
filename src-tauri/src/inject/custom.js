@@ -11,24 +11,24 @@ window.addEventListener('DOMContentLoaded', async _event => {
     let downloaded = 0;
     let contentLength = 0;
     // alternatively we could also call update.download() and update.install() separately
-    // await update.downloadAndInstall((event) => {
-    //   console.log(event)
-    //   switch (event.event) {
-    //     case 'Started':
-    //       contentLength = event.data.contentLength;
-    //       console.log(`started downloading ${event.data.contentLength} bytes`);
-    //       break;
-    //     case 'Progress':
-    //       downloaded += event.data.chunkLength;
-    //       console.log(`downloaded ${downloaded} from ${contentLength}`);
-    //       break;
-    //     case 'Finished':
-    //       console.log('download finished');
-    //       break;
-    //   }
-    // });
+    await update.downloadAndInstall((event) => {
+      console.log(event)
+      switch (event.event) {
+        case 'Started':
+          contentLength = event.data.contentLength;
+          console.log(`started downloading ${event.data.contentLength} bytes`);
+          break;
+        case 'Progress':
+          downloaded += event.data.chunkLength;
+          console.log(`downloaded ${downloaded} from ${contentLength}`);
+          break;
+        case 'Finished':
+          console.log('download finished');
+          break;
+      }
+    });
 
-    // console.log('update installed');
-    // await process.relaunch();
+    console.log('update installed');
+    await process.relaunch();
   }
 });
