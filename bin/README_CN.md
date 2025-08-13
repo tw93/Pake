@@ -286,8 +286,8 @@ pake [url] [options]
 ```typescript
 export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
   ...DEFAULT_PAKE_OPTIONS,
-  url: "https://weread.qq.com",
-  name: "Weread",
+  url: "https://weekly.tw93.fun/",
+  name: "Weekly",
 };
 ```
 

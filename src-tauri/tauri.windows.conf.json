@@ -1,8 +1,8 @@
 {
   "bundle": {
-    "icon": ["png/weread_256.ico", "png/weread_32.ico"],
+    "icon": ["png/weekly_256.ico", "png/weekly_32.ico"],
     "active": true,
-    "resources": ["png/weread_32.ico"],
+    "resources": ["png/weekly_32.ico"],
     "targets": ["msi"],
     "windows": {
       "digestAlgorithm": "sha256",

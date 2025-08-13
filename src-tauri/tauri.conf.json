@@ -1,11 +1,11 @@
 {
-  "productName": "WeRead",
-  "identifier": "com.pake.weread",
+  "productName": "Weekly",
+  "identifier": "com.pake.weekly",
   "version": "1.0.0",
   "app": {
     "withGlobalTauri": true,
     "trayIcon": {
-      "iconPath": "png/weread_512.png",
+      "iconPath": "png/weekly_512.png",
       "iconAsTemplate": false,
       "id": "pake-tray"
     }

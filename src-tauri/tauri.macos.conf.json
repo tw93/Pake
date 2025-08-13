@@ -1,6 +1,6 @@
 {
   "bundle": {
-    "icon": ["icons/weread.icns"],
+    "icon": ["icons/weekly.icns"],
     "active": true,
     "macOS": {},
     "targets": ["dmg"]
