@@ -2,7 +2,7 @@
 
 ## 安装
 
-请确保您的 Node.js 版本为 22 或更高版本（例如 22.11.0）。*注意：较旧的版本 ≥16.0.0 也可能可以工作。* 请避免使用 `sudo` 进行安装。如果 npm 报告权限问题，请参考 [如何在不使用 sudo 的情况下修复 npm 报错](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo)。
+请确保您的 Node.js 版本为 22 或更高版本（例如 22.11.0）。_注意：较旧的版本 ≥16.0.0 也可能可以工作。_ 请避免使用 `sudo` 进行安装。如果 npm 报告权限问题，请参考 [如何在不使用 sudo 的情况下修复 npm 报错](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo)。
 
 ```bash
 npm install pake-cli -g

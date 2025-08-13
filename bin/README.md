@@ -2,7 +2,7 @@
 
 ## Installation
 
-Ensure that your Node.js version is 22.0 or higher (e.g., 22.11.0). *Note: Older versions ≥16.0.0 may also work.* Avoid using `sudo` for the installation. If you encounter permission issues with npm, refer to [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo).
+Ensure that your Node.js version is 22.0 or higher (e.g., 22.11.0). _Note: Older versions ≥16.0.0 may also work._ Avoid using `sudo` for the installation. If you encounter permission issues with npm, refer to [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo).
 
 ```bash
 npm install pake-cli -g

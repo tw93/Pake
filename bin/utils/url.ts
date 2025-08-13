@@ -35,6 +35,8 @@ export function normalizeUrl(urlToNormalize: string): string {
     new URL(urlWithProtocol);
     return urlWithProtocol;
   } catch (err) {
-    throw new Error(`Your url "${urlWithProtocol}" is invalid: ${(err as Error).message}`);
+    throw new Error(
+      `Your url "${urlWithProtocol}" is invalid: ${(err as Error).message}`,
+    );
   }
 }

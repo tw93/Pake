@@ -80,7 +80,7 @@ npm run build:mac  # macOS universal build
 ### CLI Tool (`bin/`)
 
 - `bin/cli.ts` - Main entry point with Commander.js
-- `bin/builders/` - Platform-specific builders (Mac, Windows, Linux)  
+- `bin/builders/` - Platform-specific builders (Mac, Windows, Linux)
 - `bin/options/` - CLI option processing and validation
 - `bin/helpers/merge.ts` - Configuration merging (name setting at line 55)
 

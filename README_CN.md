@@ -178,7 +178,7 @@ pake https://weekly.tw93.fun --name Weekly --hide-title-bar
 
 ## 定制开发
 
-开始前请确保电脑已经安装了 Rust `>=1.89` 和 Node `>=22 如 22.11.0` 的环境，*注意：较旧的版本（Rust ≥1.78，Node ≥16）也可能可以工作，但推荐使用最新稳定版本。* 此外需参考 [Tauri 文档](https://tauri.app/start/prerequisites/) 快速配置好环境才可以开始使用，假如你太不懂，使用上面的命令行打包会更加合适。
+开始前请确保电脑已经安装了 Rust `>=1.89` 和 Node `>=22 如 22.11.0` 的环境，_注意：较旧的版本（Rust ≥1.78，Node ≥16）也可能可以工作，但推荐使用最新稳定版本。_ 此外需参考 [Tauri 文档](https://tauri.app/start/prerequisites/) 快速配置好环境才可以开始使用，假如你太不懂，使用上面的命令行打包会更加合适。
 
 ```sh
 # 安装依赖
