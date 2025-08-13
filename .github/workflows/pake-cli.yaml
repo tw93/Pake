@@ -14,6 +14,9 @@ on:
       url:
         description: 'URL'
         required: true
+      my_proxy_url:
+        description: 'MY_PROXY_URL'
+        required: false
       name:
         description: 'Name, English, Linux no capital'
         required: true
@@ -125,6 +128,7 @@ jobs:
           node ./script/build_with_pake_cli.js
         env:
           URL: ${{ inputs.url }}
+          MY_PROXY_URL: ${{ inputs.my_proxy_url }}
           NAME: ${{ inputs.name }}
           ICON: ${{ inputs.icon }}
           HEIGHT: ${{ inputs.height }}
