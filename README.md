@@ -316,6 +316,13 @@ Pake's development can not be without these Hackers. They contributed a lot of c
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/vaddisrinivas">
+            <img src="https://avatars.githubusercontent.com/u/38348871?v=4" width="90;" alt="vaddisrinivas"/>
+            <br />
+            <sub><b>Srinivas Vaddi</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/QingZ11">
             <img src="https://avatars.githubusercontent.com/u/38887077?v=4" width="90;" alt="QingZ11"/>
             <br />
@@ -349,15 +356,15 @@ Pake's development can not be without these Hackers. They contributed a lot of c
             <br />
             <sub><b>Kieran</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/exposir">
             <img src="https://avatars.githubusercontent.com/u/33340988?v=4" width="90;" alt="exposir"/>
             <br />
             <sub><b>孟世博</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/2nthony">
             <img src="https://avatars.githubusercontent.com/u/19513289?v=4" width="90;" alt="2nthony"/>
@@ -399,15 +406,15 @@ Pake's development can not be without these Hackers. They contributed a lot of c
             <br />
             <sub><b>Dengju Deng</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/Fechin">
             <img src="https://avatars.githubusercontent.com/u/2541482?v=4" width="90;" alt="Fechin"/>
             <br />
             <sub><b>Fechin</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/ImgBotApp">
             <img src="https://avatars.githubusercontent.com/u/31427850?v=4" width="90;" alt="ImgBotApp"/>
@@ -449,15 +456,15 @@ Pake's development can not be without these Hackers. They contributed a lot of c
             <br />
             <sub><b>Null</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/geekvest">
             <img src="https://avatars.githubusercontent.com/u/126322776?v=4" width="90;" alt="geekvest"/>
             <br />
             <sub><b>Null</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/houhoz">
             <img src="https://avatars.githubusercontent.com/u/19684376?v=4" width="90;" alt="houhoz"/>
