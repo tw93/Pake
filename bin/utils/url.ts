@@ -1,5 +1,4 @@
 import * as psl from 'psl';
-import isUrl from 'is-url';
 
 // Extracts the domain from a given URL.
 export function getDomain(inputUrl: string): string | null {
@@ -32,10 +31,10 @@ export function appendProtocol(inputUrl: string): string {
 // Normalizes the URL by ensuring it has a protocol and is valid.
 export function normalizeUrl(urlToNormalize: string): string {
   const urlWithProtocol = appendProtocol(urlToNormalize);
-
-  if (isUrl(urlWithProtocol)) {
+  try {
+    new URL(urlWithProtocol);
     return urlWithProtocol;
-  } else {
-    throw new Error(`Your url "${urlWithProtocol}" is invalid`);
+  } catch (err) {
+    throw new Error(`Your url "${urlWithProtocol}" is invalid: ${(err as Error).message}`);
   }
 }
