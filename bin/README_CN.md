@@ -261,10 +261,11 @@ pake [url] [options]
 
 #### [proxy-url]
 
-假如你由于某些缘故需要代理请求，你可以通过 `proxy-url` 选项来设置代理地址。
+为所有网络请求设置代理服务器。支持 HTTP、HTTPS 和 SOCKS5。
 
 ```shell
---proxy-url <url>
+--proxy-url http://127.0.0.1:7890
+--proxy-url socks5://127.0.0.1:7891
 ```
 
 #### [debug]

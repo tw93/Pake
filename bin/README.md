@@ -259,10 +259,11 @@ Supports both comma-separated and multiple option formats:
 
 #### [proxy-url]
 
-If you need to proxy requests for some reason, you can set the proxy address using the `proxy-url` option.
+Set proxy server for all network requests. Supports HTTP, HTTPS, and SOCKS5.
 
 ```shell
---proxy-url <url>
+--proxy-url http://127.0.0.1:7890
+--proxy-url socks5://127.0.0.1:7891
 ```
 
 #### [debug]

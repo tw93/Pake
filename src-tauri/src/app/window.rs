@@ -46,9 +46,13 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         .initialization_script(include_str!("../inject/style.js"))
         .initialization_script(include_str!("../inject/custom.js"));
 
+    // Configure proxy if specified
     if !config.proxy_url.is_empty() {
-        window_builder =
-            window_builder.proxy_url(Url::from_str(config.proxy_url.as_str()).unwrap());
+        if let Ok(proxy_url) = Url::from_str(&config.proxy_url) {
+            window_builder = window_builder.proxy_url(proxy_url);
+            #[cfg(debug_assertions)]
+            println!("Proxy configured: {}", config.proxy_url);
+        }
     }
 
     #[cfg(target_os = "macos")]
