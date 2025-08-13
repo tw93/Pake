@@ -79,9 +79,10 @@ npm run build:mac  # macOS universal build
 
 ### CLI Tool (`bin/`)
 
-- `bin/cli.ts` - Main entry point
-- `bin/builders/` - Platform-specific builders
-- `bin/options/` - Configuration processing
+- `bin/cli.ts` - Main entry point with Commander.js
+- `bin/builders/` - Platform-specific builders (Mac, Windows, Linux)  
+- `bin/options/` - CLI option processing and validation
+- `bin/helpers/merge.ts` - Configuration merging (name setting at line 55)
 
 ### Tauri Application (`src-tauri/`)
 

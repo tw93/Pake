@@ -36,6 +36,12 @@ export default async function handleOptions(
     name = namePrompt || defaultName;
   }
 
+  // Handle platform-specific name formatting
+  if (name && platform === 'linux') {
+    // Convert to lowercase and replace spaces with dashes for Linux
+    name = name.toLowerCase().replace(/\s+/g, '-');
+  }
+
   if (!isValidName(name, platform)) {
     const LINUX_NAME_ERROR = `✕ Name should only include lowercase letters, numbers, and dashes (not leading dashes). Examples: com-123-xxx, 123pan, pan123, weread, we-read, 123.`;
     const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dashes, and spaces (not leading dashes and spaces). Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read, 123.`;
