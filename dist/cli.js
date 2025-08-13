@@ -19,7 +19,7 @@ import { fileTypeFromBuffer } from 'file-type';
 import * as psl from 'psl';
 
 var name = "pake-cli";
-var version$1 = "3.2.0-beta";
+var version$1 = "3.2.0-beta1";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
@@ -319,11 +319,14 @@ async function shellExec(command) {
         const { exitCode } = await execa(command, {
             cwd: npmDirectory,
             stdio: 'inherit',
+            shell: true,
         });
         return exitCode;
     }
     catch (error) {
-        throw new Error(`Error occurred while executing command "${command}". Exit code: ${error.exitCode}`);
+        const exitCode = error.exitCode ?? 'unknown';
+        const errorMessage = error.message || 'Unknown error occurred';
+        throw new Error(`Error occurred while executing command "${command}". Exit code: ${exitCode}. Details: ${errorMessage}`);
     }
 }
 
