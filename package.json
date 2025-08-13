@@ -1,6 +1,6 @@
 {
   "name": "pake-cli",
-  "version": "3.1.2",
+  "version": "3.2.0-beta",
   "description": "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。",
   "engines": {
     "node": ">=16.0.0"
@@ -53,6 +53,7 @@
     "axios": "^1.11.0",
     "chalk": "^5.5.0",
     "commander": "^11.1.0",
+    "execa": "^9.6.0",
     "file-type": "^18.7.0",
     "fs-extra": "^11.3.1",
     "loglevel": "^1.9.2",

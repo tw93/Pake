@@ -17,10 +17,9 @@ import axios from 'axios';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
 import * as psl from 'psl';
-import isUrl from 'is-url';
 
 var name = "pake-cli";
-var version$1 = "3.1.2";
+var version$1 = "3.2.0-beta";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
@@ -68,17 +67,16 @@ var type = "module";
 var exports = "./dist/pake.js";
 var license = "MIT";
 var dependencies = {
-	"@tauri-apps/api": "^2.2.0",
-	"@tauri-apps/cli": "^2.2.5",
-	axios: "^1.7.9",
-	chalk: "^5.4.1",
-	commander: "^13.1.0",
-	execa: "^9.5.2",
-	"file-type": "^20.0.0",
-	"fs-extra": "^11.3.0",
-	"is-url": "^1.2.4",
+	"@tauri-apps/api": "^2.7.0",
+	"@tauri-apps/cli": "^2.7.1",
+	axios: "^1.11.0",
+	chalk: "^5.5.0",
+	commander: "^11.1.0",
+	execa: "^9.6.0",
+	"file-type": "^18.7.0",
+	"fs-extra": "^11.3.1",
 	loglevel: "^1.9.2",
-	ora: "^8.1.1",
+	ora: "^8.2.0",
 	prompts: "^2.4.2",
 	psl: "^1.15.0",
 	"tmp-promise": "^3.0.3",
@@ -86,24 +84,23 @@ var dependencies = {
 };
 var devDependencies = {
 	"@rollup/plugin-alias": "^5.1.1",
-	"@rollup/plugin-commonjs": "^28.0.2",
+	"@rollup/plugin-commonjs": "^28.0.6",
 	"@rollup/plugin-json": "^6.1.0",
 	"@rollup/plugin-replace": "^6.0.2",
 	"@rollup/plugin-terser": "^0.4.4",
 	"@types/fs-extra": "^11.0.4",
-	"@types/is-url": "^1.2.32",
-	"@types/node": "^22.10.8",
+	"@types/node": "^20.19.10",
 	"@types/page-icon": "^0.3.6",
 	"@types/prompts": "^2.4.9",
-	"@types/psl": "^1.1.3",
+	"@types/psl": "^1.11.0",
 	"@types/tmp": "^0.2.6",
 	"@types/update-notifier": "^6.0.8",
 	"app-root-path": "^3.1.0",
 	"cross-env": "^7.0.3",
-	rollup: "^4.31.0",
+	rollup: "^4.46.2",
 	"rollup-plugin-typescript2": "^0.36.0",
 	tslib: "^2.8.1",
-	typescript: "^5.7.3"
+	typescript: "^5.9.2"
 };
 var packageJson = {
 	name: name,
@@ -125,7 +122,7 @@ var packageJson = {
 
 var windows = [
 	{
-		url: "https://weread.qq.com/",
+		url: "https://weekly.tw93.fun/",
 		url_type: "web",
 		hide_title_bar: true,
 		fullscreen: false,
@@ -162,13 +159,13 @@ var pakeConf = {
 	proxy_url: proxy_url
 };
 
-var productName$1 = "WeRead";
-var identifier = "com.pake.weread";
+var productName$1 = "Weekly";
+var identifier = "com.pake.weekly";
 var version = "1.0.0";
 var app = {
 	withGlobalTauri: true,
 	trayIcon: {
-		iconPath: "png/weread_512.png",
+		iconPath: "png/weekly_512.png",
 		iconAsTemplate: false,
 		id: "pake-tray"
 	}
@@ -186,12 +183,12 @@ var CommonConf = {
 
 var bundle$2 = {
 	icon: [
-		"png/weread_256.ico",
-		"png/weread_32.ico"
+		"png/weekly_256.ico",
+		"png/weekly_32.ico"
 	],
 	active: true,
 	resources: [
-		"png/weread_32.ico"
+		"png/weekly_32.ico"
 	],
 	targets: [
 		"msi"
@@ -212,7 +209,7 @@ var WinConf = {
 
 var bundle$1 = {
 	icon: [
-		"icons/weread.icns"
+		"icons/weekly.icns"
 	],
 	active: true,
 	macOS: {
@@ -228,7 +225,7 @@ var MacConf = {
 var productName = "we-read";
 var bundle = {
 	icon: [
-		"png/weread_512.png"
+		"png/weekly.png"
 	],
 	active: true,
 	linux: {
@@ -238,7 +235,7 @@ var bundle = {
 				"wget"
 			],
 			files: {
-				"/usr/share/applications/com-pake-weread.desktop": "assets/com-pake-weread.desktop"
+				"/usr/share/applications/com-pake-weekly.desktop": "assets/com-pake-weekly.desktop"
 			}
 		}
 	},
@@ -794,7 +791,6 @@ const DEFAULT_PAKE_OPTIONS = {
     height: 780,
     width: 1200,
     fullscreen: false,
-    resizable: true,
     hideTitleBar: false,
     alwaysOnTop: false,
     appVersion: '1.0.0',
@@ -907,11 +903,12 @@ function appendProtocol(inputUrl) {
 // Normalizes the URL by ensuring it has a protocol and is valid.
 function normalizeUrl(urlToNormalize) {
     const urlWithProtocol = appendProtocol(urlToNormalize);
-    if (isUrl(urlWithProtocol)) {
+    try {
+        new URL(urlWithProtocol);
         return urlWithProtocol;
     }
-    else {
-        throw new Error(`Your url "${urlWithProtocol}" is invalid`);
+    catch (err) {
+        throw new Error(`Your url "${urlWithProtocol}" is invalid: ${err.message}`);
     }
 }
 
@@ -937,6 +934,11 @@ async function handleOptions(options, url) {
         const promptMessage = 'Enter your application name';
         const namePrompt = await promptText(promptMessage, defaultName);
         name = namePrompt || defaultName;
+    }
+    // Handle platform-specific name formatting
+    if (name && platform === 'linux') {
+        // Convert to lowercase and replace spaces with dashes for Linux
+        name = name.toLowerCase().replace(/\s+/g, '-');
     }
     if (!isValidName(name, platform)) {
         const LINUX_NAME_ERROR = `✕ Name should only include lowercase letters, numbers, and dashes (not leading dashes). Examples: com-123-xxx, 123pan, pan123, weread, we-read, 123.`;
@@ -996,12 +998,7 @@ program
     // Refer to https://github.com/tj/commander.js#custom-option-processing, turn string array into a string connected with custom connectors.
     // If the platform is Linux, use `-` as the connector, and convert all characters to lowercase.
     // For example, Google Translate will become google-translate.
-    .option('--name <string...>', 'Application name', (value, previous) => {
-    const platform = process.platform;
-    const connector = platform === 'linux' ? '-' : ' ';
-    const name = previous === undefined ? value : `${previous}${connector}${value}`;
-    return platform === 'linux' ? name.toLowerCase() : name;
-})
+    .option('--name <string>', 'Application name')
     .option('--icon <string>', 'Application icon', DEFAULT_PAKE_OPTIONS.icon)
     .option('--width <number>', 'Window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
     .option('--height <number>', 'Window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
@@ -1021,7 +1018,7 @@ program
     return previous ? [...previous, ...files] : files;
 }, DEFAULT_PAKE_OPTIONS.inject)
     .option('--debug', 'Debug build and more output', DEFAULT_PAKE_OPTIONS.debug)
-    .addOption(new Option('--proxy-url <url>', 'Proxy URL for all network requests')
+    .addOption(new Option('--proxy-url <url>', 'Proxy URL for all network requests (http://, https://, socks5://)')
     .default(DEFAULT_PAKE_OPTIONS.proxyUrl)
     .hideHelp())
     .addOption(new Option('--user-agent <string>', 'Custom user agent')
