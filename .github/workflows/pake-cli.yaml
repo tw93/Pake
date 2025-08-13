@@ -67,7 +67,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
 
       - name: Install Rust for ubuntu-24.04
         if: inputs.platform == 'ubuntu-24.04'

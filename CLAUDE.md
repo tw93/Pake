@@ -2,145 +2,164 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Philosophy
+
+- **Incremental progress over big bangs**: Break complex tasks into manageable stages
+- **Learn from existing code**: Understand patterns before implementing new features
+- **Clear intent over clever code**: Prioritize readability and maintainability
+
 ## Project Overview
 
-Pake is a tool that turns any webpage into a desktop app with Rust, using Tauri framework. It's much lighter than Electron (~5M vs ~100M+) and provides better performance. The project consists of a CLI tool for packaging web apps and the core Tauri application framework.
+Pake transforms any webpage into a lightweight desktop app using Rust and Tauri. It's significantly lighter than Electron (~5M vs ~100M+) with better performance.
 
-## Commands
+**Core Architecture:**
 
-### Development
+- **CLI Tool** (`bin/`): TypeScript-based command interface
+- **Tauri App** (`src-tauri/`): Rust desktop framework
+- **Injection System**: Custom CSS/JS injection for webpages
+
+## Development Workflow
+
+### 1. Planning Phase
+
+Break complex work into 3-5 stages:
+
+1. Understand existing patterns in codebase
+2. Plan implementation approach
+3. Write tests first (when applicable)
+4. Implement minimal working solution
+5. Refactor and optimize
+
+### 2. Implementation Flow
+
+**Understanding First:**
+
+```bash
+# Explore codebase structure
+find src-tauri/src -name "*.rs" | head -10
+grep -r "window_config" src-tauri/src/
+```
+
+**Development Commands:**
 
 ```bash
 # Install dependencies
 npm i
 
-# Local development (right-click to open debug mode)
+# Development with hot reload
 npm run dev
 
-# CLI development with hot reload
+# CLI development
 npm run cli:dev
 
-# Build CLI tools
-npm run cli:build
-```
-
-### Building
-
-```bash
 # Production build
 npm run build
+```
 
-# Debug build
+### 3. Testing and Validation
+
+**Key Testing Commands:**
+
+```bash
+# Debug build for development
 npm run build:debug
 
-# Mac universal build (Intel + M1)
-npm run build:mac
-
-# Generate app configuration
-npm run build:config
+# Multi-platform testing
+npm run build:mac  # macOS universal build
 ```
 
-### CLI Usage
+**Testing Checklist:**
+
+- [ ] Test on target platforms
+- [ ] Verify injection system works
+- [ ] Check system tray integration
+- [ ] Validate window behavior
+
+## Core Components
+
+### CLI Tool (`bin/`)
+
+- `bin/cli.ts` - Main entry point
+- `bin/builders/` - Platform-specific builders
+- `bin/options/` - Configuration processing
+
+### Tauri Application (`src-tauri/`)
+
+- `src/lib.rs` - Application entry point
+- `src/app/` - Core modules (window, tray, shortcuts)
+- `src/inject/` - Web page injection logic
+
+### Key Configuration Files
+
+- `pake.json` - App configuration
+- `tauri.conf.json` - Tauri settings
+- Platform configs: `tauri.{macos,windows,linux}.conf.json`
+
+## Problem-Solving Approach
+
+**When stuck:**
+
+1. **Limit attempts to 3** before stopping to reassess
+2. **Document what doesn't work** and why
+3. **Research alternative approaches** in similar projects
+4. **Question assumptions** - is there a simpler way?
+
+**Example debugging flow:**
 
 ```bash
-# Install CLI globally
-npm install -g pake-cli
+# 1. Check logs
+npm run dev 2>&1 | grep -i error
 
-# Package a webpage
-pake https://example.com --name MyApp --width 1200 --height 800
+# 2. Verify dependencies
+cargo check --manifest-path=src-tauri/Cargo.toml
 
-# Also supports names with spaces (cross-platform compatible)
-# pake https://translate.google.com --name "Google Translate" --hide-title-bar
-
-# Development with custom options
-# Modify DEFAULT_DEV_PAKE_OPTIONS in bin/defaults.ts
-npm run cli:dev
+# 3. Test minimal reproduction
+# Create simple test case isolating the issue
 ```
 
-### Analysis
-
-```bash
-# Analyze binary size
-npm run analyze
-```
-
-## Architecture
-
-### Core Components
-
-1. **CLI Tool** (`bin/`): Node.js/TypeScript-based command-line interface
-
-- `bin/cli.ts` - Main CLI entry point with Commander.js
-- `bin/builders/` - Platform-specific builders (Mac, Windows, Linux)
-- `bin/options/` - CLI option processing and validation
-- `bin/utils/` - Utility functions for URL validation, platform detection
-
-2. **Tauri Application** (`src-tauri/`): Rust-based desktop app framework
-
-- `src-tauri/src/lib.rs` - Main application entry point
-- `src-tauri/src/app/` - Application modules (config, window, system tray, shortcuts)
-- `src-tauri/src/inject/` - JavaScript/CSS injection for web pages
-- `src-tauri/pake.json` - Default app configuration
-
-3. **Build System**: Uses Rollup for CLI bundling and Tauri for app packaging
-
-### Configuration System
-
-- **pake.json**: Main configuration file defining window properties, user agents, system tray settings
-- **tauri.conf.json**: Tauri-specific configuration
-- Platform-specific configs: `tauri.macos.conf.json`, `tauri.windows.conf.json`, `tauri.linux.conf.json`
-
-### Key Features Implementation
-
-- **Window Management**: `src-tauri/src/app/window.rs` - Window creation, sizing, title bar handling
-- **System Tray**: `src-tauri/src/app/setup.rs` - Cross-platform system tray integration
-- **Window Close Behavior**: `src-tauri/src/lib.rs` - Configurable close behavior (hide vs exit)
-- **Global Shortcuts**: Activation shortcuts for bringing app to foreground
-- **Web Integration**: Custom user agents, proxy support, CSS/JS injection
-- **Multi-platform**: Builds for macOS (Intel/M1), Windows, Linux (deb/appimage/rpm)
-
-## File Injection System
-
-The project supports injecting custom CSS/JS files into webpages:
-
-- Files in `src-tauri/src/inject/` contain the injection logic
-- Use `--inject` CLI option to specify custom files
-- Supports both local and remote injection files
-
-## Platform-Specific Notes
+## Platform-Specific Development
 
 ### macOS
 
-- Supports universal builds (Intel + M1) with `--multi-arch`
-- Hide title bar option available with `--hide-title-bar`
+- Universal builds: `--multi-arch` flag
 - Uses `.icns` icons
+- Title bar customization available
 
 ### Windows
 
-- Requires specific build tools and redistributables (see bin/README.md)
+- Requires Visual Studio Build Tools
 - Uses `.ico` icons
-- Supports installer language configuration
+- MSI installer support
 
 ### Linux
 
-- Multiple package formats: deb, appimage, rpm
-- Requires specific system dependencies (libwebkit2gtk, etc.)
+- Multiple formats: deb, AppImage, rpm
+- Requires `libwebkit2gtk` and dependencies
 - Uses `.png` icons
 
-## Development Workflow
+## Quality Standards
 
-1. **CLI Development**: Modify `bin/defaults.ts` for default options, use `npm run cli:dev` for hot reload
-2. **Core App Development**: Work in `src-tauri/src/`, use `npm run dev` for Tauri development
-3. **Testing**: Build with `--debug` flag for development tools and verbose logging
-4. **Multi-platform**: Test builds on respective platforms or use GitHub Actions
+**Code Standards:**
 
-## Branch Management
+- Prefer composition over inheritance
+- Use explicit types over implicit
+- Write self-documenting code
+- Follow existing patterns consistently
 
-- `dev` branch: Active development, feature PRs should target this branch
-- `main` branch: Release branch for tags and publishing
+**Commit Guidelines:**
+
+- Commit working code incrementally
+- Use clear, descriptive messages
+- Never bypass commit hooks
+- Test before committing
+
+## Branch Strategy
+
+- `dev` - Active development, target for PRs
+- `main` - Release branch for stable versions
 
 ## Prerequisites
 
-- Node.js >=16.0.0
-- Rust >=1.78.0 (installed automatically by CLI if missing)
-- Platform-specific build tools (see Tauri prerequisites)
+- Node.js ≥22.0.0 (recommended LTS, older versions ≥16.0.0 may work)
+- Rust ≥1.89.0 (recommended stable, older versions ≥1.78.0 may work)
+- Platform build tools (see CONTRIBUTING.md for details)

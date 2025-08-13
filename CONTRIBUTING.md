@@ -17,6 +17,55 @@ graph LR
   - `main` is the release branch, we will make tag and publish version on this branch.
   - If it is a document modification, it can be submitted to this branch.
 
+## Development Setup
+
+### Prerequisites
+
+- Node.js ≥22.0.0 (recommended LTS, older versions ≥16.0.0 may work)
+- Rust ≥1.89.0 (recommended stable, older versions ≥1.78.0 may work)
+- Platform-specific build tools:
+  - **macOS**: Xcode Command Line Tools (`xcode-select --install`)
+  - **Windows**: Visual Studio Build Tools with MSVC
+  - **Linux**: `build-essential`, `libwebkit2gtk`, system dependencies
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/tw93/Pake.git
+cd Pake
+
+# Install dependencies
+npm install
+
+# Start development
+npm run dev
+```
+
+## Troubleshooting
+
+### macOS 26 Beta Compilation Issues
+
+If you're running macOS 26 Beta and encounter compilation errors related to `mac-notification-sys` or system frameworks (errors about `CoreFoundation`, `_Builtin_float` modules), create a `src-tauri/.cargo/config.toml` file with:
+
+```toml
+[env]
+# Fix for macOS 26 Beta compatibility issues
+# Forces use of compatible SDK when building on macOS 26 Beta
+MACOSX_DEPLOYMENT_TARGET = "15.5"
+SDKROOT = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk"
+```
+
+This file is already in `.gitignore` and should not be committed to the repository.
+
+**Root Cause**: macOS 26 Beta uses newer system frameworks that aren't yet supported by the current Xcode SDK (15.5). This configuration forces the build to use the compatible SDK version.
+
+### Common Build Issues
+
+- **Rust compilation errors**: Run `cargo clean` in `src-tauri/` directory
+- **Node dependency issues**: Delete `node_modules` and run `npm install`
+- **Permission errors on macOS**: Run `sudo xcode-select --reset`
+
 ## More
 
 It is a good habit to create a feature request issue to discuss whether the feature is necessary before you implement it. However, it's unnecessary to create an issue to claim that you found a typo or improved the readability of documentation, just create a pull request.

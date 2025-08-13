@@ -179,7 +179,7 @@ If you are new to the command line, you can compile packages online with _GitHub
 
 ## Development
 
-Prepare your environment before starting. Make sure you have Rust `>=1.63` and Node `>=16` (e.g., `16.18.1`) installed on your computer. For installation guidance, see [Tauri documentation](https://tauri.app/start/prerequisites/).
+Prepare your environment before starting. Make sure you have Rust `>=1.89` and Node `>=22` (e.g., `22.11.0`) installed on your computer. *Note: Older versions (Rust ≥1.78, Node ≥16) may also work but latest stable versions are recommended.* For installation guidance, see [Tauri documentation](https://tauri.app/start/prerequisites/).
 
 If you are unfamiliar with these, it is better to try out the above tool to pack with one click.
 
