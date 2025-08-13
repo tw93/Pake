@@ -6,6 +6,9 @@ use tauri::{App, Config, Url, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 #[cfg(target_os = "macos")]
 use tauri::{Theme, TitleBarStyle};
 
+#[cfg(target_os = "windows")]
+use tauri::Theme;
+
 pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> WebviewWindow {
     let package_name = tauri_config.clone().product_name.unwrap();
     let _data_dir = get_data_dir(app.handle(), package_name);
@@ -62,11 +65,26 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         }
     }
 
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(target_os = "windows")]
     {
         window_builder = window_builder
             .data_directory(_data_dir)
             .title(app.package_info().name.clone());
+        
+        // Set theme to None for automatic system theme detection on Windows
+        // This allows the window to respond to system theme changes automatically
+        window_builder = window_builder.theme(None);
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        window_builder = window_builder
+            .data_directory(_data_dir)
+            .title(app.package_info().name.clone());
+        
+        // Set theme to None for automatic system theme detection on Linux  
+        // This allows the window to respond to system theme changes automatically
+        window_builder = window_builder.theme(None);
     }
 
     window_builder.build().expect("Failed to build window")
