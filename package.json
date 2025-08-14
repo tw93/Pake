@@ -42,6 +42,8 @@
     "cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
     "test": "npm run cli:build && node tests/index.js",
     "format": "npx prettier --write . --ignore-unknown && cd src-tauri && cargo fmt --verbose",
+    "hooks:setup": "bash .githooks/setup.sh",
+    "postinstall": "npm run hooks:setup",
     "prepublishOnly": "npm run cli:build"
   },
   "type": "module",
