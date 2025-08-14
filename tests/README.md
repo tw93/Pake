@@ -154,7 +154,7 @@ runner.addTest(
     // Test logic here
     return true; // or false
   },
-  "Test description"
+  "Test description",
 );
 ```
 
@@ -168,7 +168,7 @@ runner.addTest(
     // Async test logic
     return await someAsyncOperation();
   },
-  TIMEOUTS.MEDIUM
+  TIMEOUTS.MEDIUM,
 );
 ```
 

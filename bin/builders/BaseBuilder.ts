@@ -54,7 +54,9 @@ export default abstract class BaseBuilder {
 
     // For global CLI installation, always use npm
     const packageManager = 'npm';
-    const registryOption = isChina ? ' --registry=https://registry.npmmirror.com' : '';
+    const registryOption = isChina
+      ? ' --registry=https://registry.npmmirror.com'
+      : '';
 
     if (isChina) {
       logger.info('✺ Located in China, using npm/rsProxy CN mirror.');
@@ -130,5 +132,4 @@ export default abstract class BaseBuilder {
       `${fileName}.${fileType}`,
     );
   }
-
 }

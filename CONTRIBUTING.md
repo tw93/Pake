@@ -48,7 +48,7 @@ npm run dev
 # Run all tests (unit + integration + builder)
 npm test
 
-# Build CLI for testing  
+# Build CLI for testing
 npm run cli:build
 ```
 

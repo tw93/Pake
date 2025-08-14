@@ -66,6 +66,6 @@ jobs:
             - Performance considerations for desktop app packaging
             - CLI usability and error handling
             - Test coverage completeness
-            
+
             Be constructive and helpful in your feedback.
           use_sticky_comment: true

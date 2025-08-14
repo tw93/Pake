@@ -98,7 +98,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install Rust (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
@@ -157,19 +157,19 @@ jobs:
         run: |
           echo "# 🎯 Quality & Testing Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ needs.formatting.result }}" == "success" ]; then
             echo "✅ **Code Formatting**: PASSED" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ **Code Formatting**: FAILED" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if [ "${{ needs.rust-quality.result }}" == "success" ]; then
             echo "✅ **Rust Quality**: PASSED" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ **Rust Quality**: FAILED" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if [ "${{ needs.cli-tests.result }}" == "success" ]; then
             echo "✅ **CLI Tests**: PASSED" >> $GITHUB_STEP_SUMMARY
           else

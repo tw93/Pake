@@ -79,7 +79,7 @@ npm run build:mac  # macOS universal build
 - [ ] Run `npm test` for comprehensive validation (35 tests)
 - [ ] Test on target platforms
 - [ ] Verify injection system works
-- [ ] Check system tray integration  
+- [ ] Check system tray integration
 - [ ] Validate window behavior
 - [ ] Test with weekly.tw93.fun URL
 - [ ] Verify remote icon functionality (https://gw.alipayobjects.com/os/k/fw/weekly.icns)
