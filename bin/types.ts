@@ -6,6 +6,9 @@ export interface PakeCliOptions {
   // Application name
   name?: string;
 
+  // Window title (supports Chinese characters)
+  title?: string;
+
   // Application icon
   icon: string;
 

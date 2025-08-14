@@ -15,6 +15,7 @@ pub struct WindowConfig {
     pub activation_shortcut: String,
     pub hide_on_close: bool,
     pub incognito: bool,
+    pub title: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

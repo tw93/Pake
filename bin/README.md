@@ -224,6 +224,18 @@ Hide the window instead of exiting when clicking the close button. Default is `t
 --hide-on-close
 ```
 
+#### [title]
+
+Set the window title bar text. If not specified, the window title will be empty.
+
+```shell
+--title <string>
+
+# Examples:
+--title "My Application"
+--title "Google Translate"
+```
+
 #### [incognito]
 
 Launch the application in incognito/private browsing mode. Default is `false`. When enabled, the webview will run in private mode, which means it won't store cookies, local storage, or browsing history. This is useful for privacy-sensitive applications.

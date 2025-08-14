@@ -232,6 +232,18 @@ pake [url] [options]
 --incognito
 ```
 
+#### [title]
+
+设置窗口标题栏文本。如果未指定，窗口标题将为空。
+
+```shell
+--title <string>
+
+# 示例：
+--title "我的应用"
+--title "音乐播放器"
+```
+
 #### [installer-language]
 
 设置 Windows 安装包语言。支持 `zh-CN`、`ja-JP`，更多在 [Tauri 文档](https://tauri.app/distribute/windows-installer/#internationalization)。默认为 `en-US`。

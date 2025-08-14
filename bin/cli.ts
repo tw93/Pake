@@ -128,6 +128,7 @@ program
       .default(DEFAULT.hideOnClose)
       .hideHelp(),
   )
+  .addOption(new Option('--title <string>', 'Window title').hideHelp())
   .addOption(
     new Option('--incognito', 'Launch app in incognito/private mode').default(
       DEFAULT.incognito,

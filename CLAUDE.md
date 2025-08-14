@@ -99,6 +99,13 @@ npm run build:mac  # macOS universal build
 - `src/app/` - Core modules (window, tray, shortcuts)
 - `src/inject/` - Web page injection logic
 
+## Documentation Guidelines
+
+- **Main README**: Only include common, frequently-used parameters to avoid clutter
+- **CLI Documentation** (`bin/README.md`): Include ALL parameters with detailed usage examples
+- **Rare/Advanced Parameters**: Should have full documentation in CLI docs but minimal/no mention in main README
+- **Examples of rare parameters**: `--title`, `--incognito`, `--system-tray-icon`, etc.
+
 ### Key Configuration Files
 
 - `pake.json` - App configuration
