@@ -68,7 +68,10 @@ program
   )
   .option('--debug', 'Debug build and more output', DEFAULT.debug)
   .addOption(
-    new Option('--proxy-url <url>', 'Proxy URL for all network requests (http://, https://, socks5://)')
+    new Option(
+      '--proxy-url <url>',
+      'Proxy URL for all network requests (http://, https://, socks5://)',
+    )
       .default(DEFAULT_PAKE_OPTIONS.proxyUrl)
       .hideHelp(),
   )

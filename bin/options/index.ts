@@ -20,7 +20,6 @@ function isValidName(name: string, platform: NodeJS.Platform): boolean {
   return !!name && reg.test(name);
 }
 
-
 export default async function handleOptions(
   options: PakeCliOptions,
   url: string,
@@ -56,7 +55,6 @@ export default async function handleOptions(
       process.exit(1);
     }
   }
-
 
   const appOptions: PakeAppOptions = {
     ...options,

@@ -645,14 +645,17 @@ class BaseBuilder {
         const rustProjectDir = path.join(tauriSrcPath, '.cargo');
         const projectConf = path.join(rustProjectDir, 'config.toml');
         await fsExtra.ensureDir(rustProjectDir);
+        // For global CLI installation, always use npm
+        const packageManager = 'npm';
+        const registryOption = isChina ? ' --registry=https://registry.npmmirror.com' : '';
         if (isChina) {
             logger.info('✺ Located in China, using npm/rsProxy CN mirror.');
             const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
             await fsExtra.copy(projectCnConf, projectConf);
-            await shellExec(`cd "${npmDirectory}" && npm install --registry=https://registry.npmmirror.com`);
+            await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}`);
         }
         else {
-            await shellExec(`cd "${npmDirectory}" && npm install`);
+            await shellExec(`cd "${npmDirectory}" && ${packageManager} install`);
         }
         spinner.succeed(chalk.green('Package installed!'));
         if (!tauriTargetPathExists) {

@@ -74,7 +74,7 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         window_builder = window_builder
             .data_directory(_data_dir)
             .title(app.package_info().name.clone());
-        
+
         // Set theme to None for automatic system theme detection on Windows
         // This allows the window to respond to system theme changes automatically
         window_builder = window_builder.theme(None);
@@ -85,8 +85,8 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         window_builder = window_builder
             .data_directory(_data_dir)
             .title(app.package_info().name.clone());
-        
-        // Set theme to None for automatic system theme detection on Linux  
+
+        // Set theme to None for automatic system theme detection on Linux
         // This allows the window to respond to system theme changes automatically
         window_builder = window_builder.theme(None);
     }
