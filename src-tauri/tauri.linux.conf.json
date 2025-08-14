@@ -1,7 +1,7 @@
 {
-  "productName": "we-read",
+  "productName": "weekly",
   "bundle": {
-    "icon": ["png/weekly.png"],
+    "icon": ["png/weekly_512.png"],
     "active": true,
     "linux": {
       "deb": {
