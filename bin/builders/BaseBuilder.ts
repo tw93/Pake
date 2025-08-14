@@ -70,7 +70,10 @@ export default abstract class BaseBuilder {
         timeout,
       );
     } else {
-      await shellExec(`cd "${npmDirectory}" && ${packageManager} install`, timeout);
+      await shellExec(
+        `cd "${npmDirectory}" && ${packageManager} install`,
+        timeout,
+      );
     }
     spinner.succeed(chalk.green('Package installed!'));
     if (!tauriTargetPathExists) {
