@@ -6,7 +6,7 @@
     "node": ">=16.0.0"
   },
   "bin": {
-    "pake": "./cli.js"
+    "pake": "./dist/cli.js"
   },
   "repository": {
     "type": "git",
@@ -26,8 +26,7 @@
   ],
   "files": [
     "dist",
-    "src-tauri",
-    "cli.js"
+    "src-tauri"
   ],
   "scripts": {
     "start": "npm run dev",
@@ -41,6 +40,7 @@
     "cli": "rollup -c rollup.config.js --watch",
     "cli:dev": "cross-env NODE_ENV=development rollup -c rollup.config.js -w",
     "cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
+    "test": "npm run cli:build && node tests/index.js",
     "format": "npx prettier --write . --ignore-unknown && cd src-tauri && cargo fmt --verbose",
     "prepublishOnly": "npm run cli:build"
   },
