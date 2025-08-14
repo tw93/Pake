@@ -58,15 +58,19 @@ export default abstract class BaseBuilder {
       ? ' --registry=https://registry.npmmirror.com'
       : '';
 
+    // Windows环境下需要更长的超时时间
+    const timeout = process.platform === 'win32' ? 600000 : 300000;
+
     if (isChina) {
       logger.info('✺ Located in China, using npm/rsProxy CN mirror.');
       const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
       await fsExtra.copy(projectCnConf, projectConf);
       await shellExec(
         `cd "${npmDirectory}" && ${packageManager} install${registryOption}`,
+        timeout,
       );
     } else {
-      await shellExec(`cd "${npmDirectory}" && ${packageManager} install`);
+      await shellExec(`cd "${npmDirectory}" && ${packageManager} install`, timeout);
     }
     spinner.succeed(chalk.green('Package installed!'));
     if (!tauriTargetPathExists) {

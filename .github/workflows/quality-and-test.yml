@@ -149,7 +149,11 @@ jobs:
         shell: bash
         run: |
           echo "Testing CLI integration with weekly.tw93.fun..."
-          timeout 30s node dist/cli.js https://weekly.tw93.fun --name "CITestWeekly" --debug || true
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            timeout 120s node dist/cli.js https://weekly.tw93.fun --name "CITestWeekly" --debug || true
+          else
+            timeout 30s node dist/cli.js https://weekly.tw93.fun --name "CITestWeekly" --debug || true
+          fi
           echo "Integration test completed (expected to timeout)"
 
   summary:

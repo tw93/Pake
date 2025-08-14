@@ -647,7 +647,9 @@ class BaseBuilder {
         await fsExtra.ensureDir(rustProjectDir);
         // For global CLI installation, always use npm
         const packageManager = 'npm';
-        const registryOption = isChina ? ' --registry=https://registry.npmmirror.com' : '';
+        const registryOption = isChina
+            ? ' --registry=https://registry.npmmirror.com'
+            : '';
         if (isChina) {
             logger.info('✺ Located in China, using npm/rsProxy CN mirror.');
             const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
