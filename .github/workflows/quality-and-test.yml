@@ -94,11 +94,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: "npm"
+          cache: "pnpm"
 
       - name: Install Rust (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
@@ -129,13 +134,13 @@ jobs:
           version: 1.1
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build CLI
-        run: npm run cli:build
+        run: pnpm run cli:build
 
       - name: Run CLI Test Suite
-        run: npm test
+        run: pnpm test
         env:
           CI: true
           NODE_ENV: test

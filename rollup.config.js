@@ -46,6 +46,14 @@ function pakeCliDevPlugin() {
 
   let devHasStarted = false;
 
+  // 智能检测包管理器
+  const detectPackageManager = () => {
+    const fs = require("fs");
+    if (fs.existsSync("pnpm-lock.yaml")) return "pnpm";
+    if (fs.existsSync("yarn.lock")) return "yarn";
+    return "npm";
+  };
+
   return {
     name: "pake-cli-dev-plugin",
     buildEnd() {
@@ -66,9 +74,11 @@ function pakeCliDevPlugin() {
         console.log(chalk.yellow(`cli running end with code: ${code}`));
         if (devHasStarted) return;
         devHasStarted = true;
-        devChildProcess = await exec(
-          "npm run tauri dev -- --config ./src-tauri/.pake/tauri.conf.json --features cli-build",
-        );
+
+        const packageManager = detectPackageManager();
+        const command = `${packageManager} run tauri dev -- --config ./src-tauri/.pake/tauri.conf.json --features cli-build`;
+
+        devChildProcess = await exec(command);
 
         devChildProcess.stdout.on("data", (data) => {
           console.log(chalk.green(data.toString()));
