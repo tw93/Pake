@@ -25,7 +25,7 @@ var engines = {
 	node: ">=16.0.0"
 };
 var bin = {
-	pake: "./cli.js"
+	pake: "./dist/cli.js"
 };
 var repository = {
 	type: "git",
@@ -45,8 +45,7 @@ var keywords = [
 ];
 var files = [
 	"dist",
-	"src-tauri",
-	"cli.js"
+	"src-tauri"
 ];
 var scripts = {
 	start: "npm run dev",
@@ -60,6 +59,7 @@ var scripts = {
 	cli: "rollup -c rollup.config.js --watch",
 	"cli:dev": "cross-env NODE_ENV=development rollup -c rollup.config.js -w",
 	"cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
+	test: "npm run cli:build && node tests/index.js",
 	format: "npx prettier --write . --ignore-unknown && cd src-tauri && cargo fmt --verbose",
 	prepublishOnly: "npm run cli:build"
 };

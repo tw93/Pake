@@ -61,6 +61,12 @@ npm run build
 **Key Testing Commands:**
 
 ```bash
+# Run comprehensive test suite (unit + integration + builder)
+npm test
+
+# Build CLI for testing
+npm run cli:build
+
 # Debug build for development
 npm run build:debug
 
@@ -70,10 +76,13 @@ npm run build:mac  # macOS universal build
 
 **Testing Checklist:**
 
+- [ ] Run `npm test` for comprehensive validation (35 tests)
 - [ ] Test on target platforms
 - [ ] Verify injection system works
-- [ ] Check system tray integration
+- [ ] Check system tray integration  
 - [ ] Validate window behavior
+- [ ] Test with weekly.tw93.fun URL
+- [ ] Verify remote icon functionality (https://gw.alipayobjects.com/os/k/fw/weekly.icns)
 
 ## Core Components
 

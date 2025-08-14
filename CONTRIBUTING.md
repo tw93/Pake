@@ -42,6 +42,24 @@ npm install
 npm run dev
 ```
 
+### Testing
+
+```bash
+# Run all tests (unit + integration + builder)
+npm test
+
+# Build CLI for testing  
+npm run cli:build
+```
+
+## Continuous Integration
+
+The project uses streamlined GitHub Actions workflows:
+
+- **Quality & Testing**: Automatic code quality checks and comprehensive testing on all platforms
+- **Claude AI Integration**: Automated code review and interactive assistance
+- **Release Management**: Coordinated releases with app building and Docker publishing
+
 ## Troubleshooting
 
 ### macOS 26 Beta Compilation Issues
