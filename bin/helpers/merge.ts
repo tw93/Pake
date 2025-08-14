@@ -1,17 +1,42 @@
 import path from 'path';
 import fsExtra from 'fs-extra';
 
-import { npmDirectory } from '@/utils/dir';
 import combineFiles from '@/utils/combine';
 import logger from '@/options/logger';
 import { PakeAppOptions, PlatformMap } from '@/types';
-import { tauriConfigDirectory } from '@/utils/dir';
+import { tauriConfigDirectory, npmDirectory } from '@/utils/dir';
 
 export async function mergeConfig(
   url: string,
   options: PakeAppOptions,
   tauriConf: any,
 ) {
+  // Ensure .pake directory exists and copy source templates if needed
+  const srcTauriDir = path.join(npmDirectory, 'src-tauri');
+  await fsExtra.ensureDir(tauriConfigDirectory);
+
+  // Copy source config files to .pake directory (as templates)
+  const sourceFiles = [
+    'tauri.conf.json',
+    'tauri.macos.conf.json',
+    'tauri.windows.conf.json',
+    'tauri.linux.conf.json',
+    'pake.json',
+  ];
+
+  await Promise.all(
+    sourceFiles.map(async (file) => {
+      const sourcePath = path.join(srcTauriDir, file);
+      const destPath = path.join(tauriConfigDirectory, file);
+
+      if (
+        (await fsExtra.pathExists(sourcePath)) &&
+        !(await fsExtra.pathExists(destPath))
+      ) {
+        await fsExtra.copy(sourcePath, destPath);
+      }
+    }),
+  );
   const {
     width,
     height,

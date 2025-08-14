@@ -5,11 +5,24 @@ import BaseBuilder from './BaseBuilder';
 export default class MacBuilder extends BaseBuilder {
   constructor(options: PakeAppOptions) {
     super(options);
-    this.options.targets = 'dmg';
+    // Use DMG by default for distribution
+    // Only create app bundles for testing to avoid user interaction
+    if (process.env.PAKE_CREATE_APP === '1') {
+      this.options.targets = 'app';
+    } else {
+      this.options.targets = 'dmg';
+    }
   }
 
   getFileName(): string {
     const { name } = this.options;
+
+    // For app bundles, use simple name without version/arch
+    if (this.options.targets === 'app') {
+      return name;
+    }
+
+    // For DMG files, use versioned filename
     let arch: string;
     if (this.options.multiArch) {
       arch = 'universal';

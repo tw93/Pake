@@ -50,7 +50,7 @@ var files = [
 var scripts = {
 	start: "npm run dev",
 	dev: "npm run tauri dev",
-	build: "npm run tauri build --release",
+	build: "npm run tauri build --",
 	"build:debug": "npm run tauri build -- --debug",
 	"build:mac": "npm run tauri build -- --target universal-apple-darwin",
 	"build:config": "chmod +x script/app_config.mjs && node script/app_config.mjs",
@@ -59,8 +59,10 @@ var scripts = {
 	cli: "rollup -c rollup.config.js --watch",
 	"cli:dev": "cross-env NODE_ENV=development rollup -c rollup.config.js -w",
 	"cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
-	test: "npm run cli:build && node tests/index.js",
+	test: "npm run cli:build && PAKE_CREATE_APP=1 node tests/index.js",
 	format: "npx prettier --write . --ignore-unknown && cd src-tauri && cargo fmt --verbose",
+	"hooks:setup": "bash .githooks/setup.sh",
+	postinstall: "npm run hooks:setup",
 	prepublishOnly: "npm run cli:build"
 };
 var type = "module";
@@ -133,7 +135,8 @@ var windows = [
 		dark_mode: false,
 		activation_shortcut: "",
 		disabled_web_shortcuts: false,
-		hide_on_close: true
+		hide_on_close: true,
+		incognito: false
 	}
 ];
 var user_agent = {
@@ -222,10 +225,10 @@ var MacConf = {
 	bundle: bundle$1
 };
 
-var productName = "we-read";
+var productName = "weekly";
 var bundle = {
 	icon: [
-		"png/weekly.png"
+		"png/weekly_512.png"
 	],
 	active: true,
 	linux: {
@@ -312,20 +315,24 @@ const IS_LINUX = platform$1 === 'linux';
 const currentModulePath = fileURLToPath(import.meta.url);
 // Resolve the parent directory of the current module
 const npmDirectory = path.join(path.dirname(currentModulePath), '..');
-const tauriConfigDirectory = path.join(npmDirectory, 'src-tauri');
+const tauriConfigDirectory = path.join(npmDirectory, 'src-tauri', '.pake');
 
-async function shellExec(command) {
+async function shellExec(command, timeout = 300000) {
     try {
         const { exitCode } = await execa(command, {
             cwd: npmDirectory,
             stdio: 'inherit',
             shell: true,
+            timeout,
         });
         return exitCode;
     }
     catch (error) {
         const exitCode = error.exitCode ?? 'unknown';
         const errorMessage = error.message || 'Unknown error occurred';
+        if (error.timedOut) {
+            throw new Error(`Command timed out after ${timeout}ms: "${command}". Try increasing timeout or check network connectivity.`);
+        }
         throw new Error(`Error occurred while executing command "${command}". Exit code: ${exitCode}. Details: ${errorMessage}`);
     }
 }
@@ -438,7 +445,19 @@ async function combineFiles(files, output) {
 }
 
 async function mergeConfig(url, options, tauriConf) {
-    const { width, height, fullscreen, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, } = options;
+    // Ensure .pake directory exists and copy source templates if needed
+    const srcTauriDir = path.join(npmDirectory, 'src-tauri');
+    await fsExtra.ensureDir(tauriConfigDirectory);
+    // Copy source config files to .pake directory (as templates)
+    const sourceFiles = ['tauri.conf.json', 'tauri.macos.conf.json', 'tauri.windows.conf.json', 'tauri.linux.conf.json', 'pake.json'];
+    await Promise.all(sourceFiles.map(async (file) => {
+        const sourcePath = path.join(srcTauriDir, file);
+        const destPath = path.join(tauriConfigDirectory, file);
+        if (await fsExtra.pathExists(sourcePath) && !(await fsExtra.pathExists(destPath))) {
+            await fsExtra.copy(sourcePath, destPath);
+        }
+    }));
+    const { width, height, fullscreen, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, } = options;
     const { platform } = process;
     // Set Windows parameters.
     const tauriConfWindowOptions = {
@@ -452,6 +471,8 @@ async function mergeConfig(url, options, tauriConf) {
         dark_mode: darkMode,
         disabled_web_shortcuts: disabledWebShortcuts,
         hide_on_close: hideOnClose,
+        incognito: incognito,
+        title: title || null,
     };
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
     tauriConf.productName = name;
@@ -650,14 +671,16 @@ class BaseBuilder {
         const registryOption = isChina
             ? ' --registry=https://registry.npmmirror.com'
             : '';
+        // Windows环境下需要更长的超时时间
+        const timeout = process.platform === 'win32' ? 600000 : 300000;
         if (isChina) {
             logger.info('✺ Located in China, using npm/rsProxy CN mirror.');
             const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
             await fsExtra.copy(projectCnConf, projectConf);
-            await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}`);
+            await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}`, timeout);
         }
         else {
-            await shellExec(`cd "${npmDirectory}" && ${packageManager} install`);
+            await shellExec(`cd "${npmDirectory}" && ${packageManager} install`, timeout);
         }
         spinner.succeed(chalk.green('Package installed!'));
         if (!tauriTargetPathExists) {
@@ -691,25 +714,66 @@ class BaseBuilder {
         return target;
     }
     getBuildCommand() {
-        // the debug option should support `--debug` and `--release`
-        return this.options.debug ? 'npm run build:debug' : 'npm run build';
+        const baseCommand = this.options.debug
+            ? 'npm run build:debug'
+            : 'npm run build';
+        // Use temporary config directory to avoid modifying source files
+        const configPath = path.join(npmDirectory, 'src-tauri', '.pake', 'tauri.conf.json');
+        let fullCommand = `${baseCommand} -- -c "${configPath}"`;
+        // For macOS, use app bundles by default unless DMG is explicitly requested
+        if (IS_MAC && this.options.targets === 'app') {
+            fullCommand += ' --bundles app';
+        }
+        // Add macos-proxy feature for modern macOS (Darwin 23+ = macOS 14+)
+        if (IS_MAC) {
+            const macOSVersion = this.getMacOSMajorVersion();
+            if (macOSVersion >= 23) {
+                fullCommand += ' --features macos-proxy';
+            }
+        }
+        return fullCommand;
+    }
+    getMacOSMajorVersion() {
+        try {
+            const os = require('os');
+            const release = os.release();
+            const majorVersion = parseInt(release.split('.')[0], 10);
+            return majorVersion;
+        }
+        catch (error) {
+            return 0; // Disable proxy feature if version detection fails
+        }
     }
     getBasePath() {
         const basePath = this.options.debug ? 'debug' : 'release';
         return `src-tauri/target/${basePath}/bundle/`;
     }
     getBuildAppPath(npmDirectory, fileName, fileType) {
-        return path.join(npmDirectory, this.getBasePath(), fileType.toLowerCase(), `${fileName}.${fileType}`);
+        // For app bundles on macOS, the directory is 'macos', not 'app'
+        const bundleDir = fileType.toLowerCase() === 'app' ? 'macos' : fileType.toLowerCase();
+        return path.join(npmDirectory, this.getBasePath(), bundleDir, `${fileName}.${fileType}`);
     }
 }
 
 class MacBuilder extends BaseBuilder {
     constructor(options) {
         super(options);
-        this.options.targets = 'dmg';
+        // Use DMG by default for distribution
+        // Only create app bundles for testing to avoid user interaction
+        if (process.env.PAKE_CREATE_APP === '1') {
+            this.options.targets = 'app';
+        }
+        else {
+            this.options.targets = 'dmg';
+        }
     }
     getFileName() {
         const { name } = this.options;
+        // For app bundles, use simple name without version/arch
+        if (this.options.targets === 'app') {
+            return name;
+        }
+        // For DMG files, use versioned filename
         let arch;
         if (this.options.multiArch) {
             arch = 'universal';
@@ -816,6 +880,7 @@ const DEFAULT_PAKE_OPTIONS = {
     inject: [],
     installerLanguage: 'en-US',
     hideOnClose: true,
+    incognito: false,
 };
 
 async function checkUpdateTips() {
@@ -1059,6 +1124,8 @@ program
     .addOption(new Option('--hide-on-close', 'Hide window on close instead of exiting')
     .default(DEFAULT_PAKE_OPTIONS.hideOnClose)
     .hideHelp())
+    .addOption(new Option('--title <string>', 'Window title').hideHelp())
+    .addOption(new Option('--incognito', 'Launch app in incognito/private mode').default(DEFAULT_PAKE_OPTIONS.incognito))
     .addOption(new Option('--installer-language <string>', 'Installer language')
     .default(DEFAULT_PAKE_OPTIONS.installerLanguage)
     .hideHelp())

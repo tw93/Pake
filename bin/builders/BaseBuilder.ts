@@ -118,8 +118,44 @@ export default abstract class BaseBuilder {
   abstract getFileName(): string;
 
   protected getBuildCommand(): string {
-    // the debug option should support `--debug` and `--release`
-    return this.options.debug ? 'npm run build:debug' : 'npm run build';
+    const baseCommand = this.options.debug
+      ? 'npm run build:debug'
+      : 'npm run build';
+
+    // Use temporary config directory to avoid modifying source files
+    const configPath = path.join(
+      npmDirectory,
+      'src-tauri',
+      '.pake',
+      'tauri.conf.json',
+    );
+    let fullCommand = `${baseCommand} -- -c "${configPath}"`;
+
+    // For macOS, use app bundles by default unless DMG is explicitly requested
+    if (IS_MAC && this.options.targets === 'app') {
+      fullCommand += ' --bundles app';
+    }
+
+    // Add macos-proxy feature for modern macOS (Darwin 23+ = macOS 14+)
+    if (IS_MAC) {
+      const macOSVersion = this.getMacOSMajorVersion();
+      if (macOSVersion >= 23) {
+        fullCommand += ' --features macos-proxy';
+      }
+    }
+
+    return fullCommand;
+  }
+
+  private getMacOSMajorVersion(): number {
+    try {
+      const os = require('os');
+      const release = os.release();
+      const majorVersion = parseInt(release.split('.')[0], 10);
+      return majorVersion;
+    } catch (error) {
+      return 0; // Disable proxy feature if version detection fails
+    }
   }
 
   protected getBasePath(): string {
@@ -132,10 +168,13 @@ export default abstract class BaseBuilder {
     fileName: string,
     fileType: string,
   ): string {
+    // For app bundles on macOS, the directory is 'macos', not 'app'
+    const bundleDir =
+      fileType.toLowerCase() === 'app' ? 'macos' : fileType.toLowerCase();
     return path.join(
       npmDirectory,
       this.getBasePath(),
-      fileType.toLowerCase(),
+      bundleDir,
       `${fileName}.${fileType}`,
     );
   }

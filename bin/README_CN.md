@@ -47,6 +47,8 @@ pake [url] [options]
 
 应用程序的打包结果将默认保存在当前工作目录。由于首次打包需要配置环境，这可能需要一些时间，请耐心等待。
 
+> **macOS 输出**：在 macOS 上，Pake 默认创建 DMG 安装程序。如需创建 `.app` 包进行测试（避免用户交互），请设置环境变量 `PAKE_CREATE_APP=1`。
+>
 > **注意**：打包过程需要使用 `Rust` 环境。如果您没有安装 `Rust`，系统会提示您是否要安装。如果遇到安装失败或超时的问题，您可以 [手动安装](https://www.rust-lang.org/tools/install)。
 
 ### [url]
@@ -281,7 +283,7 @@ pake [url] [options]
 
 #### [proxy-url]
 
-为所有网络请求设置代理服务器。支持 HTTP、HTTPS 和 SOCKS5。
+为所有网络请求设置代理服务器。支持 HTTP、HTTPS 和 SOCKS5。在 Windows 和 Linux 上可用。在 macOS 上需要 macOS 14+。
 
 ```shell
 --proxy-url http://127.0.0.1:7890

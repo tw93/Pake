@@ -47,6 +47,8 @@ pake [url] [options]
 
 The packaged application will be located in the current working directory by default. The first packaging might take some time due to environment configuration. Please be patient.
 
+> **macOS Output**: On macOS, Pake creates DMG installers by default. To create `.app` bundles for testing (to avoid user interaction), set the environment variable `PAKE_CREATE_APP=1`.
+>
 > **Note**: Packaging requires the Rust environment. If Rust is not installed, you will be prompted for installation confirmation. In case of installation failure or timeout, you can [install it manually](https://www.rust-lang.org/tools/install).
 
 ### [url]
@@ -279,7 +281,7 @@ Supports both comma-separated and multiple option formats:
 
 #### [proxy-url]
 
-Set proxy server for all network requests. Supports HTTP, HTTPS, and SOCKS5.
+Set proxy server for all network requests. Supports HTTP, HTTPS, and SOCKS5. Available on Windows and Linux. On macOS, requires macOS 14+.
 
 ```shell
 --proxy-url http://127.0.0.1:7890
