@@ -9,7 +9,7 @@ console.log('Node.js info in your localhost ', process.version);
 console.log('\n=======================\n');
 console.log('Pake parameters is: ');
 console.log('url: ', process.env.URL);
-console.log('my_proxy_url: ', process.env.MY_PROXY_URL);
+console.log('net_proxy_url: ', process.env.NET_PROXY_URL);
 console.log('name: ', process.env.NAME);
 console.log('icon: ', process.env.ICON);
 console.log('height: ', process.env.HEIGHT);
@@ -23,8 +23,8 @@ console.log('===========================\n');
 cd('node_modules/pake-cli');
 let params = `node cli.js ${process.env.URL} --name ${process.env.NAME} --height ${process.env.HEIGHT} --width ${process.env.WIDTH}`;
 
-if (process.env.MY_PROXY_URL !== '') {
-  params = `${params} --proxy-url ${process.env.MY_PROXY_URL}`;
+if (process.env.NET_PROXY_URL !== '') {
+  params = `${params} --proxy-url ${process.env.NET_PROXY_URL}`;
 }
 
 if (process.env.HIDE_TITLE_BAR === 'true') {

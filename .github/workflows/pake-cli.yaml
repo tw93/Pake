@@ -15,7 +15,7 @@ on:
         description: 'URL'
         required: true
       my_proxy_url:
-        description: 'MY_PROXY_URL'
+        description: 'NET_PROXY_URL'
         required: false
       name:
         description: 'Name, English, Linux no capital'
@@ -46,15 +46,15 @@ on:
         required: false
         type: boolean
         default: false
-      targets:
-        description: 'Targets, Linux only, Optional'
-        required: false
-        default: 'deb'
-        type: choice
-        options:
-          - 'deb'
-          - 'appimage'
-          - 'rpm'
+      # targets:
+      #   description: 'Targets, Linux only, Optional'
+      #   required: false
+      #   default: 'deb'
+      #   type: choice
+      #   options:
+      #     - 'deb'
+      #     - 'appimage'
+      #     - 'rpm'
 
 jobs:
   build:
@@ -128,7 +128,7 @@ jobs:
           node ./script/build_with_pake_cli.js
         env:
           URL: ${{ inputs.url }}
-          MY_PROXY_URL: ${{ inputs.my_proxy_url }}
+          NET_PROXY_URL: ${{ inputs.net_proxy_url }}
           NAME: ${{ inputs.name }}
           ICON: ${{ inputs.icon }}
           HEIGHT: ${{ inputs.height }}
@@ -136,7 +136,7 @@ jobs:
           HIDE_TITLE_BAR: ${{ inputs.hide_title_bar }}
           FULLSCREEN: ${{ inputs.fullscreen }}
           MULTI_ARCH: ${{ inputs.multi_arch }}
-          TARGETS: ${{ inputs.targets }}
+          TARGETS: deb
           PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig
           PKG_CONFIG_ALLOW_SYSTEM_LIBS: 1
           PKG_CONFIG_ALLOW_SYSTEM_CFLAGS: 1
