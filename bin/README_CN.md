@@ -224,6 +224,14 @@ pake [url] [options]
 --hide-on-close
 ```
 
+#### [incognito]
+
+以隐私/隐身浏览模式启动应用程序。默认为 `false`。启用后，webview 将在隐私模式下运行，这意味着它不会存储 cookie、本地存储或浏览历史记录。这对于注重隐私的应用程序很有用。
+
+```shell
+--incognito
+```
+
 #### [installer-language]
 
 设置 Windows 安装包语言。支持 `zh-CN`、`ja-JP`，更多在 [Tauri 文档](https://tauri.app/distribute/windows-installer/#internationalization)。默认为 `en-US`。

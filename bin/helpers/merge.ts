@@ -33,6 +33,7 @@ export async function mergeConfig(
     proxyUrl,
     installerLanguage,
     hideOnClose,
+    incognito,
   } = options;
 
   const { platform } = process;
@@ -49,6 +50,7 @@ export async function mergeConfig(
     dark_mode: darkMode,
     disabled_web_shortcuts: disabledWebShortcuts,
     hide_on_close: hideOnClose,
+    incognito: incognito,
   };
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
 

@@ -37,6 +37,7 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         .inner_size(window_config.width, window_config.height)
         .always_on_top(window_config.always_on_top)
         .disable_drag_drop_handler()
+        .incognito(window_config.incognito)
         .initialization_script(&config_script)
         .initialization_script(include_str!("../inject/component.js"))
         .initialization_script(include_str!("../inject/event.js"))

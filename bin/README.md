@@ -224,6 +224,14 @@ Hide the window instead of exiting when clicking the close button. Default is `t
 --hide-on-close
 ```
 
+#### [incognito]
+
+Launch the application in incognito/private browsing mode. Default is `false`. When enabled, the webview will run in private mode, which means it won't store cookies, local storage, or browsing history. This is useful for privacy-sensitive applications.
+
+```shell
+--incognito
+```
+
 #### [installer-language]
 
 Set the Windows Installer language. Options include `zh-CN`, `ja-JP`, More at [Tauri Document](https://tauri.app/distribute/windows-installer/#internationalization). Default is `en-US`.

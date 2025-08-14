@@ -23,6 +23,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   inject: [],
   installerLanguage: 'en-US',
   hideOnClose: true,
+  incognito: false,
 };
 
 // Just for cli development

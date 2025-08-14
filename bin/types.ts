@@ -71,6 +71,9 @@ export interface PakeCliOptions {
 
   // Hide window on close instead of exiting, default false
   hideOnClose: boolean;
+
+  // Launch app in incognito/private mode, default false
+  incognito: boolean;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {

@@ -129,6 +129,11 @@ program
       .hideHelp(),
   )
   .addOption(
+    new Option('--incognito', 'Launch app in incognito/private mode').default(
+      DEFAULT.incognito,
+    ),
+  )
+  .addOption(
     new Option('--installer-language <string>', 'Installer language')
       .default(DEFAULT.installerLanguage)
       .hideHelp(),
