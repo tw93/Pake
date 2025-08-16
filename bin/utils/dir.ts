@@ -1,4 +1,5 @@
 import path from 'path';
+import os from 'os';
 import { fileURLToPath } from 'url';
 
 // Convert the current module URL to a file path
@@ -12,3 +13,7 @@ export const tauriConfigDirectory = path.join(
   'src-tauri',
   '.pake',
 );
+
+export function getUserHomeDir(): string {
+  return os.homedir();
+}

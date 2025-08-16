@@ -129,7 +129,7 @@ export default abstract class BaseBuilder {
       '.pake',
       'tauri.conf.json',
     );
-    let fullCommand = `${baseCommand} -- -c "${configPath}"`;
+    let fullCommand = `${baseCommand} -- -c "${configPath}" --features cli-build`;
 
     // For macOS, use app bundles by default unless DMG is explicitly requested
     if (IS_MAC && this.options.targets === 'app') {
@@ -140,7 +140,7 @@ export default abstract class BaseBuilder {
     if (IS_MAC) {
       const macOSVersion = this.getMacOSMajorVersion();
       if (macOSVersion >= 23) {
-        fullCommand += ' --features macos-proxy';
+        fullCommand += ',macos-proxy';
       }
     }
 

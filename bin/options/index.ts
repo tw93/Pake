@@ -43,11 +43,13 @@ export default async function handleOptions(
   }
 
   if (!isValidName(name, platform)) {
-    const LINUX_NAME_ERROR = `✕ Name should only include lowercase letters, numbers, and dashes (not leading dashes). Examples: com-123-xxx, 123pan, pan123, weread, we-read, 123.`;
-    const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dashes, and spaces (not leading dashes and spaces). Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read, 123.`;
     const errorMsg =
-      platform === 'linux' ? LINUX_NAME_ERROR : DEFAULT_NAME_ERROR;
+      platform === 'linux'
+        ? `✕ Name should only include letters, numbers, dashes, and spaces. Spaces will be converted to dashes. Examples: Google Translate → google-translate, 123pan, weread.`
+        : `✕ Name should only include letters, numbers, dashes, and spaces (not leading dashes and spaces). Examples: Google Translate, 123pan, WeRead, we-read.`;
+
     logger.error(errorMsg);
+
     if (isActions) {
       name = resolveAppName(url, platform);
       logger.warn(`✼ Inside github actions, use the default name: ${name}`);
@@ -62,7 +64,7 @@ export default async function handleOptions(
     identifier: getIdentifier(url),
   };
 
-  appOptions.icon = await handleIcon(appOptions);
+  appOptions.icon = await handleIcon(appOptions, url);
 
   return appOptions;
 }

@@ -4,7 +4,11 @@ import fsExtra from 'fs-extra';
 import combineFiles from '@/utils/combine';
 import logger from '@/options/logger';
 import { PakeAppOptions, PlatformMap } from '@/types';
-import { tauriConfigDirectory, npmDirectory } from '@/utils/dir';
+import {
+  tauriConfigDirectory,
+  npmDirectory,
+  getUserHomeDir,
+} from '@/utils/dir';
 
 export async function mergeConfig(
   url: string,
@@ -182,8 +186,10 @@ export async function mergeConfig(
       logger.warn(`✼ ${iconInfo.message}, but you give ${customIconExt}`);
       tauriConf.bundle.icon = [iconInfo.defaultIcon];
     } else {
-      const iconPath = path.join(npmDirectory, 'src-tauri/', iconInfo.path);
-      tauriConf.bundle.resources = [iconInfo.path];
+      // Save icon to .pake directory instead of src-tauri
+      const iconPath = path.join(tauriConfigDirectory, iconInfo.path);
+      await fsExtra.ensureDir(path.dirname(iconPath));
+      tauriConf.bundle.resources = [`.pake/${iconInfo.path}`];
       await fsExtra.copy(options.icon, iconPath);
     }
 
@@ -199,30 +205,20 @@ export async function mergeConfig(
     tauriConf.bundle.icon = [iconInfo.defaultIcon];
   }
 
-  // Set tray icon path.
-  let trayIconPath =
-    platform === 'darwin' ? 'png/icon_512.png' : tauriConf.bundle.icon[0];
-  if (systemTrayIcon.length > 0) {
-    try {
-      await fsExtra.pathExists(systemTrayIcon);
-      // 需要判断图标格式，默认只支持ico和png两种
-      let iconExt = path.extname(systemTrayIcon).toLowerCase();
-      if (iconExt == '.png' || iconExt == '.ico') {
-        const trayIcoPath = path.join(
-          npmDirectory,
-          `src-tauri/png/${name.toLowerCase()}${iconExt}`,
-        );
-        trayIconPath = `png/${name.toLowerCase()}${iconExt}`;
-        await fsExtra.copy(systemTrayIcon, trayIcoPath);
-      } else {
-        logger.warn(
-          `✼ System tray icon must be .ico or .png, but you provided ${iconExt}.`,
-        );
-        logger.warn(`✼ Default system tray icon will be used.`);
-      }
-    } catch {
-      logger.warn(`✼ ${systemTrayIcon} not exists!`);
-      logger.warn(`✼ Default system tray icon will remain unchanged.`);
+  // Set system tray icon path
+  let trayIconPath = 'icons/icon.png'; // default fallback
+
+  if (showSystemTray) {
+    if (systemTrayIcon.length > 0) {
+      // User provided custom system tray icon
+      trayIconPath = await handleCustomTrayIcon(
+        systemTrayIcon,
+        name,
+        tauriConfigDirectory,
+      );
+    } else {
+      // Use original downloaded PNG icon for system tray
+      trayIconPath = await handleDownloadedTrayIcon(name, tauriConfigDirectory);
     }
   }
 
@@ -268,7 +264,6 @@ export async function mergeConfig(
   );
 
   const bundleConf = { bundle: tauriConf.bundle };
-  console.log('pakeConfig', tauriConf.pake);
   await fsExtra.outputJSON(configPath, bundleConf, { spaces: 4 });
   const pakeConfigPath = path.join(tauriConfigDirectory, 'pake.json');
   await fsExtra.outputJSON(pakeConfigPath, tauriConf.pake, { spaces: 4 });
@@ -282,4 +277,95 @@ export async function mergeConfig(
   }
   const configJsonPath = path.join(tauriConfigDirectory, 'tauri.conf.json');
   await fsExtra.outputJSON(configJsonPath, tauriConf2, { spaces: 4 });
+}
+
+/**
+ * Handle custom system tray icon provided by user
+ */
+async function handleCustomTrayIcon(
+  systemTrayIcon: string,
+  appName: string,
+  configDir: string,
+): Promise<string> {
+  const defaultPath = 'icons/icon.png';
+
+  if (!(await fsExtra.pathExists(systemTrayIcon))) {
+    logger.warn(`✼ Custom tray icon ${systemTrayIcon} not found!`);
+    logger.warn(`✼ Using default icon for system tray.`);
+    return defaultPath;
+  }
+
+  const iconExt = path.extname(systemTrayIcon).toLowerCase();
+  if (iconExt !== '.png' && iconExt !== '.ico') {
+    logger.warn(
+      `✼ System tray icon must be .png or .ico, but you provided ${iconExt}.`,
+    );
+    logger.warn(`✼ Using default icon for system tray.`);
+    return defaultPath;
+  }
+
+  try {
+    const trayIconPath = path.join(
+      configDir,
+      `png/${appName.toLowerCase()}${iconExt}`,
+    );
+    await fsExtra.ensureDir(path.dirname(trayIconPath));
+    await fsExtra.copy(systemTrayIcon, trayIconPath);
+
+    const relativePath = `.pake/png/${appName.toLowerCase()}${iconExt}`;
+    logger.info(`✓ Using custom system tray icon: ${systemTrayIcon}`);
+    return relativePath;
+  } catch (error) {
+    logger.warn(`✼ Failed to copy custom tray icon: ${error}`);
+    logger.warn(`✼ Using default icon for system tray.`);
+    return defaultPath;
+  }
+}
+
+/**
+ * Handle system tray icon from downloaded app icon
+ */
+async function handleDownloadedTrayIcon(
+  appName: string,
+  configDir: string,
+): Promise<string> {
+  const defaultPath = 'icons/icon.png';
+  const homeDir = getUserHomeDir();
+  const downloadedIconPath = path.join(
+    homeDir,
+    '.pake',
+    'icons',
+    'downloaded-icon.png',
+  );
+
+  if (!(await fsExtra.pathExists(downloadedIconPath))) {
+    logger.warn(
+      `✼ No downloaded icon found, using default icon for system tray.`,
+    );
+    return defaultPath;
+  }
+
+  try {
+    const trayPngPath = path.join(
+      configDir,
+      `png/${appName.toLowerCase()}_tray.png`,
+    );
+    await fsExtra.ensureDir(path.dirname(trayPngPath));
+
+    // Resize the original PNG to appropriate tray size (32x32 for optimal display)
+    const sharp = await import('sharp');
+    await sharp
+      .default(downloadedIconPath)
+      .resize(32, 32)
+      .png()
+      .toFile(trayPngPath);
+
+    const relativePath = `.pake/png/${appName.toLowerCase()}_tray.png`;
+    logger.info(`✓ Using downloaded app icon for system tray: ${relativePath}`);
+    return relativePath;
+  } catch (error) {
+    logger.warn(`✼ Failed to process downloaded icon for tray: ${error}`);
+    logger.warn(`✼ Using default icon for system tray.`);
+    return defaultPath;
+  }
 }
