@@ -2,15 +2,12 @@ use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use tauri::{
-    image::Image,
     menu::{MenuBuilder, MenuItemBuilder},
     tray::TrayIconBuilder,
     AppHandle, Manager,
 };
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
-
-use crate::util::get_pake_config;
 
 pub fn set_system_tray(app: &AppHandle, show_system_tray: bool) -> tauri::Result<()> {
     if !show_system_tray {
@@ -27,42 +24,6 @@ pub fn set_system_tray(app: &AppHandle, show_system_tray: bool) -> tauri::Result
         .build()?;
 
     app.app_handle().remove_tray_by_id("pake-tray");
-
-    // Get tray icon - use custom tray icon if provided, otherwise use app icon
-    let tray_icon = {
-        let (config, _) = get_pake_config();
-        let tray_path = &config.system_tray_path;
-
-        // Check if this is a custom tray icon or app icon
-        if !tray_path.is_empty() && tray_path != "icons/icon.png" {
-            // Try to load the tray icon - could be relative or absolute path
-            let icon_path = if tray_path.starts_with("/") {
-                // Absolute path - use as is
-                tray_path.to_string()
-            } else if tray_path.starts_with(".pake/") || tray_path.starts_with("png/") {
-                // Relative path - prepend manifest dir
-                format!("{}/{}", env!("CARGO_MANIFEST_DIR"), tray_path)
-            } else {
-                // Default fallback path
-                format!("{}/{}", env!("CARGO_MANIFEST_DIR"), tray_path)
-            };
-
-            match Image::from_path(&icon_path) {
-                Ok(icon) => icon,
-                Err(e) => {
-                    println!(
-                        "Failed to load tray icon from {}: {}, using app icon",
-                        icon_path, e
-                    );
-                    app.default_window_icon().unwrap().clone()
-                }
-            }
-        } else {
-            // No custom tray icon, use app icon (which could be downloaded custom icon)
-            println!("Using app icon for system tray (path: {})", tray_path);
-            app.default_window_icon().unwrap().clone()
-        }
-    };
 
     let tray = TrayIconBuilder::new()
         .menu(&menu)
@@ -83,7 +44,7 @@ pub fn set_system_tray(app: &AppHandle, show_system_tray: bool) -> tauri::Result
             }
             _ => (),
         })
-        .icon(tray_icon)
+        .icon(app.default_window_icon().unwrap().clone())
         .build(app)?;
 
     tray.set_icon_as_template(false)?;

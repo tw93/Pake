@@ -7,7 +7,6 @@ import json from "@rollup/plugin-json";
 import replace from "@rollup/plugin-replace";
 import chalk from "chalk";
 import { spawn, exec } from "child_process";
-import fs from "fs";
 
 const isProduction = process.env.NODE_ENV === "production";
 const devPlugins = !isProduction ? [pakeCliDevPlugin()] : [];
@@ -49,6 +48,7 @@ function pakeCliDevPlugin() {
 
   // 智能检测包管理器
   const detectPackageManager = () => {
+    const fs = require("fs");
     if (fs.existsSync("pnpm-lock.yaml")) return "pnpm";
     if (fs.existsSync("yarn.lock")) return "yarn";
     return "npm";
