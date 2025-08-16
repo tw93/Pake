@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import chalk from 'chalk';
 import { InvalidArgumentError, program, Option } from 'commander';
 import log from 'loglevel';
@@ -19,7 +20,7 @@ import { fileTypeFromBuffer } from 'file-type';
 import * as psl from 'psl';
 
 var name = "pake-cli";
-var version$1 = "3.2.0-beta1";
+var version$1 = "3.2.0-beta11";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
@@ -60,13 +61,12 @@ var scripts = {
 	"cli:dev": "cross-env NODE_ENV=development rollup -c rollup.config.js -w",
 	"cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
 	test: "npm run cli:build && PAKE_CREATE_APP=1 node tests/index.js",
-	format: "npx prettier --write . --ignore-unknown && cd src-tauri && cargo fmt --verbose",
+	format: "prettier --write . --ignore-unknown && cd src-tauri && cargo fmt --verbose",
 	"hooks:setup": "bash .githooks/setup.sh",
-	postinstall: "npm run hooks:setup",
 	prepublishOnly: "npm run cli:build"
 };
 var type = "module";
-var exports = "./dist/pake.js";
+var exports = "./dist/cli.js";
 var license = "MIT";
 var dependencies = {
 	"@tauri-apps/api": "^2.7.0",
@@ -79,6 +79,7 @@ var dependencies = {
 	"fs-extra": "^11.3.1",
 	loglevel: "^1.9.2",
 	ora: "^8.2.0",
+	"pake-cli": "file:.yalc/pake-cli",
 	prompts: "^2.4.2",
 	psl: "^1.15.0",
 	"tmp-promise": "^3.0.3",
@@ -99,6 +100,7 @@ var devDependencies = {
 	"@types/update-notifier": "^6.0.8",
 	"app-root-path": "^3.1.0",
 	"cross-env": "^7.0.3",
+	prettier: "^3.4.2",
 	rollup: "^4.46.2",
 	"rollup-plugin-typescript2": "^0.36.0",
 	tslib: "^2.8.1",
@@ -449,11 +451,18 @@ async function mergeConfig(url, options, tauriConf) {
     const srcTauriDir = path.join(npmDirectory, 'src-tauri');
     await fsExtra.ensureDir(tauriConfigDirectory);
     // Copy source config files to .pake directory (as templates)
-    const sourceFiles = ['tauri.conf.json', 'tauri.macos.conf.json', 'tauri.windows.conf.json', 'tauri.linux.conf.json', 'pake.json'];
+    const sourceFiles = [
+        'tauri.conf.json',
+        'tauri.macos.conf.json',
+        'tauri.windows.conf.json',
+        'tauri.linux.conf.json',
+        'pake.json',
+    ];
     await Promise.all(sourceFiles.map(async (file) => {
         const sourcePath = path.join(srcTauriDir, file);
         const destPath = path.join(tauriConfigDirectory, file);
-        if (await fsExtra.pathExists(sourcePath) && !(await fsExtra.pathExists(destPath))) {
+        if ((await fsExtra.pathExists(sourcePath)) &&
+            !(await fsExtra.pathExists(destPath))) {
             await fsExtra.copy(sourcePath, destPath);
         }
     }));
@@ -1125,7 +1134,9 @@ program
     .default(DEFAULT_PAKE_OPTIONS.hideOnClose)
     .hideHelp())
     .addOption(new Option('--title <string>', 'Window title').hideHelp())
-    .addOption(new Option('--incognito', 'Launch app in incognito/private mode').default(DEFAULT_PAKE_OPTIONS.incognito))
+    .addOption(new Option('--incognito', 'Launch app in incognito/private mode')
+    .default(DEFAULT_PAKE_OPTIONS.incognito)
+    .hideHelp())
     .addOption(new Option('--installer-language <string>', 'Installer language')
     .default(DEFAULT_PAKE_OPTIONS.installerLanguage)
     .hideHelp())

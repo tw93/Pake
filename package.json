@@ -1,6 +1,6 @@
 {
   "name": "pake-cli",
-  "version": "3.2.0-beta3",
+  "version": "3.2.0-beta11",
   "description": "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。",
   "engines": {
     "node": ">=16.0.0"
@@ -43,11 +43,10 @@
     "test": "npm run cli:build && PAKE_CREATE_APP=1 node tests/index.js",
     "format": "prettier --write . --ignore-unknown && cd src-tauri && cargo fmt --verbose",
     "hooks:setup": "bash .githooks/setup.sh",
-    "postinstall": "npm run hooks:setup",
     "prepublishOnly": "npm run cli:build"
   },
   "type": "module",
-  "exports": "./dist/pake.js",
+  "exports": "./dist/cli.js",
   "license": "MIT",
   "dependencies": {
     "@tauri-apps/api": "^2.7.0",
@@ -60,6 +59,7 @@
     "fs-extra": "^11.3.1",
     "loglevel": "^1.9.2",
     "ora": "^8.2.0",
+    "pake-cli": "file:.yalc/pake-cli",
     "prompts": "^2.4.2",
     "psl": "^1.15.0",
     "tmp-promise": "^3.0.3",

@@ -17,6 +17,7 @@ export default {
     file: isProduction ? "dist/cli.js" : "dist/dev.js",
     format: "es",
     sourcemap: !isProduction,
+    banner: isProduction ? "#!/usr/bin/env node" : "",
   },
   watch: {
     include: "bin/**",
@@ -78,7 +79,7 @@ function pakeCliDevPlugin() {
         const packageManager = detectPackageManager();
         const command = `${packageManager} run tauri dev -- --config ./src-tauri/.pake/tauri.conf.json --features cli-build`;
 
-        devChildProcess = await exec(command);
+        devChildProcess = exec(command);
 
         devChildProcess.stdout.on("data", (data) => {
           console.log(chalk.green(data.toString()));

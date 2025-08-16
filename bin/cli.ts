@@ -130,9 +130,9 @@ program
   )
   .addOption(new Option('--title <string>', 'Window title').hideHelp())
   .addOption(
-    new Option('--incognito', 'Launch app in incognito/private mode').default(
-      DEFAULT.incognito,
-    ),
+    new Option('--incognito', 'Launch app in incognito/private mode')
+      .default(DEFAULT.incognito)
+      .hideHelp(),
   )
   .addOption(
     new Option('--installer-language <string>', 'Installer language')
