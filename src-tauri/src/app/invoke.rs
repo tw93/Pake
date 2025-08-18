@@ -112,13 +112,15 @@ pub async fn window_run_label(app: AppHandle, label: String, url: String) {
     let _window = tauri::WebviewWindowBuilder::new(
         &app,
         label.clone(),
-        tauri::WebviewUrl::External(url.parse().unwrap()),
+        tauri::WebviewUrl::App(url.parse().unwrap()),
     )
     .title("GoViewPro")
     .user_agent(user_agent)
     .resizable(window_config.resizable)
     .fullscreen(window_config.fullscreen)
     .inner_size(window_config.width, window_config.height)
+    .always_on_top(window_config.always_on_top)
+    .disable_drag_drop_handler()
     .initialization_script(&config_script)
     .initialization_script(include_str!("../inject/component.js"))
     .initialization_script(include_str!("../inject/event.js"))
