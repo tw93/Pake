@@ -112,7 +112,7 @@ pub async fn window_run_label(app: AppHandle, label: String, url: String) {
     let _window = tauri::WebviewWindowBuilder::new(
         &app,
         label.clone(),
-        tauri::WebviewUrl::App(url.parse().unwrap()),
+        tauri::WebviewUrl::External(url.parse().unwrap()),
     )
     .title("GoViewPro")
     .user_agent(user_agent)
