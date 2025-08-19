@@ -39,6 +39,9 @@ npm run build
 3. PakePro/src-tauri/src/lib.rs <br>
   项目采用的是 tauri_plugin_localhost 插件, `http://localhost:9527` 提供的本地服务器, `tauri://` 协议会导致一些服务无法使用, 你们可以根据自己的需求修改这里的逻辑. <br>
   The project uses the tauri_plugin_localhost plugin, which provides a local server at `http://localhost:9527`. The `tauri://` protocol will cause some services to not work, so you can modify the logic here according to your own needs. <br>
+  
+4. 如果你是打包的本地静态文件, 需要服务端推送自动更新应用, 可以参考 main-pro-updater 分支. <br>
+  If you are packaging local static files, you need to push automatic updates to the server. You can refer to the main-pro-updater branch. <br>
 
 ## ⚠️ 注意安全 Caution!
   PakePro/src-tauri/capabilities/default.json <br>
