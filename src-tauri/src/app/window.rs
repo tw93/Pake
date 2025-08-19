@@ -76,12 +76,12 @@ pub fn set_window(
         }
     }
 
-    #[cfg(not(target_os = "macos"))]
-    {
-        window_builder = window_builder
-            .data_directory(_data_dir)
-            .title(app.package_info().name.clone());
-    }
+    // #[cfg(not(target_os = "macos"))]
+    // {
+    //     window_builder = window_builder
+    //         .data_directory(_data_dir)
+    //         .title(app.package_info().name.clone());
+    // }
 
     window_builder.build().expect("Failed to build window")
 }

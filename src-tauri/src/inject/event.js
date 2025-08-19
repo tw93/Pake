@@ -264,6 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const key = 'GoViewPro' + new Date().getTime()
       invoke('window_run_label', { label: key, url: hrefUrl.href })
+      return;
     }
     // Call the original window.open function to maintain its normal functionality.
     return originalWindowOpen.call(window, url, name, specs);

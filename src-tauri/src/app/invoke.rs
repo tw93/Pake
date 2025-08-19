@@ -119,6 +119,8 @@ pub async fn window_run_label(app: AppHandle, label: String, url: String) {
     .resizable(window_config.resizable)
     .fullscreen(window_config.fullscreen)
     .inner_size(window_config.width, window_config.height)
+    .always_on_top(window_config.always_on_top)
+    .disable_drag_drop_handler()
     .initialization_script(&config_script)
     .initialization_script(include_str!("../inject/component.js"))
     .initialization_script(include_str!("../inject/event.js"))
