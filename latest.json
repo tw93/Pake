@@ -5,11 +5,11 @@
   "platforms": {
     "darwin-x86_64": {
       "signature": "rw.65712.GoviewPro_2.0.0_universal",
-      "url": "https://goviewpro.oss-cn-hangzhou.aliyuncs.com/pake/rw.65712.GoviewPro_2.0.0_universal.dmg"
+      "url": "https://github.com/username/reponame/releases/download/v1.0.0/app-x86_64.dmg"
     },
     "darwin-aarch64": {
       "signature": "rw.65712.GoviewPro_2.0.0_universal",
-      "url": "https://goviewpro.oss-cn-hangzhou.aliyuncs.com/pake/rw.65712.GoviewPro_2.0.0_universal.dmg"
+      "url": "https://github.com/username/reponame/releases/download/v1.0.0/app-aarch64.dmg"
     },
     "windows-x86_64": {
       "signature": "Content of app.msi.sig",

@@ -22,9 +22,9 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IERCMzJBMkVBOTk1RDc2MkMKUldRc2RsMlo2cUl5MjBrOEsybXdZNjlvb1hZTHdiQlZFQU85b2NDZjNiSjVhcWpPdlRkRFovK1gK%",
+      "pubkey": "your public key",
       "endpoints": [
-        "https://goviewpro.oss-cn-hangzhou.aliyuncs.com/pake/latest.json"
+        "https://github.com/username/reponame/releases/latest.json"
       ]
     }
   }
