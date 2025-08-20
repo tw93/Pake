@@ -163,12 +163,12 @@ cargo check --manifest-path=src-tauri/Cargo.toml
 - Write self-documenting code
 - Follow existing patterns consistently
 
-**Commit Guidelines:**
+**Git and Commit Guidelines:**
 
-- Commit working code incrementally
-- Use clear, descriptive messages
-- Never bypass commit hooks
-- Test before committing
+- **NEVER commit code automatically** - User handles all git operations
+- **NEVER generate commit messages** - User writes their own commit messages
+- Only make code changes, user decides when and how to commit
+- Test before user commits
 
 ## Branch Strategy
 
