@@ -96,9 +96,7 @@ const main = async () => {
 
     let params = buildParameters();
 
-    if (process.env.MULTI_ARCH === "true") {
-      await execa("rustup", ["target", "add", "aarch64-apple-darwin"]);
-    }
+    // Multi-arch target is now handled in GitHub Actions workflow
 
     if (process.env.ICON && process.env.ICON !== "") {
       const iconFile = getIconFileName();

@@ -89,6 +89,11 @@ jobs:
         with:
           toolchain: stable
           target: x86_64-apple-darwin
+          
+      - name: Add additional Rust target for multi-arch
+        if: inputs.platform == 'macos-latest' && inputs.multi_arch == true
+        run: |
+          rustup target add aarch64-apple-darwin
 
       - name: Install dependencies (ubuntu only)
         if: inputs.platform == 'ubuntu-24.04'
@@ -121,6 +126,7 @@ jobs:
           npm install axios
 
       - name: Build with pake-cli
+        timeout-minutes: 15
         run: |
           node ./script/build_with_pake_cli.js
         env:
