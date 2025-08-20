@@ -73,6 +73,7 @@ const main = async () => {
     }
 
     console.log("Pake parameters:", params.join(" "));
+    console.log("Expected app name:", process.env.NAME);
     console.log("Compiling....");
 
     // Execute the CLI command with extended timeout
