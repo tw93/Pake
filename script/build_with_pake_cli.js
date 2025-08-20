@@ -24,7 +24,7 @@ const logConfiguration = () => {
 // Build parameters construction
 const buildParameters = () => {
   const params = [
-    "cli.js",
+    "dist/cli.js",
     process.env.URL,
     "--name",
     process.env.NAME,

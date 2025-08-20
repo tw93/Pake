@@ -54,4 +54,4 @@ RUN --mount=type=cache,target=/root/.npm \
 
 # Set up the entrypoint
 WORKDIR /output
-ENTRYPOINT ["node", "/pake/cli.js"]
+ENTRYPOINT ["node", "/pake/dist/cli.js"]
