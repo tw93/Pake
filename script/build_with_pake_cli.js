@@ -1,7 +1,5 @@
-import fs from "fs";
 import path from "path";
 import { execa } from "execa";
-// We'll call the CLI directly for icon handling
 
 // Configuration logging
 const logConfiguration = () => {
@@ -80,59 +78,7 @@ const main = async () => {
     const timeout = 900000; // 15 minutes for all builds
     await execa("node", params, { stdio: "inherit", timeout });
 
-    // Create output directory if it doesn't exist
-    if (!fs.existsSync("output")) {
-      fs.mkdirSync("output");
-    }
-
-    // Move built files to output directory more efficiently
-    const buildPaths = [
-      `src-tauri/target/release/bundle`,
-      `src-tauri/target/universal-apple-darwin/release/bundle`,
-    ];
-
-    for (const buildPath of buildPaths) {
-      if (fs.existsSync(buildPath)) {
-        const bundleFiles = fs
-          .readdirSync(buildPath, { recursive: true })
-          .filter((file) => {
-            const fullPath = path.join(buildPath, file);
-            return (
-              fs.statSync(fullPath).isFile() &&
-              (file.endsWith(".dmg") ||
-                file.endsWith(".exe") ||
-                file.endsWith(".deb") ||
-                file.endsWith(".rpm") ||
-                file.endsWith(".AppImage"))
-            );
-          });
-
-        for (const file of bundleFiles) {
-          const srcPath = path.join(buildPath, file);
-          const destPath = path.join("output", path.basename(file));
-          // Use fs.copyFileSync for cross-platform compatibility
-          fs.copyFileSync(srcPath, destPath);
-        }
-        break; // Found files, no need to check other paths
-      }
-    }
-
-    // Fallback to original method if no bundle files found
-    const files = fs.readdirSync(".");
-    const namePattern = new RegExp(`^${process.env.NAME}\\..*$`);
-    let foundFiles = false;
-    for (const file of files) {
-      if (namePattern.test(file)) {
-        // Use fs for cross-platform file operations
-        const destPath = path.join("output", file);
-        fs.renameSync(file, destPath);
-        foundFiles = true;
-      }
-    }
-
-    if (!foundFiles) {
-      console.log("Warning: No output files found matching pattern");
-    }
+    // pake-cli will handle file output to its own output directory
 
     console.log("Build Success");
     process.chdir("../..");
