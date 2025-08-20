@@ -27,8 +27,6 @@ output
 *.AppImage
 *.dmg
 
-package-lock.json
-yarn.lock
 dist
 !dist/about_pake.html
 !dist/cli.js
