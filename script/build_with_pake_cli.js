@@ -21,45 +21,6 @@ const logConfiguration = () => {
   console.log("===========================\n");
 };
 
-// Build parameters construction
-const buildParameters = () => {
-  const params = [
-    "dist/cli.js",
-    process.env.URL,
-    "--name",
-    process.env.NAME,
-    "--height",
-    process.env.HEIGHT,
-    "--width",
-    process.env.WIDTH,
-  ];
-
-  if (process.env.HIDE_TITLE_BAR === "true" && process.platform === "darwin") {
-    params.push("--hide-title-bar");
-  }
-
-  if (process.env.FULLSCREEN === "true") {
-    params.push("--fullscreen");
-  }
-
-  if (process.env.MULTI_ARCH === "true" && process.platform === "darwin") {
-    // We'll handle rustup separately since it's a different command
-    params.push("--multi-arch");
-  }
-
-  if (process.env.TARGETS && process.platform === "linux") {
-    params.push("--targets", process.env.TARGETS);
-  }
-
-  if (process.platform === "win32" || process.platform === "linux") {
-    params.push("--show-system-tray");
-  }
-
-  return params;
-};
-
-// Icon will be handled directly by CLI
-
 // Main execution
 const main = async () => {
   try {
@@ -68,9 +29,40 @@ const main = async () => {
     const cliPath = path.join(process.cwd(), "node_modules/pake-cli");
     process.chdir(cliPath);
 
-    let params = buildParameters();
+    // Build CLI parameters
+    let params = [
+      "dist/cli.js",
+      process.env.URL,
+      "--name",
+      process.env.NAME,
+      "--height",
+      process.env.HEIGHT,
+      "--width",
+      process.env.WIDTH,
+    ];
 
-    // Multi-arch target is now handled in GitHub Actions workflow
+    if (
+      process.env.HIDE_TITLE_BAR === "true" &&
+      process.platform === "darwin"
+    ) {
+      params.push("--hide-title-bar");
+    }
+
+    if (process.env.FULLSCREEN === "true") {
+      params.push("--fullscreen");
+    }
+
+    if (process.env.MULTI_ARCH === "true" && process.platform === "darwin") {
+      params.push("--multi-arch");
+    }
+
+    if (process.env.TARGETS && process.platform === "linux") {
+      params.push("--targets", process.env.TARGETS);
+    }
+
+    if (process.platform === "win32" || process.platform === "linux") {
+      params.push("--show-system-tray");
+    }
 
     // Add icon parameter if provided - CLI will handle download and conversion
     if (process.env.ICON && process.env.ICON !== "") {
@@ -84,8 +76,9 @@ const main = async () => {
     console.log("Pake parameters:", params.join(" "));
     console.log("Compiling....");
 
-    // Execute the CLI command
-    await execa("node", params, { stdio: "inherit" });
+    // Execute the CLI command with extended timeout
+    const timeout = 900000; // 15 minutes for all builds
+    await execa("node", params, { stdio: "inherit", timeout });
 
     // Create output directory if it doesn't exist
     if (!fs.existsSync("output")) {
@@ -117,7 +110,8 @@ const main = async () => {
         for (const file of bundleFiles) {
           const srcPath = path.join(buildPath, file);
           const destPath = path.join("output", path.basename(file));
-          await execa("cp", [srcPath, destPath]);
+          // Use fs.copyFileSync for cross-platform compatibility
+          fs.copyFileSync(srcPath, destPath);
         }
         break; // Found files, no need to check other paths
       }
@@ -129,7 +123,9 @@ const main = async () => {
     let foundFiles = false;
     for (const file of files) {
       if (namePattern.test(file)) {
-        await execa("mv", [file, path.join("output", file)]);
+        // Use fs for cross-platform file operations
+        const destPath = path.join("output", file);
+        fs.renameSync(file, destPath);
         foundFiles = true;
       }
     }

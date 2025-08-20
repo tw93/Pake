@@ -121,6 +121,7 @@ jobs:
           key: ${{ runner.os }}-pake-cli-${{ hashFiles('**/package.json') }}
 
       - name: Install pake-cli and script dependencies
+        shell: bash
         run: |
           if [ ! -d "node_modules/pake-cli" ]; then
             echo "Installing pake-cli..."
