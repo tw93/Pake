@@ -22,7 +22,7 @@ import sharp from 'sharp';
 import * as psl from 'psl';
 
 var name = "pake-cli";
-var version$1 = "3.2.0-beta15";
+var version$1 = "3.2.0";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
@@ -64,7 +64,6 @@ var scripts = {
 	"cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
 	test: "npm run cli:build && PAKE_CREATE_APP=1 node tests/index.js",
 	format: "prettier --write . --ignore-unknown && cd src-tauri && cargo fmt --verbose",
-	"hooks:setup": "bash .githooks/setup.sh",
 	prepublishOnly: "npm run cli:build"
 };
 var type = "module";
@@ -651,11 +650,13 @@ class BaseBuilder {
         this.options = options;
     }
     getBuildEnvironment() {
-        return IS_MAC ? {
-            'CFLAGS': '-fno-modules',
-            'CXXFLAGS': '-fno-modules',
-            'MACOSX_DEPLOYMENT_TARGET': '14.0'
-        } : undefined;
+        return IS_MAC
+            ? {
+                CFLAGS: '-fno-modules',
+                CXXFLAGS: '-fno-modules',
+                MACOSX_DEPLOYMENT_TARGET: '14.0',
+            }
+            : undefined;
     }
     getInstallTimeout() {
         return process.platform === 'win32' ? 600000 : 300000;
@@ -692,7 +693,9 @@ class BaseBuilder {
         await fsExtra.ensureDir(rustProjectDir);
         // 统一使用npm，简单可靠
         const packageManager = 'npm';
-        const registryOption = isChina ? ' --registry=https://registry.npmmirror.com' : '';
+        const registryOption = isChina
+            ? ' --registry=https://registry.npmmirror.com'
+            : '';
         const legacyPeerDeps = ' --legacy-peer-deps'; // 解决dependency conflicts
         const timeout = this.getInstallTimeout();
         const buildEnv = this.getBuildEnvironment();
@@ -722,7 +725,7 @@ class BaseBuilder {
         // Build app
         const buildSpinner = getSpinner('Building app...');
         // Let spinner run for a moment so user can see it, then stop before npm command
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
         buildSpinner.stop();
         // Show static message to keep the status visible
         logger.warn('✸ Building app...');
@@ -1024,10 +1027,10 @@ async function handleIcon(options, url) {
 function generateIconServiceUrls(domain) {
     const logoDevUrls = API_TOKENS.logoDev
         .sort(() => Math.random() - 0.5)
-        .map(token => `https://img.logo.dev/${domain}?token=${token}&format=png&size=256`);
+        .map((token) => `https://img.logo.dev/${domain}?token=${token}&format=png&size=256`);
     const brandfetchUrls = API_TOKENS.brandfetch
         .sort(() => Math.random() - 0.5)
-        .map(key => `https://cdn.brandfetch.io/${domain}/w/400/h/400?c=${key}`);
+        .map((key) => `https://cdn.brandfetch.io/${domain}/w/400/h/400?c=${key}`);
     return [
         ...logoDevUrls,
         ...brandfetchUrls,
@@ -1087,7 +1090,8 @@ async function downloadIcon(iconUrl, showSpinner = true) {
         if (!iconData || iconData.byteLength < ICON_CONFIG.minFileSize)
             return null;
         const fileDetails = await fileTypeFromBuffer(iconData);
-        if (!fileDetails || !ICON_CONFIG.supportedFormats.includes(fileDetails.ext)) {
+        if (!fileDetails ||
+            !ICON_CONFIG.supportedFormats.includes(fileDetails.ext)) {
             return null;
         }
         return await saveIconFile(iconData, fileDetails.ext);
