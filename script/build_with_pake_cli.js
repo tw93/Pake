@@ -34,7 +34,7 @@ const buildParameters = () => {
     process.env.WIDTH,
   ];
 
-  if (process.env.HIDE_TITLE_BAR === "true") {
+  if (process.env.HIDE_TITLE_BAR === "true" && process.platform === "darwin") {
     params.push("--hide-title-bar");
   }
 
@@ -42,12 +42,12 @@ const buildParameters = () => {
     params.push("--fullscreen");
   }
 
-  if (process.env.MULTI_ARCH === "true") {
+  if (process.env.MULTI_ARCH === "true" && process.platform === "darwin") {
     // We'll handle rustup separately since it's a different command
     params.push("--multi-arch");
   }
 
-  if (process.env.TARGETS) {
+  if (process.env.TARGETS && process.platform === "linux") {
     params.push("--targets", process.env.TARGETS);
   }
 
