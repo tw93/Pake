@@ -26,7 +26,34 @@ const main = async () => {
     logConfiguration();
 
     const cliPath = path.join(process.cwd(), "node_modules/pake-cli");
+    
+    // Check if pake-cli directory exists
+    if (!fs.existsSync(cliPath)) {
+      console.error("Error: pake-cli not found at", cliPath);
+      console.error("Please make sure pake-cli is installed: npm install pake-cli");
+      process.exit(1);
+    }
+    
     process.chdir(cliPath);
+
+    // Clean up any previous configuration to ensure fresh build
+    const pakeDirPath = path.join("src-tauri", ".pake");
+    
+    // Remove .pake directory to force fresh config generation
+    if (fs.existsSync(pakeDirPath)) {
+      fs.rmSync(pakeDirPath, { recursive: true, force: true });
+      console.log("Cleaned previous .pake directory");
+    }
+
+    // Fix hardcoded default config in npm package
+    const defaultConfigPath = path.join("src-tauri", "tauri.conf.json");
+    if (fs.existsSync(defaultConfigPath)) {
+      const defaultConfig = JSON.parse(fs.readFileSync(defaultConfigPath, 'utf8'));
+      defaultConfig.productName = process.env.NAME;
+      defaultConfig.identifier = `com.pake.${process.env.NAME.toLowerCase()}`;
+      fs.writeFileSync(defaultConfigPath, JSON.stringify(defaultConfig, null, 2));
+      console.log(`Fixed default config: productName -> ${process.env.NAME}`);
+    }
 
     // Build CLI parameters
     let params = [
@@ -76,9 +103,8 @@ const main = async () => {
     console.log("Expected app name:", process.env.NAME);
     console.log("Compiling....");
 
-    // Execute the CLI command with extended timeout
-    const timeout = 900000; // 15 minutes for all builds
-    await execa("node", params, { stdio: "inherit", timeout });
+    // Execute the CLI command
+    await execa("node", params, { stdio: "inherit" });
 
     // Create output directory and move built files
     if (!fs.existsSync("output")) {

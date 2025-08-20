@@ -118,18 +118,32 @@ jobs:
         id: pake_cache
         with:
           path: node_modules/pake-cli
-          key: ${{ runner.os }}-pake-cli-${{ hashFiles('**/package.json') }}
+          key: ${{ runner.os }}-pake-cli-${{ hashFiles('**/package.json') }}-${{ inputs.multi_arch }}
 
       - name: Install pake-cli and script dependencies
         shell: bash
         run: |
+          echo "Checking pake-cli installation..."
           if [ ! -d "node_modules/pake-cli" ]; then
             echo "Installing pake-cli..."
-            npm install pake-cli
+            npm install pake-cli --no-package-lock
           else
             echo "pake-cli found in cache"
           fi
+          
+          # Always install script dependencies
+          echo "Installing script dependencies..."
           npm install execa axios --no-package-lock
+          
+          # Verify installation
+          if [ ! -d "node_modules/pake-cli" ]; then
+            echo "Error: Failed to install pake-cli"
+            exit 1
+          fi
+          
+          echo "Listing pake-cli contents:"
+          ls -la node_modules/pake-cli/ | head -5
+          echo "pake-cli installation verified"
 
       - name: Rust cache restore
         uses: actions/cache/restore@v4.2.0
