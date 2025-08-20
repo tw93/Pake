@@ -531,7 +531,33 @@ async function mergeConfig(url, options, tauriConf) {
     tauriConf.pake.system_tray[currentPlatform] = showSystemTray;
     // Processing targets are currently only open to Linux.
     if (platform === 'linux') {
+        // Remove hardcoded desktop files and regenerate with correct app name
         delete tauriConf.bundle.linux.deb.files;
+        // Generate correct desktop file configuration
+        const appNameLower = name.toLowerCase();
+        const identifier = `com.pake.${appNameLower}`;
+        const desktopFileName = `${identifier}.desktop`;
+        // Create desktop file content
+        const desktopContent = `[Desktop Entry]
+Version=1.0
+Type=Application
+Name=${name}
+Comment=${name}
+Exec=${appNameLower}
+Icon=${appNameLower}
+Categories=Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml_xml;
+StartupNotify=true
+`;
+        // Write desktop file to assets directory
+        const assetsDir = path.join(npmDirectory, 'src-tauri/assets');
+        const desktopFilePath = path.join(assetsDir, desktopFileName);
+        await fsExtra.ensureDir(assetsDir);
+        await fsExtra.writeFile(desktopFilePath, desktopContent);
+        // Set up desktop file in bundle configuration
+        tauriConf.bundle.linux.deb.files = {
+            [`/usr/share/applications/${desktopFileName}`]: `assets/${desktopFileName}`
+        };
         const validTargets = ['deb', 'appimage', 'rpm'];
         if (validTargets.includes(options.targets)) {
             tauriConf.bundle.targets = [options.targets];
@@ -1014,11 +1040,38 @@ async function handleIcon(options, url) {
             return faviconPath;
     }
     logger.info('✼ No icon provided, using default icon.');
-    const iconPath = IS_WIN
-        ? 'src-tauri/png/icon_256.ico'
-        : IS_LINUX
-            ? 'src-tauri/png/icon_512.png'
-            : 'src-tauri/icons/icon.icns';
+    // For Windows, ensure we have proper fallback handling
+    if (IS_WIN) {
+        const defaultIcoPath = path.join(npmDirectory, 'src-tauri/png/icon_256.ico');
+        const defaultPngPath = path.join(npmDirectory, 'src-tauri/png/icon_512.png');
+        // First try default ico
+        if (await fsExtra.pathExists(defaultIcoPath)) {
+            return defaultIcoPath;
+        }
+        // If ico doesn't exist, try to convert from png
+        if (await fsExtra.pathExists(defaultPngPath)) {
+            logger.info('✼ Default ico not found, converting from png...');
+            try {
+                const convertedPath = await convertIconFormat(defaultPngPath, 'icon');
+                if (convertedPath && await fsExtra.pathExists(convertedPath)) {
+                    return convertedPath;
+                }
+            }
+            catch (error) {
+                logger.warn(`Failed to convert default png to ico: ${error.message}`);
+            }
+        }
+        // Last resort: return png path if it exists (Windows can handle png in some cases)
+        if (await fsExtra.pathExists(defaultPngPath)) {
+            logger.warn('✼ Using png as fallback for Windows (may cause issues).');
+            return defaultPngPath;
+        }
+        // If nothing exists, let the error bubble up
+        throw new Error('No default icon found for Windows build');
+    }
+    const iconPath = IS_LINUX
+        ? 'src-tauri/png/icon_512.png'
+        : 'src-tauri/icons/icon.icns';
     return path.join(npmDirectory, iconPath);
 }
 /**
@@ -1054,9 +1107,12 @@ async function tryGetFavicon(url, appName) {
         const domain = new URL(url).hostname;
         const spinner = getSpinner(`Fetching icon from ${domain}...`);
         const serviceUrls = generateIconServiceUrls(domain);
+        // Use shorter timeout for CI environments
+        const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+        const downloadTimeout = isCI ? 5000 : ICON_CONFIG.downloadTimeout;
         for (const serviceUrl of serviceUrls) {
             try {
-                const faviconPath = await downloadIcon(serviceUrl, false);
+                const faviconPath = await downloadIcon(serviceUrl, false, downloadTimeout);
                 if (!faviconPath)
                     continue;
                 const convertedPath = await convertIconFormat(faviconPath, appName);
@@ -1065,7 +1121,11 @@ async function tryGetFavicon(url, appName) {
                     return convertedPath;
                 }
             }
-            catch {
+            catch (error) {
+                // Log specific errors in CI for debugging
+                if (isCI) {
+                    logger.debug(`Icon service ${serviceUrl} failed: ${error.message}`);
+                }
                 continue;
             }
         }
@@ -1080,11 +1140,11 @@ async function tryGetFavicon(url, appName) {
 /**
  * Downloads icon from URL
  */
-async function downloadIcon(iconUrl, showSpinner = true) {
+async function downloadIcon(iconUrl, showSpinner = true, customTimeout) {
     try {
         const response = await axios.get(iconUrl, {
             responseType: 'arraybuffer',
-            timeout: ICON_CONFIG.downloadTimeout,
+            timeout: customTimeout || ICON_CONFIG.downloadTimeout,
         });
         const iconData = response.data;
         if (!iconData || iconData.byteLength < ICON_CONFIG.minFileSize)

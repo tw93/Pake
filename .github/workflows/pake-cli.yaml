@@ -125,13 +125,13 @@ jobs:
         run: |
           echo "Installing pake-cli..."
           npm install pake-cli --no-package-lock
-          
+
           # Verify installation
           if [ ! -d "node_modules/pake-cli" ]; then
             echo "Error: Failed to install pake-cli"
             exit 1
           fi
-          
+
           echo "Listing pake-cli contents:"
           ls -la node_modules/pake-cli/ | head -5
           echo "pake-cli installation verified"

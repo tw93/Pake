@@ -26,33 +26,25 @@ const main = async () => {
     logConfiguration();
 
     const cliPath = path.join(process.cwd(), "node_modules/pake-cli");
-    
+
     // Check if pake-cli directory exists
     if (!fs.existsSync(cliPath)) {
       console.error("Error: pake-cli not found at", cliPath);
-      console.error("Please make sure pake-cli is installed: npm install pake-cli");
+      console.error(
+        "Please make sure pake-cli is installed: npm install pake-cli",
+      );
       process.exit(1);
     }
-    
+
     process.chdir(cliPath);
 
     // Clean up any previous configuration to ensure fresh build
     const pakeDirPath = path.join("src-tauri", ".pake");
-    
+
     // Remove .pake directory to force fresh config generation
     if (fs.existsSync(pakeDirPath)) {
       fs.rmSync(pakeDirPath, { recursive: true, force: true });
-      console.log("Cleaned previous .pake directory");
-    }
-
-    // Fix hardcoded default config in npm package
-    const defaultConfigPath = path.join("src-tauri", "tauri.conf.json");
-    if (fs.existsSync(defaultConfigPath)) {
-      const defaultConfig = JSON.parse(fs.readFileSync(defaultConfigPath, 'utf8'));
-      defaultConfig.productName = process.env.NAME;
-      defaultConfig.identifier = `com.pake.${process.env.NAME.toLowerCase()}`;
-      fs.writeFileSync(defaultConfigPath, JSON.stringify(defaultConfig, null, 2));
-      console.log(`Fixed default config: productName -> ${process.env.NAME}`);
+      console.log("Cleaned previous .pake directory for fresh build");
     }
 
     // Build CLI parameters
@@ -95,7 +87,7 @@ const main = async () => {
       params.push("--icon", process.env.ICON);
     } else {
       console.log(
-        "Won't use icon as ICON environment variable is not defined!",
+        "No icon provided, pake-cli will attempt to fetch favicon or use default",
       );
     }
 
@@ -111,20 +103,27 @@ const main = async () => {
       fs.mkdirSync("output");
     }
 
-    // pake-cli outputs files to current directory with pattern: {name}.{extension}
+    // pake-cli outputs files to current directory with various naming patterns
     const files = fs.readdirSync(".");
-    const namePattern = new RegExp(`^${process.env.NAME}\\..*$`);
+    const appName = process.env.NAME;
+    const escapedAppName = appName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // Escape regex special chars
+
+    // Create comprehensive pattern for app files
+    const appFilePattern = new RegExp(
+      `^(${escapedAppName}|${escapedAppName.toLowerCase()})(_.*|\\..*)$`,
+      "i",
+    );
     let foundFiles = false;
-    
+
     for (const file of files) {
-      if (namePattern.test(file)) {
+      if (appFilePattern.test(file)) {
         const destPath = path.join("output", file);
         fs.renameSync(file, destPath);
         console.log(`Moved: ${file} -> output/${file}`);
         foundFiles = true;
       }
     }
-    
+
     if (!foundFiles) {
       console.log("Warning: No output files found matching pattern");
     }

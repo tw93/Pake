@@ -139,7 +139,38 @@ export async function mergeConfig(
 
   // Processing targets are currently only open to Linux.
   if (platform === 'linux') {
+    // Remove hardcoded desktop files and regenerate with correct app name
     delete tauriConf.bundle.linux.deb.files;
+
+    // Generate correct desktop file configuration
+    const appNameLower = name.toLowerCase();
+    const identifier = `com.pake.${appNameLower}`;
+    const desktopFileName = `${identifier}.desktop`;
+
+    // Create desktop file content
+    const desktopContent = `[Desktop Entry]
+Version=1.0
+Type=Application
+Name=${name}
+Comment=${name}
+Exec=${appNameLower}
+Icon=${appNameLower}
+Categories=Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml_xml;
+StartupNotify=true
+`;
+
+    // Write desktop file to assets directory
+    const assetsDir = path.join(npmDirectory, 'src-tauri/assets');
+    const desktopFilePath = path.join(assetsDir, desktopFileName);
+    await fsExtra.ensureDir(assetsDir);
+    await fsExtra.writeFile(desktopFilePath, desktopContent);
+
+    // Set up desktop file in bundle configuration
+    tauriConf.bundle.linux.deb.files = {
+      [`/usr/share/applications/${desktopFileName}`]: `assets/${desktopFileName}`,
+    };
+
     const validTargets = ['deb', 'appimage', 'rpm'];
     if (validTargets.includes(options.targets)) {
       tauriConf.bundle.targets = [options.targets];

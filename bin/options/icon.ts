@@ -119,11 +119,49 @@ export async function handleIcon(options: PakeAppOptions, url?: string) {
   }
 
   logger.info('✼ No icon provided, using default icon.');
-  const iconPath = IS_WIN
-    ? 'src-tauri/png/icon_256.ico'
-    : IS_LINUX
-      ? 'src-tauri/png/icon_512.png'
-      : 'src-tauri/icons/icon.icns';
+
+  // For Windows, ensure we have proper fallback handling
+  if (IS_WIN) {
+    const defaultIcoPath = path.join(
+      npmDirectory,
+      'src-tauri/png/icon_256.ico',
+    );
+    const defaultPngPath = path.join(
+      npmDirectory,
+      'src-tauri/png/icon_512.png',
+    );
+
+    // First try default ico
+    if (await fsExtra.pathExists(defaultIcoPath)) {
+      return defaultIcoPath;
+    }
+
+    // If ico doesn't exist, try to convert from png
+    if (await fsExtra.pathExists(defaultPngPath)) {
+      logger.info('✼ Default ico not found, converting from png...');
+      try {
+        const convertedPath = await convertIconFormat(defaultPngPath, 'icon');
+        if (convertedPath && (await fsExtra.pathExists(convertedPath))) {
+          return convertedPath;
+        }
+      } catch (error) {
+        logger.warn(`Failed to convert default png to ico: ${error.message}`);
+      }
+    }
+
+    // Last resort: return png path if it exists (Windows can handle png in some cases)
+    if (await fsExtra.pathExists(defaultPngPath)) {
+      logger.warn('✼ Using png as fallback for Windows (may cause issues).');
+      return defaultPngPath;
+    }
+
+    // If nothing exists, let the error bubble up
+    throw new Error('No default icon found for Windows build');
+  }
+
+  const iconPath = IS_LINUX
+    ? 'src-tauri/png/icon_512.png'
+    : 'src-tauri/icons/icon.icns';
   return path.join(npmDirectory, iconPath);
 }
 
@@ -171,9 +209,18 @@ async function tryGetFavicon(
 
     const serviceUrls = generateIconServiceUrls(domain);
 
+    // Use shorter timeout for CI environments
+    const isCI =
+      process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+    const downloadTimeout = isCI ? 5000 : ICON_CONFIG.downloadTimeout;
+
     for (const serviceUrl of serviceUrls) {
       try {
-        const faviconPath = await downloadIcon(serviceUrl, false);
+        const faviconPath = await downloadIcon(
+          serviceUrl,
+          false,
+          downloadTimeout,
+        );
         if (!faviconPath) continue;
 
         const convertedPath = await convertIconFormat(faviconPath, appName);
@@ -183,7 +230,11 @@ async function tryGetFavicon(
           );
           return convertedPath;
         }
-      } catch {
+      } catch (error) {
+        // Log specific errors in CI for debugging
+        if (isCI) {
+          logger.debug(`Icon service ${serviceUrl} failed: ${error.message}`);
+        }
         continue;
       }
     }
@@ -202,11 +253,12 @@ async function tryGetFavicon(
 export async function downloadIcon(
   iconUrl: string,
   showSpinner = true,
+  customTimeout?: number,
 ): Promise<string | null> {
   try {
     const response = await axios.get(iconUrl, {
       responseType: 'arraybuffer',
-      timeout: ICON_CONFIG.downloadTimeout,
+      timeout: customTimeout || ICON_CONFIG.downloadTimeout,
     });
 
     const iconData = response.data;
