@@ -21,10 +21,10 @@ export async function installRust() {
     await shellExec(
       IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac,
     );
-    spinner.succeed(chalk.green('Rust installed successfully!'));
+    spinner.succeed(chalk.green('✔ Rust installed successfully!'));
   } catch (error) {
-    console.error('Error installing Rust:', error.message);
-    spinner.fail(chalk.red('Rust installation failed!'));
+    spinner.fail(chalk.red('✕ Rust installation failed!'));
+    console.error(error.message);
     process.exit(1);
   }
 }

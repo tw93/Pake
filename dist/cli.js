@@ -17,10 +17,12 @@ import updateNotifier from 'update-notifier';
 import axios from 'axios';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
+import icongen from 'icon-gen';
+import sharp from 'sharp';
 import * as psl from 'psl';
 
 var name = "pake-cli";
-var version$1 = "3.2.0-beta11";
+var version$1 = "3.2.0-beta15";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
@@ -69,19 +71,20 @@ var type = "module";
 var exports = "./dist/cli.js";
 var license = "MIT";
 var dependencies = {
-	"@tauri-apps/api": "^2.7.0",
-	"@tauri-apps/cli": "^2.7.1",
+	"@tauri-apps/api": "^2.8.0",
+	"@tauri-apps/cli": "^2.8.1",
 	axios: "^1.11.0",
-	chalk: "^5.5.0",
+	chalk: "^5.6.0",
 	commander: "^11.1.0",
 	execa: "^9.6.0",
 	"file-type": "^18.7.0",
 	"fs-extra": "^11.3.1",
+	"icon-gen": "^5.0.0",
 	loglevel: "^1.9.2",
 	ora: "^8.2.0",
-	"pake-cli": "file:.yalc/pake-cli",
 	prompts: "^2.4.2",
 	psl: "^1.15.0",
+	sharp: "^0.33.5",
 	"tmp-promise": "^3.0.3",
 	"update-notifier": "^7.3.1"
 };
@@ -92,16 +95,15 @@ var devDependencies = {
 	"@rollup/plugin-replace": "^6.0.2",
 	"@rollup/plugin-terser": "^0.4.4",
 	"@types/fs-extra": "^11.0.4",
-	"@types/node": "^20.19.10",
+	"@types/node": "^20.19.11",
 	"@types/page-icon": "^0.3.6",
 	"@types/prompts": "^2.4.9",
-	"@types/psl": "^1.11.0",
 	"@types/tmp": "^0.2.6",
 	"@types/update-notifier": "^6.0.8",
 	"app-root-path": "^3.1.0",
 	"cross-env": "^7.0.3",
-	prettier: "^3.4.2",
-	rollup: "^4.46.2",
+	prettier: "^3.6.2",
+	rollup: "^4.46.3",
 	"rollup-plugin-typescript2": "^0.36.0",
 	tslib: "^2.8.1",
 	typescript: "^5.9.2"
@@ -319,13 +321,14 @@ const currentModulePath = fileURLToPath(import.meta.url);
 const npmDirectory = path.join(path.dirname(currentModulePath), '..');
 const tauriConfigDirectory = path.join(npmDirectory, 'src-tauri', '.pake');
 
-async function shellExec(command, timeout = 300000) {
+async function shellExec(command, timeout = 300000, env) {
     try {
         const { exitCode } = await execa(command, {
             cwd: npmDirectory,
-            stdio: 'inherit',
+            stdio: ['inherit', 'pipe', 'inherit'], // Hide stdout verbose, keep stderr
             shell: true,
             timeout,
+            env: env ? { ...process.env, ...env } : process.env,
         });
         return exitCode;
     }
@@ -412,11 +415,11 @@ async function installRust() {
     const spinner = getSpinner('Downloading Rust...');
     try {
         await shellExec(IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac);
-        spinner.succeed(chalk.green('Rust installed successfully!'));
+        spinner.succeed(chalk.green('✔ Rust installed successfully!'));
     }
     catch (error) {
-        console.error('Error installing Rust:', error.message);
-        spinner.fail(chalk.red('Rust installation failed!'));
+        spinner.fail(chalk.red('✕ Rust installation failed!'));
+        console.error(error.message);
         process.exit(1);
     }
 }
@@ -634,7 +637,6 @@ async function mergeConfig(url, options, tauriConf) {
     };
     const configPath = path.join(tauriConfigDirectory, platformConfigPaths[platform]);
     const bundleConf = { bundle: tauriConf.bundle };
-    console.log('pakeConfig', tauriConf.pake);
     await fsExtra.outputJSON(configPath, bundleConf, { spaces: 4 });
     const pakeConfigPath = path.join(tauriConfigDirectory, 'pake.json');
     await fsExtra.outputJSON(pakeConfigPath, tauriConf.pake, { spaces: 4 });
@@ -647,6 +649,19 @@ async function mergeConfig(url, options, tauriConf) {
 class BaseBuilder {
     constructor(options) {
         this.options = options;
+    }
+    getBuildEnvironment() {
+        return IS_MAC ? {
+            'CFLAGS': '-fno-modules',
+            'CXXFLAGS': '-fno-modules',
+            'MACOSX_DEPLOYMENT_TARGET': '14.0'
+        } : undefined;
+    }
+    getInstallTimeout() {
+        return process.platform === 'win32' ? 600000 : 300000;
+    }
+    getBuildTimeout() {
+        return 300000; // 5 minutes for build process
     }
     async prepare() {
         const tauriSrcPath = path.join(npmDirectory, 'src-tauri');
@@ -675,21 +690,20 @@ class BaseBuilder {
         const rustProjectDir = path.join(tauriSrcPath, '.cargo');
         const projectConf = path.join(rustProjectDir, 'config.toml');
         await fsExtra.ensureDir(rustProjectDir);
-        // For global CLI installation, always use npm
+        // 统一使用npm，简单可靠
         const packageManager = 'npm';
-        const registryOption = isChina
-            ? ' --registry=https://registry.npmmirror.com'
-            : '';
-        // Windows环境下需要更长的超时时间
-        const timeout = process.platform === 'win32' ? 600000 : 300000;
+        const registryOption = isChina ? ' --registry=https://registry.npmmirror.com' : '';
+        const legacyPeerDeps = ' --legacy-peer-deps'; // 解决dependency conflicts
+        const timeout = this.getInstallTimeout();
+        const buildEnv = this.getBuildEnvironment();
         if (isChina) {
             logger.info('✺ Located in China, using npm/rsProxy CN mirror.');
             const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
             await fsExtra.copy(projectCnConf, projectConf);
-            await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}`, timeout);
+            await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}${legacyPeerDeps} --silent`, timeout, buildEnv);
         }
         else {
-            await shellExec(`cd "${npmDirectory}" && ${packageManager} install`, timeout);
+            await shellExec(`cd "${npmDirectory}" && ${packageManager} install${legacyPeerDeps} --silent`, timeout, buildEnv);
         }
         spinner.succeed(chalk.green('Package installed!'));
         if (!tauriTargetPathExists) {
@@ -706,9 +720,14 @@ class BaseBuilder {
         const { name } = this.options;
         await mergeConfig(url, this.options, tauriConfig);
         // Build app
-        const spinner = getSpinner('Building app...');
-        setTimeout(() => spinner.stop(), 3000);
-        await shellExec(`cd "${npmDirectory}" && ${this.getBuildCommand()}`);
+        const buildSpinner = getSpinner('Building app...');
+        // Let spinner run for a moment so user can see it, then stop before npm command
+        await new Promise(resolve => setTimeout(resolve, 500));
+        buildSpinner.stop();
+        // Show static message to keep the status visible
+        logger.warn('✸ Building app...');
+        const buildEnv = this.getBuildEnvironment();
+        await shellExec(`cd "${npmDirectory}" && ${this.getBuildCommand()}`, this.getBuildTimeout(), buildEnv);
         // Copy app
         const fileName = this.getFileName();
         const fileType = this.getFileType(target);
@@ -898,60 +917,202 @@ async function checkUpdateTips() {
     });
 }
 
-async function handleIcon(options) {
+// Constants
+const ICON_CONFIG = {
+    minFileSize: 100,
+    downloadTimeout: 10000,
+    supportedFormats: ['png', 'ico', 'jpeg', 'jpg', 'webp'],
+    whiteBackground: { r: 255, g: 255, b: 255 },
+};
+// API Configuration
+const API_TOKENS = {
+    // cspell:disable-next-line
+    logoDev: ['pk_JLLMUKGZRpaG5YclhXaTkg', 'pk_Ph745P8mQSeYFfW2Wk039A'],
+    // cspell:disable-next-line
+    brandfetch: ['1idqvJC0CeFSeyp3Yf7', '1idej-yhU_ThggIHFyG'],
+};
+/**
+ * Adds white background to transparent icons only
+ */
+async function preprocessIcon(inputPath) {
+    try {
+        const metadata = await sharp(inputPath).metadata();
+        if (metadata.channels !== 4)
+            return inputPath; // No transparency
+        const { path: tempDir } = await dir();
+        const outputPath = path.join(tempDir, 'icon-with-background.png');
+        await sharp({
+            create: {
+                width: metadata.width || 512,
+                height: metadata.height || 512,
+                channels: 3,
+                background: ICON_CONFIG.whiteBackground,
+            },
+        })
+            .composite([{ input: inputPath }])
+            .png()
+            .toFile(outputPath);
+        return outputPath;
+    }
+    catch (error) {
+        logger.warn(`Failed to add background to icon: ${error.message}`);
+        return inputPath;
+    }
+}
+/**
+ * Converts icon to platform-specific format
+ */
+async function convertIconFormat(inputPath, appName) {
+    try {
+        if (!(await fsExtra.pathExists(inputPath)))
+            return null;
+        const { path: outputDir } = await dir();
+        const platformOutputDir = path.join(outputDir, 'converted-icons');
+        await fsExtra.ensureDir(platformOutputDir);
+        const processedInputPath = await preprocessIcon(inputPath);
+        const iconName = appName.toLowerCase();
+        // Generate platform-specific format
+        if (IS_WIN) {
+            await icongen(processedInputPath, platformOutputDir, {
+                report: false,
+                ico: { name: `${iconName}_256`, sizes: [256] },
+            });
+            return path.join(platformOutputDir, `${iconName}_256.ico`);
+        }
+        if (IS_LINUX) {
+            const outputPath = path.join(platformOutputDir, `${iconName}_512.png`);
+            await fsExtra.copy(processedInputPath, outputPath);
+            return outputPath;
+        }
+        // macOS
+        await icongen(processedInputPath, platformOutputDir, {
+            report: false,
+            icns: { name: iconName, sizes: [16, 32, 64, 128, 256, 512, 1024] },
+        });
+        const outputPath = path.join(platformOutputDir, `${iconName}.icns`);
+        return (await fsExtra.pathExists(outputPath)) ? outputPath : null;
+    }
+    catch (error) {
+        logger.warn(`Icon format conversion failed: ${error.message}`);
+        return null;
+    }
+}
+async function handleIcon(options, url) {
     if (options.icon) {
         if (options.icon.startsWith('http')) {
             return downloadIcon(options.icon);
         }
-        else {
-            return path.resolve(options.icon);
-        }
+        return path.resolve(options.icon);
     }
-    else {
-        logger.warn('✼ No icon given, default in use. For a custom icon, use --icon option.');
-        const iconPath = IS_WIN
-            ? 'src-tauri/png/icon_256.ico'
-            : IS_LINUX
-                ? 'src-tauri/png/icon_512.png'
-                : 'src-tauri/icons/icon.icns';
-        return path.join(npmDirectory, iconPath);
+    // Try to get favicon from website if URL is provided
+    if (url && url.startsWith('http') && options.name) {
+        const faviconPath = await tryGetFavicon(url, options.name);
+        if (faviconPath)
+            return faviconPath;
     }
+    logger.info('✼ No icon provided, using default icon.');
+    const iconPath = IS_WIN
+        ? 'src-tauri/png/icon_256.ico'
+        : IS_LINUX
+            ? 'src-tauri/png/icon_512.png'
+            : 'src-tauri/icons/icon.icns';
+    return path.join(npmDirectory, iconPath);
 }
-async function downloadIcon(iconUrl) {
-    const spinner = getSpinner('Downloading icon...');
+/**
+ * Generates icon service URLs for a domain
+ */
+function generateIconServiceUrls(domain) {
+    const logoDevUrls = API_TOKENS.logoDev
+        .sort(() => Math.random() - 0.5)
+        .map(token => `https://img.logo.dev/${domain}?token=${token}&format=png&size=256`);
+    const brandfetchUrls = API_TOKENS.brandfetch
+        .sort(() => Math.random() - 0.5)
+        .map(key => `https://cdn.brandfetch.io/${domain}/w/400/h/400?c=${key}`);
+    return [
+        ...logoDevUrls,
+        ...brandfetchUrls,
+        `https://logo.clearbit.com/${domain}?size=256`,
+        `https://logo.uplead.com/${domain}`,
+        `https://www.google.com/s2/favicons?domain=${domain}&sz=256`,
+        `https://favicon.is/${domain}`,
+        `https://icons.duckduckgo.com/ip3/${domain}.ico`,
+        `https://icon.horse/icon/${domain}`,
+        `https://${domain}/favicon.ico`,
+        `https://www.${domain}/favicon.ico`,
+        `https://${domain}/apple-touch-icon.png`,
+        `https://${domain}/apple-touch-icon-precomposed.png`,
+    ];
+}
+/**
+ * Attempts to fetch favicon from website
+ */
+async function tryGetFavicon(url, appName) {
     try {
-        const iconResponse = await axios.get(iconUrl, {
-            responseType: 'arraybuffer',
-        });
-        const iconData = await iconResponse.data;
-        if (!iconData) {
-            return null;
+        const domain = new URL(url).hostname;
+        const spinner = getSpinner(`Fetching icon from ${domain}...`);
+        const serviceUrls = generateIconServiceUrls(domain);
+        for (const serviceUrl of serviceUrls) {
+            try {
+                const faviconPath = await downloadIcon(serviceUrl, false);
+                if (!faviconPath)
+                    continue;
+                const convertedPath = await convertIconFormat(faviconPath, appName);
+                if (convertedPath) {
+                    spinner.succeed(chalk.green('Icon fetched and converted successfully!'));
+                    return convertedPath;
+                }
+            }
+            catch {
+                continue;
+            }
         }
-        const fileDetails = await fileTypeFromBuffer(iconData);
-        if (!fileDetails) {
-            return null;
-        }
-        const { path: tempPath } = await dir();
-        let iconPath = `${tempPath}/icon.${fileDetails.ext}`;
-        // Fix this for linux
-        if (IS_LINUX) {
-            iconPath = 'png/linux_temp.png';
-            await fsExtra.outputFile(`${npmDirectory}/src-tauri/${iconPath}`, iconData);
-        }
-        else {
-            await fsExtra.outputFile(iconPath, iconData);
-        }
-        await fsExtra.outputFile(iconPath, iconData);
-        spinner.succeed(chalk.green('Icon downloaded successfully!'));
-        return iconPath;
+        spinner.warn(`✼ No favicon found for ${domain}. Using default.`);
+        return null;
     }
     catch (error) {
-        spinner.fail(chalk.red('Icon download failed!'));
-        if (error.response && error.response.status === 404) {
+        logger.warn(`Failed to fetch favicon: ${error.message}`);
+        return null;
+    }
+}
+/**
+ * Downloads icon from URL
+ */
+async function downloadIcon(iconUrl, showSpinner = true) {
+    try {
+        const response = await axios.get(iconUrl, {
+            responseType: 'arraybuffer',
+            timeout: ICON_CONFIG.downloadTimeout,
+        });
+        const iconData = response.data;
+        if (!iconData || iconData.byteLength < ICON_CONFIG.minFileSize)
+            return null;
+        const fileDetails = await fileTypeFromBuffer(iconData);
+        if (!fileDetails || !ICON_CONFIG.supportedFormats.includes(fileDetails.ext)) {
             return null;
         }
-        throw error;
+        return await saveIconFile(iconData, fileDetails.ext);
     }
+    catch (error) {
+        if (showSpinner && !(error.response?.status === 404)) {
+            throw error;
+        }
+        return null;
+    }
+}
+/**
+ * Saves icon file to temporary location
+ */
+async function saveIconFile(iconData, extension) {
+    const buffer = Buffer.from(iconData);
+    if (IS_LINUX) {
+        const iconPath = 'png/linux_temp.png';
+        await fsExtra.outputFile(`${npmDirectory}/src-tauri/${iconPath}`, buffer);
+        return iconPath;
+    }
+    const { path: tempPath } = await dir();
+    const iconPath = `${tempPath}/icon.${extension}`;
+    await fsExtra.outputFile(iconPath, buffer);
+    return iconPath;
 }
 
 // Extracts the domain from a given URL.
@@ -1040,7 +1201,7 @@ async function handleOptions(options, url) {
         name,
         identifier: getIdentifier(url),
     };
-    appOptions.icon = await handleIcon(appOptions);
+    appOptions.icon = await handleIcon(appOptions, url);
     return appOptions;
 }
 
@@ -1157,7 +1318,6 @@ program
         log.setLevel('debug');
     }
     const appOptions = await handleOptions(options, url);
-    log.debug('PakeAppOptions', appOptions);
     const builder = BuilderProvider.create(appOptions);
     await builder.prepare();
     await builder.build(url);

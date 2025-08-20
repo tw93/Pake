@@ -23,6 +23,18 @@ export default {
     include: "bin/**",
     exclude: "node_modules/**",
   },
+  external: (id) => {
+    if (id === "bin/cli.ts" || id === "bin/dev.ts") return false;
+    if (id.startsWith(".") || path.isAbsolute(id) || id.startsWith("@/"))
+      return false;
+    return true;
+  },
+  onwarn(warning, warn) {
+    if (warning.code === "UNRESOLVED_IMPORT") {
+      return;
+    }
+    warn(warning);
+  },
   plugins: [
     json(),
     typescript({

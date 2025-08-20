@@ -21,6 +21,24 @@ export default abstract class BaseBuilder {
     this.options = options;
   }
 
+  private getBuildEnvironment() {
+    return IS_MAC
+      ? {
+          CFLAGS: '-fno-modules',
+          CXXFLAGS: '-fno-modules',
+          MACOSX_DEPLOYMENT_TARGET: '14.0',
+        }
+      : undefined;
+  }
+
+  private getInstallTimeout(): number {
+    return process.platform === 'win32' ? 600000 : 300000;
+  }
+
+  private getBuildTimeout(): number {
+    return 300000; // 5 minutes for build process
+  }
+
   async prepare() {
     const tauriSrcPath = path.join(npmDirectory, 'src-tauri');
     const tauriTargetPath = path.join(tauriSrcPath, 'target');
@@ -52,27 +70,31 @@ export default abstract class BaseBuilder {
     const projectConf = path.join(rustProjectDir, 'config.toml');
     await fsExtra.ensureDir(rustProjectDir);
 
-    // For global CLI installation, always use npm
+    // 统一使用npm，简单可靠
     const packageManager = 'npm';
     const registryOption = isChina
       ? ' --registry=https://registry.npmmirror.com'
       : '';
+    const legacyPeerDeps = ' --legacy-peer-deps'; // 解决dependency conflicts
 
-    // Windows环境下需要更长的超时时间
-    const timeout = process.platform === 'win32' ? 600000 : 300000;
+    const timeout = this.getInstallTimeout();
+
+    const buildEnv = this.getBuildEnvironment();
 
     if (isChina) {
       logger.info('✺ Located in China, using npm/rsProxy CN mirror.');
       const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
       await fsExtra.copy(projectCnConf, projectConf);
       await shellExec(
-        `cd "${npmDirectory}" && ${packageManager} install${registryOption}`,
+        `cd "${npmDirectory}" && ${packageManager} install${registryOption}${legacyPeerDeps} --silent`,
         timeout,
+        buildEnv,
       );
     } else {
       await shellExec(
-        `cd "${npmDirectory}" && ${packageManager} install`,
+        `cd "${npmDirectory}" && ${packageManager} install${legacyPeerDeps} --silent`,
         timeout,
+        buildEnv,
       );
     }
     spinner.succeed(chalk.green('Package installed!'));
@@ -96,9 +118,20 @@ export default abstract class BaseBuilder {
     await mergeConfig(url, this.options, tauriConfig);
 
     // Build app
-    const spinner = getSpinner('Building app...');
-    setTimeout(() => spinner.stop(), 3000);
-    await shellExec(`cd "${npmDirectory}" && ${this.getBuildCommand()}`);
+    const buildSpinner = getSpinner('Building app...');
+    // Let spinner run for a moment so user can see it, then stop before npm command
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    buildSpinner.stop();
+    // Show static message to keep the status visible
+    logger.warn('✸ Building app...');
+
+    const buildEnv = this.getBuildEnvironment();
+
+    await shellExec(
+      `cd "${npmDirectory}" && ${this.getBuildCommand()}`,
+      this.getBuildTimeout(),
+      buildEnv,
+    );
 
     // Copy app
     const fileName = this.getFileName();

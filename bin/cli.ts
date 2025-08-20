@@ -161,7 +161,6 @@ program
     }
 
     const appOptions = await handleInputOptions(options, url);
-    log.debug('PakeAppOptions', appOptions);
 
     const builder = BuilderProvider.create(appOptions);
     await builder.prepare();

@@ -62,7 +62,7 @@ export default async function handleOptions(
     identifier: getIdentifier(url),
   };
 
-  appOptions.icon = await handleIcon(appOptions);
+  appOptions.icon = await handleIcon(appOptions, url);
 
   return appOptions;
 }

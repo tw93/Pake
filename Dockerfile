@@ -33,11 +33,10 @@ RUN --mount=type=cache,target=/var/cache/apt \
     libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev \
     gnome-video-effects
 
-# Install Node.js 20.x and pnpm
+# Install Node.js 22.x
 RUN --mount=type=cache,target=/var/cache/apt \
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get update && apt-get install -y nodejs && \
-    npm install -g pnpm
+    curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get update && apt-get install -y nodejs
 
 # Copy project files
 COPY . /pake
@@ -49,9 +48,9 @@ COPY --from=cargo-builder /cargo-cache/git /usr/local/cargo/git
 COPY --from=cargo-builder /cargo-cache/registry /usr/local/cargo/registry
 
 # Install dependencies and build pake-cli
-RUN --mount=type=cache,target=/root/.pnpm \
-    pnpm install --frozen-lockfile && \
-    pnpm run cli:build
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci && \
+    npm run cli:build
 
 # Set up the entrypoint
 WORKDIR /output

@@ -268,7 +268,6 @@ export async function mergeConfig(
   );
 
   const bundleConf = { bundle: tauriConf.bundle };
-  console.log('pakeConfig', tauriConf.pake);
   await fsExtra.outputJSON(configPath, bundleConf, { spaces: 4 });
   const pakeConfigPath = path.join(tauriConfigDirectory, 'pake.json');
   await fsExtra.outputJSON(pakeConfigPath, tauriConf.pake, { spaces: 4 });

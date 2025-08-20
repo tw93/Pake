@@ -22,19 +22,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: latest
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "pnpm"
+          cache: "npm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Check EditorConfig compliance
         uses: editorconfig-checker/action-editorconfig-checker@main
@@ -94,16 +89,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: latest
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: "pnpm"
+          cache: "npm"
 
       - name: Install Rust (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
@@ -134,13 +124,13 @@ jobs:
           version: 1.1
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Build CLI
-        run: pnpm run cli:build
+        run: npm run cli:build
 
       - name: Run CLI Test Suite
-        run: pnpm test
+        run: npm test
         env:
           CI: true
           NODE_ENV: test
