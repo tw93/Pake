@@ -97,15 +97,22 @@ const main = async () => {
     let params = buildParameters();
 
     // Multi-arch target is now handled in GitHub Actions workflow
-
+    
+    // Download icon in parallel with parameter preparation if needed
+    let iconPromise = null;
     if (process.env.ICON && process.env.ICON !== "") {
       const iconFile = getIconFileName();
-      const iconParams = await downloadIcon(iconFile);
-      params.push(...iconParams);
+      iconPromise = downloadIcon(iconFile);
     } else {
       console.log(
         "Won't download the icon as ICON environment variable is not defined!",
       );
+    }
+
+    // If icon is being downloaded, wait for it and add to params
+    if (iconPromise) {
+      const iconParams = await iconPromise;
+      params.push(...iconParams);
     }
 
     console.log("Pake parameters:", params.join(" "));
@@ -119,13 +126,44 @@ const main = async () => {
       fs.mkdirSync("output");
     }
 
-    // Move built files to output directory
+    // Move built files to output directory more efficiently
+    const buildPaths = [
+      `src-tauri/target/release/bundle`,
+      `src-tauri/target/universal-apple-darwin/release/bundle`
+    ];
+    
+    for (const buildPath of buildPaths) {
+      if (fs.existsSync(buildPath)) {
+        const bundleFiles = fs.readdirSync(buildPath, { recursive: true })
+          .filter(file => {
+            const fullPath = path.join(buildPath, file);
+            return fs.statSync(fullPath).isFile() && 
+                   (file.endsWith('.dmg') || file.endsWith('.exe') || 
+                    file.endsWith('.deb') || file.endsWith('.rpm') || file.endsWith('.AppImage'));
+          });
+        
+        for (const file of bundleFiles) {
+          const srcPath = path.join(buildPath, file);
+          const destPath = path.join("output", path.basename(file));
+          await execa("cp", [srcPath, destPath]);
+        }
+        break; // Found files, no need to check other paths
+      }
+    }
+    
+    // Fallback to original method if no bundle files found
     const files = fs.readdirSync(".");
     const namePattern = new RegExp(`^${process.env.NAME}\\..*$`);
+    let foundFiles = false;
     for (const file of files) {
       if (namePattern.test(file)) {
         await execa("mv", [file, path.join("output", file)]);
+        foundFiles = true;
       }
+    }
+    
+    if (!foundFiles) {
+      console.log("Warning: No output files found matching pattern");
     }
 
     console.log("Build Success");

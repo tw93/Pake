@@ -36,7 +36,7 @@ export default abstract class BaseBuilder {
   }
 
   private getBuildTimeout(): number {
-    return 300000; // 5 minutes for build process
+    return 900000; // 15 minutes for all builds
   }
 
   async prepare() {

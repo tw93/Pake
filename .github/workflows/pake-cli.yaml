@@ -68,6 +68,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'npm'
 
       - name: Install Rust for ubuntu-24.04
         if: inputs.platform == 'ubuntu-24.04'
@@ -102,11 +103,32 @@ jobs:
           packages: libsoup-3.0-dev libdbus-1-dev libjavascriptcoregtk-4.1-dev libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra
           version: 1.1
 
-      - name: Install pake-cli local
-        shell: bash
+      - name: Cache Node dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Cache pake-cli installation
+        uses: actions/cache@v4
+        id: pake_cache
+        with:
+          path: node_modules/pake-cli
+          key: ${{ runner.os }}-pake-cli-${{ hashFiles('**/package.json') }}
+
+      - name: Install pake-cli and script dependencies
         run: |
-          echo "install pake on local"
-          npm install pake-cli
+          if [ ! -d "node_modules/pake-cli" ]; then
+            echo "Installing pake-cli..."
+            npm install pake-cli
+          else
+            echo "pake-cli found in cache"
+          fi
+          npm install execa axios --no-package-lock
 
       - name: Rust cache restore
         uses: actions/cache/restore@v4.2.0
@@ -119,11 +141,6 @@ jobs:
             ~/.cargo/git/db/
             node_modules/pake-cli/src-tauri/target/
           key: ${{ inputs.platform }}-cargo-${{ hashFiles('node_modules/pake-cli/src-tauri/Cargo.lock') }}
-
-      - name: Install dependencies
-        run: |
-          npm install execa
-          npm install axios
 
       - name: Build with pake-cli
         timeout-minutes: 15
