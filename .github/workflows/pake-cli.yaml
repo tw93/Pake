@@ -38,11 +38,13 @@ on:
         required: false
         type: boolean
         default: false
+        if: inputs.platform == 'macos-latest'
       multi_arch:
         description: "MultiArch, MacOS only, Optional"
         required: false
         type: boolean
         default: false
+        if: inputs.platform == 'macos-latest'
       targets:
         description: "Targets, Linux only, Optional"
         required: false
@@ -52,6 +54,7 @@ on:
           - "deb"
           - "appimage"
           - "rpm"
+        if: inputs.platform == 'ubuntu-24.04'
 
 jobs:
   build:
