@@ -42,7 +42,6 @@
     "cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
     "test": "npm run cli:build && PAKE_CREATE_APP=1 node tests/index.js",
     "format": "prettier --write . --ignore-unknown && cd src-tauri && cargo fmt --verbose",
-    "hooks:setup": "bash .githooks/setup.sh",
     "prepublishOnly": "npm run cli:build"
   },
   "type": "module",
