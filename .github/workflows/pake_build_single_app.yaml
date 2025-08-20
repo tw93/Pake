@@ -77,6 +77,16 @@ jobs:
           node-version: 22
           cache: "npm"
 
+      - name: Cache Node dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-deps-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-deps-
+
       - name: Install dependencies (ubuntu only)
         if: matrix.os == 'ubuntu-latest'
         uses: awalsh128/cache-apt-pkgs-action@v1.4.3
@@ -94,7 +104,7 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             src-tauri/target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Config App
         env:
@@ -108,23 +118,30 @@ jobs:
 
       - name: Build for Ubuntu
         if: matrix.os == 'ubuntu-latest'
+        timeout-minutes: 15
         run: |
           npm run tauri build
           mkdir -p output/linux
           mv src-tauri/target/release/bundle/deb/*.deb output/linux/${{inputs.title}}_`arch`.deb
           mv src-tauri/target/release/bundle/appimage/*.AppImage output/linux/"${{inputs.title}}"_`arch`.AppImage
 
-      - name: Build for macOS
+      - name: Add Rust targets for macOS universal build
         if: matrix.os == 'macos-latest'
         run: |
           rustup target add aarch64-apple-darwin
           rustup target add x86_64-apple-darwin
+
+      - name: Build for macOS
+        if: matrix.os == 'macos-latest'
+        timeout-minutes: 20
+        run: |
           npm run tauri build -- --target universal-apple-darwin
           mkdir -p output/macos
           mv src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg output/macos/"${{inputs.title}}".dmg
 
       - name: Build for Windows
         if: matrix.os == 'windows-latest'
+        timeout-minutes: 15
         run: |
           npm run tauri build -- --target x86_64-pc-windows-msvc
           New-Item -Path "output\windows" -ItemType Directory
@@ -144,7 +161,7 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             src-tauri/target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Upload For Single Build
         uses: actions/upload-artifact@v4

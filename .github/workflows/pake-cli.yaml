@@ -68,7 +68,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install Rust for ubuntu-24.04
         if: inputs.platform == 'ubuntu-24.04'
@@ -90,7 +90,7 @@ jobs:
         with:
           toolchain: stable
           target: x86_64-apple-darwin
-          
+
       - name: Add additional Rust target for multi-arch
         if: inputs.platform == 'macos-latest' && inputs.multi_arch == true
         run: |

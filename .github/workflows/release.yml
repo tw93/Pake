@@ -71,7 +71,7 @@ jobs:
       name_zh: ${{ matrix.name_zh }}
       url: ${{ matrix.url }}
 
-  # Publish Docker image
+  # Publish Docker image (runs in parallel with app builds)
   publish-docker:
     if: |
       (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) ||
