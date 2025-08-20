@@ -1,3 +1,4 @@
+import fs from "fs";
 import path from "path";
 import { execa } from "execa";
 
@@ -78,7 +79,28 @@ const main = async () => {
     const timeout = 900000; // 15 minutes for all builds
     await execa("node", params, { stdio: "inherit", timeout });
 
-    // pake-cli will handle file output to its own output directory
+    // Create output directory and move built files
+    if (!fs.existsSync("output")) {
+      fs.mkdirSync("output");
+    }
+
+    // pake-cli outputs files to current directory with pattern: {name}.{extension}
+    const files = fs.readdirSync(".");
+    const namePattern = new RegExp(`^${process.env.NAME}\\..*$`);
+    let foundFiles = false;
+    
+    for (const file of files) {
+      if (namePattern.test(file)) {
+        const destPath = path.join("output", file);
+        fs.renameSync(file, destPath);
+        console.log(`Moved: ${file} -> output/${file}`);
+        foundFiles = true;
+      }
+    }
+    
+    if (!foundFiles) {
+      console.log("Warning: No output files found matching pattern");
+    }
 
     console.log("Build Success");
     process.chdir("../..");
