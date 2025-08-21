@@ -840,7 +840,6 @@ class PakeTestRunner {
               console.log("   📦 Bundling universal binary...");
             }
             if (output.includes("Built application at:")) {
-              buildCompleted = true;
               console.log("   ✅ Multi-arch build completed!");
             }
           });
@@ -849,12 +848,8 @@ class PakeTestRunner {
             const output = data.toString();
             if (output.includes("Building app")) buildStarted = true;
             if (output.includes("Compiling")) compilationStarted = true;
-            if (output.includes("universal-apple-darwin"))
-              multiArchDetected = true;
-            if (output.includes("Bundling")) bundlingStarted = true;
             if (output.includes("Finished"))
               console.log("   ✅ Multi-arch compilation finished!");
-            if (output.includes("Built application at:")) buildCompleted = true;
           });
 
           // Multi-arch builds take longer - 12 minutes timeout
