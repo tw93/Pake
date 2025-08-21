@@ -1,4 +1,5 @@
 import path from "path";
+import fs from "fs";
 import appRootPath from "app-root-path";
 import typescript from "rollup-plugin-typescript2";
 import alias from "@rollup/plugin-alias";
@@ -7,6 +8,13 @@ import json from "@rollup/plugin-json";
 import replace from "@rollup/plugin-replace";
 import chalk from "chalk";
 import { spawn, exec } from "child_process";
+
+// Set macOS SDK environment variables for compatibility
+if (process.platform === "darwin") {
+  process.env.MACOSX_DEPLOYMENT_TARGET = process.env.MACOSX_DEPLOYMENT_TARGET || "14.0";
+  process.env.CFLAGS = process.env.CFLAGS || "-fno-modules";
+  process.env.CXXFLAGS = process.env.CXXFLAGS || "-fno-modules";
+}
 
 const isProduction = process.env.NODE_ENV === "production";
 const devPlugins = !isProduction ? [pakeCliDevPlugin()] : [];
@@ -61,7 +69,6 @@ function pakeCliDevPlugin() {
 
   // 智能检测包管理器
   const detectPackageManager = () => {
-    const fs = require("fs");
     if (fs.existsSync("pnpm-lock.yaml")) return "pnpm";
     if (fs.existsSync("yarn.lock")) return "yarn";
     return "npm";

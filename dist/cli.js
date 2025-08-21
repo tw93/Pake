@@ -4,11 +4,11 @@ import { InvalidArgumentError, program, Option } from 'commander';
 import log from 'loglevel';
 import path from 'path';
 import fsExtra from 'fs-extra';
+import { fileURLToPath } from 'url';
 import prompts from 'prompts';
 import { execa, execaSync } from 'execa';
 import crypto from 'crypto';
 import ora from 'ora';
-import { fileURLToPath } from 'url';
 import dns from 'dns';
 import http from 'http';
 import { promisify } from 'util';
@@ -22,7 +22,7 @@ import sharp from 'sharp';
 import * as psl from 'psl';
 
 var name = "pake-cli";
-var version$1 = "3.2.3";
+var version = "3.2.5";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
@@ -59,9 +59,8 @@ var scripts = {
 	"build:config": "chmod +x script/app_config.mjs && node script/app_config.mjs",
 	analyze: "cd src-tauri && cargo bloat --release --crates",
 	tauri: "tauri",
-	cli: "rollup -c rollup.config.js --watch",
-	"cli:dev": "cross-env NODE_ENV=development rollup -c rollup.config.js -w",
-	"cli:build": "cross-env NODE_ENV=production rollup -c rollup.config.js",
+	cli: "cross-env NODE_ENV=development rollup -c -w",
+	"cli:build": "cross-env NODE_ENV=production rollup -c",
 	test: "npm run cli:build && PAKE_CREATE_APP=1 node tests/index.js",
 	format: "prettier --write . --ignore-unknown && cd src-tauri && cargo fmt --verbose",
 	prepublishOnly: "npm run cli:build"
@@ -109,7 +108,7 @@ var devDependencies = {
 };
 var packageJson = {
 	name: name,
-	version: version$1,
+	version: version,
 	description: description,
 	engines: engines,
 	bin: bin,
@@ -125,136 +124,19 @@ var packageJson = {
 	devDependencies: devDependencies
 };
 
-var windows = [
-	{
-		url: "https://weekly.tw93.fun/",
-		url_type: "web",
-		hide_title_bar: true,
-		fullscreen: false,
-		width: 1200,
-		height: 780,
-		resizable: true,
-		always_on_top: false,
-		dark_mode: false,
-		activation_shortcut: "",
-		disabled_web_shortcuts: false,
-		hide_on_close: true,
-		incognito: false
-	}
-];
-var user_agent = {
-	macos: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15",
-	linux: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
-	windows: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
-};
-var system_tray = {
-	macos: false,
-	linux: true,
-	windows: true
-};
-var system_tray_path = "icons/icon.png";
-var inject = [
-];
-var proxy_url = "";
-var pakeConf = {
-	windows: windows,
-	user_agent: user_agent,
-	system_tray: system_tray,
-	system_tray_path: system_tray_path,
-	inject: inject,
-	proxy_url: proxy_url
-};
+// Convert the current module URL to a file path
+const currentModulePath = fileURLToPath(import.meta.url);
+// Resolve the parent directory of the current module
+const npmDirectory = path.join(path.dirname(currentModulePath), '..');
+const tauriConfigDirectory = path.join(npmDirectory, 'src-tauri', '.pake');
 
-var productName$1 = "Weekly";
-var identifier = "com.pake.weekly";
-var version = "1.0.0";
-var app = {
-	withGlobalTauri: true,
-	trayIcon: {
-		iconPath: "png/weekly_512.png",
-		iconAsTemplate: false,
-		id: "pake-tray"
-	}
-};
-var build = {
-	frontendDist: "../dist"
-};
-var CommonConf = {
-	productName: productName$1,
-	identifier: identifier,
-	version: version,
-	app: app,
-	build: build
-};
-
-var bundle$2 = {
-	icon: [
-		"png/weekly_256.ico",
-		"png/weekly_32.ico"
-	],
-	active: true,
-	resources: [
-		"png/weekly_32.ico"
-	],
-	targets: [
-		"msi"
-	],
-	windows: {
-		digestAlgorithm: "sha256",
-		wix: {
-			language: [
-				"en-US"
-			],
-			template: "assets/main.wxs"
-		}
-	}
-};
-var WinConf = {
-	bundle: bundle$2
-};
-
-var bundle$1 = {
-	icon: [
-		"icons/weekly.icns"
-	],
-	active: true,
-	macOS: {
-	},
-	targets: [
-		"dmg"
-	]
-};
-var MacConf = {
-	bundle: bundle$1
-};
-
-var productName = "weekly";
-var bundle = {
-	icon: [
-		"png/weekly_512.png"
-	],
-	active: true,
-	linux: {
-		deb: {
-			depends: [
-				"curl",
-				"wget"
-			],
-			files: {
-				"/usr/share/applications/com-pake-weekly.desktop": "assets/com-pake-weekly.desktop"
-			}
-		}
-	},
-	targets: [
-		"deb",
-		"appimage"
-	]
-};
-var LinuxConf = {
-	productName: productName,
-	bundle: bundle
-};
-
+// Load configs from npm package directory, not from project source
+const tauriSrcDir = path.join(npmDirectory, 'src-tauri');
+const pakeConf = fsExtra.readJSONSync(path.join(tauriSrcDir, 'pake.json'));
+const CommonConf = fsExtra.readJSONSync(path.join(tauriSrcDir, 'tauri.conf.json'));
+const WinConf = fsExtra.readJSONSync(path.join(tauriSrcDir, 'tauri.windows.conf.json'));
+const MacConf = fsExtra.readJSONSync(path.join(tauriSrcDir, 'tauri.macos.conf.json'));
+const LinuxConf = fsExtra.readJSONSync(path.join(tauriSrcDir, 'tauri.linux.conf.json'));
 const platformConfigs = {
     win32: WinConf,
     darwin: MacConf,
@@ -313,12 +195,6 @@ const { platform: platform$1 } = process;
 const IS_MAC = platform$1 === 'darwin';
 const IS_WIN = platform$1 === 'win32';
 const IS_LINUX = platform$1 === 'linux';
-
-// Convert the current module URL to a file path
-const currentModulePath = fileURLToPath(import.meta.url);
-// Resolve the parent directory of the current module
-const npmDirectory = path.join(path.dirname(currentModulePath), '..');
-const tauriConfigDirectory = path.join(npmDirectory, 'src-tauri', '.pake');
 
 async function shellExec(command, timeout = 300000, env) {
     try {
@@ -556,7 +432,7 @@ StartupNotify=true
         await fsExtra.writeFile(desktopFilePath, desktopContent);
         // Set up desktop file in bundle configuration
         tauriConf.bundle.linux.deb.files = {
-            [`/usr/share/applications/${desktopFileName}`]: `assets/${desktopFileName}`
+            [`/usr/share/applications/${desktopFileName}`]: `assets/${desktopFileName}`,
         };
         const validTargets = ['deb', 'appimage', 'rpm'];
         if (validTargets.includes(options.targets)) {
@@ -781,12 +657,17 @@ class BaseBuilder {
         if (IS_MAC && this.options.targets === 'app') {
             fullCommand += ' --bundles app';
         }
+        // Add features
+        const features = ['cli-build'];
         // Add macos-proxy feature for modern macOS (Darwin 23+ = macOS 14+)
         if (IS_MAC) {
             const macOSVersion = this.getMacOSMajorVersion();
             if (macOSVersion >= 23) {
-                fullCommand += ' --features macos-proxy';
+                features.push('macos-proxy');
             }
+        }
+        if (features.length > 0) {
+            fullCommand += ` --features ${features.join(',')}`;
         }
         return fullCommand;
     }
@@ -841,9 +722,26 @@ class MacBuilder extends BaseBuilder {
         return `${name}_${tauriConfig.version}_${arch}`;
     }
     getBuildCommand() {
-        return this.options.multiArch
-            ? 'npm run build:mac'
-            : super.getBuildCommand();
+        if (this.options.multiArch) {
+            const baseCommand = this.options.debug
+                ? 'npm run tauri build -- --debug'
+                : 'npm run tauri build --';
+            // Use temporary config directory to avoid modifying source files
+            const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
+            let fullCommand = `${baseCommand} --target universal-apple-darwin -c "${configPath}"`;
+            // Add features
+            const features = ['cli-build'];
+            // Add macos-proxy feature for modern macOS (Darwin 23+ = macOS 14+)
+            const macOSVersion = this.getMacOSMajorVersion();
+            if (macOSVersion >= 23) {
+                features.push('macos-proxy');
+            }
+            if (features.length > 0) {
+                fullCommand += ` --features ${features.join(',')}`;
+            }
+            return fullCommand;
+        }
+        return super.getBuildCommand();
     }
     getBasePath() {
         return this.options.multiArch
@@ -1053,7 +951,7 @@ async function handleIcon(options, url) {
             logger.info('✼ Default ico not found, converting from png...');
             try {
                 const convertedPath = await convertIconFormat(defaultPngPath, 'icon');
-                if (convertedPath && await fsExtra.pathExists(convertedPath)) {
+                if (convertedPath && (await fsExtra.pathExists(convertedPath))) {
                     return convertedPath;
                 }
             }
