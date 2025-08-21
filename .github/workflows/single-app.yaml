@@ -42,10 +42,11 @@ on:
         default: "https://twitter.com/"
 
 jobs:
-  build_single_app:
+  build:
     name: ${{ inputs.title }} (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         build: [linux, macos, windows]
         include:
@@ -77,16 +78,6 @@ jobs:
           node-version: 22
           cache: "npm"
 
-      - name: Cache Node dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            ~/.npm
-          key: ${{ runner.os }}-node-deps-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-deps-
-
       - name: Install dependencies (ubuntu only)
         if: matrix.os == 'ubuntu-latest'
         uses: awalsh128/cache-apt-pkgs-action@v1.4.3
@@ -95,8 +86,8 @@ jobs:
           version: 1.1
 
       - name: Rust cache restore
-        id: cache_store
         uses: actions/cache/restore@v4.2.0
+        id: cache_store
         with:
           path: |
             ~/.cargo/bin/
@@ -104,7 +95,7 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             src-tauri/target/
-          key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Config App
         env:
@@ -116,7 +107,13 @@ jobs:
           npm ci
           npm run build:config
 
-      - name: Build for Ubuntu
+      - name: Add Rust targets for macOS universal build
+        if: matrix.os == 'macos-latest'
+        run: |
+          rustup target add aarch64-apple-darwin
+          rustup target add x86_64-apple-darwin
+
+      - name: Build for Linux
         if: matrix.os == 'ubuntu-latest'
         timeout-minutes: 15
         run: |
@@ -124,12 +121,6 @@ jobs:
           mkdir -p output/linux
           mv src-tauri/target/release/bundle/deb/*.deb output/linux/${{inputs.title}}_`arch`.deb
           mv src-tauri/target/release/bundle/appimage/*.AppImage output/linux/"${{inputs.title}}"_`arch`.AppImage
-
-      - name: Add Rust targets for macOS universal build
-        if: matrix.os == 'macos-latest'
-        run: |
-          rustup target add aarch64-apple-darwin
-          rustup target add x86_64-apple-darwin
 
       - name: Build for macOS
         if: matrix.os == 'macos-latest'
@@ -146,14 +137,11 @@ jobs:
           npm run tauri build -- --target x86_64-pc-windows-msvc
           New-Item -Path "output\windows" -ItemType Directory
           Move-Item -Path "src-tauri\target\x86_64-pc-windows-msvc\release\bundle\msi\*.msi" -Destination "output\windows\${{inputs.title}}_x64.msi"
-
-      - name: Restore Cargo Lock File(Windows Only)
-        if: matrix.os == 'windows-latest'
-        run: |
           git checkout -- src-tauri/Cargo.lock
 
       - name: Rust cache store
         uses: actions/cache/save@v4.2.0
+        if: steps.cache_store.outputs.cache-hit != 'true'
         with:
           path: |
             ~/.cargo/bin/
@@ -161,18 +149,18 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             src-tauri/target/
-          key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Upload For Single Build
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
-        if: startsWith(github.ref, 'refs/tags/') != true
         with:
-          path: "output/*/*.*"
+          name: ${{ inputs.title }}-${{ matrix.build }}
+          path: output/*/*.*
+          retention-days: 3
 
-      - name: Upload For Release
-        # arg info: https://github.com/ncipollo/release-action#release-action
+      - name: Upload to release
         uses: ncipollo/release-action@v1
-        if: startsWith(github.ref, 'refs/tags/') == true
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           allowUpdates: true
           artifacts: "output/*/*.*"
