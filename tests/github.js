@@ -161,8 +161,12 @@ class PakeCliTestRunner {
     console.log("🚀 GitHub Actions Usage Guide:");
     console.log("==============================\n");
 
-    console.log("This test suite validates that pake-cli works correctly in GitHub Actions.");
-    console.log("The following workflow file (.github/workflows/pake-cli.yaml) is ready to use:\n");
+    console.log(
+      "This test suite validates that pake-cli works correctly in GitHub Actions.",
+    );
+    console.log(
+      "The following workflow file (.github/workflows/pake-cli.yaml) is ready to use:\n",
+    );
 
     console.log("Key features tested:");
     console.log("  ✅ npm package installation and caching");
@@ -284,14 +288,14 @@ runner.addTest(
       // Create a temporary .pake directory to test cleanup
       const tempDir = "/tmp/test_pake_cleanup";
       const pakeDir = path.join(tempDir, ".pake");
-      
+
       fs.mkdirSync(tempDir, { recursive: true });
       fs.mkdirSync(pakeDir, { recursive: true });
-      
+
       // Create some test config files
       fs.writeFileSync(path.join(pakeDir, "pake.json"), '{"test": true}');
       fs.writeFileSync(path.join(pakeDir, "tauri.conf.json"), '{"test": true}');
-      
+
       runner.trackTempDir(tempDir);
 
       // Test cleanup script logic (from build_with_pake_cli.js)
@@ -327,7 +331,9 @@ process.exit(cleanedDirs > 0 ? 0 : 1);
       });
 
       // Verify .pake directory was cleaned
-      return !fs.existsSync(pakeDir) && result.includes("Cleaned directories: 1");
+      return (
+        !fs.existsSync(pakeDir) && result.includes("Cleaned directories: 1")
+      );
     } catch (error) {
       console.error("Cleanup test failed:", error.message);
       return false;
@@ -384,8 +390,10 @@ process.exit(validResults && invalidResults ? 0 : 1);
         timeout: 5000,
       });
 
-      return result.includes("Valid URLs passed: true") && 
-             result.includes("Invalid URLs rejected: true");
+      return (
+        result.includes("Valid URLs passed: true") &&
+        result.includes("Invalid URLs rejected: true")
+      );
     } catch {
       return false;
     }
@@ -432,7 +440,9 @@ process.exit(isSupported ? 0 : 1);
         timeout: 5000,
       });
 
-      return result.includes("Platform:") && result.includes("Expected extension:");
+      return (
+        result.includes("Platform:") && result.includes("Expected extension:")
+      );
     } catch {
       return false;
     }
@@ -513,33 +523,36 @@ runner.addTest(
   async () => {
     try {
       // Check if the workflow file exists and has correct structure
-      const workflowPath = path.join(config.PROJECT_ROOT, ".github/workflows/pake-cli.yaml");
-      
+      const workflowPath = path.join(
+        config.PROJECT_ROOT,
+        ".github/workflows/pake-cli.yaml",
+      );
+
       if (!fs.existsSync(workflowPath)) {
         console.error("Workflow file not found:", workflowPath);
         return false;
       }
 
       const workflowContent = fs.readFileSync(workflowPath, "utf8");
-      
+
       // Check for essential workflow components
       const requiredElements = [
         "npm install pake-cli@latest --no-package-lock", // Latest version installation
         "timeout-minutes: 15", // Sufficient timeout
         "node ./script/build_with_pake_cli.js", // Build script execution
         "ubuntu-24.04", // Linux support
-        "macos-latest", // macOS support  
-        "windows-latest" // Windows support
+        "macos-latest", // macOS support
+        "windows-latest", // Windows support
       ];
 
-      const hasAllElements = requiredElements.every(element => 
-        workflowContent.includes(element)
+      const hasAllElements = requiredElements.every((element) =>
+        workflowContent.includes(element),
       );
 
       if (!hasAllElements) {
         console.error("Workflow missing required elements");
-        const missing = requiredElements.filter(element => 
-          !workflowContent.includes(element)
+        const missing = requiredElements.filter(
+          (element) => !workflowContent.includes(element),
         );
         console.error("Missing elements:", missing);
       }
@@ -556,7 +569,7 @@ runner.addTest(
 
 // Test 9: Rust feature flags validation
 runner.addTest(
-  "Rust Feature Flags Validation", 
+  "Rust Feature Flags Validation",
   async () => {
     try {
       const testScript = `
@@ -761,10 +774,12 @@ process.exit(validBuild ? 0 : 1);
         timeout: 10000,
       });
 
-      return result.includes("GitHub Actions GitHub.com build simulation started") && 
-             result.includes("URL: https://github.com") &&
-             result.includes("NAME: github") &&
-             result.includes("Build configuration valid: true");
+      return (
+        result.includes("GitHub Actions GitHub.com build simulation started") &&
+        result.includes("URL: https://github.com") &&
+        result.includes("NAME: github") &&
+        result.includes("Build configuration valid: true")
+      );
     } catch (error) {
       console.error("GitHub Actions simulation failed:", error.message);
       return false;
@@ -833,9 +848,11 @@ process.exit(validParams ? 0 : 1);
         timeout: 8000,
       });
 
-      return result.includes("GitHub.com build parameters validated: true") &&
-             result.includes("URL: https://github.com") &&
-             result.includes("App name: github");
+      return (
+        result.includes("GitHub.com build parameters validated: true") &&
+        result.includes("URL: https://github.com") &&
+        result.includes("App name: github")
+      );
     } catch (error) {
       console.error("Build script test failed:", error.message);
       return false;
@@ -847,7 +864,8 @@ process.exit(validParams ? 0 : 1);
 
 // Run the test suite
 if (import.meta.url === `file://${process.argv[1]}`) {
-  runner.runAll()
+  runner
+    .runAll()
     .then((success) => {
       process.exit(success ? 0 : 1);
     })

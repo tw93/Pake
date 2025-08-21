@@ -85,14 +85,14 @@ GitHub.com 专用快速构建验证：
 
 ## 测试命令
 
-| 命令                        | 描述                 | 覆盖范围                        | 持续时间    |
-| --------------------------- | -------------------- | ------------------------------- | ----------- |
-| `npm test`                  | **真实完整构建测试** | 完整 GitHub.com 应用打包        | **~8 分钟** |
-| `node tests/index.js`       | 基础测试套件         | Unit + Integration + Builder    | ~30 秒      |
-| `node tests/index.js --real-build` | 真实构建测试    | 完整 GitHub.com 应用打包        | ~8 分钟     |
-| `node tests/github.js`      | GitHub Actions 测试  | 12 个 GitHub Actions 专项测试   | ~2 分钟     |
-| `node tests/build.js`       | 快速构建测试         | GitHub.com 构建验证             | ~3 分钟     |
-| `node tests/complete.js`    | 完整构建测试         | 端到端完整构建流程              | ~10 分钟    |
+| 命令                               | 描述                 | 覆盖范围                      | 持续时间    |
+| ---------------------------------- | -------------------- | ----------------------------- | ----------- |
+| `npm test`                         | **真实完整构建测试** | 完整 GitHub.com 应用打包      | **~8 分钟** |
+| `node tests/index.js`              | 基础测试套件         | Unit + Integration + Builder  | ~30 秒      |
+| `node tests/index.js --real-build` | 真实构建测试         | 完整 GitHub.com 应用打包      | ~8 分钟     |
+| `node tests/github.js`             | GitHub Actions 测试  | 12 个 GitHub Actions 专项测试 | ~2 分钟     |
+| `node tests/build.js`              | 快速构建测试         | GitHub.com 构建验证           | ~3 分钟     |
+| `node tests/complete.js`           | 完整构建测试         | 端到端完整构建流程            | ~10 分钟    |
 
 ## 高级用法
 

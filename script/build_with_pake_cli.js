@@ -51,11 +51,11 @@ const main = async () => {
     const targetDirs = [
       "src-tauri/target",
       "src-tauri/target/debug",
-      "src-tauri/target/release", 
-      "src-tauri/target/universal-apple-darwin"
+      "src-tauri/target/release",
+      "src-tauri/target/universal-apple-darwin",
     ];
-    
-    targetDirs.forEach(dir => {
+
+    targetDirs.forEach((dir) => {
       if (fs.existsSync(dir)) {
         // Only remove .pake subdirectories, not the entire target directory
         const targetPakeDir = path.join(dir, ".pake");

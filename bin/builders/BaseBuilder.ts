@@ -171,7 +171,7 @@ export default abstract class BaseBuilder {
 
     // Add features
     const features = ['cli-build'];
-    
+
     // Add macos-proxy feature for modern macOS (Darwin 23+ = macOS 14+)
     if (IS_MAC) {
       const macOSVersion = this.getMacOSMajorVersion();
@@ -179,7 +179,7 @@ export default abstract class BaseBuilder {
         features.push('macos-proxy');
       }
     }
-    
+
     if (features.length > 0) {
       fullCommand += ` --features ${features.join(',')}`;
     }

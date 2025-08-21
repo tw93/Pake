@@ -2,7 +2,7 @@
 
 /**
  * GitHub.com Complete Build Test
- * 
+ *
  * This test performs a complete build of github.com to verify
  * that the entire packaging pipeline works correctly end-to-end.
  */
@@ -34,7 +34,7 @@ const cleanup = () => {
       fs.unlinkSync(dmgFile);
       console.log("✅ Cleaned up .dmg file");
     }
-    
+
     // Clean .pake directory
     const pakeDir = path.join(config.PROJECT_ROOT, "src-tauri", ".pake");
     if (fs.existsSync(pakeDir)) {
@@ -47,16 +47,18 @@ const cleanup = () => {
 };
 
 // Handle cleanup on exit
-process.on('exit', cleanup);
-process.on('SIGINT', () => {
+process.on("exit", cleanup);
+process.on("SIGINT", () => {
   console.log("\n🛑 Build interrupted by user");
   cleanup();
   process.exit(1);
 });
-process.on('SIGTERM', cleanup);
+process.on("SIGTERM", cleanup);
 
 console.log("🔧 Testing GitHub app packaging with optimal settings...");
-console.log(`Command: pake https://github.com --name ${testName} --width 1200 --height 800 --hide-title-bar\n`);
+console.log(
+  `Command: pake https://github.com --name ${testName} --width 1200 --height 800 --hide-title-bar\n`,
+);
 
 const command = `node "${config.CLI_PATH}" "https://github.com" --name "${testName}" --width 1200 --height 800 --hide-title-bar`;
 
@@ -80,7 +82,7 @@ console.log("------------------");
 
 child.stdout.on("data", (data) => {
   const output = data.toString();
-  
+
   // Track build progress
   if (output.includes("Installing package")) {
     console.log("📦 Installing pake dependencies...");
@@ -111,7 +113,7 @@ child.stdout.on("data", (data) => {
 
 child.stderr.on("data", (data) => {
   const output = data.toString();
-  
+
   // Track stderr progress (Tauri outputs build info to stderr)
   if (output.includes("Installing package")) {
     console.log("📦 Installing pake dependencies...");
@@ -135,34 +137,36 @@ child.stderr.on("data", (data) => {
     buildCompleted = true;
     console.log("✅ Application built successfully!");
   }
-  
+
   // Only show actual errors, filter out build progress
-  if (!output.includes("warning:") &&
-      !output.includes("verbose") &&
-      !output.includes("npm info") &&
-      !output.includes("Installing package") &&
-      !output.includes("Package installed") &&
-      !output.includes("Building app") &&
-      !output.includes("Compiling") &&
-      !output.includes("Finished") &&
-      !output.includes("Built application at:") &&
-      !output.includes("Bundling") &&
-      !output.includes("npm http") &&
-      !output.includes("Info Looking up installed") &&
-      output.trim().length > 0) {
+  if (
+    !output.includes("warning:") &&
+    !output.includes("verbose") &&
+    !output.includes("npm info") &&
+    !output.includes("Installing package") &&
+    !output.includes("Package installed") &&
+    !output.includes("Building app") &&
+    !output.includes("Compiling") &&
+    !output.includes("Finished") &&
+    !output.includes("Built application at:") &&
+    !output.includes("Bundling") &&
+    !output.includes("npm http") &&
+    !output.includes("Info Looking up installed") &&
+    output.trim().length > 0
+  ) {
     console.log("❌ Build error:", output.trim());
   }
 });
 
-// Set a 10-minute timeout for the complete build (real packaging takes time)  
+// Set a 10-minute timeout for the complete build (real packaging takes time)
 // DON'T kill the process early - let it complete naturally
 const timeout = setTimeout(() => {
   console.log("\n⏱️  Build timeout reached (10 minutes)");
-  
+
   // Check if we actually have output files even if process is still running
   const appExists = fs.existsSync(appFile);
   const dmgExists = fs.existsSync(dmgFile);
-  
+
   if (appExists || buildCompleted) {
     console.log("🎉 SUCCESS: GitHub app was built successfully!");
     console.log("   App file exists, build completed despite long duration");
@@ -177,7 +181,7 @@ const timeout = setTimeout(() => {
 
 child.on("close", (code) => {
   clearTimeout(timeout);
-  
+
   console.log(`\n📊 GitHub App Build Summary:`);
   console.log("=============================");
   console.log(`Exit Code: ${code}`);
@@ -185,29 +189,33 @@ child.on("close", (code) => {
   console.log(`Compilation Started: ${compilationStarted ? "✅" : "❌"}`);
   console.log(`Bundling Started: ${bundlingStarted ? "✅" : "❌"}`);
   console.log(`Build Completed: ${buildCompleted ? "✅" : "❌"}`);
-  
+
   // Check for output files
   const appExists = fs.existsSync(appFile);
   const dmgExists = fs.existsSync(dmgFile);
   console.log(`App File (.app): ${appExists ? "✅" : "❌"}`);
   console.log(`DMG File: ${dmgExists ? "✅" : "❌"}`);
-  
+
   // Check .app bundle structure if it exists
   if (appExists) {
     try {
       const contentsPath = path.join(appFile, "Contents");
       const macOSPath = path.join(contentsPath, "MacOS");
       const resourcesPath = path.join(contentsPath, "Resources");
-      
+
       console.log(`App Bundle Structure:`);
       console.log(`  Contents/: ${fs.existsSync(contentsPath) ? "✅" : "❌"}`);
-      console.log(`  Contents/MacOS/: ${fs.existsSync(macOSPath) ? "✅" : "❌"}`);
-      console.log(`  Contents/Resources/: ${fs.existsSync(resourcesPath) ? "✅" : "❌"}`);
+      console.log(
+        `  Contents/MacOS/: ${fs.existsSync(macOSPath) ? "✅" : "❌"}`,
+      );
+      console.log(
+        `  Contents/Resources/: ${fs.existsSync(resourcesPath) ? "✅" : "❌"}`,
+      );
     } catch (error) {
       console.log(`App Bundle Check: ❌ (${error.message})`);
     }
   }
-  
+
   // Real success check: app file must exist and build must have completed
   if (appExists && (buildCompleted || code === 0)) {
     console.log("\n🎉 COMPLETE SUCCESS: GitHub app build fully completed!");
@@ -221,7 +229,9 @@ child.on("close", (code) => {
     console.log("   🎯 Build process successful");
     process.exit(0);
   } else if (code === 0 && buildStarted && compilationStarted) {
-    console.log("\n⚠️  PARTIAL SUCCESS: Build process completed but no app file found");
+    console.log(
+      "\n⚠️  PARTIAL SUCCESS: Build process completed but no app file found",
+    );
     console.log("   🐙 GitHub.com build process executed successfully");
     console.log("   ⚠️  App file may be in a different location");
     process.exit(0);

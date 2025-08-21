@@ -2,7 +2,7 @@
 
 /**
  * Unified Test Runner for Pake CLI
- * 
+ *
  * This is a simplified, unified test runner that replaces the scattered
  * test files with a single, easy-to-use interface.
  */
@@ -23,12 +23,12 @@ class PakeTestRunner {
   async runAll(options = {}) {
     const {
       unit = true,
-      integration = true, 
+      integration = true,
       builder = true,
       pakeCliTests = false,
       e2e = false,
       quick = false,
-      realBuild = false  // Add option for real build test
+      realBuild = false, // Add option for real build test
     } = options;
 
     console.log("🚀 Pake CLI Test Suite");
@@ -72,9 +72,9 @@ class PakeTestRunner {
       console.log("\n🏗️ Running Real Build Test...");
       await this.runRealBuildTest();
       testCount++;
-      
+
       // Add multi-arch test on macOS
-      if (process.platform === 'darwin') {
+      if (process.platform === "darwin") {
         console.log("\n🔧 Running Multi-Arch Build Test...");
         await this.runMultiArchBuildTest();
         testCount++;
@@ -89,9 +89,9 @@ class PakeTestRunner {
     this.cleanup();
     this.displayFinalResults();
 
-    const passed = this.results.filter(r => r.passed).length;
+    const passed = this.results.filter((r) => r.passed).length;
     const total = this.results.length;
-    
+
     return passed === total;
   }
 
@@ -121,10 +121,10 @@ class PakeTestRunner {
     // Platform info
     console.log(`✅ Platform: ${process.platform} (${process.arch})`);
     console.log(`✅ Node.js: ${process.version}`);
-    
+
     const isCI = process.env.CI || process.env.GITHUB_ACTIONS;
     console.log(`${isCI ? "✅" : "ℹ️"} CI Environment: ${isCI ? "Yes" : "No"}`);
-    
+
     console.log();
   }
 
@@ -135,7 +135,7 @@ class PakeTestRunner {
       const result = await Promise.race([
         testFn(),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Test timeout")), timeout)
+          setTimeout(() => reject(new Error("Test timeout")), timeout),
         ),
       ]);
 
@@ -148,10 +148,10 @@ class PakeTestRunner {
       }
     } catch (error) {
       spinner.fail(`${name}: ERROR - ${error.message.slice(0, 100)}...`);
-      this.results.push({ 
-        name, 
-        passed: false, 
-        error: error.message 
+      this.results.push({
+        name,
+        passed: false,
+        error: error.message,
       });
     }
   }
@@ -167,7 +167,7 @@ class PakeTestRunner {
         });
         return /^\d+\.\d+\.\d+/.test(output.trim());
       },
-      TIMEOUTS.QUICK
+      TIMEOUTS.QUICK,
     );
 
     // Help command test
@@ -180,174 +180,151 @@ class PakeTestRunner {
         });
         return output.includes("Usage: cli [url] [options]");
       },
-      TIMEOUTS.QUICK
+      TIMEOUTS.QUICK,
     );
 
     // URL validation test
-    await this.runTest(
-      "URL Validation",
-      () => {
-        try {
-          execSync(`node "${config.CLI_PATH}" "invalid-url" --name TestApp`, {
-            encoding: "utf8",
-            timeout: 3000,
-          });
-          return false; // Should have failed
-        } catch (error) {
-          return error.status !== 0;
-        }
-      }
-    );
-
-    // Number validation test
-    await this.runTest(
-      "Number Validation",
-      () => {
-        try {
-          execSync(`node "${config.CLI_PATH}" https://example.com --width abc`, {
-            encoding: "utf8",
-            timeout: 3000,
-          });
-          return false; // Should throw error
-        } catch (error) {
-          return error.message.includes("Not a number");
-        }
-      }
-    );
-
-    // CLI response time test
-    await this.runTest(
-      "CLI Response Time",
-      () => {
-        const start = Date.now();
-        execSync(`node "${config.CLI_PATH}" --version`, {
+    await this.runTest("URL Validation", () => {
+      try {
+        execSync(`node "${config.CLI_PATH}" "invalid-url" --name TestApp`, {
           encoding: "utf8",
           timeout: 3000,
         });
-        const elapsed = Date.now() - start;
-        return elapsed < 2000;
+        return false; // Should have failed
+      } catch (error) {
+        return error.status !== 0;
       }
-    );
+    });
+
+    // Number validation test
+    await this.runTest("Number Validation", () => {
+      try {
+        execSync(`node "${config.CLI_PATH}" https://example.com --width abc`, {
+          encoding: "utf8",
+          timeout: 3000,
+        });
+        return false; // Should throw error
+      } catch (error) {
+        return error.message.includes("Not a number");
+      }
+    });
+
+    // CLI response time test
+    await this.runTest("CLI Response Time", () => {
+      const start = Date.now();
+      execSync(`node "${config.CLI_PATH}" --version`, {
+        encoding: "utf8",
+        timeout: 3000,
+      });
+      const elapsed = Date.now() - start;
+      return elapsed < 2000;
+    });
 
     // Weekly URL accessibility test
-    await this.runTest(
-      "Weekly URL Accessibility",
-      () => {
-        try {
-          const testCommand = `node "${config.CLI_PATH}" ${TEST_URLS.WEEKLY} --name "URLTest" --debug`;
-          execSync(`echo "n" | timeout 5s ${testCommand} || true`, {
-            encoding: "utf8",
-            timeout: 8000,
-          });
-          return true; // If we get here, URL was parsed successfully
-        } catch (error) {
-          return !error.message.includes("Invalid URL") && !error.message.includes("invalid");
-        }
+    await this.runTest("Weekly URL Accessibility", () => {
+      try {
+        const testCommand = `node "${config.CLI_PATH}" ${TEST_URLS.WEEKLY} --name "URLTest" --debug`;
+        execSync(`echo "n" | timeout 5s ${testCommand} || true`, {
+          encoding: "utf8",
+          timeout: 8000,
+        });
+        return true; // If we get here, URL was parsed successfully
+      } catch (error) {
+        return (
+          !error.message.includes("Invalid URL") &&
+          !error.message.includes("invalid")
+        );
       }
-    );
+    });
   }
 
   async runIntegrationTests() {
     // Process spawning test
-    await this.runTest(
-      "CLI Process Spawning",
-      () => {
-        return new Promise((resolve) => {
-          const child = spawn("node", [config.CLI_PATH, "--version"], {
-            stdio: ["pipe", "pipe", "pipe"],
-          });
-
-          let output = "";
-          child.stdout.on("data", (data) => {
-            output += data.toString();
-          });
-
-          child.on("close", (code) => {
-            resolve(code === 0 && /\d+\.\d+\.\d+/.test(output));
-          });
-
-          setTimeout(() => {
-            child.kill();
-            resolve(false);
-          }, 3000);
+    await this.runTest("CLI Process Spawning", () => {
+      return new Promise((resolve) => {
+        const child = spawn("node", [config.CLI_PATH, "--version"], {
+          stdio: ["pipe", "pipe", "pipe"],
         });
-      }
-    );
+
+        let output = "";
+        child.stdout.on("data", (data) => {
+          output += data.toString();
+        });
+
+        child.on("close", (code) => {
+          resolve(code === 0 && /\d+\.\d+\.\d+/.test(output));
+        });
+
+        setTimeout(() => {
+          child.kill();
+          resolve(false);
+        }, 3000);
+      });
+    });
 
     // File system permissions test
-    await this.runTest(
-      "File System Permissions",
-      () => {
-        try {
-          const testFile = "test-write-permission.tmp";
-          fs.writeFileSync(testFile, "test");
-          this.trackTempFile(testFile);
+    await this.runTest("File System Permissions", () => {
+      try {
+        const testFile = "test-write-permission.tmp";
+        fs.writeFileSync(testFile, "test");
+        this.trackTempFile(testFile);
 
-          const cliStats = fs.statSync(config.CLI_PATH);
-          return cliStats.isFile();
-        } catch {
-          return false;
-        }
+        const cliStats = fs.statSync(config.CLI_PATH);
+        return cliStats.isFile();
+      } catch {
+        return false;
       }
-    );
+    });
 
     // Dependency resolution test
-    await this.runTest(
-      "Dependency Resolution",
-      () => {
-        try {
-          const packageJsonPath = path.join(config.PROJECT_ROOT, "package.json");
-          const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+    await this.runTest("Dependency Resolution", () => {
+      try {
+        const packageJsonPath = path.join(config.PROJECT_ROOT, "package.json");
+        const packageJson = JSON.parse(
+          fs.readFileSync(packageJsonPath, "utf8"),
+        );
 
-          const essentialDeps = ["commander", "chalk", "fs-extra", "execa"];
-          return essentialDeps.every(dep => packageJson.dependencies && packageJson.dependencies[dep]);
-        } catch {
-          return false;
-        }
+        const essentialDeps = ["commander", "chalk", "fs-extra", "execa"];
+        return essentialDeps.every(
+          (dep) => packageJson.dependencies && packageJson.dependencies[dep],
+        );
+      } catch {
+        return false;
       }
-    );
+    });
   }
 
   async runBuilderTests() {
     // Platform detection test
-    await this.runTest(
-      "Platform Detection",
-      () => {
-        const platform = process.platform;
-        const platformConfigs = {
-          darwin: { ext: '.dmg', multiArch: true },
-          win32: { ext: '.msi', multiArch: false },
-          linux: { ext: '.deb', multiArch: false }
-        };
+    await this.runTest("Platform Detection", () => {
+      const platform = process.platform;
+      const platformConfigs = {
+        darwin: { ext: ".dmg", multiArch: true },
+        win32: { ext: ".msi", multiArch: false },
+        linux: { ext: ".deb", multiArch: false },
+      };
 
-        const config = platformConfigs[platform];
-        return config && typeof config.ext === 'string';
-      }
-    );
+      const config = platformConfigs[platform];
+      return config && typeof config.ext === "string";
+    });
 
     // Architecture detection test
-    await this.runTest(
-      "Architecture Detection",
-      () => {
-        const currentArch = process.arch;
-        const macArch = currentArch === "arm64" ? "aarch64" : currentArch;
-        const linuxArch = currentArch === "x64" ? "amd64" : currentArch;
+    await this.runTest("Architecture Detection", () => {
+      const currentArch = process.arch;
+      const macArch = currentArch === "arm64" ? "aarch64" : currentArch;
+      const linuxArch = currentArch === "x64" ? "amd64" : currentArch;
 
-        return typeof macArch === "string" && typeof linuxArch === "string";
-      }
-    );
+      return typeof macArch === "string" && typeof linuxArch === "string";
+    });
 
     // File naming pattern test
-    await this.runTest(
-      "File Naming Patterns",
-      () => {
-        const testNames = ["Simple App", "App-With_Symbols", "CamelCaseApp"];
-        return testNames.every(name => {
-          const processed = name.toLowerCase().replace(/\s+/g, "");
-          return processed.length > 0;
-        });
-      }
-    );
+    await this.runTest("File Naming Patterns", () => {
+      const testNames = ["Simple App", "App-With_Symbols", "CamelCaseApp"];
+      return testNames.every((name) => {
+        const processed = name.toLowerCase().replace(/\s+/g, "");
+        return processed.length > 0;
+      });
+    });
   }
 
   async runPakeCliTests() {
@@ -369,63 +346,59 @@ class PakeTestRunner {
           return false;
         }
       },
-      TIMEOUTS.LONG
+      TIMEOUTS.LONG,
     );
 
     // Version command test
-    await this.runTest(
-      "pake-cli Version Command",
-      async () => {
-        try {
-          const version = execSync("npx pake --version", {
-            encoding: "utf8",
-            timeout: 10000,
-          });
-          return /^\d+\.\d+\.\d+/.test(version.trim());
-        } catch {
-          return false;
-        }
+    await this.runTest("pake-cli Version Command", async () => {
+      try {
+        const version = execSync("npx pake --version", {
+          encoding: "utf8",
+          timeout: 10000,
+        });
+        return /^\d+\.\d+\.\d+/.test(version.trim());
+      } catch {
+        return false;
       }
-    );
+    });
 
     // Configuration validation test
-    await this.runTest(
-      "Configuration Validation",
-      async () => {
-        try {
-          const validateConfig = (config) => {
-            const required = ['url', 'name', 'width', 'height'];
-            const hasRequired = required.every(field => config.hasOwnProperty(field));
-            
-            const validTypes = 
-              typeof config.url === 'string' &&
-              typeof config.name === 'string' &&
-              typeof config.width === 'number' &&
-              typeof config.height === 'number';
-              
-            let validUrl = false;
-            try {
-              new URL(config.url);
-              validUrl = true;
-            } catch {}
-            
-            const validName = config.name.length > 0;
-            return hasRequired && validTypes && validUrl && validName;
-          };
+    await this.runTest("Configuration Validation", async () => {
+      try {
+        const validateConfig = (config) => {
+          const required = ["url", "name", "width", "height"];
+          const hasRequired = required.every((field) =>
+            config.hasOwnProperty(field),
+          );
 
-          const testConfig = {
-            url: 'https://github.com',
-            name: 'github', 
-            width: 1200,
-            height: 780
-          };
+          const validTypes =
+            typeof config.url === "string" &&
+            typeof config.name === "string" &&
+            typeof config.width === "number" &&
+            typeof config.height === "number";
 
-          return validateConfig(testConfig);
-        } catch {
-          return false;
-        }
+          let validUrl = false;
+          try {
+            new URL(config.url);
+            validUrl = true;
+          } catch {}
+
+          const validName = config.name.length > 0;
+          return hasRequired && validTypes && validUrl && validName;
+        };
+
+        const testConfig = {
+          url: "https://github.com",
+          name: "github",
+          width: 1200,
+          height: 780,
+        };
+
+        return validateConfig(testConfig);
+      } catch {
+        return false;
       }
-    );
+    });
   }
 
   async runE2ETests() {
@@ -453,20 +426,32 @@ class PakeTestRunner {
 
           child.stdout.on("data", (data) => {
             const output = data.toString();
-            if (output.includes("Building app") || output.includes("Compiling") || 
-                output.includes("Installing package") || output.includes("Bundling")) {
+            if (
+              output.includes("Building app") ||
+              output.includes("Compiling") ||
+              output.includes("Installing package") ||
+              output.includes("Bundling")
+            ) {
               buildStarted = true;
             }
-            if (output.includes("GitHub") && (output.includes("config") || output.includes("name"))) {
+            if (
+              output.includes("GitHub") &&
+              (output.includes("config") || output.includes("name"))
+            ) {
               configGenerated = true;
             }
           });
 
           child.stderr.on("data", (data) => {
             const output = data.toString();
-            if (output.includes("Building app") || output.includes("Compiling") || 
-                output.includes("Installing package") || output.includes("Bundling") ||
-                output.includes("Finished") || output.includes("Built application at:")) {
+            if (
+              output.includes("Building app") ||
+              output.includes("Compiling") ||
+              output.includes("Installing package") ||
+              output.includes("Bundling") ||
+              output.includes("Finished") ||
+              output.includes("Built application at:")
+            ) {
               buildStarted = true;
             }
           });
@@ -474,17 +459,21 @@ class PakeTestRunner {
           // Kill process after 60 seconds if build started
           const timeout = setTimeout(() => {
             child.kill("SIGTERM");
-            
+
             const appFile = path.join(config.PROJECT_ROOT, `${testName}.app`);
             const dmgFile = path.join(config.PROJECT_ROOT, `${testName}.dmg`);
             this.trackTempFile(appFile);
             this.trackTempFile(dmgFile);
 
             if (buildStarted) {
-              console.log(`✓ GitHub.com CLI build started successfully (${testName})`);
+              console.log(
+                `✓ GitHub.com CLI build started successfully (${testName})`,
+              );
               resolve(true);
             } else {
-              reject(new Error("GitHub.com CLI build did not start within timeout"));
+              reject(
+                new Error("GitHub.com CLI build did not start within timeout"),
+              );
             }
           }, 60000);
 
@@ -498,18 +487,22 @@ class PakeTestRunner {
             if (buildStarted) {
               resolve(true);
             } else {
-              reject(new Error("GitHub.com CLI build process ended before starting"));
+              reject(
+                new Error("GitHub.com CLI build process ended before starting"),
+              );
             }
           });
 
           child.on("error", (error) => {
-            reject(new Error(`GitHub.com CLI build process error: ${error.message}`));
+            reject(
+              new Error(`GitHub.com CLI build process error: ${error.message}`),
+            );
           });
 
           child.stdin.end();
         });
       },
-      70000 // 70 seconds timeout
+      70000, // 70 seconds timeout
     );
 
     // Configuration verification test
@@ -517,7 +510,7 @@ class PakeTestRunner {
       "Configuration File Verification",
       async () => {
         const pakeDir = path.join(config.PROJECT_ROOT, "src-tauri", ".pake");
-        
+
         return new Promise((resolve, reject) => {
           const testName = "GitHubConfigTest";
           const command = `node "${config.CLI_PATH}" "https://github.com" --name "${testName}" --debug --width 1200 --height 780`;
@@ -528,7 +521,7 @@ class PakeTestRunner {
             stdio: ["pipe", "pipe", "pipe"],
             env: {
               ...process.env,
-              PAKE_E2E_TEST: "1", 
+              PAKE_E2E_TEST: "1",
               PAKE_CREATE_APP: "1",
             },
           });
@@ -540,14 +533,22 @@ class PakeTestRunner {
 
               if (fs.existsSync(configFile) && fs.existsSync(pakeConfigFile)) {
                 try {
-                  const config = JSON.parse(fs.readFileSync(configFile, "utf8"));
-                  const pakeConfig = JSON.parse(fs.readFileSync(pakeConfigFile, "utf8"));
-                  
-                  if (config.productName === testName && 
-                      pakeConfig.windows[0].url === "https://github.com/") {
+                  const config = JSON.parse(
+                    fs.readFileSync(configFile, "utf8"),
+                  );
+                  const pakeConfig = JSON.parse(
+                    fs.readFileSync(pakeConfigFile, "utf8"),
+                  );
+
+                  if (
+                    config.productName === testName &&
+                    pakeConfig.windows[0].url === "https://github.com/"
+                  ) {
                     child.kill("SIGTERM");
                     this.trackTempDir(pakeDir);
-                    console.log("✓ GitHub.com configuration files verified correctly");
+                    console.log(
+                      "✓ GitHub.com configuration files verified correctly",
+                    );
                     resolve(true);
                     return true;
                   }
@@ -561,15 +562,21 @@ class PakeTestRunner {
 
           child.stdout.on("data", (data) => {
             const output = data.toString();
-            if (output.includes("Installing package") || output.includes("Building app")) {
+            if (
+              output.includes("Installing package") ||
+              output.includes("Building app")
+            ) {
               setTimeout(checkConfigFiles, 1000);
             }
           });
 
           child.stderr.on("data", (data) => {
             const output = data.toString();
-            if (output.includes("Installing package") || output.includes("Building app") || 
-                output.includes("Package installed")) {
+            if (
+              output.includes("Installing package") ||
+              output.includes("Building app") ||
+              output.includes("Package installed")
+            ) {
               setTimeout(checkConfigFiles, 1000);
             }
           });
@@ -582,13 +589,17 @@ class PakeTestRunner {
           }, 20000);
 
           child.on("error", (error) => {
-            reject(new Error(`GitHub.com config verification error: ${error.message}`));
+            reject(
+              new Error(
+                `GitHub.com config verification error: ${error.message}`,
+              ),
+            );
           });
 
           child.stdin.end();
         });
       },
-      25000
+      25000,
     );
   }
 
@@ -601,10 +612,10 @@ class PakeTestRunner {
           const testName = "GitHubRealBuild";
           const appFile = path.join(config.PROJECT_ROOT, `${testName}.app`);
           const dmgFile = path.join(config.PROJECT_ROOT, `${testName}.dmg`);
-          
+
           console.log(`🔧 Starting real build test for GitHub.com...`);
           console.log(`📝 Expected output: ${appFile}`);
-          
+
           const command = `node "${config.CLI_PATH}" "https://github.com" --name "${testName}" --width 1200 --height 800 --hide-title-bar`;
 
           const child = spawn(command, {
@@ -651,7 +662,8 @@ class PakeTestRunner {
             if (output.includes("Building app")) buildStarted = true;
             if (output.includes("Compiling")) compilationStarted = true;
             if (output.includes("Bundling")) bundlingStarted = true;
-            if (output.includes("Finished")) console.log("   ✅ Compilation finished!");
+            if (output.includes("Finished"))
+              console.log("   ✅ Compilation finished!");
             if (output.includes("Built application at:")) buildCompleted = true;
           });
 
@@ -659,9 +671,11 @@ class PakeTestRunner {
           const timeout = setTimeout(() => {
             const appExists = fs.existsSync(appFile);
             const dmgExists = fs.existsSync(dmgFile);
-            
+
             if (appExists) {
-              console.log("   🎉 Build completed successfully (app file exists)!");
+              console.log(
+                "   🎉 Build completed successfully (app file exists)!",
+              );
               console.log(`   📱 App location: ${appFile}`);
               if (dmgExists) {
                 console.log(`   💿 DMG location: ${dmgFile}`);
@@ -679,10 +693,10 @@ class PakeTestRunner {
 
           child.on("close", (code) => {
             clearTimeout(timeout);
-            
+
             const appExists = fs.existsSync(appFile);
             const dmgExists = fs.existsSync(dmgFile);
-            
+
             // DON'T track files for cleanup - let user see the results
             // this.trackTempFile(appFile);
             // this.trackTempFile(dmgFile);
@@ -696,7 +710,9 @@ class PakeTestRunner {
               console.log("   ✨ Build artifacts preserved for inspection");
               resolve(true);
             } else if (code === 0 && buildStarted && compilationStarted) {
-              console.log("   ⚠️  Build process completed but no app file found");
+              console.log(
+                "   ⚠️  Build process completed but no app file found",
+              );
               console.log(`   📍 Expected location: ${appFile}`);
               resolve(false);
             } else {
@@ -706,13 +722,15 @@ class PakeTestRunner {
 
           child.on("error", (error) => {
             clearTimeout(timeout);
-            reject(new Error(`Real build test process error: ${error.message}`));
+            reject(
+              new Error(`Real build test process error: ${error.message}`),
+            );
           });
 
           child.stdin.end();
         });
       },
-      500000 // 8+ minutes timeout
+      500000, // 8+ minutes timeout
     );
   }
 
@@ -725,11 +743,11 @@ class PakeTestRunner {
           const testName = "GitHubMultiArch";
           const appFile = path.join(config.PROJECT_ROOT, `${testName}.app`);
           const dmgFile = path.join(config.PROJECT_ROOT, `${testName}.dmg`);
-          
+
           console.log(`🔧 Starting multi-arch build test for GitHub.com...`);
           console.log(`📝 Expected output: ${appFile}`);
           console.log(`🏗️  Building Universal Binary (Intel + Apple Silicon)`);
-          
+
           const command = `node "${config.CLI_PATH}" "https://github.com" --name "${testName}" --width 1200 --height 800 --hide-title-bar --multi-arch`;
 
           const child = spawn(command, {
@@ -762,7 +780,10 @@ class PakeTestRunner {
               compilationStarted = true;
               console.log("   ⚙️  Compiling for multiple architectures...");
             }
-            if (output.includes("universal-apple-darwin") || output.includes("Universal")) {
+            if (
+              output.includes("universal-apple-darwin") ||
+              output.includes("Universal")
+            ) {
               multiArchDetected = true;
               console.log("   🔀 Universal binary target detected");
             }
@@ -780,9 +801,11 @@ class PakeTestRunner {
             const output = data.toString();
             if (output.includes("Building app")) buildStarted = true;
             if (output.includes("Compiling")) compilationStarted = true;
-            if (output.includes("universal-apple-darwin")) multiArchDetected = true;
+            if (output.includes("universal-apple-darwin"))
+              multiArchDetected = true;
             if (output.includes("Bundling")) bundlingStarted = true;
-            if (output.includes("Finished")) console.log("   ✅ Multi-arch compilation finished!");
+            if (output.includes("Finished"))
+              console.log("   ✅ Multi-arch compilation finished!");
             if (output.includes("Built application at:")) buildCompleted = true;
           });
 
@@ -790,7 +813,7 @@ class PakeTestRunner {
           const timeout = setTimeout(() => {
             const appExists = fs.existsSync(appFile);
             const dmgExists = fs.existsSync(dmgFile);
-            
+
             if (appExists) {
               console.log("   🎉 Multi-arch build completed successfully!");
               console.log(`   📱 App location: ${appFile}`);
@@ -801,7 +824,9 @@ class PakeTestRunner {
               child.kill("SIGTERM");
               resolve(true);
             } else {
-              console.log("   ❌ Multi-arch build timeout - no app file generated");
+              console.log(
+                "   ❌ Multi-arch build timeout - no app file generated",
+              );
               console.log(`   📍 Expected location: ${appFile}`);
               child.kill("SIGTERM");
               reject(new Error("Multi-arch build test timeout"));
@@ -810,49 +835,67 @@ class PakeTestRunner {
 
           child.on("close", (code) => {
             clearTimeout(timeout);
-            
+
             const appExists = fs.existsSync(appFile);
             const dmgExists = fs.existsSync(dmgFile);
 
             if (appExists) {
-              console.log("   🎉 Multi-arch build test SUCCESS: Universal binary generated!");
+              console.log(
+                "   🎉 Multi-arch build test SUCCESS: Universal binary generated!",
+              );
               console.log(`   📱 App location: ${appFile}`);
               if (dmgExists) {
                 console.log(`   💿 DMG location: ${dmgFile}`);
               }
               console.log("   🔀 Universal binary preserved for inspection");
-              
+
               // Verify it's actually a universal binary
               try {
-                const fileOutput = execSync(`file "${appFile}/Contents/MacOS/pake"`, { encoding: 'utf8' });
-                if (fileOutput.includes('universal binary')) {
-                  console.log("   ✅ Verified: Universal binary created successfully");
+                const fileOutput = execSync(
+                  `file "${appFile}/Contents/MacOS/pake"`,
+                  { encoding: "utf8" },
+                );
+                if (fileOutput.includes("universal binary")) {
+                  console.log(
+                    "   ✅ Verified: Universal binary created successfully",
+                  );
                 } else {
-                  console.log("   ⚠️  Note: Binary architecture:", fileOutput.trim());
+                  console.log(
+                    "   ⚠️  Note: Binary architecture:",
+                    fileOutput.trim(),
+                  );
                 }
               } catch (error) {
                 console.log("   ⚠️  Could not verify binary architecture");
               }
-              
+
               resolve(true);
             } else if (code === 0 && buildStarted && compilationStarted) {
-              console.log("   ⚠️  Multi-arch build process completed but no app file found");
+              console.log(
+                "   ⚠️  Multi-arch build process completed but no app file found",
+              );
               console.log(`   📍 Expected location: ${appFile}`);
               resolve(false);
             } else {
-              reject(new Error(`Multi-arch build test failed with code ${code}`));
+              reject(
+                new Error(`Multi-arch build test failed with code ${code}`),
+              );
             }
           });
 
           child.on("error", (error) => {
             clearTimeout(timeout);
-            reject(new Error(`Multi-arch build test process error: ${error.message}`));
+            reject(
+              new Error(
+                `Multi-arch build test process error: ${error.message}`,
+              ),
+            );
           });
 
           child.stdin.end();
         });
       },
-      750000 // 12+ minutes timeout
+      750000, // 12+ minutes timeout
     );
   }
 
@@ -867,11 +910,11 @@ class PakeTestRunner {
         });
         return /^\d+\.\d+\.\d+/.test(output.trim());
       },
-      TIMEOUTS.QUICK
+      TIMEOUTS.QUICK,
     );
 
     await this.runTest(
-      "Quick Help Check", 
+      "Quick Help Check",
       () => {
         const output = execSync(`node "${config.CLI_PATH}" --help`, {
           encoding: "utf8",
@@ -879,7 +922,7 @@ class PakeTestRunner {
         });
         return output.includes("Usage: cli [url] [options]");
       },
-      TIMEOUTS.QUICK
+      TIMEOUTS.QUICK,
     );
 
     await this.runTest(
@@ -888,12 +931,14 @@ class PakeTestRunner {
         const platform = process.platform;
         const arch = process.arch;
         const nodeVersion = process.version;
-        
-        return typeof platform === 'string' && 
-               typeof arch === 'string' && 
-               nodeVersion.startsWith('v');
+
+        return (
+          typeof platform === "string" &&
+          typeof arch === "string" &&
+          nodeVersion.startsWith("v")
+        );
       },
-      TIMEOUTS.QUICK
+      TIMEOUTS.QUICK,
     );
   }
 
@@ -943,8 +988,10 @@ class PakeTestRunner {
     if (passed === total) {
       console.log("🎉 All tests passed! CLI is ready for use.\n");
     } else {
-      console.log(`❌ ${total - passed} test(s) failed. Please check the issues above.\n`);
-      
+      console.log(
+        `❌ ${total - passed} test(s) failed. Please check the issues above.\n`,
+      );
+
       // Show failed tests
       const failed = this.results.filter((r) => !r.passed);
       if (failed.length > 0) {
@@ -964,17 +1011,17 @@ const args = process.argv.slice(2);
 
 // Parse command line arguments
 const options = {
-  unit: args.includes('--unit') || args.length === 0,
-  integration: args.includes('--integration') || args.length === 0,
-  builder: args.includes('--builder') || args.length === 0,
-  pakeCliTests: args.includes('--pake-cli'),
-  e2e: args.includes('--e2e') || args.includes('--full'),
-  realBuild: args.includes('--real-build') || args.length === 0, // Include real build in default tests
-  quick: args.includes('--quick')
+  unit: args.includes("--unit") || args.length === 0,
+  integration: args.includes("--integration") || args.length === 0,
+  builder: args.includes("--builder") || args.length === 0,
+  pakeCliTests: args.includes("--pake-cli"),
+  e2e: args.includes("--e2e") || args.includes("--full"),
+  realBuild: args.includes("--real-build") || args.length === 0, // Include real build in default tests
+  quick: args.includes("--quick"),
 };
 
 // Help message
-if (args.includes('--help') || args.includes('-h')) {
+if (args.includes("--help") || args.includes("-h")) {
   console.log(`
 🚀 Pake CLI Test Suite
 
@@ -1009,7 +1056,8 @@ Environment:
 
 // Run tests
 const runner = new PakeTestRunner();
-runner.runAll(options)
+runner
+  .runAll(options)
   .then((success) => {
     process.exit(success ? 0 : 1);
   })
