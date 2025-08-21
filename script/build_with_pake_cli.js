@@ -47,6 +47,25 @@ const main = async () => {
       console.log("Cleaned previous .pake directory for fresh build");
     }
 
+    // Also clean any potential target directories that might contain cached configs
+    const targetDirs = [
+      "src-tauri/target",
+      "src-tauri/target/debug",
+      "src-tauri/target/release", 
+      "src-tauri/target/universal-apple-darwin"
+    ];
+    
+    targetDirs.forEach(dir => {
+      if (fs.existsSync(dir)) {
+        // Only remove .pake subdirectories, not the entire target directory
+        const targetPakeDir = path.join(dir, ".pake");
+        if (fs.existsSync(targetPakeDir)) {
+          fs.rmSync(targetPakeDir, { recursive: true, force: true });
+          console.log(`Cleaned .pake directory in ${dir}`);
+        }
+      }
+    });
+
     // Build CLI parameters
     let params = [
       "dist/cli.js",

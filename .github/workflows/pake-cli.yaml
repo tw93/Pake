@@ -113,18 +113,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Cache pake-cli installation
-        uses: actions/cache@v4
-        id: pake_cache
-        with:
-          path: node_modules/pake-cli
-          key: ${{ runner.os }}-pake-cli-${{ hashFiles('**/package.json') }}-${{ inputs.multi_arch }}
-
       - name: Install pake-cli
         shell: bash
         run: |
-          echo "Installing pake-cli..."
-          npm install pake-cli --no-package-lock
+          echo "Installing latest pake-cli..."
+          npm install pake-cli@latest --no-package-lock
 
           # Verify installation
           if [ ! -d "node_modules/pake-cli" ]; then

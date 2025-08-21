@@ -1,3 +1,4 @@
+import path from 'path';
 import tauriConfig from '@/helpers/tauriConfig';
 import { PakeAppOptions } from '@/types';
 import BaseBuilder from './BaseBuilder';
@@ -33,9 +34,35 @@ export default class MacBuilder extends BaseBuilder {
   }
 
   protected getBuildCommand(): string {
-    return this.options.multiArch
-      ? 'npm run build:mac'
-      : super.getBuildCommand();
+    if (this.options.multiArch) {
+      const baseCommand = this.options.debug
+        ? 'npm run tauri build -- --debug'
+        : 'npm run tauri build --';
+      
+      // Use temporary config directory to avoid modifying source files
+      const configPath = path.join(
+        'src-tauri',
+        '.pake',
+        'tauri.conf.json',
+      );
+      let fullCommand = `${baseCommand} --target universal-apple-darwin -c "${configPath}"`;
+
+      // Add features
+      const features = ['cli-build'];
+      
+      // Add macos-proxy feature for modern macOS (Darwin 23+ = macOS 14+)
+      const macOSVersion = this.getMacOSMajorVersion();
+      if (macOSVersion >= 23) {
+        features.push('macos-proxy');
+      }
+      
+      if (features.length > 0) {
+        fullCommand += ` --features ${features.join(',')}`;
+      }
+
+      return fullCommand;
+    }
+    return super.getBuildCommand();
   }
 
   protected getBasePath(): string {
