@@ -728,7 +728,7 @@ class PakeTestRunner {
               expectedFiles.installer,
             );
             const actualAppPath = this.getActualFilePath(expectedFiles.app);
-            const actualInstallerPath = getActualFilePath(
+            const actualInstallerPath = this.getActualFilePath(
               expectedFiles.installer,
             );
 
@@ -1053,7 +1053,28 @@ class PakeTestRunner {
     this.tempDirs.push(dirpath);
   }
 
+  cleanupTempIcons() {
+    // Clean up temporary icon files generated during tests
+    const iconsDir = path.join(config.PROJECT_ROOT, 'src-tauri/icons');
+    const testNames = ['urltest', 'githubapp', 'githubmultiarch'];
+    
+    testNames.forEach(name => {
+      const iconPath = path.join(iconsDir, `${name}.icns`);
+      try {
+        if (fs.existsSync(iconPath)) {
+          fs.unlinkSync(iconPath);
+          console.log(`   🗑️  Cleaned up temporary icon: ${name}.icns`);
+        }
+      } catch (error) {
+        console.warn(`Warning: Could not clean up icon ${iconPath}`);
+      }
+    });
+  }
+
   cleanup() {
+    // Clean up temporary icon files generated during tests
+    this.cleanupTempIcons();
+    
     // Clean up temporary files and directories
     this.tempFiles.forEach((file) => {
       try {
