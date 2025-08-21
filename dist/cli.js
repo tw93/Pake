@@ -22,7 +22,7 @@ import sharp from 'sharp';
 import * as psl from 'psl';
 
 var name = "pake-cli";
-var version = "3.2.6";
+var version = "3.2.8";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
@@ -431,9 +431,9 @@ StartupNotify=true
         await fsExtra.ensureDir(srcAssetsDir);
         await fsExtra.writeFile(srcDesktopFilePath, desktopContent);
         // Set up desktop file in bundle configuration
-        // Use relative path from .pake directory to assets
+        // Use absolute path from src-tauri directory to assets
         tauriConf.bundle.linux.deb.files = {
-            [`/usr/share/applications/${desktopFileName}`]: `../assets/${desktopFileName}`,
+            [`/usr/share/applications/${desktopFileName}`]: `assets/${desktopFileName}`,
         };
         const validTargets = ['deb', 'appimage', 'rpm'];
         if (validTargets.includes(options.targets)) {
