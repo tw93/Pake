@@ -5,10 +5,7 @@
     "active": true,
     "linux": {
       "deb": {
-        "depends": ["curl", "wget"],
-        "files": {
-          "/usr/share/applications/com-pake-weekly.desktop": "assets/com-pake-weekly.desktop"
-        }
+        "depends": ["curl", "wget"]
       }
     },
     "targets": ["deb", "appimage"]

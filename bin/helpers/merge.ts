@@ -167,9 +167,9 @@ StartupNotify=true
     await fsExtra.writeFile(srcDesktopFilePath, desktopContent);
 
     // Set up desktop file in bundle configuration
-    // Use relative path from .pake directory to assets
+    // Use absolute path from src-tauri directory to assets
     tauriConf.bundle.linux.deb.files = {
-      [`/usr/share/applications/${desktopFileName}`]: `../assets/${desktopFileName}`,
+      [`/usr/share/applications/${desktopFileName}`]: `assets/${desktopFileName}`,
     };
 
     const validTargets = ['deb', 'appimage', 'rpm'];
