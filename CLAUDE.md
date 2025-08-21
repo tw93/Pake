@@ -84,6 +84,11 @@ npm run build:mac  # macOS universal build
 - [ ] Test with weekly.tw93.fun URL
 - [ ] Verify remote icon functionality (https://gw.alipayobjects.com/os/k/fw/weekly.icns)
 
+**Testing Notes:**
+
+- Do NOT use `PAKE_NO_CONFIG_OVERWRITE=1` - this environment variable is not implemented
+- For testing, simply use: `node dist/cli.js https://example.com --name TestApp --debug`
+
 ## Core Components
 
 ### CLI Tool (`bin/`)

@@ -155,8 +155,9 @@ export async function handleIcon(options: PakeAppOptions, url?: string) {
       return defaultPngPath;
     }
 
-    // If nothing exists, let the error bubble up
-    throw new Error('No default icon found for Windows build');
+    // If nothing exists, return empty string to let merge.ts handle default icon
+    logger.warn('✼ No default icon found, will use pake default.');
+    return '';
   }
 
   const iconPath = IS_LINUX
