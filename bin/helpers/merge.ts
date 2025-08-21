@@ -160,15 +160,16 @@ MimeType=text/html;text/xml;application/xhtml_xml;
 StartupNotify=true
 `;
 
-    // Write desktop file to assets directory
-    const assetsDir = path.join(npmDirectory, 'src-tauri/assets');
-    const desktopFilePath = path.join(assetsDir, desktopFileName);
-    await fsExtra.ensureDir(assetsDir);
-    await fsExtra.writeFile(desktopFilePath, desktopContent);
+    // Write desktop file to src-tauri/assets directory where Tauri expects it
+    const srcAssetsDir = path.join(npmDirectory, 'src-tauri/assets');
+    const srcDesktopFilePath = path.join(srcAssetsDir, desktopFileName);
+    await fsExtra.ensureDir(srcAssetsDir);
+    await fsExtra.writeFile(srcDesktopFilePath, desktopContent);
 
     // Set up desktop file in bundle configuration
+    // Use relative path from .pake directory to assets
     tauriConf.bundle.linux.deb.files = {
-      [`/usr/share/applications/${desktopFileName}`]: `assets/${desktopFileName}`,
+      [`/usr/share/applications/${desktopFileName}`]: `../assets/${desktopFileName}`,
     };
 
     const validTargets = ['deb', 'appimage', 'rpm'];
@@ -203,7 +204,7 @@ StartupNotify=true
     },
   };
   const iconInfo = platformIconMap[platform];
-  const exists = await fsExtra.pathExists(options.icon);
+  const exists = options.icon && (await fsExtra.pathExists(options.icon));
   if (exists) {
     let updateIconPath = true;
     let customIconExt = path.extname(options.icon).toLowerCase();

@@ -22,7 +22,7 @@ import sharp from 'sharp';
 import * as psl from 'psl';
 
 var name = "pake-cli";
-var version = "3.2.5";
+var version = "3.2.6";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
@@ -425,14 +425,15 @@ Categories=Network;WebBrowser;
 MimeType=text/html;text/xml;application/xhtml_xml;
 StartupNotify=true
 `;
-        // Write desktop file to assets directory
-        const assetsDir = path.join(npmDirectory, 'src-tauri/assets');
-        const desktopFilePath = path.join(assetsDir, desktopFileName);
-        await fsExtra.ensureDir(assetsDir);
-        await fsExtra.writeFile(desktopFilePath, desktopContent);
+        // Write desktop file to src-tauri/assets directory where Tauri expects it
+        const srcAssetsDir = path.join(npmDirectory, 'src-tauri/assets');
+        const srcDesktopFilePath = path.join(srcAssetsDir, desktopFileName);
+        await fsExtra.ensureDir(srcAssetsDir);
+        await fsExtra.writeFile(srcDesktopFilePath, desktopContent);
         // Set up desktop file in bundle configuration
+        // Use relative path from .pake directory to assets
         tauriConf.bundle.linux.deb.files = {
-            [`/usr/share/applications/${desktopFileName}`]: `assets/${desktopFileName}`,
+            [`/usr/share/applications/${desktopFileName}`]: `../assets/${desktopFileName}`,
         };
         const validTargets = ['deb', 'appimage', 'rpm'];
         if (validTargets.includes(options.targets)) {
@@ -464,7 +465,7 @@ StartupNotify=true
         },
     };
     const iconInfo = platformIconMap[platform];
-    const exists = await fsExtra.pathExists(options.icon);
+    const exists = options.icon && (await fsExtra.pathExists(options.icon));
     if (exists) {
         let updateIconPath = true;
         let customIconExt = path.extname(options.icon).toLowerCase();
@@ -964,8 +965,9 @@ async function handleIcon(options, url) {
             logger.warn('✼ Using png as fallback for Windows (may cause issues).');
             return defaultPngPath;
         }
-        // If nothing exists, let the error bubble up
-        throw new Error('No default icon found for Windows build');
+        // If nothing exists, return empty string to let merge.ts handle default icon
+        logger.warn('✼ No default icon found, will use pake default.');
+        return '';
     }
     const iconPath = IS_LINUX
         ? 'src-tauri/png/icon_512.png'
@@ -1163,7 +1165,8 @@ async function handleOptions(options, url) {
         name,
         identifier: getIdentifier(url),
     };
-    appOptions.icon = await handleIcon(appOptions, url);
+    const iconPath = await handleIcon(appOptions, url);
+    appOptions.icon = iconPath || undefined;
     return appOptions;
 }
 
