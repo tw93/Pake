@@ -610,11 +610,64 @@ class PakeTestRunner {
       async () => {
         return new Promise((resolve, reject) => {
           const testName = "GitHubRealBuild";
-          const appFile = path.join(config.PROJECT_ROOT, `${testName}.app`);
-          const dmgFile = path.join(config.PROJECT_ROOT, `${testName}.dmg`);
+          // Platform-specific output files
+          const outputFiles = {
+            darwin: {
+              app: path.join(config.PROJECT_ROOT, `${testName}.app`),
+              installer: path.join(config.PROJECT_ROOT, `${testName}.dmg`),
+            },
+            linux: {
+              app: path.join(
+                config.PROJECT_ROOT,
+                `src-tauri/target/release/bundle/deb/${testName.toLowerCase()}_*.deb`,
+              ),
+              installer: path.join(
+                config.PROJECT_ROOT,
+                `src-tauri/target/release/bundle/appimage/${testName.toLowerCase()}_*.AppImage`,
+              ),
+            },
+            win32: {
+              app: path.join(config.PROJECT_ROOT, `${testName}.exe`),
+              installer: path.join(config.PROJECT_ROOT, `${testName}.msi`),
+            },
+          };
+          const platform = process.platform;
+          const expectedFiles = outputFiles[platform] || outputFiles.darwin;
+
+          // Helper function to check if files exist (handles wildcards for Linux)
+          const checkFileExists = (filePath) => {
+            if (filePath.includes("*")) {
+              const dir = path.dirname(filePath);
+              const pattern = path.basename(filePath);
+              try {
+                const files = fs.readdirSync(dir);
+                const regex = new RegExp(pattern.replace(/\*/g, ".*"));
+                return files.some((file) => regex.test(file));
+              } catch {
+                return false;
+              }
+            }
+            return fs.existsSync(filePath);
+          };
+
+          const getActualFilePath = (filePath) => {
+            if (filePath.includes("*")) {
+              const dir = path.dirname(filePath);
+              const pattern = path.basename(filePath);
+              try {
+                const files = fs.readdirSync(dir);
+                const regex = new RegExp(pattern.replace(/\*/g, ".*"));
+                const match = files.find((file) => regex.test(file));
+                return match ? path.join(dir, match) : filePath;
+              } catch {
+                return filePath;
+              }
+            }
+            return filePath;
+          };
 
           console.log(`🔧 Starting real build test for GitHub.com...`);
-          console.log(`📝 Expected output: ${appFile}`);
+          console.log(`📝 Expected output: ${expectedFiles.app}`);
 
           const command = `node "${config.CLI_PATH}" "https://github.com" --name "${testName}" --width 1200 --height 800 --hide-title-bar`;
 
@@ -630,8 +683,6 @@ class PakeTestRunner {
 
           let buildStarted = false;
           let compilationStarted = false;
-          let bundlingStarted = false;
-          let buildCompleted = false;
 
           // Track progress without too much noise
           child.stdout.on("data", (data) => {
@@ -648,11 +699,9 @@ class PakeTestRunner {
               console.log("   ⚙️  Compiling...");
             }
             if (output.includes("Bundling")) {
-              bundlingStarted = true;
               console.log("   📦 Bundling...");
             }
             if (output.includes("Built application at:")) {
-              buildCompleted = true;
               console.log("   ✅ Build completed!");
             }
           });
@@ -661,31 +710,35 @@ class PakeTestRunner {
             const output = data.toString();
             if (output.includes("Building app")) buildStarted = true;
             if (output.includes("Compiling")) compilationStarted = true;
-            if (output.includes("Bundling")) bundlingStarted = true;
             if (output.includes("Finished"))
               console.log("   ✅ Compilation finished!");
-            if (output.includes("Built application at:")) buildCompleted = true;
           });
 
           // Real timeout - 8 minutes for actual build
           const timeout = setTimeout(() => {
-            const appExists = fs.existsSync(appFile);
-            const dmgExists = fs.existsSync(dmgFile);
+            const appExists = checkFileExists(expectedFiles.app);
+            const installerExists = checkFileExists(expectedFiles.installer);
 
             if (appExists) {
               console.log(
                 "   🎉 Build completed successfully (app file exists)!",
               );
-              console.log(`   📱 App location: ${appFile}`);
-              if (dmgExists) {
-                console.log(`   💿 DMG location: ${dmgFile}`);
+              console.log(
+                `   📱 App location: ${getActualFilePath(expectedFiles.app)}`,
+              );
+              if (installerExists) {
+                console.log(
+                  `   💿 Installer location: ${getActualFilePath(expectedFiles.installer)}`,
+                );
               }
               console.log("   ✨ Build artifacts preserved for inspection");
               child.kill("SIGTERM");
               resolve(true);
             } else {
-              console.log("   ❌ Build timeout - no app file generated");
-              console.log(`   📍 Expected location: ${appFile}`);
+              console.log(
+                "   ⚠️  Build process completed but no app file found",
+              );
+              console.log(`   📍 Expected location: ${expectedFiles.app}`);
               child.kill("SIGTERM");
               reject(new Error("Real build test timeout"));
             }
@@ -694,18 +747,18 @@ class PakeTestRunner {
           child.on("close", (code) => {
             clearTimeout(timeout);
 
-            const appExists = fs.existsSync(appFile);
-            const dmgExists = fs.existsSync(dmgFile);
-
-            // DON'T track files for cleanup - let user see the results
-            // this.trackTempFile(appFile);
-            // this.trackTempFile(dmgFile);
+            const appExists = checkFileExists(expectedFiles.app);
+            const installerExists = checkFileExists(expectedFiles.installer);
+            const actualAppPath = getActualFilePath(expectedFiles.app);
+            const actualInstallerPath = getActualFilePath(
+              expectedFiles.installer,
+            );
 
             if (appExists) {
               console.log("   🎉 Real build test SUCCESS: App file generated!");
-              console.log(`   📱 App location: ${appFile}`);
-              if (dmgExists) {
-                console.log(`   💿 DMG location: ${dmgFile}`);
+              console.log(`   📱 App location: ${actualAppPath}`);
+              if (installerExists) {
+                console.log(`   💿 Installer location: ${actualInstallerPath}`);
               }
               console.log("   ✨ Build artifacts preserved for inspection");
               resolve(true);
@@ -713,7 +766,7 @@ class PakeTestRunner {
               console.log(
                 "   ⚠️  Build process completed but no app file found",
               );
-              console.log(`   📍 Expected location: ${appFile}`);
+              console.log(`   📍 Expected location: ${expectedFiles.app}`);
               resolve(false);
             } else {
               reject(new Error(`Real build test failed with code ${code}`));
@@ -762,9 +815,6 @@ class PakeTestRunner {
 
           let buildStarted = false;
           let compilationStarted = false;
-          let bundlingStarted = false;
-          let buildCompleted = false;
-          let multiArchDetected = false;
 
           // Track progress
           child.stdout.on("data", (data) => {
@@ -784,11 +834,9 @@ class PakeTestRunner {
               output.includes("universal-apple-darwin") ||
               output.includes("Universal")
             ) {
-              multiArchDetected = true;
               console.log("   🔀 Universal binary target detected");
             }
             if (output.includes("Bundling")) {
-              bundlingStarted = true;
               console.log("   📦 Bundling universal binary...");
             }
             if (output.includes("Built application at:")) {
@@ -1029,7 +1077,7 @@ Usage: node tests/index.js [options]
 
 Options:
   --unit         Run unit tests (default)
-  --integration  Run integration tests (default)  
+  --integration  Run integration tests (default)
   --builder      Run builder tests (default)
   --pake-cli     Run pake-cli GitHub Actions tests
   --e2e, --full  Run end-to-end tests

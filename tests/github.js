@@ -254,7 +254,7 @@ console.log('URL:', process.env.URL);
 console.log('NAME:', process.env.NAME);
 
 // Test that environment variables are properly passed
-const success = process.env.URL === 'https://github.com' && 
+const success = process.env.URL === 'https://github.com' &&
                 process.env.NAME === 'github' &&
                 process.env.HEIGHT === '780' &&
                 process.env.WIDTH === '1200';
@@ -461,22 +461,22 @@ runner.addTest(
 const generateMacBuildCommand = (multiArch, debug, features = ['cli-build']) => {
   if (!multiArch) {
     const baseCommand = debug ? 'npm run tauri build -- --debug' : 'npm run tauri build --';
-    return features.length > 0 ? 
-      \`\${baseCommand} --features \${features.join(',')}\` : 
+    return features.length > 0 ?
+      \`\${baseCommand} --features \${features.join(',')}\` :
       baseCommand;
   }
-  
+
   const baseCommand = debug
     ? 'npm run tauri build -- --debug'
     : 'npm run tauri build --';
-    
+
   const configPath = 'src-tauri/.pake/tauri.conf.json';
   let fullCommand = \`\${baseCommand} --target universal-apple-darwin -c "\${configPath}"\`;
-  
+
   if (features.length > 0) {
     fullCommand += \` --features \${features.join(',')}\`;
   }
-  
+
   return fullCommand;
 };
 
@@ -576,12 +576,12 @@ runner.addTest(
 // Test Rust feature flag logic
 const validateFeatureFlags = (platform, darwinVersion = 23) => {
   const features = ['cli-build'];
-  
+
   // Add macos-proxy feature for modern macOS (Darwin 23+ = macOS 14+)
   if (platform === 'darwin' && darwinVersion >= 23) {
-    features.push('macos-proxy');  
+    features.push('macos-proxy');
   }
-  
+
   return features;
 };
 
@@ -633,52 +633,52 @@ runner.addTest(
 const validateConfig = (config) => {
   const required = ['url', 'name', 'width', 'height'];
   const optional = ['icon', 'fullscreen', 'debug', 'multiArch'];
-  
+
   // Check required fields
   const hasRequired = required.every(field => config.hasOwnProperty(field));
-  
+
   // Check field types
-  const validTypes = 
+  const validTypes =
     typeof config.url === 'string' &&
     typeof config.name === 'string' &&
     typeof config.width === 'number' &&
     typeof config.height === 'number';
-    
+
   // Check URL format
   let validUrl = false;
   try {
     new URL(config.url);
     validUrl = true;
   } catch {}
-  
+
   // Check name is not empty
   const validName = config.name.length > 0;
-  
+
   return hasRequired && validTypes && validUrl && validName;
 };
 
 // Test different configurations
 const configs = [
-  { 
-    url: 'https://github.com', 
-    name: 'github', 
-    width: 1200, 
+  {
+    url: 'https://github.com',
+    name: 'github',
+    width: 1200,
     height: 780,
-    valid: true 
+    valid: true
   },
-  { 
-    url: 'invalid-url', 
-    name: 'test', 
-    width: 800, 
+  {
+    url: 'invalid-url',
+    name: 'test',
+    width: 800,
     height: 600,
-    valid: false 
+    valid: false
   },
-  { 
-    url: 'https://example.com', 
-    name: '', 
-    width: 1000, 
+  {
+    url: 'https://example.com',
+    name: '',
+    width: 1000,
     height: 700,
-    valid: false 
+    valid: false
   },
 ];
 
@@ -755,7 +755,7 @@ const command = 'pake ' + process.env.URL + ' --name ' + process.env.NAME + ' --
 console.log('Build command:', command);
 
 // Simulate build process validation
-const validBuild = 
+const validBuild =
   process.env.URL === 'https://github.com' &&
   process.env.NAME === 'github' &&
   process.env.WIDTH === '1200' &&
@@ -825,7 +825,7 @@ const env = {
 };
 
 // Test parameter validation
-const validParams = 
+const validParams =
   env.URL === 'https://github.com' &&
   env.NAME === 'github' &&
   env.WIDTH === '1200' &&

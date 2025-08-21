@@ -28,11 +28,7 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         serde_json::to_string(&window_config).unwrap()
     );
 
-    let window_title = window_config
-        .title
-        .as_ref()
-        .map(|t| t.as_str())
-        .unwrap_or("");
+    let window_title = window_config.title.as_deref().unwrap_or("");
 
     let mut window_builder = WebviewWindowBuilder::new(app, "pake", url)
         .title(window_title)
