@@ -61,8 +61,8 @@ var scripts = {
 	tauri: "tauri",
 	cli: "cross-env NODE_ENV=development rollup -c -w",
 	"cli:build": "cross-env NODE_ENV=production rollup -c",
-	test: "npm run cli:build && PAKE_CREATE_APP=1 node tests/index.js",
-	format: "prettier --write . --ignore-unknown && cd src-tauri && cargo fmt --verbose",
+	test: "npm run cli:build && cross-env PAKE_CREATE_APP=1 node tests/index.js",
+	format: "prettier --write . --ignore-unknown && find tests -name '*.js' -exec sed -i '' 's/[[:space:]]*$//' {} \\; && cd src-tauri && cargo fmt --verbose",
 	prepublishOnly: "npm run cli:build"
 };
 var type = "module";
@@ -441,6 +441,13 @@ StartupNotify=true
         }
         else {
             logger.warn(`✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`);
+        }
+    }
+    // Set macOS bundle targets (for app vs dmg)
+    if (platform === 'darwin') {
+        const validMacTargets = ['app', 'dmg'];
+        if (validMacTargets.includes(options.targets)) {
+            tauriConf.bundle.targets = [options.targets];
         }
     }
     // Set icon.

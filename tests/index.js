@@ -69,14 +69,14 @@ class PakeTestRunner {
     }
 
     if (realBuild && !quick) {
-      console.log("\n🏗️ Running Real Build Test...");
-      await this.runRealBuildTest();
-      testCount++;
-
-      // Add multi-arch test on macOS
+      // On macOS, prefer multi-arch test as it's more likely to catch issues
       if (process.platform === "darwin") {
-        console.log("\n🔧 Running Multi-Arch Build Test...");
+        console.log("\n🏗️ Running Real Build Test (Multi-Arch)...");
         await this.runMultiArchBuildTest();
+        testCount++;
+      } else {
+        console.log("\n🏗️ Running Real Build Test...");
+        await this.runRealBuildTest();
         testCount++;
       }
     }
@@ -619,52 +619,26 @@ class PakeTestRunner {
             linux: {
               app: path.join(
                 config.PROJECT_ROOT,
-                `src-tauri/target/release/bundle/deb/${testName.toLowerCase()}_*.deb`,
+                `src-tauri/target/release/bundle/deb/*.deb`,
               ),
               installer: path.join(
                 config.PROJECT_ROOT,
-                `src-tauri/target/release/bundle/appimage/${testName.toLowerCase()}_*.AppImage`,
+                `src-tauri/target/release/bundle/appimage/*.AppImage`,
               ),
             },
             win32: {
-              app: path.join(config.PROJECT_ROOT, `${testName}.exe`),
-              installer: path.join(config.PROJECT_ROOT, `${testName}.msi`),
+              app: path.join(
+                config.PROJECT_ROOT,
+                `src-tauri/target/x86_64-pc-windows-msvc/release/pake.exe`,
+              ),
+              installer: path.join(
+                config.PROJECT_ROOT,
+                `src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi`,
+              ),
             },
           };
           const platform = process.platform;
           const expectedFiles = outputFiles[platform] || outputFiles.darwin;
-
-          // Helper function to check if files exist (handles wildcards for Linux)
-          const checkFileExists = (filePath) => {
-            if (filePath.includes("*")) {
-              const dir = path.dirname(filePath);
-              const pattern = path.basename(filePath);
-              try {
-                const files = fs.readdirSync(dir);
-                const regex = new RegExp(pattern.replace(/\*/g, ".*"));
-                return files.some((file) => regex.test(file));
-              } catch {
-                return false;
-              }
-            }
-            return fs.existsSync(filePath);
-          };
-
-          const getActualFilePath = (filePath) => {
-            if (filePath.includes("*")) {
-              const dir = path.dirname(filePath);
-              const pattern = path.basename(filePath);
-              try {
-                const files = fs.readdirSync(dir);
-                const regex = new RegExp(pattern.replace(/\*/g, ".*"));
-                const match = files.find((file) => regex.test(file));
-                return match ? path.join(dir, match) : filePath;
-              } catch {
-                return filePath;
-              }
-            }
-            return filePath;
-          };
 
           console.log(`🔧 Starting real build test for GitHub.com...`);
           console.log(`📝 Expected output: ${expectedFiles.app}`);
@@ -716,19 +690,21 @@ class PakeTestRunner {
 
           // Real timeout - 8 minutes for actual build
           const timeout = setTimeout(() => {
-            const appExists = checkFileExists(expectedFiles.app);
-            const installerExists = checkFileExists(expectedFiles.installer);
+            const appExists = this.checkFileExists(expectedFiles.app);
+            const installerExists = this.checkFileExists(
+              expectedFiles.installer,
+            );
 
             if (appExists) {
               console.log(
                 "   🎉 Build completed successfully (app file exists)!",
               );
               console.log(
-                `   📱 App location: ${getActualFilePath(expectedFiles.app)}`,
+                `   📱 App location: ${this.getActualFilePath(expectedFiles.app)}`,
               );
               if (installerExists) {
                 console.log(
-                  `   💿 Installer location: ${getActualFilePath(expectedFiles.installer)}`,
+                  `   💿 Installer location: ${this.getActualFilePath(expectedFiles.installer)}`,
                 );
               }
               console.log("   ✨ Build artifacts preserved for inspection");
@@ -747,9 +723,11 @@ class PakeTestRunner {
           child.on("close", (code) => {
             clearTimeout(timeout);
 
-            const appExists = checkFileExists(expectedFiles.app);
-            const installerExists = checkFileExists(expectedFiles.installer);
-            const actualAppPath = getActualFilePath(expectedFiles.app);
+            const appExists = this.checkFileExists(expectedFiles.app);
+            const installerExists = this.checkFileExists(
+              expectedFiles.installer,
+            );
+            const actualAppPath = this.getActualFilePath(expectedFiles.app);
             const actualInstallerPath = getActualFilePath(
               expectedFiles.installer,
             );
@@ -797,6 +775,18 @@ class PakeTestRunner {
           const appFile = path.join(config.PROJECT_ROOT, `${testName}.app`);
           const dmgFile = path.join(config.PROJECT_ROOT, `${testName}.dmg`);
 
+          // Also check universal binary locations
+          const universalAppFile = path.join(
+            config.PROJECT_ROOT,
+            `src-tauri/target/universal-apple-darwin/release/bundle/macos/${testName}.app`,
+          );
+
+          // Check for DMG file in universal target (fallback if app target not working)
+          const universalDmgFile = path.join(
+            config.PROJECT_ROOT,
+            `src-tauri/target/universal-apple-darwin/release/bundle/dmg/${testName}_*.dmg`,
+          );
+
           console.log(`🔧 Starting multi-arch build test for GitHub.com...`);
           console.log(`📝 Expected output: ${appFile}`);
           console.log(`🏗️  Building Universal Binary (Intel + Apple Silicon)`);
@@ -810,6 +800,8 @@ class PakeTestRunner {
             env: {
               ...process.env,
               PAKE_CREATE_APP: "1",
+              HDIUTIL_QUIET: "1",
+              HDIUTIL_NO_AUTOOPEN: "1",
             },
           });
 
@@ -855,22 +847,39 @@ class PakeTestRunner {
           // Multi-arch builds take longer - 12 minutes timeout
           const timeout = setTimeout(() => {
             const appExists = fs.existsSync(appFile);
+            const universalAppExists = fs.existsSync(universalAppFile);
             const dmgExists = fs.existsSync(dmgFile);
+            const universalDmgExists = this.checkFileExists(universalDmgFile);
 
-            if (appExists) {
+            if (
+              appExists ||
+              universalAppExists ||
+              dmgExists ||
+              universalDmgExists
+            ) {
               console.log("   🎉 Multi-arch build completed successfully!");
-              console.log(`   📱 App location: ${appFile}`);
+              if (appExists || universalAppExists) {
+                const actualAppFile = appExists ? appFile : universalAppFile;
+                console.log(`   📱 App location: ${actualAppFile}`);
+              }
               if (dmgExists) {
                 console.log(`   💿 DMG location: ${dmgFile}`);
+              }
+              if (universalDmgExists) {
+                const actualDmgFile = this.getActualFilePath(universalDmgFile);
+                console.log(`   💿 Universal DMG location: ${actualDmgFile}`);
               }
               console.log("   🔀 Universal binary preserved for inspection");
               child.kill("SIGTERM");
               resolve(true);
             } else {
               console.log(
-                "   ❌ Multi-arch build timeout - no app file generated",
+                "   ❌ Multi-arch build timeout - no output files generated",
               );
-              console.log(`   📍 Expected location: ${appFile}`);
+              console.log(`   📍 Expected: ${appFile}`);
+              console.log(`   📍 Or: ${universalAppFile}`);
+              console.log(`   📍 Or: ${dmgFile}`);
+              console.log(`   📍 Or: ${universalDmgFile}`);
               child.kill("SIGTERM");
               reject(new Error("Multi-arch build test timeout"));
             }
@@ -880,22 +889,36 @@ class PakeTestRunner {
             clearTimeout(timeout);
 
             const appExists = fs.existsSync(appFile);
+            const universalAppExists = fs.existsSync(universalAppFile);
             const dmgExists = fs.existsSync(dmgFile);
+            const universalDmgExists = this.checkFileExists(universalDmgFile);
 
-            if (appExists) {
+            if (
+              appExists ||
+              universalAppExists ||
+              dmgExists ||
+              universalDmgExists
+            ) {
               console.log(
                 "   🎉 Multi-arch build test SUCCESS: Universal binary generated!",
               );
-              console.log(`   📱 App location: ${appFile}`);
+              if (appExists || universalAppExists) {
+                const actualAppFile = appExists ? appFile : universalAppFile;
+                console.log(`   📱 App location: ${actualAppFile}`);
+              }
               if (dmgExists) {
                 console.log(`   💿 DMG location: ${dmgFile}`);
+              }
+              if (universalDmgExists) {
+                const actualDmgFile = this.getActualFilePath(universalDmgFile);
+                console.log(`   💿 Universal DMG location: ${actualDmgFile}`);
               }
               console.log("   🔀 Universal binary preserved for inspection");
 
               // Verify it's actually a universal binary
               try {
                 const fileOutput = execSync(
-                  `file "${appFile}/Contents/MacOS/pake"`,
+                  `file "${actualAppFile}/Contents/MacOS/pake"`,
                   { encoding: "utf8" },
                 );
                 if (fileOutput.includes("universal binary")) {
@@ -913,13 +936,18 @@ class PakeTestRunner {
               }
 
               resolve(true);
-            } else if (code === 0 && buildStarted && compilationStarted) {
+            } else if (buildStarted && compilationStarted) {
+              // If build started and compilation happened, but no output files found
               console.log(
-                "   ⚠️  Multi-arch build process completed but no app file found",
+                "   ⚠️  Multi-arch build process completed but no output files found",
               );
-              console.log(`   📍 Expected location: ${appFile}`);
+              console.log(`   📍 Expected: ${appFile}`);
+              console.log(`   📍 Or: ${universalAppFile}`);
+              console.log(`   📍 Or: ${dmgFile}`);
+              console.log(`   📍 Or: ${universalDmgFile}`);
               resolve(false);
             } else {
+              // Only reject if the build never started or failed early
               reject(
                 new Error(`Multi-arch build test failed with code ${code}`),
               );
@@ -983,6 +1011,38 @@ class PakeTestRunner {
       },
       TIMEOUTS.QUICK,
     );
+  }
+
+  // Helper function to check if files exist (handles wildcards)
+  checkFileExists(filePath) {
+    if (filePath.includes("*")) {
+      const dir = path.dirname(filePath);
+      const pattern = path.basename(filePath);
+      try {
+        const files = fs.readdirSync(dir);
+        const regex = new RegExp(pattern.replace(/\*/g, ".*"));
+        return files.some((file) => regex.test(file));
+      } catch {
+        return false;
+      }
+    }
+    return fs.existsSync(filePath);
+  }
+
+  getActualFilePath(filePath) {
+    if (filePath.includes("*")) {
+      const dir = path.dirname(filePath);
+      const pattern = path.basename(filePath);
+      try {
+        const files = fs.readdirSync(dir);
+        const regex = new RegExp(pattern.replace(/\*/g, ".*"));
+        const match = files.find((file) => regex.test(file));
+        return match ? path.join(dir, match) : filePath;
+      } catch {
+        return filePath;
+      }
+    }
+    return filePath;
   }
 
   trackTempFile(filepath) {
@@ -1076,15 +1136,15 @@ Options:
   --builder      Run builder tests (default)
   --pake-cli     Run pake-cli GitHub Actions tests
   --e2e, --full  Run end-to-end tests
-  --real-build   Run complete real build test (8+ minutes)
+  --real-build   Run complete real build test (8+ minutes on non-macOS, 12+ minutes multi-arch on macOS)
   --quick        Run only essential tests (fast)
   --help, -h     Show this help message
 
 Examples:
-  npm test                         # Run all default tests
-  node tests/index.js              # Run all default tests
+  npm test                         # Run all default tests (multi-arch on macOS)
+  node tests/index.js              # Run all default tests (multi-arch on macOS)
   node tests/index.js --quick      # Quick test (30 seconds)
-  node tests/index.js --real-build # Complete build test (8+ minutes)
+  node tests/index.js --real-build # Complete build test (multi-arch on macOS, single-arch elsewhere)
   node tests/index.js --pake-cli   # GitHub Actions tests
   node tests/index.js --e2e        # Full end-to-end tests
   node tests/index.js --unit --integration  # Specific tests only

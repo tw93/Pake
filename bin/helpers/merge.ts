@@ -182,6 +182,14 @@ StartupNotify=true
     }
   }
 
+  // Set macOS bundle targets (for app vs dmg)
+  if (platform === 'darwin') {
+    const validMacTargets = ['app', 'dmg'];
+    if (validMacTargets.includes(options.targets)) {
+      tauriConf.bundle.targets = [options.targets];
+    }
+  }
+
   // Set icon.
   const platformIconMap: PlatformMap = {
     win32: {
