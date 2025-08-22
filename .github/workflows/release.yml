@@ -20,46 +20,6 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  # Update contributor list
-  update-contributors:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
-
-      - name: Update Contributors in README.md
-        uses: akhilmhdh/contributors-readme-action@v2.3.11
-        with:
-          image_size: 90
-          columns_per_row: 7
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Update Contributors in README_CN.md
-        uses: akhilmhdh/contributors-readme-action@v2.3.11
-        with:
-          image_size: 90
-          columns_per_row: 7
-          readme_path: README_CN.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Update Contributors in README_JP.md
-        uses: akhilmhdh/contributors-readme-action@v2.3.11
-        with:
-          image_size: 90
-          columns_per_row: 7
-          readme_path: README_JP.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   # Build and release popular apps
   release-apps:
     if: |
