@@ -281,7 +281,7 @@ async function tryGetFavicon(
       }
     }
 
-    spinner.warn(`✼ No favicon found for ${domain}. Using default.`);
+    spinner.warn(`No favicon found for ${domain}. Using default.`);
     return null;
   } catch (error) {
     logger.warn(`Failed to fetch favicon: ${error.message}`);
