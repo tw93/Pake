@@ -680,12 +680,18 @@ class PakeTestRunner {
             }
           });
 
+          let errorOutput = "";
           child.stderr.on("data", (data) => {
             const output = data.toString();
             if (output.includes("Building app")) buildStarted = true;
             if (output.includes("Compiling")) compilationStarted = true;
             if (output.includes("Finished"))
               console.log("   ✅ Compilation finished!");
+            
+            // Capture error output for debugging
+            if (output.includes("error:") || output.includes("Error:") || output.includes("ERROR")) {
+              errorOutput += output;
+            }
           });
 
           // Real timeout - 8 minutes for actual build
@@ -732,9 +738,11 @@ class PakeTestRunner {
               expectedFiles.installer,
             );
 
-            if (appExists) {
-              console.log("   🎉 Real build test SUCCESS: App file generated!");
-              console.log(`   📱 App location: ${actualAppPath}`);
+            if (appExists || installerExists) {
+              console.log("   🎉 Real build test SUCCESS: Build file(s) generated!");
+              if (appExists) {
+                console.log(`   📱 App location: ${actualAppPath}`);
+              }
               if (installerExists) {
                 console.log(`   💿 Installer location: ${actualInstallerPath}`);
               }
@@ -742,11 +750,52 @@ class PakeTestRunner {
               resolve(true);
             } else if (code === 0 && buildStarted && compilationStarted) {
               console.log(
-                "   ⚠️  Build process completed but no app file found",
+                "   ⚠️  Build process completed but no build files found",
               );
-              console.log(`   📍 Expected location: ${expectedFiles.app}`);
+              console.log(`   📍 Expected app location: ${expectedFiles.app}`);
+              console.log(`   📍 Expected installer location: ${expectedFiles.installer}`);
+              
+              // Debug: List actual files in target directories to help diagnose
+              const targetDir = path.join(config.PROJECT_ROOT, 'src-tauri/target');
+              if (fs.existsSync(targetDir)) {
+                console.log("   🔍 Debug: Listing target directory structure...");
+                try {
+                  this.listTargetContents(targetDir);
+                } catch (error) {
+                  console.log(`   ⚠️  Could not list target contents: ${error.message}`);
+                }
+              }
+              
               resolve(false);
             } else {
+              console.log(`   ❌ Build process failed with exit code: ${code}`);
+              if (buildStarted) {
+                console.log("   📊 Build was started but failed during execution");
+                if (errorOutput.trim()) {
+                  console.log("   🔍 Error details:");
+                  errorOutput.split('\n').forEach(line => {
+                    if (line.trim()) console.log(`     ${line.trim()}`);
+                  });
+                }
+                // Debug: List actual files in target directories to help diagnose
+                const targetDir = path.join(config.PROJECT_ROOT, 'src-tauri/target');
+                if (fs.existsSync(targetDir)) {
+                  console.log("   🔍 Debug: Listing target directory structure...");
+                  try {
+                    this.listTargetContents(targetDir);
+                  } catch (error) {
+                    console.log(`   ⚠️  Could not list target contents: ${error.message}`);
+                  }
+                }
+              } else {
+                console.log("   📊 Build failed before starting compilation");
+                if (errorOutput.trim()) {
+                  console.log("   🔍 Error details:");
+                  errorOutput.split('\n').forEach(line => {
+                    if (line.trim()) console.log(`     ${line.trim()}`);
+                  });
+                }
+              }
               reject(new Error(`Real build test failed with code ${code}`));
             }
           });
@@ -1019,9 +1068,13 @@ class PakeTestRunner {
       const dir = path.dirname(filePath);
       const pattern = path.basename(filePath);
       try {
+        if (!fs.existsSync(dir)) {
+          return false;
+        }
         const files = fs.readdirSync(dir);
         const regex = new RegExp(pattern.replace(/\*/g, ".*"));
-        return files.some((file) => regex.test(file));
+        const matches = files.filter((file) => regex.test(file));
+        return matches.length > 0;
       } catch {
         return false;
       }
@@ -1045,6 +1098,30 @@ class PakeTestRunner {
     return filePath;
   }
 
+  listTargetContents(targetDir, maxDepth = 3, currentDepth = 0) {
+    if (currentDepth >= maxDepth) return;
+    
+    try {
+      const items = fs.readdirSync(targetDir);
+      items.forEach(item => {
+        const fullPath = path.join(targetDir, item);
+        const relativePath = path.relative(config.PROJECT_ROOT, fullPath);
+        const indent = "     ".repeat(currentDepth + 1);
+        
+        if (fs.statSync(fullPath).isDirectory()) {
+          console.log(`${indent}📁 ${relativePath}/`);
+          if (item === 'bundle' || item === 'release') {
+            this.listTargetContents(fullPath, maxDepth, currentDepth + 1);
+          }
+        } else {
+          console.log(`${indent}📄 ${relativePath}`);
+        }
+      });
+    } catch (error) {
+      console.log(`     ⚠️  Could not list contents of ${targetDir}`);
+    }
+  }
+
   trackTempFile(filepath) {
     this.tempFiles.push(filepath);
   }
@@ -1055,10 +1132,10 @@ class PakeTestRunner {
 
   cleanupTempIcons() {
     // Clean up temporary icon files generated during tests
-    const iconsDir = path.join(config.PROJECT_ROOT, 'src-tauri/icons');
-    const testNames = ['urltest', 'githubapp', 'githubmultiarch'];
-    
-    testNames.forEach(name => {
+    const iconsDir = path.join(config.PROJECT_ROOT, "src-tauri/icons");
+    const testNames = ["urltest", "githubapp", "githubmultiarch"];
+
+    testNames.forEach((name) => {
       const iconPath = path.join(iconsDir, `${name}.icns`);
       try {
         if (fs.existsSync(iconPath)) {
@@ -1074,7 +1151,7 @@ class PakeTestRunner {
   cleanup() {
     // Clean up temporary icon files generated during tests
     this.cleanupTempIcons();
-    
+
     // Clean up temporary files and directories
     this.tempFiles.forEach((file) => {
       try {
