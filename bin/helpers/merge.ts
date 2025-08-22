@@ -224,7 +224,13 @@ StartupNotify=true
     } else {
       const iconPath = path.join(npmDirectory, 'src-tauri/', iconInfo.path);
       tauriConf.bundle.resources = [iconInfo.path];
-      await fsExtra.copy(options.icon, iconPath);
+
+      // Avoid copying if source and destination are the same
+      const absoluteIconPath = path.resolve(options.icon);
+      const absoluteDestPath = path.resolve(iconPath);
+      if (absoluteIconPath !== absoluteDestPath) {
+        await fsExtra.copy(options.icon, iconPath);
+      }
     }
 
     if (updateIconPath) {

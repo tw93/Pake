@@ -22,7 +22,7 @@ import sharp from 'sharp';
 import * as psl from 'psl';
 
 var name = "pake-cli";
-var version = "3.2.10";
+var version = "3.2.11";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
@@ -484,7 +484,12 @@ StartupNotify=true
         else {
             const iconPath = path.join(npmDirectory, 'src-tauri/', iconInfo.path);
             tauriConf.bundle.resources = [iconInfo.path];
-            await fsExtra.copy(options.icon, iconPath);
+            // Avoid copying if source and destination are the same
+            const absoluteIconPath = path.resolve(options.icon);
+            const absoluteDestPath = path.resolve(iconPath);
+            if (absoluteIconPath !== absoluteDestPath) {
+                await fsExtra.copy(options.icon, iconPath);
+            }
         }
         if (updateIconPath) {
             tauriConf.bundle.icon = [options.icon];
