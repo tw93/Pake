@@ -174,6 +174,7 @@ cargo check --manifest-path=src-tauri/Cargo.toml
 - **NEVER commit code automatically** - User handles all git operations
 - **NEVER generate commit messages** - User writes their own commit messages
 - **NEVER run npm publish automatically** - Always remind user to run it manually
+- **NEVER execute git tag or push operations** - User handles all tag creation and GitHub pushes
 - Only make code changes, user decides when and how to commit
 - Test before user commits
 
