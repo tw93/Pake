@@ -51,8 +51,14 @@ pub fn run_app() {
             let window = set_window(app, &pake_config, &tauri_config);
             set_system_tray(app.app_handle(), show_system_tray).unwrap();
             set_global_shortcut(app.app_handle(), activation_shortcut).unwrap();
-            // Prevent flickering on the first open.
-            window.show().unwrap();
+
+            // Show window after state restoration to prevent position flashing
+            let window_clone = window.clone();
+            tauri::async_runtime::spawn(async move {
+                tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
+                window_clone.show().unwrap();
+            });
+
             Ok(())
         })
         .on_window_event(move |_window, _event| {
