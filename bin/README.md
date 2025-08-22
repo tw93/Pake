@@ -123,7 +123,7 @@ screen.
 
 #### [activation-shortcut]
 
-Set the activation shortcut for the application. Default is ` `, it does not take effect, you can customize the activation shortcut with the following commands, e.g. `CmdOrControl+Shift+P`, use can refer to [available-modifiers](https://www.electronjs.org/docs/latest/api/accelerator#available-modifiers).
+Set the activation shortcut for the application. Default is empty, so it does not take effect. You can customize the activation shortcut with the following commands, e.g. `CmdOrControl+Shift+P`. Usage can refer to [available-modifiers](https://www.electronjs.org/docs/latest/api/accelerator#available-modifiers).
 
 ```shell
 --activation-shortcut <string>
@@ -188,7 +188,7 @@ Package the application to support both Intel and M1 chips, exclusively for macO
 
 #### [targets]
 
-Choose the output package format, supporting `deb`, `appimage`, `rpm`, This option is only applicable to Linux and defaults to `deb`.
+Choose the output package format, supporting `deb`, `appimage`, `rpm`. This option is only applicable to Linux and defaults to `deb`.
 
 ```shell
 --targets <format>
@@ -290,7 +290,7 @@ Set proxy server for all network requests. Supports HTTP, HTTPS, and SOCKS5. Ava
 
 #### [debug]
 
-The typed package has dev-tools for debugging, in addition to outputting more log messages for debugging.
+The packaged application has dev-tools for debugging, in addition to outputting more log messages for debugging.
 
 ```shell
 --debug

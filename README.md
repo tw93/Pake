@@ -26,7 +26,7 @@
 - 🎐 Nearly 20 times smaller than an Electron package (around 5M!)
 - 🚀 With Rust Tauri, Pake is much more lightweight and faster than JS-based frameworks.
 - 📦 Battery-included package — shortcut pass-through, immersive windows, and minimalist customization.
-- 👻 Pake is just a simple tool — replace the old bundle approach with Tauri (though PWA is good enough).
+- 👻 Pake is just a simple tool — replaces the old bundle approach with Tauri (though PWA is also a good alternative).
 
 ## Popular Packages
 
@@ -141,7 +141,7 @@
 | <kbd>⌘</kbd> + <kbd>↑</kbd> | <kbd>Ctrl</kbd> + <kbd>↑</kbd> | Auto scroll to top of page    |
 | <kbd>⌘</kbd> + <kbd>↓</kbd> | <kbd>Ctrl</kbd> + <kbd>↓</kbd> | Auto scroll to bottom of page |
 | <kbd>⌘</kbd> + <kbd>r</kbd> | <kbd>Ctrl</kbd> + <kbd>r</kbd> | Refresh Page                  |
-| <kbd>⌘</kbd> + <kbd>w</kbd> | <kbd>Ctrl</kbd> + <kbd>w</kbd> | Hide window, not quite        |
+| <kbd>⌘</kbd> + <kbd>w</kbd> | <kbd>Ctrl</kbd> + <kbd>w</kbd> | Hide window, not quit         |
 | <kbd>⌘</kbd> + <kbd>-</kbd> | <kbd>Ctrl</kbd> + <kbd>-</kbd> | Zoom out the page             |
 | <kbd>⌘</kbd> + <kbd>+</kbd> | <kbd>Ctrl</kbd> + <kbd>+</kbd> | Zoom in the page              |
 | <kbd>⌘</kbd> + <kbd>=</kbd> | <kbd>Ctrl</kbd> + <kbd>=</kbd> | Zoom in the Page              |
@@ -161,7 +161,7 @@ In addition, double-click the title bar to switch to full-screen mode. For Mac u
 
 ![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake.gif)
 
-**Pake provides a command line tool, making the flow of package customization quicker and easier. See [documentation](./bin/README.md) for more information.**
+**Pake provides a command line tool, making the flow of package customization quicker and easier. See the [documentation](./bin/README.md) for more information.**
 
 ```bash
 # Install with npm

@@ -1,6 +1,6 @@
 # Pake CLI 测试
 
-统一的 CLI 构建测试套件，验证多平台打包功能。
+统一的 CLI 构建测试套件，用于验证多平台打包功能。
 
 ## 运行测试
 
@@ -44,7 +44,7 @@ npm test -- --no-build      # 跳过构建测试，仅验证核心功能（30秒
 
 ### 真实构建测试（重点）
 
-**macOS**: 🔥 多架构构建（Universal Binary）
+**macOS**: 🔥 多架构构建（通用二进制）
 
 - 编译 Intel + Apple Silicon 双架构
 - 检测 `.app` 文件生成：`GitHubMultiArch.app`
@@ -91,7 +91,7 @@ npm test -- --no-build      # 跳过构建测试，仅验证核心功能（30秒
 node ./tests/release.js
 ```
 
-真实构建2个应用包，验证完整的打包流程和release.yml逻辑是否正常工作。
+真实构建2个应用包，验证完整的打包流程和 release.yml 逻辑是否正常工作。
 
 ## 开发建议
 

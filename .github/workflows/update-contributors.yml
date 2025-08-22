@@ -4,7 +4,7 @@ on:
   push:
     branches: [main, dev]
   schedule:
-    - cron: '0 0 * * 0'  # Every Sunday at midnight UTC
+    - cron: "0 0 * * 0" # Every Sunday at midnight UTC
 
 jobs:
   update-contributors:

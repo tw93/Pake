@@ -15,7 +15,7 @@
     <img alt="GitHub commit" src="https://img.shields.io/github/commit-activity/m/tw93/Pake?style=flat-square"></a>
     <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank">
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
-    <a href="https://colab.research.google.com/drive/1bX345znvDZ30848xjRtpgtU8eypWwXrp?usp=sharingg" target="_blank">
+    <a href="https://colab.research.google.com/drive/1bX345znvDZ30848xjRtpgtU8eypWwXrp?usp=sharing" target="_blank">
     <img alt="在 Colab 中打开" src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 </div>
 <div align="left">支持 Mac / Windows / Linux，关于 <a href="#常用包下载">常用包下载</a>、<a href="#命令行一键打包">命令行一键打包</a>、<a href="#定制开发">定制开发</a> 可见下面文档，也欢迎去 <a href=https://github.com/tw93/Pake/discussions>讨论区</a> 交流。</div>
@@ -24,7 +24,7 @@
 
 - 🎐 相比传统的 Electron 套壳打包，要小将近 20 倍，5M 上下。
 - 🚀 Pake 的底层使用的 Rust Tauri 框架，性能体验较 JS 框架要轻快不少，内存小很多。
-- 📦 不是单纯打包，实现了快捷键的透传、沉浸式的窗口、拖动、样式改写、去广告、产品的极简风格定制。
+- 📦 不是单纯打包，实现了快捷键透传、沉浸式窗口、拖动、样式改写、去广告、产品极简风格定制。
 - 👻 只是一个很简单的小玩具，用 Tauri 替代之前套壳网页打包的老思路，其实 PWA 也很好。
 
 ## 常用包下载
@@ -161,7 +161,7 @@
 
 ![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake.gif)
 
-**Pake 提供了命令行工具，可以更快捷方便地一键自定义打你需要的包，详细可见 [文档](./bin/README_CN.md)。**
+**Pake 提供了命令行工具，可以更快捷方便地一键自定义打包你需要的应用，详细可见 [文档](./bin/README_CN.md)。**
 
 ```bash
 # 使用 npm 进行安装
