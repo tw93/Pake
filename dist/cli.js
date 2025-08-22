@@ -22,7 +22,7 @@ import sharp from 'sharp';
 import * as psl from 'psl';
 
 var name = "pake-cli";
-var version = "3.2.9";
+var version = "3.2.10";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
@@ -935,7 +935,22 @@ async function convertIconFormat(inputPath, appName) {
 async function handleIcon(options, url) {
     if (options.icon) {
         if (options.icon.startsWith('http')) {
-            return downloadIcon(options.icon);
+            const downloadedPath = await downloadIcon(options.icon);
+            if (downloadedPath && options.name) {
+                // Convert downloaded icon to platform-specific format
+                const convertedPath = await convertIconFormat(downloadedPath, options.name);
+                if (convertedPath) {
+                    // For Windows, copy the converted ico to the expected location
+                    if (IS_WIN && convertedPath.endsWith('.ico')) {
+                        const finalIconPath = path.join(npmDirectory, `src-tauri/png/${options.name.toLowerCase()}_256.ico`);
+                        await fsExtra.ensureDir(path.dirname(finalIconPath));
+                        await fsExtra.copy(convertedPath, finalIconPath);
+                        return finalIconPath;
+                    }
+                    return convertedPath;
+                }
+            }
+            return downloadedPath;
         }
         return path.resolve(options.icon);
     }
@@ -960,7 +975,11 @@ async function handleIcon(options, url) {
             try {
                 const convertedPath = await convertIconFormat(defaultPngPath, 'icon');
                 if (convertedPath && (await fsExtra.pathExists(convertedPath))) {
-                    return convertedPath;
+                    // Copy converted icon to the expected location for Windows
+                    const finalIconPath = path.join(npmDirectory, 'src-tauri/png/icon_256.ico');
+                    await fsExtra.ensureDir(path.dirname(finalIconPath));
+                    await fsExtra.copy(convertedPath, finalIconPath);
+                    return finalIconPath;
                 }
             }
             catch (error) {
@@ -1024,6 +1043,14 @@ async function tryGetFavicon(url, appName) {
                     continue;
                 const convertedPath = await convertIconFormat(faviconPath, appName);
                 if (convertedPath) {
+                    // For Windows, copy the converted ico to the expected location
+                    if (IS_WIN && convertedPath.endsWith('.ico')) {
+                        const finalIconPath = path.join(npmDirectory, `src-tauri/png/${appName.toLowerCase()}_256.ico`);
+                        await fsExtra.ensureDir(path.dirname(finalIconPath));
+                        await fsExtra.copy(convertedPath, finalIconPath);
+                        spinner.succeed(chalk.green('Icon fetched and converted successfully!'));
+                        return finalIconPath;
+                    }
                     spinner.succeed(chalk.green('Icon fetched and converted successfully!'));
                     return convertedPath;
                 }
