@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Incremental progress over big bangs**: Break complex tasks into manageable stages
 - **Learn from existing code**: Understand patterns before implementing new features
 - **Clear intent over clever code**: Prioritize readability and maintainability
+- **Simple over complex**: Keep all implementations simple and straightforward - prioritize solving problems and ease of maintenance over complex solutions
 
 ## Project Overview
 
