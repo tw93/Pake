@@ -292,6 +292,13 @@ window.addEventListener("DOMContentLoaded", (_event) => {
     .header-overlay .header-logged-out {
       margin-top: 15px;
     }
+
+    .w-full #stage-slideover-sidebar {
+      padding-top: 16px;
+    }
+    .w-full #thread #page-header {
+      padding-top: 36px;
+    }
   `;
   const contentStyleElement = document.createElement("style");
   contentStyleElement.innerHTML = contentCSS;
