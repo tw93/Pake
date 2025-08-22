@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 # Cargo build stage
-FROM rust:1.80-slim AS cargo-builder
+FROM rust:1.82-slim AS cargo-builder
 # Install Rust dependencies
 RUN --mount=type=cache,target=/var/cache/apt \
     --mount=type=cache,target=/usr/local/cargo/registry \
@@ -23,7 +23,7 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
 RUN ls -la /cargo-cache/registry && ls -la /cargo-cache/git && rm -rfd /cargo-cache/registry/src
 
 # Main build stage
-FROM rust:1.80-slim AS builder
+FROM rust:1.82-slim AS builder
 # Install Rust dependencies
 RUN --mount=type=cache,target=/var/cache/apt \
     --mount=type=cache,target=/usr/local/cargo/registry \
