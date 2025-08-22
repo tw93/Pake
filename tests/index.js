@@ -619,21 +619,21 @@ class PakeTestRunner {
             linux: {
               app: path.join(
                 config.PROJECT_ROOT,
-                `src-tauri/target/release/bundle/deb/*.deb`,
+                `src-tauri/target/release/pake`,
               ),
               installer: path.join(
                 config.PROJECT_ROOT,
-                `src-tauri/target/release/bundle/appimage/*.AppImage`,
+                `src-tauri/target/release/bundle/deb/*.deb`,
               ),
             },
             win32: {
               app: path.join(
                 config.PROJECT_ROOT,
-                `src-tauri/target/x86_64-pc-windows-msvc/release/pake.exe`,
+                `src-tauri/target/release/pake.exe`,
               ),
               installer: path.join(
                 config.PROJECT_ROOT,
-                `src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi`,
+                `src-tauri/target/release/bundle/msi/*.msi`,
               ),
             },
           };
@@ -687,9 +687,13 @@ class PakeTestRunner {
             if (output.includes("Compiling")) compilationStarted = true;
             if (output.includes("Finished"))
               console.log("   ✅ Compilation finished!");
-            
+
             // Capture error output for debugging
-            if (output.includes("error:") || output.includes("Error:") || output.includes("ERROR")) {
+            if (
+              output.includes("error:") ||
+              output.includes("Error:") ||
+              output.includes("ERROR")
+            ) {
               errorOutput += output;
             }
           });
@@ -739,12 +743,18 @@ class PakeTestRunner {
             );
 
             if (appExists || installerExists) {
-              console.log("   🎉 Real build test SUCCESS: Build file(s) generated!");
+              console.log(
+                "   🎉 Real build test SUCCESS: Build file(s) generated!",
+              );
               if (appExists) {
                 console.log(`   📱 App location: ${actualAppPath}`);
               }
               if (installerExists) {
                 console.log(`   💿 Installer location: ${actualInstallerPath}`);
+              } else if (appExists && !installerExists) {
+                console.log(
+                  "   ℹ️  Note: Binary created successfully, but installer package not generated",
+                );
               }
               console.log("   ✨ Build artifacts preserved for inspection");
               resolve(true);
@@ -753,45 +763,63 @@ class PakeTestRunner {
                 "   ⚠️  Build process completed but no build files found",
               );
               console.log(`   📍 Expected app location: ${expectedFiles.app}`);
-              console.log(`   📍 Expected installer location: ${expectedFiles.installer}`);
-              
+              console.log(
+                `   📍 Expected installer location: ${expectedFiles.installer}`,
+              );
+
               // Debug: List actual files in target directories to help diagnose
-              const targetDir = path.join(config.PROJECT_ROOT, 'src-tauri/target');
+              const targetDir = path.join(
+                config.PROJECT_ROOT,
+                "src-tauri/target",
+              );
               if (fs.existsSync(targetDir)) {
-                console.log("   🔍 Debug: Listing target directory structure...");
+                console.log(
+                  "   🔍 Debug: Listing target directory structure...",
+                );
                 try {
                   this.listTargetContents(targetDir);
                 } catch (error) {
-                  console.log(`   ⚠️  Could not list target contents: ${error.message}`);
+                  console.log(
+                    `   ⚠️  Could not list target contents: ${error.message}`,
+                  );
                 }
               }
-              
+
               resolve(false);
             } else {
               console.log(`   ❌ Build process failed with exit code: ${code}`);
               if (buildStarted) {
-                console.log("   📊 Build was started but failed during execution");
+                console.log(
+                  "   📊 Build was started but failed during execution",
+                );
                 if (errorOutput.trim()) {
                   console.log("   🔍 Error details:");
-                  errorOutput.split('\n').forEach(line => {
+                  errorOutput.split("\n").forEach((line) => {
                     if (line.trim()) console.log(`     ${line.trim()}`);
                   });
                 }
                 // Debug: List actual files in target directories to help diagnose
-                const targetDir = path.join(config.PROJECT_ROOT, 'src-tauri/target');
+                const targetDir = path.join(
+                  config.PROJECT_ROOT,
+                  "src-tauri/target",
+                );
                 if (fs.existsSync(targetDir)) {
-                  console.log("   🔍 Debug: Listing target directory structure...");
+                  console.log(
+                    "   🔍 Debug: Listing target directory structure...",
+                  );
                   try {
                     this.listTargetContents(targetDir);
                   } catch (error) {
-                    console.log(`   ⚠️  Could not list target contents: ${error.message}`);
+                    console.log(
+                      `   ⚠️  Could not list target contents: ${error.message}`,
+                    );
                   }
                 }
               } else {
                 console.log("   📊 Build failed before starting compilation");
                 if (errorOutput.trim()) {
                   console.log("   🔍 Error details:");
-                  errorOutput.split('\n').forEach(line => {
+                  errorOutput.split("\n").forEach((line) => {
                     if (line.trim()) console.log(`     ${line.trim()}`);
                   });
                 }
@@ -1100,17 +1128,17 @@ class PakeTestRunner {
 
   listTargetContents(targetDir, maxDepth = 3, currentDepth = 0) {
     if (currentDepth >= maxDepth) return;
-    
+
     try {
       const items = fs.readdirSync(targetDir);
-      items.forEach(item => {
+      items.forEach((item) => {
         const fullPath = path.join(targetDir, item);
         const relativePath = path.relative(config.PROJECT_ROOT, fullPath);
         const indent = "     ".repeat(currentDepth + 1);
-        
+
         if (fs.statSync(fullPath).isDirectory()) {
           console.log(`${indent}📁 ${relativePath}/`);
-          if (item === 'bundle' || item === 'release') {
+          if (item === "bundle" || item === "release") {
             this.listTargetContents(fullPath, maxDepth, currentDepth + 1);
           }
         } else {
