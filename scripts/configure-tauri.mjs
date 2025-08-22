@@ -82,7 +82,7 @@ Type=Application
       icons: [`icons/${process.env.NAME}.icns`],
     },
 
-    windows: {
+    win32: {
       configFile: "src-tauri/tauri.windows.conf.json",
       iconPath: `src-tauri/png/${process.env.NAME}_32.ico`,
       hdIconPath: `src-tauri/png/${process.env.NAME}_256.ico`,
@@ -102,13 +102,34 @@ function updateBaseConfigs() {
   // Update pake.json
   pakeJson.windows[0].url = process.env.URL;
 
+  // Update system tray icon path in pake.json
+  if (pakeJson.system_tray_path) {
+    pakeJson.system_tray_path = `icons/${process.env.NAME}.png`;
+    // Note: System tray icons should be provided in default_app_list.json
+    // Don't auto-generate them here to avoid wrong icon content
+  }
+
   // Update tauri.conf.json
   tauriJson.productName = process.env.TITLE;
   tauriJson.identifier = CONFIG.identifier;
+
+  // Update tray icon path in tauri.conf.json
+  if (tauriJson.app && tauriJson.app.trayIcon) {
+    tauriJson.app.trayIcon.iconPath = `png/${process.env.NAME}_512.png`;
+    // Note: Tray icons should be provided in default_app_list.json
+    // Don't auto-generate them here to avoid wrong icon content
+  }
 }
 
 function ensureIconExists(iconPath, defaultPath, description = "icon") {
   if (!existsSync(iconPath)) {
+    // For official release apps, icons should already exist
+    if (process.env.PAKE_CREATE_APP === "1") {
+      console.warn(
+        `${description} for ${process.env.NAME} not found at ${iconPath}`,
+      );
+      return; // Don't auto-generate for release builds
+    }
     console.warn(
       `${description} for ${process.env.NAME} not found, using default`,
     );
@@ -117,8 +138,14 @@ function ensureIconExists(iconPath, defaultPath, description = "icon") {
 }
 
 function updatePlatformConfig(platformConfig, platformVars) {
+  // Ensure bundle object exists
+  if (!platformConfig.bundle) {
+    platformConfig.bundle = {};
+  }
+
   platformConfig.bundle.icon = platformVars.icons;
   platformConfig.identifier = CONFIG.identifier;
+  platformConfig.productName = process.env.TITLE;
 }
 
 // Platform-specific handlers
@@ -148,6 +175,7 @@ const platformHandlers = {
       "Windows HD icon",
     );
 
+    // Update both bundle.icon and bundle.resources for Windows
     windowsJson.bundle.resources = config.resources;
     updatePlatformConfig(windowsJson, config);
   },
@@ -159,11 +187,11 @@ function saveConfigurations() {
     { path: CONFIG.paths.tauriConfig, data: tauriJson },
     { path: CONFIG.platforms.linux.configFile, data: linuxJson },
     { path: CONFIG.platforms.darwin.configFile, data: macosJson },
-    { path: CONFIG.platforms.windows.configFile, data: windowsJson },
+    { path: CONFIG.platforms.win32.configFile, data: windowsJson },
   ];
 
   configs.forEach(({ path, data }) => {
-    writeFileSync(path, JSON.stringify(data, null, 2));
+    writeFileSync(path, JSON.stringify(data, null, 2) + "\n");
   });
 }
 
