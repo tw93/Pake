@@ -234,7 +234,7 @@ runner.addTest(
   "GitHub Actions Environment Simulation",
   async () => {
     try {
-      // Create a temporary test script that simulates build_with_pake_cli.js
+      // Create a temporary test script that simulates github-action-build.js
       const testScript = `
 const { execSync } = require('child_process');
 
@@ -298,7 +298,7 @@ runner.addTest(
 
       runner.trackTempDir(tempDir);
 
-      // Test cleanup script logic (from build_with_pake_cli.js)
+      // Test cleanup script logic (from github-action-build.js)
       const cleanupScript = `
 const fs = require('fs');
 const path = require('path');
@@ -340,7 +340,7 @@ process.exit(cleanedDirs > 0 ? 0 : 1);
     }
   },
   TIMEOUTS.MEDIUM,
-  "Tests configuration cleanup logic from build_with_pake_cli.js",
+  "Tests configuration cleanup logic from github-action-build.js",
 );
 
 // Test 5: Icon fetching simulation
@@ -539,7 +539,7 @@ runner.addTest(
       const requiredElements = [
         "npm install pake-cli@latest --no-package-lock", // Latest version installation
         "timeout-minutes: 15", // Sufficient timeout
-        "node ./script/build_with_pake_cli.js", // Build script execution
+        "node ./script/github-action-build.js", // Build script execution
         "ubuntu-24.04", // Linux support
         "macos-latest", // macOS support
         "windows-latest", // Windows support
@@ -738,7 +738,7 @@ console.log('URL:', process.env.URL);
 console.log('NAME:', process.env.NAME);
 console.log('WIDTH x HEIGHT:', process.env.WIDTH + 'x' + process.env.HEIGHT);
 
-// Simulate the build script execution (script/build_with_pake_cli.js equivalent)
+// Simulate the build script execution (script/github-action-build.js equivalent)
 const fs = require('fs');
 
 // Simulate pake-cli installation check
@@ -800,7 +800,7 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 // Check if build script exists
-const buildScript = path.join(process.cwd(), 'script', 'build_with_pake_cli.js');
+const buildScript = path.join(process.cwd(), 'script', 'github-action-build.js');
 const fs = require('fs');
 
 if (!fs.existsSync(buildScript)) {

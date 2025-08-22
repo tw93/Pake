@@ -81,11 +81,6 @@ class PakeTestRunner {
       }
     }
 
-    if (quick) {
-      console.log("⚡ Running Quick Tests...");
-      await this.runQuickTests();
-    }
-
     this.cleanup();
     this.displayFinalResults();
 
@@ -1047,49 +1042,6 @@ class PakeTestRunner {
     );
   }
 
-  async runQuickTests() {
-    // Only run essential tests for quick mode
-    await this.runTest(
-      "Quick Version Check",
-      () => {
-        const output = execSync(`node "${config.CLI_PATH}" --version`, {
-          encoding: "utf8",
-          timeout: 3000,
-        });
-        return /^\d+\.\d+\.\d+/.test(output.trim());
-      },
-      TIMEOUTS.QUICK,
-    );
-
-    await this.runTest(
-      "Quick Help Check",
-      () => {
-        const output = execSync(`node "${config.CLI_PATH}" --help`, {
-          encoding: "utf8",
-          timeout: 3000,
-        });
-        return output.includes("Usage: cli [url] [options]");
-      },
-      TIMEOUTS.QUICK,
-    );
-
-    await this.runTest(
-      "Quick Environment Check",
-      () => {
-        const platform = process.platform;
-        const arch = process.arch;
-        const nodeVersion = process.version;
-
-        return (
-          typeof platform === "string" &&
-          typeof arch === "string" &&
-          nodeVersion.startsWith("v")
-        );
-      },
-      TIMEOUTS.QUICK,
-    );
-  }
-
   // Helper function to check if files exist (handles wildcards)
   checkFileExists(filePath) {
     if (filePath.includes("*")) {
@@ -1238,15 +1190,15 @@ class PakeTestRunner {
 // Command line interface
 const args = process.argv.slice(2);
 
-// Parse command line arguments
+// Complete test suite by default - no more smart modes
 const options = {
-  unit: args.includes("--unit") || args.length === 0,
-  integration: args.includes("--integration") || args.length === 0,
-  builder: args.includes("--builder") || args.length === 0,
+  unit: !args.includes("--no-unit"),
+  integration: !args.includes("--no-integration"),
+  builder: !args.includes("--no-builder"),
   pakeCliTests: args.includes("--pake-cli"),
-  e2e: args.includes("--e2e") || args.includes("--full"),
-  realBuild: args.includes("--real-build") || args.length === 0, // Include real build in default tests
-  quick: args.includes("--quick"),
+  e2e: args.includes("--e2e"),
+  realBuild: !args.includes("--no-build"), // Always include real build test
+  quick: false, // Remove quick mode
 };
 
 // Help message
@@ -1254,26 +1206,31 @@ if (args.includes("--help") || args.includes("-h")) {
   console.log(`
 🚀 Pake CLI Test Suite
 
-Usage: node tests/index.js [options]
+Usage: npm test [-- options]
 
-Options:
-  --unit         Run unit tests (default)
-  --integration  Run integration tests (default)
-  --builder      Run builder tests (default)
-  --pake-cli     Run pake-cli GitHub Actions tests
-  --e2e, --full  Run end-to-end tests
-  --real-build   Run complete real build test (8+ minutes on non-macOS, 12+ minutes multi-arch on macOS)
-  --quick        Run only essential tests (fast)
-  --help, -h     Show this help message
+Complete Test Suite (Default):
+  npm test                    # Run complete test suite with real build (8-12 minutes)
+
+Test Components:
+  ✅ Unit Tests               # CLI commands, validation, response time
+  ✅ Integration Tests        # Process spawning, file permissions, dependencies
+  ✅ Builder Tests           # Platform detection, architecture, file naming
+  ✅ Real Build Test         # Complete GitHub.com app build with packaging
+
+Optional Components:
+  --e2e          Add end-to-end configuration tests
+  --pake-cli     Add pake-cli GitHub Actions tests
+
+Skip Components (if needed):
+  --no-unit      Skip unit tests
+  --no-integration  Skip integration tests
+  --no-builder   Skip builder tests
+  --no-build     Skip real build test
 
 Examples:
-  npm test                         # Run all default tests (multi-arch on macOS)
-  node tests/index.js              # Run all default tests (multi-arch on macOS)
-  node tests/index.js --quick      # Quick test (30 seconds)
-  node tests/index.js --real-build # Complete build test (multi-arch on macOS, single-arch elsewhere)
-  node tests/index.js --pake-cli   # GitHub Actions tests
-  node tests/index.js --e2e        # Full end-to-end tests
-  node tests/index.js --unit --integration  # Specific tests only
+  npm test                         # Complete test suite (recommended)
+  npm test -- --e2e               # Complete suite + end-to-end tests
+  npm test -- --no-build          # Skip real build (faster for development)
 
 Environment:
   CI=1              # Enable CI mode
