@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-# Cargo build stage
+# Cargo build stage - Updated to Rust 1.82 for zerovec dependency compatibility
 FROM rust:1.82-slim AS cargo-builder
 # Install Rust dependencies
 RUN --mount=type=cache,target=/var/cache/apt \
@@ -9,6 +9,10 @@ RUN --mount=type=cache,target=/var/cache/apt \
     libwebkit2gtk-4.1-dev build-essential curl wget libssl-dev \
     libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev \
     gnome-video-effects
+
+# Verify Rust version
+RUN rustc --version && echo "Rust version verified"
+
 COPY . /pake
 WORKDIR /pake/src-tauri
 # Build cargo packages and store cache
@@ -32,6 +36,9 @@ RUN --mount=type=cache,target=/var/cache/apt \
     libwebkit2gtk-4.1-dev build-essential curl wget libssl-dev \
     libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev \
     gnome-video-effects
+
+# Verify Rust version in builder stage
+RUN rustc --version && echo "Builder stage Rust version verified"
 
 # Install Node.js 22.x
 RUN --mount=type=cache,target=/var/cache/apt \
