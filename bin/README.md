@@ -19,6 +19,8 @@ npm install pake-cli -g
   4. Microsoft Visual C++ 2013 Redistributable (x86) (optional)
   5. Microsoft Visual C++ 2008 Redistributable (x86) (optional)
 
+  **For Windows on ARM (ARM64) support**: Install the C++ ARM64 build tools in Visual Studio Installer under "Individual Components" → "MSVC v143 - VS 2022 C++ ARM64 build tools". The system will automatically detect ARM64 architecture and build native ARM64 binaries.
+
 - For Ubuntu users, execute the following commands to install the required libraries before compiling:
 
   ```bash
@@ -188,11 +190,34 @@ Package the application to support both Intel and M1 chips, exclusively for macO
 
 #### [targets]
 
-Choose the output package format, supporting `deb`, `appimage`, `rpm`. This option is only applicable to Linux and defaults to `deb`.
+Specify the build target architecture or format:
+
+- **Linux**: `deb`, `appimage`, `deb-arm64`, `appimage-arm64` (default: `deb`)
+- **Windows**: `x64`, `arm64` (auto-detects if not specified)
+- **macOS**: `intel`, `apple`, `universal` (auto-detects if not specified)
 
 ```shell
---targets <format>
+--targets <target>
+
+# Examples:
+--targets arm64          # Windows ARM64
+--targets x64            # Windows x64
+--targets universal      # macOS Universal (Intel + Apple Silicon)
+--targets apple          # macOS Apple Silicon only
+--targets intel          # macOS Intel only
+--targets deb            # Linux DEB package (x64)
+--targets rpm            # Linux RPM package (x64)
+--targets appimage       # Linux AppImage (x64)
+--targets deb-arm64      # Linux DEB package (ARM64)
+--targets rpm-arm64      # Linux RPM package (ARM64)
+--targets appimage-arm64 # Linux AppImage (ARM64)
 ```
+
+**Note for Linux ARM64**:
+
+- Cross-compilation requires additional setup. Install `gcc-aarch64-linux-gnu` and configure environment variables for cross-compilation.
+- ARM64 support enables Pake apps to run on ARM-based Linux devices, including Linux phones (postmarketOS, Ubuntu Touch), Raspberry Pi, and other ARM64 Linux systems.
+- Use `--target appimage-arm64` for portable ARM64 applications that work across different ARM64 Linux distributions.
 
 #### [user-agent]
 

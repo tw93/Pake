@@ -19,6 +19,8 @@ npm install pake-cli -g
   4. Microsoft Visual C++ 2013 Redistributable (x86)（可选）
   5. Microsoft Visual C++ 2008 Redistributable (x86)（可选）
 
+  **Windows ARM（ARM64）支持**：在 Visual Studio Installer 中的"单个组件"下安装"MSVC v143 - VS 2022 C++ ARM64 构建工具"。系统会自动检测 ARM64 架构并构建原生 ARM64 二进制文件。
+
 - 对于 Ubuntu 用户，在开始之前，建议运行以下命令以安装所需的依赖项：
 
   ```bash
@@ -188,11 +190,34 @@ pake [url] [options]
 
 #### [targets]
 
-选择输出的包格式，支持 `deb`、`appimage`、`rpm`，此选项仅适用于 Linux，默认为 `deb`。
+指定构建目标架构或格式：
+
+- **Linux**: `deb`, `appimage`, `deb-arm64`, `appimage-arm64`（默认：`deb`）
+- **Windows**: `x64`, `arm64`（未指定时自动检测）
+- **macOS**: `intel`, `apple`, `universal`（未指定时自动检测）
 
 ```shell
---targets <string>
+--targets <target>
+
+# 示例：
+--targets arm64          # Windows ARM64
+--targets x64            # Windows x64
+--targets universal      # macOS 通用版本（Intel + Apple Silicon）
+--targets apple          # 仅 macOS Apple Silicon
+--targets intel          # 仅 macOS Intel
+--targets deb            # Linux DEB 包（x64）
+--targets rpm            # Linux RPM 包（x64）
+--targets appimage       # Linux AppImage（x64）
+--targets deb-arm64      # Linux DEB 包（ARM64）
+--targets rpm-arm64      # Linux RPM 包（ARM64）
+--targets appimage-arm64 # Linux AppImage（ARM64）
 ```
+
+**Linux ARM64 注意事项**：
+
+- 交叉编译需要额外设置。需要安装 `gcc-aarch64-linux-gnu` 并配置交叉编译环境变量。
+- ARM64 支持让 Pake 应用可以在基于 ARM 的 Linux 设备上运行，包括 Linux 手机（postmarketOS、Ubuntu Touch）、树莓派和其他 ARM64 Linux 系统。
+- 使用 `--target appimage-arm64` 可以创建便携式 ARM64 应用，在不同的 ARM64 Linux 发行版上运行。
 
 #### [user-agent]
 

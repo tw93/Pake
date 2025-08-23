@@ -81,9 +81,10 @@ program
       .hideHelp(),
   )
   .addOption(
-    new Option('--targets <string>', 'For Linux, option "deb" or "appimage"')
-      .default(DEFAULT.targets)
-      .hideHelp(),
+    new Option(
+      '--targets <string>',
+      'Build target: Linux: "deb", "rpm", "appimage", "deb-arm64", "rpm-arm64", "appimage-arm64"; Windows: "x64", "arm64"; macOS: "intel", "apple", "universal"',
+    ).default(DEFAULT.targets),
   )
   .addOption(
     new Option(

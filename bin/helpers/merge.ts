@@ -172,9 +172,20 @@ StartupNotify=true
       [`/usr/share/applications/${desktopFileName}`]: `assets/${desktopFileName}`,
     };
 
-    const validTargets = ['deb', 'appimage', 'rpm'];
+    const validTargets = [
+      'deb',
+      'appimage',
+      'rpm',
+      'deb-arm64',
+      'appimage-arm64',
+      'rpm-arm64',
+    ];
+    const baseTarget = options.targets.includes('-arm64')
+      ? options.targets.replace('-arm64', '')
+      : options.targets;
+
     if (validTargets.includes(options.targets)) {
-      tauriConf.bundle.targets = [options.targets];
+      tauriConf.bundle.targets = [baseTarget];
     } else {
       logger.warn(
         `✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`,

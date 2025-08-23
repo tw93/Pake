@@ -57,7 +57,8 @@ export interface PakeCliOptions {
   // Multi arch, supports both Intel and M1 chips, only for Mac
   multiArch: boolean;
 
-  // Package output, valid for Linux users, default is deb, optional appimage, or all (i.e., output both deb and all);
+  // Build target architecture/format:
+  // Linux: "deb", "appimage", "deb-arm64", "appimage-arm64"; Windows: "x64", "arm64"; macOS: "intel", "apple", "universal"
   targets: string;
 
   // Debug mode, outputs more logs
