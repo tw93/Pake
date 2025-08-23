@@ -47,7 +47,7 @@ grep -r "window_config" src-tauri/src/
 # Install dependencies
 npm i
 
-# Development with hot reload
+# Development with hot reload (for testing app functionality)
 npm run dev
 
 # CLI development
@@ -88,7 +88,9 @@ npm run build:mac  # macOS universal build
 **Testing Notes:**
 
 - Do NOT use `PAKE_NO_CONFIG_OVERWRITE=1` - this environment variable is not implemented
-- For testing, simply use: `node dist/cli.js https://example.com --name TestApp --debug`
+- For CLI testing: `node dist/cli.js https://example.com --name TestApp --debug`
+- **For app functionality testing**: Use `npm run dev` to start development server with hot reload. This allows real-time testing of injected JavaScript changes without rebuilding the entire app.
+- The dev server automatically reloads when you modify files in `src-tauri/src/inject/` directory
 
 ## Core Components
 

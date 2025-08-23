@@ -19,6 +19,7 @@
     "notification:allow-get-active",
     "notification:allow-register-listener",
     "notification:allow-register-action-types",
-    "notification:default"
+    "notification:default",
+    "core:path:default"
   ]
 }
