@@ -26,6 +26,7 @@
 - 🎐 Nearly 20 times smaller than an Electron package (around 5M!)
 - 🚀 With Rust Tauri, Pake is much more lightweight and faster than JS-based frameworks.
 - 📦 Battery-included package — shortcut pass-through, immersive windows, and minimalist customization.
+- 🖱️ Smart right-click context menus with download support for images, videos, and files.
 - 👻 Pake is just a simple tool — replaces the old bundle approach with Tauri (though PWA is also a good alternative).
 
 ## Popular Packages
@@ -525,10 +526,6 @@ Pake's development can not be without these Hackers. They contributed a lot of c
 	<tbody>
 </table>
 <!-- readme: contributors -end -->
-
-## Frequently Asked Questions
-
-1. Right-clicking on an image element in the page to open the menu and select download image or other events does not work (common in MacOS systems). This issue is due to the MacOS built-in webview not supporting this feature.
 
 ## Support
 

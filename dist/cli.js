@@ -435,9 +435,19 @@ StartupNotify=true
         tauriConf.bundle.linux.deb.files = {
             [`/usr/share/applications/${desktopFileName}`]: `assets/${desktopFileName}`,
         };
-        const validTargets = ['deb', 'appimage', 'rpm'];
+        const validTargets = [
+            'deb',
+            'appimage',
+            'rpm',
+            'deb-arm64',
+            'appimage-arm64',
+            'rpm-arm64',
+        ];
+        const baseTarget = options.targets.includes('-arm64')
+            ? options.targets.replace('-arm64', '')
+            : options.targets;
         if (validTargets.includes(options.targets)) {
-            tauriConf.bundle.targets = [options.targets];
+            tauriConf.bundle.targets = [baseTarget];
         }
         else {
             logger.warn(`✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`);
@@ -792,7 +802,7 @@ class MacBuilder extends BaseBuilder {
                 : 'npm run tauri build --';
             const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
             let fullCommand = `${baseCommand} --target x86_64-apple-darwin -c "${configPath}"`;
-            // Add features  
+            // Add features
             const features = ['cli-build'];
             const macOSVersion = this.getMacOSMajorVersion();
             if (macOSVersion >= 23) {
@@ -844,8 +854,8 @@ class WinBuilder extends BaseBuilder {
         else {
             // Auto-detect based on current architecture if no explicit target
             const archMap = {
-                'x64': 'x64',
-                'arm64': 'aarch64',
+                x64: 'x64',
+                arm64: 'aarch64',
             };
             targetArch = archMap[process.arch] || process.arch;
         }
@@ -868,7 +878,10 @@ class WinBuilder extends BaseBuilder {
         }
         else {
             // Auto-detect based on current architecture if no explicit target
-            buildTarget = process.arch === 'arm64' ? 'aarch64-pc-windows-msvc' : 'x86_64-pc-windows-msvc';
+            buildTarget =
+                process.arch === 'arm64'
+                    ? 'aarch64-pc-windows-msvc'
+                    : 'x86_64-pc-windows-msvc';
         }
         fullCommand += ` --target ${buildTarget}`;
         // Add features
@@ -890,7 +903,10 @@ class WinBuilder extends BaseBuilder {
         }
         else {
             // Auto-detect based on current architecture if no explicit target
-            target = process.arch === 'arm64' ? 'aarch64-pc-windows-msvc' : 'x86_64-pc-windows-msvc';
+            target =
+                process.arch === 'arm64'
+                    ? 'aarch64-pc-windows-msvc'
+                    : 'x86_64-pc-windows-msvc';
         }
         return `src-tauri/target/${target}/${basePath}/bundle/`;
     }
@@ -1436,8 +1452,7 @@ program
     .addOption(new Option('--user-agent <string>', 'Custom user agent')
     .default(DEFAULT_PAKE_OPTIONS.userAgent)
     .hideHelp())
-    .addOption(new Option('--targets <string>', 'Build target: Linux: "deb", "appimage", "deb-arm64", "appimage-arm64"; Windows: "x64", "arm64"; macOS: "intel", "apple", "universal"')
-    .default(DEFAULT_PAKE_OPTIONS.targets))
+    .addOption(new Option('--targets <string>', 'Build target: Linux: "deb", "rpm", "appimage", "deb-arm64", "rpm-arm64", "appimage-arm64"; Windows: "x64", "arm64"; macOS: "intel", "apple", "universal"').default(DEFAULT_PAKE_OPTIONS.targets))
     .addOption(new Option('--app-version <string>', 'App version, the same as package.json version')
     .default(DEFAULT_PAKE_OPTIONS.appVersion)
     .hideHelp())

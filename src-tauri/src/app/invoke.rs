@@ -30,7 +30,10 @@ pub struct NotificationParams {
 #[command]
 pub async fn download_file(app: AppHandle, params: DownloadFileParams) -> Result<(), String> {
     let window: WebviewWindow = app.get_webview_window("pake").unwrap();
-    show_toast(&window, &get_download_message_with_lang(MessageType::Start, params.language.clone()));
+    show_toast(
+        &window,
+        &get_download_message_with_lang(MessageType::Start, params.language.clone()),
+    );
 
     let output_path = app.path().download_dir().unwrap().join(params.filename);
     let file_path = check_file_or_append(output_path.to_str().unwrap());
@@ -49,11 +52,17 @@ pub async fn download_file(app: AppHandle, params: DownloadFileParams) -> Result
 
             let mut file = File::create(file_path).unwrap();
             file.write_all(&bytes).unwrap();
-            show_toast(&window, &get_download_message_with_lang(MessageType::Success, params.language.clone()));
+            show_toast(
+                &window,
+                &get_download_message_with_lang(MessageType::Success, params.language.clone()),
+            );
             Ok(())
         }
         Err(e) => {
-            show_toast(&window, &get_download_message_with_lang(MessageType::Failure, params.language));
+            show_toast(
+                &window,
+                &get_download_message_with_lang(MessageType::Failure, params.language),
+            );
             Err(e.to_string())
         }
     }
@@ -65,17 +74,26 @@ pub async fn download_file_by_binary(
     params: BinaryDownloadParams,
 ) -> Result<(), String> {
     let window: WebviewWindow = app.get_webview_window("pake").unwrap();
-    show_toast(&window, &get_download_message_with_lang(MessageType::Start, params.language.clone()));
+    show_toast(
+        &window,
+        &get_download_message_with_lang(MessageType::Start, params.language.clone()),
+    );
     let output_path = app.path().download_dir().unwrap().join(params.filename);
     let file_path = check_file_or_append(output_path.to_str().unwrap());
     let download_file_result = fs::write(file_path, &params.binary);
     match download_file_result {
         Ok(_) => {
-            show_toast(&window, &get_download_message_with_lang(MessageType::Success, params.language.clone()));
+            show_toast(
+                &window,
+                &get_download_message_with_lang(MessageType::Success, params.language.clone()),
+            );
             Ok(())
         }
         Err(e) => {
-            show_toast(&window, &get_download_message_with_lang(MessageType::Failure, params.language));
+            show_toast(
+                &window,
+                &get_download_message_with_lang(MessageType::Failure, params.language),
+            );
             Err(e.to_string())
         }
     }

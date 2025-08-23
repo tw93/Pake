@@ -50,8 +50,10 @@ pub enum MessageType {
     Failure,
 }
 
-
-pub fn get_download_message_with_lang(message_type: MessageType, language: Option<String>) -> String {
+pub fn get_download_message_with_lang(
+    message_type: MessageType,
+    language: Option<String>,
+) -> String {
     let default_start_message = "Start downloading~";
     let chinese_start_message = "开始下载中~";
 
@@ -63,13 +65,23 @@ pub fn get_download_message_with_lang(message_type: MessageType, language: Optio
 
     let is_chinese = language
         .as_ref()
-        .map(|lang| lang.starts_with("zh") || lang.contains("CN") || lang.contains("TW") || lang.contains("HK"))
+        .map(|lang| {
+            lang.starts_with("zh")
+                || lang.contains("CN")
+                || lang.contains("TW")
+                || lang.contains("HK")
+        })
         .unwrap_or_else(|| {
             // Try multiple environment variables for better system detection
             ["LANG", "LC_ALL", "LC_MESSAGES", "LANGUAGE"]
                 .iter()
                 .find_map(|var| env::var(var).ok())
-                .map(|lang| lang.starts_with("zh") || lang.contains("CN") || lang.contains("TW") || lang.contains("HK"))
+                .map(|lang| {
+                    lang.starts_with("zh")
+                        || lang.contains("CN")
+                        || lang.contains("TW")
+                        || lang.contains("HK")
+                })
                 .unwrap_or(false)
         });
 

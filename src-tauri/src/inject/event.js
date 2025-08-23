@@ -38,18 +38,115 @@ function handleShortcut(event) {
 
 // Configuration constants
 const DOWNLOADABLE_FILE_EXTENSIONS = {
-  documents: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'rtf', 'odt', 'ods', 'odp', 'pages', 'numbers', 'key', 'epub', 'mobi'],
-  archives: ['zip', 'rar', '7z', 'tar', 'gz', 'gzip', 'bz2', 'xz', 'lzma', 'deb', 'rpm', 'pkg', 'msi', 'exe', 'dmg', 'apk', 'ipa'],
-  data: ['json', 'xml', 'csv', 'sql', 'db', 'sqlite', 'yaml', 'yml', 'toml', 'ini', 'cfg', 'conf', 'log'],
-  code: ['js', 'ts', 'jsx', 'tsx', 'css', 'scss', 'sass', 'less', 'html', 'htm', 'php', 'py', 'java', 'cpp', 'c', 'h', 'cs', 'rb', 'go', 'rs', 'swift', 'kt', 'scala', 'sh', 'bat', 'ps1'],
-  fonts: ['ttf', 'otf', 'woff', 'woff2', 'eot'],
-  design: ['ai', 'psd', 'sketch', 'fig', 'xd'],
-  system: ['iso', 'img', 'bin', 'torrent', 'jar', 'war', 'indd', 'fla', 'swf', 'raw']
+  documents: [
+    "pdf",
+    "doc",
+    "docx",
+    "xls",
+    "xlsx",
+    "ppt",
+    "pptx",
+    "txt",
+    "rtf",
+    "odt",
+    "ods",
+    "odp",
+    "pages",
+    "numbers",
+    "key",
+    "epub",
+    "mobi",
+  ],
+  archives: [
+    "zip",
+    "rar",
+    "7z",
+    "tar",
+    "gz",
+    "gzip",
+    "bz2",
+    "xz",
+    "lzma",
+    "deb",
+    "rpm",
+    "pkg",
+    "msi",
+    "exe",
+    "dmg",
+    "apk",
+    "ipa",
+  ],
+  data: [
+    "json",
+    "xml",
+    "csv",
+    "sql",
+    "db",
+    "sqlite",
+    "yaml",
+    "yml",
+    "toml",
+    "ini",
+    "cfg",
+    "conf",
+    "log",
+  ],
+  code: [
+    "js",
+    "ts",
+    "jsx",
+    "tsx",
+    "css",
+    "scss",
+    "sass",
+    "less",
+    "html",
+    "htm",
+    "php",
+    "py",
+    "java",
+    "cpp",
+    "c",
+    "h",
+    "cs",
+    "rb",
+    "go",
+    "rs",
+    "swift",
+    "kt",
+    "scala",
+    "sh",
+    "bat",
+    "ps1",
+  ],
+  fonts: ["ttf", "otf", "woff", "woff2", "eot"],
+  design: ["ai", "psd", "sketch", "fig", "xd"],
+  system: [
+    "iso",
+    "img",
+    "bin",
+    "torrent",
+    "jar",
+    "war",
+    "indd",
+    "fla",
+    "swf",
+    "raw",
+  ],
 };
 
-const ALL_DOWNLOADABLE_EXTENSIONS = Object.values(DOWNLOADABLE_FILE_EXTENSIONS).flat();
+const ALL_DOWNLOADABLE_EXTENSIONS = Object.values(
+  DOWNLOADABLE_FILE_EXTENSIONS,
+).flat();
 
-const DOWNLOAD_PATH_PATTERNS = ['/download/', '/files/', '/attachments/', '/assets/', '/releases/', '/dist/'];
+const DOWNLOAD_PATH_PATTERNS = [
+  "/download/",
+  "/files/",
+  "/attachments/",
+  "/assets/",
+  "/releases/",
+  "/dist/",
+];
 
 // Language detection utilities
 function getUserLanguage() {
@@ -57,7 +154,13 @@ function getUserLanguage() {
 }
 
 function isChineseLanguage(language = getUserLanguage()) {
-  return language && (language.startsWith('zh') || language.includes('CN') || language.includes('TW') || language.includes('HK'));
+  return (
+    language &&
+    (language.startsWith("zh") ||
+      language.includes("CN") ||
+      language.includes("TW") ||
+      language.includes("HK"))
+  );
 }
 
 // Unified file detection - replaces both isDownloadLink and isFileLink
@@ -65,18 +168,20 @@ function isDownloadableFile(url) {
   try {
     const urlObj = new URL(url);
     const pathname = urlObj.pathname.toLowerCase();
-    
+
     // Get file extension
-    const extension = pathname.substring(pathname.lastIndexOf('.') + 1);
-    
+    const extension = pathname.substring(pathname.lastIndexOf(".") + 1);
+
     const fileExtensions = ALL_DOWNLOADABLE_EXTENSIONS;
-    
-    return fileExtensions.includes(extension) || 
-           // Check for download hints
-           urlObj.searchParams.has('download') ||
-           urlObj.searchParams.has('attachment') ||
-           // Check for common download paths
-           DOWNLOAD_PATH_PATTERNS.some(pattern => pathname.includes(pattern));
+
+    return (
+      fileExtensions.includes(extension) ||
+      // Check for download hints
+      urlObj.searchParams.has("download") ||
+      urlObj.searchParams.has("attachment") ||
+      // Check for common download paths
+      DOWNLOAD_PATH_PATTERNS.some((pattern) => pathname.includes(pattern))
+    );
   } catch (e) {
     return false;
   }
@@ -287,7 +392,9 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         e.stopImmediatePropagation();
         const userLanguage = getUserLanguage();
-        invoke("download_file", { params: { url: absoluteUrl, filename, language: userLanguage } });
+        invoke("download_file", {
+          params: { url: absoluteUrl, filename, language: userLanguage },
+        });
         return;
       }
 
@@ -363,55 +470,57 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener(
     "keydown",
     (e) => {
-      if (e.key === 'Process') e.stopPropagation();
+      if (e.key === "Process") e.stopPropagation();
     },
     true,
   );
 
   // Language detection and texts
   const isChinese = isChineseLanguage();
-  
+
   const menuTexts = {
     // Media operations
-    downloadImage: isChinese ? '下载图片' : 'Download Image',
-    downloadVideo: isChinese ? '下载视频' : 'Download Video',
-    downloadFile: isChinese ? '下载文件' : 'Download File',
-    copyAddress: isChinese ? '复制地址' : 'Copy Address', 
-    openInBrowser: isChinese ? '浏览器打开' : 'Open in Browser'
+    downloadImage: isChinese ? "下载图片" : "Download Image",
+    downloadVideo: isChinese ? "下载视频" : "Download Video",
+    downloadFile: isChinese ? "下载文件" : "Download File",
+    copyAddress: isChinese ? "复制地址" : "Copy Address",
+    openInBrowser: isChinese ? "浏览器打开" : "Open in Browser",
   };
 
   // Menu theme configuration
   const MENU_THEMES = {
     dark: {
       menu: {
-        background: '#2d2d2d',
-        border: '1px solid #404040',
-        color: '#ffffff',
-        shadow: '0 4px 16px rgba(0, 0, 0, 0.4)'
+        background: "#2d2d2d",
+        border: "1px solid #404040",
+        color: "#ffffff",
+        shadow: "0 4px 16px rgba(0, 0, 0, 0.4)",
       },
       item: {
-        divider: '#404040',
-        hoverBg: '#404040'
-      }
+        divider: "#404040",
+        hoverBg: "#404040",
+      },
     },
     light: {
       menu: {
-        background: '#ffffff',
-        border: '1px solid #e0e0e0',
-        color: '#333333',
-        shadow: '0 4px 16px rgba(0, 0, 0, 0.15)'
+        background: "#ffffff",
+        border: "1px solid #e0e0e0",
+        color: "#333333",
+        shadow: "0 4px 16px rgba(0, 0, 0, 0.15)",
       },
       item: {
-        divider: '#f0f0f0',
-        hoverBg: '#d0d0d0'
-      }
-    }
+        divider: "#f0f0f0",
+        hoverBg: "#d0d0d0",
+      },
+    },
   };
 
   // Theme detection and menu styles
   function getTheme() {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return prefersDark ? 'dark' : 'light';
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
+    return prefersDark ? "dark" : "light";
   }
 
   function getMenuStyles(theme = getTheme()) {
@@ -420,25 +529,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Menu configuration constants
   const MENU_CONFIG = {
-    id: 'pake-context-menu',
-    minWidth: '120px', // Compact width for better UX
-    borderRadius: '6px', // Slightly more rounded for modern look
-    fontSize: '13px',
-    zIndex: '999999',
-    fontFamily: '-apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif',
+    id: "pake-context-menu",
+    minWidth: "120px", // Compact width for better UX
+    borderRadius: "6px", // Slightly more rounded for modern look
+    fontSize: "13px",
+    zIndex: "999999",
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
     // Menu item dimensions
-    itemPadding: '8px 16px', // Increased vertical padding for better comfort
-    itemLineHeight: '1.2',
-    itemBorderRadius: '3px', // Subtle rounded corners for menu items
-    itemTransition: 'background-color 0.1s ease'
+    itemPadding: "8px 16px", // Increased vertical padding for better comfort
+    itemLineHeight: "1.2",
+    itemBorderRadius: "3px", // Subtle rounded corners for menu items
+    itemTransition: "background-color 0.1s ease",
   };
 
   // Create custom context menu
   function createContextMenu() {
-    const contextMenu = document.createElement('div');
+    const contextMenu = document.createElement("div");
     contextMenu.id = MENU_CONFIG.id;
     const styles = getMenuStyles();
-    
+
     contextMenu.style.cssText = `
       position: fixed;
       background: ${styles.menu.background};
@@ -459,9 +569,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function createMenuItem(text, onClick, divider = false) {
-    const item = document.createElement('div');
+    const item = document.createElement("div");
     const styles = getMenuStyles();
-    
+
     item.style.cssText = `
       padding: ${MENU_CONFIG.itemPadding};
       cursor: pointer;
@@ -472,201 +582,225 @@ document.addEventListener("DOMContentLoaded", () => {
       white-space: nowrap;
       border-radius: ${MENU_CONFIG.itemBorderRadius};
       margin: 2px 4px;
-      border-bottom: ${divider ? `1px solid ${styles.item.divider}` : 'none'};
+      border-bottom: ${divider ? `1px solid ${styles.item.divider}` : "none"};
     `;
     item.textContent = text;
-    
-    item.addEventListener('mouseenter', () => {
+
+    item.addEventListener("mouseenter", () => {
       item.style.backgroundColor = styles.item.hoverBg;
     });
-    
-    item.addEventListener('mouseleave', () => {
-      item.style.backgroundColor = 'transparent';
+
+    item.addEventListener("mouseleave", () => {
+      item.style.backgroundColor = "transparent";
     });
-    
-    item.addEventListener('click', (e) => {
+
+    item.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
       onClick();
       hideContextMenu();
     });
-    
+
     return item;
   }
 
   function showContextMenu(x, y, items) {
     let contextMenu = document.getElementById(MENU_CONFIG.id);
-    
+
     // Always recreate menu to ensure theme is up-to-date
     if (contextMenu) {
       contextMenu.remove();
     }
     contextMenu = createContextMenu();
-    
-    items.forEach(item => {
+
+    items.forEach((item) => {
       contextMenu.appendChild(item);
     });
-    
-    contextMenu.style.left = x + 'px';
-    contextMenu.style.top = y + 'px';
-    contextMenu.style.display = 'block';
-    
+
+    contextMenu.style.left = x + "px";
+    contextMenu.style.top = y + "px";
+    contextMenu.style.display = "block";
+
     // Adjust position if menu goes off screen
     const rect = contextMenu.getBoundingClientRect();
     if (rect.right > window.innerWidth) {
-      contextMenu.style.left = (x - rect.width) + 'px';
+      contextMenu.style.left = x - rect.width + "px";
     }
     if (rect.bottom > window.innerHeight) {
-      contextMenu.style.top = (y - rect.height) + 'px';
+      contextMenu.style.top = y - rect.height + "px";
     }
   }
 
   function hideContextMenu() {
     const contextMenu = document.getElementById(MENU_CONFIG.id);
     if (contextMenu) {
-      contextMenu.style.display = 'none';
+      contextMenu.style.display = "none";
     }
   }
 
   function downloadImage(imageUrl) {
     // Convert relative URLs to absolute
-    if (imageUrl.startsWith('/')) {
+    if (imageUrl.startsWith("/")) {
       imageUrl = window.location.origin + imageUrl;
-    } else if (imageUrl.startsWith('./')) {
+    } else if (imageUrl.startsWith("./")) {
       imageUrl = new URL(imageUrl, window.location.href).href;
-    } else if (!imageUrl.startsWith('http') && !imageUrl.startsWith('data:') && !imageUrl.startsWith('blob:')) {
+    } else if (
+      !imageUrl.startsWith("http") &&
+      !imageUrl.startsWith("data:") &&
+      !imageUrl.startsWith("blob:")
+    ) {
       imageUrl = new URL(imageUrl, window.location.href).href;
     }
-    
+
     // Generate filename from URL
-    const filename = getFilenameFromUrl(imageUrl) || 'image';
-    
+    const filename = getFilenameFromUrl(imageUrl) || "image";
+
     // Handle different URL types
-    if (imageUrl.startsWith('data:')) {
+    if (imageUrl.startsWith("data:")) {
       downloadFromDataUri(imageUrl, filename);
-    } else if (imageUrl.startsWith('blob:')) {
+    } else if (imageUrl.startsWith("blob:")) {
       if (window.blobToUrlCaches && window.blobToUrlCaches.has(imageUrl)) {
         downloadFromBlobUrl(imageUrl, filename);
       }
     } else {
       // Regular HTTP(S) image
       const userLanguage = navigator.language || navigator.userLanguage;
-      invoke("download_file", { 
-        params: { 
-          url: imageUrl, 
+      invoke("download_file", {
+        params: {
+          url: imageUrl,
           filename: filename,
-          language: userLanguage
-        } 
+          language: userLanguage,
+        },
       });
     }
   }
 
-
   // Check if element is media (image or video)
   function getMediaInfo(target) {
     // Check for img tags
-    if (target.tagName.toLowerCase() === 'img') {
-      return { isMedia: true, url: target.src, type: 'image' };
+    if (target.tagName.toLowerCase() === "img") {
+      return { isMedia: true, url: target.src, type: "image" };
     }
-    
+
     // Check for video tags
-    if (target.tagName.toLowerCase() === 'video') {
-      return { isMedia: true, url: target.src || target.currentSrc, type: 'video' };
+    if (target.tagName.toLowerCase() === "video") {
+      return {
+        isMedia: true,
+        url: target.src || target.currentSrc,
+        type: "video",
+      };
     }
-    
+
     // Check for elements with background images
     if (target.style && target.style.backgroundImage) {
       const bgImage = target.style.backgroundImage;
       const urlMatch = bgImage.match(/url\(["']?([^"')]+)["']?\)/);
       if (urlMatch) {
-        return { isMedia: true, url: urlMatch[1], type: 'image' };
+        return { isMedia: true, url: urlMatch[1], type: "image" };
       }
     }
-    
+
     // Check for parent elements with background images
     const parentWithBg = target.closest('[style*="background-image"]');
     if (parentWithBg) {
       const bgImage = parentWithBg.style.backgroundImage;
       const urlMatch = bgImage.match(/url\(["']?([^"')]+)["']?\)/);
       if (urlMatch) {
-        return { isMedia: true, url: urlMatch[1], type: 'image' };
+        return { isMedia: true, url: urlMatch[1], type: "image" };
       }
     }
-    
-    return { isMedia: false, url: '', type: '' };
+
+    return { isMedia: false, url: "", type: "" };
   }
 
   // Simplified menu builder
   function buildMenuItems(type, data) {
     const userLanguage = navigator.language || navigator.userLanguage;
     const items = [];
-    
+
     switch (type) {
-      case 'media':
-        const downloadText = data.type === 'image' ? menuTexts.downloadImage : menuTexts.downloadVideo;
+      case "media":
+        const downloadText =
+          data.type === "image"
+            ? menuTexts.downloadImage
+            : menuTexts.downloadVideo;
         items.push(
           createMenuItem(downloadText, () => downloadImage(data.url)),
-          createMenuItem(menuTexts.copyAddress, () => navigator.clipboard.writeText(data.url)),
-          createMenuItem(menuTexts.openInBrowser, () => invoke("plugin:shell|open", { path: data.url }))
+          createMenuItem(menuTexts.copyAddress, () =>
+            navigator.clipboard.writeText(data.url),
+          ),
+          createMenuItem(menuTexts.openInBrowser, () =>
+            invoke("plugin:shell|open", { path: data.url }),
+          ),
         );
         break;
-        
-      case 'link':
+
+      case "link":
         if (data.isFile) {
-          items.push(createMenuItem(menuTexts.downloadFile, () => {
-            const filename = getFilenameFromUrl(data.url);
-            invoke("download_file", { 
-              params: { url: data.url, filename, language: userLanguage } 
-            });
-          }));
+          items.push(
+            createMenuItem(menuTexts.downloadFile, () => {
+              const filename = getFilenameFromUrl(data.url);
+              invoke("download_file", {
+                params: { url: data.url, filename, language: userLanguage },
+              });
+            }),
+          );
         }
         items.push(
-          createMenuItem(menuTexts.copyAddress, () => navigator.clipboard.writeText(data.url)),
-          createMenuItem(menuTexts.openInBrowser, () => invoke("plugin:shell|open", { path: data.url }))
+          createMenuItem(menuTexts.copyAddress, () =>
+            navigator.clipboard.writeText(data.url),
+          ),
+          createMenuItem(menuTexts.openInBrowser, () =>
+            invoke("plugin:shell|open", { path: data.url }),
+          ),
         );
         break;
     }
-    
+
     return items;
   }
 
   // Handle right-click context menu
-  document.addEventListener('contextmenu', function(event) {
-    const target = event.target;
-    
-    // Check for media elements (images/videos)
-    const mediaInfo = getMediaInfo(target);
-    
-    // Check for links (but not if it's media)
-    const linkElement = target.closest('a');
-    const isLink = linkElement && linkElement.href && !mediaInfo.isMedia;
-    
-    // Only show custom menu for media or links
-    if (mediaInfo.isMedia || isLink) {
-      event.preventDefault();
-      event.stopPropagation();
-      
-      let menuItems = [];
-      
-      if (mediaInfo.isMedia) {
-        menuItems = buildMenuItems('media', mediaInfo);
-      } else if (isLink) {
-        const linkUrl = linkElement.href;
-        menuItems = buildMenuItems('link', { 
-          url: linkUrl, 
-          isFile: isDownloadableFile(linkUrl) 
-        });
+  document.addEventListener(
+    "contextmenu",
+    function (event) {
+      const target = event.target;
+
+      // Check for media elements (images/videos)
+      const mediaInfo = getMediaInfo(target);
+
+      // Check for links (but not if it's media)
+      const linkElement = target.closest("a");
+      const isLink = linkElement && linkElement.href && !mediaInfo.isMedia;
+
+      // Only show custom menu for media or links
+      if (mediaInfo.isMedia || isLink) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        let menuItems = [];
+
+        if (mediaInfo.isMedia) {
+          menuItems = buildMenuItems("media", mediaInfo);
+        } else if (isLink) {
+          const linkUrl = linkElement.href;
+          menuItems = buildMenuItems("link", {
+            url: linkUrl,
+            isFile: isDownloadableFile(linkUrl),
+          });
+        }
+
+        showContextMenu(event.clientX, event.clientY, menuItems);
       }
-      
-      showContextMenu(event.clientX, event.clientY, menuItems);
-    }
-    // For all other elements, let browser's default context menu handle it
-  }, true);
+      // For all other elements, let browser's default context menu handle it
+    },
+    true,
+  );
 
   // Hide context menu when clicking elsewhere
-  document.addEventListener('click', hideContextMenu);
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
+  document.addEventListener("click", hideContextMenu);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
       hideContextMenu();
     }
   });
@@ -715,37 +849,37 @@ function getFilenameFromUrl(url) {
   try {
     const urlPath = new URL(url).pathname;
     let filename = urlPath.substring(urlPath.lastIndexOf("/") + 1);
-    
+
     // If no filename or no extension, generate one
-    if (!filename || !filename.includes('.')) {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      
+    if (!filename || !filename.includes(".")) {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+
       // Detect image type from URL or data URI
-      if (url.startsWith('data:image/')) {
-        const mimeType = url.substring(11, url.indexOf(';'));
+      if (url.startsWith("data:image/")) {
+        const mimeType = url.substring(11, url.indexOf(";"));
         filename = `image-${timestamp}.${mimeType}`;
       } else {
         // Default to common image extensions based on common patterns
-        if (url.includes('jpg') || url.includes('jpeg')) {
+        if (url.includes("jpg") || url.includes("jpeg")) {
           filename = `image-${timestamp}.jpg`;
-        } else if (url.includes('png')) {
+        } else if (url.includes("png")) {
           filename = `image-${timestamp}.png`;
-        } else if (url.includes('gif')) {
+        } else if (url.includes("gif")) {
           filename = `image-${timestamp}.gif`;
-        } else if (url.includes('webp')) {
+        } else if (url.includes("webp")) {
           filename = `image-${timestamp}.webp`;
-        } else if (url.includes('svg')) {
+        } else if (url.includes("svg")) {
           filename = `image-${timestamp}.svg`;
         } else {
           filename = `image-${timestamp}.png`; // default
         }
       }
     }
-    
+
     return filename;
   } catch (e) {
     // Fallback for invalid URLs
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     return `image-${timestamp}.png`;
   }
 }

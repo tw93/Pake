@@ -2,14 +2,6 @@
   "bundle": {
     "icon": ["icons/weekly.icns"],
     "active": true,
-    "macOS": {
-      "frameworks": [],
-      "minimumSystemVersion": "10.13",
-      "exceptionDomain": "",
-      "signingIdentity": null,
-      "hardenedRuntime": true,
-      "entitlements": null
-    },
     "targets": ["dmg"]
   }
 }
