@@ -8,26 +8,26 @@ Transform any webpage into a lightweight desktop app with a single GitHub Action
 - name: Build Pake App
   uses: tw93/Pake@v3
   with:
-    url: 'https://example.com'
-    name: 'MyApp'
+    url: "https://example.com"
+    name: "MyApp"
 ```
 
 ## Inputs
 
-| Parameter | Description | Required | Default |
-|-----------|-------------|----------|---------|
-| `url` | Target URL to package | ✅ | |
-| `name` | Application name | ✅ | |
-| `output-dir` | Output directory | | `dist` |
-| `icon` | Custom app icon URL/path | | |
-| `width` | Window width | | `1200` |
-| `height` | Window height | | `780` |
-| `debug` | Enable debug mode | | `false` |
+| Parameter    | Description              | Required | Default |
+| ------------ | ------------------------ | -------- | ------- |
+| `url`        | Target URL to package    | ✅       |         |
+| `name`       | Application name         | ✅       |         |
+| `output-dir` | Output directory         |          | `dist`  |
+| `icon`       | Custom app icon URL/path |          |         |
+| `width`      | Window width             |          | `1200`  |
+| `height`     | Window height            |          | `780`   |
+| `debug`      | Enable debug mode        |          | `false` |
 
 ## Outputs
 
-| Output | Description |
-|--------|-------------|
+| Output         | Description                   |
+| -------------- | ----------------------------- |
 | `package-path` | Path to the generated package |
 
 ## Examples
@@ -45,8 +45,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: tw93/Pake@v3
         with:
-          url: 'https://weekly.tw93.fun'
-          name: 'WeeklyApp'
+          url: "https://weekly.tw93.fun"
+          name: "WeeklyApp"
 ```
 
 ### With Custom Icon
@@ -54,9 +54,9 @@ jobs:
 ```yaml
 - uses: tw93/Pake@v3
   with:
-    url: 'https://example.com'
-    name: 'MyApp'
-    icon: 'https://example.com/icon.png'
+    url: "https://example.com"
+    name: "MyApp"
+    icon: "https://example.com/icon.png"
     width: 1400
     height: 900
 ```
@@ -74,20 +74,20 @@ jobs:
       - uses: actions/checkout@v4
       - uses: tw93/Pake@v3
         with:
-          url: 'https://example.com'
-          name: 'CrossPlatformApp'
+          url: "https://example.com"
+          name: "CrossPlatformApp"
 ```
 
 ## How It Works
 
 1. **Auto Setup**: Installs Rust, Node.js dependencies, builds Pake CLI
-2. **Build App**: Runs `pake` command with your parameters  
+2. **Build App**: Runs `pake` command with your parameters
 3. **Package Output**: Finds and moves the generated package to output directory
 
 ## Supported Platforms
 
 - **Linux**: `.deb` packages (Ubuntu runners)
-- **macOS**: `.app` and `.dmg` packages (macOS runners)  
+- **macOS**: `.app` and `.dmg` packages (macOS runners)
 - **Windows**: `.exe` and `.msi` packages (Windows runners)
 
 Use GitHub's matrix strategy to build for multiple platforms simultaneously.

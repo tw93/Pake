@@ -1,16 +1,16 @@
-name: 'Test Pake Action'
+name: "Test Pake Action"
 
 on:
   workflow_dispatch:
     inputs:
       url:
-        description: 'URL to package'
+        description: "URL to package"
         required: true
-        default: 'https://weekly.tw93.fun'
+        default: "https://weekly.tw93.fun"
       name:
-        description: 'App name'
+        description: "App name"
         required: true
-        default: 'TestApp'
+        default: "TestApp"
 
 jobs:
   test:
@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Build Pake App
         id: build

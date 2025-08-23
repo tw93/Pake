@@ -151,7 +151,7 @@ program
 
     if (!url) {
       program.help({
-        error: false
+        error: false,
       });
       return;
     }
