@@ -24,6 +24,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   installerLanguage: 'en-US',
   hideOnClose: true,
   incognito: false,
+  wasm: false,
 };
 
 // Just for cli development

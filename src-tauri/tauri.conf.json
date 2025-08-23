@@ -8,6 +8,9 @@
       "iconPath": "png/weekly_512.png",
       "iconAsTemplate": false,
       "id": "pake-tray"
+    },
+    "security": {
+      "headers": {}
     }
   },
   "build": {

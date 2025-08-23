@@ -46,6 +46,13 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         .initialization_script(include_str!("../inject/style.js"))
         .initialization_script(include_str!("../inject/custom.js"));
 
+    // Configure WASM support with required headers for SharedArrayBuffer
+    if window_config.enable_wasm {
+        window_builder = window_builder
+            .additional_browser_args("--enable-features=SharedArrayBuffer")
+            .additional_browser_args("--enable-unsafe-webgpu");
+    }
+
     // Configure proxy if specified
     if !config.proxy_url.is_empty() {
         if let Ok(proxy_url) = Url::from_str(&config.proxy_url) {

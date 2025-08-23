@@ -136,6 +136,11 @@ program
       .hideHelp(),
   )
   .addOption(
+    new Option('--wasm', 'Enable WebAssembly support (Flutter Web, etc.)')
+      .default(DEFAULT.wasm)
+      .hideHelp(),
+  )
+  .addOption(
     new Option('--installer-language <string>', 'Installer language')
       .default(DEFAULT.installerLanguage)
       .hideHelp(),
@@ -145,15 +150,10 @@ program
     await checkUpdateTips();
 
     if (!url) {
-      program.outputHelp((str) => {
-        return str
-          .split('\n')
-          .filter(
-            (line) => !/((-h,|--help)|((-v|-V),|--version))\s+.+$/.test(line),
-          )
-          .join('\n');
+      program.help({
+        error: false
       });
-      process.exit(0);
+      return;
     }
 
     log.setDefaultLevel('info');

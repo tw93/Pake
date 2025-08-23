@@ -60,6 +60,7 @@ export async function mergeConfig(
     hideOnClose,
     incognito,
     title,
+    wasm,
   } = options;
 
   const { platform } = process;
@@ -78,6 +79,7 @@ export async function mergeConfig(
     hide_on_close: hideOnClose,
     incognito: incognito,
     title: title || null,
+    enable_wasm: wasm,
   };
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
 
@@ -311,6 +313,16 @@ StartupNotify=true
     await fsExtra.writeFile(injectFilePath, '');
   }
   tauriConf.pake.proxy_url = proxyUrl || '';
+
+  // Configure WASM support with required HTTP headers
+  if (wasm) {
+    tauriConf.app.security = {
+      headers: {
+        'Cross-Origin-Opener-Policy': 'same-origin',
+        'Cross-Origin-Embedder-Policy': 'require-corp'
+      }
+    };
+  }
 
   // Save config file.
   const platformConfigPaths: PlatformMap = {

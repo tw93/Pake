@@ -78,6 +78,9 @@ export interface PakeCliOptions {
 
   // Launch app in incognito/private mode, default false
   incognito: boolean;
+
+  // Enable WebAssembly support (Flutter Web, etc.), default false
+  wasm: boolean;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {

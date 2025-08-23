@@ -344,7 +344,7 @@ async function mergeConfig(url, options, tauriConf) {
             await fsExtra.copy(sourcePath, destPath);
         }
     }));
-    const { width, height, fullscreen, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, } = options;
+    const { width, height, fullscreen, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, } = options;
     const { platform } = process;
     // Set Windows parameters.
     const tauriConfWindowOptions = {
@@ -360,6 +360,7 @@ async function mergeConfig(url, options, tauriConf) {
         hide_on_close: hideOnClose,
         incognito: incognito,
         title: title || null,
+        enable_wasm: wasm,
     };
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
     tauriConf.productName = name;
@@ -553,6 +554,15 @@ StartupNotify=true
         await fsExtra.writeFile(injectFilePath, '');
     }
     tauriConf.pake.proxy_url = proxyUrl || '';
+    // Configure WASM support with required HTTP headers
+    if (wasm) {
+        tauriConf.app.security = {
+            headers: {
+                'Cross-Origin-Opener-Policy': 'same-origin',
+                'Cross-Origin-Embedder-Policy': 'require-corp'
+            }
+        };
+    }
     // Save config file.
     const platformConfigPaths = {
         win32: 'tauri.windows.conf.json',
@@ -1030,6 +1040,7 @@ const DEFAULT_PAKE_OPTIONS = {
     installerLanguage: 'en-US',
     hideOnClose: true,
     incognito: false,
+    wasm: false,
 };
 
 async function checkUpdateTips() {
@@ -1481,6 +1492,9 @@ program
     .addOption(new Option('--incognito', 'Launch app in incognito/private mode')
     .default(DEFAULT_PAKE_OPTIONS.incognito)
     .hideHelp())
+    .addOption(new Option('--wasm', 'Enable WebAssembly support (Flutter Web, etc.)')
+    .default(DEFAULT_PAKE_OPTIONS.wasm)
+    .hideHelp())
     .addOption(new Option('--installer-language <string>', 'Installer language')
     .default(DEFAULT_PAKE_OPTIONS.installerLanguage)
     .hideHelp())
@@ -1488,13 +1502,10 @@ program
     .action(async (url, options) => {
     await checkUpdateTips();
     if (!url) {
-        program.outputHelp((str) => {
-            return str
-                .split('\n')
-                .filter((line) => !/((-h,|--help)|((-v|-V),|--version))\s+.+$/.test(line))
-                .join('\n');
+        program.help({
+            error: false
         });
-        process.exit(0);
+        return;
     }
     log.setDefaultLevel('info');
     if (options.debug) {

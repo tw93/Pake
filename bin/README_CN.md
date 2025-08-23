@@ -259,6 +259,19 @@ pake [url] [options]
 --incognito
 ```
 
+#### [wasm]
+
+启用 WebAssembly 支持，添加跨域隔离头部，适用于 Flutter Web 应用以及其他使用 WebAssembly 模块（如 `sqlite3.wasm`、`canvaskit.wasm`）的 Web 应用，默认为 `false`。
+
+此选项会添加必要的 HTTP 头部（`Cross-Origin-Opener-Policy: same-origin` 和 `Cross-Origin-Embedder-Policy: require-corp`）以及浏览器标志，以启用 SharedArrayBuffer 和 WebAssembly 功能。
+
+```shell
+--wasm
+
+# 示例：打包支持 WASM 的 Flutter Web 应用
+pake https://flutter.dev --name FlutterApp --wasm
+```
+
 #### [title]
 
 设置窗口标题栏文本。如果未指定，窗口标题将为空。

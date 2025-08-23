@@ -271,6 +271,19 @@ Launch the application in incognito/private browsing mode. Default is `false`. W
 --incognito
 ```
 
+#### [wasm]
+
+Enable WebAssembly support with cross-origin isolation headers. Required for Flutter Web applications and other web applications that use WebAssembly modules like `sqlite3.wasm`, `canvaskit.wasm`. Default is `false`.
+
+This option adds necessary HTTP headers (`Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp`) and browser flags to enable SharedArrayBuffer and WebAssembly features.
+
+```shell
+--wasm
+
+# Example: Package a Flutter Web app with WASM support
+pake https://flutter.dev --name FlutterApp --wasm
+```
+
 #### [installer-language]
 
 Set the Windows Installer language. Options include `zh-CN`, `ja-JP`, More at [Tauri Document](https://tauri.app/distribute/windows-installer/#internationalization). Default is `en-US`.

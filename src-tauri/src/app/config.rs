@@ -16,6 +16,7 @@ pub struct WindowConfig {
     pub hide_on_close: bool,
     pub incognito: bool,
     pub title: Option<String>,
+    pub enable_wasm: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
