@@ -214,10 +214,18 @@ jobs:
         shell: bash
         run: |
           echo "Generated files in project root:"
-          find . -maxdepth 1 \( -name "*.dmg" -o -name "*.app" -o -name "*.msi" -o -name "*.deb" -o -name "*.AppImage" \) || echo "No direct output files found"
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            ls -la *.{dmg,app,msi,deb,AppImage} 2>/dev/null || echo "No direct output files found"
+          else
+            find . -maxdepth 1 \( -name "*.dmg" -o -name "*.app" -o -name "*.msi" -o -name "*.deb" -o -name "*.AppImage" \) || echo "No direct output files found"
+          fi
           echo ""
           echo "Generated files in target directories:"
-          find src-tauri/target -name "*.dmg" -o -name "*.app" -o -name "*.msi" -o -name "*.deb" -o -name "*.AppImage" 2>/dev/null || echo "No target output files found"
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            find src-tauri/target -type f \( -name "*.dmg" -o -name "*.app" -o -name "*.msi" -o -name "*.deb" -o -name "*.AppImage" \) 2>/dev/null || echo "No target output files found"
+          else
+            find src-tauri/target -name "*.dmg" -o -name "*.app" -o -name "*.msi" -o -name "*.deb" -o -name "*.AppImage" 2>/dev/null || echo "No target output files found"
+          fi
 
   summary:
     name: Quality Summary
