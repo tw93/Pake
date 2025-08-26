@@ -48,15 +48,15 @@ export default class MacBuilder extends BaseBuilder {
     return `${name}_${tauriConfig.version}_${arch}`;
   }
 
-  protected getBuildCommand(): string {
+  protected getBuildCommand(packageManager: string = 'pnpm'): string {
     // Determine if we need universal build
     const needsUniversal =
       this.buildArch === 'universal' || this.options.multiArch;
 
     if (needsUniversal) {
       const baseCommand = this.options.debug
-        ? 'npm run tauri build -- --debug'
-        : 'npm run tauri build --';
+        ? `${packageManager} run tauri build -- --debug`
+        : `${packageManager} run tauri build --`;
 
       // Use temporary config directory to avoid modifying source files
       const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
@@ -79,8 +79,8 @@ export default class MacBuilder extends BaseBuilder {
     } else if (this.buildArch === 'apple') {
       // Build for Apple Silicon only
       const baseCommand = this.options.debug
-        ? 'npm run tauri build -- --debug'
-        : 'npm run tauri build --';
+        ? `${packageManager} run tauri build -- --debug`
+        : `${packageManager} run tauri build --`;
       const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
       let fullCommand = `${baseCommand} --target aarch64-apple-darwin -c "${configPath}"`;
 
@@ -98,8 +98,8 @@ export default class MacBuilder extends BaseBuilder {
     } else if (this.buildArch === 'intel') {
       // Build for Intel only
       const baseCommand = this.options.debug
-        ? 'npm run tauri build -- --debug'
-        : 'npm run tauri build --';
+        ? `${packageManager} run tauri build -- --debug`
+        : `${packageManager} run tauri build --`;
       const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
       let fullCommand = `${baseCommand} --target x86_64-apple-darwin -c "${configPath}"`;
 

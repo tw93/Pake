@@ -3,10 +3,7 @@
   "version": "3.2.16",
   "description": "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。",
   "engines": {
-    "node": ">=18.0.0",
-    "pnpm": ">=10.0.0",
-    "npm": "please-use-pnpm",
-    "yarn": "please-use-pnpm"
+    "node": ">=18.0.0"
   },
   "packageManager": "pnpm@10.15.0",
   "bin": {

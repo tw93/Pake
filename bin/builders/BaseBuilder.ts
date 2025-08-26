@@ -16,6 +16,7 @@ import logger from '@/options/logger';
 
 export default abstract class BaseBuilder {
   protected options: PakeAppOptions;
+  private static packageManagerCache: string | null = null;
 
   protected constructor(options: PakeAppOptions) {
     this.options = options;
@@ -37,6 +38,35 @@ export default abstract class BaseBuilder {
 
   private getBuildTimeout(): number {
     return 900000; // 15 minutes for all builds
+  }
+
+  private async detectPackageManager(): Promise<string> {
+    // 使用缓存避免重复检测
+    if (BaseBuilder.packageManagerCache) {
+      return BaseBuilder.packageManagerCache;
+    }
+
+    const { execa } = await import('execa');
+
+    // 优先使用pnpm（如果可用）
+    try {
+      await execa('pnpm', ['--version'], { stdio: 'ignore' });
+      logger.info('✺ Using pnpm for package management.');
+      BaseBuilder.packageManagerCache = 'pnpm';
+      return 'pnpm';
+    } catch {
+      // pnpm不可用，回退到npm
+      try {
+        await execa('npm', ['--version'], { stdio: 'ignore' });
+        logger.info('✺ pnpm not available, using npm for package management.');
+        BaseBuilder.packageManagerCache = 'npm';
+        return 'npm';
+      } catch {
+        throw new Error(
+          'Neither pnpm nor npm is available. Please install a package manager.',
+        );
+      }
+    }
   }
 
   async prepare() {
@@ -70,8 +100,8 @@ export default abstract class BaseBuilder {
     const projectConf = path.join(rustProjectDir, 'config.toml');
     await fsExtra.ensureDir(rustProjectDir);
 
-    // 统一使用npm，简单可靠
-    const packageManager = 'npm';
+    // 智能检测可用的包管理器
+    const packageManager = await this.detectPackageManager();
     const registryOption = isChina
       ? ' --registry=https://registry.npmmirror.com'
       : '';
@@ -82,7 +112,9 @@ export default abstract class BaseBuilder {
     const buildEnv = this.getBuildEnvironment();
 
     if (isChina) {
-      logger.info('✺ Located in China, using npm/rsProxy CN mirror.');
+      logger.info(
+        `✺ Located in China, using ${packageManager}/rsProxy CN mirror.`,
+      );
       const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
       await fsExtra.copy(projectCnConf, projectConf);
       await shellExec(
@@ -117,9 +149,12 @@ export default abstract class BaseBuilder {
     const { name } = this.options;
     await mergeConfig(url, this.options, tauriConfig);
 
+    // Detect available package manager
+    const packageManager = await this.detectPackageManager();
+
     // Build app
     const buildSpinner = getSpinner('Building app...');
-    // Let spinner run for a moment so user can see it, then stop before npm command
+    // Let spinner run for a moment so user can see it, then stop before package manager command
     await new Promise((resolve) => setTimeout(resolve, 500));
     buildSpinner.stop();
     // Show static message to keep the status visible
@@ -128,7 +163,7 @@ export default abstract class BaseBuilder {
     const buildEnv = this.getBuildEnvironment();
 
     await shellExec(
-      `cd "${npmDirectory}" && ${this.getBuildCommand()}`,
+      `cd "${npmDirectory}" && ${this.getBuildCommand(packageManager)}`,
       this.getBuildTimeout(),
       buildEnv,
     );
@@ -150,10 +185,10 @@ export default abstract class BaseBuilder {
 
   abstract getFileName(): string;
 
-  protected getBuildCommand(): string {
+  protected getBuildCommand(packageManager: string = 'pnpm'): string {
     const baseCommand = this.options.debug
-      ? 'npm run build:debug'
-      : 'npm run build';
+      ? `${packageManager} run build:debug`
+      : `${packageManager} run build`;
 
     // Use temporary config directory to avoid modifying source files
     const configPath = path.join(

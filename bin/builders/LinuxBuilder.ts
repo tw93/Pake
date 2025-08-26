@@ -58,10 +58,10 @@ export default class LinuxBuilder extends BaseBuilder {
     }
   }
 
-  protected getBuildCommand(): string {
+  protected getBuildCommand(packageManager: string = 'pnpm'): string {
     const baseCommand = this.options.debug
-      ? 'npm run build:debug'
-      : 'npm run build';
+      ? `${packageManager} run build:debug`
+      : `${packageManager} run build`;
 
     // Use temporary config directory to avoid modifying source files
     const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');

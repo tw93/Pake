@@ -401,7 +401,7 @@ export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
 then
 
 ```bash
-npm run cli:dev
+pnpm run cli:dev
 ```
 
 The script will read the above configuration and packages the specified `app` using `watch` mode, and changes to the `pake-cli` code and `pake` are hot updated in real time.

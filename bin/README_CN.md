@@ -400,7 +400,7 @@ export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
 之后运行
 
 ```bash
-npm run cli:dev
+pnpm run cli:dev
 ```
 
 脚本会读取上述配置并使用 `watch` 模式打包指定的 `app`，对 `pake-cli` 代码和 `pake` 的修改都会实时热更新。
