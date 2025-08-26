@@ -255,7 +255,7 @@ export default abstract class BaseBuilder {
       ? `${packageManager} run build:debug`
       : `${packageManager} run build`;
 
-    const argSeparator = ' --';  // Both npm and pnpm need -- to pass args to scripts
+    const argSeparator = ' --'; // Both npm and pnpm need -- to pass args to scripts
     let fullCommand = `${baseCommand}${argSeparator} -c "${configPath}"`;
 
     if (target) {
