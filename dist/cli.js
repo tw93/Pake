@@ -64,6 +64,7 @@ var scripts = {
 	"cli:build": "cross-env NODE_ENV=production rollup -c",
 	test: "pnpm run cli:build && cross-env PAKE_CREATE_APP=1 node tests/index.js",
 	format: "prettier --write . --ignore-unknown && find tests -name '*.js' -exec sed -i '' 's/[[:space:]]*$//' {} \\; && cd src-tauri && cargo fmt --verbose",
+	"format:check": "prettier --check . --ignore-unknown",
 	prepublishOnly: "pnpm run cli:build"
 };
 var type = "module";

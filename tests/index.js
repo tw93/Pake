@@ -624,7 +624,7 @@ class PakeTestRunner {
             win32: {
               app: path.join(
                 config.PROJECT_ROOT,
-                `src-tauri/target/x86_64-pc-windows-msvc/release/pake.exe`,
+                `src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/${testName}_*.msi`,
               ),
               installer: path.join(
                 config.PROJECT_ROOT,
