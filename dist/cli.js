@@ -804,22 +804,22 @@ BaseBuilder.ARCH_MAPPINGS = {
     darwin: {
         arm64: 'aarch64-apple-darwin',
         x64: 'x86_64-apple-darwin',
-        universal: 'universal-apple-darwin'
+        universal: 'universal-apple-darwin',
     },
     win32: {
         arm64: 'aarch64-pc-windows-msvc',
-        x64: 'x86_64-pc-windows-msvc'
+        x64: 'x86_64-pc-windows-msvc',
     },
     linux: {
         arm64: 'aarch64-unknown-linux-gnu',
-        x64: 'x86_64-unknown-linux-gnu'
-    }
+        x64: 'x86_64-unknown-linux-gnu',
+    },
 };
 // 架构名称映射（用于文件名生成）
 BaseBuilder.ARCH_DISPLAY_NAMES = {
     arm64: 'aarch64',
     x64: 'x64',
-    universal: 'universal'
+    universal: 'universal',
 };
 
 class MacBuilder extends BaseBuilder {
@@ -829,7 +829,9 @@ class MacBuilder extends BaseBuilder {
         // For macOS, targets can be architecture names or format names
         // Filter out non-architecture values
         const validArchs = ['intel', 'apple', 'universal', 'auto', 'x64', 'arm64'];
-        this.buildArch = validArchs.includes(options.targets || '') ? options.targets : 'auto';
+        this.buildArch = validArchs.includes(options.targets || '')
+            ? options.targets
+            : 'auto';
         // Use DMG by default for distribution
         // Only create app bundles for testing to avoid user interaction
         if (process.env.PAKE_CREATE_APP === '1') {
@@ -903,7 +905,12 @@ class WinBuilder extends BaseBuilder {
     constructor(options) {
         super(options);
         this.buildFormat = 'msi';
-        this.buildArch = this.resolveTargetArch(options.targets);
+        // For Windows, targets can be architecture names or format names
+        // Filter out non-architecture values
+        const validArchs = ['x64', 'arm64', 'auto'];
+        this.buildArch = validArchs.includes(options.targets || '')
+            ? this.resolveTargetArch(options.targets)
+            : this.resolveTargetArch('auto');
         this.options.targets = this.buildFormat;
     }
     getFileName() {
@@ -961,7 +968,8 @@ class LinuxBuilder extends BaseBuilder {
             // Auto-detect or default to current architecture
             const resolvedArch = this.buildArch === 'x64' ? 'amd64' : this.buildArch;
             arch = resolvedArch;
-            if (resolvedArch === 'arm64' && (targets === 'rpm' || targets === 'appimage')) {
+            if (resolvedArch === 'arm64' &&
+                (targets === 'rpm' || targets === 'appimage')) {
                 arch = 'aarch64';
             }
         }
