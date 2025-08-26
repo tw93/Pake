@@ -17,7 +17,7 @@ export default class LinuxBuilder extends BaseBuilder {
       this.buildArch = 'arm64';
     } else {
       this.buildFormat = target;
-      this.buildArch = 'auto';
+      this.buildArch = this.resolveTargetArch('auto');
     }
 
     // Set targets to format for Tauri
@@ -28,14 +28,18 @@ export default class LinuxBuilder extends BaseBuilder {
     const { name, targets } = this.options;
     const version = tauriConfig.version;
 
-    // Determine architecture based on explicit target or auto-detect
+    // Determine architecture display name
     let arch: string;
     if (this.buildArch === 'arm64') {
       arch = targets === 'rpm' || targets === 'appimage' ? 'aarch64' : 'arm64';
     } else {
       // Auto-detect or default to current architecture
-      arch = process.arch === 'x64' ? 'amd64' : process.arch;
-      if (arch === 'arm64' && (targets === 'rpm' || targets === 'appimage')) {
+      const resolvedArch = this.buildArch === 'x64' ? 'amd64' : this.buildArch;
+      arch = resolvedArch;
+      if (
+        resolvedArch === 'arm64' &&
+        (targets === 'rpm' || targets === 'appimage')
+      ) {
         arch = 'aarch64';
       }
     }
@@ -59,21 +63,22 @@ export default class LinuxBuilder extends BaseBuilder {
   }
 
   protected getBuildCommand(packageManager: string = 'pnpm'): string {
-    const baseCommand = this.options.debug
-      ? `${packageManager} run build:debug`
-      : `${packageManager} run build`;
-
-    // Use temporary config directory to avoid modifying source files
     const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
-    let fullCommand = `${baseCommand} -- -c "${configPath}"`;
 
-    // Add ARM64 target if explicitly specified
-    if (this.buildArch === 'arm64') {
-      fullCommand += ' --target aarch64-unknown-linux-gnu';
-    }
+    // Only add target if it's ARM64
+    const buildTarget =
+      this.buildArch === 'arm64'
+        ? this.getTauriTarget(this.buildArch, 'linux')
+        : undefined;
+
+    let fullCommand = this.buildBaseCommand(
+      packageManager,
+      configPath,
+      buildTarget,
+    );
 
     // Add features
-    const features = ['cli-build'];
+    const features = this.getBuildFeatures();
     if (features.length > 0) {
       fullCommand += ` --features ${features.join(',')}`;
     }
@@ -85,7 +90,8 @@ export default class LinuxBuilder extends BaseBuilder {
     const basePath = this.options.debug ? 'debug' : 'release';
 
     if (this.buildArch === 'arm64') {
-      return `src-tauri/target/aarch64-unknown-linux-gnu/${basePath}/bundle/`;
+      const target = this.getTauriTarget(this.buildArch, 'linux');
+      return `src-tauri/target/${target}/${basePath}/bundle/`;
     }
 
     return super.getBasePath();

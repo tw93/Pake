@@ -54,9 +54,9 @@ var files = [
 var scripts = {
 	start: "pnpm run dev",
 	dev: "pnpm run tauri dev",
-	build: "pnpm run tauri build --",
-	"build:debug": "pnpm run tauri build -- --debug",
-	"build:mac": "pnpm run tauri build -- --target universal-apple-darwin",
+	build: "tauri build",
+	"build:debug": "tauri build --debug",
+	"build:mac": "tauri build --target universal-apple-darwin",
 	"build:config": "chmod +x scripts/configure-tauri.mjs && node scripts/configure-tauri.mjs",
 	analyze: "cd src-tauri && cargo bloat --release --crates",
 	tauri: "tauri",
@@ -710,18 +710,48 @@ class BaseBuilder {
     getFileType(target) {
         return target;
     }
-    getBuildCommand(packageManager = 'pnpm') {
+    /**
+     * 解析目标架构
+     */
+    resolveTargetArch(requestedArch) {
+        if (requestedArch === 'auto' || !requestedArch) {
+            return process.arch;
+        }
+        return requestedArch;
+    }
+    /**
+     * 获取Tauri构建目标
+     */
+    getTauriTarget(arch, platform = process.platform) {
+        const platformMappings = BaseBuilder.ARCH_MAPPINGS[platform];
+        if (!platformMappings)
+            return null;
+        return platformMappings[arch] || null;
+    }
+    /**
+     * 获取架构显示名称（用于文件名）
+     */
+    getArchDisplayName(arch) {
+        return BaseBuilder.ARCH_DISPLAY_NAMES[arch] || arch;
+    }
+    /**
+     * 构建基础构建命令
+     */
+    buildBaseCommand(packageManager, configPath, target) {
         const baseCommand = this.options.debug
             ? `${packageManager} run build:debug`
             : `${packageManager} run build`;
-        // Use temporary config directory to avoid modifying source files
-        const configPath = path.join(npmDirectory, 'src-tauri', '.pake', 'tauri.conf.json');
-        let fullCommand = `${baseCommand} -- -c "${configPath}"`;
-        // For macOS, use app bundles by default unless DMG is explicitly requested
-        if (IS_MAC && this.options.targets === 'app') {
-            fullCommand += ' --bundles app';
+        const argSeparator = packageManager === 'npm' ? ' --' : '';
+        let fullCommand = `${baseCommand}${argSeparator} -c "${configPath}"`;
+        if (target) {
+            fullCommand += ` --target ${target}`;
         }
-        // Add features
+        return fullCommand;
+    }
+    /**
+     * 获取构建特性列表
+     */
+    getBuildFeatures() {
         const features = ['cli-build'];
         // Add macos-proxy feature for modern macOS (Darwin 23+ = macOS 14+)
         if (IS_MAC) {
@@ -730,6 +760,18 @@ class BaseBuilder {
                 features.push('macos-proxy');
             }
         }
+        return features;
+    }
+    getBuildCommand(packageManager = 'pnpm') {
+        // Use temporary config directory to avoid modifying source files
+        const configPath = path.join(npmDirectory, 'src-tauri', '.pake', 'tauri.conf.json');
+        let fullCommand = this.buildBaseCommand(packageManager, configPath);
+        // For macOS, use app bundles by default unless DMG is explicitly requested
+        if (IS_MAC && this.options.targets === 'app') {
+            fullCommand += ' --bundles app';
+        }
+        // Add features
+        const features = this.getBuildFeatures();
         if (features.length > 0) {
             fullCommand += ` --features ${features.join(',')}`;
         }
@@ -757,12 +799,37 @@ class BaseBuilder {
     }
 }
 BaseBuilder.packageManagerCache = null;
+// 架构映射配置
+BaseBuilder.ARCH_MAPPINGS = {
+    darwin: {
+        arm64: 'aarch64-apple-darwin',
+        x64: 'x86_64-apple-darwin',
+        universal: 'universal-apple-darwin'
+    },
+    win32: {
+        arm64: 'aarch64-pc-windows-msvc',
+        x64: 'x86_64-pc-windows-msvc'
+    },
+    linux: {
+        arm64: 'aarch64-unknown-linux-gnu',
+        x64: 'x86_64-unknown-linux-gnu'
+    }
+};
+// 架构名称映射（用于文件名生成）
+BaseBuilder.ARCH_DISPLAY_NAMES = {
+    arm64: 'aarch64',
+    x64: 'x64',
+    universal: 'universal'
+};
 
 class MacBuilder extends BaseBuilder {
     constructor(options) {
         super(options);
         // Store the original targets value for architecture selection
-        this.buildArch = options.targets || 'auto';
+        // For macOS, targets can be architecture names or format names
+        // Filter out non-architecture values
+        const validArchs = ['intel', 'apple', 'universal', 'auto', 'x64', 'arm64'];
+        this.buildArch = validArchs.includes(options.targets || '') ? options.targets : 'auto';
         // Use DMG by default for distribution
         // Only create app bundles for testing to avoid user interaction
         if (process.env.PAKE_CREATE_APP === '1') {
@@ -793,141 +860,32 @@ class MacBuilder extends BaseBuilder {
         }
         else {
             // Auto-detect based on current architecture
-            arch = process.arch === 'arm64' ? 'aarch64' : process.arch;
+            arch = this.getArchDisplayName(this.resolveTargetArch(this.buildArch));
         }
         return `${name}_${tauriConfig.version}_${arch}`;
     }
-    getBuildCommand(packageManager = 'pnpm') {
-        // Determine if we need universal build
-        const needsUniversal = this.buildArch === 'universal' || this.options.multiArch;
-        if (needsUniversal) {
-            const baseCommand = this.options.debug
-                ? `${packageManager} run tauri build -- --debug`
-                : `${packageManager} run tauri build --`;
-            // Use temporary config directory to avoid modifying source files
-            const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
-            let fullCommand = `${baseCommand} --target universal-apple-darwin -c "${configPath}"`;
-            // Add features
-            const features = ['cli-build'];
-            // Add macos-proxy feature for modern macOS (Darwin 23+ = macOS 14+)
-            const macOSVersion = this.getMacOSMajorVersion();
-            if (macOSVersion >= 23) {
-                features.push('macos-proxy');
-            }
-            if (features.length > 0) {
-                fullCommand += ` --features ${features.join(',')}`;
-            }
-            return fullCommand;
+    getActualArch() {
+        if (this.buildArch === 'universal' || this.options.multiArch) {
+            return 'universal';
         }
         else if (this.buildArch === 'apple') {
-            // Build for Apple Silicon only
-            const baseCommand = this.options.debug
-                ? `${packageManager} run tauri build -- --debug`
-                : `${packageManager} run tauri build --`;
-            const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
-            let fullCommand = `${baseCommand} --target aarch64-apple-darwin -c "${configPath}"`;
-            // Add features
-            const features = ['cli-build'];
-            const macOSVersion = this.getMacOSMajorVersion();
-            if (macOSVersion >= 23) {
-                features.push('macos-proxy');
-            }
-            if (features.length > 0) {
-                fullCommand += ` --features ${features.join(',')}`;
-            }
-            return fullCommand;
+            return 'arm64';
         }
         else if (this.buildArch === 'intel') {
-            // Build for Intel only
-            const baseCommand = this.options.debug
-                ? `${packageManager} run tauri build -- --debug`
-                : `${packageManager} run tauri build --`;
-            const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
-            let fullCommand = `${baseCommand} --target x86_64-apple-darwin -c "${configPath}"`;
-            // Add features
-            const features = ['cli-build'];
-            const macOSVersion = this.getMacOSMajorVersion();
-            if (macOSVersion >= 23) {
-                features.push('macos-proxy');
-            }
-            if (features.length > 0) {
-                fullCommand += ` --features ${features.join(',')}`;
-            }
-            return fullCommand;
+            return 'x64';
         }
-        return super.getBuildCommand();
-    }
-    getBasePath() {
-        const needsUniversal = this.buildArch === 'universal' || this.options.multiArch;
-        const basePath = this.options.debug ? 'debug' : 'release';
-        if (needsUniversal) {
-            return `src-tauri/target/universal-apple-darwin/${basePath}/bundle`;
-        }
-        else if (this.buildArch === 'apple') {
-            return `src-tauri/target/aarch64-apple-darwin/${basePath}/bundle`;
-        }
-        else if (this.buildArch === 'intel') {
-            return `src-tauri/target/x86_64-apple-darwin/${basePath}/bundle`;
-        }
-        return super.getBasePath();
-    }
-}
-
-class WinBuilder extends BaseBuilder {
-    constructor(options) {
-        super(options);
-        this.buildFormat = 'msi';
-        // Store the original targets value for architecture selection
-        this.buildArch = options.targets || 'auto';
-        // Set targets to msi format for Tauri
-        this.options.targets = this.buildFormat;
-    }
-    getFileName() {
-        const { name } = this.options;
-        const language = tauriConfig.bundle.windows.wix.language[0];
-        // Determine architecture name based on explicit targets option or auto-detect
-        let targetArch;
-        if (this.buildArch === 'arm64') {
-            targetArch = 'aarch64';
-        }
-        else if (this.buildArch === 'x64') {
-            targetArch = 'x64';
-        }
-        else {
-            // Auto-detect based on current architecture if no explicit target
-            const archMap = {
-                x64: 'x64',
-                arm64: 'aarch64',
-            };
-            targetArch = archMap[process.arch] || process.arch;
-        }
-        return `${name}_${tauriConfig.version}_${targetArch}_${language}`;
+        return this.resolveTargetArch(this.buildArch);
     }
     getBuildCommand(packageManager = 'pnpm') {
-        const baseCommand = this.options.debug
-            ? `${packageManager} run build:debug`
-            : `${packageManager} run build`;
-        // Use temporary config directory to avoid modifying source files
         const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
-        let fullCommand = `${baseCommand} -- -c "${configPath}"`;
-        // Determine build target based on explicit targets option or auto-detect
-        let buildTarget;
-        if (this.buildArch === 'arm64') {
-            buildTarget = 'aarch64-pc-windows-msvc';
+        const actualArch = this.getActualArch();
+        const buildTarget = this.getTauriTarget(actualArch, 'darwin');
+        if (!buildTarget) {
+            throw new Error(`Unsupported architecture: ${actualArch} for macOS`);
         }
-        else if (this.buildArch === 'x64') {
-            buildTarget = 'x86_64-pc-windows-msvc';
-        }
-        else {
-            // Auto-detect based on current architecture if no explicit target
-            buildTarget =
-                process.arch === 'arm64'
-                    ? 'aarch64-pc-windows-msvc'
-                    : 'x86_64-pc-windows-msvc';
-        }
-        fullCommand += ` --target ${buildTarget}`;
+        let fullCommand = this.buildBaseCommand(packageManager, configPath, buildTarget);
         // Add features
-        const features = ['cli-build'];
+        const features = this.getBuildFeatures();
         if (features.length > 0) {
             fullCommand += ` --features ${features.join(',')}`;
         }
@@ -935,21 +893,42 @@ class WinBuilder extends BaseBuilder {
     }
     getBasePath() {
         const basePath = this.options.debug ? 'debug' : 'release';
-        // Determine target based on explicit targets option or auto-detect
-        let target;
-        if (this.buildArch === 'arm64') {
-            target = 'aarch64-pc-windows-msvc';
+        const actualArch = this.getActualArch();
+        const target = this.getTauriTarget(actualArch, 'darwin');
+        return `src-tauri/target/${target}/${basePath}/bundle`;
+    }
+}
+
+class WinBuilder extends BaseBuilder {
+    constructor(options) {
+        super(options);
+        this.buildFormat = 'msi';
+        this.buildArch = this.resolveTargetArch(options.targets);
+        this.options.targets = this.buildFormat;
+    }
+    getFileName() {
+        const { name } = this.options;
+        const language = tauriConfig.bundle.windows.wix.language[0];
+        const targetArch = this.getArchDisplayName(this.buildArch);
+        return `${name}_${tauriConfig.version}_${targetArch}_${language}`;
+    }
+    getBuildCommand(packageManager = 'pnpm') {
+        const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
+        const buildTarget = this.getTauriTarget(this.buildArch, 'win32');
+        if (!buildTarget) {
+            throw new Error(`Unsupported architecture: ${this.buildArch} for Windows`);
         }
-        else if (this.buildArch === 'x64') {
-            target = 'x86_64-pc-windows-msvc';
+        let fullCommand = this.buildBaseCommand(packageManager, configPath, buildTarget);
+        // Add features
+        const features = this.getBuildFeatures();
+        if (features.length > 0) {
+            fullCommand += ` --features ${features.join(',')}`;
         }
-        else {
-            // Auto-detect based on current architecture if no explicit target
-            target =
-                process.arch === 'arm64'
-                    ? 'aarch64-pc-windows-msvc'
-                    : 'x86_64-pc-windows-msvc';
-        }
+        return fullCommand;
+    }
+    getBasePath() {
+        const basePath = this.options.debug ? 'debug' : 'release';
+        const target = this.getTauriTarget(this.buildArch, 'win32');
         return `src-tauri/target/${target}/${basePath}/bundle/`;
     }
 }
@@ -965,7 +944,7 @@ class LinuxBuilder extends BaseBuilder {
         }
         else {
             this.buildFormat = target;
-            this.buildArch = 'auto';
+            this.buildArch = this.resolveTargetArch('auto');
         }
         // Set targets to format for Tauri
         this.options.targets = this.buildFormat;
@@ -973,15 +952,16 @@ class LinuxBuilder extends BaseBuilder {
     getFileName() {
         const { name, targets } = this.options;
         const version = tauriConfig.version;
-        // Determine architecture based on explicit target or auto-detect
+        // Determine architecture display name
         let arch;
         if (this.buildArch === 'arm64') {
             arch = targets === 'rpm' || targets === 'appimage' ? 'aarch64' : 'arm64';
         }
         else {
             // Auto-detect or default to current architecture
-            arch = process.arch === 'x64' ? 'amd64' : process.arch;
-            if (arch === 'arm64' && (targets === 'rpm' || targets === 'appimage')) {
+            const resolvedArch = this.buildArch === 'x64' ? 'amd64' : this.buildArch;
+            arch = resolvedArch;
+            if (resolvedArch === 'arm64' && (targets === 'rpm' || targets === 'appimage')) {
                 arch = 'aarch64';
             }
         }
@@ -1001,18 +981,14 @@ class LinuxBuilder extends BaseBuilder {
         }
     }
     getBuildCommand(packageManager = 'pnpm') {
-        const baseCommand = this.options.debug
-            ? `${packageManager} run build:debug`
-            : `${packageManager} run build`;
-        // Use temporary config directory to avoid modifying source files
         const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
-        let fullCommand = `${baseCommand} -- -c "${configPath}"`;
-        // Add ARM64 target if explicitly specified
-        if (this.buildArch === 'arm64') {
-            fullCommand += ' --target aarch64-unknown-linux-gnu';
-        }
+        // Only add target if it's ARM64
+        const buildTarget = this.buildArch === 'arm64'
+            ? this.getTauriTarget(this.buildArch, 'linux')
+            : undefined;
+        let fullCommand = this.buildBaseCommand(packageManager, configPath, buildTarget);
         // Add features
-        const features = ['cli-build'];
+        const features = this.getBuildFeatures();
         if (features.length > 0) {
             fullCommand += ` --features ${features.join(',')}`;
         }
@@ -1021,7 +997,8 @@ class LinuxBuilder extends BaseBuilder {
     getBasePath() {
         const basePath = this.options.debug ? 'debug' : 'release';
         if (this.buildArch === 'arm64') {
-            return `src-tauri/target/aarch64-unknown-linux-gnu/${basePath}/bundle/`;
+            const target = this.getTauriTarget(this.buildArch, 'linux');
+            return `src-tauri/target/${target}/${basePath}/bundle/`;
         }
         return super.getBasePath();
     }

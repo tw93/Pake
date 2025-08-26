@@ -11,7 +11,12 @@ export default class MacBuilder extends BaseBuilder {
     super(options);
 
     // Store the original targets value for architecture selection
-    this.buildArch = options.targets || 'auto';
+    // For macOS, targets can be architecture names or format names
+    // Filter out non-architecture values
+    const validArchs = ['intel', 'apple', 'universal', 'auto', 'x64', 'arm64'];
+    this.buildArch = validArchs.includes(options.targets || '')
+      ? options.targets
+      : 'auto';
 
     // Use DMG by default for distribution
     // Only create app bundles for testing to avoid user interaction
@@ -43,95 +48,51 @@ export default class MacBuilder extends BaseBuilder {
       arch = 'x64';
     } else {
       // Auto-detect based on current architecture
-      arch = process.arch === 'arm64' ? 'aarch64' : process.arch;
+      arch = this.getArchDisplayName(this.resolveTargetArch(this.buildArch));
     }
     return `${name}_${tauriConfig.version}_${arch}`;
   }
 
-  protected getBuildCommand(packageManager: string = 'pnpm'): string {
-    // Determine if we need universal build
-    const needsUniversal =
-      this.buildArch === 'universal' || this.options.multiArch;
-
-    if (needsUniversal) {
-      const baseCommand = this.options.debug
-        ? `${packageManager} run tauri build -- --debug`
-        : `${packageManager} run tauri build --`;
-
-      // Use temporary config directory to avoid modifying source files
-      const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
-      let fullCommand = `${baseCommand} --target universal-apple-darwin -c "${configPath}"`;
-
-      // Add features
-      const features = ['cli-build'];
-
-      // Add macos-proxy feature for modern macOS (Darwin 23+ = macOS 14+)
-      const macOSVersion = this.getMacOSMajorVersion();
-      if (macOSVersion >= 23) {
-        features.push('macos-proxy');
-      }
-
-      if (features.length > 0) {
-        fullCommand += ` --features ${features.join(',')}`;
-      }
-
-      return fullCommand;
+  private getActualArch(): string {
+    if (this.buildArch === 'universal' || this.options.multiArch) {
+      return 'universal';
     } else if (this.buildArch === 'apple') {
-      // Build for Apple Silicon only
-      const baseCommand = this.options.debug
-        ? `${packageManager} run tauri build -- --debug`
-        : `${packageManager} run tauri build --`;
-      const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
-      let fullCommand = `${baseCommand} --target aarch64-apple-darwin -c "${configPath}"`;
-
-      // Add features
-      const features = ['cli-build'];
-      const macOSVersion = this.getMacOSMajorVersion();
-      if (macOSVersion >= 23) {
-        features.push('macos-proxy');
-      }
-      if (features.length > 0) {
-        fullCommand += ` --features ${features.join(',')}`;
-      }
-
-      return fullCommand;
+      return 'arm64';
     } else if (this.buildArch === 'intel') {
-      // Build for Intel only
-      const baseCommand = this.options.debug
-        ? `${packageManager} run tauri build -- --debug`
-        : `${packageManager} run tauri build --`;
-      const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
-      let fullCommand = `${baseCommand} --target x86_64-apple-darwin -c "${configPath}"`;
+      return 'x64';
+    }
+    return this.resolveTargetArch(this.buildArch);
+  }
 
-      // Add features
-      const features = ['cli-build'];
-      const macOSVersion = this.getMacOSMajorVersion();
-      if (macOSVersion >= 23) {
-        features.push('macos-proxy');
-      }
-      if (features.length > 0) {
-        fullCommand += ` --features ${features.join(',')}`;
-      }
+  protected getBuildCommand(packageManager: string = 'pnpm'): string {
+    const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
+    const actualArch = this.getActualArch();
 
-      return fullCommand;
+    const buildTarget = this.getTauriTarget(actualArch, 'darwin');
+    if (!buildTarget) {
+      throw new Error(`Unsupported architecture: ${actualArch} for macOS`);
     }
 
-    return super.getBuildCommand();
+    let fullCommand = this.buildBaseCommand(
+      packageManager,
+      configPath,
+      buildTarget,
+    );
+
+    // Add features
+    const features = this.getBuildFeatures();
+    if (features.length > 0) {
+      fullCommand += ` --features ${features.join(',')}`;
+    }
+
+    return fullCommand;
   }
 
   protected getBasePath(): string {
-    const needsUniversal =
-      this.buildArch === 'universal' || this.options.multiArch;
     const basePath = this.options.debug ? 'debug' : 'release';
+    const actualArch = this.getActualArch();
+    const target = this.getTauriTarget(actualArch, 'darwin');
 
-    if (needsUniversal) {
-      return `src-tauri/target/universal-apple-darwin/${basePath}/bundle`;
-    } else if (this.buildArch === 'apple') {
-      return `src-tauri/target/aarch64-apple-darwin/${basePath}/bundle`;
-    } else if (this.buildArch === 'intel') {
-      return `src-tauri/target/x86_64-apple-darwin/${basePath}/bundle`;
-    }
-
-    return super.getBasePath();
+    return `src-tauri/target/${target}/${basePath}/bundle`;
   }
 }

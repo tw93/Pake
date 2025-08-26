@@ -187,26 +187,88 @@ export default abstract class BaseBuilder {
 
   abstract getFileName(): string;
 
-  protected getBuildCommand(packageManager: string = 'pnpm'): string {
+  // 架构映射配置
+  protected static readonly ARCH_MAPPINGS: Record<
+    string,
+    Record<string, string>
+  > = {
+    darwin: {
+      arm64: 'aarch64-apple-darwin',
+      x64: 'x86_64-apple-darwin',
+      universal: 'universal-apple-darwin',
+    },
+    win32: {
+      arm64: 'aarch64-pc-windows-msvc',
+      x64: 'x86_64-pc-windows-msvc',
+    },
+    linux: {
+      arm64: 'aarch64-unknown-linux-gnu',
+      x64: 'x86_64-unknown-linux-gnu',
+    },
+  };
+
+  // 架构名称映射（用于文件名生成）
+  protected static readonly ARCH_DISPLAY_NAMES: Record<string, string> = {
+    arm64: 'aarch64',
+    x64: 'x64',
+    universal: 'universal',
+  };
+
+  /**
+   * 解析目标架构
+   */
+  protected resolveTargetArch(requestedArch?: string): string {
+    if (requestedArch === 'auto' || !requestedArch) {
+      return process.arch;
+    }
+    return requestedArch;
+  }
+
+  /**
+   * 获取Tauri构建目标
+   */
+  protected getTauriTarget(
+    arch: string,
+    platform: NodeJS.Platform = process.platform,
+  ): string | null {
+    const platformMappings = BaseBuilder.ARCH_MAPPINGS[platform];
+    if (!platformMappings) return null;
+    return platformMappings[arch] || null;
+  }
+
+  /**
+   * 获取架构显示名称（用于文件名）
+   */
+  protected getArchDisplayName(arch: string): string {
+    return BaseBuilder.ARCH_DISPLAY_NAMES[arch] || arch;
+  }
+
+  /**
+   * 构建基础构建命令
+   */
+  protected buildBaseCommand(
+    packageManager: string,
+    configPath: string,
+    target?: string,
+  ): string {
     const baseCommand = this.options.debug
       ? `${packageManager} run build:debug`
       : `${packageManager} run build`;
 
-    // Use temporary config directory to avoid modifying source files
-    const configPath = path.join(
-      npmDirectory,
-      'src-tauri',
-      '.pake',
-      'tauri.conf.json',
-    );
-    let fullCommand = `${baseCommand} -- -c "${configPath}"`;
+    const argSeparator = packageManager === 'npm' ? ' --' : '';
+    let fullCommand = `${baseCommand}${argSeparator} -c "${configPath}"`;
 
-    // For macOS, use app bundles by default unless DMG is explicitly requested
-    if (IS_MAC && this.options.targets === 'app') {
-      fullCommand += ' --bundles app';
+    if (target) {
+      fullCommand += ` --target ${target}`;
     }
 
-    // Add features
+    return fullCommand;
+  }
+
+  /**
+   * 获取构建特性列表
+   */
+  protected getBuildFeatures(): string[] {
     const features = ['cli-build'];
 
     // Add macos-proxy feature for modern macOS (Darwin 23+ = macOS 14+)
@@ -217,6 +279,27 @@ export default abstract class BaseBuilder {
       }
     }
 
+    return features;
+  }
+
+  protected getBuildCommand(packageManager: string = 'pnpm'): string {
+    // Use temporary config directory to avoid modifying source files
+    const configPath = path.join(
+      npmDirectory,
+      'src-tauri',
+      '.pake',
+      'tauri.conf.json',
+    );
+
+    let fullCommand = this.buildBaseCommand(packageManager, configPath);
+
+    // For macOS, use app bundles by default unless DMG is explicitly requested
+    if (IS_MAC && this.options.targets === 'app') {
+      fullCommand += ' --bundles app';
+    }
+
+    // Add features
+    const features = this.getBuildFeatures();
     if (features.length > 0) {
       fullCommand += ` --features ${features.join(',')}`;
     }
