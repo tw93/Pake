@@ -26,10 +26,6 @@ export default class WinBuilder extends BaseBuilder {
   }
 
   protected getBuildCommand(packageManager: string = 'pnpm'): string {
-    const baseCommand = this.options.debug
-      ? `${packageManager} run build:debug`
-      : `${packageManager} run build`;
-
     const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
     const buildTarget = this.getTauriTarget(this.buildArch, 'win32');
 
@@ -39,7 +35,11 @@ export default class WinBuilder extends BaseBuilder {
       );
     }
 
-    let fullCommand = `${baseCommand} -- -c "${configPath}" --target ${buildTarget}`;
+    let fullCommand = this.buildBaseCommand(
+      packageManager,
+      configPath,
+      buildTarget,
+    );
 
     // Add features
     const features = this.getBuildFeatures();

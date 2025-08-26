@@ -32,9 +32,9 @@
   "scripts": {
     "start": "pnpm run dev",
     "dev": "pnpm run tauri dev",
-    "build": "pnpm run tauri build --",
-    "build:debug": "pnpm run tauri build -- --debug",
-    "build:mac": "pnpm run tauri build -- --target universal-apple-darwin",
+    "build": "tauri build",
+    "build:debug": "tauri build --debug",
+    "build:mac": "tauri build --target universal-apple-darwin",
     "build:config": "chmod +x scripts/configure-tauri.mjs && node scripts/configure-tauri.mjs",
     "analyze": "cd src-tauri && cargo bloat --release --crates",
     "tauri": "tauri",
