@@ -2,10 +2,30 @@
 
 ## 安装
 
-请确保您的 Node.js 版本为 22 或更高版本（例如 22.11.0）。_注意：较旧的版本 ≥16.0.0 也可能可以工作。_ 请避免使用 `sudo` 进行安装。如果 npm 报告权限问题，请参考 [如何在不使用 sudo 的情况下修复 npm 报错](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo)。
+请确保您的 Node.js 版本为 22 或更高版本（例如 22.11.0）。_注意：较旧的版本 ≥18.0.0 也可能可以工作。_
+
+**推荐方式 (pnpm)：**
 
 ```bash
-npm install pake-cli -g
+pnpm install -g pake-cli
+```
+
+**备选方式 (npm)：**
+
+```bash
+npm install -g pake-cli
+```
+
+**如果遇到权限问题：**
+
+```bash
+# 使用 npx 运行，无需全局安装
+npx pake-cli [url] [选项]
+
+# 或者永久修复 npm 权限
+npm config set prefix ~/.npm-global
+echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc
 ```
 
 <details>
@@ -41,6 +61,19 @@ npm install pake-cli -g
 
 </details>
 
+## 快速开始
+
+```bash
+# 基础用法 - 只需要提供URL
+pake https://weekly.tw93.fun --name "Weekly"
+
+# 自定义图标和窗口大小（macOS示例）
+pake https://weekly.tw93.fun --name "Weekly" --icon https://cdn.tw93.fun/pake/weekly.icns --width 1200 --height 800
+
+# macOS 沉浸式体验
+pake https://weekly.tw93.fun --name "Weekly" --hide-title-bar
+```
+
 ## 命令行使用
 
 ```bash
@@ -59,7 +92,18 @@ pake [url] [options]
 
 ### [options]
 
-您可以通过传递以下选项来定制打包过程：
+您可以通过传递以下选项来定制打包过程。以下是最常用的选项：
+
+| 选项               | 描述                     | 示例                                           |
+| ------------------ | ------------------------ | ---------------------------------------------- |
+| `--name`           | 应用程序名称             | `--name "Weekly"`                              |
+| `--icon`           | 应用程序图标             | `--icon https://cdn.tw93.fun/pake/weekly.icns` |
+| `--width`          | 窗口宽度（默认：1200px） | `--width 1400`                                 |
+| `--height`         | 窗口高度（默认：780px）  | `--height 900`                                 |
+| `--hide-title-bar` | 沉浸式标题栏（仅macOS）  | `--hide-title-bar`                             |
+| `--debug`          | 启用开发者工具           | `--debug`                                      |
+
+完整选项请参见下面的详细说明：
 
 #### [name]
 
@@ -80,8 +124,7 @@ pake [url] [options]
 
 #### [icon]
 
-指定应用程序的图标，支持本地或远程文件。默认使用 Pake 的内置图标。您可以访问 [icon-icons](https://icon-icons.com)
-或 [macOSicons](https://macosicons.com/#/) 下载自定义图标。
+指定应用程序的图标，支持本地或远程文件，不传此参数时，Pake 会智能获取网站图标。自定义图标可访问 [icon-icons](https://icon-icons.com) 或 [macOSicons](https://macosicons.com/#/) 下载。
 
 - macOS 要求使用 `.icns` 格式。
 - Windows 要求使用 `.ico` 格式。
@@ -89,6 +132,10 @@ pake [url] [options]
 
 ```shell
 --icon <path>
+
+# 示例：
+--icon ./my-icon.png
+--icon https://cdn.tw93.fun/pake/weekly.icns  # 远程图标（.icns适用于macOS）
 ```
 
 #### [height]
@@ -229,7 +276,7 @@ pake [url] [options]
 
 #### [show-system-tray]
 
-设置是否显示通知栏托盘，默认不显示。
+设置应用程序显示在系统托盘，默认为 `false`。
 
 ```shell
 --show-system-tray
@@ -245,7 +292,7 @@ pake [url] [options]
 
 #### [hide-on-close]
 
-设置点击关闭按钮时隐藏窗口而不是退出应用。默认为 `true`。启用后，点击关闭按钮时应用会最小化到系统托盘（如果可用）或隐藏窗口，而不是直接关闭应用程序。
+点击关闭按钮时隐藏窗口而不是退出应用程序。默认为 `true`。
 
 ```shell
 --hide-on-close
@@ -328,13 +375,13 @@ pake https://flutter.dev --name FlutterApp --wasm
 
 #### [debug]
 
-打出来的包具备 dev-tools 的调试模式，此外还会输出更多的日志信息用于调试。
+启用开发者工具和详细日志输出，用于调试。
 
 ```shell
 --debug
 ```
 
-### 稍等片刻
+### 打包完成
 
 完成上述步骤后，您的应用程序应该已经成功打包。请注意，根据您的系统配置和网络状况，打包过程可能需要一些时间。请耐心等待，一旦打包完成，您就可以在指定的目录中找到应用程序安装包。
 

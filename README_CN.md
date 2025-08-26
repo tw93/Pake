@@ -165,13 +165,16 @@
 **Pake 提供了命令行工具，可以更快捷方便地一键自定义打包你需要的应用，详细可见 [文档](./bin/README_CN.md)。**
 
 ```bash
-# 使用 npm 进行安装
+# 推荐方式 (pnpm)
+pnpm install -g pake-cli
+
+# 备选方式 (npm)
 npm install -g pake-cli
 
 # 命令使用
 pake url [OPTIONS]...
 
-# 随便玩玩，首次由于安装环境会有些慢，后面就快了
+# 试试看！首次打包可能较慢（需要安装环境），后续会很快
 pake https://weekly.tw93.fun --name Weekly --hide-title-bar
 ```
 
@@ -179,17 +182,19 @@ pake https://weekly.tw93.fun --name Weekly --hide-title-bar
 
 ## 定制开发
 
-开始前请确保电脑已经安装了 Rust `>=1.89` 和 Node `>=22 如 22.11.0` 的环境，_注意：较旧的版本（Rust ≥1.78，Node ≥16）也可能可以工作，但推荐使用最新稳定版本。_ 此外需参考 [Tauri 文档](https://tauri.app/start/prerequisites/) 快速配置好环境才可以开始使用，假如你太不懂，使用上面的命令行打包会更加合适。
+开始前请确保电脑已经安装了 Rust `>=1.89` 和 Node `>=18`（如 22.11.0）的环境。_注意：推荐使用最新稳定版本。_ 详细安装指南请参考 [Tauri 文档](https://tauri.app/start/prerequisites/)。
+
+如果您对这些不熟悉，建议使用上面的命令行工具进行一键打包。
 
 ```sh
 # 安装依赖
-npm i
+pnpm i
 
 # 本地开发[右键可打开调试模式]
-npm run dev
+pnpm run dev
 
 # 打包应用
-npm run build
+pnpm run build
 
 ```
 

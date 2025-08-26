@@ -2,10 +2,30 @@
 
 ## Installation
 
-Ensure that your Node.js version is 22.0 or higher (e.g., 22.11.0). _Note: Older versions ≥16.0.0 may also work._ Avoid using `sudo` for the installation. If you encounter permission issues with npm, refer to [How to fix npm throwing error without sudo](https://stackoverflow.com/questions/16151018/how-to-fix-npm-throwing-error-without-sudo).
+Ensure that your Node.js version is 22.0 or higher (e.g., 22.11.0). _Note: Older versions ≥18.0.0 may also work._
+
+**Recommended (pnpm):**
 
 ```bash
-npm install pake-cli -g
+pnpm install -g pake-cli
+```
+
+**Alternative (npm):**
+
+```bash
+npm install -g pake-cli
+```
+
+**If you encounter permission issues:**
+
+```bash
+# Use npx to run without global installation
+npx pake-cli [url] [options]
+
+# Or fix npm permissions permanently
+npm config set prefix ~/.npm-global
+echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc
 ```
 
 <details>
@@ -41,6 +61,19 @@ npm install pake-cli -g
 
 </details>
 
+## Quick Start
+
+```bash
+# Basic usage - just provide a URL
+pake https://weekly.tw93.fun --name "Weekly"
+
+# With custom icon and window size (macOS example)
+pake https://weekly.tw93.fun --name "Weekly" --icon https://cdn.tw93.fun/pake/weekly.icns --width 1200 --height 800
+
+# macOS immersive experience
+pake https://weekly.tw93.fun --name "Weekly" --hide-title-bar
+```
+
 ## CLI Usage
 
 ```bash
@@ -59,7 +92,18 @@ The URL is the link to the web page you want to package or the path to a local H
 
 ### [options]
 
-Various options are available for customization. You can pass corresponding arguments during packaging to achieve the desired configuration.
+Various options are available for customization. Here are the most commonly used ones:
+
+| Option             | Description                    | Example                                        |
+| ------------------ | ------------------------------ | ---------------------------------------------- |
+| `--name`           | Application name               | `--name "Weekly"`                              |
+| `--icon`           | Application icon               | `--icon https://cdn.tw93.fun/pake/weekly.icns` |
+| `--width`          | Window width (default: 1200px) | `--width 1400`                                 |
+| `--height`         | Window height (default: 780px) | `--height 900`                                 |
+| `--hide-title-bar` | Immersive header (macOS only)  | `--hide-title-bar`                             |
+| `--debug`          | Enable development tools       | `--debug`                                      |
+
+For complete options, see detailed sections below.
 
 #### [name]
 
@@ -80,7 +124,7 @@ Specify the application name. If not provided, you will be prompted to enter it.
 
 #### [icon]
 
-Specify the application icon. Supports both local and remote files. By default, it uses the Pake brand icon. For custom icons, visit [icon icons](https://icon-icons.com) or [macOSicons](https://macosicons.com/#/).
+Specify the application icon. Supports both local and remote files. If not provided, Pake will intelligently fetch the website's icon. For custom icons, visit [icon-icons](https://icon-icons.com) or [macOSicons](https://macosicons.com/#/).
 
 - For macOS, use `.icns` format.
 - For Windows, use `.ico` format.
@@ -88,6 +132,10 @@ Specify the application icon. Supports both local and remote files. By default, 
 
 ```shell
 --icon <path>
+
+# Examples:
+--icon ./my-icon.png
+--icon https://cdn.tw93.fun/pake/weekly.icns  # Remote icon (.icns for macOS)
 ```
 
 #### [height]
@@ -229,7 +277,7 @@ Customize the browser user agent. Default is empty.
 
 #### [show-system-tray]
 
-Display the system tray. Default is not to display. Use the following command to enable the system tray.
+Display the application in system tray. Default is `false`.
 
 ```shell
 --show-system-tray
@@ -245,7 +293,7 @@ Specify the system tray icon. This is only effective when the system tray is ena
 
 #### [hide-on-close]
 
-Hide the window instead of exiting when clicking the close button. Default is `true`. When enabled, the application will be minimized to the system tray (if available) or hidden when the close button is clicked, rather than actually closing the application.
+Hide window instead of closing the application when clicking close button. Default is `true`.
 
 ```shell
 --hide-on-close
@@ -328,13 +376,13 @@ Set proxy server for all network requests. Supports HTTP, HTTPS, and SOCKS5. Ava
 
 #### [debug]
 
-The packaged application has dev-tools for debugging, in addition to outputting more log messages for debugging.
+Enable developer tools and detailed logging for debugging.
 
 ```shell
 --debug
 ```
 
-### Wait a moment
+### Packaging Complete
 
 After completing the above steps, your application should be successfully packaged. Please note that the packaging process may take some time depending on your system configuration and network conditions. Be patient, and once the packaging is complete, you can find the application installer in the specified directory.
 

@@ -165,7 +165,10 @@ In addition, double-click the title bar to switch to full-screen mode. For Mac u
 **Pake provides a command line tool, making the flow of package customization quicker and easier. See the [documentation](./bin/README.md) for more information.**
 
 ```bash
-# Install with npm
+# Recommended (pnpm)
+pnpm install -g pake-cli
+
+# Alternative (npm)
 npm install -g pake-cli
 
 # Command usage
@@ -179,19 +182,19 @@ If you are new to the command line, you can compile packages online with _GitHub
 
 ## Development
 
-Prepare your environment before starting. Make sure you have Rust `>=1.89` and Node `>=22` (e.g., `22.11.0`) installed on your computer. _Note: Older versions (Rust ≥1.78, Node ≥16) may also work but latest stable versions are recommended._ For installation guidance, see [Tauri documentation](https://tauri.app/start/prerequisites/).
+Prepare your environment before starting. Make sure you have Rust `>=1.89` and Node `>=18` (e.g., `22.11.0`) installed on your computer. _Note: Latest stable versions are recommended._ For installation guidance, see [Tauri documentation](https://tauri.app/start/prerequisites/).
 
 If you are unfamiliar with these, it is better to try out the above tool to pack with one click.
 
 ```sh
-# Install Dependencies
-npm i
+# Install dependencies
+pnpm i
 
-# Local development [Right-click to open debug mode.]
-npm run dev
+# Local development (right-click to open debug mode)
+pnpm run dev
 
-# Pack application
-npm run build
+# Build application
+pnpm run build
 ```
 
 ## Advanced Usage
