@@ -54,9 +54,9 @@ var files = [
 var scripts = {
 	start: "pnpm run dev",
 	dev: "pnpm run tauri dev",
-	build: "tauri build",
-	"build:debug": "tauri build --debug",
-	"build:mac": "tauri build --target universal-apple-darwin",
+	build: "pnpm run tauri build --",
+	"build:debug": "pnpm run tauri build -- --debug",
+	"build:mac": "pnpm run tauri build -- --target universal-apple-darwin",
 	"build:config": "chmod +x scripts/configure-tauri.mjs && node scripts/configure-tauri.mjs",
 	analyze: "cd src-tauri && cargo bloat --release --crates",
 	tauri: "tauri",
@@ -742,7 +742,7 @@ class BaseBuilder {
         const baseCommand = this.options.debug
             ? `${packageManager} run build:debug`
             : `${packageManager} run build`;
-        const argSeparator = packageManager === 'npm' ? ' --' : '';
+        const argSeparator = ' --'; // Both npm and pnpm need -- to pass args to scripts
         let fullCommand = `${baseCommand}${argSeparator} -c "${configPath}"`;
         if (target) {
             fullCommand += ` --target ${target}`;
@@ -764,9 +764,12 @@ class BaseBuilder {
         return features;
     }
     getBuildCommand(packageManager = 'pnpm') {
+        const baseCommand = this.options.debug
+            ? `${packageManager} run build:debug`
+            : `${packageManager} run build`;
         // Use temporary config directory to avoid modifying source files
         const configPath = path.join(npmDirectory, 'src-tauri', '.pake', 'tauri.conf.json');
-        let fullCommand = this.buildBaseCommand(packageManager, configPath);
+        let fullCommand = `${baseCommand} -- -c "${configPath}"`;
         // For macOS, use app bundles by default unless DMG is explicitly requested
         if (IS_MAC && this.options.targets === 'app') {
             fullCommand += ' --bundles app';
@@ -921,12 +924,15 @@ class WinBuilder extends BaseBuilder {
         return `${name}_${tauriConfig.version}_${targetArch}_${language}`;
     }
     getBuildCommand(packageManager = 'pnpm') {
+        const baseCommand = this.options.debug
+            ? `${packageManager} run build:debug`
+            : `${packageManager} run build`;
         const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
         const buildTarget = this.getTauriTarget(this.buildArch, 'win32');
         if (!buildTarget) {
             throw new Error(`Unsupported architecture: ${this.buildArch} for Windows`);
         }
-        let fullCommand = this.buildBaseCommand(packageManager, configPath, buildTarget);
+        let fullCommand = `${baseCommand} -- -c "${configPath}" --target ${buildTarget}`;
         // Add features
         const features = this.getBuildFeatures();
         if (features.length > 0) {
