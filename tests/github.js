@@ -193,7 +193,7 @@ runner.addTest(
   async () => {
     try {
       // Test installing pake-cli@latest (simulates GitHub Actions)
-      execSync("npm install pake-cli@latest --no-package-lock", {
+      execSync("pnpm install pake-cli@latest", {
         encoding: "utf8",
         timeout: 60000, // 1 minute timeout
         cwd: "/tmp",
@@ -351,7 +351,7 @@ runner.addTest(
       // Test icon URL validation (without actually downloading)
       const testScript = `
 const validIconUrls = [
-  'https://gw.alipayobjects.com/os/k/fw/weekly.icns',
+  'https://cdn.tw93.fun/pake/weekly.icns',
   'https://example.com/icon.png',
   'https://cdn.example.com/assets/app.ico'
 ];
@@ -460,15 +460,15 @@ runner.addTest(
 // Simulate MacBuilder multi-arch command generation
 const generateMacBuildCommand = (multiArch, debug, features = ['cli-build']) => {
   if (!multiArch) {
-    const baseCommand = debug ? 'npm run tauri build -- --debug' : 'npm run tauri build --';
+    const baseCommand = debug ? 'pnpm run tauri build -- --debug' : 'pnpm run tauri build --';
     return features.length > 0 ?
       \`\${baseCommand} --features \${features.join(',')}\` :
       baseCommand;
   }
 
   const baseCommand = debug
-    ? 'npm run tauri build -- --debug'
-    : 'npm run tauri build --';
+    ? 'pnpm run tauri build -- --debug'
+    : 'pnpm run tauri build --';
 
   const configPath = 'src-tauri/.pake/tauri.conf.json';
   let fullCommand = \`\${baseCommand} --target universal-apple-darwin -c "\${configPath}"\`;
@@ -482,7 +482,7 @@ const generateMacBuildCommand = (multiArch, debug, features = ['cli-build']) => 
 
 // Test different scenarios
 const tests = [
-  { multiArch: false, debug: false, expected: 'npm run tauri build -- --features cli-build' },
+  { multiArch: false, debug: false, expected: 'pnpm run tauri build -- --features cli-build' },
   { multiArch: true, debug: false, expected: 'universal-apple-darwin' },
   { multiArch: false, debug: true, expected: '--debug' },
 ];
@@ -537,7 +537,7 @@ runner.addTest(
 
       // Check for essential workflow components
       const requiredElements = [
-        "npm install pake-cli@latest --no-package-lock", // Latest version installation
+        "pnpm install pake-cli@latest", // Latest version installation
         "timeout-minutes: 15", // Sufficient timeout
         "node ./script/github-action-build.js", // Build script execution
         "ubuntu-24.04", // Linux support

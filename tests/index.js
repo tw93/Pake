@@ -96,7 +96,7 @@ class PakeTestRunner {
 
     // Check if CLI file exists
     if (!fs.existsSync(config.CLI_PATH)) {
-      console.log("❌ CLI file not found. Run: npm run cli:build");
+      console.log("❌ CLI file not found. Run: pnpm run cli:build");
       process.exit(1);
     }
     console.log("✅ CLI file exists");
@@ -328,7 +328,7 @@ class PakeTestRunner {
       "pake-cli Package Installation",
       async () => {
         try {
-          execSync("npm install pake-cli@latest --no-package-lock", {
+          execSync("pnpm install pake-cli@latest", {
             encoding: "utf8",
             timeout: 60000,
             cwd: "/tmp",
@@ -1209,7 +1209,7 @@ if (args.includes("--help") || args.includes("-h")) {
 Usage: npm test [-- options]
 
 Complete Test Suite (Default):
-  npm test                    # Run complete test suite with real build (8-12 minutes)
+  pnpm test                   # Run complete test suite with real build (8-12 minutes)
 
 Test Components:
   ✅ Unit Tests               # CLI commands, validation, response time
@@ -1230,7 +1230,7 @@ Skip Components (if needed):
 Examples:
   npm test                         # Complete test suite (recommended)
   npm test -- --e2e               # Complete suite + end-to-end tests
-  npm test -- --no-build          # Skip real build (faster for development)
+  pnpm test -- --no-build         # Skip real build (faster for development)
 
 Environment:
   CI=1              # Enable CI mode

@@ -3,8 +3,12 @@
   "version": "3.2.16",
   "description": "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。",
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0",
+    "pnpm": ">=10.0.0",
+    "npm": "please-use-pnpm",
+    "yarn": "please-use-pnpm"
   },
+  "packageManager": "pnpm@10.15.0",
   "bin": {
     "pake": "./dist/cli.js"
   },
@@ -29,19 +33,19 @@
     "src-tauri"
   ],
   "scripts": {
-    "start": "npm run dev",
-    "dev": "npm run tauri dev",
-    "build": "npm run tauri build --",
-    "build:debug": "npm run tauri build -- --debug",
-    "build:mac": "npm run tauri build -- --target universal-apple-darwin",
+    "start": "pnpm run dev",
+    "dev": "pnpm run tauri dev",
+    "build": "pnpm run tauri build --",
+    "build:debug": "pnpm run tauri build -- --debug",
+    "build:mac": "pnpm run tauri build -- --target universal-apple-darwin",
     "build:config": "chmod +x scripts/configure-tauri.mjs && node scripts/configure-tauri.mjs",
     "analyze": "cd src-tauri && cargo bloat --release --crates",
     "tauri": "tauri",
     "cli": "cross-env NODE_ENV=development rollup -c -w",
     "cli:build": "cross-env NODE_ENV=production rollup -c",
-    "test": "npm run cli:build && cross-env PAKE_CREATE_APP=1 node tests/index.js",
+    "test": "pnpm run cli:build && cross-env PAKE_CREATE_APP=1 node tests/index.js",
     "format": "prettier --write . --ignore-unknown && find tests -name '*.js' -exec sed -i '' 's/[[:space:]]*$//' {} \\; && cd src-tauri && cargo fmt --verbose",
-    "prepublishOnly": "npm run cli:build"
+    "prepublishOnly": "pnpm run cli:build"
   },
   "type": "module",
   "exports": "./dist/cli.js",
@@ -80,7 +84,7 @@
     "cross-env": "^7.0.3",
     "prettier": "^3.6.2",
     "rollup": "^4.46.3",
-    "rollup-plugin-typescript2": "^0.36.0",
+    "@rollup/plugin-typescript": "^12.1.2",
     "tslib": "^2.8.1",
     "typescript": "^5.9.2"
   }

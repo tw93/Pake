@@ -63,12 +63,12 @@ class ReleaseBuildTest {
     try {
       // Build config
       this.log("DEBUG", "Configuring app...");
-      execSync("npm run build:config", { stdio: "pipe" });
+      execSync("pnpm run build:config", { stdio: "pipe" });
 
       // Build app
       this.log("DEBUG", "Building app package...");
       try {
-        execSync("npm run build:debug", {
+        execSync("pnpm run build:debug", {
           stdio: "pipe",
           timeout: 120000, // 2 minutes
           env: { ...process.env, PAKE_CREATE_APP: "1" },

@@ -76,7 +76,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: "npm"
+          cache: "pnpm"
 
       - name: Install dependencies (ubuntu only)
         if: matrix.os == 'ubuntu-latest'
@@ -104,8 +104,8 @@ jobs:
           NAME_ZH: ${{ inputs.name_zh }}
           URL: ${{ inputs.url }}
         run: |
-          npm ci
-          npm run build:config
+          pnpm install --frozen-lockfile
+          pnpm run build:config
 
       - name: Add Rust targets for macOS universal build
         if: matrix.os == 'macos-latest'
@@ -117,7 +117,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         timeout-minutes: 15
         run: |
-          npm run tauri build
+          pnpm run tauri build
           mkdir -p output/linux
           mv src-tauri/target/release/bundle/deb/*.deb output/linux/${{inputs.title}}_`arch`.deb
           mv src-tauri/target/release/bundle/appimage/*.AppImage output/linux/"${{inputs.title}}"_`arch`.AppImage
@@ -126,7 +126,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         timeout-minutes: 20
         run: |
-          npm run tauri build -- --target universal-apple-darwin
+          pnpm run tauri build -- --target universal-apple-darwin
           mkdir -p output/macos
           mv src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg output/macos/"${{inputs.title}}".dmg
 
@@ -134,7 +134,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         timeout-minutes: 15
         run: |
-          npm run tauri build -- --target x86_64-pc-windows-msvc
+          pnpm run tauri build -- --target x86_64-pc-windows-msvc
           New-Item -Path "output\windows" -ItemType Directory
           Move-Item -Path "src-tauri\target\x86_64-pc-windows-msvc\release\bundle\msi\*.msi" -Destination "output\windows\${{inputs.title}}_x64.msi"
           git checkout -- src-tauri/Cargo.lock

@@ -68,7 +68,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: "npm"
+          cache: "pnpm"
 
       - name: Install Rust for ubuntu-24.04
         if: inputs.platform == 'ubuntu-24.04'
@@ -109,7 +109,7 @@ jobs:
           path: |
             node_modules
             ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
@@ -117,7 +117,7 @@ jobs:
         shell: bash
         run: |
           echo "Installing latest pake-cli..."
-          npm install pake-cli@latest --no-package-lock
+          pnpm install pake-cli@latest
 
           # Verify installation
           if [ ! -d "node_modules/pake-cli" ]; then

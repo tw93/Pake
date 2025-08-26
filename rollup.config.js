@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 import appRootPath from "app-root-path";
-import typescript from "rollup-plugin-typescript2";
+import typescript from "@rollup/plugin-typescript";
 import alias from "@rollup/plugin-alias";
 import commonjs from "@rollup/plugin-commonjs";
 import json from "@rollup/plugin-json";
@@ -48,7 +48,6 @@ export default {
     json(),
     typescript({
       tsconfig: "tsconfig.json",
-      clean: true, // Clear cache
     }),
     commonjs(),
     replace({

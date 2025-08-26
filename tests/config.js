@@ -31,7 +31,7 @@ export const TEST_URLS = {
 
 // Test assets for different scenarios
 export const TEST_ASSETS = {
-  WEEKLY_ICNS: "https://gw.alipayobjects.com/os/k/fw/weekly.icns",
+  WEEKLY_ICNS: "https://cdn.tw93.fun/pake/weekly.icns",
   INVALID_ICON: "https://example.com/nonexistent.icns",
 };
 
