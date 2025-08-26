@@ -105,7 +105,9 @@ export default abstract class BaseBuilder {
     const registryOption = isChina
       ? ' --registry=https://registry.npmmirror.com'
       : '';
-    const legacyPeerDeps = ' --legacy-peer-deps'; // 解决dependency conflicts
+    // 根据包管理器类型设置依赖冲突解决选项
+    const peerDepsOption =
+      packageManager === 'npm' ? ' --legacy-peer-deps' : '';
 
     const timeout = this.getInstallTimeout();
 
@@ -118,13 +120,13 @@ export default abstract class BaseBuilder {
       const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
       await fsExtra.copy(projectCnConf, projectConf);
       await shellExec(
-        `cd "${npmDirectory}" && ${packageManager} install${registryOption}${legacyPeerDeps} --silent`,
+        `cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption} --silent`,
         timeout,
         buildEnv,
       );
     } else {
       await shellExec(
-        `cd "${npmDirectory}" && ${packageManager} install${legacyPeerDeps} --silent`,
+        `cd "${npmDirectory}" && ${packageManager} install${peerDepsOption} --silent`,
         timeout,
         buildEnv,
       );
