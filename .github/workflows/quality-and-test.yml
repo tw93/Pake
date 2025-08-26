@@ -131,8 +131,19 @@ jobs:
       - name: Install WIX Toolset (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          winget install --id Microsoft.WiXToolset --source winget --silent --accept-package-agreements --accept-source-agreements
-          echo "C:\Program Files (x86)\WiX Toolset v3.14\bin" >> $env:GITHUB_PATH
+          # Download and install WIX Toolset v3.11
+          Invoke-WebRequest -Uri "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311.exe" -OutFile "wix311.exe"
+          Start-Process -FilePath "wix311.exe" -ArgumentList "/quiet" -Wait
+          
+          # Add WIX to PATH
+          $wixPath = "${env:ProgramFiles(x86)}\WiX Toolset v3.11\bin"
+          if (Test-Path $wixPath) {
+            echo $wixPath >> $env:GITHUB_PATH
+            echo "WIX Toolset installed successfully"
+          } else {
+            echo "Warning: WIX installation path not found"
+          }
+        shell: powershell
 
       - name: Install system dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
