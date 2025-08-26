@@ -83,7 +83,7 @@ npm run build:mac  # macOS universal build
 - [ ] Check system tray integration
 - [ ] Validate window behavior
 - [ ] Test with weekly.tw93.fun URL
-- [ ] Verify remote icon functionality (https://gw.alipayobjects.com/os/k/fw/weekly.icns)
+- [ ] Verify remote icon functionality (https://cdn.tw93.fun/pake/weekly.icns)
 
 **Testing Notes:**
 
@@ -187,6 +187,6 @@ cargo check --manifest-path=src-tauri/Cargo.toml
 
 ## Prerequisites
 
-- Node.js ≥22.0.0 (recommended LTS, older versions ≥16.0.0 may work)
+- Node.js ≥22.0.0 (recommended LTS, older versions ≥18.0.0 may work)
 - Rust ≥1.89.0 (recommended stable, older versions ≥1.78.0 may work)
 - Platform build tools (see CONTRIBUTING.md for details)
