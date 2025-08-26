@@ -134,7 +134,7 @@ jobs:
           # Download and install WIX Toolset v3.11
           Invoke-WebRequest -Uri "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311.exe" -OutFile "wix311.exe"
           Start-Process -FilePath "wix311.exe" -ArgumentList "/quiet" -Wait
-
+          
           # Add WIX to PATH
           $wixPath = "${env:ProgramFiles(x86)}\WiX Toolset v3.11\bin"
           if (Test-Path $wixPath) {
