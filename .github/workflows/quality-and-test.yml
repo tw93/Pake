@@ -128,6 +128,12 @@ jobs:
           toolchain: stable
           target: x86_64-apple-darwin
 
+      - name: Install WIX Toolset (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          winget install --id Microsoft.WiXToolset --source winget --silent --accept-package-agreements --accept-source-agreements
+          echo "C:\Program Files (x86)\WiX Toolset v3.14\bin" >> $env:GITHUB_PATH
+
       - name: Install system dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         uses: awalsh128/cache-apt-pkgs-action@v1.4.3
