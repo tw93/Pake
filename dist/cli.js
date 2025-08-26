@@ -25,8 +25,9 @@ var name = "pake-cli";
 var version = "3.2.16";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
-	node: ">=16.0.0"
+	node: ">=18.0.0"
 };
+var packageManager = "pnpm@10.15.0";
 var bin = {
 	pake: "./dist/cli.js"
 };
@@ -51,19 +52,19 @@ var files = [
 	"src-tauri"
 ];
 var scripts = {
-	start: "npm run dev",
-	dev: "npm run tauri dev",
-	build: "npm run tauri build --",
-	"build:debug": "npm run tauri build -- --debug",
-	"build:mac": "npm run tauri build -- --target universal-apple-darwin",
+	start: "pnpm run dev",
+	dev: "pnpm run tauri dev",
+	build: "pnpm run tauri build --",
+	"build:debug": "pnpm run tauri build -- --debug",
+	"build:mac": "pnpm run tauri build -- --target universal-apple-darwin",
 	"build:config": "chmod +x scripts/configure-tauri.mjs && node scripts/configure-tauri.mjs",
 	analyze: "cd src-tauri && cargo bloat --release --crates",
 	tauri: "tauri",
 	cli: "cross-env NODE_ENV=development rollup -c -w",
 	"cli:build": "cross-env NODE_ENV=production rollup -c",
-	test: "npm run cli:build && cross-env PAKE_CREATE_APP=1 node tests/index.js",
+	test: "pnpm run cli:build && cross-env PAKE_CREATE_APP=1 node tests/index.js",
 	format: "prettier --write . --ignore-unknown && find tests -name '*.js' -exec sed -i '' 's/[[:space:]]*$//' {} \\; && cd src-tauri && cargo fmt --verbose",
-	prepublishOnly: "npm run cli:build"
+	prepublishOnly: "pnpm run cli:build"
 };
 var type = "module";
 var exports = "./dist/cli.js";
@@ -111,6 +112,7 @@ var packageJson = {
 	version: version,
 	description: description,
 	engines: engines,
+	packageManager: packageManager,
 	bin: bin,
 	repository: repository,
 	author: author,
@@ -559,8 +561,8 @@ StartupNotify=true
         tauriConf.app.security = {
             headers: {
                 'Cross-Origin-Opener-Policy': 'same-origin',
-                'Cross-Origin-Embedder-Policy': 'require-corp'
-            }
+                'Cross-Origin-Embedder-Policy': 'require-corp',
+            },
         };
     }
     // Save config file.
@@ -599,6 +601,32 @@ class BaseBuilder {
     getBuildTimeout() {
         return 900000; // 15 minutes for all builds
     }
+    async detectPackageManager() {
+        // 使用缓存避免重复检测
+        if (BaseBuilder.packageManagerCache) {
+            return BaseBuilder.packageManagerCache;
+        }
+        const { execa } = await import('execa');
+        // 优先使用pnpm（如果可用）
+        try {
+            await execa('pnpm', ['--version'], { stdio: 'ignore' });
+            logger.info('✺ Using pnpm for package management.');
+            BaseBuilder.packageManagerCache = 'pnpm';
+            return 'pnpm';
+        }
+        catch {
+            // pnpm不可用，回退到npm
+            try {
+                await execa('npm', ['--version'], { stdio: 'ignore' });
+                logger.info('✺ pnpm not available, using npm for package management.');
+                BaseBuilder.packageManagerCache = 'npm';
+                return 'npm';
+            }
+            catch {
+                throw new Error('Neither pnpm nor npm is available. Please install a package manager.');
+            }
+        }
+    }
     async prepare() {
         const tauriSrcPath = path.join(npmDirectory, 'src-tauri');
         const tauriTargetPath = path.join(tauriSrcPath, 'target');
@@ -626,8 +654,8 @@ class BaseBuilder {
         const rustProjectDir = path.join(tauriSrcPath, '.cargo');
         const projectConf = path.join(rustProjectDir, 'config.toml');
         await fsExtra.ensureDir(rustProjectDir);
-        // 统一使用npm，简单可靠
-        const packageManager = 'npm';
+        // 智能检测可用的包管理器
+        const packageManager = await this.detectPackageManager();
         const registryOption = isChina
             ? ' --registry=https://registry.npmmirror.com'
             : '';
@@ -635,7 +663,7 @@ class BaseBuilder {
         const timeout = this.getInstallTimeout();
         const buildEnv = this.getBuildEnvironment();
         if (isChina) {
-            logger.info('✺ Located in China, using npm/rsProxy CN mirror.');
+            logger.info(`✺ Located in China, using ${packageManager}/rsProxy CN mirror.`);
             const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
             await fsExtra.copy(projectCnConf, projectConf);
             await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}${legacyPeerDeps} --silent`, timeout, buildEnv);
@@ -657,15 +685,17 @@ class BaseBuilder {
     async buildAndCopy(url, target) {
         const { name } = this.options;
         await mergeConfig(url, this.options, tauriConfig);
+        // Detect available package manager
+        const packageManager = await this.detectPackageManager();
         // Build app
         const buildSpinner = getSpinner('Building app...');
-        // Let spinner run for a moment so user can see it, then stop before npm command
+        // Let spinner run for a moment so user can see it, then stop before package manager command
         await new Promise((resolve) => setTimeout(resolve, 500));
         buildSpinner.stop();
         // Show static message to keep the status visible
         logger.warn('✸ Building app...');
         const buildEnv = this.getBuildEnvironment();
-        await shellExec(`cd "${npmDirectory}" && ${this.getBuildCommand()}`, this.getBuildTimeout(), buildEnv);
+        await shellExec(`cd "${npmDirectory}" && ${this.getBuildCommand(packageManager)}`, this.getBuildTimeout(), buildEnv);
         // Copy app
         const fileName = this.getFileName();
         const fileType = this.getFileType(target);
@@ -679,10 +709,10 @@ class BaseBuilder {
     getFileType(target) {
         return target;
     }
-    getBuildCommand() {
+    getBuildCommand(packageManager = 'pnpm') {
         const baseCommand = this.options.debug
-            ? 'npm run build:debug'
-            : 'npm run build';
+            ? `${packageManager} run build:debug`
+            : `${packageManager} run build`;
         // Use temporary config directory to avoid modifying source files
         const configPath = path.join(npmDirectory, 'src-tauri', '.pake', 'tauri.conf.json');
         let fullCommand = `${baseCommand} -- -c "${configPath}"`;
@@ -725,6 +755,7 @@ class BaseBuilder {
         return path.join(npmDirectory, this.getBasePath(), bundleDir, `${fileName}.${fileType}`);
     }
 }
+BaseBuilder.packageManagerCache = null;
 
 class MacBuilder extends BaseBuilder {
     constructor(options) {
@@ -765,13 +796,13 @@ class MacBuilder extends BaseBuilder {
         }
         return `${name}_${tauriConfig.version}_${arch}`;
     }
-    getBuildCommand() {
+    getBuildCommand(packageManager = 'pnpm') {
         // Determine if we need universal build
         const needsUniversal = this.buildArch === 'universal' || this.options.multiArch;
         if (needsUniversal) {
             const baseCommand = this.options.debug
-                ? 'npm run tauri build -- --debug'
-                : 'npm run tauri build --';
+                ? `${packageManager} run tauri build -- --debug`
+                : `${packageManager} run tauri build --`;
             // Use temporary config directory to avoid modifying source files
             const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
             let fullCommand = `${baseCommand} --target universal-apple-darwin -c "${configPath}"`;
@@ -790,8 +821,8 @@ class MacBuilder extends BaseBuilder {
         else if (this.buildArch === 'apple') {
             // Build for Apple Silicon only
             const baseCommand = this.options.debug
-                ? 'npm run tauri build -- --debug'
-                : 'npm run tauri build --';
+                ? `${packageManager} run tauri build -- --debug`
+                : `${packageManager} run tauri build --`;
             const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
             let fullCommand = `${baseCommand} --target aarch64-apple-darwin -c "${configPath}"`;
             // Add features
@@ -808,8 +839,8 @@ class MacBuilder extends BaseBuilder {
         else if (this.buildArch === 'intel') {
             // Build for Intel only
             const baseCommand = this.options.debug
-                ? 'npm run tauri build -- --debug'
-                : 'npm run tauri build --';
+                ? `${packageManager} run tauri build -- --debug`
+                : `${packageManager} run tauri build --`;
             const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
             let fullCommand = `${baseCommand} --target x86_64-apple-darwin -c "${configPath}"`;
             // Add features
@@ -871,10 +902,10 @@ class WinBuilder extends BaseBuilder {
         }
         return `${name}_${tauriConfig.version}_${targetArch}_${language}`;
     }
-    getBuildCommand() {
+    getBuildCommand(packageManager = 'pnpm') {
         const baseCommand = this.options.debug
-            ? 'npm run build:debug'
-            : 'npm run build';
+            ? `${packageManager} run build:debug`
+            : `${packageManager} run build`;
         // Use temporary config directory to avoid modifying source files
         const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
         let fullCommand = `${baseCommand} -- -c "${configPath}"`;
@@ -968,10 +999,10 @@ class LinuxBuilder extends BaseBuilder {
             }
         }
     }
-    getBuildCommand() {
+    getBuildCommand(packageManager = 'pnpm') {
         const baseCommand = this.options.debug
-            ? 'npm run build:debug'
-            : 'npm run build';
+            ? `${packageManager} run build:debug`
+            : `${packageManager} run build`;
         // Use temporary config directory to avoid modifying source files
         const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
         let fullCommand = `${baseCommand} -- -c "${configPath}"`;
@@ -1503,7 +1534,7 @@ program
     await checkUpdateTips();
     if (!url) {
         program.help({
-            error: false
+            error: false,
         });
         return;
     }

@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 import appRootPath from "app-root-path";
-import typescript from "@rollup/plugin-typescript";
+import typescript from "rollup-plugin-typescript2";
 import alias from "@rollup/plugin-alias";
 import commonjs from "@rollup/plugin-commonjs";
 import json from "@rollup/plugin-json";
@@ -45,10 +45,21 @@ export default {
     warn(warning);
   },
   plugins: [
-    json(),
     typescript({
-      tsconfig: "tsconfig.json",
+      tsconfig: "./tsconfig.json",
+      sourceMap: !isProduction,
+      inlineSources: !isProduction,
+      noEmitOnError: false,
+      compilerOptions: {
+        target: "es2020",
+        module: "esnext",
+        moduleResolution: "node",
+        esModuleInterop: true,
+        allowSyntheticDefaultImports: true,
+        strict: false,
+      },
     }),
+    json(),
     commonjs(),
     replace({
       "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
