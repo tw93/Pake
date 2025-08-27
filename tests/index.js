@@ -610,7 +610,10 @@ class PakeTestRunner {
             darwin: {
               app: path.join(config.PROJECT_ROOT, `${testName}.app`),
               installer: path.join(config.PROJECT_ROOT, `${testName}.dmg`),
-              bundleDir: path.join(config.PROJECT_ROOT, "src-tauri/target/release/bundle"),
+              bundleDir: path.join(
+                config.PROJECT_ROOT,
+                "src-tauri/target/release/bundle",
+              ),
             },
             linux: {
               app: path.join(
@@ -621,7 +624,10 @@ class PakeTestRunner {
                 config.PROJECT_ROOT,
                 "src-tauri/target/release/bundle/deb",
               ),
-              bundleDir: path.join(config.PROJECT_ROOT, "src-tauri/target/release/bundle"),
+              bundleDir: path.join(
+                config.PROJECT_ROOT,
+                "src-tauri/target/release/bundle",
+              ),
             },
             win32: {
               app: path.join(
@@ -632,12 +638,24 @@ class PakeTestRunner {
                 config.PROJECT_ROOT,
                 "src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi",
               ),
-              bundleDir: path.join(config.PROJECT_ROOT, "src-tauri/target/x86_64-pc-windows-msvc/release/bundle"),
+              bundleDir: path.join(
+                config.PROJECT_ROOT,
+                "src-tauri/target/x86_64-pc-windows-msvc/release/bundle",
+              ),
               // Alternative directories to check
               altDirs: [
-                path.join(config.PROJECT_ROOT, "src-tauri/target/release/bundle/msi"),
-                path.join(config.PROJECT_ROOT, "src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis"),
-                path.join(config.PROJECT_ROOT, "src-tauri/target/release/bundle/nsis"),
+                path.join(
+                  config.PROJECT_ROOT,
+                  "src-tauri/target/release/bundle/msi",
+                ),
+                path.join(
+                  config.PROJECT_ROOT,
+                  "src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis",
+                ),
+                path.join(
+                  config.PROJECT_ROOT,
+                  "src-tauri/target/release/bundle/nsis",
+                ),
               ],
             },
           };
@@ -647,7 +665,9 @@ class PakeTestRunner {
           console.log(`🔧 Starting real build test for GitHub.com...`);
           console.log(`📝 Platform: ${platform}`);
           console.log(`📝 Expected app directory: ${expectedFiles.app}`);
-          console.log(`📝 Expected installer directory: ${expectedFiles.installer}`);
+          console.log(
+            `📝 Expected installer directory: ${expectedFiles.installer}`,
+          );
           if (expectedFiles.bundleDir) {
             console.log(`📝 Bundle directory: ${expectedFiles.bundleDir}`);
           }
@@ -715,15 +735,21 @@ class PakeTestRunner {
 
           // Real timeout - 8 minutes for actual build
           const timeout = setTimeout(() => {
-            console.log("   🔍 Build timeout reached, checking for output files...");
-            
-            const foundFiles = this.findBuildOutputFiles(testName, expectedFiles, platform);
-            
+            console.log(
+              "   🔍 Build timeout reached, checking for output files...",
+            );
+
+            const foundFiles = this.findBuildOutputFiles(
+              testName,
+              expectedFiles,
+              platform,
+            );
+
             if (foundFiles.length > 0) {
               console.log(
                 "   🎉 Build completed successfully - found output files!",
               );
-              foundFiles.forEach(file => {
+              foundFiles.forEach((file) => {
                 console.log(`   📱 Found: ${file.path} (${file.type})`);
               });
               console.log("   ✨ Build artifacts preserved for inspection");
@@ -735,7 +761,9 @@ class PakeTestRunner {
               );
               this.debugBuildDirectories(expectedFiles, platform);
               child.kill("SIGTERM");
-              reject(new Error("Real build test timeout - no output files found"));
+              reject(
+                new Error("Real build test timeout - no output files found"),
+              );
             }
           }, 480000); // 8 minutes
 
@@ -743,14 +771,18 @@ class PakeTestRunner {
             clearTimeout(timeout);
 
             console.log(`   📊 Build process finished with exit code: ${code}`);
-            
-            const foundFiles = this.findBuildOutputFiles(testName, expectedFiles, platform);
-            
+
+            const foundFiles = this.findBuildOutputFiles(
+              testName,
+              expectedFiles,
+              platform,
+            );
+
             if (foundFiles.length > 0) {
               console.log(
                 "   🎉 Real build test SUCCESS: Build file(s) generated!",
               );
-              foundFiles.forEach(file => {
+              foundFiles.forEach((file) => {
                 console.log(`   📱 ${file.type}: ${file.path}`);
                 try {
                   const stats = fs.statSync(file.path);
@@ -889,17 +921,26 @@ class PakeTestRunner {
 
           // Multi-arch builds take longer - 12 minutes timeout
           const timeout = setTimeout(() => {
-            console.log("   🔍 Multi-arch build timeout reached, checking for output files...");
-            
-            const foundFiles = this.findBuildOutputFiles(testName, {
-              app: appFile,
-              installer: dmgFile,
-              bundleDir: path.join(config.PROJECT_ROOT, "src-tauri/target/universal-apple-darwin/release/bundle")
-            }, "darwin");
-            
+            console.log(
+              "   🔍 Multi-arch build timeout reached, checking for output files...",
+            );
+
+            const foundFiles = this.findBuildOutputFiles(
+              testName,
+              {
+                app: appFile,
+                installer: dmgFile,
+                bundleDir: path.join(
+                  config.PROJECT_ROOT,
+                  "src-tauri/target/universal-apple-darwin/release/bundle",
+                ),
+              },
+              "darwin",
+            );
+
             if (foundFiles.length > 0) {
               console.log("   🎉 Multi-arch build completed successfully!");
-              foundFiles.forEach(file => {
+              foundFiles.forEach((file) => {
                 console.log(`   📱 Found: ${file.path} (${file.type})`);
               });
               console.log("   🔀 Universal binary preserved for inspection");
@@ -909,11 +950,17 @@ class PakeTestRunner {
               console.log(
                 "   ❌ Multi-arch build timeout - no output files generated",
               );
-              this.debugBuildDirectories({
-                app: appFile,
-                installer: dmgFile,
-                bundleDir: path.join(config.PROJECT_ROOT, "src-tauri/target/universal-apple-darwin/release/bundle")
-              }, "darwin");
+              this.debugBuildDirectories(
+                {
+                  app: appFile,
+                  installer: dmgFile,
+                  bundleDir: path.join(
+                    config.PROJECT_ROOT,
+                    "src-tauri/target/universal-apple-darwin/release/bundle",
+                  ),
+                },
+                "darwin",
+              );
               child.kill("SIGTERM");
               reject(new Error("Multi-arch build test timeout"));
             }
@@ -922,32 +969,43 @@ class PakeTestRunner {
           child.on("close", (code) => {
             clearTimeout(timeout);
 
-            console.log(`   📊 Multi-arch build process finished with exit code: ${code}`);
-            
-            const foundFiles = this.findBuildOutputFiles(testName, {
-              app: appFile,
-              installer: dmgFile,
-              bundleDir: path.join(config.PROJECT_ROOT, "src-tauri/target/universal-apple-darwin/release/bundle")
-            }, "darwin");
-            
+            console.log(
+              `   📊 Multi-arch build process finished with exit code: ${code}`,
+            );
+
+            const foundFiles = this.findBuildOutputFiles(
+              testName,
+              {
+                app: appFile,
+                installer: dmgFile,
+                bundleDir: path.join(
+                  config.PROJECT_ROOT,
+                  "src-tauri/target/universal-apple-darwin/release/bundle",
+                ),
+              },
+              "darwin",
+            );
+
             if (foundFiles.length > 0) {
               console.log(
                 "   🎉 Multi-arch build test SUCCESS: Universal binary generated!",
               );
-              foundFiles.forEach(file => {
+              foundFiles.forEach((file) => {
                 console.log(`   📱 ${file.type}: ${file.path}`);
               });
               console.log("   🔀 Universal binary preserved for inspection");
 
               // Verify it's actually a universal binary
-              const appFile = foundFiles.find(f => f.type.includes('App'));
+              const appFile = foundFiles.find((f) => f.type.includes("App"));
               if (appFile) {
                 try {
-                  const binaryPath = path.join(appFile.path, 'Contents/MacOS/pake');
-                  const fileOutput = execSync(
-                    `file "${binaryPath}"`,
-                    { encoding: "utf8" },
+                  const binaryPath = path.join(
+                    appFile.path,
+                    "Contents/MacOS/pake",
                   );
+                  const fileOutput = execSync(`file "${binaryPath}"`, {
+                    encoding: "utf8",
+                  });
                   if (fileOutput.includes("universal binary")) {
                     console.log(
                       "   ✅ Verified: Universal binary created successfully",
@@ -969,11 +1027,17 @@ class PakeTestRunner {
               console.log(
                 "   ⚠️  Multi-arch build process completed but no output files found",
               );
-              this.debugBuildDirectories({
-                app: appFile,
-                installer: dmgFile,
-                bundleDir: path.join(config.PROJECT_ROOT, "src-tauri/target/universal-apple-darwin/release/bundle")
-              }, "darwin");
+              this.debugBuildDirectories(
+                {
+                  app: appFile,
+                  installer: dmgFile,
+                  bundleDir: path.join(
+                    config.PROJECT_ROOT,
+                    "src-tauri/target/universal-apple-darwin/release/bundle",
+                  ),
+                },
+                "darwin",
+              );
               resolve(false);
             } else {
               // Only reject if the build never started or failed early
@@ -1002,105 +1066,112 @@ class PakeTestRunner {
   // Enhanced file finding with better Windows support
   findBuildOutputFiles(testName, expectedFiles, platform) {
     const foundFiles = [];
-    
+
     // Check different possible locations based on platform
     const searchDirs = [];
-    
+
     if (platform === "win32") {
       // Windows-specific search directories
       searchDirs.push(
         expectedFiles.app,
         expectedFiles.installer,
-        ...(expectedFiles.altDirs || [])
+        ...(expectedFiles.altDirs || []),
       );
     } else if (platform === "darwin") {
       // macOS search
       searchDirs.push(
         path.dirname(expectedFiles.app),
         path.dirname(expectedFiles.installer),
-        expectedFiles.bundleDir
+        expectedFiles.bundleDir,
       );
     } else {
       // Linux search
       searchDirs.push(
         path.dirname(expectedFiles.app),
         expectedFiles.installer,
-        expectedFiles.bundleDir
+        expectedFiles.bundleDir,
       );
     }
-    
-    console.log(`   🔍 Searching for ${testName} build outputs in ${searchDirs.length} locations...`);
-    
+
+    console.log(
+      `   🔍 Searching for ${testName} build outputs in ${searchDirs.length} locations...`,
+    );
+
     searchDirs.forEach((searchDir, index) => {
       if (!searchDir || !fs.existsSync(searchDir)) {
-        console.log(`   ⚠️  Location ${index + 1}: ${searchDir} - Directory not found`);
+        console.log(
+          `   ⚠️  Location ${index + 1}: ${searchDir} - Directory not found`,
+        );
         return;
       }
-      
+
       console.log(`   🔍 Location ${index + 1}: ${searchDir}`);
-      
+
       try {
         const files = fs.readdirSync(searchDir);
-        console.log(`      Found ${files.length} files/dirs: [${files.join(', ')}]`);
-        
+        console.log(
+          `      Found ${files.length} files/dirs: [${files.join(", ")}]`,
+        );
+
         // Look for files matching our test name or common patterns
-        const relevantFiles = files.filter(file => {
+        const relevantFiles = files.filter((file) => {
           const lowerFile = file.toLowerCase();
           const lowerTestName = testName.toLowerCase();
-          
-          return lowerFile.includes(lowerTestName) || 
-                 lowerFile.includes('github') ||
-                 lowerFile.endsWith('.msi') ||
-                 lowerFile.endsWith('.exe') ||
-                 lowerFile.endsWith('.dmg') ||
-                 lowerFile.endsWith('.deb') ||
-                 lowerFile.endsWith('.appimage') ||
-                 lowerFile.endsWith('.app');
+
+          return (
+            lowerFile.includes(lowerTestName) ||
+            lowerFile.includes("github") ||
+            lowerFile.endsWith(".msi") ||
+            lowerFile.endsWith(".exe") ||
+            lowerFile.endsWith(".dmg") ||
+            lowerFile.endsWith(".deb") ||
+            lowerFile.endsWith(".appimage") ||
+            lowerFile.endsWith(".app")
+          );
         });
-        
-        relevantFiles.forEach(file => {
+
+        relevantFiles.forEach((file) => {
           const fullPath = path.join(searchDir, file);
           const stats = fs.statSync(fullPath);
-          
+
           if (stats.isFile()) {
             let fileType = "Unknown";
-            if (file.endsWith('.msi')) fileType = "MSI Installer";
-            else if (file.endsWith('.exe')) fileType = "Executable";
-            else if (file.endsWith('.dmg')) fileType = "DMG Image";
-            else if (file.endsWith('.deb')) fileType = "DEB Package";
-            else if (file.endsWith('.appimage')) fileType = "AppImage";
-            else if (file.endsWith('.app')) fileType = "macOS App";
-            
+            if (file.endsWith(".msi")) fileType = "MSI Installer";
+            else if (file.endsWith(".exe")) fileType = "Executable";
+            else if (file.endsWith(".dmg")) fileType = "DMG Image";
+            else if (file.endsWith(".deb")) fileType = "DEB Package";
+            else if (file.endsWith(".appimage")) fileType = "AppImage";
+            else if (file.endsWith(".app")) fileType = "macOS App";
+
             foundFiles.push({
               path: fullPath,
               type: fileType,
-              size: stats.size
+              size: stats.size,
             });
-            
+
             console.log(`      ✅ Found ${fileType}: ${file}`);
-          } else if (stats.isDirectory() && file.endsWith('.app')) {
+          } else if (stats.isDirectory() && file.endsWith(".app")) {
             foundFiles.push({
               path: fullPath,
               type: "macOS App Bundle",
-              size: 0
+              size: 0,
             });
             console.log(`      ✅ Found macOS App Bundle: ${file}`);
           }
         });
-        
       } catch (error) {
         console.log(`      ❌ Error reading directory: ${error.message}`);
       }
     });
-    
+
     console.log(`   📊 Total found files: ${foundFiles.length}`);
     return foundFiles;
   }
-  
+
   // Debug function to show directory structure
   debugBuildDirectories(expectedFiles, platform) {
     console.log("   🔍 Debug: Analyzing build directories...");
-    
+
     const targetDir = path.join(config.PROJECT_ROOT, "src-tauri/target");
     if (fs.existsSync(targetDir)) {
       console.log("   🔍 Target directory structure:");
@@ -1112,20 +1183,22 @@ class PakeTestRunner {
     } else {
       console.log(`   ❌ Target directory does not exist: ${targetDir}`);
     }
-    
+
     // Check project root for direct outputs
     console.log("   🔍 Project root files:");
     try {
-      const rootFiles = fs.readdirSync(config.PROJECT_ROOT)
-        .filter(file => 
-          file.endsWith('.app') || 
-          file.endsWith('.dmg') || 
-          file.endsWith('.msi') ||
-          file.endsWith('.deb') ||
-          file.endsWith('.exe')
+      const rootFiles = fs
+        .readdirSync(config.PROJECT_ROOT)
+        .filter(
+          (file) =>
+            file.endsWith(".app") ||
+            file.endsWith(".dmg") ||
+            file.endsWith(".msi") ||
+            file.endsWith(".deb") ||
+            file.endsWith(".exe"),
         );
       if (rootFiles.length > 0) {
-        rootFiles.forEach(file => {
+        rootFiles.forEach((file) => {
           console.log(`      📱 ${file}`);
         });
       } else {
@@ -1135,7 +1208,7 @@ class PakeTestRunner {
       console.log(`      ❌ Error reading project root: ${error.message}`);
     }
   }
-  
+
   // Helper function to check if files exist (handles wildcards) - kept for compatibility
   checkFileExists(filePath) {
     if (filePath.includes("*")) {
@@ -1187,12 +1260,21 @@ class PakeTestRunner {
           if (stats.isDirectory()) {
             console.log(`${indent}📁 ${relativePath}/`);
             // Show more directories for Windows debugging
-            if (item === "bundle" || item === "release" || item === "msi" || item === "nsis" || 
-                item.includes("windows") || item.includes("msvc")) {
+            if (
+              item === "bundle" ||
+              item === "release" ||
+              item === "msi" ||
+              item === "nsis" ||
+              item.includes("windows") ||
+              item.includes("msvc")
+            ) {
               this.listTargetContents(fullPath, maxDepth, currentDepth + 1);
             }
           } else {
-            const size = stats.size > 0 ? ` (${(stats.size / 1024 / 1024).toFixed(1)}MB)` : '';
+            const size =
+              stats.size > 0
+                ? ` (${(stats.size / 1024 / 1024).toFixed(1)}MB)`
+                : "";
             console.log(`${indent}📄 ${relativePath}${size}`);
           }
         } catch (statError) {
@@ -1200,7 +1282,9 @@ class PakeTestRunner {
         }
       });
     } catch (error) {
-      console.log(`     ⚠️  Could not list contents of ${targetDir}: ${error.message}`);
+      console.log(
+        `     ⚠️  Could not list contents of ${targetDir}: ${error.message}`,
+      );
     }
   }
 
