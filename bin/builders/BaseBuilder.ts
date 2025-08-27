@@ -255,7 +255,7 @@ export default abstract class BaseBuilder {
       ? `${packageManager} run build:debug`
       : `${packageManager} run build`;
 
-    const argSeparator = ' --'; // Both npm and pnpm need -- to pass args to scripts
+    const argSeparator = packageManager === 'npm' ? ' --' : '';
     let fullCommand = `${baseCommand}${argSeparator} -c "${configPath}"`;
 
     if (target) {
@@ -283,10 +283,6 @@ export default abstract class BaseBuilder {
   }
 
   protected getBuildCommand(packageManager: string = 'pnpm'): string {
-    const baseCommand = this.options.debug
-      ? `${packageManager} run build:debug`
-      : `${packageManager} run build`;
-
     // Use temporary config directory to avoid modifying source files
     const configPath = path.join(
       npmDirectory,
@@ -294,7 +290,8 @@ export default abstract class BaseBuilder {
       '.pake',
       'tauri.conf.json',
     );
-    let fullCommand = `${baseCommand} -- -c "${configPath}"`;
+
+    let fullCommand = this.buildBaseCommand(packageManager, configPath);
 
     // For macOS, use app bundles by default unless DMG is explicitly requested
     if (IS_MAC && this.options.targets === 'app') {
