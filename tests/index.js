@@ -739,11 +739,7 @@ class PakeTestRunner {
               "   🔍 Build timeout reached, checking for output files...",
             );
 
-            const foundFiles = this.findBuildOutputFiles(
-              testName,
-              expectedFiles,
-              platform,
-            );
+            const foundFiles = this.findBuildOutputFiles(testName, platform);
 
             if (foundFiles.length > 0) {
               console.log(
@@ -759,7 +755,7 @@ class PakeTestRunner {
               console.log(
                 "   ⚠️  Build process completed but no output files found",
               );
-              this.debugBuildDirectories(expectedFiles, platform);
+              this.debugBuildDirectories();
               child.kill("SIGTERM");
               reject(
                 new Error("Real build test timeout - no output files found"),
@@ -772,11 +768,7 @@ class PakeTestRunner {
 
             console.log(`   📊 Build process finished with exit code: ${code}`);
 
-            const foundFiles = this.findBuildOutputFiles(
-              testName,
-              expectedFiles,
-              platform,
-            );
+            const foundFiles = this.findBuildOutputFiles(testName, platform);
 
             if (foundFiles.length > 0) {
               console.log(
@@ -798,7 +790,7 @@ class PakeTestRunner {
               console.log(
                 "   ⚠️  Build process completed but no output files found",
               );
-              this.debugBuildDirectories(expectedFiles, platform);
+              this.debugBuildDirectories();
               resolve(false);
             } else {
               console.log(`   ❌ Build process failed with exit code: ${code}`);
@@ -812,7 +804,7 @@ class PakeTestRunner {
                     if (line.trim()) console.log(`     ${line.trim()}`);
                   });
                 }
-                this.debugBuildDirectories(expectedFiles, platform);
+                this.debugBuildDirectories();
               } else {
                 console.log("   📊 Build failed before starting compilation");
                 if (errorOutput.trim()) {
@@ -849,18 +841,6 @@ class PakeTestRunner {
           const testName = "GitHubMultiArch";
           const appFile = path.join(config.PROJECT_ROOT, `${testName}.app`);
           const dmgFile = path.join(config.PROJECT_ROOT, `${testName}.dmg`);
-
-          // Also check universal binary locations
-          const universalAppFile = path.join(
-            config.PROJECT_ROOT,
-            `src-tauri/target/universal-apple-darwin/release/bundle/macos/${testName}.app`,
-          );
-
-          // Check for DMG file in universal target (fallback if app target not working)
-          const universalDmgFile = path.join(
-            config.PROJECT_ROOT,
-            `src-tauri/target/universal-apple-darwin/release/bundle/dmg/${testName}_*.dmg`,
-          );
 
           console.log(`🔧 Starting multi-arch build test for GitHub.com...`);
           console.log(`📝 Expected output: ${appFile}`);
@@ -925,18 +905,7 @@ class PakeTestRunner {
               "   🔍 Multi-arch build timeout reached, checking for output files...",
             );
 
-            const foundFiles = this.findBuildOutputFiles(
-              testName,
-              {
-                app: appFile,
-                installer: dmgFile,
-                bundleDir: path.join(
-                  config.PROJECT_ROOT,
-                  "src-tauri/target/universal-apple-darwin/release/bundle",
-                ),
-              },
-              "darwin",
-            );
+            const foundFiles = this.findBuildOutputFiles(testName, "darwin");
 
             if (foundFiles.length > 0) {
               console.log("   🎉 Multi-arch build completed successfully!");
@@ -973,18 +942,7 @@ class PakeTestRunner {
               `   📊 Multi-arch build process finished with exit code: ${code}`,
             );
 
-            const foundFiles = this.findBuildOutputFiles(
-              testName,
-              {
-                app: appFile,
-                installer: dmgFile,
-                bundleDir: path.join(
-                  config.PROJECT_ROOT,
-                  "src-tauri/target/universal-apple-darwin/release/bundle",
-                ),
-              },
-              "darwin",
-            );
+            const foundFiles = this.findBuildOutputFiles(testName, "darwin");
 
             if (foundFiles.length > 0) {
               console.log(
@@ -1064,7 +1022,7 @@ class PakeTestRunner {
   }
 
   // Simplified build output detection - if build succeeds, check for any output files
-  findBuildOutputFiles(testName, expectedFiles, platform) {
+  findBuildOutputFiles(testName, platform) {
     const foundFiles = [];
     console.log(`   🔍 Checking for ${platform} build outputs...`);
 
@@ -1228,7 +1186,7 @@ class PakeTestRunner {
   }
 
   // Debug function to show directory structure
-  debugBuildDirectories(expectedFiles, platform) {
+  debugBuildDirectories() {
     console.log("   🔍 Debug: Analyzing build directories...");
 
     const targetDir = path.join(config.PROJECT_ROOT, "src-tauri/target");
@@ -1266,42 +1224,6 @@ class PakeTestRunner {
     } catch (error) {
       console.log(`      ❌ Error reading project root: ${error.message}`);
     }
-  }
-
-  // Helper function to check if files exist (handles wildcards) - kept for compatibility
-  checkFileExists(filePath) {
-    if (filePath.includes("*")) {
-      const dir = path.dirname(filePath);
-      const pattern = path.basename(filePath);
-      try {
-        if (!fs.existsSync(dir)) {
-          return false;
-        }
-        const files = fs.readdirSync(dir);
-        const regex = new RegExp(pattern.replace(/\*/g, ".*"));
-        const matches = files.filter((file) => regex.test(file));
-        return matches.length > 0;
-      } catch {
-        return false;
-      }
-    }
-    return fs.existsSync(filePath);
-  }
-
-  getActualFilePath(filePath) {
-    if (filePath.includes("*")) {
-      const dir = path.dirname(filePath);
-      const pattern = path.basename(filePath);
-      try {
-        const files = fs.readdirSync(dir);
-        const regex = new RegExp(pattern.replace(/\*/g, ".*"));
-        const match = files.find((file) => regex.test(file));
-        return match ? path.join(dir, match) : filePath;
-      } catch {
-        return filePath;
-      }
-    }
-    return filePath;
   }
 
   listTargetContents(targetDir, maxDepth = 3, currentDepth = 0) {
