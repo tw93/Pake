@@ -1063,108 +1063,167 @@ class PakeTestRunner {
     );
   }
 
-  // Enhanced file finding with better Windows support
+  // Simplified build output detection - if build succeeds, check for any output files
   findBuildOutputFiles(testName, expectedFiles, platform) {
     const foundFiles = [];
+    console.log(`   🔍 Checking for ${platform} build outputs...`);
 
-    // Check different possible locations based on platform
-    const searchDirs = [];
+    // Simple approach: look for common build artifacts in project root and common locations
+    const searchLocations = [
+      // Always check project root first (most builds output there)
+      config.PROJECT_ROOT,
+      // Platform-specific bundle directories
+      ...(platform === "linux"
+        ? [
+            path.join(config.PROJECT_ROOT, "src-tauri/target/release"),
+            path.join(
+              config.PROJECT_ROOT,
+              "src-tauri/target/release/bundle/deb",
+            ),
+          ]
+        : []),
+      ...(platform === "win32"
+        ? [
+            path.join(
+              config.PROJECT_ROOT,
+              "src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi",
+            ),
+            path.join(
+              config.PROJECT_ROOT,
+              "src-tauri/target/release/bundle/msi",
+            ),
+          ]
+        : []),
+      ...(platform === "darwin"
+        ? [
+            path.join(
+              config.PROJECT_ROOT,
+              "src-tauri/target/release/bundle/macos",
+            ),
+            path.join(
+              config.PROJECT_ROOT,
+              "src-tauri/target/release/bundle/dmg",
+            ),
+            path.join(
+              config.PROJECT_ROOT,
+              "src-tauri/target/universal-apple-darwin/release/bundle",
+            ),
+          ]
+        : []),
+    ];
 
-    if (platform === "win32") {
-      // Windows-specific search directories
-      searchDirs.push(
-        expectedFiles.app,
-        expectedFiles.installer,
-        ...(expectedFiles.altDirs || []),
-      );
-    } else if (platform === "darwin") {
-      // macOS search
-      searchDirs.push(
-        path.dirname(expectedFiles.app),
-        path.dirname(expectedFiles.installer),
-        expectedFiles.bundleDir,
-      );
-    } else {
-      // Linux search
-      searchDirs.push(
-        path.dirname(expectedFiles.app),
-        expectedFiles.installer,
-        expectedFiles.bundleDir,
-      );
-    }
+    // Define what we're looking for based on platform
+    const buildPatterns = {
+      win32: [".msi", ".exe"],
+      linux: [".deb", ".appimage"],
+      darwin: [".dmg", ".app"],
+    };
 
-    console.log(
-      `   🔍 Searching for ${testName} build outputs in ${searchDirs.length} locations...`,
-    );
+    const patterns = buildPatterns[platform] || buildPatterns.darwin;
 
-    searchDirs.forEach((searchDir, index) => {
-      if (!searchDir || !fs.existsSync(searchDir)) {
-        console.log(
-          `   ⚠️  Location ${index + 1}: ${searchDir} - Directory not found`,
-        );
-        return;
+    for (const location of searchLocations) {
+      if (!fs.existsSync(location)) {
+        continue;
       }
 
-      console.log(`   🔍 Location ${index + 1}: ${searchDir}`);
+      console.log(
+        `      📁 Checking: ${path.relative(config.PROJECT_ROOT, location)}`,
+      );
 
       try {
-        const files = fs.readdirSync(searchDir);
-        console.log(
-          `      Found ${files.length} files/dirs: [${files.join(", ")}]`,
-        );
+        const items = fs.readdirSync(location);
+        const buildFiles = items.filter((item) => {
+          const itemPath = path.join(location, item);
+          const stats = fs.statSync(itemPath);
 
-        // Look for files matching our test name or common patterns
-        const relevantFiles = files.filter((file) => {
-          const lowerFile = file.toLowerCase();
-          const lowerTestName = testName.toLowerCase();
+          // Skip common non-build directories
+          if (
+            stats.isDirectory() &&
+            [".git", ".github", "node_modules", "src", "bin", "tests"].includes(
+              item,
+            )
+          ) {
+            return false;
+          }
 
+          // Check if it's a build artifact we care about
+          const lowerItem = item.toLowerCase();
           return (
-            lowerFile.includes(lowerTestName) ||
-            lowerFile.includes("github") ||
-            lowerFile.endsWith(".msi") ||
-            lowerFile.endsWith(".exe") ||
-            lowerFile.endsWith(".dmg") ||
-            lowerFile.endsWith(".deb") ||
-            lowerFile.endsWith(".appimage") ||
-            lowerFile.endsWith(".app")
-          );
+            patterns.some((pattern) => lowerItem.endsWith(pattern)) ||
+            lowerItem.includes(testName.toLowerCase()) ||
+            (lowerItem.includes("github") && !item.startsWith(".")) || // Avoid .github directory
+            (platform === "linux" && item === "pake")
+          ); // Linux binary
         });
 
-        relevantFiles.forEach((file) => {
-          const fullPath = path.join(searchDir, file);
+        buildFiles.forEach((file) => {
+          const fullPath = path.join(location, file);
           const stats = fs.statSync(fullPath);
 
-          if (stats.isFile()) {
-            let fileType = "Unknown";
-            if (file.endsWith(".msi")) fileType = "MSI Installer";
-            else if (file.endsWith(".exe")) fileType = "Executable";
-            else if (file.endsWith(".dmg")) fileType = "DMG Image";
-            else if (file.endsWith(".deb")) fileType = "DEB Package";
-            else if (file.endsWith(".appimage")) fileType = "AppImage";
-            else if (file.endsWith(".app")) fileType = "macOS App";
+          let fileType = "Build Artifact";
+          if (file.endsWith(".msi")) fileType = "MSI Installer";
+          else if (file.endsWith(".exe")) fileType = "Windows Executable";
+          else if (file.endsWith(".deb")) fileType = "DEB Package";
+          else if (file.endsWith(".appimage")) fileType = "AppImage";
+          else if (file.endsWith(".dmg")) fileType = "DMG Image";
+          else if (file.endsWith(".app"))
+            fileType = stats.isDirectory() ? "macOS App Bundle" : "macOS App";
+          else if (file === "pake") fileType = "Linux Binary";
 
-            foundFiles.push({
-              path: fullPath,
-              type: fileType,
-              size: stats.size,
-            });
+          foundFiles.push({
+            path: fullPath,
+            type: fileType,
+            size: stats.isFile() ? stats.size : 0,
+          });
 
-            console.log(`      ✅ Found ${fileType}: ${file}`);
-          } else if (stats.isDirectory() && file.endsWith(".app")) {
-            foundFiles.push({
-              path: fullPath,
-              type: "macOS App Bundle",
-              size: 0,
-            });
-            console.log(`      ✅ Found macOS App Bundle: ${file}`);
-          }
+          const size =
+            stats.isFile() && stats.size > 0
+              ? ` (${(stats.size / 1024 / 1024).toFixed(1)}MB)`
+              : "";
+          console.log(`      ✅ Found ${fileType}: ${file}${size}`);
         });
-      } catch (error) {
-        console.log(`      ❌ Error reading directory: ${error.message}`);
-      }
-    });
 
-    console.log(`   📊 Total found files: ${foundFiles.length}`);
+        // For Linux, also check inside architecture directories
+        if (platform === "linux") {
+          const archDirs = items.filter(
+            (item) => item.includes("amd64") || item.includes("x86_64"),
+          );
+
+          for (const archDir of archDirs) {
+            const archPath = path.join(location, archDir);
+            if (fs.statSync(archPath).isDirectory()) {
+              console.log(`      🔍 Checking arch directory: ${archDir}`);
+              try {
+                const archFiles = fs.readdirSync(archPath);
+                archFiles
+                  .filter((f) => f.endsWith(".deb"))
+                  .forEach((debFile) => {
+                    const debPath = path.join(archPath, debFile);
+                    const debStats = fs.statSync(debPath);
+                    foundFiles.push({
+                      path: debPath,
+                      type: "DEB Package",
+                      size: debStats.size,
+                    });
+                    const size = `(${(debStats.size / 1024 / 1024).toFixed(1)}MB)`;
+                    console.log(
+                      `      ✅ Found DEB Package: ${debFile} ${size}`,
+                    );
+                  });
+              } catch (error) {
+                console.log(
+                  `      ⚠️  Could not check ${archDir}: ${error.message}`,
+                );
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.log(`      ⚠️  Could not read ${location}: ${error.message}`);
+      }
+    }
+
+    console.log(`   📊 Found ${foundFiles.length} build artifact(s)`);
     return foundFiles;
   }
 
