@@ -1,4 +1,4 @@
-# Pake GitHub Action
+# Use Pake For GitHub Action
 
 Transform any webpage into a lightweight desktop app with a single GitHub Actions step.
 
