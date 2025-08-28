@@ -15,7 +15,7 @@
 3. 填写表单（参数与 [CLI 选项](cli-usage_CN.md) 相同）
 4. 点击 `Run Workflow`
 
-![Actions 界面](https://gw.alipayobjects.com/zos/k/wf/XNWeAg.png)
+  ![Actions 界面](https://gw.alipayobjects.com/zos/k/lv/fPWNKc.png)
 
 ### 3. 下载应用
 
@@ -23,7 +23,7 @@
 - 点击工作流名称查看详情
 - 在 `Artifacts` 部分下载应用
 
-![构建成功](https://gw.alipayobjects.com/zos/k/dd/QaGees.png)
+  ![构建成功](https://gw.alipayobjects.com/zos/k/dd/QaGees.png)
 
 ### 4. 构建时间
 
