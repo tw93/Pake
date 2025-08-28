@@ -202,6 +202,7 @@ pnpm run build
 - **[CLI Usage](docs/cli-usage.md)** | [中文](docs/cli-usage_CN.md) - Command-line interface reference
 - **[Advanced Usage](docs/advanced-usage.md)** | [中文](docs/advanced-usage_CN.md) - Customization and advanced features
 - **[GitHub Actions](docs/github-actions-usage.md)** | [中文](docs/github-actions-usage_CN.md) - Build apps online
+- **[Pake Action](docs/pake-action.md)** - Use Pake as GitHub Action in your projects
 - **[Contributing](CONTRIBUTING.md)** - How to contribute to development
 
 ## Developers

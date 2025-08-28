@@ -203,6 +203,7 @@ pnpm run build
 - **[CLI 使用指南](docs/cli-usage_CN.md)** - 命令行接口参考
 - **[高级用法指南](docs/advanced-usage_CN.md)** - 自定义和高级功能
 - **[GitHub Actions 指南](docs/github-actions-usage_CN.md)** - 在线构建应用
+- **[Pake Action](docs/pake-action.md)** - 在你的项目中使用 Pake Action
 - **[贡献指南](CONTRIBUTING.md)** - 如何参与开发
 
 ## 开发者

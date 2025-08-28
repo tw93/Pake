@@ -6,6 +6,7 @@ Welcome to Pake documentation! Here you'll find comprehensive guides and documen
 
 - **[CLI Usage](cli-usage.md)** | [中文](cli-usage_CN.md) - Command-line interface reference
 - **[GitHub Actions](github-actions-usage.md)** | [中文](github-actions-usage_CN.md) - Build apps online without local setup
+- **[Pake Action](pake-action.md)** - Use Pake as GitHub Action in your projects
 
 ## Developer Guides
 

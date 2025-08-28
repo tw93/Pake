@@ -1,6 +1,8 @@
-# Use Pake For GitHub Action
+# Pake Action
 
 Transform any webpage into a lightweight desktop app with a single GitHub Actions step.
+
+> This guide shows how to use Pake as a GitHub Action in your own projects. For using our project's built-in GitHub Actions workflow, see [GitHub Actions Usage](github-actions-usage.md).
 
 ## Quick Start
 
@@ -92,6 +94,8 @@ jobs:
 
 Use GitHub's matrix strategy to build for multiple platforms simultaneously.
 
-## Testing
+## Related Documentation
 
-Try the action with our test workflow: [test-action.yml](.github/workflows/test-action.yml)
+- [GitHub Actions Usage](github-actions-usage.md) - Using Pake's built-in workflow
+- [CLI Usage](cli-usage.md) - Command-line interface reference  
+- [Advanced Usage](advanced-usage.md) - Customization options
