@@ -36,20 +36,20 @@ git clone https://github.com/tw93/Pake.git
 cd Pake
 
 # Install dependencies
-npm install
+pnpm install
 
 # Start development
-npm run dev
+pnpm run dev
 ```
 
 ### Testing
 
 ```bash
 # Run all tests (unit + integration + builder)
-npm test
+pnpm test
 
 # Build CLI for testing
-npm run cli:build
+pnpm run cli:build
 ```
 
 ## Continuous Integration
@@ -81,8 +81,10 @@ This file is already in `.gitignore` and should not be committed to the reposito
 ### Common Build Issues
 
 - **Rust compilation errors**: Run `cargo clean` in `src-tauri/` directory
-- **Node dependency issues**: Delete `node_modules` and run `npm install`
+- **Node dependency issues**: Delete `node_modules` and run `pnpm install`
 - **Permission errors on macOS**: Run `sudo xcode-select --reset`
+
+See the [Advanced Usage Guide](docs/advanced-usage.md) for project structure and customization techniques.
 
 ## More
 

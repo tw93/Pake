@@ -1,4 +1,4 @@
-<h4 align="right"><strong>English</strong> | <a href="https://github.com/tw93/Pake/blob/main/bin/README_CN.md">简体中文</a></h4>
+<h4 align="right"><strong>English</strong> | <a href="cli-usage_CN.md">简体中文</a></h4>
 
 ## Installation
 
@@ -346,6 +346,9 @@ Enable recursive copying. When the URL is a local file path, enabling this optio
 
 ```shell
 --use-local-file
+
+# Basic static file packaging
+pake ./my-app/index.html --name "my-app" --use-local-file
 ```
 
 #### [inject]

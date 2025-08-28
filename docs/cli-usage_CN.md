@@ -1,4 +1,4 @@
-<h4 align="right"><strong><a href="https://github.com/tw93/Pake/tree/main/bin">English</a></strong> | 简体中文</h4>
+<h4 align="right"><strong><a href="cli-usage.md">English</a></strong> | 简体中文</h4>
 
 ## 安装
 
@@ -345,6 +345,9 @@ pake https://flutter.dev --name FlutterApp --wasm
 
 ```shell
 --use-local-file
+
+# 基础静态文件打包
+pake ./my-app/index.html --name "my-app" --use-local-file
 ```
 
 #### [inject]

@@ -1,4 +1,4 @@
-<h4 align="right"><strong>English</strong> | <a href="https://github.com/tw93/Pake/blob/main/README_CN.md">简体中文</a> | <a href="https://github.com/tw93/Pake/blob/main/README_JP.md">日本語</a></h4>
+<h4 align="right"><strong>English</strong> | <a href="README_CN.md">简体中文</a> | <a href="README_JP.md">日本語</a></h4>
 <p align="center">
     <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
 </p>
@@ -154,7 +154,7 @@ In addition, double-click the title bar to switch to full-screen mode. For Mac u
 
 ## Before starting
 
-1. **For beginners**: Play with Popular Packages to find out Pake's capabilities, or try to pack your application with [GitHub Actions](<https://github.com/tw93/Pake/wiki/Online-Compilation-(used-by-ordinary-users)>). Don't hesitate to reach for assistance at [Discussion](https://github.com/tw93/Pake/discussions)!
+1. **For beginners**: Play with Popular Packages to find out Pake's capabilities, or try to pack your application with [GitHub Actions](docs/github-actions-usage.md). Don't hesitate to reach for assistance at [Discussion](https://github.com/tw93/Pake/discussions)!
 2. **For developers**: “Command-Line Packaging” supports macOS fully. For Windows/Linux users, it requires some tinkering. [Configure your environment](https://tauri.app/start/prerequisites/) before getting started.
 3. **For hackers**: For people who are good at both front-end development and Rust, how about customizing your apps' function more with the following [Customized Development](#development)?
 
@@ -162,7 +162,7 @@ In addition, double-click the title bar to switch to full-screen mode. For Mac u
 
 ![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake.gif)
 
-**Pake provides a command line tool, making the flow of package customization quicker and easier. See the [documentation](./bin/README.md) for more information.**
+**Pake provides a command line tool, making the flow of package customization quicker and easier. See the [CLI usage guide](docs/cli-usage.md) for more information.**
 
 ```bash
 # Recommended (pnpm)
@@ -178,7 +178,7 @@ pake url [OPTIONS]...
 pake https://weekly.tw93.fun --name Weekly --hide-title-bar
 ```
 
-If you are new to the command line, you can compile packages online with _GitHub Actions_. See the [Tutorial](<https://github.com/tw93/Pake/wiki/Online-Compilation-(used-by-ordinary-users)>) for more information.
+If you are new to the command line, you can compile packages online with _GitHub Actions_. See our [documentation](#documentation) for detailed guides.
 
 ## Development
 
@@ -197,12 +197,12 @@ pnpm run dev
 pnpm run build
 ```
 
-## Advanced Usage
+## Documentation
 
-1. You can refer to the [codebase structure](https://github.com/tw93/Pake/wiki/Description-of-Pake's-code-structure) before working on Pake, which will help you much in development.
-2. Modify the `url` and `productName` fields in the `pake.json` file under the src-tauri directory, the "domain" field in the `tauri.config.json` file needs to be modified synchronously, as well as the `icon` and `identifier` fields in the `tauri.xxx.conf.json` file. You can select an `icon` from the `icons` directory or download one from [macOSicons](https://macosicons.com/#/) to match your product needs.
-3. For configurations on window properties, you can modify the `pake.json` file to change the value of `width`, `height`, `fullscreen` (or not), `resizable` (or not), `hide_on_close` (hide window on close instead of exiting) of the `windows` property. To adapt to the immersive header on Mac, change `hideTitleBar` to `true`, look for the `Header` element, and add the `padding-top` property.
-4. For advanced usages such as style rewriting, advertisement removal, JS injection, container message communication, and user-defined shortcut keys, see [Advanced Usage of Pake](https://github.com/tw93/Pake/wiki/Advanced-Usage-of-Pake).
+- **[CLI Usage](docs/cli-usage.md)** ([中文](docs/cli-usage_CN.md)) - Command-line interface reference
+- **[Advanced Usage](docs/advanced-usage.md)** ([中文](docs/advanced-usage_CN.md)) - Customization and advanced features
+- **[GitHub Actions](docs/github-actions-usage.md)** ([中文](docs/github-actions-usage_CN.md)) - Build apps online
+- **[Contributing](CONTRIBUTING.md)** - How to contribute to development
 
 ## Developers
 

@@ -1,4 +1,4 @@
-<h4 align="right"><a href="https://github.com/tw93/Pake">English</a> | <a href="https://github.com/tw93/Pake/blob/main/README_CN.md">简体中文</a> | <strong>日本語</strong></h4>
+<h4 align="right"><a href="README.md">English</a> | <a href="README_CN.md">简体中文</a> | <strong>日本語</strong></h4>
 <p align="center">
     <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
 </p>
@@ -154,7 +154,7 @@
 
 ## 始める前に
 
-1. **初心者の方へ**: 「人気のパッケージ」を使用して Pake の機能を試してみてください。または、[GitHub Actions](<https://github.com/tw93/Pake/wiki/Online-Compilation-(used-by-ordinary-users)>)を使用してアプリケーションをパッケージ化してみてください。[ディスカッション](https://github.com/tw93/Pake/discussions)で助けを求めることもできます！
+1. **初心者の方へ**: 「人気のパッケージ」を使用して Pake の機能を試してみてください。または、[GitHub Actions](docs/github-actions-usage.md)を使用してアプリケーションをパッケージ化してみてください。[ディスカッション](https://github.com/tw93/Pake/discussions)で助けを求めることもできます！
 2. **開発者の方へ**: 「コマンドラインパッケージング」を使用してください。macOS では完全にサポートされています。Windows/Linux ユーザーは、[環境を設定](https://tauri.app/start/prerequisites/)する必要があります。
 3. **ハッカーの方へ**: フロントエンド開発と Rust の両方が得意な方は、以下の[カスタマイズ開発](#開発)でアプリの機能をさらにカスタマイズしてみてください。
 
@@ -162,7 +162,7 @@
 
 ![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake.gif)
 
-**Pake はコマンドラインツールを提供しており、必要なパッケージをより迅速かつ簡単にカスタマイズすることができます。詳細は[ドキュメント](./bin/README.md)をご覧ください。**
+**Pake はコマンドラインツールを提供しており、必要なパッケージをより迅速かつ簡単にカスタマイズすることができます。詳細は[CLI使用ガイド](docs/cli-usage.md)をご覧ください。**
 
 ```bash
 # 推奨方法 (pnpm)
@@ -178,7 +178,7 @@ pake url [OPTIONS]...
 pake https://weekly.tw93.fun --name Weekly --hide-title-bar
 ```
 
-コマンドラインの使用に不慣れな場合は、_GitHub Actions_ を使用してオンラインでパッケージをコンパイルすることができます。[チュートリアル](<https://github.com/tw93/Pake/wiki/Online-Compilation-(used-by-ordinary-users)>)をご覧ください。
+コマンドラインの使用に不慣れな場合は、_GitHub Actions_ を使用してオンラインでパッケージをコンパイルすることができます。詳細な手順については [GitHub Actions 使用ガイド](docs/github-actions-usage.md) をご覧ください。
 
 ## 開発
 
@@ -199,10 +199,10 @@ pnpm run build
 
 ## 高度な使用法
 
-1. [コードベースの構造](https://github.com/tw93/Pake/wiki/Description-of-Pake's-code-structure)を参照して、開発前により多くの情報を得ることができます。
+1. [CONTRIBUTING.md](CONTRIBUTING.md#project-structure)のコードベース構造を参照して、開発前により多くの情報を得ることができます。
 2. `src-tauri` ディレクトリ内の `pake.json` ファイルの `url` と `productName` フィールドを変更する場合は、`tauri.config.json` ファイル内の `domain` フィールド、および `tauri.xxx.conf.json` ファイル内の `icon` と `identifier` フィールドを同期して変更する必要があります。`icon` は `icons` ディレクトリから選択することも、[macOSicons](https://macosicons.com/#/) から効果に合ったものをダウンロードすることもできます。
 3. ウィンドウプロパティの設定については、`pake.json` ファイルを変更して `windows` プロパティの `width`、`height`、`fullscreen`（またはしない）、`resizable`（またはしない）の値を変更できます。Mac の没入型ヘッダーに適応するには、`hideTitleBar` を `true` に設定し、`Header` 要素を見つけて `padding-top` プロパティを追加します。
-4. スタイルの書き換え、広告の除去、JS の注入、コンテナメッセージ通信、ユーザー定義のショートカットキーについては、[高度な使用法](https://github.com/tw93/Pake/wiki/Advanced-Usage-of-Pake)を参照してください。
+4. スタイルの書き換え、広告の除去、JS の注入、コンテナメッセージ通信、ユーザー定義のショートカットキーについては、[高度な使用法](docs/advanced-usage.md)を参照してください。
 
 ## 開発者
 

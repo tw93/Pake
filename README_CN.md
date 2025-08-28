@@ -1,4 +1,4 @@
-<h4 align="right"><a href="https://github.com/tw93/Pake">English</a> | <strong>简体中文</strong> | <a href="https://github.com/tw93/Pake/blob/main/README_JP.md">日本語</a></h4>
+<h4 align="right"><a href="README.md">English</a> | <strong>简体中文</strong> | <a href="README_JP.md">日本語</a></h4>
 <p align="center">
     <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
 </p>
@@ -162,7 +162,7 @@
 
 ![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake.gif)
 
-**Pake 提供了命令行工具，可以更快捷方便地一键自定义打包你需要的应用，详细可见 [文档](./bin/README_CN.md)。**
+**Pake 提供了命令行工具，可以更快捷方便地一键自定义打包你需要的应用，详细可见 [CLI 使用指南](docs/cli-usage_CN.md)。**
 
 ```bash
 # 推荐方式 (pnpm)
@@ -178,7 +178,7 @@ pake url [OPTIONS]...
 pake https://weekly.tw93.fun --name Weekly --hide-title-bar
 ```
 
-假如你不太会使用命令行，或许使用 **GitHub Actions 在线编译多系统版本** 是一个不错的选择，可查看 [文档](https://github.com/tw93/Pake/wiki/%E5%9C%A8%E7%BA%BF%E7%BC%96%E8%AF%91%EF%BC%88%E6%99%AE%E9%80%9A%E7%94%A8%E6%88%B7%E4%BD%BF%E7%94%A8%EF%BC%89)。
+如果你不太会使用命令行，可以使用 **GitHub Actions 在线编译**，详细步骤请参考[文档](#文档)。
 
 ## 定制开发
 
@@ -198,12 +198,12 @@ pnpm run build
 
 ```
 
-## 高级使用
+## 文档
 
-1. 代码结构可参考 [文档](https://github.com/tw93/Pake/wiki/Pake-%E7%9A%84%E4%BB%A3%E7%A0%81%E7%BB%93%E6%9E%84%E8%AF%B4%E6%98%8E)，便于你在开发前了解更多。
-2. 修改 src-tauri 目录下 `pake.json` 中的 `url` 和 `productName` 字段，需同步修改下 `tauri.config.json` 中的 `domain` 字段，以及 `tauri.xxx.conf.json` 中的 `icon` 和 `identifier` 字段，其中 `icon` 可以从 icons 目录选择一个，也可以去 [macOSicons](https://macosicons.com/#/) 下载符合效果的。
-3. 关于窗口属性设置，可以在 `pake.json` 修改 windows 属性对应的 `width/height`，fullscreen 是否全屏，resizable 是否可以调整大小，hide_on_close 关闭时是否隐藏窗口而不是退出，假如想适配 Mac 沉浸式头部，可以将 hideTitleBar 设置成 `true`，找到 Header 元素加一个 padding-top 样式即可，不想适配改成 `false` 也行。
-4. 此外样式改写、屏蔽广告、逻辑代码注入、容器消息通信、自定义快捷键可见 [高级用法](https://github.com/tw93/Pake/wiki/Pake-%E7%9A%84%E9%AB%98%E7%BA%A7%E7%94%A8%E6%B3%95)。
+- **[CLI 使用指南](docs/cli-usage_CN.md)** - 命令行接口参考
+- **[高级用法指南](docs/advanced-usage_CN.md)** - 自定义和高级功能
+- **[GitHub Actions 指南](docs/github-actions-usage_CN.md)** - 在线构建应用
+- **[贡献指南](CONTRIBUTING.md)** - 如何参与开发
 
 ## 开发者
 
