@@ -445,6 +445,13 @@ Pake の開発はこれらのハッカーたちなしにはあり得ませんで
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/Jason6987">
+                    <img src="https://avatars.githubusercontent.com/u/140222795?v=4" width="90;" alt="Jason6987"/>
+                    <br />
+                    <sub><b>Luminall</b></sub>
+                </a>
+            </td>
+            <td align="center">
                 <a href="https://github.com/Milo123459">
                     <img src="https://avatars.githubusercontent.com/u/50248166?v=4" width="90;" alt="Milo123459"/>
                     <br />
@@ -458,6 +465,8 @@ Pake の開発はこれらのハッカーたちなしにはあり得ませんで
                     <sub><b>Po Chen</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/beautifulrem">
                     <img src="https://avatars.githubusercontent.com/u/98527099?v=4" width="90;" alt="beautifulrem"/>
@@ -465,8 +474,6 @@ Pake の開発はこれらのハッカーたちなしにはあり得ませんで
                     <sub><b>Xie Ruiqi</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/bocanhcam">
                     <img src="https://avatars.githubusercontent.com/u/35592955?v=4" width="90;" alt="bocanhcam"/>
@@ -509,6 +516,8 @@ Pake の開発はこれらのハッカーたちなしにはあり得ませんで
                     <sub><b>Liusishan</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/piaoyidage">
                     <img src="https://avatars.githubusercontent.com/u/5135405?v=4" width="90;" alt="piaoyidage"/>
@@ -516,8 +525,6 @@ Pake の開発はこれらのハッカーたちなしにはあり得ませんで
                     <sub><b>Ranger</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/hetz">
                     <img src="https://avatars.githubusercontent.com/u/820141?v=4" width="90;" alt="hetz"/>
