@@ -64,6 +64,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Debug - List files
+        shell: bash
+        run: |
+          echo "=== 当前工作目录 ==="
+          pwd
+          echo "=== 列出根目录文件 ==="
+          ls -la
+          echo "=== 查找所有 .js 文件 ==="
+          find . -name "*.js" -type f | head -20
+          echo "=== 检查 script 目录 ==="
+          if [ -d "script" ]; then
+            echo "script 目录存在"
+            ls -la script/
+          else
+            echo "script 目录不存在"
+          fi
+          echo "=== 检查特定文件 ==="
+          if [ -f "script/github-action-build.js" ]; then
+            echo "github-action-build.js 文件存在"
+            ls -la script/github-action-build.js
+          else
+            echo "github-action-build.js 文件不存在"
+          fi
+
       - name: Install node
         uses: actions/setup-node@v4
         with:
@@ -143,8 +167,25 @@ jobs:
 
       - name: Build with pake-cli
         timeout-minutes: 15
+        shell: bash
         run: |
-          node ./script/github-action-build.js
+          echo "=== 构建前最终检查 ==="
+          pwd
+          ls -la script/
+          
+          # 检查文件是否可读
+          if [ -r "script/github-action-build.js" ]; then
+            echo "文件可读"
+          else
+            echo "文件不可读"
+          fi
+          
+          # 显示文件内容前几行（调试用）
+          echo "=== 文件内容预览 ==="
+          head -5 script/github-action-build.js || echo "无法读取文件内容"
+          
+          echo "=== 开始执行构建脚本 ==="
+          node script/github-action-build.js
         env:
           URL: ${{ inputs.url }}
           NAME: ${{ inputs.name }}
@@ -163,7 +204,15 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: output-${{ inputs.platform }}.zip
-          path: node_modules/pake-cli/output/*
+          path: |
+            output/*
+            node_modules/pake-cli/output/*
+            *.deb
+            *.rpm
+            *.AppImage
+            *.dmg
+            *.exe
+            *.msi
           retention-days: 3
 
       - name: Rust cache store
