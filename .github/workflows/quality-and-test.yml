@@ -23,7 +23,7 @@ jobs:
   auto-format:
     name: Auto-fix Formatting
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/main' && github.event_name == 'push'
+    if: github.event_name == 'push'
     permissions:
       contents: write
     steps:
@@ -93,7 +93,7 @@ jobs:
       - name: Setup Rust Environment
         uses: ./.github/actions/setup-env
         with:
-          mode: rust-only
+          mode: build
 
       - name: Install Rust components
         shell: bash
@@ -102,9 +102,8 @@ jobs:
       - uses: rui314/setup-mold@v1
         if: matrix.os == 'ubuntu-latest'
 
-      - uses: taiki-e/install-action@v1  # cspell:disable-line
-        with:
-          tool: cargo-hack
+      - name: Install cargo-hack
+        run: cargo install cargo-hack
 
       - name: Check Rust formatting
         run: cargo fmt --all -- --color=always --check
