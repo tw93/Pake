@@ -69,20 +69,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js Environment
-        uses: ./.github/actions/setup-node.yml
+      - name: Setup Build Environment
+        uses: ./.github/actions/setup-env
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Rust Environment
-        uses: ./.github/actions/setup-rust.yml
-        with:
-          platform: ${{ inputs.platform }}
-
-      - name: Setup Ubuntu Dependencies
-        if: contains(inputs.platform, 'ubuntu')
-        uses: ./.github/actions/setup-ubuntu-deps.yml
+          mode: build
 
       - name: Cache Node dependencies
         uses: actions/cache@v4

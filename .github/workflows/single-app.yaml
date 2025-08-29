@@ -78,14 +78,9 @@ jobs:
           target: ${{ matrix.target }}
 
       - name: Setup Node.js Environment
-        uses: ./.github/actions/setup-node.yml
+        uses: ./.github/actions/setup-env
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Ubuntu Dependencies
-        if: matrix.os == 'ubuntu-latest'
-        uses: ./.github/actions/setup-ubuntu-deps.yml
+          mode: node-only
 
       - name: Rust cache restore
         uses: actions/cache/restore@v4.2.0

@@ -34,17 +34,8 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Node.js Environment
-        uses: ./.github/actions/setup-node.yml
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Rust Environment
-        uses: ./.github/actions/setup-rust.yml
-        with:
-          platform: ubuntu-latest
-          components: rustfmt
+      - name: Setup Development Environment
+        uses: ./.github/actions/setup-env
 
 
       - name: Auto-fix Prettier formatting
@@ -73,8 +64,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js Environment
-        uses: ./.github/actions/setup-node.yml
+      - name: Setup Build Environment
+        uses: ./.github/actions/setup-env
+        with:
+          mode: build
         with:
           node-version: ${{ env.NODE_VERSION }}
           pnpm-version: ${{ env.PNPM_VERSION }}
@@ -104,27 +97,26 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup Rust Environment
-        uses: ./.github/actions/setup-rust.yml
+        uses: ./.github/actions/setup-env
         with:
-          platform: ${{ matrix.os }}
-          components: rustfmt, clippy
+          mode: rust-only
+
+      - name: Install Rust components
+        shell: bash
+        run: rustup component add rustfmt clippy
 
       - uses: rui314/setup-mold@v1
         if: matrix.os == 'ubuntu-latest'
 
-      - uses: taiki-e/install-action@v1
+      - uses: taiki-e/install-action@v1  # cspell:disable-line
         with:
           tool: cargo-hack
-
-      - name: Setup Ubuntu Dependencies
-        if: matrix.os == 'ubuntu-latest'
-        uses: ./.github/actions/setup-ubuntu-deps.yml
 
       - name: Check Rust formatting
         run: cargo fmt --all -- --color=always --check
 
       - name: Run Clippy lints
-        run: cargo hack --feature-powerset --exclude-features cli-build --no-dev-deps clippy
+        run: cargo hack --feature-powerset --exclude-features cli-build --no-dev-deps clippy  # cspell:disable-line
 
   cli-tests:
     name: CLI Tests (${{ matrix.os }})
@@ -137,25 +129,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js Environment
-        uses: ./.github/actions/setup-node.yml
+      - name: Setup Build Environment
+        uses: ./.github/actions/setup-env
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Rust Environment
-        uses: ./.github/actions/setup-rust.yml
+          mode: build
         with:
-          platform: ${{ matrix.os }}
-
-
-      - name: Setup Ubuntu Dependencies
-        if: matrix.os == 'ubuntu-latest'
-        uses: ./.github/actions/setup-ubuntu-deps.yml
-
-      - name: Setup Windows Environment
-        if: matrix.os == 'windows-latest'
-        uses: ./.github/actions/setup-windows.yml
 
       - name: Build CLI
         run: pnpm run cli:build
@@ -188,30 +166,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js Environment
-        uses: ./.github/actions/setup-node.yml
+      - name: Setup Build Environment
+        uses: ./.github/actions/setup-env
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Rust Environment
-        uses: ./.github/actions/setup-rust.yml
+          mode: build
         with:
-          platform: ${{ matrix.os }}
 
-      - name: Add macOS targets
-        if: matrix.os == 'macos-latest'
-        run: |
-          rustup target add aarch64-apple-darwin
-          rustup target add x86_64-apple-darwin
-
-      - name: Setup Ubuntu Dependencies
-        if: matrix.os == 'ubuntu-latest'
-        uses: ./.github/actions/setup-ubuntu-deps.yml
-
-      - name: Setup Windows Environment
-        if: matrix.os == 'windows-latest'
-        uses: ./.github/actions/setup-windows.yml
 
       - name: Build CLI
         run: pnpm run cli:build
