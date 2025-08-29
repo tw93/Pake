@@ -11,6 +11,7 @@ Welcome to Pake documentation! Here you'll find comprehensive guides and documen
 ## Developer Guides
 
 - **[Advanced Usage](advanced-usage.md)** | [中文](advanced-usage_CN.md) - Customization, development, and advanced features
+- **[CLI Testing](cli-testing.md)** - Testing guide for CLI functionality
 - **[Contributing](../CONTRIBUTING.md)** - How to contribute to Pake development
 
 ## Quick Links

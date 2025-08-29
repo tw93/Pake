@@ -170,5 +170,5 @@ pnpm run cli:build
 ## 链接
 
 - [CLI 文档](cli-usage_CN.md)
-- [测试指南](testing.md)
+- [CLI 测试指南](cli-testing.md)
 - [GitHub 讨论区](https://github.com/tw93/Pake/discussions)

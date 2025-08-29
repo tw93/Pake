@@ -170,5 +170,5 @@ pnpm run cli:build
 ## Links
 
 - [CLI Documentation](cli-usage.md)
-- [Testing Guide](testing.md)
+- [CLI Testing Guide](cli-testing.md)
 - [GitHub Discussions](https://github.com/tw93/Pake/discussions)
