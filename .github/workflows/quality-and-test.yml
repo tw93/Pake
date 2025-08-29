@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '22'
-  PNPM_VERSION: '10.15.0'
+  NODE_VERSION: "22"
+  PNPM_VERSION: "10.15.0"
 
 permissions:
   actions: write
@@ -33,7 +33,6 @@ jobs:
 
       - name: Setup Development Environment
         uses: ./.github/actions/setup-env
-
 
       - name: Auto-fix Prettier formatting
         run: npx prettier --write . --ignore-unknown
@@ -65,7 +64,6 @@ jobs:
         uses: ./.github/actions/setup-env
         with:
           mode: build
-
 
       - name: Check EditorConfig compliance
         uses: editorconfig-checker/action-editorconfig-checker@main
@@ -109,7 +107,7 @@ jobs:
         run: cargo fmt --all -- --color=always --check
 
       - name: Run Clippy lints
-        run: cargo hack --feature-powerset --exclude-features cli-build --no-dev-deps clippy  # cspell:disable-line
+        run: cargo hack --feature-powerset --exclude-features cli-build --no-dev-deps clippy # cspell:disable-line
 
   cli-tests:
     name: CLI Tests (${{ matrix.os }})
@@ -162,7 +160,6 @@ jobs:
         uses: ./.github/actions/setup-env
         with:
           mode: build
-
 
       - name: Build CLI
         run: pnpm run cli:build

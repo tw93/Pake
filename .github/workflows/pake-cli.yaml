@@ -1,8 +1,8 @@
 name: Build App With Pake CLI
 
 env:
-  NODE_VERSION: '22'
-  PNPM_VERSION: '10.15.0'
+  NODE_VERSION: "22"
+  PNPM_VERSION: "10.15.0"
 
 on:
   workflow_dispatch:

@@ -5,14 +5,14 @@ description: One-stop setup with smart presets
 
 inputs:
   mode:
-    description: 'Setup mode: full, node-only, rust-only, or build'
+    description: "Setup mode: full, node-only, rust-only, or build"
     required: false
-    default: 'full'
+    default: "full"
 
 outputs:
   setup-complete:
     description: Setup completion status
-    value: 'true'
+    value: "true"
 
 runs:
   using: composite
@@ -22,7 +22,7 @@ runs:
       shell: bash
       run: |
         MODE="${{ inputs.mode }}"
-        
+
         # Validate and set flags in one pass
         case "$MODE" in
           full)
@@ -56,14 +56,14 @@ runs:
       if: env.SETUP_NODE == 'true'
       uses: pnpm/action-setup@v4
       with:
-        version: '10.15.0'
+        version: "10.15.0"
         run_install: false
 
     - name: Setup Node.js
       if: env.SETUP_NODE == 'true'
       uses: actions/setup-node@v4
       with:
-        node-version: '22'
+        node-version: "22"
         cache: pnpm
 
     - name: Install dependencies
@@ -79,7 +79,7 @@ runs:
         toolchain: stable
         target: x86_64-unknown-linux-gnu
 
-    - name: Setup Rust for Windows  
+    - name: Setup Rust for Windows
       if: env.SETUP_RUST == 'true' && runner.os == 'Windows'
       uses: dtolnay/rust-toolchain@stable
       with:

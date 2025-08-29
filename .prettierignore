@@ -21,3 +21,4 @@ cli.js
 *.wxs
 *.plist
 *.toml
+.github/workflows/
