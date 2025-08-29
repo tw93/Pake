@@ -7,6 +7,13 @@ on:
     branches: [main, dev]
   workflow_dispatch:
 
+env:
+  NODE_VERSION: '22'
+  PNPM_VERSION: '10.15.0'
+  UBUNTU_DEPS_VERSION: '1.1'
+  ACTIONS_CHECKOUT_VERSION: 'v4'
+  CACHE_VERSION: 'v4.2.0'
+
 permissions:
   actions: write
   contents: read
@@ -19,7 +26,7 @@ jobs:
   auto-format:
     name: Auto-fix Formatting
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.ref != 'refs/heads/main' && github.event_name == 'push'
     permissions:
       contents: write
     steps:
@@ -27,25 +34,18 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node.js Environment
+        uses: ./.github/actions/setup-node.yml
         with:
-          version: 10.15.0
-          run_install: false
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Rust Environment
+        uses: ./.github/actions/setup-rust.yml
         with:
-          node-version: "22"
-          cache: "pnpm"
-
-      - name: Setup Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
+          platform: ubuntu-latest
           components: rustfmt
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
 
       - name: Auto-fix Prettier formatting
         run: npx prettier --write . --ignore-unknown
@@ -73,20 +73,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node.js Environment
+        uses: ./.github/actions/setup-node.yml
         with:
-          version: 10.15.0
-          run_install: false
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
 
       - name: Check EditorConfig compliance
         uses: editorconfig-checker/action-editorconfig-checker@main
@@ -111,8 +103,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Setup Rust Environment
+        uses: ./.github/actions/setup-rust.yml
         with:
+          platform: ${{ matrix.os }}
           components: rustfmt, clippy
 
       - uses: rui314/setup-mold@v1
@@ -122,12 +116,9 @@ jobs:
         with:
           tool: cargo-hack
 
-      - name: Install Ubuntu dependencies
+      - name: Setup Ubuntu Dependencies
         if: matrix.os == 'ubuntu-latest'
-        uses: awalsh128/cache-apt-pkgs-action@v1.4.3
-        with:
-          packages: libdbus-1-dev libsoup-3.0-dev libjavascriptcoregtk-4.1-dev libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra
-          version: 1.0
+        uses: ./.github/actions/setup-ubuntu-deps.yml
 
       - name: Check Rust formatting
         run: cargo fmt --all -- --color=always --check
@@ -146,65 +137,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node.js Environment
+        uses: ./.github/actions/setup-node.yml
         with:
-          version: 10.15.0
-          run_install: false
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Rust Environment
+        uses: ./.github/actions/setup-rust.yml
         with:
-          node-version: 22
-          cache: "pnpm"
+          platform: ${{ matrix.os }}
 
-      - name: Install Rust (Ubuntu)
+
+      - name: Setup Ubuntu Dependencies
         if: matrix.os == 'ubuntu-latest'
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
-          target: x86_64-unknown-linux-gnu
+        uses: ./.github/actions/setup-ubuntu-deps.yml
 
-      - name: Install Rust (Windows)
+      - name: Setup Windows Environment
         if: matrix.os == 'windows-latest'
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable-x86_64-msvc
-          target: x86_64-pc-windows-msvc
-
-      - name: Install Rust (macOS)
-        if: matrix.os == 'macos-latest'
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
-          target: x86_64-apple-darwin
-
-      - name: Install WIX Toolset (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          # Download and install WIX Toolset v3.11
-          Invoke-WebRequest -Uri "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311.exe" -OutFile "wix311.exe"
-          Start-Process -FilePath "wix311.exe" -ArgumentList "/quiet" -Wait
-
-          # Add WIX to PATH
-          $wixPath = "${env:ProgramFiles(x86)}\WiX Toolset v3.11\bin"
-          if (Test-Path $wixPath) {
-            echo $wixPath >> $env:GITHUB_PATH
-            echo "WIX Toolset installed successfully"
-          } else {
-            echo "Warning: WIX installation path not found"
-          }
-        shell: powershell
-
-      - name: Install system dependencies (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        uses: awalsh128/cache-apt-pkgs-action@v1.4.3
-        with:
-          packages: libdbus-1-dev libsoup-3.0-dev libjavascriptcoregtk-4.1-dev libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra
-          version: 1.1
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        uses: ./.github/actions/setup-windows.yml
 
       - name: Build CLI
         run: pnpm run cli:build
@@ -237,38 +188,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node.js Environment
+        uses: ./.github/actions/setup-node.yml
         with:
-          version: 10.15.0
-          run_install: false
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Rust Environment
+        uses: ./.github/actions/setup-rust.yml
         with:
-          node-version: 22
-          cache: "pnpm"
-
-      - name: Install Rust (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
-          target: x86_64-unknown-linux-gnu
-
-      - name: Install Rust (Windows)
-        if: matrix.os == 'windows-latest'
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable-x86_64-msvc
-          target: x86_64-pc-windows-msvc
-
-      - name: Install Rust (macOS)
-        if: matrix.os == 'macos-latest'
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
-          target: x86_64-apple-darwin
+          platform: ${{ matrix.os }}
 
       - name: Add macOS targets
         if: matrix.os == 'macos-latest'
@@ -276,15 +205,13 @@ jobs:
           rustup target add aarch64-apple-darwin
           rustup target add x86_64-apple-darwin
 
-      - name: Install system dependencies (Ubuntu)
+      - name: Setup Ubuntu Dependencies
         if: matrix.os == 'ubuntu-latest'
-        uses: awalsh128/cache-apt-pkgs-action@v1.4.3
-        with:
-          packages: libdbus-1-dev libsoup-3.0-dev libjavascriptcoregtk-4.1-dev libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra
-          version: 1.1
+        uses: ./.github/actions/setup-ubuntu-deps.yml
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Setup Windows Environment
+        if: matrix.os == 'windows-latest'
+        uses: ./.github/actions/setup-windows.yml
 
       - name: Build CLI
         run: pnpm run cli:build
