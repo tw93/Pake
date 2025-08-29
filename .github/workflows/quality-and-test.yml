@@ -59,7 +59,7 @@ jobs:
           git config --local user.name "GitHub Action"
           git add .
           if ! git diff --staged --quiet; then
-            git commit -m "🎨 Auto-fix formatting issues"
+            git commit -m "Auto-fix formatting issues"
             git push
           else
             echo "No formatting changes to commit"
@@ -321,7 +321,7 @@ jobs:
     steps:
       - name: Generate Summary
         run: |
-          echo "# 🎯 Quality & Testing Summary" >> $GITHUB_STEP_SUMMARY
+          echo "# Quality & Testing Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [ "${{ needs.formatting.result }}" == "success" ]; then
