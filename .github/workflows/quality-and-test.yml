@@ -10,9 +10,6 @@ on:
 env:
   NODE_VERSION: '22'
   PNPM_VERSION: '10.15.0'
-  UBUNTU_DEPS_VERSION: '1.1'
-  ACTIONS_CHECKOUT_VERSION: 'v4'
-  CACHE_VERSION: 'v4.2.0'
 
 permissions:
   actions: write
@@ -68,9 +65,6 @@ jobs:
         uses: ./.github/actions/setup-env
         with:
           mode: build
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
 
 
       - name: Check EditorConfig compliance
@@ -133,7 +127,6 @@ jobs:
         uses: ./.github/actions/setup-env
         with:
           mode: build
-        with:
 
       - name: Build CLI
         run: pnpm run cli:build
@@ -170,7 +163,6 @@ jobs:
         uses: ./.github/actions/setup-env
         with:
           mode: build
-        with:
 
 
       - name: Build CLI

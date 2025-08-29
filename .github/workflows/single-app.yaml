@@ -58,15 +58,12 @@ jobs:
           - build: linux
             os: ubuntu-latest
             rust: stable
-            target: x86_64-unknown-linux-musl
           - build: windows
             os: windows-latest
             rust: stable-x86_64-msvc
-            target: x86_64-pc-windows-msvc
           - build: macos
             os: macos-latest
             rust: stable
-            target: x86_64-apple-darwin
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -75,7 +72,6 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ matrix.rust }}
-          target: ${{ matrix.target }}
 
       - name: Setup Node.js Environment
         uses: ./.github/actions/setup-env
