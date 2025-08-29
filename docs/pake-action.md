@@ -97,5 +97,5 @@ Use GitHub's matrix strategy to build for multiple platforms simultaneously.
 ## Related Documentation
 
 - [GitHub Actions Usage](github-actions-usage.md) - Using Pake's built-in workflow
-- [CLI Usage](cli-usage.md) - Command-line interface reference  
+- [CLI Usage](cli-usage.md) - Command-line interface reference
 - [Advanced Usage](advanced-usage.md) - Customization options

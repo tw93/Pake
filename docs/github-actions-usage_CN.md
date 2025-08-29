@@ -15,7 +15,7 @@
 3. 填写表单（参数与 [CLI 选项](cli-usage_CN.md) 相同）
 4. 点击 `Run Workflow`
 
-  ![Actions 界面](https://raw.githubusercontent.com/tw93/static/main/pake/action.png)
+![Actions 界面](https://raw.githubusercontent.com/tw93/static/main/pake/action.png)
 
 ### 3. 下载应用
 

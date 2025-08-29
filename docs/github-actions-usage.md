@@ -15,7 +15,7 @@ Build Pake apps online without installing development tools locally.
 3. Fill in the form (same parameters as [CLI options](cli-usage.md))
 4. Click `Run Workflow`
 
-  ![Actions Interface](https://raw.githubusercontent.com/tw93/static/main/pake/action.png)
+![Actions Interface](https://raw.githubusercontent.com/tw93/static/main/pake/action.png)
 
 ### 3. Download App
 

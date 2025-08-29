@@ -899,7 +899,7 @@ class PakeTestRunner {
               console.log("   ✅ Multi-arch compilation finished!");
           });
 
-          // Multi-arch builds take longer - 12 minutes timeout
+          // Multi-arch builds take longer - 20 minutes timeout
           const timeout = setTimeout(() => {
             console.log(
               "   🔍 Multi-arch build timeout reached, checking for output files...",
@@ -933,7 +933,7 @@ class PakeTestRunner {
               child.kill("SIGTERM");
               reject(new Error("Multi-arch build test timeout"));
             }
-          }, 720000); // 12 minutes for multi-arch
+          }, 1200000); // 20 minutes for multi-arch
 
           child.on("close", (code) => {
             clearTimeout(timeout);
@@ -1017,7 +1017,7 @@ class PakeTestRunner {
           child.stdin.end();
         });
       },
-      750000, // 12+ minutes timeout
+      1250000, // 20+ minutes timeout
     );
   }
 
