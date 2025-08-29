@@ -52,27 +52,6 @@ jobs:
             echo "No formatting changes to commit"
           fi
 
-  formatting:
-    name: Code Formatting Check
-    runs-on: ubuntu-latest
-    needs: auto-format
-    if: always()
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Build Environment
-        uses: ./.github/actions/setup-env
-        with:
-          mode: build
-
-      - name: Check EditorConfig compliance
-        uses: editorconfig-checker/action-editorconfig-checker@main
-
-      - name: Run EditorConfig checker with exclusions
-        run: editorconfig-checker -exclude 'Cargo\.lock|dist/.*|.*\.(md|icns|ico|png|jpg|jpeg|gif|svg|desktop|wxs|plist|toml)$|cli\.js$|node_modules/.*|target/.*|src-tauri/(target|icons|png)/.*'
-
-      - name: Check Prettier formatting
-        run: npx prettier --check . --ignore-unknown
 
   rust-quality:
     name: Rust Code Quality
@@ -191,7 +170,7 @@ jobs:
   summary:
     name: Quality Summary
     runs-on: ubuntu-latest
-    needs: [formatting, rust-quality, cli-tests, release-build-test]
+    needs: [auto-format, rust-quality, cli-tests, release-build-test]
     if: always()
     steps:
       - name: Generate Summary
@@ -199,10 +178,10 @@ jobs:
           echo "# Quality & Testing Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [ "${{ needs.formatting.result }}" == "success" ]; then
-            echo "✅ **Code Formatting**: PASSED" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.auto-format.result }}" == "success" ]; then
+            echo "✅ **Auto Formatting**: PASSED" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ **Code Formatting**: FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "❌ **Auto Formatting**: FAILED" >> $GITHUB_STEP_SUMMARY
           fi
 
           if [ "${{ needs.rust-quality.result }}" == "success" ]; then
