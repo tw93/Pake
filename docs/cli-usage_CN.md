@@ -319,6 +319,17 @@ pake [url] [options]
 pake https://flutter.dev --name FlutterApp --wasm
 ```
 
+#### [enable-drag-drop]
+
+启用原生拖拽功能。默认为 `false`。启用后，允许在应用中进行拖拽操作，如重新排序项目、文件上传以及其他在常规浏览器中有效的交互式拖拽行为。
+
+```shell
+--enable-drag-drop
+
+# 示例：打包需要拖拽功能的应用
+pake https://planka.example.com --name PlankApp --enable-drag-drop
+```
+
 #### [title]
 
 设置窗口标题栏文本。如果未指定，窗口标题将为空。

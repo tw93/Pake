@@ -61,12 +61,13 @@ export async function mergeConfig(
     incognito,
     title,
     wasm,
+    enableDragDrop,
   } = options;
 
   const { platform } = process;
 
   // Platform-specific hide_on_close behavior: macOS keeps true, others default to false
-  const platformHideOnClose = hideOnClose ?? (platform === 'darwin');
+  const platformHideOnClose = hideOnClose ?? platform === 'darwin';
 
   // Set Windows parameters.
   const tauriConfWindowOptions = {
@@ -83,6 +84,7 @@ export async function mergeConfig(
     incognito: incognito,
     title: title || null,
     enable_wasm: wasm,
+    enable_drag_drop: enableDragDrop,
   };
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
 

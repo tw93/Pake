@@ -81,6 +81,9 @@ export interface PakeCliOptions {
 
   // Enable WebAssembly support (Flutter Web, etc.), default false
   wasm: boolean;
+
+  // Enable drag and drop functionality, default false
+  enableDragDrop: boolean;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {

@@ -25,6 +25,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   hideOnClose: undefined, // Platform-specific: true for macOS, false for others
   incognito: false,
   wasm: false,
+  enableDragDrop: false,
 };
 
 // Just for cli development

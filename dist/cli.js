@@ -348,10 +348,10 @@ async function mergeConfig(url, options, tauriConf) {
             await fsExtra.copy(sourcePath, destPath);
         }
     }));
-    const { width, height, fullscreen, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, } = options;
+    const { width, height, fullscreen, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, } = options;
     const { platform } = process;
     // Platform-specific hide_on_close behavior: macOS keeps true, others default to false
-    const platformHideOnClose = hideOnClose ?? (platform === 'darwin');
+    const platformHideOnClose = hideOnClose ?? platform === 'darwin';
     // Set Windows parameters.
     const tauriConfWindowOptions = {
         width,
@@ -367,6 +367,7 @@ async function mergeConfig(url, options, tauriConf) {
         incognito: incognito,
         title: title || null,
         enable_wasm: wasm,
+        enable_drag_drop: enableDragDrop,
     };
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
     tauriConf.productName = name;
@@ -1062,6 +1063,7 @@ const DEFAULT_PAKE_OPTIONS = {
     hideOnClose: undefined, // Platform-specific: true for macOS, false for others
     incognito: false,
     wasm: false,
+    enableDragDrop: false,
 };
 
 async function checkUpdateTips() {
@@ -1515,6 +1517,9 @@ program
     .hideHelp())
     .addOption(new Option('--wasm', 'Enable WebAssembly support (Flutter Web, etc.)')
     .default(DEFAULT_PAKE_OPTIONS.wasm)
+    .hideHelp())
+    .addOption(new Option('--enable-drag-drop', 'Enable drag and drop functionality')
+    .default(DEFAULT_PAKE_OPTIONS.enableDragDrop)
     .hideHelp())
     .addOption(new Option('--installer-language <string>', 'Installer language')
     .default(DEFAULT_PAKE_OPTIONS.installerLanguage)

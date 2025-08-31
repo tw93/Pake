@@ -38,8 +38,14 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         .fullscreen(window_config.fullscreen)
         .inner_size(window_config.width, window_config.height)
         .always_on_top(window_config.always_on_top)
-        .disable_drag_drop_handler()
-        .incognito(window_config.incognito)
+        .incognito(window_config.incognito);
+
+    // Conditionally disable drag-drop handler
+    if !window_config.enable_drag_drop {
+        window_builder = window_builder.disable_drag_drop_handler();
+    }
+
+    window_builder = window_builder
         .initialization_script(&config_script)
         .initialization_script(include_str!("../inject/component.js"))
         .initialization_script(include_str!("../inject/event.js"))

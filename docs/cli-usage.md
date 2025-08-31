@@ -332,6 +332,17 @@ This option adds necessary HTTP headers (`Cross-Origin-Opener-Policy: same-origi
 pake https://flutter.dev --name FlutterApp --wasm
 ```
 
+#### [enable-drag-drop]
+
+Enable native drag and drop functionality within the application. Default is `false`. When enabled, allows drag and drop operations like reordering items, file uploads, and other interactive drag behaviors that work in regular browsers.
+
+```shell
+--enable-drag-drop
+
+# Example: Package an app that requires drag-drop functionality
+pake https://planka.example.com --name PlankApp --enable-drag-drop
+```
+
 #### [installer-language]
 
 Set the Windows Installer language. Options include `zh-CN`, `ja-JP`, More at [Tauri Document](https://tauri.app/distribute/windows-installer/#internationalization). Default is `en-US`.
