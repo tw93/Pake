@@ -14,7 +14,8 @@
       "disabled_web_shortcuts": false,
       "hide_on_close": true,
       "incognito": false,
-      "enable_wasm": false
+      "enable_wasm": false,
+      "enable_drag_drop": false
     }
   ],
   "user_agent": {
