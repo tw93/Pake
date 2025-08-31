@@ -548,11 +548,13 @@ StartupNotify=true
     const injectFilePath = path.join(npmDirectory, `src-tauri/src/inject/custom.js`);
     // inject js or css files
     if (inject?.length > 0) {
-        if (!inject.every((item) => item.endsWith('.css') || item.endsWith('.js'))) {
+        // Ensure inject is an array before calling .every()
+        const injectArray = Array.isArray(inject) ? inject : [inject];
+        if (!injectArray.every((item) => item.endsWith('.css') || item.endsWith('.js'))) {
             logger.error('The injected file must be in either CSS or JS format.');
             return;
         }
-        const files = inject.map((filepath) => path.isAbsolute(filepath) ? filepath : path.join(process.cwd(), filepath));
+        const files = injectArray.map((filepath) => path.isAbsolute(filepath) ? filepath : path.join(process.cwd(), filepath));
         tauriConf.pake.inject = files;
         await combineFiles(files, injectFilePath);
     }

@@ -302,13 +302,15 @@ StartupNotify=true
 
   // inject js or css files
   if (inject?.length > 0) {
+    // Ensure inject is an array before calling .every()
+    const injectArray = Array.isArray(inject) ? inject : [inject];
     if (
-      !inject.every((item) => item.endsWith('.css') || item.endsWith('.js'))
+      !injectArray.every((item) => item.endsWith('.css') || item.endsWith('.js'))
     ) {
       logger.error('The injected file must be in either CSS or JS format.');
       return;
     }
-    const files = inject.map((filepath) =>
+    const files = injectArray.map((filepath) =>
       path.isAbsolute(filepath) ? filepath : path.join(process.cwd(), filepath),
     );
     tauriConf.pake.inject = files;
