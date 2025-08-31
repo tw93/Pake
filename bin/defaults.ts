@@ -22,7 +22,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   debug: false,
   inject: [],
   installerLanguage: 'en-US',
-  hideOnClose: true,
+  hideOnClose: undefined, // Platform-specific: true for macOS, false for others
   incognito: false,
   wasm: false,
 };

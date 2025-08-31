@@ -13,7 +13,8 @@
       "activation_shortcut": "",
       "disabled_web_shortcuts": false,
       "hide_on_close": true,
-      "incognito": false
+      "incognito": false,
+      "enable_wasm": false
     }
   ],
   "user_agent": {

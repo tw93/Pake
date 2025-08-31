@@ -18,11 +18,10 @@ import axios from 'axios';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
 import icongen from 'icon-gen';
-import sharp from 'sharp';
 import * as psl from 'psl';
 
 var name = "pake-cli";
-var version = "3.2.17";
+var version = "3.2.18";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -72,7 +71,7 @@ var exports = "./dist/cli.js";
 var license = "MIT";
 var dependencies = {
 	"@tauri-apps/api": "^2.8.0",
-	"@tauri-apps/cli": "^2.8.1",
+	"@tauri-apps/cli": "^2.8.3",
 	axios: "^1.11.0",
 	chalk: "^5.6.0",
 	commander: "^11.1.0",
@@ -84,7 +83,6 @@ var dependencies = {
 	ora: "^8.2.0",
 	prompts: "^2.4.2",
 	psl: "^1.15.0",
-	sharp: "^0.33.5",
 	"tmp-promise": "^3.0.3",
 	"update-notifier": "^7.3.1"
 };
@@ -103,10 +101,13 @@ var devDependencies = {
 	"app-root-path": "^3.1.0",
 	"cross-env": "^7.0.3",
 	prettier: "^3.6.2",
-	rollup: "^4.46.3",
+	rollup: "^4.49.0",
 	"rollup-plugin-typescript2": "^0.36.0",
 	tslib: "^2.8.1",
 	typescript: "^5.9.2"
+};
+var optionalDependencies = {
+	sharp: "^0.33.5"
 };
 var packageJson = {
 	name: name,
@@ -124,7 +125,8 @@ var packageJson = {
 	exports: exports,
 	license: license,
 	dependencies: dependencies,
-	devDependencies: devDependencies
+	devDependencies: devDependencies,
+	optionalDependencies: optionalDependencies
 };
 
 // Convert the current module URL to a file path
@@ -349,6 +351,8 @@ async function mergeConfig(url, options, tauriConf) {
     }));
     const { width, height, fullscreen, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, } = options;
     const { platform } = process;
+    // Platform-specific hide_on_close behavior: macOS keeps true, others default to false
+    const platformHideOnClose = hideOnClose ?? (platform === 'darwin');
     // Set Windows parameters.
     const tauriConfWindowOptions = {
         width,
@@ -360,7 +364,7 @@ async function mergeConfig(url, options, tauriConf) {
         always_on_top: alwaysOnTop,
         dark_mode: darkMode,
         disabled_web_shortcuts: disabledWebShortcuts,
-        hide_on_close: hideOnClose,
+        hide_on_close: platformHideOnClose,
         incognito: incognito,
         title: title || null,
         enable_wasm: wasm,
@@ -1056,7 +1060,7 @@ const DEFAULT_PAKE_OPTIONS = {
     debug: false,
     inject: [],
     installerLanguage: 'en-US',
-    hideOnClose: true,
+    hideOnClose: undefined, // Platform-specific: true for macOS, false for others
     incognito: false,
     wasm: false,
 };
@@ -1067,6 +1071,24 @@ async function checkUpdateTips() {
     });
 }
 
+// Lazy load sharp to handle installation issues gracefully
+let sharp;
+/**
+ * Safely loads sharp with fallback
+ */
+async function loadSharp() {
+    if (sharp)
+        return sharp;
+    try {
+        const sharpModule = await import('sharp');
+        sharp = sharpModule.default || sharpModule;
+        return sharp;
+    }
+    catch (error) {
+        logger.warn('Sharp not available, icon preprocessing will be skipped');
+        return null;
+    }
+}
 // Constants
 const ICON_CONFIG = {
     minFileSize: 100,
@@ -1086,12 +1108,17 @@ const API_TOKENS = {
  */
 async function preprocessIcon(inputPath) {
     try {
-        const metadata = await sharp(inputPath).metadata();
+        const sharpInstance = await loadSharp();
+        if (!sharpInstance) {
+            logger.debug('Sharp not available, skipping icon preprocessing');
+            return inputPath;
+        }
+        const metadata = await sharpInstance(inputPath).metadata();
         if (metadata.channels !== 4)
             return inputPath; // No transparency
         const { path: tempDir } = await dir();
         const outputPath = path.join(tempDir, 'icon-with-background.png');
-        await sharp({
+        await sharpInstance({
             create: {
                 width: metadata.width || 512,
                 height: metadata.height || 512,
@@ -1503,7 +1530,7 @@ program
     .addOption(new Option('--system-tray-icon <string>', 'Custom system tray icon')
     .default(DEFAULT_PAKE_OPTIONS.systemTrayIcon)
     .hideHelp())
-    .addOption(new Option('--hide-on-close', 'Hide window on close instead of exiting')
+    .addOption(new Option('--hide-on-close', 'Hide window on close instead of exiting (default: true for macOS, false for others)')
     .default(DEFAULT_PAKE_OPTIONS.hideOnClose)
     .hideHelp())
     .addOption(new Option('--title <string>', 'Window title').hideHelp())

@@ -64,6 +64,7 @@ pub fn run_app() {
         .on_window_event(move |_window, _event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = _event {
                 if hide_on_close {
+                    // Hide window when hide_on_close is enabled (regardless of tray status)
                     let window = _window.clone();
                     tauri::async_runtime::spawn(async move {
                         #[cfg(target_os = "macos")]
@@ -77,8 +78,10 @@ pub fn run_app() {
                         window.hide().unwrap();
                     });
                     api.prevent_close();
+                } else {
+                    // Exit app completely when hide_on_close is false
+                    std::process::exit(0);
                 }
-                // If hide_on_close is false, allow normal close behavior
             }
         })
         .run(tauri::generate_context!())

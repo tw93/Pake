@@ -292,7 +292,7 @@ pake [url] [options]
 
 #### [hide-on-close]
 
-点击关闭按钮时隐藏窗口而不是退出应用程序。默认为 `true`。
+点击关闭按钮时隐藏窗口而不是退出应用程序。平台特定默认值：macOS 为 `true`，Windows/Linux 为 `false`。
 
 ```shell
 --hide-on-close

@@ -293,7 +293,7 @@ Specify the system tray icon. This is only effective when the system tray is ena
 
 #### [hide-on-close]
 
-Hide window instead of closing the application when clicking close button. Default is `true`.
+Hide window instead of closing the application when clicking close button. Platform-specific default: `true` for macOS, `false` for Windows/Linux.
 
 ```shell
 --hide-on-close

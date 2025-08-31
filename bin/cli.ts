@@ -125,7 +125,7 @@ program
       .hideHelp(),
   )
   .addOption(
-    new Option('--hide-on-close', 'Hide window on close instead of exiting')
+    new Option('--hide-on-close', 'Hide window on close instead of exiting (default: true for macOS, false for others)')
       .default(DEFAULT.hideOnClose)
       .hideHelp(),
   )
