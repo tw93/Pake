@@ -51,12 +51,16 @@ source ~/.bashrc
       build-essential \
       curl \
       wget \
+      file \
+      libxdo-dev \
       libssl-dev \
       libgtk-3-dev \
       libayatana-appindicator3-dev \
       librsvg2-dev \
       gnome-video-effects \
-      gnome-video-effects-extra
+      gnome-video-effects-extra \
+      libglib2.0-dev \
+      pkg-config
   ```
 
 </details>
