@@ -80,7 +80,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
 
       - name: Install cargo-hack
-        run: cargo install cargo-hack
+        run: cargo install cargo-hack --force
 
       - name: Check Rust formatting
         run: cargo fmt --all -- --color=always --check
