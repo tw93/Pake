@@ -18,6 +18,7 @@ import axios from 'axios';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
 import icongen from 'icon-gen';
+import sharp from 'sharp';
 import * as psl from 'psl';
 
 var name = "pake-cli";
@@ -64,6 +65,7 @@ var scripts = {
 	test: "pnpm run cli:build && cross-env PAKE_CREATE_APP=1 node tests/index.js",
 	format: "prettier --write . --ignore-unknown && find tests -name '*.js' -exec sed -i '' 's/[[:space:]]*$//' {} \\; && cd src-tauri && cargo fmt --verbose",
 	"format:check": "prettier --check . --ignore-unknown",
+	update: "pnpm update --verbose && cd src-tauri && cargo update",
 	prepublishOnly: "pnpm run cli:build"
 };
 var type = "module";
@@ -74,7 +76,7 @@ var dependencies = {
 	"@tauri-apps/cli": "^2.8.3",
 	axios: "^1.11.0",
 	chalk: "^5.6.0",
-	commander: "^11.1.0",
+	commander: "^12.1.0",
 	execa: "^9.6.0",
 	"file-type": "^18.7.0",
 	"fs-extra": "^11.3.1",
@@ -83,6 +85,7 @@ var dependencies = {
 	ora: "^8.2.0",
 	prompts: "^2.4.2",
 	psl: "^1.15.0",
+	sharp: "^0.34.3",
 	"tmp-promise": "^3.0.3",
 	"update-notifier": "^7.3.1"
 };
@@ -106,9 +109,6 @@ var devDependencies = {
 	tslib: "^2.8.1",
 	typescript: "^5.9.2"
 };
-var optionalDependencies = {
-	sharp: "^0.33.5"
-};
 var packageJson = {
 	name: name,
 	version: version,
@@ -125,8 +125,7 @@ var packageJson = {
 	exports: exports,
 	license: license,
 	dependencies: dependencies,
-	devDependencies: devDependencies,
-	optionalDependencies: optionalDependencies
+	devDependencies: devDependencies
 };
 
 // Convert the current module URL to a file path
@@ -1071,24 +1070,6 @@ async function checkUpdateTips() {
     });
 }
 
-// Lazy load sharp to handle installation issues gracefully
-let sharp;
-/**
- * Safely loads sharp with fallback
- */
-async function loadSharp() {
-    if (sharp)
-        return sharp;
-    try {
-        const sharpModule = await import('sharp');
-        sharp = sharpModule.default || sharpModule;
-        return sharp;
-    }
-    catch (error) {
-        logger.warn('Sharp not available, icon preprocessing will be skipped');
-        return null;
-    }
-}
 // Constants
 const ICON_CONFIG = {
     minFileSize: 100,
@@ -1108,17 +1089,12 @@ const API_TOKENS = {
  */
 async function preprocessIcon(inputPath) {
     try {
-        const sharpInstance = await loadSharp();
-        if (!sharpInstance) {
-            logger.debug('Sharp not available, skipping icon preprocessing');
-            return inputPath;
-        }
-        const metadata = await sharpInstance(inputPath).metadata();
+        const metadata = await sharp(inputPath).metadata();
         if (metadata.channels !== 4)
             return inputPath; // No transparency
         const { path: tempDir } = await dir();
         const outputPath = path.join(tempDir, 'icon-with-background.png');
-        await sharpInstance({
+        await sharp({
             create: {
                 width: metadata.width || 512,
                 height: metadata.height || 512,

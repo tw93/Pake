@@ -20,7 +20,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.npmrc
 output
 *.msi
 *.deb
