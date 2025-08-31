@@ -66,7 +66,7 @@ export async function mergeConfig(
   const { platform } = process;
 
   // Platform-specific hide_on_close behavior: macOS keeps true, others default to false
-  const platformHideOnClose = hideOnClose ?? (platform === 'darwin');
+  const platformHideOnClose = hideOnClose ?? platform === 'darwin';
 
   // Set Windows parameters.
   const tauriConfWindowOptions = {
