@@ -40,7 +40,6 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         .always_on_top(window_config.always_on_top)
         .incognito(window_config.incognito);
 
-    // Conditionally disable drag-drop handler
     if !window_config.enable_drag_drop {
         window_builder = window_builder.disable_drag_drop_handler();
     }
@@ -52,14 +51,12 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         .initialization_script(include_str!("../inject/style.js"))
         .initialization_script(include_str!("../inject/custom.js"));
 
-    // Configure WASM support with required headers for SharedArrayBuffer
     if window_config.enable_wasm {
         window_builder = window_builder
             .additional_browser_args("--enable-features=SharedArrayBuffer")
             .additional_browser_args("--enable-unsafe-webgpu");
     }
 
-    // Configure proxy if specified
     if !config.proxy_url.is_empty() {
         if let Ok(proxy_url) = Url::from_str(&config.proxy_url) {
             window_builder = window_builder.proxy_url(proxy_url);
@@ -86,10 +83,9 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
     {
         window_builder = window_builder
             .data_directory(_data_dir)
-            .title(app.package_info().name.clone());
+            .title(app.package_info().name.clone())
+            .additional_browser_args("--disable-blink-features=AutomationControlled");
 
-        // Set theme to None for automatic system theme detection on Windows
-        // This allows the window to respond to system theme changes automatically
         window_builder = window_builder.theme(None);
     }
 
@@ -97,10 +93,9 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
     {
         window_builder = window_builder
             .data_directory(_data_dir)
-            .title(app.package_info().name.clone());
+            .title(app.package_info().name.clone())
+            .additional_browser_args("--disable-blink-features=AutomationControlled");
 
-        // Set theme to None for automatic system theme detection on Linux
-        // This allows the window to respond to system theme changes automatically
         window_builder = window_builder.theme(None);
     }
 

@@ -350,9 +350,7 @@ async function mergeConfig(url, options, tauriConf) {
     }));
     const { width, height, fullscreen, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, } = options;
     const { platform } = process;
-    // Platform-specific hide_on_close behavior: macOS keeps true, others default to false
     const platformHideOnClose = hideOnClose ?? platform === 'darwin';
-    // Set Windows parameters.
     const tauriConfWindowOptions = {
         width,
         height,
@@ -373,10 +371,12 @@ async function mergeConfig(url, options, tauriConf) {
     tauriConf.productName = name;
     tauriConf.identifier = identifier;
     tauriConf.version = appVersion;
+    if (platform === 'linux') {
+        tauriConf.mainBinaryName = `pake-${name.toLowerCase()}`;
+    }
     if (platform == 'win32') {
         tauriConf.bundle.windows.wix.language[0] = installerLanguage;
     }
-    //Judge the type of URL, whether it is a file or a website.
     const pathExists = await fsExtra.pathExists(url);
     if (pathExists) {
         logger.warn('✼ Your input might be a local file.');
@@ -427,8 +427,8 @@ Version=1.0
 Type=Application
 Name=${name}
 Comment=${name}
-Exec=${appNameLower}
-Icon=${appNameLower}
+Exec=pake-${appNameLower}
+Icon=${appNameLower}_512
 Categories=Network;WebBrowser;
 MimeType=text/html;text/xml;application/xhtml_xml;
 StartupNotify=true
@@ -510,7 +510,7 @@ StartupNotify=true
             }
         }
         if (updateIconPath) {
-            tauriConf.bundle.icon = [options.icon];
+            tauriConf.bundle.icon = [iconInfo.path];
         }
         else {
             logger.warn(`✼ Icon will remain as default.`);
@@ -606,15 +606,13 @@ class BaseBuilder {
         return process.platform === 'win32' ? 600000 : 300000;
     }
     getBuildTimeout() {
-        return 900000; // 15 minutes for all builds
+        return 900000;
     }
     async detectPackageManager() {
-        // 使用缓存避免重复检测
         if (BaseBuilder.packageManagerCache) {
             return BaseBuilder.packageManagerCache;
         }
         const { execa } = await import('execa');
-        // 优先使用pnpm（如果可用）
         try {
             await execa('pnpm', ['--version'], { stdio: 'ignore' });
             logger.info('✺ Using pnpm for package management.');
@@ -622,7 +620,6 @@ class BaseBuilder {
             return 'pnpm';
         }
         catch {
-            // pnpm不可用，回退到npm
             try {
                 await execa('npm', ['--version'], { stdio: 'ignore' });
                 logger.info('✺ pnpm not available, using npm for package management.');
@@ -710,9 +707,18 @@ class BaseBuilder {
         const appPath = this.getBuildAppPath(npmDirectory, fileName, fileType);
         const distPath = path.resolve(`${name}.${fileType}`);
         await fsExtra.copy(appPath, distPath);
+        // Copy raw binary if requested
+        if (this.options.keepBinary) {
+            await this.copyRawBinary(npmDirectory, name);
+        }
         await fsExtra.remove(appPath);
         logger.success('✔ Build success!');
         logger.success('✔ App installer located in', distPath);
+        // Log binary location if preserved
+        if (this.options.keepBinary) {
+            const binaryPath = this.getRawBinaryPath(name);
+            logger.success('✔ Raw binary located in', path.resolve(binaryPath));
+        }
     }
     getFileType(target) {
         return target;
@@ -804,6 +810,67 @@ class BaseBuilder {
         const bundleDir = fileType.toLowerCase() === 'app' ? 'macos' : fileType.toLowerCase();
         return path.join(npmDirectory, this.getBasePath(), bundleDir, `${fileName}.${fileType}`);
     }
+    /**
+     * Copy raw binary file to output directory
+     */
+    async copyRawBinary(npmDirectory, appName) {
+        const binaryPath = this.getRawBinarySourcePath(npmDirectory, appName);
+        const outputPath = this.getRawBinaryPath(appName);
+        if (await fsExtra.pathExists(binaryPath)) {
+            await fsExtra.copy(binaryPath, outputPath);
+            // Make binary executable on Unix-like systems
+            if (process.platform !== 'win32') {
+                await fsExtra.chmod(outputPath, 0o755);
+            }
+        }
+        else {
+            logger.warn(`✼ Raw binary not found at ${binaryPath}, skipping...`);
+        }
+    }
+    /**
+     * Get the source path of the raw binary file in the build directory
+     */
+    getRawBinarySourcePath(npmDirectory, appName) {
+        const basePath = this.options.debug ? 'debug' : 'release';
+        const binaryName = this.getBinaryName(appName);
+        // Handle cross-platform builds
+        if (this.options.multiArch || this.hasArchSpecificTarget()) {
+            return path.join(npmDirectory, this.getArchSpecificPath(), basePath, binaryName);
+        }
+        return path.join(npmDirectory, 'src-tauri/target', basePath, binaryName);
+    }
+    /**
+     * Get the output path for the raw binary file
+     */
+    getRawBinaryPath(appName) {
+        const extension = process.platform === 'win32' ? '.exe' : '';
+        const suffix = process.platform === 'win32' ? '' : '-binary';
+        return `${appName}${suffix}${extension}`;
+    }
+    /**
+     * Get the binary name based on app name and platform
+     */
+    getBinaryName(appName) {
+        const extension = process.platform === 'win32' ? '.exe' : '';
+        // Linux uses the unique binary name we set in merge.ts
+        if (process.platform === 'linux') {
+            return `pake-${appName.toLowerCase()}${extension}`;
+        }
+        // Windows and macOS use 'pake' as binary name
+        return `pake${extension}`;
+    }
+    /**
+     * Check if this build has architecture-specific target
+     */
+    hasArchSpecificTarget() {
+        return false; // Override in subclasses if needed
+    }
+    /**
+     * Get architecture-specific path for binary
+     */
+    getArchSpecificPath() {
+        return 'src-tauri/target'; // Override in subclasses if needed
+    }
 }
 BaseBuilder.packageManagerCache = null;
 // 架构映射配置
@@ -832,31 +899,23 @@ BaseBuilder.ARCH_DISPLAY_NAMES = {
 class MacBuilder extends BaseBuilder {
     constructor(options) {
         super(options);
-        // Store the original targets value for architecture selection
-        // For macOS, targets can be architecture names or format names
-        // Filter out non-architecture values
         const validArchs = ['intel', 'apple', 'universal', 'auto', 'x64', 'arm64'];
         this.buildArch = validArchs.includes(options.targets || '')
             ? options.targets
             : 'auto';
-        // Use DMG by default for distribution
-        // Only create app bundles for testing to avoid user interaction
         if (process.env.PAKE_CREATE_APP === '1') {
             this.buildFormat = 'app';
         }
         else {
             this.buildFormat = 'dmg';
         }
-        // Set targets to format for Tauri
         this.options.targets = this.buildFormat;
     }
     getFileName() {
         const { name } = this.options;
-        // For app bundles, use simple name without version/arch
         if (this.buildFormat === 'app') {
             return name;
         }
-        // For DMG files, use versioned filename
         let arch;
         if (this.buildArch === 'universal' || this.options.multiArch) {
             arch = 'universal';
@@ -868,7 +927,6 @@ class MacBuilder extends BaseBuilder {
             arch = 'x64';
         }
         else {
-            // Auto-detect based on current architecture
             arch = this.getArchDisplayName(this.resolveTargetArch(this.buildArch));
         }
         return `${name}_${tauriConfig.version}_${arch}`;
@@ -893,7 +951,6 @@ class MacBuilder extends BaseBuilder {
             throw new Error(`Unsupported architecture: ${actualArch} for macOS`);
         }
         let fullCommand = this.buildBaseCommand(packageManager, configPath, buildTarget);
-        // Add features
         const features = this.getBuildFeatures();
         if (features.length > 0) {
             fullCommand += ` --features ${features.join(',')}`;
@@ -906,14 +963,20 @@ class MacBuilder extends BaseBuilder {
         const target = this.getTauriTarget(actualArch, 'darwin');
         return `src-tauri/target/${target}/${basePath}/bundle`;
     }
+    hasArchSpecificTarget() {
+        return true;
+    }
+    getArchSpecificPath() {
+        const actualArch = this.getActualArch();
+        const target = this.getTauriTarget(actualArch, 'darwin');
+        return `src-tauri/target/${target}`;
+    }
 }
 
 class WinBuilder extends BaseBuilder {
     constructor(options) {
         super(options);
         this.buildFormat = 'msi';
-        // For Windows, targets can be architecture names or format names
-        // Filter out non-architecture values
         const validArchs = ['x64', 'arm64', 'auto'];
         this.buildArch = validArchs.includes(options.targets || '')
             ? this.resolveTargetArch(options.targets)
@@ -933,7 +996,6 @@ class WinBuilder extends BaseBuilder {
             throw new Error(`Unsupported architecture: ${this.buildArch} for Windows`);
         }
         let fullCommand = this.buildBaseCommand(packageManager, configPath, buildTarget);
-        // Add features
         const features = this.getBuildFeatures();
         if (features.length > 0) {
             fullCommand += ` --features ${features.join(',')}`;
@@ -945,12 +1007,18 @@ class WinBuilder extends BaseBuilder {
         const target = this.getTauriTarget(this.buildArch, 'win32');
         return `src-tauri/target/${target}/${basePath}/bundle/`;
     }
+    hasArchSpecificTarget() {
+        return true;
+    }
+    getArchSpecificPath() {
+        const target = this.getTauriTarget(this.buildArch, 'win32');
+        return `src-tauri/target/${target}`;
+    }
 }
 
 class LinuxBuilder extends BaseBuilder {
     constructor(options) {
         super(options);
-        // Parse target format and architecture
         const target = options.targets || 'deb';
         if (target.includes('-arm64')) {
             this.buildFormat = target.replace('-arm64', '');
@@ -960,33 +1028,32 @@ class LinuxBuilder extends BaseBuilder {
             this.buildFormat = target;
             this.buildArch = this.resolveTargetArch('auto');
         }
-        // Set targets to format for Tauri
         this.options.targets = this.buildFormat;
     }
     getFileName() {
         const { name, targets } = this.options;
         const version = tauriConfig.version;
-        // Determine architecture display name
         let arch;
         if (this.buildArch === 'arm64') {
             arch = targets === 'rpm' || targets === 'appimage' ? 'aarch64' : 'arm64';
         }
         else {
-            // Auto-detect or default to current architecture
-            const resolvedArch = this.buildArch === 'x64' ? 'amd64' : this.buildArch;
-            arch = resolvedArch;
-            if (resolvedArch === 'arm64' &&
-                (targets === 'rpm' || targets === 'appimage')) {
-                arch = 'aarch64';
+            if (this.buildArch === 'x64') {
+                arch = targets === 'rpm' ? 'x86_64' : 'amd64';
+            }
+            else {
+                arch = this.buildArch;
+                if (this.buildArch === 'arm64' &&
+                    (targets === 'rpm' || targets === 'appimage')) {
+                    arch = 'aarch64';
+                }
             }
         }
-        // The RPM format uses different separators and version number formats
         if (targets === 'rpm') {
             return `${name}-${version}-1.${arch}`;
         }
         return `${name}_${version}_${arch}`;
     }
-    // Customize it, considering that there are all targets.
     async build(url) {
         const targetTypes = ['deb', 'appimage', 'rpm'];
         for (const target of targetTypes) {
@@ -997,12 +1064,10 @@ class LinuxBuilder extends BaseBuilder {
     }
     getBuildCommand(packageManager = 'pnpm') {
         const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
-        // Only add target if it's ARM64
         const buildTarget = this.buildArch === 'arm64'
             ? this.getTauriTarget(this.buildArch, 'linux')
             : undefined;
         let fullCommand = this.buildBaseCommand(packageManager, configPath, buildTarget);
-        // Add features
         const features = this.getBuildFeatures();
         if (features.length > 0) {
             fullCommand += ` --features ${features.join(',')}`;
@@ -1022,6 +1087,16 @@ class LinuxBuilder extends BaseBuilder {
             return 'AppImage';
         }
         return super.getFileType(target);
+    }
+    hasArchSpecificTarget() {
+        return this.buildArch === 'arm64';
+    }
+    getArchSpecificPath() {
+        if (this.buildArch === 'arm64') {
+            const target = this.getTauriTarget(this.buildArch, 'linux');
+            return `src-tauri/target/${target}`;
+        }
+        return super.getArchSpecificPath();
     }
 }
 
@@ -1066,6 +1141,7 @@ const DEFAULT_PAKE_OPTIONS = {
     incognito: false,
     wasm: false,
     enableDragDrop: false,
+    keepBinary: false,
 };
 
 async function checkUpdateTips() {
@@ -1522,6 +1598,9 @@ program
     .hideHelp())
     .addOption(new Option('--enable-drag-drop', 'Enable drag and drop functionality')
     .default(DEFAULT_PAKE_OPTIONS.enableDragDrop)
+    .hideHelp())
+    .addOption(new Option('--keep-binary', 'Keep raw binary file alongside installer')
+    .default(DEFAULT_PAKE_OPTIONS.keepBinary)
     .hideHelp())
     .addOption(new Option('--installer-language <string>', 'Installer language')
     .default(DEFAULT_PAKE_OPTIONS.installerLanguage)

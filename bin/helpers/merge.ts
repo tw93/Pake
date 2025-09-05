@@ -66,10 +66,8 @@ export async function mergeConfig(
 
   const { platform } = process;
 
-  // Platform-specific hide_on_close behavior: macOS keeps true, others default to false
   const platformHideOnClose = hideOnClose ?? platform === 'darwin';
 
-  // Set Windows parameters.
   const tauriConfWindowOptions = {
     width,
     height,
@@ -92,11 +90,14 @@ export async function mergeConfig(
   tauriConf.identifier = identifier;
   tauriConf.version = appVersion;
 
+  if (platform === 'linux') {
+    tauriConf.mainBinaryName = `pake-${name.toLowerCase()}`;
+  }
+
   if (platform == 'win32') {
     tauriConf.bundle.windows.wix.language[0] = installerLanguage;
   }
 
-  //Judge the type of URL, whether it is a file or a website.
   const pathExists = await fsExtra.pathExists(url);
   if (pathExists) {
     logger.warn('✼ Your input might be a local file.');
@@ -160,8 +161,8 @@ Version=1.0
 Type=Application
 Name=${name}
 Comment=${name}
-Exec=${appNameLower}
-Icon=${appNameLower}
+Exec=pake-${appNameLower}
+Icon=${appNameLower}_512
 Categories=Network;WebBrowser;
 MimeType=text/html;text/xml;application/xhtml_xml;
 StartupNotify=true
@@ -252,7 +253,7 @@ StartupNotify=true
     }
 
     if (updateIconPath) {
-      tauriConf.bundle.icon = [options.icon];
+      tauriConf.bundle.icon = [iconInfo.path];
     } else {
       logger.warn(`✼ Icon will remain as default.`);
     }
