@@ -22,7 +22,7 @@ import sharp from 'sharp';
 import * as psl from 'psl';
 
 var name = "pake-cli";
-var version = "3.2.18";
+var version = "3.3.0";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=18.0.0"
