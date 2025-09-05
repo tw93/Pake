@@ -37,25 +37,22 @@ export default abstract class BaseBuilder {
   }
 
   private getBuildTimeout(): number {
-    return 900000; // 15 minutes for all builds
+    return 900000;
   }
 
   private async detectPackageManager(): Promise<string> {
-    // 使用缓存避免重复检测
     if (BaseBuilder.packageManagerCache) {
       return BaseBuilder.packageManagerCache;
     }
 
     const { execa } = await import('execa');
 
-    // 优先使用pnpm（如果可用）
     try {
       await execa('pnpm', ['--version'], { stdio: 'ignore' });
       logger.info('✺ Using pnpm for package management.');
       BaseBuilder.packageManagerCache = 'pnpm';
       return 'pnpm';
     } catch {
-      // pnpm不可用，回退到npm
       try {
         await execa('npm', ['--version'], { stdio: 'ignore' });
         logger.info('✺ pnpm not available, using npm for package management.');
@@ -176,9 +173,21 @@ export default abstract class BaseBuilder {
     const appPath = this.getBuildAppPath(npmDirectory, fileName, fileType);
     const distPath = path.resolve(`${name}.${fileType}`);
     await fsExtra.copy(appPath, distPath);
+
+    // Copy raw binary if requested
+    if (this.options.keepBinary) {
+      await this.copyRawBinary(npmDirectory, name);
+    }
+
     await fsExtra.remove(appPath);
     logger.success('✔ Build success!');
     logger.success('✔ App installer located in', distPath);
+
+    // Log binary location if preserved
+    if (this.options.keepBinary) {
+      const binaryPath = this.getRawBinaryPath(name);
+      logger.success('✔ Raw binary located in', path.resolve(binaryPath));
+    }
   }
 
   protected getFileType(target: string): string {
@@ -337,5 +346,87 @@ export default abstract class BaseBuilder {
       bundleDir,
       `${fileName}.${fileType}`,
     );
+  }
+
+  /**
+   * Copy raw binary file to output directory
+   */
+  protected async copyRawBinary(
+    npmDirectory: string,
+    appName: string,
+  ): Promise<void> {
+    const binaryPath = this.getRawBinarySourcePath(npmDirectory, appName);
+    const outputPath = this.getRawBinaryPath(appName);
+
+    if (await fsExtra.pathExists(binaryPath)) {
+      await fsExtra.copy(binaryPath, outputPath);
+      // Make binary executable on Unix-like systems
+      if (process.platform !== 'win32') {
+        await fsExtra.chmod(outputPath, 0o755);
+      }
+    } else {
+      logger.warn(`✼ Raw binary not found at ${binaryPath}, skipping...`);
+    }
+  }
+
+  /**
+   * Get the source path of the raw binary file in the build directory
+   */
+  protected getRawBinarySourcePath(
+    npmDirectory: string,
+    appName: string,
+  ): string {
+    const basePath = this.options.debug ? 'debug' : 'release';
+    const binaryName = this.getBinaryName(appName);
+
+    // Handle cross-platform builds
+    if (this.options.multiArch || this.hasArchSpecificTarget()) {
+      return path.join(
+        npmDirectory,
+        this.getArchSpecificPath(),
+        basePath,
+        binaryName,
+      );
+    }
+
+    return path.join(npmDirectory, 'src-tauri/target', basePath, binaryName);
+  }
+
+  /**
+   * Get the output path for the raw binary file
+   */
+  protected getRawBinaryPath(appName: string): string {
+    const extension = process.platform === 'win32' ? '.exe' : '';
+    const suffix = process.platform === 'win32' ? '' : '-binary';
+    return `${appName}${suffix}${extension}`;
+  }
+
+  /**
+   * Get the binary name based on app name and platform
+   */
+  protected getBinaryName(appName: string): string {
+    const extension = process.platform === 'win32' ? '.exe' : '';
+
+    // Linux uses the unique binary name we set in merge.ts
+    if (process.platform === 'linux') {
+      return `pake-${appName.toLowerCase()}${extension}`;
+    }
+
+    // Windows and macOS use 'pake' as binary name
+    return `pake${extension}`;
+  }
+
+  /**
+   * Check if this build has architecture-specific target
+   */
+  protected hasArchSpecificTarget(): boolean {
+    return false; // Override in subclasses if needed
+  }
+
+  /**
+   * Get architecture-specific path for binary
+   */
+  protected getArchSpecificPath(): string {
+    return 'src-tauri/target'; // Override in subclasses if needed
   }
 }

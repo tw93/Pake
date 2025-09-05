@@ -347,6 +347,19 @@ Enable native drag and drop functionality within the application. Default is `fa
 pake https://planka.example.com --name PlankApp --enable-drag-drop
 ```
 
+#### [keep-binary]
+
+Keep the raw binary file alongside the installer. Default is `false`. When enabled, also outputs a standalone executable that can run without installation.
+
+```shell
+--keep-binary
+
+# Example: Package app with both installer and standalone binary
+pake https://github.com --name GitHub --keep-binary
+```
+
+**Output**: Creates both installer and standalone executable (`AppName-binary` on Unix, `AppName.exe` on Windows).
+
 #### [installer-language]
 
 Set the Windows Installer language. Options include `zh-CN`, `ja-JP`, More at [Tauri Document](https://tauri.app/distribute/windows-installer/#internationalization). Default is `en-US`.

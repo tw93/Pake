@@ -9,8 +9,6 @@ export default class WinBuilder extends BaseBuilder {
 
   constructor(options: PakeAppOptions) {
     super(options);
-    // For Windows, targets can be architecture names or format names
-    // Filter out non-architecture values
     const validArchs = ['x64', 'arm64', 'auto'];
     this.buildArch = validArchs.includes(options.targets || '')
       ? this.resolveTargetArch(options.targets)
@@ -41,7 +39,6 @@ export default class WinBuilder extends BaseBuilder {
       buildTarget,
     );
 
-    // Add features
     const features = this.getBuildFeatures();
     if (features.length > 0) {
       fullCommand += ` --features ${features.join(',')}`;
@@ -54,5 +51,14 @@ export default class WinBuilder extends BaseBuilder {
     const basePath = this.options.debug ? 'debug' : 'release';
     const target = this.getTauriTarget(this.buildArch, 'win32');
     return `src-tauri/target/${target}/${basePath}/bundle/`;
+  }
+
+  protected hasArchSpecificTarget(): boolean {
+    return true;
+  }
+
+  protected getArchSpecificPath(): string {
+    const target = this.getTauriTarget(this.buildArch, 'win32');
+    return `src-tauri/target/${target}`;
   }
 }

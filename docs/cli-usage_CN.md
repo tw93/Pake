@@ -334,6 +334,19 @@ pake https://flutter.dev --name FlutterApp --wasm
 pake https://planka.example.com --name PlankApp --enable-drag-drop
 ```
 
+#### [keep-binary]
+
+保留原始二进制文件与安装包一起。默认为 `false`。启用后，除了平台特定的安装包外，还会输出一个可独立运行的可执行文件。
+
+```shell
+--keep-binary
+
+# 示例：同时生成安装包和独立可执行文件
+pake https://github.com --name GitHub --keep-binary
+```
+
+**输出结果**：同时创建安装包和独立可执行文件（Unix 系统为 `AppName-binary`，Windows 为 `AppName.exe`）。
+
 #### [title]
 
 设置窗口标题栏文本。如果未指定，窗口标题将为空。

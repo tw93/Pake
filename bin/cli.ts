@@ -149,6 +149,11 @@ program
       .hideHelp(),
   )
   .addOption(
+    new Option('--keep-binary', 'Keep raw binary file alongside installer')
+      .default(DEFAULT.keepBinary)
+      .hideHelp(),
+  )
+  .addOption(
     new Option('--installer-language <string>', 'Installer language')
       .default(DEFAULT.installerLanguage)
       .hideHelp(),

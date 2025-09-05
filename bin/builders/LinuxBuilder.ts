@@ -10,7 +10,6 @@ export default class LinuxBuilder extends BaseBuilder {
   constructor(options: PakeAppOptions) {
     super(options);
 
-    // Parse target format and architecture
     const target = options.targets || 'deb';
     if (target.includes('-arm64')) {
       this.buildFormat = target.replace('-arm64', '');
@@ -20,7 +19,6 @@ export default class LinuxBuilder extends BaseBuilder {
       this.buildArch = this.resolveTargetArch('auto');
     }
 
-    // Set targets to format for Tauri
     this.options.targets = this.buildFormat;
   }
 
@@ -28,23 +26,23 @@ export default class LinuxBuilder extends BaseBuilder {
     const { name, targets } = this.options;
     const version = tauriConfig.version;
 
-    // Determine architecture display name
     let arch: string;
     if (this.buildArch === 'arm64') {
       arch = targets === 'rpm' || targets === 'appimage' ? 'aarch64' : 'arm64';
     } else {
-      // Auto-detect or default to current architecture
-      const resolvedArch = this.buildArch === 'x64' ? 'amd64' : this.buildArch;
-      arch = resolvedArch;
-      if (
-        resolvedArch === 'arm64' &&
-        (targets === 'rpm' || targets === 'appimage')
-      ) {
-        arch = 'aarch64';
+      if (this.buildArch === 'x64') {
+        arch = targets === 'rpm' ? 'x86_64' : 'amd64';
+      } else {
+        arch = this.buildArch;
+        if (
+          this.buildArch === 'arm64' &&
+          (targets === 'rpm' || targets === 'appimage')
+        ) {
+          arch = 'aarch64';
+        }
       }
     }
 
-    // The RPM format uses different separators and version number formats
     if (targets === 'rpm') {
       return `${name}-${version}-1.${arch}`;
     }
@@ -52,7 +50,6 @@ export default class LinuxBuilder extends BaseBuilder {
     return `${name}_${version}_${arch}`;
   }
 
-  // Customize it, considering that there are all targets.
   async build(url: string) {
     const targetTypes = ['deb', 'appimage', 'rpm'];
     for (const target of targetTypes) {
@@ -65,7 +62,6 @@ export default class LinuxBuilder extends BaseBuilder {
   protected getBuildCommand(packageManager: string = 'pnpm'): string {
     const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
 
-    // Only add target if it's ARM64
     const buildTarget =
       this.buildArch === 'arm64'
         ? this.getTauriTarget(this.buildArch, 'linux')
@@ -77,7 +73,6 @@ export default class LinuxBuilder extends BaseBuilder {
       buildTarget,
     );
 
-    // Add features
     const features = this.getBuildFeatures();
     if (features.length > 0) {
       fullCommand += ` --features ${features.join(',')}`;
@@ -102,5 +97,17 @@ export default class LinuxBuilder extends BaseBuilder {
       return 'AppImage';
     }
     return super.getFileType(target);
+  }
+
+  protected hasArchSpecificTarget(): boolean {
+    return this.buildArch === 'arm64';
+  }
+
+  protected getArchSpecificPath(): string {
+    if (this.buildArch === 'arm64') {
+      const target = this.getTauriTarget(this.buildArch, 'linux');
+      return `src-tauri/target/${target}`;
+    }
+    return super.getArchSpecificPath();
   }
 }

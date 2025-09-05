@@ -26,6 +26,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   incognito: false,
   wasm: false,
   enableDragDrop: false,
+  keepBinary: false,
 };
 
 // Just for cli development
