@@ -22,7 +22,7 @@ import sharp from 'sharp';
 import * as psl from 'psl';
 
 var name = "pake-cli";
-var version = "3.3.0";
+var version = "3.3.1";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -85,7 +85,7 @@ var dependencies = {
 	ora: "^8.2.0",
 	prompts: "^2.4.2",
 	psl: "^1.15.0",
-	sharp: "^0.34.3",
+	sharp: "^0.33.4",
 	"tmp-promise": "^3.0.3",
 	"update-notifier": "^7.3.1"
 };
@@ -1154,7 +1154,7 @@ async function checkUpdateTips() {
 const ICON_CONFIG = {
     minFileSize: 100,
     downloadTimeout: 10000,
-    supportedFormats: ['png', 'ico', 'jpeg', 'jpg', 'webp'],
+    supportedFormats: ['png', 'ico', 'jpeg', 'jpg', 'webp', 'icns'],
     whiteBackground: { r: 255, g: 255, b: 255 },
 };
 // API Configuration
@@ -1235,6 +1235,14 @@ async function handleIcon(options, url) {
         if (options.icon.startsWith('http')) {
             const downloadedPath = await downloadIcon(options.icon);
             if (downloadedPath && options.name) {
+                // Check if the downloaded file is already in the correct format for the platform
+                const downloadedExt = path.extname(downloadedPath).toLowerCase();
+                const isCorrectFormat = (IS_WIN && downloadedExt === '.ico') ||
+                    (IS_LINUX && downloadedExt === '.png') ||
+                    (!IS_WIN && !IS_LINUX && downloadedExt === '.icns'); // macOS
+                if (isCorrectFormat) {
+                    return downloadedPath;
+                }
                 // Convert downloaded icon to platform-specific format
                 const convertedPath = await convertIconFormat(downloadedPath, options.name);
                 if (convertedPath) {
@@ -1546,7 +1554,7 @@ program
     .option('--fullscreen', 'Start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
     .option('--hide-title-bar', 'For Mac, hide title bar', DEFAULT_PAKE_OPTIONS.hideTitleBar)
     .option('--multi-arch', 'For Mac, both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
-    .option('--inject <./style.css,./script.js,...>', 'Injection of .js or .css files', (val, previous) => {
+    .option('--inject <files>', 'Inject local CSS/JS files into the page', (val, previous) => {
     if (!val)
         return DEFAULT_PAKE_OPTIONS.inject;
     // Split by comma and trim whitespace, filter out empty strings
@@ -1564,7 +1572,7 @@ program
     .addOption(new Option('--user-agent <string>', 'Custom user agent')
     .default(DEFAULT_PAKE_OPTIONS.userAgent)
     .hideHelp())
-    .addOption(new Option('--targets <string>', 'Build target: Linux: "deb", "rpm", "appimage", "deb-arm64", "rpm-arm64", "appimage-arm64"; Windows: "x64", "arm64"; macOS: "intel", "apple", "universal"').default(DEFAULT_PAKE_OPTIONS.targets))
+    .addOption(new Option('--targets <string>', 'Build target format for your system').default(DEFAULT_PAKE_OPTIONS.targets))
     .addOption(new Option('--app-version <string>', 'App version, the same as package.json version')
     .default(DEFAULT_PAKE_OPTIONS.appVersion)
     .hideHelp())

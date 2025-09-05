@@ -50,8 +50,8 @@ program
   .option('--hide-title-bar', 'For Mac, hide title bar', DEFAULT.hideTitleBar)
   .option('--multi-arch', 'For Mac, both Intel and M1', DEFAULT.multiArch)
   .option(
-    '--inject <./style.css,./script.js,...>',
-    'Injection of .js or .css files',
+    '--inject <files>',
+    'Inject local CSS/JS files into the page',
     (val, previous) => {
       if (!val) return DEFAULT.inject;
 
@@ -83,7 +83,7 @@ program
   .addOption(
     new Option(
       '--targets <string>',
-      'Build target: Linux: "deb", "rpm", "appimage", "deb-arm64", "rpm-arm64", "appimage-arm64"; Windows: "x64", "arm64"; macOS: "intel", "apple", "universal"',
+      'Build target format for your system',
     ).default(DEFAULT.targets),
   )
   .addOption(

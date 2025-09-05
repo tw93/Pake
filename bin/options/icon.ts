@@ -17,7 +17,7 @@ import { PakeAppOptions } from '@/types';
 const ICON_CONFIG = {
   minFileSize: 100,
   downloadTimeout: 10000,
-  supportedFormats: ['png', 'ico', 'jpeg', 'jpg', 'webp'] as const,
+  supportedFormats: ['png', 'ico', 'jpeg', 'jpg', 'webp', 'icns'] as const,
   whiteBackground: { r: 255, g: 255, b: 255 },
 };
 
@@ -109,6 +109,17 @@ export async function handleIcon(options: PakeAppOptions, url?: string) {
     if (options.icon.startsWith('http')) {
       const downloadedPath = await downloadIcon(options.icon);
       if (downloadedPath && options.name) {
+        // Check if the downloaded file is already in the correct format for the platform
+        const downloadedExt = path.extname(downloadedPath).toLowerCase();
+        const isCorrectFormat =
+          (IS_WIN && downloadedExt === '.ico') ||
+          (IS_LINUX && downloadedExt === '.png') ||
+          (!IS_WIN && !IS_LINUX && downloadedExt === '.icns'); // macOS
+
+        if (isCorrectFormat) {
+          return downloadedPath;
+        }
+
         // Convert downloaded icon to platform-specific format
         const convertedPath = await convertIconFormat(
           downloadedPath,
