@@ -169,7 +169,7 @@ class PakeTestRunner {
     await this.runTest(
       "Help Command",
       () => {
-        const output = execSync(`node "${config.CLI_PATH}" --help`, {
+        const output = execSync(`node "${config.CLI_PATH}"`, {
           encoding: "utf8",
           timeout: 3000,
         });
