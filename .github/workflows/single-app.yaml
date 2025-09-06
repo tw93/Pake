@@ -48,7 +48,7 @@ on:
 
 jobs:
   build:
-    name: ${{ inputs.title }} (${{ matrix.os }})
+    name: ${{ inputs.title }} (${{ matrix.build }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false

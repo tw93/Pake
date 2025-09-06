@@ -40,6 +40,7 @@ jobs:
           echo "apps_config=$(jq -c '.' default_app_list.json)" >> $GITHUB_OUTPUT
 
   build-popular-apps:
+    name: ${{ matrix.config.title }}
     needs: release-apps
     if: needs.release-apps.result == 'success'
     strategy:
