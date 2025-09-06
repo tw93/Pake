@@ -28,10 +28,17 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         serde_json::to_string(&window_config).unwrap()
     );
 
-    let window_title = window_config.title.as_deref().unwrap_or("");
+    // Platform-specific title: macOS prefers empty, others fallback to product name
+    let effective_title = window_config.title.as_deref().unwrap_or_else(|| {
+        if cfg!(target_os = "macos") {
+            ""
+        } else {
+            tauri_config.product_name.as_deref().unwrap_or("")
+        }
+    });
 
     let mut window_builder = WebviewWindowBuilder::new(app, "pake", url)
-        .title(window_title)
+        .title(effective_title)
         .visible(false)
         .user_agent(user_agent)
         .resizable(window_config.resizable)
@@ -44,6 +51,7 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         window_builder = window_builder.disable_drag_drop_handler();
     }
 
+    // Add initialization scripts
     window_builder = window_builder
         .initialization_script(&config_script)
         .initialization_script(include_str!("../inject/component.js"))
@@ -79,24 +87,13 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         }
     }
 
-    #[cfg(target_os = "windows")]
+    // Windows and Linux share the same configuration
+    #[cfg(not(target_os = "macos"))]
     {
         window_builder = window_builder
             .data_directory(_data_dir)
-            .title(app.package_info().name.clone())
-            .additional_browser_args("--disable-blink-features=AutomationControlled");
-
-        window_builder = window_builder.theme(None);
-    }
-
-    #[cfg(target_os = "linux")]
-    {
-        window_builder = window_builder
-            .data_directory(_data_dir)
-            .title(app.package_info().name.clone())
-            .additional_browser_args("--disable-blink-features=AutomationControlled");
-
-        window_builder = window_builder.theme(None);
+            .additional_browser_args("--disable-blink-features=AutomationControlled")
+            .theme(None);
     }
 
     window_builder.build().expect("Failed to build window")
