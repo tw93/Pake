@@ -76,7 +76,7 @@ jobs:
       - name: Setup Node.js Environment
         uses: ./.github/actions/setup-env
         with:
-          mode: ${{ matrix.build == 'linux' && 'full' || 'node-only' }}
+          mode: ${{ (matrix.build == 'linux' || matrix.build == 'macos') && 'build' || 'node' }}
 
       - name: Rust cache restore
         uses: actions/cache/restore@v4.2.0

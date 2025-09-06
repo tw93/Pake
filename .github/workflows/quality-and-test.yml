@@ -33,6 +33,8 @@ jobs:
 
       - name: Setup Development Environment
         uses: ./.github/actions/setup-env
+        with:
+          mode: node
 
       - name: Auto-fix Prettier formatting
         run: npx prettier --write . --ignore-unknown
@@ -175,29 +177,13 @@ jobs:
     steps:
       - name: Generate Summary
         run: |
-          echo "# Quality & Testing Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [ "${{ needs.auto-format.result }}" == "success" ]; then
-            echo "✅ **Auto Formatting**: PASSED" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "❌ **Auto Formatting**: FAILED" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          if [ "${{ needs.rust-quality.result }}" == "success" ]; then
-            echo "✅ **Rust Quality**: PASSED" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "❌ **Rust Quality**: FAILED" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          if [ "${{ needs.cli-tests.result }}" == "success" ]; then
-            echo "✅ **CLI Tests**: PASSED" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "❌ **CLI Tests**: FAILED" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          if [ "${{ needs.release-build-test.result }}" == "success" ]; then
-            echo "✅ **Release Build Test**: PASSED" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "❌ **Release Build Test**: FAILED" >> $GITHUB_STEP_SUMMARY
-          fi
+          {
+            echo "# Quality & Testing Summary"
+            echo ""
+            echo "| Check | Status |"
+            echo "|-------|--------|"
+            echo "| Auto Formatting | ${{ needs.auto-format.result == 'success' && 'PASSED' || 'FAILED' }} |"
+            echo "| Rust Quality | ${{ needs.rust-quality.result == 'success' && 'PASSED' || 'FAILED' }} |"
+            echo "| CLI Tests | ${{ needs.cli-tests.result == 'success' && 'PASSED' || 'FAILED' }} |"
+            echo "| Release Build | ${{ needs.release-build-test.result == 'success' && 'PASSED' || 'FAILED' }} |"
+          } >> $GITHUB_STEP_SUMMARY

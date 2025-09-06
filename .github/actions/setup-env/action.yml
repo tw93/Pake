@@ -1,13 +1,15 @@
 name: Setup Development Environment
-description: One-stop setup with smart presets
-
-# Modes: full (default), node-only, rust-only, build (with cache)
+description: Unified environment setup with Node.js, Rust, and system dependencies
 
 inputs:
   mode:
-    description: "Setup mode: full, node-only, rust-only, or build"
+    description: |
+      Setup mode:
+      - build: Complete environment (Node + Rust + System deps + Cache)  
+      - node: Node.js only (pnpm + Node 22)
+      - rust: Rust only (toolchain + targets)
     required: false
-    default: "full"
+    default: "build"
 
 outputs:
   setup-complete:
@@ -17,7 +19,7 @@ outputs:
 runs:
   using: composite
   steps:
-    # 1. Setup environment flags
+    # Parse mode and set environment flags
     - name: Setup environment flags
       shell: bash
       run: |
@@ -25,33 +27,28 @@ runs:
 
         # Validate and set flags in one pass
         case "$MODE" in
-          full)
+          build|full)
             echo "SETUP_NODE=true" >> $GITHUB_ENV
             echo "SETUP_RUST=true" >> $GITHUB_ENV  
             echo "SETUP_SYSTEM=true" >> $GITHUB_ENV
             ;;
-          node-only)
+          node|node-only)
             echo "SETUP_NODE=true" >> $GITHUB_ENV
             echo "SETUP_RUST=false" >> $GITHUB_ENV
             echo "SETUP_SYSTEM=false" >> $GITHUB_ENV
             ;;
-          rust-only)
+          rust|rust-only)
             echo "SETUP_NODE=false" >> $GITHUB_ENV
             echo "SETUP_RUST=true" >> $GITHUB_ENV
             echo "SETUP_SYSTEM=false" >> $GITHUB_ENV
             ;;
-          build)
-            echo "SETUP_NODE=true" >> $GITHUB_ENV
-            echo "SETUP_RUST=true" >> $GITHUB_ENV
-            echo "SETUP_SYSTEM=true" >> $GITHUB_ENV
-            ;;
           *)
-            echo "❌ Invalid mode: '$MODE'. Valid modes: full, node-only, rust-only, build"
+            echo "❌ Invalid mode: '$MODE'. Valid modes: build, node, rust"
             exit 1
             ;;
         esac
 
-    # 2. Node.js Environment Setup
+    # Node.js Environment Setup
     - name: Install pnpm
       if: env.SETUP_NODE == 'true'
       uses: pnpm/action-setup@v4
@@ -71,7 +68,7 @@ runs:
       shell: bash
       run: pnpm install --frozen-lockfile
 
-    # 3. Rust Environment Setup
+    # Rust Environment Setup
     - name: Setup Rust for Linux
       if: env.SETUP_RUST == 'true' && runner.os == 'Linux'
       uses: dtolnay/rust-toolchain@stable
@@ -99,7 +96,7 @@ runs:
         rustup target add x86_64-apple-darwin
         rustup target add aarch64-apple-darwin
 
-    # 4. System Dependencies
+    # System Dependencies
     - name: Install Ubuntu dependencies
       if: env.SETUP_SYSTEM == 'true' && runner.os == 'Linux'
       uses: awalsh128/cache-apt-pkgs-action@v1.4.3
@@ -140,7 +137,7 @@ runs:
           exit 1
         }
 
-    # 5. Build optimizations (caching)
+    # Build optimizations (caching)
     - name: Setup Rust cache
       if: inputs.mode == 'build'
       uses: actions/cache@v4
