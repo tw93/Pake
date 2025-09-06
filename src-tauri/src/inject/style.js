@@ -16,7 +16,6 @@ window.addEventListener("DOMContentLoaded", (_event) => {
     #masthead-ad,
     #app > header > div > div.menu,
     #root > div > div.fixed.top-0.left-0.w-64.h-screen.p-10.pb-0.flex.flex-col.justify-between > div > div.space-y-4 > a:nth-child(3),
-    #app > div.layout > div.main-container > div.side-bar > div,
     #app > div.layout > div.main-container > div.side-bar > li.divider,
     #Rightbar > div:nth-child(6) > div.sidebar_compliance,
     #__next > div.PageWithSidebarLayout_centeringDiv___L9br > aside > div > div > a.ChatPageFollowTwitterLink_followLink__Gl2tt,
