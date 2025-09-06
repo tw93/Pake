@@ -1,7 +1,7 @@
 {
   "name": "pake-cli",
   "version": "3.3.2",
-  "description": "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。",
+  "description": "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。",
   "engines": {
     "node": ">=18.0.0"
   },
@@ -51,7 +51,7 @@
   "license": "MIT",
   "dependencies": {
     "@tauri-apps/api": "^2.8.0",
-    "@tauri-apps/cli": "^2.8.3",
+    "@tauri-apps/cli": "^2.8.4",
     "axios": "^1.11.0",
     "chalk": "^5.6.0",
     "commander": "^12.1.0",
@@ -63,7 +63,7 @@
     "ora": "^8.2.0",
     "prompts": "^2.4.2",
     "psl": "^1.15.0",
-    "sharp": "^0.33.4",
+    "sharp": "^0.33.5",
     "tmp-promise": "^3.0.3",
     "update-notifier": "^7.3.1"
   },
@@ -74,7 +74,7 @@
     "@rollup/plugin-replace": "^6.0.2",
     "@rollup/plugin-terser": "^0.4.4",
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^20.19.11",
+    "@types/node": "^20.19.13",
     "@types/page-icon": "^0.3.6",
     "@types/prompts": "^2.4.9",
     "@types/tmp": "^0.2.6",
@@ -82,7 +82,7 @@
     "app-root-path": "^3.1.0",
     "cross-env": "^7.0.3",
     "prettier": "^3.6.2",
-    "rollup": "^4.49.0",
+    "rollup": "^4.50.0",
     "rollup-plugin-typescript2": "^0.36.0",
     "tslib": "^2.8.1",
     "typescript": "^5.9.2"

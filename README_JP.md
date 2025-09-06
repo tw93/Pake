@@ -3,7 +3,7 @@
     <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
 </p>
 <h1 align="center">Pake</h1>
-<p align="center"><strong>Rustでウェブページをデスクトップアプリにパッケージ化、Mac | Windows | Linux対応</strong></p>
+<p align="center"><strong>ワンコマンドでウェブページをデスクトップアプリにパッケージ化、macOS、Windows、Linux対応</strong></p>
 <div align="center">
     <a href="https://twitter.com/HiTw93" target="_blank">
     <img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
