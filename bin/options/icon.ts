@@ -20,14 +20,7 @@ type PlatformIconConfig = {
 };
 const ICON_CONFIG = {
   minFileSize: 100,
-  supportedFormats: [
-    'png',
-    'ico',
-    'jpeg',
-    'jpg',
-    'webp',
-    'icns',
-  ] as const,
+  supportedFormats: ['png', 'ico', 'jpeg', 'jpg', 'webp', 'icns'] as const,
   whiteBackground: { r: 255, g: 255, b: 255 },
   transparentBackground: { r: 255, g: 255, b: 255, alpha: 0 },
   downloadTimeout: {
@@ -43,14 +36,8 @@ const PLATFORM_CONFIG: Record<'win' | 'linux' | 'macos', PlatformIconConfig> = {
 };
 
 const API_KEYS = {
-  logoDev: [
-    'pk_JLLMUKGZRpaG5YclhXaTkg',
-    'pk_Ph745P8mQSeYFfW2Wk039A',
-  ],
-  brandfetch: [
-    '1idqvJC0CeFSeyp3Yf7',
-    '1idej-yhU_ThggIHFyG',
-  ],
+  logoDev: ['pk_JLLMUKGZRpaG5YclhXaTkg', 'pk_Ph745P8mQSeYFfW2Wk039A'],
+  brandfetch: ['1idqvJC0CeFSeyp3Yf7', '1idej-yhU_ThggIHFyG'],
 };
 
 /**
@@ -83,7 +70,9 @@ async function copyWindowsIconIfNeeded(
     await fsExtra.copy(convertedPath, finalIconPath);
     return finalIconPath;
   } catch (error) {
-    logger.warn(`Failed to copy Windows icon: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    logger.warn(
+      `Failed to copy Windows icon: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
     return convertedPath;
   }
 }
@@ -188,7 +177,10 @@ async function convertIconFormat(
 /**
  * Processes downloaded or local icon for platform-specific format
  */
-async function processIcon(iconPath: string, appName: string): Promise<string | null> {
+async function processIcon(
+  iconPath: string,
+  appName: string,
+): Promise<string | null> {
   if (!iconPath || !appName) return iconPath;
 
   // Check if already in correct platform format
@@ -219,7 +211,10 @@ async function getDefaultIcon(): Promise<string> {
 
   if (IS_WIN) {
     const defaultIcoPath = generateIconPath('icon', true);
-    const defaultPngPath = path.join(npmDirectory, 'src-tauri/png/icon_512.png');
+    const defaultPngPath = path.join(
+      npmDirectory,
+      'src-tauri/png/icon_512.png',
+    );
 
     // Try default ico first
     if (await fsExtra.pathExists(defaultIcoPath)) {
@@ -235,7 +230,9 @@ async function getDefaultIcon(): Promise<string> {
           return await copyWindowsIconIfNeeded(convertedPath, 'icon');
         }
       } catch (error) {
-        logger.warn(`Failed to convert default png to ico: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        logger.warn(
+          `Failed to convert default png to ico: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
       }
     }
 
@@ -250,7 +247,9 @@ async function getDefaultIcon(): Promise<string> {
   }
 
   // Linux and macOS defaults
-  const iconPath = IS_LINUX ? 'src-tauri/png/icon_512.png' : 'src-tauri/icons/icon.icns';
+  const iconPath = IS_LINUX
+    ? 'src-tauri/png/icon_512.png'
+    : 'src-tauri/icons/icon.icns';
   return path.join(npmDirectory, iconPath);
 }
 
@@ -343,8 +342,13 @@ async function tryGetFavicon(
 
         const convertedPath = await convertIconFormat(faviconPath, appName);
         if (convertedPath) {
-          const finalPath = await copyWindowsIconIfNeeded(convertedPath, appName);
-          spinner.succeed(chalk.green('Icon fetched and converted successfully!'));
+          const finalPath = await copyWindowsIconIfNeeded(
+            convertedPath,
+            appName,
+          );
+          spinner.succeed(
+            chalk.green('Icon fetched and converted successfully!'),
+          );
           return finalPath;
         }
       } catch (error) {
