@@ -169,7 +169,7 @@ program
     optionDescription: (option) => {
       if (option.flags === '-v, --version') return '';
       return option.description;
-    }
+    },
   })
   .action(async (url: string, options: PakeCliOptions) => {
     await checkUpdateTips();
