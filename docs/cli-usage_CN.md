@@ -41,7 +41,7 @@ source ~/.bashrc
 ## 快速开始
 
 ```bash
-# 基础用法 - 只需要提供URL
+# 基础用法 - 只需要提供URL（自动获取网站图标）
 pake https://weekly.tw93.fun --name "Weekly"
 
 # 自定义图标和窗口大小（macOS示例）
@@ -49,6 +49,12 @@ pake https://weekly.tw93.fun --name "Weekly" --icon https://cdn.tw93.fun/pake/we
 
 # macOS 沉浸式体验
 pake https://weekly.tw93.fun --name "Weekly" --hide-title-bar
+
+# 完整示例：多个选项组合使用
+pake https://github.com --name "GitHub Desktop" --width 1400 --height 900 --show-system-tray --debug
+
+# 注重隐私的应用：隐身模式
+pake https://duckduckgo.com --name "DuckDuckGo" --incognito --always-on-top
 ```
 
 ## 命令行使用
@@ -71,14 +77,14 @@ pake [url] [options]
 
 您可以通过传递以下选项来定制打包过程。以下是最常用的选项：
 
-| 选项               | 描述                     | 示例                                           |
-| ------------------ | ------------------------ | ---------------------------------------------- |
-| `--name`           | 应用程序名称             | `--name "Weekly"`                              |
-| `--icon`           | 应用程序图标             | `--icon https://cdn.tw93.fun/pake/weekly.icns` |
-| `--width`          | 窗口宽度（默认：1200px） | `--width 1400`                                 |
-| `--height`         | 窗口高度（默认：780px）  | `--height 900`                                 |
-| `--hide-title-bar` | 沉浸式标题栏（仅macOS）  | `--hide-title-bar`                             |
-| `--debug`          | 启用开发者工具           | `--debug`                                      |
+| 选项               | 描述                                 | 示例                                           |
+| ------------------ | ------------------------------------ | ---------------------------------------------- |
+| `--name`           | 应用程序名称                         | `--name "Weekly"`                              |
+| `--icon`           | 自定义图标（可选，自动获取网站图标） | `--icon https://cdn.tw93.fun/pake/weekly.icns` |
+| `--width`          | 窗口宽度（默认：1200px）             | `--width 1400`                                 |
+| `--height`         | 窗口高度（默认：780px）              | `--height 900`                                 |
+| `--hide-title-bar` | 沉浸式标题栏（仅macOS）              | `--hide-title-bar`                             |
+| `--debug`          | 启用开发者工具                       | `--debug`                                      |
 
 完整选项请参见下面的详细说明：
 
@@ -101,16 +107,22 @@ pake [url] [options]
 
 #### [icon]
 
-指定应用程序的图标，支持本地或远程文件，不传此参数时，Pake 会智能获取网站图标。自定义图标可访问 [icon-icons](https://icon-icons.com) 或 [macOSicons](https://macosicons.com/#/) 下载。
+**可选参数**：不传此参数时，Pake 会自动获取网站图标并转换为对应格式。如需自定义图标，可访问 [icon-icons](https://icon-icons.com) 或 [macOSicons](https://macosicons.com/#/) 下载。
 
-- macOS 要求使用 `.icns` 格式。
-- Windows 要求使用 `.ico` 格式。
-- Linux 要求使用 `.png` 格式。
+支持本地或远程文件，自动转换为平台所需格式：
+
+- macOS：`.icns` 格式
+- Windows：`.ico` 格式
+- Linux：`.png` 格式
 
 ```shell
 --icon <path>
 
 # 示例：
+# 不传 --icon 参数，自动获取网站图标
+pake https://github.com --name GitHub
+
+# 使用自定义图标
 --icon ./my-icon.png
 --icon https://cdn.tw93.fun/pake/weekly.icns  # 远程图标（.icns适用于macOS）
 ```
@@ -275,6 +287,18 @@ pake [url] [options]
 --hide-on-close
 ```
 
+#### [title]
+
+设置窗口标题栏文本，macOS 未指定时不显示标题，Windows/Linux 回退使用应用名称。
+
+```shell
+--title <string>
+
+# 示例：
+--title "我的应用"
+--title "音乐播放器"
+```
+
 #### [incognito]
 
 以隐私/隐身浏览模式启动应用程序。默认为 `false`。启用后，webview 将在隐私模式下运行，这意味着它不会存储 cookie、本地存储或浏览历史记录。这对于注重隐私的应用程序很有用。
@@ -319,18 +343,6 @@ pake https://github.com --name GitHub --keep-binary
 ```
 
 **输出结果**：同时创建安装包和独立可执行文件（Unix 系统为 `AppName-binary`，Windows 为 `AppName.exe`）。
-
-#### [title]
-
-设置窗口标题栏文本，macOS 未指定时不显示标题，Windows/Linux 回退使用应用名称。
-
-```shell
---title <string>
-
-# 示例：
---title "我的应用"
---title "音乐播放器"
-```
 
 #### [installer-language]
 
@@ -402,6 +414,6 @@ docker run -it --rm \ # Run interactively, remove container after exit
 docker run -it --rm \
     -v ./packages:/output \
     ghcr.io/tw93/pake \
-    https://example.com --name myapp --icon ./icon.png
+    https://example.com --name MyApp --icon ./icon.png
 
 ```

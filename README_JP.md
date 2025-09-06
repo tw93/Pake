@@ -161,10 +161,10 @@
 # インストール
 pnpm install -g pake-cli
 
-# 基本使用
+# 基本使用（ウェブサイトのアイコンを自動取得）
 pake https://weekly.tw93.fun --name Weekly
 
-# よく使うパラメータ：--name アプリ名、--icon アイコン、--width/--height ウィンドウサイズ、--hide-title-bar macOS没入型
+# よく使うパラメータ：--name アプリ名、--icon カスタムアイコン、--width/--height ウィンドウサイズ、--hide-title-bar macOS没入型
 pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/weekly.icns --hide-title-bar
 ```
 

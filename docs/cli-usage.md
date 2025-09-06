@@ -41,7 +41,7 @@ source ~/.bashrc
 ## Quick Start
 
 ```bash
-# Basic usage - just provide a URL
+# Basic usage - just provide a URL (auto-fetch website icon)
 pake https://weekly.tw93.fun --name "Weekly"
 
 # With custom icon and window size (macOS example)
@@ -49,6 +49,12 @@ pake https://weekly.tw93.fun --name "Weekly" --icon https://cdn.tw93.fun/pake/we
 
 # macOS immersive experience
 pake https://weekly.tw93.fun --name "Weekly" --hide-title-bar
+
+# Complete example with multiple options
+pake https://github.com --name "GitHub Desktop" --width 1400 --height 900 --show-system-tray --debug
+
+# Privacy-focused app with incognito mode
+pake https://duckduckgo.com --name "DuckDuckGo" --incognito --always-on-top
 ```
 
 ## CLI Usage
@@ -71,14 +77,14 @@ The URL is the link to the web page you want to package or the path to a local H
 
 Various options are available for customization. Here are the most commonly used ones:
 
-| Option             | Description                    | Example                                        |
-| ------------------ | ------------------------------ | ---------------------------------------------- |
-| `--name`           | Application name               | `--name "Weekly"`                              |
-| `--icon`           | Application icon               | `--icon https://cdn.tw93.fun/pake/weekly.icns` |
-| `--width`          | Window width (default: 1200px) | `--width 1400`                                 |
-| `--height`         | Window height (default: 780px) | `--height 900`                                 |
-| `--hide-title-bar` | Immersive header (macOS only)  | `--hide-title-bar`                             |
-| `--debug`          | Enable development tools       | `--debug`                                      |
+| Option             | Description                                     | Example                                        |
+| ------------------ | ----------------------------------------------- | ---------------------------------------------- |
+| `--name`           | Application name                                | `--name "Weekly"`                              |
+| `--icon`           | Custom icon (optional, auto-fetch website icon) | `--icon https://cdn.tw93.fun/pake/weekly.icns` |
+| `--width`          | Window width (default: 1200px)                  | `--width 1400`                                 |
+| `--height`         | Window height (default: 780px)                  | `--height 900`                                 |
+| `--hide-title-bar` | Immersive header (macOS only)                   | `--hide-title-bar`                             |
+| `--debug`          | Enable development tools                        | `--debug`                                      |
 
 For complete options, see detailed sections below.
 
@@ -101,16 +107,22 @@ Specify the application name. If not provided, you will be prompted to enter it.
 
 #### [icon]
 
-Specify the application icon. Supports both local and remote files. If not provided, Pake will intelligently fetch the website's icon. For custom icons, visit [icon-icons](https://icon-icons.com) or [macOSicons](https://macosicons.com/#/).
+**Optional parameter**: If not provided, Pake will automatically fetch the website's icon and convert to the appropriate format. For custom icons, visit [icon-icons](https://icon-icons.com) or [macOSicons](https://macosicons.com/#/).
 
-- For macOS, use `.icns` format.
-- For Windows, use `.ico` format.
-- For Linux, use `.png` format.
+Supports both local and remote files, automatically converts to platform-specific formats:
+
+- macOS: `.icns` format
+- Windows: `.ico` format
+- Linux: `.png` format
 
 ```shell
 --icon <path>
 
 # Examples:
+# Without --icon parameter, auto-fetch website icon
+pake https://github.com --name GitHub
+
+# With custom icons
 --icon ./my-icon.png
 --icon https://cdn.tw93.fun/pake/weekly.icns  # Remote icon (.icns for macOS)
 ```

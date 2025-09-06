@@ -161,10 +161,10 @@ In addition, double-click the title bar to switch to full-screen mode. For Mac u
 # Install
 pnpm install -g pake-cli
 
-# Basic usage
+# Basic usage (auto-fetch website icon)
 pake https://weekly.tw93.fun --name Weekly
 
-# Common options: --name app name, --icon icon, --width/--height window size, --hide-title-bar macOS immersive
+# Common options: --name app name, --icon custom icon, --width/--height window size, --hide-title-bar macOS immersive
 pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/weekly.icns --hide-title-bar
 ```
 

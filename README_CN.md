@@ -162,10 +162,10 @@
 # 安装
 pnpm install -g pake-cli
 
-# 基础使用
+# 基础使用（自动获取网站图标）
 pake https://weekly.tw93.fun --name Weekly
 
-# 常用参数：--name 应用名称，--icon 图标，--width/--height 窗口尺寸，--hide-title-bar macOS沉浸式
+# 常用参数：--name 应用名称，--icon 自定义图标，--width/--height 窗口尺寸，--hide-title-bar macOS沉浸式
 pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/weekly.icns --hide-title-bar
 ```
 
