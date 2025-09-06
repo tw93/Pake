@@ -1,5 +1,7 @@
 # 高级用法
 
+<h4 align="right"><strong><a href="advanced-usage.md">English</a></strong> | 简体中文</h4>
+
 通过样式修改、JavaScript 注入和容器通信等方式自定义 Pake 应用。
 
 ## 样式自定义
@@ -12,12 +14,14 @@
 2. 使用开发者工具找到要修改的元素
 3. 编辑 `src-tauri/src/inject/style.js`：
 
-```javascript
-const css = `
-  .ads-banner { display: none !important; }
-  .header { background: #1a1a1a !important; }
-`;
-```
+   ```javascript
+   const css = `
+     .ads-banner { display: none !important; }
+     .header { background: #1a1a1a !important; }
+   `;
+   ```
+
+````
 
 ## JavaScript 注入
 
@@ -28,13 +32,13 @@ const css = `
 1. 编辑 `src-tauri/src/inject/event.js`
 2. 添加事件监听器：
 
-```javascript
-document.addEventListener("keydown", (e) => {
-  if (e.ctrlKey && e.key === "k") {
-    // 自定义操作
-  }
-});
-```
+  ```javascript
+  document.addEventListener("keydown", (e) => {
+    if (e.ctrlKey && e.key === "k") {
+      // 自定义操作
+    }
+  });
+  ```
 
 ## 容器通信
 
@@ -44,10 +48,10 @@ document.addEventListener("keydown", (e) => {
 
 ```javascript
 window.__TAURI__.invoke("handle_scroll", {
-  scrollY: window.scrollY,
-  scrollX: window.scrollX,
+scrollY: window.scrollY,
+scrollX: window.scrollX,
 });
-```
+````
 
 **容器端（Rust）：**
 
@@ -118,12 +122,49 @@ pake ./my-app/index.html --name my-static-app --use-local-file
 
 ### 前置条件
 
-- Node.js ≥22.0.0 (推荐 LTS，较旧版本 ≥16.0.0 可能可用)
+- Node.js ≥22.0.0 (推荐 LTS，较旧版本 ≥18.0.0 可能可用)
 - Rust ≥1.89.0 (推荐稳定版，较旧版本 ≥1.78.0 可能可用)
-- 平台特定构建工具:
-  - **macOS**: Xcode 命令行工具 (`xcode-select --install`)
-  - **Windows**: Visual Studio 构建工具与 MSVC
-  - **Linux**: `build-essential`、`libwebkit2gtk`、系统依赖
+
+#### 平台特定要求
+
+**macOS:**
+
+- Xcode 命令行工具：`xcode-select --install`
+
+**Windows:**
+
+- **重要**：请先参阅 [Tauri 依赖项指南](https://tauri.app/start/prerequisites/)
+- Windows 10 SDK (10.0.19041.0) 和 Visual Studio Build Tools 2022 (≥17.2)
+- 必需的运行库：
+  1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
+  2. Microsoft Visual C++ 2015-2022 Redistributable (x86)
+  3. Microsoft Visual C++ 2012 Redistributable (x86)（可选）
+  4. Microsoft Visual C++ 2013 Redistributable (x86)（可选）
+  5. Microsoft Visual C++ 2008 Redistributable (x86)（可选）
+
+- **Windows ARM (ARM64) 支持**：在 Visual Studio Installer 中的"单个组件"下安装"MSVC v143 - VS 2022 C++ ARM64 构建工具"
+
+**Linux (Ubuntu):**
+
+```bash
+sudo apt install libdbus-1-dev \
+    libsoup-3.0-dev \
+    libjavascriptcoregtk-4.1-dev \
+    libwebkit2gtk-4.1-dev \
+    build-essential \
+    curl \
+    wget \
+    file \
+    libxdo-dev \
+    libssl-dev \
+    libgtk-3-dev \
+    libayatana-appindicator3-dev \
+    librsvg2-dev \
+    gnome-video-effects \
+    gnome-video-effects-extra \
+    libglib2.0-dev \
+    pkg-config
+```
 
 ### 安装
 
@@ -146,20 +187,116 @@ pnpm run dev
 3. **注入逻辑**: 修改 `src-tauri/src/inject/` 中的文件以进行网页自定义
 4. **测试**: 运行 `pnpm test` 进行综合验证
 
+#### 命令参考
+
 - **开发模式**：`pnpm run dev`（热重载）
 - **构建**：`pnpm run build`
 - **调试构建**：`pnpm run build:debug`
 - **CLI 构建**：`pnpm run cli:build`
 
-### 测试
+#### CLI 开发调试
+
+对于需要热重载的 CLI 开发，可修改 `bin/defaults.ts` 中的 `DEFAULT_DEV_PAKE_OPTIONS` 配置：
+
+```typescript
+export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
+  ...DEFAULT_PAKE_OPTIONS,
+  url: "https://weekly.tw93.fun/",
+  name: "Weekly",
+};
+```
+
+然后运行：
 
 ```bash
-# 运行所有测试（单元 + 集成 + 构建器）
-pnpm test
+pnpm run cli:dev
+```
+
+此脚本会读取上述配置并使用 watch 模式打包指定的应用，对 `pake-cli` 代码修改可实时热更新。
+
+### 测试指南
+
+统一的 CLI 构建测试套件，用于验证多平台打包功能。
+
+#### 运行测试
+
+```bash
+# 完整测试套件（推荐）
+pnpm test                   # 运行完整测试套件，包含真实构建测试（8-12分钟）
+
+# 开发时快速测试
+pnpm test -- --no-build     # 跳过构建测试，仅验证核心功能（30秒）
 
 # 构建 CLI 以供测试
 pnpm run cli:build
 ```
+
+#### 🚀 完整测试套件包含
+
+- ✅ **单元测试**：CLI命令、参数验证、响应时间
+- ✅ **集成测试**：进程管理、文件权限、依赖解析
+- ✅ **构建器测试**：平台检测、架构检测、文件命名
+- ✅ **真实构建测试**：完整的GitHub.com应用打包验证
+
+#### 测试内容详情
+
+**单元测试（6个）**
+
+- 版本命令 (`--version`)
+- 帮助命令 (`--help`)
+- URL 验证（有效/无效链接）
+- 参数验证（数字类型检查）
+- CLI 响应时间（<2秒）
+- Weekly URL 可访问性
+
+**集成测试（3个）**
+
+- 进程生成和管理
+- 文件系统权限检查
+- 依赖包解析验证
+
+**构建测试（3个）**
+
+- 平台检测（macOS/Windows/Linux）
+- 架构检测（Intel/ARM64）
+- 文件命名模式验证
+
+**真实构建测试（重点）**
+
+_macOS_: 🔥 多架构构建（通用二进制）
+
+- 编译 Intel + Apple Silicon 双架构
+- 检测 `.app` 文件生成：`GitHubMultiArch.app`
+- 备用检测：`src-tauri/target/universal-apple-darwin/release/bundle/macos/`
+- 验证通用二进制：`file` 命令检查架构
+
+_Windows_: 单架构构建
+
+- 检测 EXE 文件：`src-tauri/target/x86_64-pc-windows-msvc/release/pake.exe`
+- 检测 MSI 安装包：`src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi`
+
+_Linux_: 单架构构建
+
+- 检测 DEB 包：`src-tauri/target/release/bundle/deb/*.deb`
+- 检测 AppImage：`src-tauri/target/release/bundle/appimage/*.AppImage`
+
+#### 发布构建测试
+
+```bash
+# 实际构建测试（固定测试 weread + twitter 两个应用）
+node ./tests/release.js
+```
+
+真实构建2个应用包，验证完整的打包流程和 release.yml 逻辑是否正常工作。
+
+#### 故障排除
+
+- **CLI 文件不存在**：运行 `pnpm run cli:build`
+- **测试超时**：构建测试需要较长时间完成
+- **构建失败**：检查 Rust 工具链 `rustup update`
+- **权限错误**：确保有写入权限
+
+总计：**13 个测试**，全部通过表示 CLI 功能正常。提交代码前建议运行 `pnpm test` 确保所有平台构建正常。
 
 ### 常见构建问题
 
@@ -170,5 +307,4 @@ pnpm run cli:build
 ## 链接
 
 - [CLI 文档](cli-usage_CN.md)
-- [CLI 测试指南](cli-testing.md)
 - [GitHub 讨论区](https://github.com/tw93/Pake/discussions)

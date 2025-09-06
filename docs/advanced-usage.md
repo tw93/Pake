@@ -1,5 +1,7 @@
 # Advanced Usage
 
+<h4 align="right"><strong>English</strong> | <a href="advanced-usage_CN.md">简体中文</a></h4>
+
 Customize Pake apps with style modifications, JavaScript injection, and container communication.
 
 ## Style Customization
@@ -118,12 +120,49 @@ Understanding Pake's codebase structure will help you navigate and contribute ef
 
 ### Prerequisites
 
-- Node.js ≥22.0.0 (recommended LTS, older versions ≥16.0.0 may work)
+- Node.js ≥22.0.0 (recommended LTS, older versions ≥18.0.0 may work)
 - Rust ≥1.89.0 (recommended stable, older versions ≥1.78.0 may work)
-- Platform-specific build tools:
-  - **macOS**: Xcode Command Line Tools (`xcode-select --install`)
-  - **Windows**: Visual Studio Build Tools with MSVC
-  - **Linux**: `build-essential`, `libwebkit2gtk`, system dependencies
+
+#### Platform-Specific Requirements
+
+**macOS:**
+
+- Xcode Command Line Tools: `xcode-select --install`
+
+**Windows:**
+
+- **CRITICAL**: Consult [Tauri prerequisites](https://tauri.app/start/prerequisites/) before proceeding
+- Windows 10 SDK (10.0.19041.0) and Visual Studio Build Tools 2022 (≥17.2)
+- Required redistributables:
+  1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
+  2. Microsoft Visual C++ 2015-2022 Redistributable (x86)
+  3. Microsoft Visual C++ 2012 Redistributable (x86) (optional)
+  4. Microsoft Visual C++ 2013 Redistributable (x86) (optional)
+  5. Microsoft Visual C++ 2008 Redistributable (x86) (optional)
+
+- **Windows ARM (ARM64) support**: Install C++ ARM64 build tools in Visual Studio Installer under "Individual Components" → "MSVC v143 - VS 2022 C++ ARM64 build tools"
+
+**Linux (Ubuntu):**
+
+```bash
+sudo apt install libdbus-1-dev \
+    libsoup-3.0-dev \
+    libjavascriptcoregtk-4.1-dev \
+    libwebkit2gtk-4.1-dev \
+    build-essential \
+    curl \
+    wget \
+    file \
+    libxdo-dev \
+    libssl-dev \
+    libgtk-3-dev \
+    libayatana-appindicator3-dev \
+    librsvg2-dev \
+    gnome-video-effects \
+    gnome-video-effects-extra \
+    libglib2.0-dev \
+    pkg-config
+```
 
 ### Installation
 
@@ -146,20 +185,116 @@ pnpm run dev
 3. **Injection Logic**: Modify files in `src-tauri/src/inject/` for web customizations
 4. **Testing**: Run `pnpm test` for comprehensive validation
 
+#### Command Reference
+
 - **Dev mode**: `pnpm run dev` (hot reload)
 - **Build**: `pnpm run build`
 - **Debug build**: `pnpm run build:debug`
 - **CLI build**: `pnpm run cli:build`
 
-### Testing
+#### CLI Development
+
+For CLI development with hot reloading, modify the `DEFAULT_DEV_PAKE_OPTIONS` configuration in `bin/defaults.ts`:
+
+```typescript
+export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
+  ...DEFAULT_PAKE_OPTIONS,
+  url: "https://weekly.tw93.fun/",
+  name: "Weekly",
+};
+```
+
+Then run:
 
 ```bash
-# Run all tests (unit + integration + builder)
-pnpm test
+pnpm run cli:dev
+```
+
+This script reads the configuration and packages the specified app in watch mode, with hot updates for `pake-cli` code changes.
+
+### Testing Guide
+
+Comprehensive CLI build test suite for validating multi-platform packaging functionality.
+
+#### Running Tests
+
+```bash
+# Complete test suite (recommended)
+pnpm test                   # Run full test suite including real build tests (8-12 minutes)
+
+# Quick testing during development
+pnpm test -- --no-build     # Skip build tests, validate core functionality only (30 seconds)
 
 # Build CLI for testing
 pnpm run cli:build
 ```
+
+#### 🚀 Complete Test Suite Includes
+
+- ✅ **Unit Tests**: CLI commands, parameter validation, response time
+- ✅ **Integration Tests**: Process management, file permissions, dependency resolution
+- ✅ **Builder Tests**: Platform detection, architecture detection, file naming
+- ✅ **Real Build Tests**: Complete GitHub.com app packaging validation
+
+#### Test Details
+
+**Unit Tests (6 tests)**
+
+- Version command (`--version`)
+- Help command (`--help`)
+- URL validation (valid/invalid links)
+- Parameter validation (number type checking)
+- CLI response time (<2 seconds)
+- Weekly URL accessibility
+
+**Integration Tests (3 tests)**
+
+- Process spawning and management
+- File system permission checks
+- Dependency package resolution validation
+
+**Builder Tests (3 tests)**
+
+- Platform detection (macOS/Windows/Linux)
+- Architecture detection (Intel/ARM64)
+- File naming pattern verification
+
+**Real Build Tests (Focus)**
+
+_macOS_: 🔥 Multi-architecture build (Universal binary)
+
+- Compile Intel + Apple Silicon dual architecture
+- Detect `.app` file generation: `GitHubMultiArch.app`
+- Fallback detection: `src-tauri/target/universal-apple-darwin/release/bundle/macos/`
+- Verify universal binary: `file` command architecture check
+
+_Windows_: Single architecture build
+
+- Detect EXE file: `src-tauri/target/x86_64-pc-windows-msvc/release/pake.exe`
+- Detect MSI installer: `src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi`
+
+_Linux_: Single architecture build
+
+- Detect DEB package: `src-tauri/target/release/bundle/deb/*.deb`
+- Detect AppImage: `src-tauri/target/release/bundle/appimage/*.AppImage`
+
+#### Release Build Testing
+
+```bash
+# Actual build testing (tests weread + twitter apps)
+node ./tests/release.js
+```
+
+Real build of 2 application packages to verify complete packaging flow and release.yml logic.
+
+#### Troubleshooting
+
+- **CLI file not found**: Run `pnpm run cli:build`
+- **Test timeout**: Build tests require extended time to complete
+- **Build failures**: Check Rust toolchain with `rustup update`
+- **Permission errors**: Ensure write permissions are available
+
+Total: **13 tests** - all passing indicates CLI functionality is working properly. Recommend running `pnpm test` before code commits to ensure all platforms build correctly.
 
 ### Common Build Issues
 
@@ -170,5 +305,4 @@ pnpm run cli:build
 ## Links
 
 - [CLI Documentation](cli-usage.md)
-- [CLI Testing Guide](cli-testing.md)
 - [GitHub Discussions](https://github.com/tw93/Pake/discussions)

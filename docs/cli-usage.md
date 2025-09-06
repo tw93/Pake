@@ -1,4 +1,8 @@
+# CLI Usage Guide
+
 <h4 align="right"><strong>English</strong> | <a href="cli-usage_CN.md">简体中文</a></h4>
+
+Complete command-line reference and basic usage for Pake CLI.
 
 ## Installation
 
@@ -28,42 +32,11 @@ echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-<details>
-<summary><strong>Considerations for Windows & Linux Users</strong></summary>
+**Prerequisites:**
 
-- **CRITICAL**: Consult [Tauri prerequisites](https://tauri.app/start/prerequisites/) before proceeding.
-- For Windows users (ensure that `Win10 SDK (10.0.19041.0)` and `Visual Studio build tool 2022 (>=17.2)` are installed), additional installations are required:
-  1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
-  2. Microsoft Visual C++ 2015-2022 Redistributable (x86)
-  3. Microsoft Visual C++ 2012 Redistributable (x86) (optional)
-  4. Microsoft Visual C++ 2013 Redistributable (x86) (optional)
-  5. Microsoft Visual C++ 2008 Redistributable (x86) (optional)
-
-  **For Windows on ARM (ARM64) support**: Install the C++ ARM64 build tools in Visual Studio Installer under "Individual Components" → "MSVC v143 - VS 2022 C++ ARM64 build tools". The system will automatically detect ARM64 architecture and build native ARM64 binaries.
-
-- For Ubuntu users, execute the following commands to install the required libraries before compiling:
-
-  ```bash
-  sudo apt install libdbus-1-dev \
-      libsoup-3.0-dev \
-      libjavascriptcoregtk-4.1-dev \
-      libwebkit2gtk-4.1-dev \
-      build-essential \
-      curl \
-      wget \
-      file \
-      libxdo-dev \
-      libssl-dev \
-      libgtk-3-dev \
-      libayatana-appindicator3-dev \
-      librsvg2-dev \
-      gnome-video-effects \
-      gnome-video-effects-extra \
-      libglib2.0-dev \
-      pkg-config
-  ```
-
-</details>
+- Node.js ≥18.0.0
+- Rust ≥1.78.0 (installed automatically if missing)
+- **Windows/Linux**: See [system dependencies guide](advanced-usage.md#prerequisites) for platform-specific requirements
 
 ## Quick Start
 
@@ -305,7 +278,7 @@ Hide window instead of closing the application when clicking close button. Platf
 
 #### [title]
 
-Set the window title bar text. If not specified, the window title will be empty.
+Set the window title bar text. macOS shows no title if not specified; Windows/Linux fallback to app name.
 
 ```shell
 --title <string>
@@ -416,26 +389,6 @@ Enable developer tools and detailed logging for debugging.
 ### Packaging Complete
 
 After completing the above steps, your application should be successfully packaged. Please note that the packaging process may take some time depending on your system configuration and network conditions. Be patient, and once the packaging is complete, you can find the application installer in the specified directory.
-
-## Development
-
-The `DEFAULT_DEV_PAKE_OPTIONS` configuration in `bin/defaults.ts` can be modified at development time to match the `pake-cli` configuration description.
-
-```typescript
-export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
-  ...DEFAULT_PAKE_OPTIONS,
-  url: "https://weekly.tw93.fun/",
-  name: "Weekly",
-};
-```
-
-then
-
-```bash
-pnpm run cli:dev
-```
-
-The script will read the above configuration and packages the specified `app` using `watch` mode, and changes to the `pake-cli` code and `pake` are hot updated in real time.
 
 ## Docker
 

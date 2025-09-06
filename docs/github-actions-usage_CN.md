@@ -1,5 +1,7 @@
 # GitHub Actions 使用指南
 
+<h4 align="right"><strong><a href="github-actions-usage.md">English</a></strong> | 简体中文</h4>
+
 无需本地安装开发工具，在线构建 Pake 应用。
 
 ## 快速步骤
@@ -15,7 +17,7 @@
 3. 填写表单（参数与 [CLI 选项](cli-usage_CN.md) 相同）
 4. 点击 `Run Workflow`
 
-![Actions 界面](https://raw.githubusercontent.com/tw93/static/main/pake/action.png)
+   ![Actions 界面](https://raw.githubusercontent.com/tw93/static/main/pake/action.png)
 
 ### 3. 下载应用
 

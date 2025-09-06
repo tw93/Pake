@@ -1,18 +1,19 @@
 # Pake Documentation
 
+<h4 align="right"><strong>English</strong> | <a href="README_CN.md">简体中文</a></h4>
+
 Welcome to Pake documentation! Here you'll find comprehensive guides and documentation to help you start working with Pake as quickly as possible.
 
 ## User Guides
 
-- **[CLI Usage](cli-usage.md)** | [中文](cli-usage_CN.md) - Command-line interface reference
-- **[GitHub Actions](github-actions-usage.md)** | [中文](github-actions-usage_CN.md) - Build apps online without local setup
-- **[Pake Action](pake-action.md)** - Use Pake as GitHub Action in your projects
+- **[CLI Command Reference](cli-usage.md)** - Complete command-line parameters and basic usage
+- **[GitHub Actions Online Build](github-actions-usage.md)** - Online build without local environment setup
+- **[Pake Action Integration](pake-action.md)** - Use Pake as a GitHub Action in your projects
 
 ## Developer Guides
 
-- **[Advanced Usage](advanced-usage.md)** | [中文](advanced-usage_CN.md) - Customization, development, and advanced features
-- **[CLI Testing](cli-testing.md)** - Testing guide for CLI functionality
-- **[Contributing](../CONTRIBUTING.md)** - How to contribute to Pake development
+- **[Advanced Usage & Development](advanced-usage.md)** - Code customization, project structure, development environment setup and testing guides
+- **[Contributing Guide](../CONTRIBUTING.md)** - How to contribute to Pake development
 
 ## Quick Links
 
