@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
-# Cargo build stage - Updated to Rust 1.82 for zerovec dependency compatibility
-FROM rust:1.82-slim AS cargo-builder
+# Cargo build stage - Updated to Rust 1.85 for edition2024 support
+FROM rust:1.85-slim AS cargo-builder
 # Install Rust dependencies
 RUN --mount=type=cache,target=/var/cache/apt \
     --mount=type=cache,target=/usr/local/cargo/registry \
@@ -27,7 +27,7 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
 RUN ls -la /cargo-cache/registry && ls -la /cargo-cache/git && rm -rfd /cargo-cache/registry/src
 
 # Main build stage
-FROM rust:1.82-slim AS builder
+FROM rust:1.85-slim AS builder
 # Install Rust dependencies
 RUN --mount=type=cache,target=/var/cache/apt \
     --mount=type=cache,target=/usr/local/cargo/registry \

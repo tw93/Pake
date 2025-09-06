@@ -91,12 +91,13 @@ runs:
       uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: stable
-        target: x86_64-apple-darwin
 
     - name: Add macOS universal targets
       if: env.SETUP_RUST == 'true' && runner.os == 'macOS'
       shell: bash
-      run: rustup target add aarch64-apple-darwin
+      run: |
+        rustup target add x86_64-apple-darwin
+        rustup target add aarch64-apple-darwin
 
     # 4. System Dependencies
     - name: Install Ubuntu dependencies
@@ -107,7 +108,8 @@ runs:
           libdbus-1-dev libsoup-3.0-dev libjavascriptcoregtk-4.1-dev libwebkit2gtk-4.1-dev
           build-essential curl wget file libxdo-dev libssl-dev libgtk-3-dev 
           libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra
-          libglib2.0-dev pkg-config
+          libglib2.0-dev libglib2.0-dev-bin libgio2.0-cil-dev libgirepository1.0-dev 
+          pkg-config
         version: 1.1
 
     - name: Install WIX Toolset

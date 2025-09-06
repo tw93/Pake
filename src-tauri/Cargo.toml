@@ -6,7 +6,7 @@ authors = ["Tw93"]
 license = "MIT"
 repository = "https://github.com/tw93/Pake"
 edition = "2021"
-rust-version = "1.78.0"
+rust-version = "1.85.0"
 
 [lib]
 name = "app_lib"

@@ -1674,7 +1674,7 @@ program
         if (option.flags === '-v, --version')
             return '';
         return option.description;
-    }
+    },
 })
     .action(async (url, options) => {
     await checkUpdateTips();
