@@ -3,7 +3,7 @@
     <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
 </p>
 <h1 align="center">Pake</h1>
-<p align="center"><strong>Rustを使って、簡単にウェブページをデスクトップアプリに変換します。</strong></p>
+<p align="center"><strong>Rustでウェブページをデスクトップアプリにパッケージ化、Mac | Windows | Linux対応</strong></p>
 <div align="center">
     <a href="https://twitter.com/HiTw93" target="_blank">
     <img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
@@ -15,19 +15,20 @@
     <img alt="GitHub commit" src="https://img.shields.io/github/commit-activity/m/tw93/Pake?style=flat-square"></a>
     <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank">
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
-    <a href="https://colab.research.google.com/drive/1bX345znvDZ30848xjRtpgtU8eypWwXrp?usp=sharing" target="_blank">
-    <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 </div>
-
-<div align="left">PakeはMac、Windows、Linuxをサポートしています。<a href="#人気のパッケージ">人気のパッケージ</a>、<a href="#コマンドラインパッケージング">コマンドラインパッケージング</a>、<a href="#開発">カスタマイズ開発</a>に関する情報はREADMEをご覧ください。<a href=https://github.com/tw93/Pake/discussions>ディスカッション</a>でご意見をお聞かせください。</div>
 
 ## 特徴
 
-- 🎐 Electron パッケージと比較して約 20 倍小さい（約 5M！）
-- 🚀 Rust Tauri を使用しているため、Pake は JS ベースのフレームワークよりもはるかに軽量で高速です。
-- 📦 パッケージにはショートカットの透過、没入型ウィンドウ、ミニマリストのカスタマイズが含まれています。
-- 🖱️ 画像、動画、ファイルのダウンロードをサポートするスマートな右クリックコンテキストメニュー。
-- 👻 Pake は単なるシンプルなツールです — Tauri を使用して古いバンドルアプローチを置き換えます（PWA も十分に良い代替手段です）。
+- 🎐 **軽量**: Electronより約20倍小さく、通常約5M
+- 🚀 **高速**: Rust Tauriベースで、従来のJSフレームワークより高速、メモリ使用量も少ない
+- ⚡ **使いやすい**: CLIでワンコマンドパッケージング、複雑な設定不要
+- 📦 **高機能**: ショートカット透過、没入型ウィンドウ、ドラッグ&ドロップ、スタイルカスタマイズをサポート
+
+## 快速開始
+
+- **初心者**: 既成の[人気パッケージ](#人気のパッケージ)をダウンロード、または[オンライン構築](docs/github-actions-usage.md)で環境設定なしでパッケージ化
+- **開発者**: [CLIツール](docs/cli-usage.md)インストール後、ワンコマンドで任意のウェブサイトをパッケージ化、アイコンやウィンドウなどのパラメータをカスタマイズ可能
+- **上級者**: プロジェクトをローカルクローンして[カスタム開発](#開発)、または[高級用法](docs/advanced-usage.md)でスタイルカスタマイズ・機能拡張を実現
 
 ## 人気のパッケージ
 
@@ -152,57 +153,39 @@
 
 </details>
 
-## 始める前に
-
-1. **初心者の方へ**: 「人気のパッケージ」を使用して Pake の機能を試してみてください。または、[GitHub Actions](docs/github-actions-usage.md)を使用してアプリケーションをパッケージ化してみてください。[ディスカッション](https://github.com/tw93/Pake/discussions)で助けを求めることもできます！
-2. **開発者の方へ**: 「コマンドラインパッケージング」を使用してください。macOS では完全にサポートされています。Windows/Linux ユーザーは、[環境を設定](https://tauri.app/start/prerequisites/)する必要があります。
-3. **ハッカーの方へ**: フロントエンド開発と Rust の両方が得意な方は、以下の[カスタマイズ開発](#開発)でアプリの機能をさらにカスタマイズしてみてください。
-
 ## コマンドラインパッケージング
 
 ![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake.gif)
 
-**Pake はコマンドラインツールを提供しており、必要なパッケージをより迅速かつ簡単にカスタマイズすることができます。詳細は[CLI使用ガイド](docs/cli-usage.md)をご覧ください。**
-
 ```bash
-# 推奨方法 (pnpm)
+# インストール
 pnpm install -g pake-cli
 
-# 代替方法 (npm)
-npm install -g pake-cli
+# 基本使用
+pake https://weekly.tw93.fun --name Weekly
 
-# コマンドの使用
-pake url [OPTIONS]...
-
-# Pakeを自由に試してみてください！初めての起動時は環境の準備に時間がかかる場合があります。
-pake https://weekly.tw93.fun --name Weekly --hide-title-bar
+# よく使うパラメータ：--name アプリ名、--icon アイコン、--width/--height ウィンドウサイズ、--hide-title-bar macOS没入型
+pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/weekly.icns --hide-title-bar
 ```
 
-コマンドラインの使用に不慣れな場合は、_GitHub Actions_ を使用してオンラインでパッケージをコンパイルすることができます。詳細な手順については [GitHub Actions 使用ガイド](docs/github-actions-usage.md) をご覧ください。
+初回パッケージ化は環境設定で時間がかかりますが、その後は高速です。完全なパラメータ説明は[CLI使用ガイド](docs/cli-usage.md)を参照してください。コマンドラインを使いたくない場合は[GitHub Actions オンライン構築](docs/github-actions-usage.md)をお試しください。
 
 ## 開発
 
-開始する前に、Rust `>=1.89` と Node `>=18`（例：22.11.0）がコンピュータにインストールされていることを確認してください。_注意：最新の安定版の使用をお勧めします。_ インストールガイドについては、[Tauri ドキュメント](https://tauri.app/start/prerequisites/)を参照してください。
+Rust `>=1.89` と Node `>=22` が必要です。詳細なインストールガイドは[Tauriドキュメント](https://tauri.app/start/prerequisites/)を参照してください。開発環境に不慣れな場合は、直接コマンドラインツールの使用をお勧めします。
 
-これらに不慣れな場合は、上記のツールを使用してワンクリックでパッケージを作成することをお勧めします。
-
-```sh
+```bash
 # 依存関係のインストール
 pnpm i
 
-# ローカル開発（右クリックでデバッグモードを開く）
+# ローカル開発[右クリックでデバッグモード開可]
 pnpm run dev
 
 # アプリケーションのビルド
 pnpm run build
 ```
 
-## 高度な使用法
-
-1. [CONTRIBUTING.md](CONTRIBUTING.md#project-structure)のコードベース構造を参照して、開発前により多くの情報を得ることができます。
-2. `src-tauri` ディレクトリ内の `pake.json` ファイルの `url` と `productName` フィールドを変更する場合は、`tauri.config.json` ファイル内の `domain` フィールド、および `tauri.xxx.conf.json` ファイル内の `icon` と `identifier` フィールドを同期して変更する必要があります。`icon` は `icons` ディレクトリから選択することも、[macOSicons](https://macosicons.com/#/) から効果に合ったものをダウンロードすることもできます。
-3. ウィンドウプロパティの設定については、`pake.json` ファイルを変更して `windows` プロパティの `width`、`height`、`fullscreen`（またはしない）、`resizable`（またはしない）の値を変更できます。Mac の没入型ヘッダーに適応するには、`hideTitleBar` を `true` に設定し、`Header` 要素を見つけて `padding-top` プロパティを追加します。
-4. スタイルの書き換え、広告の除去、JS の注入、コンテナメッセージ通信、ユーザー定義のショートカットキーについては、[高度な使用法](docs/advanced-usage.md)を参照してください。
+スタイルカスタマイズ、機能拡張、コンテナ通信などの高度な機能については、[高級使用法ドキュメント](docs/advanced-usage.md)を参照してください。
 
 ## 開発者
 
@@ -547,6 +530,6 @@ Pake の開発はこれらのハッカーたちなしにはあり得ませんで
 ## サポート
 
 1. 私には汤圆と可乐という 2 匹の猫がいます。Pake があなたの生活をより良くしてくれると思ったら、<a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">缶詰をあげてください 🥩</a>。
-2. Pake が気に入ったら、GitHub でスターをつけてください。また、友達に<a href="https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=%23Pake%20-%20Rust%E3%82%92%E4%BD%BF%E3%81%A3%E3%81%A6%E3%80%81%E7%B0%A1%E5%8D%98%E3%81%AB%E3%82%A6%E3%82%A7%E3%83%96%E3%83%9A%E3%83%BC%E3%82%B8%E3%82%92%E3%83%87%E3%82%B9%E3%82%AF%E3%83%88%E3%83%83%E3%83%97%E3%82%A2%E3%83%97%E3%83%AA%E3%81%AB%E5%A4%89%E6%8F%9B%E3%81%99%E3%82%8B%E3%83%84%E3%83%BC%E3%83%AB%E3%80%82Electron%E3%83%91%E3%83%83%E3%82%B1%E3%83%BC%E3%82%B8%E3%81%A8%E6%AF%94%E8%BC%83%E3%81%97%E3%81%A6%E3%80%81%E7%B4%84%2040%E5%80%8D%E5%B0%8F%E3%81%95%E3%81%84%E3%80%81%E4%B8%80%E8%88%AC%E7%B4%842M%E3%80%81Tauri%E3%82%92%E4%BD%BF%E7%94%A8%E3%81%97%E3%81%A6%E3%81%84%E3%82%8B%E3%81%9F%E3%82%81%E3%80%81JS%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0%E3%83%AF%E3%83%BC%E3%82%AF%E3%82%88%E3%82%8A%E3%82%82%E3%81%AF%E3%82%8B%E3%81%8B%E3%81%AB%E8%BB%BD%E9%87%8F%E3%81%A7%E9%AB%98%E9%80%9F%E3%81%A7%E3%81%99%E3%80%82">推薦</a>することを歓迎します。
+2. Pake が気に入ったら、GitHub でスターをつけてください。また、友達に<a href="https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20Rust%E3%81%A7%E3%82%A6%E3%82%A7%E3%83%96%E3%83%9A%E3%83%BC%E3%82%B8%E3%82%92%E3%83%87%E3%82%B9%E3%82%AF%E3%83%88%E3%83%83%E3%83%97%E3%82%A2%E3%83%97%E3%83%AA%E3%81%AB%E5%A4%89%E6%8F%9B%E3%80%81Electron%E3%82%88%E3%82%8A20%E5%80%8D%E5%B0%8F%E3%81%95%E3%81%84%E3%80%81Mac%20Windows%20Linux%E5%AF%BE%E5%BF%9C">推薦</a>することを歓迎します。
 3. 私の<a href="https://twitter.com/HiTw93">Twitter</a>をフォローして、Pake の最新情報を入手することができます。また、<a href="https://t.me/+GclQS9ZnxyI2ODQ1">Telegram</a>のチャットグループに参加することもできます。
 4. 皆さんが楽しんでいただけることを願っています。Mac アプリに適したウェブサイトを見つけたら、ぜひ教えてください。

@@ -3,7 +3,7 @@
     <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
 </p>
 <h1 align="center">Pake</h1>
-<p align="center"><strong>利用 Rust 轻松构建轻量级多端桌面应用</strong></p>
+<p align="center"><strong>用 Rust 打包网页生成轻量桌面应用，支持 Mac | Windows | Linux</strong></p>
 <div align="center">
     <a href="https://twitter.com/HiTw93" target="_blank">
     <img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
@@ -15,18 +15,20 @@
     <img alt="GitHub commit" src="https://img.shields.io/github/commit-activity/m/tw93/Pake?style=flat-square"></a>
     <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank">
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
-    <a href="https://colab.research.google.com/drive/1bX345znvDZ30848xjRtpgtU8eypWwXrp?usp=sharing" target="_blank">
-    <img alt="在 Colab 中打开" src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 </div>
-<div align="left">支持 Mac / Windows / Linux，关于 <a href="#常用包下载">常用包下载</a>、<a href="#命令行一键打包">命令行一键打包</a>、<a href="#定制开发">定制开发</a> 可见下面文档，也欢迎去 <a href=https://github.com/tw93/Pake/discussions>讨论区</a> 交流。</div>
 
 ## 特征
 
-- 🎐 相比传统的 Electron 套壳打包，要小将近 20 倍，5M 上下。
-- 🚀 Pake 的底层使用的 Rust Tauri 框架，性能体验较 JS 框架要轻快不少，内存小很多。
-- 📦 不是单纯打包，实现了快捷键透传、沉浸式窗口、拖动、样式改写、去广告、产品极简风格定制。
-- 🖱️ 智能右键菜单，支持图片、视频、文件的下载和操作功能。
-- 👻 只是一个很简单的小玩具，用 Tauri 替代之前套壳网页打包的老思路，其实 PWA 也很好。
+- 🎐 **体积小巧**：相比 Electron 应用小近 20 倍，通常只有 5M 左右
+- 🚀 **性能优异**：基于 Rust Tauri，比传统 JS 框架更快，内存占用更少
+- ⚡ **使用简单**：命令行一键打包，或在线构建，无需复杂配置
+- 📦 **功能丰富**：支持快捷键透传、沉浸式窗口、拖拽、样式定制、去广告
+
+## 快速开始
+
+- **新手用户**：直接下载现成的 [常用包](#常用包下载)，或通过 [在线构建](docs/github-actions-usage_CN.md) 无需环境配置即可打包
+- **开发者**：安装 [CLI 工具](docs/cli-usage_CN.md) 后一行命令打包任意网站，支持自定义图标、窗口等参数
+- **高级用户**：本地克隆项目进行 [定制开发](#定制开发)，或查看 [高级用法](docs/advanced-usage_CN.md) 实现样式定制、功能增强
 
 ## 常用包下载
 
@@ -148,45 +150,32 @@
 | <kbd>⌘</kbd> + <kbd>=</kbd> | <kbd>Ctrl</kbd> + <kbd>=</kbd> | 放大页面           |
 | <kbd>⌘</kbd> + <kbd>0</kbd> | <kbd>Ctrl</kbd> + <kbd>0</kbd> | 重置页面缩放       |
 
-此外还支持双击头部进行全屏切换，拖拽头部进行移动窗口，Mac 用户支持手势方式返回和去下一页，还有其他需求，欢迎提过来。
+此外还支持双击头部全屏切换，拖拽头部移动窗口，Mac 用户支持手势返回和前进，有其他需求欢迎提出。
 
 </details>
-
-## 开始之前
-
-1. **小白用户**：使用 「常用包下载」 方式来把玩 Pake 的能力，可去 [讨论群](https://github.com/tw93/Pake/discussions) 寻求帮助，也可试试 [Action](https://github.com/tw93/Pake/wiki/%E5%9C%A8%E7%BA%BF%E7%BC%96%E8%AF%91%EF%BC%88%E6%99%AE%E9%80%9A%E7%94%A8%E6%88%B7%E4%BD%BF%E7%94%A8%EF%BC%89) 方式。
-2. **开发用户**：使用 「命令行一键打包」，对 Mac 比较友好，Windows / Linux 需折腾下 [环境配置](https://tauri.app/start/prerequisites/)。
-3. **折腾用户**：假如你前端和 Rust 都会，那可试试下面的 「[定制开发](#定制开发)」，可深度二次开发定制你的功能。
 
 ## 命令行一键打包
 
 ![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake.gif)
 
-**Pake 提供了命令行工具，可以更快捷方便地一键自定义打包你需要的应用，详细可见 [CLI 使用指南](docs/cli-usage_CN.md)。**
-
 ```bash
-# 推荐方式 (pnpm)
+# 安装
 pnpm install -g pake-cli
 
-# 备选方式 (npm)
-npm install -g pake-cli
+# 基础使用
+pake https://weekly.tw93.fun --name Weekly
 
-# 命令使用
-pake url [OPTIONS]...
-
-# 试试看！首次打包可能较慢（需要安装环境），后续会很快
-pake https://weekly.tw93.fun --name Weekly --hide-title-bar
+# 常用参数：--name 应用名称，--icon 图标，--width/--height 窗口尺寸，--hide-title-bar macOS沉浸式
+pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/weekly.icns --hide-title-bar
 ```
 
-如果你不太会使用命令行，可以使用 **GitHub Actions 在线编译**，详细步骤请参考[文档](#文档)。
+首次打包需要安装环境会比较慢，后续很快。完整参数说明查看 [CLI 使用指南](docs/cli-usage_CN.md)，不想用命令行可以试试 [GitHub Actions 在线构建](docs/github-actions-usage_CN.md)。
 
 ## 定制开发
 
-开始前请确保电脑已经安装了 Rust `>=1.89` 和 Node `>=18`（如 22.11.0）的环境。_注意：推荐使用最新稳定版本。_ 详细安装指南请参考 [Tauri 文档](https://tauri.app/start/prerequisites/)。
+需要 Rust `>=1.89` 和 Node `>=22`，详细安装指南参考 [Tauri 文档](https://tauri.app/start/prerequisites/)。不熟悉开发环境建议直接使用命令行工具。
 
-如果您对这些不熟悉，建议使用上面的命令行工具进行一键打包。
-
-```sh
+```bash
 # 安装依赖
 pnpm i
 
@@ -195,20 +184,13 @@ pnpm run dev
 
 # 打包应用
 pnpm run build
-
 ```
 
-## 文档
-
-- **[CLI 使用指南](docs/cli-usage_CN.md)** - 命令行接口参考
-- **[高级用法指南](docs/advanced-usage_CN.md)** - 自定义和高级功能
-- **[GitHub Actions 指南](docs/github-actions-usage_CN.md)** - 在线构建应用
-- **[Pake Action](docs/pake-action.md)** - 在你的项目中使用 Pake Action
-- **[贡献指南](CONTRIBUTING.md)** - 如何参与开发
+想要样式定制、功能增强、容器通信等高级玩法，查看 [高级用法文档](docs/advanced-usage_CN.md)。
 
 ## 开发者
 
-Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢迎关注他们 ❤️
+Pake 的发展离不开这些优秀的贡献者 ❤️
 
 <!-- readme: contributors -start -->
 <table>
@@ -549,6 +531,6 @@ Pake 的发展离不开这些 Hacker 们，一起贡献了大量能力，也欢�
 ## 支持
 
 1. 我有两只猫，一只叫汤圆，一只可乐，假如 Pake 让你生活更美好，可以给她们 <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">喂罐头 🥩</a>。
-2. 如果你喜欢 Pake，可以在 Github Star，更欢迎 [推荐](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=%23Pake%20%E4%B8%80%E4%B8%AA%E5%BE%88%E7%AE%80%E5%8D%95%E7%9A%84%E7%94%A8%20Rust%20%E6%89%93%E5%8C%85%E7%BD%91%E9%A1%B5%E7%94%9F%E6%88%90%20Mac%20App%20%E7%9A%84%E5%B7%A5%E5%85%B7%EF%BC%8C%E7%9B%B8%E6%AF%94%E4%BC%A0%E7%BB%9F%E7%9A%84%20Electron%20%E5%A5%97%E5%A3%B3%E6%89%93%E5%8C%85%EF%BC%8C%E5%A4%A7%E5%B0%8F%E8%A6%81%E5%B0%8F%E5%B0%86%E8%BF%91%2040%20%E5%80%8D%EF%BC%8C%E4%B8%80%E8%88%AC%202M%20%E5%B7%A6%E5%8F%B3%EF%BC%8C%E5%BA%95%E5%B1%82%E4%BD%BF%E7%94%A8Tauri%20%EF%BC%8C%E6%80%A7%E8%83%BD%E4%BD%93%E9%AA%8C%E8%BE%83%20JS%20%E6%A1%86%E6%9E%B6%E8%A6%81%E8%BD%BB%E5%BF%AB%E4%B8%8D%E5%B0%91%EF%BC%8C%E5%86%85%E5%AD%98%E5%B0%8F%E5%BE%88%E5%A4%9A%EF%BC%8C%E6%94%AF%E6%8C%81%E5%BE%AE%E4%BF%A1%E8%AF%BB%E4%B9%A6%E3%80%81Twitter%E3%80%81Youtube%E3%80%81RunCode%E3%80%81Flomo%E3%80%81%E8%AF%AD%E9%9B%80%E7%AD%89%EF%BC%8C%E5%8F%AF%E4%BB%A5%E5%BE%88%E6%96%B9%E4%BE%BF%E4%BA%8C%E6%AC%A1%E5%BC%80%E5%8F%91~) 给你志同道合的朋友使用。
-3. 可以关注我的 [Twitter](https://twitter.com/HiTw93) 获取到最新的 Pake 更新消息，也欢迎加入 [Telegram](https://t.me/+GclQS9ZnxyI2ODQ1) 聊天群。
-4. 希望大伙玩的过程中有一种学习新技术的喜悦感，假如你发现有很适合做成桌面 App 的网页也很欢迎告诉我。
+2. 如果你喜欢 Pake，可以在 Github Star，更欢迎 [推荐](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20用%20Rust%20打包网页生成轻量桌面应用，比%20Electron%20小%2020%20倍，支持%20Mac%20Windows%20Linux) 给志同道合的朋友使用。
+3. 可以关注我的 [Twitter](https://twitter.com/HiTw93) 获取最新的 Pake 更新消息，也欢迎加入 [Telegram](https://t.me/+GclQS9ZnxyI2ODQ1) 聊天群。
+4. 希望大伙玩的过程中有一种学习新技术的喜悦感，发现适合做成桌面 App 的网页也欢迎告诉我。

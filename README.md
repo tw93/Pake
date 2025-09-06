@@ -3,7 +3,7 @@
     <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
 </p>
 <h1 align="center">Pake</h1>
-<p align="center"><strong>Turn any webpage into a desktop app with Rust <em>with ease</em>.</strong></p>
+<p align="center"><strong>Turn any webpage into a desktop app with Rust, supports Mac | Windows | Linux</strong></p>
 <div align="center">
     <a href="https://twitter.com/HiTw93" target="_blank">
     <img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
@@ -15,19 +15,20 @@
     <img alt="GitHub commit" src="https://img.shields.io/github/commit-activity/m/tw93/Pake?style=flat-square"></a>
     <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank">
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
-    <a href="https://colab.research.google.com/drive/1bX345znvDZ30848xjRtpgtU8eypWwXrp?usp=sharing" target="_blank">
-    <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>
 </div>
-
-<div align="left">Pake supports Mac, Windows, and Linux. Check out README for <a href="#popular-packages">Popular Packages</a>, <a href="#command-line-packaging">Command-Line Packaging</a>, and <a href="#development">Customized Development</a> information. Feel free to share your suggestions in <a href=https://github.com/tw93/Pake/discussions>Discussions</a>.</div>
 
 ## Features
 
-- 🎐 Nearly 20 times smaller than an Electron package (around 5M!)
-- 🚀 With Rust Tauri, Pake is much more lightweight and faster than JS-based frameworks.
-- 📦 Battery-included package — shortcut pass-through, immersive windows, and minimalist customization.
-- 🖱️ Smart right-click context menus with download support for images, videos, and files.
-- 👻 Pake is just a simple tool — replaces the old bundle approach with Tauri (though PWA is also a good alternative).
+- 🎐 **Lightweight**: Nearly 20 times smaller than Electron packages, typically around 5M
+- 🚀 **Fast**: Built with Rust Tauri, much faster than traditional JS frameworks with lower memory usage
+- ⚡ **Easy to use**: One-command packaging via CLI or online building, no complex configuration needed
+- 📦 **Feature-rich**: Supports shortcut pass-through, immersive windows, drag & drop, style customization, ad removal
+
+## Getting Started
+
+- **Beginners**: Download ready-made [Popular Packages](#popular-packages) or use [Online Building](docs/github-actions-usage.md) with no environment setup required
+- **Developers**: Install [CLI Tool](docs/cli-usage.md) for one-command packaging of any website with customizable icons, window settings, and more
+- **Advanced Users**: Clone the project locally for [Custom Development](#development), or check [Advanced Usage](docs/advanced-usage.md) for style customization and feature enhancement
 
 ## Popular Packages
 
@@ -152,58 +153,39 @@ In addition, double-click the title bar to switch to full-screen mode. For Mac u
 
 </details>
 
-## Before starting
-
-1. **For beginners**: Play with Popular Packages to find out Pake's capabilities, or try to pack your application with [GitHub Actions](docs/github-actions-usage.md). Don't hesitate to reach for assistance at [Discussion](https://github.com/tw93/Pake/discussions)!
-2. **For developers**: “Command-Line Packaging” supports macOS fully. For Windows/Linux users, it requires some tinkering. [Configure your environment](https://tauri.app/start/prerequisites/) before getting started.
-3. **For hackers**: For people who are good at both front-end development and Rust, how about customizing your apps' function more with the following [Customized Development](#development)?
-
 ## Command-Line Packaging
 
 ![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake.gif)
 
-**Pake provides a command line tool, making the flow of package customization quicker and easier. See the [CLI usage guide](docs/cli-usage.md) for more information.**
-
 ```bash
-# Recommended (pnpm)
+# Install
 pnpm install -g pake-cli
 
-# Alternative (npm)
-npm install -g pake-cli
+# Basic usage
+pake https://weekly.tw93.fun --name Weekly
 
-# Command usage
-pake url [OPTIONS]...
-
-# Feel free to play with Pake! It might take a while to prepare the environment the first time you launch Pake.
-pake https://weekly.tw93.fun --name Weekly --hide-title-bar
+# Common options: --name app name, --icon icon, --width/--height window size, --hide-title-bar macOS immersive
+pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/weekly.icns --hide-title-bar
 ```
 
-If you are new to the command line, you can compile packages online with _GitHub Actions_. See our [documentation](#documentation) for detailed guides.
+First-time packaging requires environment setup and may be slower, subsequent builds are fast. For complete parameter documentation, see [CLI Usage Guide](docs/cli-usage.md). Don't want to use CLI? Try [GitHub Actions Online Building](docs/github-actions-usage.md).
 
 ## Development
 
-Prepare your environment before starting. Make sure you have Rust `>=1.89` and Node `>=18` (e.g., `22.11.0`) installed on your computer. _Note: Latest stable versions are recommended._ For installation guidance, see [Tauri documentation](https://tauri.app/start/prerequisites/).
+Requires Rust `>=1.89` and Node `>=22`. For detailed installation guide, see [Tauri documentation](https://tauri.app/start/prerequisites/). If unfamiliar with development environment, use the CLI tool instead.
 
-If you are unfamiliar with these, it is better to try out the above tool to pack with one click.
-
-```sh
+```bash
 # Install dependencies
 pnpm i
 
-# Local development (right-click to open debug mode)
+# Local development [right-click to open debug mode]
 pnpm run dev
 
 # Build application
 pnpm run build
 ```
 
-## Documentation
-
-- **[CLI Usage](docs/cli-usage.md)** | [中文](docs/cli-usage_CN.md) - Command-line interface reference
-- **[Advanced Usage](docs/advanced-usage.md)** | [中文](docs/advanced-usage_CN.md) - Customization and advanced features
-- **[GitHub Actions](docs/github-actions-usage.md)** | [中文](docs/github-actions-usage_CN.md) - Build apps online
-- **[Pake Action](docs/pake-action.md)** - Use Pake as GitHub Action in your projects
-- **[Contributing](CONTRIBUTING.md)** - How to contribute to development
+For style customization, feature enhancement, container communication and other advanced features, see [Advanced Usage Documentation](docs/advanced-usage.md).
 
 ## Developers
 
@@ -548,6 +530,6 @@ Pake's development can not be without these Hackers. They contributed a lot of c
 ## Support
 
 1. I have two cats, TangYuan and Coke. If you think Pake delights your life, you can feed them <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">some canned food 🥩</a>.
-2. If you like Pake, you can star it on GitHub. Also, welcome to [recommend Pake](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=%23Pake%20-%20A%20simple%20Rust%20packaged%20web%20pages%20to%20generate%20Mac%20App%20tool,%20compared%20to%20traditional%20Electron%20package,%20the%20size%20of%20nearly%2040%20times%20smaller,%20generally%20about%202M,%20the%20underlying%20use%20of%20Tauri,%20performance%20experience%20than%20the%20JS%20framework%20is%20much%20lighter~) to your friends.
+2. If you like Pake, you can star it on GitHub. Also, welcome to [recommend Pake](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20Turn%20any%20webpage%20into%20a%20desktop%20app%20with%20Rust.%20Nearly%2020x%20smaller%20than%20Electron%20packages,%20supports%20Mac%20Windows%20Linux) to your friends.
 3. You can follow my [Twitter](https://twitter.com/HiTw93) to get the latest news of Pake or join our [Telegram](https://t.me/+GclQS9ZnxyI2ODQ1) chat group.
 4. I hope that you enjoy playing with it. Let us know if you find a website that would be great for a Mac App!
