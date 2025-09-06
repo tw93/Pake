@@ -107,7 +107,7 @@ runs:
         packages: >
           libdbus-1-dev libsoup-3.0-dev libjavascriptcoregtk-4.1-dev libwebkit2gtk-4.1-dev
           build-essential curl wget file libxdo-dev libssl-dev libgtk-3-dev 
-          libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra
+          libayatana-appindicator3-dev librsvg2-dev gnome-video-effects
           libglib2.0-dev libgirepository1.0-dev 
           pkg-config
         version: 1.1
