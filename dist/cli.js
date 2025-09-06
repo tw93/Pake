@@ -22,7 +22,7 @@ import sharp from 'sharp';
 import * as psl from 'psl';
 
 var name = "pake-cli";
-var version = "3.3.1";
+var version = "3.3.2";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -1150,20 +1150,67 @@ async function checkUpdateTips() {
     });
 }
 
-// Constants
 const ICON_CONFIG = {
     minFileSize: 100,
-    downloadTimeout: 10000,
-    supportedFormats: ['png', 'ico', 'jpeg', 'jpg', 'webp', 'icns'],
+    supportedFormats: [
+        'png',
+        'ico',
+        'jpeg',
+        'jpg',
+        'webp',
+        'icns',
+    ],
     whiteBackground: { r: 255, g: 255, b: 255 },
+    transparentBackground: { r: 255, g: 255, b: 255, alpha: 0 },
+    downloadTimeout: {
+        ci: 5000,
+        default: 15000,
+    },
 };
-// API Configuration
-const API_TOKENS = {
-    // cspell:disable-next-line
-    logoDev: ['pk_JLLMUKGZRpaG5YclhXaTkg', 'pk_Ph745P8mQSeYFfW2Wk039A'],
-    // cspell:disable-next-line
-    brandfetch: ['1idqvJC0CeFSeyp3Yf7', '1idej-yhU_ThggIHFyG'],
+const PLATFORM_CONFIG = {
+    win: { format: '.ico', sizes: [16, 32, 48, 64, 128, 256] },
+    linux: { format: '.png', size: 512 },
+    macos: { format: '.icns', sizes: [16, 32, 64, 128, 256, 512, 1024] },
 };
+const API_KEYS = {
+    logoDev: [
+        'pk_JLLMUKGZRpaG5YclhXaTkg',
+        'pk_Ph745P8mQSeYFfW2Wk039A',
+    ],
+    brandfetch: [
+        '1idqvJC0CeFSeyp3Yf7',
+        '1idej-yhU_ThggIHFyG',
+    ],
+};
+/**
+ * Generates platform-specific icon paths and handles copying for Windows
+ */
+function generateIconPath(appName, isDefault = false) {
+    const safeName = appName.toLowerCase().replace(/[^a-z0-9-_]/g, '_');
+    const baseName = isDefault ? 'icon' : safeName;
+    if (IS_WIN) {
+        return path.join(npmDirectory, 'src-tauri', 'png', `${baseName}_256.ico`);
+    }
+    if (IS_LINUX) {
+        return path.join(npmDirectory, 'src-tauri', 'png', `${baseName}_512.png`);
+    }
+    return path.join(npmDirectory, 'src-tauri', 'icons', `${baseName}.icns`);
+}
+async function copyWindowsIconIfNeeded(convertedPath, appName) {
+    if (!IS_WIN || !convertedPath.endsWith('.ico')) {
+        return convertedPath;
+    }
+    try {
+        const finalIconPath = generateIconPath(appName);
+        await fsExtra.ensureDir(path.dirname(finalIconPath));
+        await fsExtra.copy(convertedPath, finalIconPath);
+        return finalIconPath;
+    }
+    catch (error) {
+        logger.warn(`Failed to copy Windows icon: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        return convertedPath;
+    }
+}
 /**
  * Adds white background to transparent icons only
  */
@@ -1206,23 +1253,34 @@ async function convertIconFormat(inputPath, appName) {
         const iconName = appName.toLowerCase();
         // Generate platform-specific format
         if (IS_WIN) {
+            // Support multiple sizes for better Windows compatibility
             await icongen(processedInputPath, platformOutputDir, {
                 report: false,
-                ico: { name: `${iconName}_256`, sizes: [256] },
+                ico: {
+                    name: `${iconName}_256`,
+                    sizes: PLATFORM_CONFIG.win.sizes,
+                },
             });
-            return path.join(platformOutputDir, `${iconName}_256.ico`);
+            return path.join(platformOutputDir, `${iconName}_256${PLATFORM_CONFIG.win.format}`);
         }
         if (IS_LINUX) {
-            const outputPath = path.join(platformOutputDir, `${iconName}_512.png`);
-            await fsExtra.copy(processedInputPath, outputPath);
+            const outputPath = path.join(platformOutputDir, `${iconName}_${PLATFORM_CONFIG.linux.size}${PLATFORM_CONFIG.linux.format}`);
+            // Ensure we convert to proper PNG format with correct size
+            await sharp(processedInputPath)
+                .resize(PLATFORM_CONFIG.linux.size, PLATFORM_CONFIG.linux.size, {
+                fit: 'contain',
+                background: ICON_CONFIG.transparentBackground,
+            })
+                .png()
+                .toFile(outputPath);
             return outputPath;
         }
         // macOS
         await icongen(processedInputPath, platformOutputDir, {
             report: false,
-            icns: { name: iconName, sizes: [16, 32, 64, 128, 256, 512, 1024] },
+            icns: { name: iconName, sizes: PLATFORM_CONFIG.macos.sizes },
         });
-        const outputPath = path.join(platformOutputDir, `${iconName}.icns`);
+        const outputPath = path.join(platformOutputDir, `${iconName}${PLATFORM_CONFIG.macos.format}`);
         return (await fsExtra.pathExists(outputPath)) ? outputPath : null;
     }
     catch (error) {
@@ -1230,105 +1288,111 @@ async function convertIconFormat(inputPath, appName) {
         return null;
     }
 }
-async function handleIcon(options, url) {
-    if (options.icon) {
-        if (options.icon.startsWith('http')) {
-            const downloadedPath = await downloadIcon(options.icon);
-            if (downloadedPath && options.name) {
-                // Check if the downloaded file is already in the correct format for the platform
-                const downloadedExt = path.extname(downloadedPath).toLowerCase();
-                const isCorrectFormat = (IS_WIN && downloadedExt === '.ico') ||
-                    (IS_LINUX && downloadedExt === '.png') ||
-                    (!IS_WIN && !IS_LINUX && downloadedExt === '.icns'); // macOS
-                if (isCorrectFormat) {
-                    return downloadedPath;
-                }
-                // Convert downloaded icon to platform-specific format
-                const convertedPath = await convertIconFormat(downloadedPath, options.name);
-                if (convertedPath) {
-                    // For Windows, copy the converted ico to the expected location
-                    if (IS_WIN && convertedPath.endsWith('.ico')) {
-                        const finalIconPath = path.join(npmDirectory, `src-tauri/png/${options.name.toLowerCase()}_256.ico`);
-                        await fsExtra.ensureDir(path.dirname(finalIconPath));
-                        await fsExtra.copy(convertedPath, finalIconPath);
-                        return finalIconPath;
-                    }
-                    return convertedPath;
-                }
-            }
-            return downloadedPath;
-        }
-        return path.resolve(options.icon);
+/**
+ * Processes downloaded or local icon for platform-specific format
+ */
+async function processIcon(iconPath, appName) {
+    if (!iconPath || !appName)
+        return iconPath;
+    // Check if already in correct platform format
+    const ext = path.extname(iconPath).toLowerCase();
+    const isCorrectFormat = (IS_WIN && ext === '.ico') ||
+        (IS_LINUX && ext === '.png') ||
+        (!IS_WIN && !IS_LINUX && ext === '.icns');
+    if (isCorrectFormat) {
+        return await copyWindowsIconIfNeeded(iconPath, appName);
     }
-    // Try to get favicon from website if URL is provided
-    if (url && url.startsWith('http') && options.name) {
-        const faviconPath = await tryGetFavicon(url, options.name);
-        if (faviconPath)
-            return faviconPath;
+    // Convert to platform format
+    const convertedPath = await convertIconFormat(iconPath, appName);
+    if (convertedPath) {
+        return await copyWindowsIconIfNeeded(convertedPath, appName);
     }
+    return iconPath;
+}
+/**
+ * Gets default icon with platform-specific fallback logic
+ */
+async function getDefaultIcon() {
     logger.info('✼ No icon provided, using default icon.');
-    // For Windows, ensure we have proper fallback handling
     if (IS_WIN) {
-        const defaultIcoPath = path.join(npmDirectory, 'src-tauri/png/icon_256.ico');
+        const defaultIcoPath = generateIconPath('icon', true);
         const defaultPngPath = path.join(npmDirectory, 'src-tauri/png/icon_512.png');
-        // First try default ico
+        // Try default ico first
         if (await fsExtra.pathExists(defaultIcoPath)) {
             return defaultIcoPath;
         }
-        // If ico doesn't exist, try to convert from png
+        // Convert from png if ico doesn't exist
         if (await fsExtra.pathExists(defaultPngPath)) {
             logger.info('✼ Default ico not found, converting from png...');
             try {
                 const convertedPath = await convertIconFormat(defaultPngPath, 'icon');
                 if (convertedPath && (await fsExtra.pathExists(convertedPath))) {
-                    // Copy converted icon to the expected location for Windows
-                    const finalIconPath = path.join(npmDirectory, 'src-tauri/png/icon_256.ico');
-                    await fsExtra.ensureDir(path.dirname(finalIconPath));
-                    await fsExtra.copy(convertedPath, finalIconPath);
-                    return finalIconPath;
+                    return await copyWindowsIconIfNeeded(convertedPath, 'icon');
                 }
             }
             catch (error) {
-                logger.warn(`Failed to convert default png to ico: ${error.message}`);
+                logger.warn(`Failed to convert default png to ico: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
         }
-        // Last resort: return png path if it exists (Windows can handle png in some cases)
+        // Fallback to png or empty
         if (await fsExtra.pathExists(defaultPngPath)) {
             logger.warn('✼ Using png as fallback for Windows (may cause issues).');
             return defaultPngPath;
         }
-        // If nothing exists, return empty string to let merge.ts handle default icon
         logger.warn('✼ No default icon found, will use pake default.');
         return '';
     }
-    const iconPath = IS_LINUX
-        ? 'src-tauri/png/icon_512.png'
-        : 'src-tauri/icons/icon.icns';
+    // Linux and macOS defaults
+    const iconPath = IS_LINUX ? 'src-tauri/png/icon_512.png' : 'src-tauri/icons/icon.icns';
     return path.join(npmDirectory, iconPath);
+}
+/**
+ * Main icon handling function with simplified logic flow
+ */
+async function handleIcon(options, url) {
+    // Handle custom icon (local file or remote URL)
+    if (options.icon) {
+        if (options.icon.startsWith('http')) {
+            const downloadedPath = await downloadIcon(options.icon);
+            if (downloadedPath) {
+                const result = await processIcon(downloadedPath, options.name || '');
+                if (result)
+                    return result;
+            }
+            return '';
+        }
+        // Local file path
+        const resolvedPath = path.resolve(options.icon);
+        const result = await processIcon(resolvedPath, options.name || '');
+        return result || resolvedPath;
+    }
+    // Try favicon from website
+    if (url && options.name) {
+        const faviconPath = await tryGetFavicon(url, options.name);
+        if (faviconPath)
+            return faviconPath;
+    }
+    // Use default icon
+    return await getDefaultIcon();
 }
 /**
  * Generates icon service URLs for a domain
  */
 function generateIconServiceUrls(domain) {
-    const logoDevUrls = API_TOKENS.logoDev
+    const logoDevUrls = API_KEYS.logoDev
         .sort(() => Math.random() - 0.5)
         .map((token) => `https://img.logo.dev/${domain}?token=${token}&format=png&size=256`);
-    const brandfetchUrls = API_TOKENS.brandfetch
+    const brandfetchUrls = API_KEYS.brandfetch
         .sort(() => Math.random() - 0.5)
         .map((key) => `https://cdn.brandfetch.io/${domain}/w/400/h/400?c=${key}`);
     return [
         ...logoDevUrls,
         ...brandfetchUrls,
         `https://logo.clearbit.com/${domain}?size=256`,
-        `https://logo.uplead.com/${domain}`,
         `https://www.google.com/s2/favicons?domain=${domain}&sz=256`,
         `https://favicon.is/${domain}`,
-        `https://icons.duckduckgo.com/ip3/${domain}.ico`,
-        `https://icon.horse/icon/${domain}`,
         `https://${domain}/favicon.ico`,
         `https://www.${domain}/favicon.ico`,
-        `https://${domain}/apple-touch-icon.png`,
-        `https://${domain}/apple-touch-icon-precomposed.png`,
     ];
 }
 /**
@@ -1339,9 +1403,10 @@ async function tryGetFavicon(url, appName) {
         const domain = new URL(url).hostname;
         const spinner = getSpinner(`Fetching icon from ${domain}...`);
         const serviceUrls = generateIconServiceUrls(domain);
-        // Use shorter timeout for CI environments
         const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
-        const downloadTimeout = isCI ? 5000 : ICON_CONFIG.downloadTimeout;
+        const downloadTimeout = isCI
+            ? ICON_CONFIG.downloadTimeout.ci
+            : ICON_CONFIG.downloadTimeout.default;
         for (const serviceUrl of serviceUrls) {
             try {
                 const faviconPath = await downloadIcon(serviceUrl, false, downloadTimeout);
@@ -1349,22 +1414,20 @@ async function tryGetFavicon(url, appName) {
                     continue;
                 const convertedPath = await convertIconFormat(faviconPath, appName);
                 if (convertedPath) {
-                    // For Windows, copy the converted ico to the expected location
-                    if (IS_WIN && convertedPath.endsWith('.ico')) {
-                        const finalIconPath = path.join(npmDirectory, `src-tauri/png/${appName.toLowerCase()}_256.ico`);
-                        await fsExtra.ensureDir(path.dirname(finalIconPath));
-                        await fsExtra.copy(convertedPath, finalIconPath);
-                        spinner.succeed(chalk.green('Icon fetched and converted successfully!'));
-                        return finalIconPath;
-                    }
+                    const finalPath = await copyWindowsIconIfNeeded(convertedPath, appName);
                     spinner.succeed(chalk.green('Icon fetched and converted successfully!'));
-                    return convertedPath;
+                    return finalPath;
                 }
             }
             catch (error) {
-                // Log specific errors in CI for debugging
-                if (isCI) {
-                    logger.debug(`Icon service ${serviceUrl} failed: ${error.message}`);
+                logger.debug(`Icon service ${serviceUrl} failed: ${error.message}`);
+                // Platform-specific error handling
+                if ((IS_LINUX || IS_WIN) && error.code === 'ENOTFOUND') {
+                    logger.debug(`DNS resolution failed for ${serviceUrl}, trying next service...`);
+                }
+                // Windows-specific icon conversion errors
+                if (IS_WIN && error.message.includes('icongen')) {
+                    logger.debug(`Windows icon conversion failed for ${serviceUrl}, trying next service...`);
                 }
                 continue;
             }
@@ -1384,7 +1447,7 @@ async function downloadIcon(iconUrl, showSpinner = true, customTimeout) {
     try {
         const response = await axios.get(iconUrl, {
             responseType: 'arraybuffer',
-            timeout: customTimeout || ICON_CONFIG.downloadTimeout,
+            timeout: customTimeout || 10000,
         });
         const iconData = response.data;
         if (!iconData || iconData.byteLength < ICON_CONFIG.minFileSize)
@@ -1408,15 +1471,11 @@ async function downloadIcon(iconUrl, showSpinner = true, customTimeout) {
  */
 async function saveIconFile(iconData, extension) {
     const buffer = Buffer.from(iconData);
-    if (IS_LINUX) {
-        const iconPath = 'png/linux_temp.png';
-        await fsExtra.outputFile(`${npmDirectory}/src-tauri/${iconPath}`, buffer);
-        return iconPath;
-    }
     const { path: tempPath } = await dir();
-    const iconPath = `${tempPath}/icon.${extension}`;
-    await fsExtra.outputFile(iconPath, buffer);
-    return iconPath;
+    // Always save with the original extension first
+    const originalIconPath = path.join(tempPath, `icon.${extension}`);
+    await fsExtra.outputFile(originalIconPath, buffer);
+    return originalIconPath;
 }
 
 // Extracts the domain from a given URL.
