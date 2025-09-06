@@ -108,9 +108,15 @@ runs:
           libdbus-1-dev libsoup-3.0-dev libjavascriptcoregtk-4.1-dev libwebkit2gtk-4.1-dev
           build-essential curl wget file libxdo-dev libssl-dev libgtk-3-dev 
           libayatana-appindicator3-dev librsvg2-dev gnome-video-effects gnome-video-effects-extra
-          libglib2.0-dev libglib2.0-dev-bin libgio2.0-cil-dev libgirepository1.0-dev 
+          libglib2.0-dev libgobject-2.0-dev libgio-3.0-dev libgirepository1.0-dev 
           pkg-config
         version: 1.1
+
+    - name: Set PKG_CONFIG_PATH for Linux
+      if: env.SETUP_SYSTEM == 'true' && runner.os == 'Linux'
+      shell: bash
+      run: |
+        echo "PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/share/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig" >> $GITHUB_ENV
 
     - name: Install WIX Toolset
       if: env.SETUP_SYSTEM == 'true' && runner.os == 'Windows'

@@ -1,6 +1,13 @@
 # syntax=docker/dockerfile:1.4
-# Cargo build stage - Updated to Rust 1.85 for edition2024 support
-FROM rust:1.85-slim AS cargo-builder
+# Cargo build stage - Updated to latest Rust for edition2024 support
+FROM rust:latest AS cargo-builder
+
+# Update Rust to ensure we have the latest version with edition2024 support
+RUN rustup update stable && rustup default stable
+
+# Verify Rust version supports edition2024
+RUN rustc --version && cargo --version
+
 # Install Rust dependencies
 RUN --mount=type=cache,target=/var/cache/apt \
     --mount=type=cache,target=/usr/local/cargo/registry \
@@ -27,7 +34,11 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
 RUN ls -la /cargo-cache/registry && ls -la /cargo-cache/git && rm -rfd /cargo-cache/registry/src
 
 # Main build stage
-FROM rust:1.85-slim AS builder
+FROM rust:latest AS builder
+
+# Update Rust to ensure we have the latest version with edition2024 support
+RUN rustup update stable && rustup default stable
+
 # Install Rust dependencies
 RUN --mount=type=cache,target=/var/cache/apt \
     --mount=type=cache,target=/usr/local/cargo/registry \
