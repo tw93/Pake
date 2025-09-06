@@ -22,7 +22,7 @@
 - 🎐 **Lightweight**: Nearly 20 times smaller than Electron packages, typically around 5M
 - 🚀 **Fast**: Built with Rust Tauri, much faster than traditional JS frameworks with lower memory usage
 - ⚡ **Easy to use**: One-command packaging via CLI or online building, no complex configuration needed
-- 📦 **Feature-rich**: Supports shortcut pass-through, immersive windows, drag & drop, style customization, ad removal
+- 📦 **Feature-rich**: Supports shortcuts, immersive windows, drag & drop, style customization, ad removal
 
 ## Getting Started
 
@@ -529,7 +529,7 @@ Pake's development can not be without these Hackers. They contributed a lot of c
 
 ## Support
 
-1. I have two cats, TangYuan and Coke. If you think Pake delights your life, you can feed them <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">some canned food 🥩</a>.
+1. I have two cats, TangYuan and Coke. If you think Pake delights your life, you can feed them <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">food 🥩</a>.
 2. If you like Pake, you can star it on GitHub. Also, welcome to [recommend Pake](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20Turn%20any%20webpage%20into%20a%20desktop%20app%20with%20one%20command.%20Nearly%2020x%20smaller%20than%20Electron%20packages,%20supports%20macOS%20Windows%20Linux) to your friends.
 3. You can follow my [Twitter](https://twitter.com/HiTw93) to get the latest news of Pake or join our [Telegram](https://t.me/+GclQS9ZnxyI2ODQ1) chat group.
 4. I hope that you enjoy playing with it. Let us know if you find a website that would be great for a Mac App!
