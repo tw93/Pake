@@ -23,7 +23,7 @@ import * as psl from 'psl';
 
 var name = "pake-cli";
 var version = "3.3.2";
-var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
+var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
 };
@@ -73,7 +73,7 @@ var exports = "./dist/cli.js";
 var license = "MIT";
 var dependencies = {
 	"@tauri-apps/api": "^2.8.0",
-	"@tauri-apps/cli": "^2.8.3",
+	"@tauri-apps/cli": "^2.8.4",
 	axios: "^1.11.0",
 	chalk: "^5.6.0",
 	commander: "^12.1.0",
@@ -85,7 +85,7 @@ var dependencies = {
 	ora: "^8.2.0",
 	prompts: "^2.4.2",
 	psl: "^1.15.0",
-	sharp: "^0.33.4",
+	sharp: "^0.33.5",
 	"tmp-promise": "^3.0.3",
 	"update-notifier": "^7.3.1"
 };
@@ -96,7 +96,7 @@ var devDependencies = {
 	"@rollup/plugin-replace": "^6.0.2",
 	"@rollup/plugin-terser": "^0.4.4",
 	"@types/fs-extra": "^11.0.4",
-	"@types/node": "^20.19.11",
+	"@types/node": "^20.19.13",
 	"@types/page-icon": "^0.3.6",
 	"@types/prompts": "^2.4.9",
 	"@types/tmp": "^0.2.6",
@@ -104,7 +104,7 @@ var devDependencies = {
 	"app-root-path": "^3.1.0",
 	"cross-env": "^7.0.3",
 	prettier: "^3.6.2",
-	rollup: "^4.49.0",
+	rollup: "^4.50.0",
 	"rollup-plugin-typescript2": "^0.36.0",
 	tslib: "^2.8.1",
 	typescript: "^5.9.2"
@@ -1152,14 +1152,7 @@ async function checkUpdateTips() {
 
 const ICON_CONFIG = {
     minFileSize: 100,
-    supportedFormats: [
-        'png',
-        'ico',
-        'jpeg',
-        'jpg',
-        'webp',
-        'icns',
-    ],
+    supportedFormats: ['png', 'ico', 'jpeg', 'jpg', 'webp', 'icns'],
     whiteBackground: { r: 255, g: 255, b: 255 },
     transparentBackground: { r: 255, g: 255, b: 255, alpha: 0 },
     downloadTimeout: {
@@ -1173,14 +1166,8 @@ const PLATFORM_CONFIG = {
     macos: { format: '.icns', sizes: [16, 32, 64, 128, 256, 512, 1024] },
 };
 const API_KEYS = {
-    logoDev: [
-        'pk_JLLMUKGZRpaG5YclhXaTkg',
-        'pk_Ph745P8mQSeYFfW2Wk039A',
-    ],
-    brandfetch: [
-        '1idqvJC0CeFSeyp3Yf7',
-        '1idej-yhU_ThggIHFyG',
-    ],
+    logoDev: ['pk_JLLMUKGZRpaG5YclhXaTkg', 'pk_Ph745P8mQSeYFfW2Wk039A'],
+    brandfetch: ['1idqvJC0CeFSeyp3Yf7', '1idej-yhU_ThggIHFyG'],
 };
 /**
  * Generates platform-specific icon paths and handles copying for Windows
@@ -1343,7 +1330,9 @@ async function getDefaultIcon() {
         return '';
     }
     // Linux and macOS defaults
-    const iconPath = IS_LINUX ? 'src-tauri/png/icon_512.png' : 'src-tauri/icons/icon.icns';
+    const iconPath = IS_LINUX
+        ? 'src-tauri/png/icon_512.png'
+        : 'src-tauri/icons/icon.icns';
     return path.join(npmDirectory, iconPath);
 }
 /**
@@ -1599,7 +1588,8 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
 program
     .addHelpText('beforeAll', logo)
     .usage(`[url] [options]`)
-    .showHelpAfterError();
+    .showHelpAfterError()
+    .helpOption(false);
 program
     .argument('[url]', 'The web URL you want to package', validateUrlInput)
     // Refer to https://github.com/tj/commander.js#custom-option-processing, turn string array into a string connected with custom connectors.
@@ -1672,7 +1662,20 @@ program
     .addOption(new Option('--installer-language <string>', 'Installer language')
     .default(DEFAULT_PAKE_OPTIONS.installerLanguage)
     .hideHelp())
-    .version(packageJson.version, '-v, --version', 'Output the current version')
+    .version(packageJson.version, '-v, --version')
+    .configureHelp({
+    sortSubcommands: true,
+    optionTerm: (option) => {
+        if (option.flags === '-v, --version')
+            return '';
+        return option.flags;
+    },
+    optionDescription: (option) => {
+        if (option.flags === '-v, --version')
+            return '';
+        return option.description;
+    }
+})
     .action(async (url, options) => {
     await checkUpdateTips();
     if (!url) {

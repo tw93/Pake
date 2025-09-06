@@ -24,7 +24,8 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
 program
   .addHelpText('beforeAll', logo)
   .usage(`[url] [options]`)
-  .showHelpAfterError();
+  .showHelpAfterError()
+  .helpOption(false);
 
 program
   .argument('[url]', 'The web URL you want to package', validateUrlInput)
@@ -158,7 +159,18 @@ program
       .default(DEFAULT.installerLanguage)
       .hideHelp(),
   )
-  .version(packageJson.version, '-v, --version', 'Output the current version')
+  .version(packageJson.version, '-v, --version')
+  .configureHelp({
+    sortSubcommands: true,
+    optionTerm: (option) => {
+      if (option.flags === '-v, --version') return '';
+      return option.flags;
+    },
+    optionDescription: (option) => {
+      if (option.flags === '-v, --version') return '';
+      return option.description;
+    }
+  })
   .action(async (url: string, options: PakeCliOptions) => {
     await checkUpdateTips();
 
