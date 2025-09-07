@@ -162,10 +162,10 @@
 pnpm install -g pake-cli
 
 # 基本使用法 - ウェブサイトのアイコンを自動取得
-pake https://github.com --name "GitHub"
+pake https://github.com --name GitHub
 
 # 高級使用法：カスタムオプション
-pake https://weekly.tw93.fun --name "Weekly" --icon https://cdn.tw93.fun/pake/weekly.icns --width 1200 --height 800 --hide-title-bar
+pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/weekly.icns --width 1200 --height 800 --hide-title-bar
 ```
 
 初回パッケージ化は環境設定で時間がかかりますが、その後は高速です。完全なパラメータ説明は[CLI使用ガイド](docs/cli-usage.md)を参照してください。コマンドラインを使いたくない場合は[GitHub Actions オンライン構築](docs/github-actions-usage.md)をお試しください。
