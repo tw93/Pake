@@ -41,20 +41,15 @@ source ~/.bashrc
 ## 快速开始
 
 ```bash
-# 基础用法 - 只需要提供URL（自动获取网站图标）
-pake https://weekly.tw93.fun --name "Weekly"
+# 基础用法 - 自动获取网站图标
+pake https://github.com --name "GitHub"
 
-# 自定义图标和窗口大小（macOS示例）
-pake https://weekly.tw93.fun --name "Weekly" --icon https://cdn.tw93.fun/pake/weekly.icns --width 1200 --height 800
-
-# macOS 沉浸式体验
-pake https://weekly.tw93.fun --name "Weekly" --hide-title-bar
+# 高级用法：自定义选项
+pake https://weekly.tw93.fun --name "Weekly" --icon https://cdn.tw93.fun/pake/weekly.icns --width 1200 --height 800 --hide-title-bar
 
 # 完整示例：多个选项组合使用
 pake https://github.com --name "GitHub Desktop" --width 1400 --height 900 --show-system-tray --debug
 
-# 注重隐私的应用：隐身模式
-pake https://duckduckgo.com --name "DuckDuckGo" --incognito --always-on-top
 ```
 
 ## 命令行使用

@@ -41,20 +41,15 @@ source ~/.bashrc
 ## Quick Start
 
 ```bash
-# Basic usage - just provide a URL (auto-fetch website icon)
-pake https://weekly.tw93.fun --name "Weekly"
+# Basic usage - automatically fetches website icon
+pake https://github.com --name "GitHub"
 
-# With custom icon and window size (macOS example)
-pake https://weekly.tw93.fun --name "Weekly" --icon https://cdn.tw93.fun/pake/weekly.icns --width 1200 --height 800
-
-# macOS immersive experience
-pake https://weekly.tw93.fun --name "Weekly" --hide-title-bar
+# Advanced usage with custom options
+pake https://weekly.tw93.fun --name "Weekly" --icon https://cdn.tw93.fun/pake/weekly.icns --width 1200 --height 800 --hide-title-bar
 
 # Complete example with multiple options
 pake https://github.com --name "GitHub Desktop" --width 1400 --height 900 --show-system-tray --debug
 
-# Privacy-focused app with incognito mode
-pake https://duckduckgo.com --name "DuckDuckGo" --incognito --always-on-top
 ```
 
 ## CLI Usage

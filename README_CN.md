@@ -159,14 +159,14 @@
 ![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake.gif)
 
 ```bash
-# 安装
+# 安装 Pake CLI
 pnpm install -g pake-cli
 
-# 基础使用（自动获取网站图标）
-pake https://weekly.tw93.fun --name Weekly
+# 基础用法 - 自动获取网站图标
+pake https://github.com --name "GitHub"
 
-# 常用参数：--name 应用名称，--icon 自定义图标，--width/--height 窗口尺寸，--hide-title-bar macOS沉浸式
-pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/weekly.icns --hide-title-bar
+# 高级用法：自定义选项
+pake https://weekly.tw93.fun --name "Weekly" --icon https://cdn.tw93.fun/pake/weekly.icns --width 1200 --height 800 --hide-title-bar
 ```
 
 首次打包需要安装环境会比较慢，后续很快。完整参数说明查看 [CLI 使用指南](docs/cli-usage_CN.md)，不想用命令行可以试试 [GitHub Actions 在线构建](docs/github-actions-usage_CN.md)。

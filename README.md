@@ -158,14 +158,14 @@ In addition, double-click the title bar to switch to full-screen mode. For Mac u
 ![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake.gif)
 
 ```bash
-# Install
+# Install Pake CLI
 pnpm install -g pake-cli
 
-# Basic usage (auto-fetch website icon)
-pake https://weekly.tw93.fun --name Weekly
+# Basic usage - automatically fetches website icon
+pake https://github.com --name "GitHub"
 
-# Common options: --name app name, --icon custom icon, --width/--height window size, --hide-title-bar macOS immersive
-pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/weekly.icns --hide-title-bar
+# Advanced usage with custom options
+pake https://weekly.tw93.fun --name "Weekly" --icon https://cdn.tw93.fun/pake/weekly.icns --width 1200 --height 800 --hide-title-bar
 ```
 
 First-time packaging requires environment setup and may be slower, subsequent builds are fast. For complete parameter documentation, see [CLI Usage Guide](docs/cli-usage.md). Don't want to use CLI? Try [GitHub Actions Online Building](docs/github-actions-usage.md).
