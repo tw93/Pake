@@ -155,7 +155,7 @@ In addition, double-click the title bar to switch to full-screen mode. For Mac u
 
 ## Command-Line Packaging
 
-![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake.gif)
+![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake1.gif)
 
 ```bash
 # Install Pake CLI

@@ -156,7 +156,7 @@
 
 ## 命令行一键打包
 
-![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake.gif)
+![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake1.gif)
 
 ```bash
 # 安装 Pake CLI

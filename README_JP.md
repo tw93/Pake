@@ -155,7 +155,7 @@
 
 ## コマンドラインパッケージング
 
-![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake.gif)
+![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake1.gif)
 
 ```bash
 # Pake CLIをインストール
