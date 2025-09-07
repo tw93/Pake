@@ -1,11 +1,27 @@
-bin/**/*               linguist-vendored
-bin/*                  linguist-vendored
-dist/*                 linguist-vendored
-/cli.js                linguist-vendored
-.github/**/*           linguist-vendored
-.github/*              linguist-vendored
-script/*               linguist-vendored
-/icns2png.py           linguist-vendored
-/rollup.config.js      linguist-vendored
-src-tauri/src/inject/* linguist-vendored
-src-tauri/src/.pake/*  linguist-vendored
+# Exclude all non-source directories from language detection
+bin/**/*                  linguist-vendored
+dist/**/*                 linguist-vendored
+scripts/**/*              linguist-vendored
+tests/**/*                linguist-vendored
+docs/**/*                 linguist-vendored
+.github/**/*              linguist-vendored
+node_modules/**/*         linguist-vendored
+
+# Exclude build artifacts and config files
+/cli.js                   linguist-vendored
+/rollup.config.js         linguist-vendored
+/icns2png.py              linguist-vendored
+*.json                    linguist-vendored
+
+# Exclude Tauri generated and vendor code
+src-tauri/target/**/*     linguist-vendored
+src-tauri/gen/**/*        linguist-vendored
+src-tauri/capabilities/** linguist-vendored
+src-tauri/icons/**/*      linguist-vendored
+src-tauri/assets/**/*     linguist-vendored
+src-tauri/png/**/*        linguist-vendored
+src-tauri/.pake/**/*      linguist-vendored
+src-tauri/.cargo/**/*     linguist-vendored
+
+# Exclude injection system (since it's mostly JS/CSS)
+src-tauri/src/inject/**/* linguist-vendored
