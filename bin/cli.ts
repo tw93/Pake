@@ -127,10 +127,16 @@ program
   )
   .addOption(
     new Option(
-      '--hide-on-close',
+      '--hide-on-close [boolean]',
       'Hide window on close instead of exiting (default: true for macOS, false for others)',
     )
       .default(DEFAULT.hideOnClose)
+      .argParser((value) => {
+        if (value === undefined) return true; // --hide-on-close without value
+        if (value === 'true') return true;
+        if (value === 'false') return false;
+        throw new Error('--hide-on-close must be true or false');
+      })
       .hideHelp(),
   )
   .addOption(new Option('--title <string>', 'Window title').hideHelp())

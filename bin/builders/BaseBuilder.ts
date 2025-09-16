@@ -7,6 +7,7 @@ import { PakeAppOptions } from '@/types';
 import { checkRustInstalled, installRust } from '@/helpers/rust';
 import { mergeConfig } from '@/helpers/merge';
 import tauriConfig from '@/helpers/tauriConfig';
+import { generateIdentifierSafeName } from '@/utils/name';
 import { npmDirectory } from '@/utils/dir';
 import { getSpinner } from '@/utils/info';
 import { shellExec } from '@/utils/shell';
@@ -409,7 +410,7 @@ export default abstract class BaseBuilder {
 
     // Linux uses the unique binary name we set in merge.ts
     if (process.platform === 'linux') {
-      return `pake-${appName.toLowerCase()}${extension}`;
+      return `pake-${generateIdentifierSafeName(appName)}${extension}`;
     }
 
     // Windows and macOS use 'pake' as binary name

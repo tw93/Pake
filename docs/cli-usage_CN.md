@@ -284,7 +284,12 @@ pake https://github.com --name GitHub
 点击关闭按钮时隐藏窗口而不是退出应用程序。平台特定默认值：macOS 为 `true`，Windows/Linux 为 `false`。
 
 ```shell
+# 关闭时隐藏（macOS 默认行为）
 --hide-on-close
+--hide-on-close true
+
+# 立即关闭应用程序（Windows/Linux 默认行为）
+--hide-on-close false
 ```
 
 #### [title]
