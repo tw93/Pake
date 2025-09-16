@@ -252,27 +252,33 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function downloadFromDataUri(dataURI, filename) {
-    const byteString = atob(dataURI.split(",")[1]);
-    // write the bytes of the string to an ArrayBuffer
-    const bufferArray = new ArrayBuffer(byteString.length);
+    try {
+      const byteString = atob(dataURI.split(",")[1]);
+      // write the bytes of the string to an ArrayBuffer
+      const bufferArray = new ArrayBuffer(byteString.length);
 
-    // create a view into the buffer
-    const binary = new Uint8Array(bufferArray);
+      // create a view into the buffer
+      const binary = new Uint8Array(bufferArray);
 
-    // set the bytes of the buffer to the correct values
-    for (let i = 0; i < byteString.length; i++) {
-      binary[i] = byteString.charCodeAt(i);
+      // set the bytes of the buffer to the correct values
+      for (let i = 0; i < byteString.length; i++) {
+        binary[i] = byteString.charCodeAt(i);
+      }
+
+      // write the ArrayBuffer to a binary, and you're done
+      const userLanguage = navigator.language || navigator.userLanguage;
+      invoke("download_file_by_binary", {
+        params: {
+          filename,
+          binary: Array.from(binary),
+          language: userLanguage,
+        },
+      }).catch(error => {
+        console.error('Failed to download data URI file:', filename, error);
+      });
+    } catch (error) {
+      console.error('Failed to process data URI:', dataURI, error);
     }
-
-    // write the ArrayBuffer to a binary, and you're done
-    const userLanguage = navigator.language || navigator.userLanguage;
-    invoke("download_file_by_binary", {
-      params: {
-        filename,
-        binary: Array.from(binary),
-        language: userLanguage,
-      },
-    });
   }
 
   function downloadFromBlobUrl(blobUrl, filename) {
@@ -284,7 +290,11 @@ document.addEventListener("DOMContentLoaded", () => {
           binary,
           language: userLanguage,
         },
+      }).catch(error => {
+        console.error('Failed to download blob file:', filename, error);
       });
+    }).catch(error => {
+      console.error('Failed to convert blob to binary:', blobUrl, error);
     });
   }
 
@@ -323,8 +333,16 @@ document.addEventListener("DOMContentLoaded", () => {
     anchorElement.download || e.metaKey || e.ctrlKey || isDownloadableFile(url);
 
   const handleExternalLink = (url) => {
+    // Don't try to open blob: or data: URLs with shell
+    if (isSpecialDownload(url)) {
+      console.warn('Cannot open special URL with shell:', url);
+      return;
+    }
+
     invoke("plugin:shell|open", {
       path: url,
+    }).catch(error => {
+      console.error('Failed to open URL with shell:', url, error);
     });
   };
 
@@ -351,6 +369,10 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const detectAnchorElementClick = (e) => {
+    // Safety check: ensure e.target exists and is an Element with closest method
+    if (!e.target || typeof e.target.closest !== 'function') {
+      return;
+    }
     const anchorElement = e.target.closest("a");
 
     if (anchorElement && anchorElement.href) {
@@ -701,7 +723,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Check for parent elements with background images
-    const parentWithBg = target.closest('[style*="background-image"]');
+    const parentWithBg = target && typeof target.closest === 'function' ? target.closest('[style*="background-image"]') : null;
     if (parentWithBg) {
       const bgImage = parentWithBg.style.backgroundImage;
       const urlMatch = bgImage.match(/url\(["']?([^"')]+)["']?\)/);
@@ -770,7 +792,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const mediaInfo = getMediaInfo(target);
 
       // Check for links (but not if it's media)
-      const linkElement = target.closest("a");
+      const linkElement = target && typeof target.closest === 'function' ? target.closest("a") : null;
       const isLink = linkElement && linkElement.href && !mediaInfo.isMedia;
 
       // Only show custom menu for media or links

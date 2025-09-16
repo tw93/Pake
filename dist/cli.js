@@ -328,6 +328,26 @@ async function combineFiles(files, output) {
     return files;
 }
 
+function generateSafeFilename(name) {
+    return name
+        .replace(/[<>:"/\\|?*]/g, '_')
+        .replace(/\s+/g, '_')
+        .replace(/\.+$/g, '')
+        .slice(0, 255);
+}
+function generateLinuxPackageName(name) {
+    return name
+        .toLowerCase()
+        .replace(/[^a-z0-9\u4e00-\u9fff]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .replace(/-+/g, '-');
+}
+function generateIdentifierSafeName(name) {
+    return name
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .toLowerCase();
+}
+
 async function mergeConfig(url, options, tauriConf) {
     // Ensure .pake directory exists and copy source templates if needed
     const srcTauriDir = path.join(npmDirectory, 'src-tauri');
@@ -372,7 +392,7 @@ async function mergeConfig(url, options, tauriConf) {
     tauriConf.identifier = identifier;
     tauriConf.version = appVersion;
     if (platform === 'linux') {
-        tauriConf.mainBinaryName = `pake-${name.toLowerCase()}`;
+        tauriConf.mainBinaryName = `pake-${generateIdentifierSafeName(name)}`;
     }
     if (platform == 'win32') {
         tauriConf.bundle.windows.wix.language[0] = installerLanguage;
@@ -418,8 +438,8 @@ async function mergeConfig(url, options, tauriConf) {
         // Remove hardcoded desktop files and regenerate with correct app name
         delete tauriConf.bundle.linux.deb.files;
         // Generate correct desktop file configuration
-        const appNameLower = name.toLowerCase();
-        const identifier = `com.pake.${appNameLower}`;
+        const appNameSafe = generateSafeFilename(name).toLowerCase();
+        const identifier = `com.pake.${appNameSafe}`;
         const desktopFileName = `${identifier}.desktop`;
         // Create desktop file content
         const desktopContent = `[Desktop Entry]
@@ -427,8 +447,8 @@ Version=1.0
 Type=Application
 Name=${name}
 Comment=${name}
-Exec=pake-${appNameLower}
-Icon=${appNameLower}_512
+Exec=pake-${appNameSafe}
+Icon=${appNameSafe}_512
 Categories=Network;WebBrowser;
 MimeType=text/html;text/xml;application/xhtml_xml;
 StartupNotify=true
@@ -472,28 +492,29 @@ StartupNotify=true
     const platformIconMap = {
         win32: {
             fileExt: '.ico',
-            path: `png/${name.toLowerCase()}_256.ico`,
+            path: `png/${generateSafeFilename(name).toLowerCase()}_256.ico`,
             defaultIcon: 'png/icon_256.ico',
             message: 'Windows icon must be .ico and 256x256px.',
         },
         linux: {
             fileExt: '.png',
-            path: `png/${name.toLowerCase()}_512.png`,
+            path: `png/${generateSafeFilename(name).toLowerCase()}_512.png`,
             defaultIcon: 'png/icon_512.png',
             message: 'Linux icon must be .png and 512x512px.',
         },
         darwin: {
             fileExt: '.icns',
-            path: `icons/${name.toLowerCase()}.icns`,
+            path: `icons/${generateSafeFilename(name).toLowerCase()}.icns`,
             defaultIcon: 'icons/icon.icns',
             message: 'macOS icon must be .icns type.',
         },
     };
     const iconInfo = platformIconMap[platform];
-    const exists = options.icon && (await fsExtra.pathExists(options.icon));
+    const resolvedIconPath = options.icon ? path.resolve(options.icon) : null;
+    const exists = resolvedIconPath && (await fsExtra.pathExists(resolvedIconPath));
     if (exists) {
         let updateIconPath = true;
-        let customIconExt = path.extname(options.icon).toLowerCase();
+        let customIconExt = path.extname(resolvedIconPath).toLowerCase();
         if (customIconExt !== iconInfo.fileExt) {
             updateIconPath = false;
             logger.warn(`✼ ${iconInfo.message}, but you give ${customIconExt}`);
@@ -503,10 +524,9 @@ StartupNotify=true
             const iconPath = path.join(npmDirectory, 'src-tauri/', iconInfo.path);
             tauriConf.bundle.resources = [iconInfo.path];
             // Avoid copying if source and destination are the same
-            const absoluteIconPath = path.resolve(options.icon);
             const absoluteDestPath = path.resolve(iconPath);
-            if (absoluteIconPath !== absoluteDestPath) {
-                await fsExtra.copy(options.icon, iconPath);
+            if (resolvedIconPath !== absoluteDestPath) {
+                await fsExtra.copy(resolvedIconPath, iconPath);
             }
         }
         if (updateIconPath) {
@@ -528,8 +548,8 @@ StartupNotify=true
             // 需要判断图标格式，默认只支持ico和png两种
             let iconExt = path.extname(systemTrayIcon).toLowerCase();
             if (iconExt == '.png' || iconExt == '.ico') {
-                const trayIcoPath = path.join(npmDirectory, `src-tauri/png/${name.toLowerCase()}${iconExt}`);
-                trayIconPath = `png/${name.toLowerCase()}${iconExt}`;
+                const trayIcoPath = path.join(npmDirectory, `src-tauri/png/${generateSafeFilename(name).toLowerCase()}${iconExt}`);
+                trayIconPath = `png/${generateSafeFilename(name).toLowerCase()}${iconExt}`;
                 await fsExtra.copy(systemTrayIcon, trayIcoPath);
             }
             else {
@@ -854,7 +874,7 @@ class BaseBuilder {
         const extension = process.platform === 'win32' ? '.exe' : '';
         // Linux uses the unique binary name we set in merge.ts
         if (process.platform === 'linux') {
-            return `pake-${appName.toLowerCase()}${extension}`;
+            return `pake-${generateIdentifierSafeName(appName)}${extension}`;
         }
         // Windows and macOS use 'pake' as binary name
         return `pake${extension}`;
@@ -1169,12 +1189,9 @@ const API_KEYS = {
     logoDev: ['pk_JLLMUKGZRpaG5YclhXaTkg', 'pk_Ph745P8mQSeYFfW2Wk039A'],
     brandfetch: ['1idqvJC0CeFSeyp3Yf7', '1idej-yhU_ThggIHFyG'],
 };
-/**
- * Generates platform-specific icon paths and handles copying for Windows
- */
 function generateIconPath(appName, isDefault = false) {
-    const safeName = appName.toLowerCase().replace(/[^a-z0-9-_]/g, '_');
-    const baseName = isDefault ? 'icon' : safeName;
+    const safeName = isDefault ? 'icon' : generateSafeFilename(appName).toLowerCase();
+    const baseName = safeName;
     if (IS_WIN) {
         return path.join(npmDirectory, 'src-tauri', 'png', `${baseName}_256.ico`);
     }
@@ -1237,7 +1254,7 @@ async function convertIconFormat(inputPath, appName) {
         const platformOutputDir = path.join(outputDir, 'converted-icons');
         await fsExtra.ensureDir(platformOutputDir);
         const processedInputPath = await preprocessIcon(inputPath);
-        const iconName = appName.toLowerCase();
+        const iconName = generateSafeFilename(appName).toLowerCase();
         // Generate platform-specific format
         if (IS_WIN) {
             // Support multiple sizes for better Windows compatibility
@@ -1513,8 +1530,8 @@ function resolveAppName(name, platform) {
 }
 function isValidName(name, platform) {
     const platformRegexMapping = {
-        linux: /^[a-z0-9][a-z0-9-]*$/,
-        default: /^[a-zA-Z0-9][a-zA-Z0-9- ]*$/,
+        linux: /^[a-z0-9\u4e00-\u9fff][a-z0-9\u4e00-\u9fff-]*$/,
+        default: /^[a-zA-Z0-9\u4e00-\u9fff][a-zA-Z0-9\u4e00-\u9fff- ]*$/,
     };
     const reg = platformRegexMapping[platform] || platformRegexMapping.default;
     return !!name && reg.test(name);
@@ -1530,10 +1547,8 @@ async function handleOptions(options, url) {
         const namePrompt = await promptText(promptMessage, defaultName);
         name = namePrompt || defaultName;
     }
-    // Handle platform-specific name formatting
     if (name && platform === 'linux') {
-        // Convert to lowercase and replace spaces with dashes for Linux
-        name = name.toLowerCase().replace(/\s+/g, '-');
+        name = generateLinuxPackageName(name);
     }
     if (!isValidName(name, platform)) {
         const LINUX_NAME_ERROR = `✕ Name should only include lowercase letters, numbers, and dashes (not leading dashes). Examples: com-123-xxx, 123pan, pan123, weread, we-read, 123.`;
@@ -1643,8 +1658,17 @@ program
     .addOption(new Option('--system-tray-icon <string>', 'Custom system tray icon')
     .default(DEFAULT_PAKE_OPTIONS.systemTrayIcon)
     .hideHelp())
-    .addOption(new Option('--hide-on-close', 'Hide window on close instead of exiting (default: true for macOS, false for others)')
+    .addOption(new Option('--hide-on-close [boolean]', 'Hide window on close instead of exiting (default: true for macOS, false for others)')
     .default(DEFAULT_PAKE_OPTIONS.hideOnClose)
+    .argParser((value) => {
+    if (value === undefined)
+        return true; // --hide-on-close without value
+    if (value === 'true')
+        return true;
+    if (value === 'false')
+        return false;
+    throw new Error('--hide-on-close must be true or false');
+})
     .hideHelp())
     .addOption(new Option('--title <string>', 'Window title').hideHelp())
     .addOption(new Option('--incognito', 'Launch app in incognito/private mode')
