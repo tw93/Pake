@@ -46,7 +46,9 @@ const API_KEYS = {
 import { generateSafeFilename } from '@/utils/name';
 
 function generateIconPath(appName: string, isDefault = false): string {
-  const safeName = isDefault ? 'icon' : generateSafeFilename(appName).toLowerCase();
+  const safeName = isDefault
+    ? 'icon'
+    : generateSafeFilename(appName).toLowerCase();
   const baseName = safeName;
 
   if (IS_WIN) {

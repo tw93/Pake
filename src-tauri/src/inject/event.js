@@ -273,29 +273,31 @@ document.addEventListener("DOMContentLoaded", () => {
           binary: Array.from(binary),
           language: userLanguage,
         },
-      }).catch(error => {
-        console.error('Failed to download data URI file:', filename, error);
+      }).catch((error) => {
+        console.error("Failed to download data URI file:", filename, error);
       });
     } catch (error) {
-      console.error('Failed to process data URI:', dataURI, error);
+      console.error("Failed to process data URI:", dataURI, error);
     }
   }
 
   function downloadFromBlobUrl(blobUrl, filename) {
-    convertBlobUrlToBinary(blobUrl).then((binary) => {
-      const userLanguage = navigator.language || navigator.userLanguage;
-      invoke("download_file_by_binary", {
-        params: {
-          filename,
-          binary,
-          language: userLanguage,
-        },
-      }).catch(error => {
-        console.error('Failed to download blob file:', filename, error);
+    convertBlobUrlToBinary(blobUrl)
+      .then((binary) => {
+        const userLanguage = navigator.language || navigator.userLanguage;
+        invoke("download_file_by_binary", {
+          params: {
+            filename,
+            binary,
+            language: userLanguage,
+          },
+        }).catch((error) => {
+          console.error("Failed to download blob file:", filename, error);
+        });
+      })
+      .catch((error) => {
+        console.error("Failed to convert blob to binary:", blobUrl, error);
       });
-    }).catch(error => {
-      console.error('Failed to convert blob to binary:', blobUrl, error);
-    });
   }
 
   // detect blob download by createElement("a")
@@ -335,14 +337,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const handleExternalLink = (url) => {
     // Don't try to open blob: or data: URLs with shell
     if (isSpecialDownload(url)) {
-      console.warn('Cannot open special URL with shell:', url);
+      console.warn("Cannot open special URL with shell:", url);
       return;
     }
 
     invoke("plugin:shell|open", {
       path: url,
-    }).catch(error => {
-      console.error('Failed to open URL with shell:', url, error);
+    }).catch((error) => {
+      console.error("Failed to open URL with shell:", url, error);
     });
   };
 
@@ -370,7 +372,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const detectAnchorElementClick = (e) => {
     // Safety check: ensure e.target exists and is an Element with closest method
-    if (!e.target || typeof e.target.closest !== 'function') {
+    if (!e.target || typeof e.target.closest !== "function") {
       return;
     }
     const anchorElement = e.target.closest("a");
@@ -723,7 +725,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Check for parent elements with background images
-    const parentWithBg = target && typeof target.closest === 'function' ? target.closest('[style*="background-image"]') : null;
+    const parentWithBg =
+      target && typeof target.closest === "function"
+        ? target.closest('[style*="background-image"]')
+        : null;
     if (parentWithBg) {
       const bgImage = parentWithBg.style.backgroundImage;
       const urlMatch = bgImage.match(/url\(["']?([^"')]+)["']?\)/);
@@ -792,7 +797,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const mediaInfo = getMediaInfo(target);
 
       // Check for links (but not if it's media)
-      const linkElement = target && typeof target.closest === 'function' ? target.closest("a") : null;
+      const linkElement =
+        target && typeof target.closest === "function"
+          ? target.closest("a")
+          : null;
       const isLink = linkElement && linkElement.href && !mediaInfo.isMedia;
 
       // Only show custom menu for media or links

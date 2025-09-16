@@ -47,6 +47,7 @@ pnpm run dev        # Development with hot reload
 ```
 
 **Testing:**
+
 - Always run `pnpm test` before committing
 - For CLI testing: `node dist/cli.js https://example.com --name TestApp --debug`
 - For app functionality testing: Use `pnpm run dev` for hot reload

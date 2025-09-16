@@ -15,9 +15,7 @@ export function generateLinuxPackageName(name: string): string {
 }
 
 export function generateIdentifierSafeName(name: string): string {
-  return name
-    .replace(/[^a-zA-Z0-9]/g, '')
-    .toLowerCase();
+  return name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
 }
 
 export function generateWindowsFilename(name: string): string {
@@ -28,7 +26,5 @@ export function generateWindowsFilename(name: string): string {
 }
 
 export function generateMacOSFilename(name: string): string {
-  return name
-    .replace(/[:]/g, '_')
-    .slice(0, 255);
+  return name.replace(/[:]/g, '_').slice(0, 255);
 }

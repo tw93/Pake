@@ -233,7 +233,8 @@ StartupNotify=true
   };
   const iconInfo = platformIconMap[platform];
   const resolvedIconPath = options.icon ? path.resolve(options.icon) : null;
-  const exists = resolvedIconPath && (await fsExtra.pathExists(resolvedIconPath));
+  const exists =
+    resolvedIconPath && (await fsExtra.pathExists(resolvedIconPath));
   if (exists) {
     let updateIconPath = true;
     let customIconExt = path.extname(resolvedIconPath).toLowerCase();
