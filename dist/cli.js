@@ -343,9 +343,28 @@ function generateLinuxPackageName(name) {
         .replace(/-+/g, '-');
 }
 function generateIdentifierSafeName(name) {
-    return name
-        .replace(/[^a-zA-Z0-9]/g, '')
+    // Support Chinese characters (CJK Unified Ideographs: U+4E00-U+9FFF)
+    // and other common Unicode letter categories
+    const cleaned = name
+        .replace(/[^a-zA-Z0-9\u4e00-\u9fff]/g, '')
         .toLowerCase();
+    // If result is empty after cleaning, generate a fallback based on original name
+    if (cleaned === '') {
+        // Convert to ASCII-safe representation using character codes
+        const fallback = Array.from(name)
+            .map(char => {
+            const code = char.charCodeAt(0);
+            // Keep ASCII alphanumeric, convert others to their hex codes
+            if ((code >= 48 && code <= 57) || (code >= 65 && code <= 90) || (code >= 97 && code <= 122)) {
+                return char.toLowerCase();
+            }
+            return code.toString(16);
+        })
+            .join('')
+            .slice(0, 50); // Limit length to avoid extremely long names
+        return fallback || 'pake-app'; // Ultimate fallback
+    }
+    return cleaned;
 }
 
 async function mergeConfig(url, options, tauriConf) {
@@ -1190,7 +1209,9 @@ const API_KEYS = {
     brandfetch: ['1idqvJC0CeFSeyp3Yf7', '1idej-yhU_ThggIHFyG'],
 };
 function generateIconPath(appName, isDefault = false) {
-    const safeName = isDefault ? 'icon' : generateSafeFilename(appName).toLowerCase();
+    const safeName = isDefault
+        ? 'icon'
+        : generateSafeFilename(appName).toLowerCase();
     const baseName = safeName;
     if (IS_WIN) {
         return path.join(npmDirectory, 'src-tauri', 'png', `${baseName}_256.ico`);
