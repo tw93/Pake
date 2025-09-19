@@ -30,13 +30,13 @@
 1. 编辑 `src-tauri/src/inject/event.js`
 2. 添加事件监听器：
 
-  ```javascript
-  document.addEventListener("keydown", (e) => {
-    if (e.ctrlKey && e.key === "k") {
-      // 自定义操作
-    }
-  });
-  ```
+```javascript
+document.addEventListener("keydown", (e) => {
+  if (e.ctrlKey && e.key === "k") {
+    // 自定义操作
+  }
+});
+```
 
 ## 容器通信
 
@@ -46,10 +46,10 @@
 
 ```javascript
 window.__TAURI__.invoke("handle_scroll", {
-scrollY: window.scrollY,
-scrollX: window.scrollX,
+  scrollY: window.scrollY,
+  scrollX: window.scrollX,
 });
-````
+```
 
 **容器端（Rust）：**
 
