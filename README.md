@@ -193,8 +193,8 @@ Pake's development can not be without these Hackers. They contributed a lot of c
 
 <!-- readme: contributors -start -->
 <table>
-	<tbody>
-		<tr>
+ <tbody>
+  <tr>
             <td align="center">
                 <a href="https://github.com/tw93">
                     <img src="https://avatars.githubusercontent.com/u/8736212?v=4" width="90;" alt="tw93"/>
@@ -244,8 +244,8 @@ Pake's development can not be without these Hackers. They contributed a lot of c
                     <sub><b>Bryan Lee</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
+  </tr>
+  <tr>
             <td align="center">
                 <a href="https://github.com/essesoul">
                     <img src="https://avatars.githubusercontent.com/u/58624474?v=4" width="90;" alt="essesoul"/>
@@ -295,8 +295,8 @@ Pake's development can not be without these Hackers. They contributed a lot of c
                     <sub><b>Ikko Eltociear Ashimine</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
+  </tr>
+  <tr>
             <td align="center">
                 <a href="https://github.com/kittizz">
                     <img src="https://avatars.githubusercontent.com/u/62899732?v=4" width="90;" alt="kittizz"/>
@@ -346,8 +346,8 @@ Pake's development can not be without these Hackers. They contributed a lot of c
                     <sub><b>Yue Yang</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
+  </tr>
+  <tr>
             <td align="center">
                 <a href="https://github.com/lkieryan">
                     <img src="https://avatars.githubusercontent.com/u/187804088?v=4" width="90;" alt="lkieryan"/>
@@ -397,8 +397,8 @@ Pake's development can not be without these Hackers. They contributed a lot of c
                     <sub><b>Ayaka Neko</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
+  </tr>
+  <tr>
             <td align="center">
                 <a href="https://github.com/turkyden">
                     <img src="https://avatars.githubusercontent.com/u/24560160?v=4" width="90;" alt="turkyden"/>
@@ -448,8 +448,8 @@ Pake's development can not be without these Hackers. They contributed a lot of c
                     <sub><b>Luminall</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
+  </tr>
+  <tr>
             <td align="center">
                 <a href="https://github.com/Milo123459">
                     <img src="https://avatars.githubusercontent.com/u/50248166?v=4" width="90;" alt="Milo123459"/>
@@ -499,8 +499,8 @@ Pake's development can not be without these Hackers. They contributed a lot of c
                     <sub><b>Null</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
+  </tr>
+  <tr>
             <td align="center">
                 <a href="https://github.com/liudonghua123">
                     <img src="https://avatars.githubusercontent.com/u/2276718?v=4" width="90;" alt="liudonghua123"/>
@@ -529,8 +529,8 @@ Pake's development can not be without these Hackers. They contributed a lot of c
                     <sub><b>贺天卓</b></sub>
                 </a>
             </td>
-		</tr>
-	<tbody>
+  </tr>
+ <tbody>
 </table>
 <!-- readme: contributors -end -->
 
@@ -540,6 +540,3 @@ Pake's development can not be without these Hackers. They contributed a lot of c
 2. If you like Pake, you can star it on GitHub. Also, welcome to [recommend Pake](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20Turn%20any%20webpage%20into%20a%20desktop%20app%20with%20one%20command.%20Nearly%2020x%20smaller%20than%20Electron%20packages,%20supports%20macOS%20Windows%20Linux) to your friends.
 3. You can follow my [Twitter](https://twitter.com/HiTw93) to get the latest news of Pake or join our [Telegram](https://t.me/+GclQS9ZnxyI2ODQ1) chat group.
 4. I hope that you enjoy playing with it. Let us know if you find a website that would be great for a Mac App!
-5. CDN acceleration and security protection for this project are sponsored by Tencent EdgeOne.
-
-   <a href="https://edgeone.ai/?from=github"><img src="https://cdn.tw93.fun/img/edgeone.png" width="300"></a>
