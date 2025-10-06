@@ -161,6 +161,11 @@ program
       .hideHelp(),
   )
   .addOption(
+    new Option('--multi-instance', 'Allow multiple app instances')
+      .default(DEFAULT.multiInstance)
+      .hideHelp(),
+  )
+  .addOption(
     new Option('--installer-language <string>', 'Installer language')
       .default(DEFAULT.installerLanguage)
       .hideHelp(),

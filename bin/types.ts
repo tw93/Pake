@@ -87,6 +87,9 @@ export interface PakeCliOptions {
 
   // Keep raw binary file alongside installer, default false
   keepBinary: boolean;
+
+  // Allow multiple instances, default false (single instance)
+  multiInstance: boolean;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {

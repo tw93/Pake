@@ -30,5 +30,6 @@
   },
   "system_tray_path": "icons/icon.png",
   "inject": [],
-  "proxy_url": ""
+  "proxy_url": "",
+  "multi_instance": false
 }

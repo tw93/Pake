@@ -59,6 +59,8 @@ pub struct PakeConfig {
     pub system_tray: FunctionON,
     pub system_tray_path: String,
     pub proxy_url: String,
+    #[serde(default)]
+    pub multi_instance: bool,
 }
 
 impl PakeConfig {

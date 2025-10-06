@@ -343,26 +343,21 @@ function generateLinuxPackageName(name) {
         .replace(/-+/g, '-');
 }
 function generateIdentifierSafeName(name) {
-    // Support Chinese characters (CJK Unified Ideographs: U+4E00-U+9FFF)
-    // and other common Unicode letter categories
-    const cleaned = name
-        .replace(/[^a-zA-Z0-9\u4e00-\u9fff]/g, '')
-        .toLowerCase();
-    // If result is empty after cleaning, generate a fallback based on original name
+    const cleaned = name.replace(/[^a-zA-Z0-9\u4e00-\u9fff]/g, '').toLowerCase();
     if (cleaned === '') {
-        // Convert to ASCII-safe representation using character codes
         const fallback = Array.from(name)
-            .map(char => {
+            .map((char) => {
             const code = char.charCodeAt(0);
-            // Keep ASCII alphanumeric, convert others to their hex codes
-            if ((code >= 48 && code <= 57) || (code >= 65 && code <= 90) || (code >= 97 && code <= 122)) {
+            if ((code >= 48 && code <= 57) ||
+                (code >= 65 && code <= 90) ||
+                (code >= 97 && code <= 122)) {
                 return char.toLowerCase();
             }
             return code.toString(16);
         })
             .join('')
-            .slice(0, 50); // Limit length to avoid extremely long names
-        return fallback || 'pake-app'; // Ultimate fallback
+            .slice(0, 50);
+        return fallback || 'pake-app';
     }
     return cleaned;
 }
@@ -387,7 +382,7 @@ async function mergeConfig(url, options, tauriConf) {
             await fsExtra.copy(sourcePath, destPath);
         }
     }));
-    const { width, height, fullscreen, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, } = options;
+    const { width, height, fullscreen, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, multiInstance, } = options;
     const { platform } = process;
     const platformHideOnClose = hideOnClose ?? platform === 'darwin';
     const tauriConfWindowOptions = {
@@ -602,6 +597,7 @@ StartupNotify=true
         await fsExtra.writeFile(injectFilePath, '');
     }
     tauriConf.pake.proxy_url = proxyUrl || '';
+    tauriConf.pake.multi_instance = multiInstance;
     // Configure WASM support with required HTTP headers
     if (wasm) {
         tauriConf.app.security = {
@@ -1181,6 +1177,7 @@ const DEFAULT_PAKE_OPTIONS = {
     wasm: false,
     enableDragDrop: false,
     keepBinary: false,
+    multiInstance: false,
 };
 
 async function checkUpdateTips() {
@@ -1703,6 +1700,9 @@ program
     .hideHelp())
     .addOption(new Option('--keep-binary', 'Keep raw binary file alongside installer')
     .default(DEFAULT_PAKE_OPTIONS.keepBinary)
+    .hideHelp())
+    .addOption(new Option('--multi-instance', 'Allow multiple app instances')
+    .default(DEFAULT_PAKE_OPTIONS.multiInstance)
     .hideHelp())
     .addOption(new Option('--installer-language <string>', 'Installer language')
     .default(DEFAULT_PAKE_OPTIONS.installerLanguage)

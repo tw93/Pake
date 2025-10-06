@@ -63,6 +63,7 @@ export async function mergeConfig(
     title,
     wasm,
     enableDragDrop,
+    multiInstance,
   } = options;
 
   const { platform } = process;
@@ -325,6 +326,7 @@ StartupNotify=true
     await fsExtra.writeFile(injectFilePath, '');
   }
   tauriConf.pake.proxy_url = proxyUrl || '';
+  tauriConf.pake.multi_instance = multiInstance;
 
   // Configure WASM support with required HTTP headers
   if (wasm) {

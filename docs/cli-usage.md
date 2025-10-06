@@ -350,6 +350,17 @@ pake https://github.com --name GitHub --keep-binary
 
 **Output**: Creates both installer and standalone executable (`AppName-binary` on Unix, `AppName.exe` on Windows).
 
+#### [multi-instance]
+
+Allow the packaged app to run more than one instance at the same time. Default is `false`, which means launching a second instance simply focuses the existing window. Enable this when you need to open several windows of the same app simultaneously.
+
+```shell
+--multi-instance
+
+# Example: Allow multiple chat windows
+pake https://chat.example.com --name ChatApp --multi-instance
+```
+
 #### [installer-language]
 
 Set the Windows Installer language. Options include `zh-CN`, `ja-JP`, More at [Tauri Document](https://tauri.app/distribute/windows-installer/#internationalization). Default is `en-US`.
