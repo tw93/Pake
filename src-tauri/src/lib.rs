@@ -87,7 +87,13 @@ pub fn run_app() {
                         window.minimize().unwrap();
                         window.hide().unwrap();
                     });
-                    api.prevent_close();
+                    
+                    let label = _window.label();
+                    if label == "pake" {
+                        api.prevent_close();
+                    } else {
+                        _window.destroy().unwrap();
+                    }
                 } else {
                     // Exit app completely when hide_on_close is false
                     std::process::exit(0);
