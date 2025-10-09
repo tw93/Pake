@@ -18,10 +18,15 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   targets: 'deb',
   useLocalFile: false,
   systemTrayIcon: '',
-  proxyUrl: "",
+  proxyUrl: '',
   debug: false,
   inject: [],
   installerLanguage: 'en-US',
+  hideOnClose: undefined, // Platform-specific: true for macOS, false for others
+  incognito: false,
+  wasm: false,
+  enableDragDrop: false,
+  keepBinary: false,
 };
 
 // Just for cli development

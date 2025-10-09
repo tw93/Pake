@@ -1,0 +1,153 @@
+name: Setup Development Environment
+description: Unified environment setup with Node.js, Rust, and system dependencies
+
+inputs:
+  mode:
+    description: |
+      Setup mode:
+      - build: Complete environment (Node + Rust + System deps + Cache)  
+      - node: Node.js only (pnpm + Node 22)
+      - rust: Rust only (toolchain + targets)
+    required: false
+    default: "build"
+
+outputs:
+  setup-complete:
+    description: Setup completion status
+    value: "true"
+
+runs:
+  using: composite
+  steps:
+    # Parse mode and set environment flags
+    - name: Setup environment flags
+      shell: bash
+      run: |
+        MODE="${{ inputs.mode }}"
+
+        # Validate and set flags in one pass
+        case "$MODE" in
+          build|full)
+            echo "SETUP_NODE=true" >> $GITHUB_ENV
+            echo "SETUP_RUST=true" >> $GITHUB_ENV  
+            echo "SETUP_SYSTEM=true" >> $GITHUB_ENV
+            ;;
+          node|node-only)
+            echo "SETUP_NODE=true" >> $GITHUB_ENV
+            echo "SETUP_RUST=false" >> $GITHUB_ENV
+            echo "SETUP_SYSTEM=false" >> $GITHUB_ENV
+            ;;
+          rust|rust-only)
+            echo "SETUP_NODE=false" >> $GITHUB_ENV
+            echo "SETUP_RUST=true" >> $GITHUB_ENV
+            echo "SETUP_SYSTEM=false" >> $GITHUB_ENV
+            ;;
+          *)
+            echo "❌ Invalid mode: '$MODE'. Valid modes: build, node, rust"
+            exit 1
+            ;;
+        esac
+
+    # Node.js Environment Setup
+    - name: Install pnpm
+      if: env.SETUP_NODE == 'true'
+      uses: pnpm/action-setup@v4
+      with:
+        version: "10.15.0"
+        run_install: false
+
+    - name: Setup Node.js
+      if: env.SETUP_NODE == 'true'
+      uses: actions/setup-node@v4
+      with:
+        node-version: "22"
+        cache: pnpm
+
+    - name: Install dependencies
+      if: env.SETUP_NODE == 'true'
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    # Rust Environment Setup
+    - name: Setup Rust for Linux
+      if: env.SETUP_RUST == 'true' && runner.os == 'Linux'
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
+        target: x86_64-unknown-linux-gnu
+
+    - name: Setup Rust for Windows
+      if: env.SETUP_RUST == 'true' && runner.os == 'Windows'
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable-x86_64-msvc
+        target: x86_64-pc-windows-msvc
+
+    - name: Setup Rust for macOS
+      if: env.SETUP_RUST == 'true' && runner.os == 'macOS'
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
+
+    - name: Add macOS universal targets
+      if: env.SETUP_RUST == 'true' && runner.os == 'macOS'
+      shell: bash
+      run: |
+        rustup target add x86_64-apple-darwin
+        rustup target add aarch64-apple-darwin
+
+    # System Dependencies
+    - name: Install Ubuntu dependencies
+      if: env.SETUP_SYSTEM == 'true' && runner.os == 'Linux'
+      uses: awalsh128/cache-apt-pkgs-action@v1.4.3
+      with:
+        packages: >
+          libdbus-1-dev libsoup-3.0-dev libjavascriptcoregtk-4.1-dev libwebkit2gtk-4.1-dev
+          build-essential curl wget file libxdo-dev libssl-dev libgtk-3-dev 
+          libayatana-appindicator3-dev librsvg2-dev gnome-video-effects
+          libglib2.0-dev libgirepository1.0-dev 
+          pkg-config
+        version: 1.1
+
+    - name: Set PKG_CONFIG_PATH for Linux
+      if: env.SETUP_SYSTEM == 'true' && runner.os == 'Linux'
+      shell: bash
+      run: |
+        echo "PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/share/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig" >> $GITHUB_ENV
+
+    - name: Install WIX Toolset
+      if: env.SETUP_SYSTEM == 'true' && runner.os == 'Windows'
+      shell: powershell
+      run: |
+        try {
+          # Download and install WIX Toolset v3.11
+          Invoke-WebRequest -Uri "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311.exe" -OutFile "wix311.exe"
+          Start-Process -FilePath "wix311.exe" -ArgumentList "/quiet" -Wait
+
+          # Add WIX to PATH
+          $wixPath = "${env:ProgramFiles(x86)}\WiX Toolset v3.11\bin"
+          if (Test-Path $wixPath) {
+            echo $wixPath >> $env:GITHUB_PATH
+            Write-Host "✅ WIX Toolset installed successfully"
+          } else {
+            Write-Warning "WIX installation path not found"
+          }
+        } catch {
+          Write-Error "Failed to install WIX Toolset: $($_.Exception.Message)"
+          exit 1
+        }
+
+    # Build optimizations (caching)
+    - name: Setup Rust cache
+      if: inputs.mode == 'build'
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          src-tauri/target/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-

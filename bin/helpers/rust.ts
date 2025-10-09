@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import shelljs from 'shelljs';
+import { execaSync } from 'execa';
 
 import { getSpinner } from '@/utils/info';
 import { IS_WIN } from '@/utils/platform';
@@ -18,15 +18,22 @@ export async function installRust() {
   const spinner = getSpinner('Downloading Rust...');
 
   try {
-    await shellExec(IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac);
-    spinner.succeed(chalk.green('Rust installed successfully!'));
+    await shellExec(
+      IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac,
+    );
+    spinner.succeed(chalk.green('✔ Rust installed successfully!'));
   } catch (error) {
-    console.error('Error installing Rust:', error.message);
-    spinner.fail(chalk.red('Rust installation failed!'));
+    spinner.fail(chalk.red('✕ Rust installation failed!'));
+    console.error(error.message);
     process.exit(1);
   }
 }
 
 export function checkRustInstalled() {
-  return shelljs.exec('rustc --version', { silent: true }).code === 0;
+  try {
+    execaSync('rustc', ['--version']);
+    return true;
+  } catch {
+    return false;
+  }
 }

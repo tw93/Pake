@@ -6,7 +6,10 @@ import BuilderProvider from './builders/BuilderProvider';
 async function startBuild() {
   log.setDefaultLevel('debug');
 
-  const appOptions = await handleInputOptions(DEFAULT_DEV_PAKE_OPTIONS, DEFAULT_DEV_PAKE_OPTIONS.url);
+  const appOptions = await handleInputOptions(
+    DEFAULT_DEV_PAKE_OPTIONS,
+    DEFAULT_DEV_PAKE_OPTIONS.url,
+  );
   log.debug('PakeAppOptions', appOptions);
 
   const builder = BuilderProvider.create(appOptions);

@@ -1,8 +1,22 @@
-import pakeConf from '../../src-tauri/pake.json';
-import CommonConf from '../../src-tauri/tauri.conf.json';
-import WinConf from '../../src-tauri/tauri.windows.conf.json';
-import MacConf from '../../src-tauri/tauri.macos.conf.json';
-import LinuxConf from '../../src-tauri/tauri.linux.conf.json';
+import path from 'path';
+import fsExtra from 'fs-extra';
+import { npmDirectory } from '@/utils/dir';
+
+// Load configs from npm package directory, not from project source
+const tauriSrcDir = path.join(npmDirectory, 'src-tauri');
+const pakeConf = fsExtra.readJSONSync(path.join(tauriSrcDir, 'pake.json'));
+const CommonConf = fsExtra.readJSONSync(
+  path.join(tauriSrcDir, 'tauri.conf.json'),
+);
+const WinConf = fsExtra.readJSONSync(
+  path.join(tauriSrcDir, 'tauri.windows.conf.json'),
+);
+const MacConf = fsExtra.readJSONSync(
+  path.join(tauriSrcDir, 'tauri.macos.conf.json'),
+);
+const LinuxConf = fsExtra.readJSONSync(
+  path.join(tauriSrcDir, 'tauri.linux.conf.json'),
+);
 
 const platformConfigs = {
   win32: WinConf,

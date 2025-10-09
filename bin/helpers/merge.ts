@@ -1,13 +1,42 @@
 import path from 'path';
 import fsExtra from 'fs-extra';
 
-import { npmDirectory } from '@/utils/dir';
 import combineFiles from '@/utils/combine';
 import logger from '@/options/logger';
 import { PakeAppOptions, PlatformMap } from '@/types';
-import { tauriConfigDirectory } from '@/utils/dir';
+import { tauriConfigDirectory, npmDirectory } from '@/utils/dir';
 
-export async function mergeConfig(url: string, options: PakeAppOptions, tauriConf: any) {
+export async function mergeConfig(
+  url: string,
+  options: PakeAppOptions,
+  tauriConf: any,
+) {
+  // Ensure .pake directory exists and copy source templates if needed
+  const srcTauriDir = path.join(npmDirectory, 'src-tauri');
+  await fsExtra.ensureDir(tauriConfigDirectory);
+
+  // Copy source config files to .pake directory (as templates)
+  const sourceFiles = [
+    'tauri.conf.json',
+    'tauri.macos.conf.json',
+    'tauri.windows.conf.json',
+    'tauri.linux.conf.json',
+    'pake.json',
+  ];
+
+  await Promise.all(
+    sourceFiles.map(async (file) => {
+      const sourcePath = path.join(srcTauriDir, file);
+      const destPath = path.join(tauriConfigDirectory, file);
+
+      if (
+        (await fsExtra.pathExists(sourcePath)) &&
+        !(await fsExtra.pathExists(destPath))
+      ) {
+        await fsExtra.copy(sourcePath, destPath);
+      }
+    }),
+  );
   const {
     width,
     height,
@@ -28,11 +57,17 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     inject,
     proxyUrl,
     installerLanguage,
+    hideOnClose,
+    incognito,
+    title,
+    wasm,
+    enableDragDrop,
   } = options;
 
   const { platform } = process;
 
-  // Set Windows parameters.
+  const platformHideOnClose = hideOnClose ?? platform === 'darwin';
+
   const tauriConfWindowOptions = {
     width,
     height,
@@ -43,6 +78,11 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     always_on_top: alwaysOnTop,
     dark_mode: darkMode,
     disabled_web_shortcuts: disabledWebShortcuts,
+    hide_on_close: platformHideOnClose,
+    incognito: incognito,
+    title: title || null,
+    enable_wasm: wasm,
+    enable_drag_drop: enableDragDrop,
   };
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
 
@@ -50,11 +90,14 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
   tauriConf.identifier = identifier;
   tauriConf.version = appVersion;
 
+  if (platform === 'linux') {
+    tauriConf.mainBinaryName = `pake-${name.toLowerCase()}`;
+  }
+
   if (platform == 'win32') {
     tauriConf.bundle.windows.wix.language[0] = installerLanguage;
   }
 
-  //Judge the type of URL, whether it is a file or a website.
   const pathExists = await fsExtra.pathExists(url);
   if (pathExists) {
     logger.warn('✼ Your input might be a local file.');
@@ -76,7 +119,11 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
       // ignore it, because about_pake.html have be erased.
       // const filesToCopyBack = ['cli.js', 'about_pake.html'];
       const filesToCopyBack = ['cli.js'];
-      await Promise.all(filesToCopyBack.map(file => fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file))));
+      await Promise.all(
+        filesToCopyBack.map((file) =>
+          fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file)),
+        ),
+      );
     }
 
     tauriConf.pake.windows[0].url = fileName;
@@ -100,12 +147,65 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
 
   // Processing targets are currently only open to Linux.
   if (platform === 'linux') {
+    // Remove hardcoded desktop files and regenerate with correct app name
     delete tauriConf.bundle.linux.deb.files;
-    const validTargets = ['deb', 'appimage', 'rpm'];
+
+    // Generate correct desktop file configuration
+    const appNameLower = name.toLowerCase();
+    const identifier = `com.pake.${appNameLower}`;
+    const desktopFileName = `${identifier}.desktop`;
+
+    // Create desktop file content
+    const desktopContent = `[Desktop Entry]
+Version=1.0
+Type=Application
+Name=${name}
+Comment=${name}
+Exec=pake-${appNameLower}
+Icon=${appNameLower}_512
+Categories=Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml_xml;
+StartupNotify=true
+`;
+
+    // Write desktop file to src-tauri/assets directory where Tauri expects it
+    const srcAssetsDir = path.join(npmDirectory, 'src-tauri/assets');
+    const srcDesktopFilePath = path.join(srcAssetsDir, desktopFileName);
+    await fsExtra.ensureDir(srcAssetsDir);
+    await fsExtra.writeFile(srcDesktopFilePath, desktopContent);
+
+    // Set up desktop file in bundle configuration
+    // Use absolute path from src-tauri directory to assets
+    tauriConf.bundle.linux.deb.files = {
+      [`/usr/share/applications/${desktopFileName}`]: `assets/${desktopFileName}`,
+    };
+
+    const validTargets = [
+      'deb',
+      'appimage',
+      'rpm',
+      'deb-arm64',
+      'appimage-arm64',
+      'rpm-arm64',
+    ];
+    const baseTarget = options.targets.includes('-arm64')
+      ? options.targets.replace('-arm64', '')
+      : options.targets;
+
     if (validTargets.includes(options.targets)) {
-      tauriConf.bundle.targets = [options.targets];
+      tauriConf.bundle.targets = [baseTarget];
     } else {
-      logger.warn(`✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`);
+      logger.warn(
+        `✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`,
+      );
+    }
+  }
+
+  // Set macOS bundle targets (for app vs dmg)
+  if (platform === 'darwin') {
+    const validMacTargets = ['app', 'dmg'];
+    if (validMacTargets.includes(options.targets)) {
+      tauriConf.bundle.targets = [options.targets];
     }
   }
 
@@ -131,7 +231,7 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     },
   };
   const iconInfo = platformIconMap[platform];
-  const exists = await fsExtra.pathExists(options.icon);
+  const exists = options.icon && (await fsExtra.pathExists(options.icon));
   if (exists) {
     let updateIconPath = true;
     let customIconExt = path.extname(options.icon).toLowerCase();
@@ -143,32 +243,46 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     } else {
       const iconPath = path.join(npmDirectory, 'src-tauri/', iconInfo.path);
       tauriConf.bundle.resources = [iconInfo.path];
-      await fsExtra.copy(options.icon, iconPath);
+
+      // Avoid copying if source and destination are the same
+      const absoluteIconPath = path.resolve(options.icon);
+      const absoluteDestPath = path.resolve(iconPath);
+      if (absoluteIconPath !== absoluteDestPath) {
+        await fsExtra.copy(options.icon, iconPath);
+      }
     }
 
     if (updateIconPath) {
-      tauriConf.bundle.icon = [options.icon];
+      tauriConf.bundle.icon = [iconInfo.path];
     } else {
       logger.warn(`✼ Icon will remain as default.`);
     }
   } else {
-    logger.warn('✼ Custom icon path may be invalid, default icon will be used instead.');
+    logger.warn(
+      '✼ Custom icon path may be invalid, default icon will be used instead.',
+    );
     tauriConf.bundle.icon = [iconInfo.defaultIcon];
   }
 
   // Set tray icon path.
-  let trayIconPath = platform === 'darwin' ? 'png/icon_512.png' : tauriConf.bundle.icon[0];
+  let trayIconPath =
+    platform === 'darwin' ? 'png/icon_512.png' : tauriConf.bundle.icon[0];
   if (systemTrayIcon.length > 0) {
     try {
       await fsExtra.pathExists(systemTrayIcon);
       // 需要判断图标格式，默认只支持ico和png两种
       let iconExt = path.extname(systemTrayIcon).toLowerCase();
       if (iconExt == '.png' || iconExt == '.ico') {
-        const trayIcoPath = path.join(npmDirectory, `src-tauri/png/${name.toLowerCase()}${iconExt}`);
+        const trayIcoPath = path.join(
+          npmDirectory,
+          `src-tauri/png/${name.toLowerCase()}${iconExt}`,
+        );
         trayIconPath = `png/${name.toLowerCase()}${iconExt}`;
         await fsExtra.copy(systemTrayIcon, trayIcoPath);
       } else {
-        logger.warn(`✼ System tray icon must be .ico or .png, but you provided ${iconExt}.`);
+        logger.warn(
+          `✼ System tray icon must be .ico or .png, but you provided ${iconExt}.`,
+        );
         logger.warn(`✼ Default system tray icon will be used.`);
       }
     } catch {
@@ -182,15 +296,26 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
 
   delete tauriConf.app.trayIcon;
 
-  const injectFilePath = path.join(npmDirectory, `src-tauri/src/inject/custom.js`);
+  const injectFilePath = path.join(
+    npmDirectory,
+    `src-tauri/src/inject/custom.js`,
+  );
 
   // inject js or css files
   if (inject?.length > 0) {
-    if (!inject.every(item => item.endsWith('.css') || item.endsWith('.js'))) {
+    // Ensure inject is an array before calling .every()
+    const injectArray = Array.isArray(inject) ? inject : [inject];
+    if (
+      !injectArray.every(
+        (item) => item.endsWith('.css') || item.endsWith('.js'),
+      )
+    ) {
       logger.error('The injected file must be in either CSS or JS format.');
       return;
     }
-    const files = inject.map(filepath => (path.isAbsolute(filepath) ? filepath : path.join(process.cwd(), filepath)));
+    const files = injectArray.map((filepath) =>
+      path.isAbsolute(filepath) ? filepath : path.join(process.cwd(), filepath),
+    );
     tauriConf.pake.inject = files;
     await combineFiles(files, injectFilePath);
   } else {
@@ -199,6 +324,16 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
   }
   tauriConf.pake.proxy_url = proxyUrl || '';
 
+  // Configure WASM support with required HTTP headers
+  if (wasm) {
+    tauriConf.app.security = {
+      headers: {
+        'Cross-Origin-Opener-Policy': 'same-origin',
+        'Cross-Origin-Embedder-Policy': 'require-corp',
+      },
+    };
+  }
+
   // Save config file.
   const platformConfigPaths: PlatformMap = {
     win32: 'tauri.windows.conf.json',
@@ -206,10 +341,12 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     linux: 'tauri.linux.conf.json',
   };
 
-  const configPath = path.join(tauriConfigDirectory, platformConfigPaths[platform]);
+  const configPath = path.join(
+    tauriConfigDirectory,
+    platformConfigPaths[platform],
+  );
 
   const bundleConf = { bundle: tauriConf.bundle };
-  console.log('pakeConfig', tauriConf.pake);
   await fsExtra.outputJSON(configPath, bundleConf, { spaces: 4 });
   const pakeConfigPath = path.join(tauriConfigDirectory, 'pake.json');
   await fsExtra.outputJSON(pakeConfigPath, tauriConf.pake, { spaces: 4 });
