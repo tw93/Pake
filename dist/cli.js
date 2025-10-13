@@ -75,12 +75,12 @@ var license = "MIT";
 var dependencies = {
 	"@tauri-apps/api": "^2.8.0",
 	"@tauri-apps/cli": "^2.8.4",
-	axios: "^1.11.0",
-	chalk: "^5.6.0",
+	axios: "^1.12.2",
+	chalk: "^5.6.2",
 	commander: "^12.1.0",
 	execa: "^9.6.0",
 	"file-type": "^18.7.0",
-	"fs-extra": "^11.3.1",
+	"fs-extra": "^11.3.2",
 	"icon-gen": "^5.0.0",
 	loglevel: "^1.9.2",
 	ora: "^8.2.0",
@@ -97,7 +97,7 @@ var devDependencies = {
 	"@rollup/plugin-replace": "^6.0.2",
 	"@rollup/plugin-terser": "^0.4.4",
 	"@types/fs-extra": "^11.0.4",
-	"@types/node": "^20.19.13",
+	"@types/node": "^20.19.21",
 	"@types/page-icon": "^0.3.6",
 	"@types/prompts": "^2.4.9",
 	"@types/tmp": "^0.2.6",
@@ -105,10 +105,10 @@ var devDependencies = {
 	"app-root-path": "^3.1.0",
 	"cross-env": "^7.0.3",
 	prettier: "^3.6.2",
-	rollup: "^4.50.0",
+	rollup: "^4.52.4",
 	"rollup-plugin-typescript2": "^0.36.0",
 	tslib: "^2.8.1",
-	typescript: "^5.9.2"
+	typescript: "^5.9.3"
 };
 var packageJson = {
 	name: name,
@@ -1671,8 +1671,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
 program
     .addHelpText('beforeAll', logo)
     .usage(`[url] [options]`)
-    .showHelpAfterError()
-    .helpOption(false);
+    .showHelpAfterError();
 program
     .argument('[url]', 'The web URL you want to package', validateUrlInput)
     // Refer to https://github.com/tj/commander.js#custom-option-processing, turn string array into a string connected with custom connectors.
@@ -1761,12 +1760,12 @@ program
     .configureHelp({
     sortSubcommands: true,
     optionTerm: (option) => {
-        if (option.flags === '-v, --version')
+        if (option.flags === '-v, --version' || option.flags === '-h, --help')
             return '';
         return option.flags;
     },
     optionDescription: (option) => {
-        if (option.flags === '-v, --version')
+        if (option.flags === '-v, --version' || option.flags === '-h, --help')
             return '';
         return option.description;
     },

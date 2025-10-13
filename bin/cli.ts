@@ -24,8 +24,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
 program
   .addHelpText('beforeAll', logo)
   .usage(`[url] [options]`)
-  .showHelpAfterError()
-  .helpOption(false);
+  .showHelpAfterError();
 
 program
   .argument('[url]', 'The web URL you want to package', validateUrlInput)
@@ -174,11 +173,11 @@ program
   .configureHelp({
     sortSubcommands: true,
     optionTerm: (option) => {
-      if (option.flags === '-v, --version') return '';
+      if (option.flags === '-v, --version' || option.flags === '-h, --help') return '';
       return option.flags;
     },
     optionDescription: (option) => {
-      if (option.flags === '-v, --version') return '';
+      if (option.flags === '-v, --version' || option.flags === '-h, --help') return '';
       return option.description;
     },
   })
