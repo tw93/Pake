@@ -173,11 +173,13 @@ program
   .configureHelp({
     sortSubcommands: true,
     optionTerm: (option) => {
-      if (option.flags === '-v, --version' || option.flags === '-h, --help') return '';
+      if (option.flags === '-v, --version' || option.flags === '-h, --help')
+        return '';
       return option.flags;
     },
     optionDescription: (option) => {
-      if (option.flags === '-v, --version' || option.flags === '-h, --help') return '';
+      if (option.flags === '-v, --version' || option.flags === '-h, --help')
+        return '';
       return option.description;
     },
   })
