@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import prompts from 'prompts';
 
 import { PakeAppOptions } from '@/types';
-import { checkRustInstalled, installRust } from '@/helpers/rust';
+import { checkRustInstalled, ensureRustEnv, installRust } from '@/helpers/rust';
 import { mergeConfig } from '@/helpers/merge';
 import tauriConfig from '@/helpers/tauriConfig';
 import { generateIdentifierSafeName } from '@/utils/name';
@@ -76,6 +76,8 @@ export default abstract class BaseBuilder {
       logger.warn('✼ The first use requires installing system dependencies.');
       logger.warn('✼ See more in https://tauri.app/start/prerequisites/.');
     }
+
+    ensureRustEnv();
 
     if (!checkRustInstalled()) {
       const res = await prompts({
