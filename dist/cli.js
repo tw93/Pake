@@ -201,11 +201,11 @@ const IS_MAC = platform$1 === 'darwin';
 const IS_WIN = platform$1 === 'win32';
 const IS_LINUX = platform$1 === 'linux';
 
-async function shellExec(command, timeout = 300000, env) {
+async function shellExec(command, timeout = 300000, env, showOutput = false) {
     try {
         const { exitCode } = await execa(command, {
             cwd: npmDirectory,
-            stdio: ['inherit', 'pipe', 'inherit'], // Hide stdout verbose, keep stderr
+            stdio: showOutput ? 'inherit' : ['inherit', 'pipe', 'inherit'],
             shell: true,
             timeout,
             env: env ? { ...process.env, ...env } : process.env,
@@ -340,7 +340,7 @@ async function installRust() {
     const rustInstallScriptForWindows = 'winget install --id Rustlang.Rustup';
     const spinner = getSpinner('Downloading Rust...');
     try {
-        await shellExec(IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac);
+        await shellExec(IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac, 300000, undefined, true);
         spinner.succeed(chalk.green('✔ Rust installed successfully!'));
         ensureRustEnv();
     }
@@ -756,10 +756,10 @@ class BaseBuilder {
             logger.info(`✺ Located in China, using ${packageManager}/rsProxy CN mirror.`);
             const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
             await fsExtra.copy(projectCnConf, projectConf);
-            await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption} --silent`, timeout, buildEnv);
+            await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`, timeout, buildEnv, this.options.debug);
         }
         else {
-            await shellExec(`cd "${npmDirectory}" && ${packageManager} install${peerDepsOption} --silent`, timeout, buildEnv);
+            await shellExec(`cd "${npmDirectory}" && ${packageManager} install${peerDepsOption}`, timeout, buildEnv, this.options.debug);
         }
         spinner.succeed(chalk.green('Package installed!'));
         if (!tauriTargetPathExists) {

@@ -5,11 +5,12 @@ export async function shellExec(
   command: string,
   timeout: number = 300000,
   env?: Record<string, string>,
+  showOutput: boolean = false,
 ) {
   try {
     const { exitCode } = await execa(command, {
       cwd: npmDirectory,
-      stdio: ['inherit', 'pipe', 'inherit'], // Hide stdout verbose, keep stderr
+      stdio: showOutput ? 'inherit' : ['inherit', 'pipe', 'inherit'],
       shell: true,
       timeout,
       env: env ? { ...process.env, ...env } : process.env,

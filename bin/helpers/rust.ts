@@ -81,6 +81,9 @@ export async function installRust() {
   try {
     await shellExec(
       IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac,
+      300000,
+      undefined,
+      true,
     );
     spinner.succeed(chalk.green('✔ Rust installed successfully!'));
     ensureRustEnv();

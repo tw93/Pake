@@ -120,15 +120,17 @@ export default abstract class BaseBuilder {
       const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
       await fsExtra.copy(projectCnConf, projectConf);
       await shellExec(
-        `cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption} --silent`,
+        `cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`,
         timeout,
         buildEnv,
+        this.options.debug,
       );
     } else {
       await shellExec(
-        `cd "${npmDirectory}" && ${packageManager} install${peerDepsOption} --silent`,
+        `cd "${npmDirectory}" && ${packageManager} install${peerDepsOption}`,
         timeout,
         buildEnv,
+        this.options.debug,
       );
     }
     spinner.succeed(chalk.green('Package installed!'));
