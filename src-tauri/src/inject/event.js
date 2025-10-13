@@ -385,20 +385,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Handle _blank links: same domain navigates in-app, cross-domain opens new window
       if (target === "_blank") {
+        if (isSameDomain(absoluteUrl)) {
+          // For same-domain links, let the browser/SPA handle it naturally
+          // This prevents full page reload in SPA apps like Discord
+          return;
+        }
+
         e.preventDefault();
         e.stopImmediatePropagation();
-
-        if (isSameDomain(absoluteUrl)) {
-          window.location.href = absoluteUrl;
-        } else {
-          const newWindow = originalWindowOpen.call(
-            window,
-            absoluteUrl,
-            "_blank",
-            "width=1200,height=800,scrollbars=yes,resizable=yes",
-          );
-          if (!newWindow) handleExternalLink(absoluteUrl);
-        }
+        const newWindow = originalWindowOpen.call(
+          window,
+          absoluteUrl,
+          "_blank",
+          "width=1200,height=800,scrollbars=yes,resizable=yes",
+        );
+        if (!newWindow) handleExternalLink(absoluteUrl);
         return;
       }
 
@@ -448,39 +449,24 @@ document.addEventListener("DOMContentLoaded", () => {
   // Rewrite the window.open function.
   const originalWindowOpen = window.open;
   window.open = function (url, name, specs) {
-    // Apple login and google login
     if (name === "AppleAuthentication") {
-      //do nothing
-    } else if (
-      specs &&
-      (specs.includes("height=") || specs.includes("width="))
-    ) {
-      location.href = url;
-    } else {
+      return originalWindowOpen.call(window, url, name, specs);
+    }
+
+    try {
       const baseUrl = window.location.origin + window.location.pathname;
       const hrefUrl = new URL(url, baseUrl);
       const absoluteUrl = hrefUrl.href;
 
-      // Apply same domain logic as anchor links
-      if (isSameDomain(absoluteUrl)) {
-        // Same domain: navigate in app or open new window based on specs
-        if (name === "_blank" || !name) {
-          return originalWindowOpen.call(
-            window,
-            absoluteUrl,
-            "_blank",
-            "width=1200,height=800,scrollbars=yes,resizable=yes",
-          );
-        } else {
-          location.href = absoluteUrl;
-        }
-      } else {
-        // Cross domain: open in external browser
+      if (!isSameDomain(absoluteUrl)) {
         handleExternalLink(absoluteUrl);
+        return null;
       }
+
+      return originalWindowOpen.call(window, absoluteUrl, name, specs);
+    } catch (error) {
+      return originalWindowOpen.call(window, url, name, specs);
     }
-    // Call the original window.open function to maintain its normal functionality.
-    return originalWindowOpen.call(window, url, name, specs);
   };
 
   // Set the default zoom, There are problems with Loop without using try-catch.
