@@ -164,7 +164,10 @@ export default abstract class BaseBuilder {
     // Show static message to keep the status visible
     logger.warn('✸ Building app...');
 
-    const buildEnv = this.getBuildEnvironment();
+    const buildEnv = {
+      ...this.getBuildEnvironment(),
+      ...(process.env.NO_STRIP && { NO_STRIP: process.env.NO_STRIP }),
+    };
 
     await shellExec(
       `cd "${npmDirectory}" && ${this.getBuildCommand(packageManager)}`,

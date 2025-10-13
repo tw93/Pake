@@ -218,7 +218,18 @@ async function shellExec(command, timeout = 300000, env, showOutput = false) {
         if (error.timedOut) {
             throw new Error(`Command timed out after ${timeout}ms: "${command}". Try increasing timeout or check network connectivity.`);
         }
-        throw new Error(`Error occurred while executing command "${command}". Exit code: ${exitCode}. Details: ${errorMessage}`);
+        let errorMsg = `Error occurred while executing command "${command}". Exit code: ${exitCode}. Details: ${errorMessage}`;
+        if (process.platform === 'linux' &&
+            (errorMessage.includes('linuxdeploy') ||
+                errorMessage.includes('appimage') ||
+                errorMessage.includes('strip'))) {
+            errorMsg +=
+                '\n\nLinux AppImage build error. Try one of these solutions:\n' +
+                    '  1. Run with: NO_STRIP=true pake <url> --targets appimage\n' +
+                    '  2. Use DEB format instead: pake <url> --targets deb\n' +
+                    '  3. See detailed solutions: https://github.com/tw93/Pake/blob/main/docs/faq.md';
+        }
+        throw new Error(errorMsg);
     }
 }
 
@@ -784,7 +795,10 @@ class BaseBuilder {
         buildSpinner.stop();
         // Show static message to keep the status visible
         logger.warn('✸ Building app...');
-        const buildEnv = this.getBuildEnvironment();
+        const buildEnv = {
+            ...this.getBuildEnvironment(),
+            ...(process.env.NO_STRIP && { NO_STRIP: process.env.NO_STRIP }),
+        };
         await shellExec(`cd "${npmDirectory}" && ${this.getBuildCommand(packageManager)}`, this.getBuildTimeout(), buildEnv);
         // Copy app
         const fileName = this.getFileName();
