@@ -7,6 +7,13 @@ import { generateSafeFilename, generateIdentifierSafeName } from '@/utils/name';
 import { PakeAppOptions, PlatformMap } from '@/types';
 import { tauriConfigDirectory, npmDirectory } from '@/utils/dir';
 
+/**
+ * Helper function to generate safe lowercase app name for file paths
+ */
+function getSafeAppName(name: string): string {
+  return generateSafeFilename(name).toLowerCase();
+}
+
 export async function mergeConfig(
   url: string,
   options: PakeAppOptions,
@@ -153,7 +160,7 @@ export async function mergeConfig(
     delete tauriConf.bundle.linux.deb.files;
 
     // Generate correct desktop file configuration
-    const appNameSafe = generateSafeFilename(name).toLowerCase();
+    const appNameSafe = getSafeAppName(name);
     const identifier = `com.pake.${appNameSafe}`;
     const desktopFileName = `${identifier}.desktop`;
 
@@ -212,22 +219,23 @@ StartupNotify=true
   }
 
   // Set icon.
+  const safeAppName = getSafeAppName(name);
   const platformIconMap: PlatformMap = {
     win32: {
       fileExt: '.ico',
-      path: `png/${generateSafeFilename(name).toLowerCase()}_256.ico`,
+      path: `png/${safeAppName}_256.ico`,
       defaultIcon: 'png/icon_256.ico',
       message: 'Windows icon must be .ico and 256x256px.',
     },
     linux: {
       fileExt: '.png',
-      path: `png/${generateSafeFilename(name).toLowerCase()}_512.png`,
+      path: `png/${safeAppName}_512.png`,
       defaultIcon: 'png/icon_512.png',
       message: 'Linux icon must be .png and 512x512px.',
     },
     darwin: {
       fileExt: '.icns',
-      path: `icons/${generateSafeFilename(name).toLowerCase()}.icns`,
+      path: `icons/${safeAppName}.icns`,
       defaultIcon: 'icons/icon.icns',
       message: 'macOS icon must be .icns type.',
     },
@@ -278,9 +286,9 @@ StartupNotify=true
       if (iconExt == '.png' || iconExt == '.ico') {
         const trayIcoPath = path.join(
           npmDirectory,
-          `src-tauri/png/${generateSafeFilename(name).toLowerCase()}${iconExt}`,
+          `src-tauri/png/${safeAppName}${iconExt}`,
         );
-        trayIconPath = `png/${generateSafeFilename(name).toLowerCase()}${iconExt}`;
+        trayIconPath = `png/${safeAppName}${iconExt}`;
         await fsExtra.copy(systemTrayIcon, trayIcoPath);
       } else {
         logger.warn(

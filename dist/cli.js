@@ -422,6 +422,12 @@ function generateIdentifierSafeName(name) {
     return cleaned;
 }
 
+/**
+ * Helper function to generate safe lowercase app name for file paths
+ */
+function getSafeAppName(name) {
+    return generateSafeFilename(name).toLowerCase();
+}
 async function mergeConfig(url, options, tauriConf) {
     // Ensure .pake directory exists and copy source templates if needed
     const srcTauriDir = path.join(npmDirectory, 'src-tauri');
@@ -512,7 +518,7 @@ async function mergeConfig(url, options, tauriConf) {
         // Remove hardcoded desktop files and regenerate with correct app name
         delete tauriConf.bundle.linux.deb.files;
         // Generate correct desktop file configuration
-        const appNameSafe = generateSafeFilename(name).toLowerCase();
+        const appNameSafe = getSafeAppName(name);
         const identifier = `com.pake.${appNameSafe}`;
         const desktopFileName = `${identifier}.desktop`;
         // Create desktop file content
@@ -563,22 +569,23 @@ StartupNotify=true
         }
     }
     // Set icon.
+    const safeAppName = getSafeAppName(name);
     const platformIconMap = {
         win32: {
             fileExt: '.ico',
-            path: `png/${generateSafeFilename(name).toLowerCase()}_256.ico`,
+            path: `png/${safeAppName}_256.ico`,
             defaultIcon: 'png/icon_256.ico',
             message: 'Windows icon must be .ico and 256x256px.',
         },
         linux: {
             fileExt: '.png',
-            path: `png/${generateSafeFilename(name).toLowerCase()}_512.png`,
+            path: `png/${safeAppName}_512.png`,
             defaultIcon: 'png/icon_512.png',
             message: 'Linux icon must be .png and 512x512px.',
         },
         darwin: {
             fileExt: '.icns',
-            path: `icons/${generateSafeFilename(name).toLowerCase()}.icns`,
+            path: `icons/${safeAppName}.icns`,
             defaultIcon: 'icons/icon.icns',
             message: 'macOS icon must be .icns type.',
         },
@@ -622,8 +629,8 @@ StartupNotify=true
             // 需要判断图标格式，默认只支持ico和png两种
             let iconExt = path.extname(systemTrayIcon).toLowerCase();
             if (iconExt == '.png' || iconExt == '.ico') {
-                const trayIcoPath = path.join(npmDirectory, `src-tauri/png/${generateSafeFilename(name).toLowerCase()}${iconExt}`);
-                trayIconPath = `png/${generateSafeFilename(name).toLowerCase()}${iconExt}`;
+                const trayIcoPath = path.join(npmDirectory, `src-tauri/png/${safeAppName}${iconExt}`);
+                trayIconPath = `png/${safeAppName}${iconExt}`;
                 await fsExtra.copy(systemTrayIcon, trayIcoPath);
             }
             else {
@@ -799,7 +806,7 @@ class BaseBuilder {
             ...this.getBuildEnvironment(),
             ...(process.env.NO_STRIP && { NO_STRIP: process.env.NO_STRIP }),
         };
-        await shellExec(`cd "${npmDirectory}" && ${this.getBuildCommand(packageManager)}`, this.getBuildTimeout(), buildEnv);
+        await shellExec(`cd "${npmDirectory}" && ${this.getBuildCommand(packageManager)}`, this.getBuildTimeout(), buildEnv, this.options.debug);
         // Copy app
         const fileName = this.getFileName();
         const fileType = this.getFileType(target);

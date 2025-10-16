@@ -173,6 +173,7 @@ export default abstract class BaseBuilder {
       `cd "${npmDirectory}" && ${this.getBuildCommand(packageManager)}`,
       this.getBuildTimeout(),
       buildEnv,
+      this.options.debug,
     );
 
     // Copy app

@@ -38,6 +38,44 @@ document.addEventListener("keydown", (e) => {
 });
 ```
 
+## Built-in Features
+
+### Download Error Notifications
+
+Pake automatically provides user-friendly download error notifications:
+
+**Features:**
+
+- **Bilingual Support**: Automatically detects browser language (Chinese/English)
+- **System Notifications**: Uses native OS notifications when permission is granted
+- **Graceful Fallback**: Falls back to console logging if notifications are unavailable
+- **Comprehensive Coverage**: Handles all download types (HTTP, Data URI, Blob)
+
+**User Experience:**
+
+When a download fails, users will see a notification:
+
+- English: "Download Error - Download failed: filename.pdf"
+- Chinese: "下载错误 - 下载失败: filename.pdf"
+
+**Requesting Notification Permission:**
+
+To enable notifications, add this to your injected JavaScript:
+
+```javascript
+// Request notification permission on app start
+if (window.Notification && Notification.permission === "default") {
+  Notification.requestPermission();
+}
+```
+
+The download system automatically handles:
+
+- Regular HTTP(S) downloads
+- Data URI downloads (base64 encoded files)
+- Blob URL downloads (dynamically generated files)
+- Context menu initiated downloads
+
 ## Container Communication
 
 Send messages between web content and Pake container.

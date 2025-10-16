@@ -148,6 +148,22 @@ function isChineseLanguage(language = getUserLanguage()) {
   );
 }
 
+// User notification helper
+function showDownloadError(filename) {
+  const isChinese = isChineseLanguage();
+  const message = isChinese
+    ? `下载失败: ${filename}`
+    : `Download failed: ${filename}`;
+
+  if (window.Notification && Notification.permission === "granted") {
+    new Notification(isChinese ? "下载错误" : "Download Error", {
+      body: message,
+    });
+  } else {
+    console.error(message);
+  }
+}
+
 // Unified file detection - replaces both isDownloadLink and isFileLink
 function isDownloadableFile(url) {
   try {
@@ -251,7 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // write the ArrayBuffer to a binary, and you're done
-      const userLanguage = navigator.language || navigator.userLanguage;
+      const userLanguage = getUserLanguage();
       invoke("download_file_by_binary", {
         params: {
           filename,
@@ -260,16 +276,18 @@ document.addEventListener("DOMContentLoaded", () => {
         },
       }).catch((error) => {
         console.error("Failed to download data URI file:", filename, error);
+        showDownloadError(filename);
       });
     } catch (error) {
       console.error("Failed to process data URI:", dataURI, error);
+      showDownloadError(filename || "file");
     }
   }
 
   function downloadFromBlobUrl(blobUrl, filename) {
     convertBlobUrlToBinary(blobUrl)
       .then((binary) => {
-        const userLanguage = navigator.language || navigator.userLanguage;
+        const userLanguage = getUserLanguage();
         invoke("download_file_by_binary", {
           params: {
             filename,
@@ -278,10 +296,12 @@ document.addEventListener("DOMContentLoaded", () => {
           },
         }).catch((error) => {
           console.error("Failed to download blob file:", filename, error);
+          showDownloadError(filename);
         });
       })
       .catch((error) => {
         console.error("Failed to convert blob to binary:", blobUrl, error);
+        showDownloadError(filename);
       });
   }
 
@@ -659,13 +679,16 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } else {
       // Regular HTTP(S) image
-      const userLanguage = navigator.language || navigator.userLanguage;
+      const userLanguage = getUserLanguage();
       invoke("download_file", {
         params: {
           url: imageUrl,
           filename: filename,
           language: userLanguage,
         },
+      }).catch((error) => {
+        console.error("Failed to download image:", filename, error);
+        showDownloadError(filename);
       });
     }
   }
@@ -713,7 +736,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Simplified menu builder
   function buildMenuItems(type, data) {
-    const userLanguage = navigator.language || navigator.userLanguage;
+    const userLanguage = getUserLanguage();
     const items = [];
 
     switch (type) {
@@ -740,6 +763,9 @@ document.addEventListener("DOMContentLoaded", () => {
               const filename = getFilenameFromUrl(data.url);
               invoke("download_file", {
                 params: { url: data.url, filename, language: userLanguage },
+              }).catch((error) => {
+                console.error("Failed to download file:", filename, error);
+                showDownloadError(filename);
               });
             }),
           );
