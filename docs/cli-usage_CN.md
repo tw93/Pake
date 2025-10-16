@@ -279,7 +279,12 @@ pake https://github.com --name GitHub
 点击关闭按钮时隐藏窗口而不是退出应用程序。平台特定默认值：macOS 为 `true`，Windows/Linux 为 `false`。
 
 ```shell
+# 关闭时隐藏（macOS 默认行为）
 --hide-on-close
+--hide-on-close true
+
+# 立即关闭应用程序（Windows/Linux 默认行为）
+--hide-on-close false
 ```
 
 #### [title]
@@ -338,6 +343,17 @@ pake https://github.com --name GitHub --keep-binary
 ```
 
 **输出结果**：同时创建安装包和独立可执行文件（Unix 系统为 `AppName-binary`，Windows 为 `AppName.exe`）。
+
+#### [multi-instance]
+
+允许打包后的应用同时运行多个实例。默认为 `false`，此时再次启动只会聚焦已有窗口。启用该选项后，可以同时打开同一个应用的多个窗口。
+
+```shell
+--multi-instance
+
+# 示例：允许聊天应用同时开多个窗口
+pake https://chat.example.com --name ChatApp --multi-instance
+```
 
 #### [installer-language]
 

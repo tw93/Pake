@@ -3,8 +3,16 @@ import fsExtra from 'fs-extra';
 
 import combineFiles from '@/utils/combine';
 import logger from '@/options/logger';
+import { generateSafeFilename, generateIdentifierSafeName } from '@/utils/name';
 import { PakeAppOptions, PlatformMap } from '@/types';
 import { tauriConfigDirectory, npmDirectory } from '@/utils/dir';
+
+/**
+ * Helper function to generate safe lowercase app name for file paths
+ */
+function getSafeAppName(name: string): string {
+  return generateSafeFilename(name).toLowerCase();
+}
 
 export async function mergeConfig(
   url: string,
@@ -62,6 +70,7 @@ export async function mergeConfig(
     title,
     wasm,
     enableDragDrop,
+    multiInstance,
   } = options;
 
   const { platform } = process;
@@ -91,7 +100,7 @@ export async function mergeConfig(
   tauriConf.version = appVersion;
 
   if (platform === 'linux') {
-    tauriConf.mainBinaryName = `pake-${name.toLowerCase()}`;
+    tauriConf.mainBinaryName = `pake-${generateIdentifierSafeName(name)}`;
   }
 
   if (platform == 'win32') {
@@ -151,8 +160,8 @@ export async function mergeConfig(
     delete tauriConf.bundle.linux.deb.files;
 
     // Generate correct desktop file configuration
-    const appNameLower = name.toLowerCase();
-    const identifier = `com.pake.${appNameLower}`;
+    const appNameSafe = getSafeAppName(name);
+    const identifier = `com.pake.${appNameSafe}`;
     const desktopFileName = `${identifier}.desktop`;
 
     // Create desktop file content
@@ -161,8 +170,8 @@ Version=1.0
 Type=Application
 Name=${name}
 Comment=${name}
-Exec=pake-${appNameLower}
-Icon=${appNameLower}_512
+Exec=pake-${appNameSafe}
+Icon=${appNameSafe}_512
 Categories=Network;WebBrowser;
 MimeType=text/html;text/xml;application/xhtml_xml;
 StartupNotify=true
@@ -210,31 +219,34 @@ StartupNotify=true
   }
 
   // Set icon.
+  const safeAppName = getSafeAppName(name);
   const platformIconMap: PlatformMap = {
     win32: {
       fileExt: '.ico',
-      path: `png/${name.toLowerCase()}_256.ico`,
+      path: `png/${safeAppName}_256.ico`,
       defaultIcon: 'png/icon_256.ico',
       message: 'Windows icon must be .ico and 256x256px.',
     },
     linux: {
       fileExt: '.png',
-      path: `png/${name.toLowerCase()}_512.png`,
+      path: `png/${safeAppName}_512.png`,
       defaultIcon: 'png/icon_512.png',
       message: 'Linux icon must be .png and 512x512px.',
     },
     darwin: {
       fileExt: '.icns',
-      path: `icons/${name.toLowerCase()}.icns`,
+      path: `icons/${safeAppName}.icns`,
       defaultIcon: 'icons/icon.icns',
       message: 'macOS icon must be .icns type.',
     },
   };
   const iconInfo = platformIconMap[platform];
-  const exists = options.icon && (await fsExtra.pathExists(options.icon));
+  const resolvedIconPath = options.icon ? path.resolve(options.icon) : null;
+  const exists =
+    resolvedIconPath && (await fsExtra.pathExists(resolvedIconPath));
   if (exists) {
     let updateIconPath = true;
-    let customIconExt = path.extname(options.icon).toLowerCase();
+    let customIconExt = path.extname(resolvedIconPath).toLowerCase();
 
     if (customIconExt !== iconInfo.fileExt) {
       updateIconPath = false;
@@ -245,10 +257,9 @@ StartupNotify=true
       tauriConf.bundle.resources = [iconInfo.path];
 
       // Avoid copying if source and destination are the same
-      const absoluteIconPath = path.resolve(options.icon);
       const absoluteDestPath = path.resolve(iconPath);
-      if (absoluteIconPath !== absoluteDestPath) {
-        await fsExtra.copy(options.icon, iconPath);
+      if (resolvedIconPath !== absoluteDestPath) {
+        await fsExtra.copy(resolvedIconPath, iconPath);
       }
     }
 
@@ -275,9 +286,9 @@ StartupNotify=true
       if (iconExt == '.png' || iconExt == '.ico') {
         const trayIcoPath = path.join(
           npmDirectory,
-          `src-tauri/png/${name.toLowerCase()}${iconExt}`,
+          `src-tauri/png/${safeAppName}${iconExt}`,
         );
-        trayIconPath = `png/${name.toLowerCase()}${iconExt}`;
+        trayIconPath = `png/${safeAppName}${iconExt}`;
         await fsExtra.copy(systemTrayIcon, trayIcoPath);
       } else {
         logger.warn(
@@ -323,6 +334,7 @@ StartupNotify=true
     await fsExtra.writeFile(injectFilePath, '');
   }
   tauriConf.pake.proxy_url = proxyUrl || '';
+  tauriConf.pake.multi_instance = multiInstance;
 
   // Configure WASM support with required HTTP headers
   if (wasm) {

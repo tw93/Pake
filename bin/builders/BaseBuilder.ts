@@ -4,9 +4,10 @@ import chalk from 'chalk';
 import prompts from 'prompts';
 
 import { PakeAppOptions } from '@/types';
-import { checkRustInstalled, installRust } from '@/helpers/rust';
+import { checkRustInstalled, ensureRustEnv, installRust } from '@/helpers/rust';
 import { mergeConfig } from '@/helpers/merge';
 import tauriConfig from '@/helpers/tauriConfig';
+import { generateIdentifierSafeName } from '@/utils/name';
 import { npmDirectory } from '@/utils/dir';
 import { getSpinner } from '@/utils/info';
 import { shellExec } from '@/utils/shell';
@@ -76,6 +77,8 @@ export default abstract class BaseBuilder {
       logger.warn('✼ See more in https://tauri.app/start/prerequisites/.');
     }
 
+    ensureRustEnv();
+
     if (!checkRustInstalled()) {
       const res = await prompts({
         type: 'confirm',
@@ -117,15 +120,17 @@ export default abstract class BaseBuilder {
       const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
       await fsExtra.copy(projectCnConf, projectConf);
       await shellExec(
-        `cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption} --silent`,
+        `cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`,
         timeout,
         buildEnv,
+        this.options.debug,
       );
     } else {
       await shellExec(
-        `cd "${npmDirectory}" && ${packageManager} install${peerDepsOption} --silent`,
+        `cd "${npmDirectory}" && ${packageManager} install${peerDepsOption}`,
         timeout,
         buildEnv,
+        this.options.debug,
       );
     }
     spinner.succeed(chalk.green('Package installed!'));
@@ -159,12 +164,16 @@ export default abstract class BaseBuilder {
     // Show static message to keep the status visible
     logger.warn('✸ Building app...');
 
-    const buildEnv = this.getBuildEnvironment();
+    const buildEnv = {
+      ...this.getBuildEnvironment(),
+      ...(process.env.NO_STRIP && { NO_STRIP: process.env.NO_STRIP }),
+    };
 
     await shellExec(
       `cd "${npmDirectory}" && ${this.getBuildCommand(packageManager)}`,
       this.getBuildTimeout(),
       buildEnv,
+      this.options.debug,
     );
 
     // Copy app
@@ -409,7 +418,7 @@ export default abstract class BaseBuilder {
 
     // Linux uses the unique binary name we set in merge.ts
     if (process.platform === 'linux') {
-      return `pake-${appName.toLowerCase()}${extension}`;
+      return `pake-${generateIdentifierSafeName(appName)}${extension}`;
     }
 
     // Windows and macOS use 'pake' as binary name

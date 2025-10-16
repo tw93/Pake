@@ -280,7 +280,12 @@ Specify the system tray icon. This is only effective when the system tray is ena
 Hide window instead of closing the application when clicking close button. Platform-specific default: `true` for macOS, `false` for Windows/Linux.
 
 ```shell
+# Hide on close (default behavior on macOS)
 --hide-on-close
+--hide-on-close true
+
+# Close application immediately (default behavior on Windows/Linux)
+--hide-on-close false
 ```
 
 #### [title]
@@ -339,6 +344,17 @@ pake https://github.com --name GitHub --keep-binary
 ```
 
 **Output**: Creates both installer and standalone executable (`AppName-binary` on Unix, `AppName.exe` on Windows).
+
+#### [multi-instance]
+
+Allow the packaged app to run more than one instance at the same time. Default is `false`, which means launching a second instance simply focuses the existing window. Enable this when you need to open several windows of the same app simultaneously.
+
+```shell
+--multi-instance
+
+# Example: Allow multiple chat windows
+pake https://chat.example.com --name ChatApp --multi-instance
+```
 
 #### [installer-language]
 

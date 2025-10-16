@@ -100,21 +100,6 @@ const DOWNLOADABLE_FILE_EXTENSIONS = {
     "scss",
     "sass",
     "less",
-    "html",
-    "htm",
-    "php",
-    "py",
-    "java",
-    "cpp",
-    "c",
-    "h",
-    "cs",
-    "rb",
-    "go",
-    "rs",
-    "swift",
-    "kt",
-    "scala",
     "sh",
     "bat",
     "ps1",
@@ -161,6 +146,22 @@ function isChineseLanguage(language = getUserLanguage()) {
       language.includes("TW") ||
       language.includes("HK"))
   );
+}
+
+// User notification helper
+function showDownloadError(filename) {
+  const isChinese = isChineseLanguage();
+  const message = isChinese
+    ? `下载失败: ${filename}`
+    : `Download failed: ${filename}`;
+
+  if (window.Notification && Notification.permission === "granted") {
+    new Notification(isChinese ? "下载错误" : "Download Error", {
+      body: message,
+    });
+  } else {
+    console.error(message);
+  }
 }
 
 // Unified file detection - replaces both isDownloadLink and isFileLink
@@ -252,40 +253,56 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function downloadFromDataUri(dataURI, filename) {
-    const byteString = atob(dataURI.split(",")[1]);
-    // write the bytes of the string to an ArrayBuffer
-    const bufferArray = new ArrayBuffer(byteString.length);
+    try {
+      const byteString = atob(dataURI.split(",")[1]);
+      // write the bytes of the string to an ArrayBuffer
+      const bufferArray = new ArrayBuffer(byteString.length);
 
-    // create a view into the buffer
-    const binary = new Uint8Array(bufferArray);
+      // create a view into the buffer
+      const binary = new Uint8Array(bufferArray);
 
-    // set the bytes of the buffer to the correct values
-    for (let i = 0; i < byteString.length; i++) {
-      binary[i] = byteString.charCodeAt(i);
-    }
+      // set the bytes of the buffer to the correct values
+      for (let i = 0; i < byteString.length; i++) {
+        binary[i] = byteString.charCodeAt(i);
+      }
 
-    // write the ArrayBuffer to a binary, and you're done
-    const userLanguage = navigator.language || navigator.userLanguage;
-    invoke("download_file_by_binary", {
-      params: {
-        filename,
-        binary: Array.from(binary),
-        language: userLanguage,
-      },
-    });
-  }
-
-  function downloadFromBlobUrl(blobUrl, filename) {
-    convertBlobUrlToBinary(blobUrl).then((binary) => {
-      const userLanguage = navigator.language || navigator.userLanguage;
+      // write the ArrayBuffer to a binary, and you're done
+      const userLanguage = getUserLanguage();
       invoke("download_file_by_binary", {
         params: {
           filename,
-          binary,
+          binary: Array.from(binary),
           language: userLanguage,
         },
+      }).catch((error) => {
+        console.error("Failed to download data URI file:", filename, error);
+        showDownloadError(filename);
       });
-    });
+    } catch (error) {
+      console.error("Failed to process data URI:", dataURI, error);
+      showDownloadError(filename || "file");
+    }
+  }
+
+  function downloadFromBlobUrl(blobUrl, filename) {
+    convertBlobUrlToBinary(blobUrl)
+      .then((binary) => {
+        const userLanguage = getUserLanguage();
+        invoke("download_file_by_binary", {
+          params: {
+            filename,
+            binary,
+            language: userLanguage,
+          },
+        }).catch((error) => {
+          console.error("Failed to download blob file:", filename, error);
+          showDownloadError(filename);
+        });
+      })
+      .catch((error) => {
+        console.error("Failed to convert blob to binary:", blobUrl, error);
+        showDownloadError(filename);
+      });
   }
 
   // detect blob download by createElement("a")
@@ -323,8 +340,16 @@ document.addEventListener("DOMContentLoaded", () => {
     anchorElement.download || e.metaKey || e.ctrlKey || isDownloadableFile(url);
 
   const handleExternalLink = (url) => {
+    // Don't try to open blob: or data: URLs with shell
+    if (isSpecialDownload(url)) {
+      console.warn("Cannot open special URL with shell:", url);
+      return;
+    }
+
     invoke("plugin:shell|open", {
       path: url,
+    }).catch((error) => {
+      console.error("Failed to open URL with shell:", url, error);
     });
   };
 
@@ -351,6 +376,10 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const detectAnchorElementClick = (e) => {
+    // Safety check: ensure e.target exists and is an Element with closest method
+    if (!e.target || typeof e.target.closest !== "function") {
+      return;
+    }
     const anchorElement = e.target.closest("a");
 
     if (anchorElement && anchorElement.href) {
@@ -361,20 +390,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Handle _blank links: same domain navigates in-app, cross-domain opens new window
       if (target === "_blank") {
+        if (isSameDomain(absoluteUrl)) {
+          // For same-domain links, let the browser/SPA handle it naturally
+          // This prevents full page reload in SPA apps like Discord
+          return;
+        }
+
         e.preventDefault();
         e.stopImmediatePropagation();
-
-        if (isSameDomain(absoluteUrl)) {
-          window.location.href = absoluteUrl;
-        } else {
-          const newWindow = originalWindowOpen.call(
-            window,
-            absoluteUrl,
-            "_blank",
-            "width=1200,height=800,scrollbars=yes,resizable=yes",
-          );
-          if (!newWindow) handleExternalLink(absoluteUrl);
-        }
+        const newWindow = originalWindowOpen.call(
+          window,
+          absoluteUrl,
+          "_blank",
+          "width=1200,height=800,scrollbars=yes,resizable=yes",
+        );
+        if (!newWindow) handleExternalLink(absoluteUrl);
         return;
       }
 
@@ -424,39 +454,24 @@ document.addEventListener("DOMContentLoaded", () => {
   // Rewrite the window.open function.
   const originalWindowOpen = window.open;
   window.open = function (url, name, specs) {
-    // Apple login and google login
     if (name === "AppleAuthentication") {
-      //do nothing
-    } else if (
-      specs &&
-      (specs.includes("height=") || specs.includes("width="))
-    ) {
-      location.href = url;
-    } else {
+      return originalWindowOpen.call(window, url, name, specs);
+    }
+
+    try {
       const baseUrl = window.location.origin + window.location.pathname;
       const hrefUrl = new URL(url, baseUrl);
       const absoluteUrl = hrefUrl.href;
 
-      // Apply same domain logic as anchor links
-      if (isSameDomain(absoluteUrl)) {
-        // Same domain: navigate in app or open new window based on specs
-        if (name === "_blank" || !name) {
-          return originalWindowOpen.call(
-            window,
-            absoluteUrl,
-            "_blank",
-            "width=1200,height=800,scrollbars=yes,resizable=yes",
-          );
-        } else {
-          location.href = absoluteUrl;
-        }
-      } else {
-        // Cross domain: open in external browser
+      if (!isSameDomain(absoluteUrl)) {
         handleExternalLink(absoluteUrl);
+        return null;
       }
+
+      return originalWindowOpen.call(window, absoluteUrl, name, specs);
+    } catch (error) {
+      return originalWindowOpen.call(window, url, name, specs);
     }
-    // Call the original window.open function to maintain its normal functionality.
-    return originalWindowOpen.call(window, url, name, specs);
   };
 
   // Set the default zoom, There are problems with Loop without using try-catch.
@@ -664,13 +679,16 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } else {
       // Regular HTTP(S) image
-      const userLanguage = navigator.language || navigator.userLanguage;
+      const userLanguage = getUserLanguage();
       invoke("download_file", {
         params: {
           url: imageUrl,
           filename: filename,
           language: userLanguage,
         },
+      }).catch((error) => {
+        console.error("Failed to download image:", filename, error);
+        showDownloadError(filename);
       });
     }
   }
@@ -701,7 +719,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Check for parent elements with background images
-    const parentWithBg = target.closest('[style*="background-image"]');
+    const parentWithBg =
+      target && typeof target.closest === "function"
+        ? target.closest('[style*="background-image"]')
+        : null;
     if (parentWithBg) {
       const bgImage = parentWithBg.style.backgroundImage;
       const urlMatch = bgImage.match(/url\(["']?([^"')]+)["']?\)/);
@@ -715,7 +736,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Simplified menu builder
   function buildMenuItems(type, data) {
-    const userLanguage = navigator.language || navigator.userLanguage;
+    const userLanguage = getUserLanguage();
     const items = [];
 
     switch (type) {
@@ -742,6 +763,9 @@ document.addEventListener("DOMContentLoaded", () => {
               const filename = getFilenameFromUrl(data.url);
               invoke("download_file", {
                 params: { url: data.url, filename, language: userLanguage },
+              }).catch((error) => {
+                console.error("Failed to download file:", filename, error);
+                showDownloadError(filename);
               });
             }),
           );
@@ -770,7 +794,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const mediaInfo = getMediaInfo(target);
 
       // Check for links (but not if it's media)
-      const linkElement = target.closest("a");
+      const linkElement =
+        target && typeof target.closest === "function"
+          ? target.closest("a")
+          : null;
       const isLink = linkElement && linkElement.href && !mediaInfo.isMedia;
 
       // Only show custom menu for media or links

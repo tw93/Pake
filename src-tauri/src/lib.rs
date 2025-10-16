@@ -24,6 +24,7 @@ pub fn run_app() {
     let hide_on_close = pake_config.windows[0].hide_on_close;
     let activation_shortcut = pake_config.windows[0].activation_shortcut.clone();
     let init_fullscreen = pake_config.windows[0].fullscreen;
+    let multi_instance = pake_config.multi_instance;
 
     let window_state_plugin = WindowStatePlugin::default()
         .with_state_flags(if init_fullscreen {
@@ -35,19 +36,25 @@ pub fn run_app() {
         .build();
 
     #[allow(deprecated)]
-    tauri_app
+    let mut app_builder = tauri_app
         .plugin(window_state_plugin)
         .plugin(tauri_plugin_oauth::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_shell::init())
-        .plugin(tauri_plugin_notification::init())
-        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+        .plugin(tauri_plugin_notification::init());
+
+    // Only add single instance plugin if multiple instances are not allowed
+    if !multi_instance {
+        app_builder = app_builder.plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             if let Some(window) = app.get_webview_window("pake") {
                 let _ = window.unminimize();
                 let _ = window.show();
                 let _ = window.set_focus();
             }
-        }))
+        }));
+    }
+
+    app_builder
         .invoke_handler(tauri::generate_handler![
             download_file,
             download_file_by_binary,

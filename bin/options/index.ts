@@ -4,6 +4,7 @@ import logger from '@/options/logger';
 import { handleIcon } from './icon';
 import { getDomain } from '@/utils/url';
 import { getIdentifier, promptText, capitalizeFirstLetter } from '@/utils/info';
+import { generateLinuxPackageName } from '@/utils/name';
 import { PakeAppOptions, PakeCliOptions, PlatformMap } from '@/types';
 
 function resolveAppName(name: string, platform: NodeJS.Platform): string {
@@ -13,8 +14,8 @@ function resolveAppName(name: string, platform: NodeJS.Platform): string {
 
 function isValidName(name: string, platform: NodeJS.Platform): boolean {
   const platformRegexMapping: PlatformMap = {
-    linux: /^[a-z0-9][a-z0-9-]*$/,
-    default: /^[a-zA-Z0-9][a-zA-Z0-9- ]*$/,
+    linux: /^[a-z0-9\u4e00-\u9fff][a-z0-9\u4e00-\u9fff-]*$/,
+    default: /^[a-zA-Z0-9\u4e00-\u9fff][a-zA-Z0-9\u4e00-\u9fff- ]*$/,
   };
   const reg = platformRegexMapping[platform] || platformRegexMapping.default;
   return !!name && reg.test(name);
@@ -36,10 +37,8 @@ export default async function handleOptions(
     name = namePrompt || defaultName;
   }
 
-  // Handle platform-specific name formatting
   if (name && platform === 'linux') {
-    // Convert to lowercase and replace spaces with dashes for Linux
-    name = name.toLowerCase().replace(/\s+/g, '-');
+    name = generateLinuxPackageName(name);
   }
 
   if (!isValidName(name, platform)) {

@@ -27,6 +27,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   wasm: false,
   enableDragDrop: false,
   keepBinary: false,
+  multiInstance: false,
 };
 
 // Just for cli development
