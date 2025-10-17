@@ -43,6 +43,7 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         .user_agent(user_agent)
         .resizable(window_config.resizable)
         .fullscreen(window_config.fullscreen)
+        .maximized(window_config.maximize)
         .inner_size(window_config.width, window_config.height)
         .always_on_top(window_config.always_on_top)
         .incognito(window_config.incognito);
@@ -65,14 +66,7 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
             .additional_browser_args("--enable-unsafe-webgpu");
     }
 
-    if !config.proxy_url.is_empty() {
-        if let Ok(proxy_url) = Url::from_str(&config.proxy_url) {
-            window_builder = window_builder.proxy_url(proxy_url);
-            #[cfg(debug_assertions)]
-            println!("Proxy configured: {}", config.proxy_url);
-        }
-    }
-
+    // Platform-specific configuration must be set before proxy on Windows/Linux
     #[cfg(target_os = "macos")]
     {
         let title_bar_style = if window_config.hide_title_bar {
@@ -87,13 +81,22 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         }
     }
 
-    // Windows and Linux share the same configuration
+    // Windows and Linux: set data_directory before proxy_url
     #[cfg(not(target_os = "macos"))]
     {
         window_builder = window_builder
             .data_directory(_data_dir)
             .additional_browser_args("--disable-blink-features=AutomationControlled")
             .theme(None);
+    }
+
+    // Set proxy after platform-specific configs (required for Windows/Linux)
+    if !config.proxy_url.is_empty() {
+        if let Ok(proxy_url) = Url::from_str(&config.proxy_url) {
+            window_builder = window_builder.proxy_url(proxy_url);
+            #[cfg(debug_assertions)]
+            println!("Proxy configured: {}", config.proxy_url);
+        }
     }
 
     window_builder.build().expect("Failed to build window")
