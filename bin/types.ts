@@ -24,6 +24,9 @@ export interface PakeCliOptions {
   // Whether the window can be fullscreen, default false
   fullscreen: boolean;
 
+  // Start window maximized, default false
+  maximize: boolean;
+
   // Enable immersive header, default false.
   hideTitleBar: boolean;
 
@@ -90,6 +93,9 @@ export interface PakeCliOptions {
 
   // Allow multiple instances, default false (single instance)
   multiInstance: boolean;
+
+  // Start app minimized to tray, default false
+  startToTray: boolean;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {

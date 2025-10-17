@@ -100,6 +100,11 @@ program
       .hideHelp(),
   )
   .addOption(
+    new Option('--maximize', 'Start window maximized')
+      .default(DEFAULT.maximize)
+      .hideHelp(),
+  )
+  .addOption(
     new Option('--dark-mode', 'Force Mac app to use dark mode')
       .default(DEFAULT.darkMode)
       .hideHelp(),
@@ -162,6 +167,11 @@ program
   .addOption(
     new Option('--multi-instance', 'Allow multiple app instances')
       .default(DEFAULT.multiInstance)
+      .hideHelp(),
+  )
+  .addOption(
+    new Option('--start-to-tray', 'Start app minimized to tray')
+      .default(DEFAULT.startToTray)
       .hideHelp(),
   )
   .addOption(

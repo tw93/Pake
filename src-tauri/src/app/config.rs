@@ -5,6 +5,7 @@ pub struct WindowConfig {
     pub url: String,
     pub hide_title_bar: bool,
     pub fullscreen: bool,
+    pub maximize: bool,
     pub width: f64,
     pub height: f64,
     pub resizable: bool,
@@ -18,6 +19,7 @@ pub struct WindowConfig {
     pub title: Option<String>,
     pub enable_wasm: bool,
     pub enable_drag_drop: bool,
+    pub start_to_tray: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

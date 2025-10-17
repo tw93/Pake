@@ -57,12 +57,14 @@ pnpm run dev        # Development with hot reload
 - **CLI Tool** (`bin/`): Main entry point, builders, options processing
 - **Tauri App** (`src-tauri/`): Rust application, window/tray management, injection logic
 - **Config Files**: `pake.json`, `tauri.conf.json`, platform-specific configs
+- **Injection System** (`src-tauri/src/inject/event.js`): Custom event handlers, shortcuts, downloads, notifications
 
 ## Documentation Guidelines
 
 - **Main README**: Common parameters only
 - **CLI Documentation** (`docs/cli-usage.md`): ALL parameters with examples
 - **Rare parameters**: Full docs in CLI usage, minimal in main README
+- **NO technical documentation files**: Do not create separate technical docs, design docs, or implementation notes - keep technical details in memory/conversation only
 
 ## Platform Specifics
 

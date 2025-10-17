@@ -24,6 +24,7 @@ pub fn run_app() {
     let hide_on_close = pake_config.windows[0].hide_on_close;
     let activation_shortcut = pake_config.windows[0].activation_shortcut.clone();
     let init_fullscreen = pake_config.windows[0].fullscreen;
+    let start_to_tray = pake_config.windows[0].start_to_tray && show_system_tray; // Only valid when tray is enabled
     let multi_instance = pake_config.multi_instance;
 
     let window_state_plugin = WindowStatePlugin::default()
@@ -62,15 +63,18 @@ pub fn run_app() {
         ])
         .setup(move |app| {
             let window = set_window(app, &pake_config, &tauri_config);
-            set_system_tray(app.app_handle(), show_system_tray).unwrap();
+            set_system_tray(app.app_handle(), show_system_tray, &pake_config.system_tray_path).unwrap();
             set_global_shortcut(app.app_handle(), activation_shortcut).unwrap();
 
             // Show window after state restoration to prevent position flashing
-            let window_clone = window.clone();
-            tauri::async_runtime::spawn(async move {
-                tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
-                window_clone.show().unwrap();
-            });
+            // Unless start_to_tray is enabled, then keep it hidden
+            if !start_to_tray {
+                let window_clone = window.clone();
+                tauri::async_runtime::spawn(async move {
+                    tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
+                    window_clone.show().unwrap();
+                });
+            }
 
             Ok(())
         })
