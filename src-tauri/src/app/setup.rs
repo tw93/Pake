@@ -9,7 +9,11 @@ use tauri::{
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
-pub fn set_system_tray(app: &AppHandle, show_system_tray: bool, tray_icon_path: &str) -> tauri::Result<()> {
+pub fn set_system_tray(
+    app: &AppHandle,
+    show_system_tray: bool,
+    tray_icon_path: &str,
+) -> tauri::Result<()> {
     if !show_system_tray {
         app.remove_tray_by_id("pake-tray");
         return Ok(());
@@ -61,11 +65,15 @@ pub fn set_system_tray(app: &AppHandle, show_system_tray: bool, tray_icon_path: 
             _ => {}
         })
         .icon(if tray_icon_path.is_empty() {
-            app.default_window_icon().unwrap_or_else(|| panic!("Failed to get default window icon")).clone()
+            app.default_window_icon()
+                .unwrap_or_else(|| panic!("Failed to get default window icon"))
+                .clone()
         } else {
             tauri::image::Image::from_path(tray_icon_path).unwrap_or_else(|_| {
                 // If custom tray icon fails to load, fallback to default
-                app.default_window_icon().unwrap_or_else(|| panic!("Failed to get default window icon")).clone()
+                app.default_window_icon()
+                    .unwrap_or_else(|| panic!("Failed to get default window icon"))
+                    .clone()
             })
         })
         .build(app)?;
