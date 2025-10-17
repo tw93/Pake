@@ -49,6 +49,7 @@ export async function mergeConfig(
     width,
     height,
     fullscreen,
+    maximize,
     hideTitleBar,
     alwaysOnTop,
     appVersion,
@@ -71,6 +72,7 @@ export async function mergeConfig(
     wasm,
     enableDragDrop,
     multiInstance,
+    startToTray,
   } = options;
 
   const { platform } = process;
@@ -81,6 +83,7 @@ export async function mergeConfig(
     width,
     height,
     fullscreen,
+    maximize,
     resizable,
     hide_title_bar: hideTitleBar,
     activation_shortcut: activationShortcut,
@@ -92,6 +95,7 @@ export async function mergeConfig(
     title: title || null,
     enable_wasm: wasm,
     enable_drag_drop: enableDragDrop,
+    start_to_tray: startToTray && showSystemTray,
   };
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
 

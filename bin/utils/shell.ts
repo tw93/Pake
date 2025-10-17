@@ -5,12 +5,13 @@ export async function shellExec(
   command: string,
   timeout: number = 300000,
   env?: Record<string, string>,
-  showOutput: boolean = false,
 ) {
   try {
     const { exitCode } = await execa(command, {
       cwd: npmDirectory,
-      stdio: showOutput ? 'inherit' : ['inherit', 'pipe', 'inherit'],
+      // Use 'inherit' to show all output directly to user in real-time.
+      // This ensures linuxdeploy and other tool outputs are visible during builds.
+      stdio: 'inherit',
       shell: true,
       timeout,
       env: env ? { ...process.env, ...env } : process.env,
@@ -28,6 +29,8 @@ export async function shellExec(
 
     let errorMsg = `Error occurred while executing command "${command}". Exit code: ${exitCode}. Details: ${errorMessage}`;
 
+    // Provide helpful guidance for common Linux AppImage build failures
+    // caused by strip tool incompatibility with modern glibc (2.38+)
     if (
       process.platform === 'linux' &&
       (errorMessage.includes('linuxdeploy') ||
@@ -35,10 +38,18 @@ export async function shellExec(
         errorMessage.includes('strip'))
     ) {
       errorMsg +=
-        '\n\nLinux AppImage build error. Try one of these solutions:\n' +
-        '  1. Run with: NO_STRIP=true pake <url> --targets appimage\n' +
-        '  2. Use DEB format instead: pake <url> --targets deb\n' +
-        '  3. See detailed solutions: https://github.com/tw93/Pake/blob/main/docs/faq.md';
+        '\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
+        'Linux AppImage Build Failed\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+        'Cause: Strip tool incompatibility with glibc 2.38+\n' +
+        '       (affects Debian Trixie, Arch Linux, and other modern distros)\n\n' +
+        'Quick fix:\n' +
+        '  NO_STRIP=1 pake <url> --targets appimage --debug\n\n' +
+        'Alternatives:\n' +
+        '  • Use DEB format: pake <url> --targets deb\n' +
+        '  • Update binutils: sudo apt install binutils (or pacman -S binutils)\n' +
+        '  • Detailed guide: https://github.com/tw93/Pake/blob/main/docs/faq.md\n' +
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
     }
 
     throw new Error(errorMsg);

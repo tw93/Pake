@@ -123,14 +123,12 @@ export default abstract class BaseBuilder {
         `cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`,
         timeout,
         buildEnv,
-        this.options.debug,
       );
     } else {
       await shellExec(
         `cd "${npmDirectory}" && ${packageManager} install${peerDepsOption}`,
         timeout,
         buildEnv,
-        this.options.debug,
       );
     }
     spinner.succeed(chalk.green('Package installed!'));
@@ -169,11 +167,24 @@ export default abstract class BaseBuilder {
       ...(process.env.NO_STRIP && { NO_STRIP: process.env.NO_STRIP }),
     };
 
+    // Warn users about potential AppImage build failures on modern Linux systems.
+    // The linuxdeploy tool bundled in Tauri uses an older strip tool that doesn't
+    // recognize the .relr.dyn section introduced in glibc 2.38+.
+    if (process.platform === 'linux' && this.options.targets === 'appimage') {
+      if (!buildEnv.NO_STRIP) {
+        logger.warn(
+          '⚠ Building AppImage on Linux may fail due to strip incompatibility with glibc 2.38+',
+        );
+        logger.warn(
+          '⚠ If build fails, retry with: NO_STRIP=1 pake <url> --targets appimage',
+        );
+      }
+    }
+
     await shellExec(
       `cd "${npmDirectory}" && ${this.getBuildCommand(packageManager)}`,
       this.getBuildTimeout(),
       buildEnv,
-      this.options.debug,
     );
 
     // Copy app
@@ -278,6 +289,12 @@ export default abstract class BaseBuilder {
 
     if (target) {
       fullCommand += ` --target ${target}`;
+    }
+
+    // Enable verbose output in debug mode to help diagnose build issues.
+    // This provides detailed logs from Tauri CLI and bundler tools.
+    if (this.options.debug) {
+      fullCommand += ' --verbose';
     }
 
     return fullCommand;

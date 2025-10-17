@@ -15,7 +15,9 @@
       "hide_on_close": true,
       "incognito": false,
       "enable_wasm": false,
-      "enable_drag_drop": false
+      "enable_drag_drop": false,
+      "maximize": false,
+      "start_to_tray": false
     }
   ],
   "user_agent": {

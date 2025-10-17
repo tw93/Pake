@@ -23,7 +23,7 @@ import sharp from 'sharp';
 import * as psl from 'psl';
 
 var name = "pake-cli";
-var version = "3.4.0";
+var version = "3.4.1";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -201,11 +201,13 @@ const IS_MAC = platform$1 === 'darwin';
 const IS_WIN = platform$1 === 'win32';
 const IS_LINUX = platform$1 === 'linux';
 
-async function shellExec(command, timeout = 300000, env, showOutput = false) {
+async function shellExec(command, timeout = 300000, env) {
     try {
         const { exitCode } = await execa(command, {
             cwd: npmDirectory,
-            stdio: showOutput ? 'inherit' : ['inherit', 'pipe', 'inherit'],
+            // Use 'inherit' to show all output directly to user in real-time.
+            // This ensures linuxdeploy and other tool outputs are visible during builds.
+            stdio: 'inherit',
             shell: true,
             timeout,
             env: env ? { ...process.env, ...env } : process.env,
@@ -219,15 +221,25 @@ async function shellExec(command, timeout = 300000, env, showOutput = false) {
             throw new Error(`Command timed out after ${timeout}ms: "${command}". Try increasing timeout or check network connectivity.`);
         }
         let errorMsg = `Error occurred while executing command "${command}". Exit code: ${exitCode}. Details: ${errorMessage}`;
+        // Provide helpful guidance for common Linux AppImage build failures
+        // caused by strip tool incompatibility with modern glibc (2.38+)
         if (process.platform === 'linux' &&
             (errorMessage.includes('linuxdeploy') ||
                 errorMessage.includes('appimage') ||
                 errorMessage.includes('strip'))) {
             errorMsg +=
-                '\n\nLinux AppImage build error. Try one of these solutions:\n' +
-                    '  1. Run with: NO_STRIP=true pake <url> --targets appimage\n' +
-                    '  2. Use DEB format instead: pake <url> --targets deb\n' +
-                    '  3. See detailed solutions: https://github.com/tw93/Pake/blob/main/docs/faq.md';
+                '\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
+                    'Linux AppImage Build Failed\n' +
+                    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n' +
+                    'Cause: Strip tool incompatibility with glibc 2.38+\n' +
+                    '       (affects Debian Trixie, Arch Linux, and other modern distros)\n\n' +
+                    'Quick fix:\n' +
+                    '  NO_STRIP=1 pake <url> --targets appimage --debug\n\n' +
+                    'Alternatives:\n' +
+                    '  • Use DEB format: pake <url> --targets deb\n' +
+                    '  • Update binutils: sudo apt install binutils (or pacman -S binutils)\n' +
+                    '  • Detailed guide: https://github.com/tw93/Pake/blob/main/docs/faq.md\n' +
+                    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
         }
         throw new Error(errorMsg);
     }
@@ -351,7 +363,7 @@ async function installRust() {
     const rustInstallScriptForWindows = 'winget install --id Rustlang.Rustup';
     const spinner = getSpinner('Downloading Rust...');
     try {
-        await shellExec(IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac, 300000, undefined, true);
+        await shellExec(IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac, 300000, undefined);
         spinner.succeed(chalk.green('✔ Rust installed successfully!'));
         ensureRustEnv();
     }
@@ -448,13 +460,14 @@ async function mergeConfig(url, options, tauriConf) {
             await fsExtra.copy(sourcePath, destPath);
         }
     }));
-    const { width, height, fullscreen, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, multiInstance, } = options;
+    const { width, height, fullscreen, maximize, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, multiInstance, startToTray, } = options;
     const { platform } = process;
     const platformHideOnClose = hideOnClose ?? platform === 'darwin';
     const tauriConfWindowOptions = {
         width,
         height,
         fullscreen,
+        maximize,
         resizable,
         hide_title_bar: hideTitleBar,
         activation_shortcut: activationShortcut,
@@ -466,6 +479,7 @@ async function mergeConfig(url, options, tauriConf) {
         title: title || null,
         enable_wasm: wasm,
         enable_drag_drop: enableDragDrop,
+        start_to_tray: startToTray && showSystemTray,
     };
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
     tauriConf.productName = name;
@@ -774,10 +788,10 @@ class BaseBuilder {
             logger.info(`✺ Located in China, using ${packageManager}/rsProxy CN mirror.`);
             const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
             await fsExtra.copy(projectCnConf, projectConf);
-            await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`, timeout, buildEnv, this.options.debug);
+            await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`, timeout, buildEnv);
         }
         else {
-            await shellExec(`cd "${npmDirectory}" && ${packageManager} install${peerDepsOption}`, timeout, buildEnv, this.options.debug);
+            await shellExec(`cd "${npmDirectory}" && ${packageManager} install${peerDepsOption}`, timeout, buildEnv);
         }
         spinner.succeed(chalk.green('Package installed!'));
         if (!tauriTargetPathExists) {
@@ -806,7 +820,16 @@ class BaseBuilder {
             ...this.getBuildEnvironment(),
             ...(process.env.NO_STRIP && { NO_STRIP: process.env.NO_STRIP }),
         };
-        await shellExec(`cd "${npmDirectory}" && ${this.getBuildCommand(packageManager)}`, this.getBuildTimeout(), buildEnv, this.options.debug);
+        // Warn users about potential AppImage build failures on modern Linux systems.
+        // The linuxdeploy tool bundled in Tauri uses an older strip tool that doesn't
+        // recognize the .relr.dyn section introduced in glibc 2.38+.
+        if (process.platform === 'linux' && this.options.targets === 'appimage') {
+            if (!buildEnv.NO_STRIP) {
+                logger.warn('⚠ Building AppImage on Linux may fail due to strip incompatibility with glibc 2.38+');
+                logger.warn('⚠ If build fails, retry with: NO_STRIP=1 pake <url> --targets appimage');
+            }
+        }
+        await shellExec(`cd "${npmDirectory}" && ${this.getBuildCommand(packageManager)}`, this.getBuildTimeout(), buildEnv);
         // Copy app
         const fileName = this.getFileName();
         const fileType = this.getFileType(target);
@@ -864,6 +887,11 @@ class BaseBuilder {
         let fullCommand = `${baseCommand}${argSeparator} -c "${configPath}"`;
         if (target) {
             fullCommand += ` --target ${target}`;
+        }
+        // Enable verbose output in debug mode to help diagnose build issues.
+        // This provides detailed logs from Tauri CLI and bundler tools.
+        if (this.options.debug) {
+            fullCommand += ' --verbose';
         }
         return fullCommand;
     }
@@ -1178,6 +1206,12 @@ class LinuxBuilder extends BaseBuilder {
         if (features.length > 0) {
             fullCommand += ` --features ${features.join(',')}`;
         }
+        // Enable verbose output for AppImage builds when debugging or PAKE_VERBOSE is set.
+        // AppImage builds often fail with minimal error messages from linuxdeploy,
+        // so verbose mode helps diagnose issues like strip failures and missing dependencies.
+        if (this.options.targets === 'appimage' && (this.options.debug || process.env.PAKE_VERBOSE)) {
+            fullCommand += ' --verbose';
+        }
         return fullCommand;
     }
     getBasePath() {
@@ -1227,6 +1261,7 @@ const DEFAULT_PAKE_OPTIONS = {
     height: 780,
     width: 1200,
     fullscreen: false,
+    maximize: false,
     hideTitleBar: false,
     alwaysOnTop: false,
     appVersion: '1.0.0',
@@ -1249,6 +1284,7 @@ const DEFAULT_PAKE_OPTIONS = {
     enableDragDrop: false,
     keepBinary: false,
     multiInstance: false,
+    startToTray: false,
 };
 
 async function checkUpdateTips() {
@@ -1731,6 +1767,9 @@ program
     .addOption(new Option('--always-on-top', 'Always on the top level')
     .default(DEFAULT_PAKE_OPTIONS.alwaysOnTop)
     .hideHelp())
+    .addOption(new Option('--maximize', 'Start window maximized')
+    .default(DEFAULT_PAKE_OPTIONS.maximize)
+    .hideHelp())
     .addOption(new Option('--dark-mode', 'Force Mac app to use dark mode')
     .default(DEFAULT_PAKE_OPTIONS.darkMode)
     .hideHelp())
@@ -1773,6 +1812,9 @@ program
     .hideHelp())
     .addOption(new Option('--multi-instance', 'Allow multiple app instances')
     .default(DEFAULT_PAKE_OPTIONS.multiInstance)
+    .hideHelp())
+    .addOption(new Option('--start-to-tray', 'Start app minimized to tray')
+    .default(DEFAULT_PAKE_OPTIONS.startToTray)
     .hideHelp())
     .addOption(new Option('--installer-language <string>', 'Installer language')
     .default(DEFAULT_PAKE_OPTIONS.installerLanguage)
