@@ -131,11 +131,12 @@ jobs:
           PKG_CONFIG_ALLOW_SYSTEM_CFLAGS: 1
 
       - name: Upload archive
-        uses: actions/upload-artifact@v4
-        with:
-          name: output-${{ inputs.platform }}.zip
-          path: node_modules/pake-cli/output/*
-          retention-days: 3
+  uses: actions/upload-artifact@v4
+  with:
+    name: output-${{ inputs.platform }}.zip
+    path: node_modules/pake-cli/**
+    retention-days: 3
+
 
       - name: Rust cache store
         uses: actions/cache/save@v4.2.0
