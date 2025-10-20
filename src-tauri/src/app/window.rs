@@ -10,13 +10,11 @@ use tauri::{Theme, TitleBarStyle};
 fn build_proxy_browser_arg(url: &Url) -> Option<String> {
     let host = url.host_str()?;
     let scheme = url.scheme();
-    let port = url
-        .port()
-        .or_else(|| match scheme {
-            "http" => Some(80),
-            "socks5" => Some(1080),
-            _ => None,
-        })?;
+    let port = url.port().or_else(|| match scheme {
+        "http" => Some(80),
+        "socks5" => Some(1080),
+        _ => None,
+    })?;
 
     match scheme {
         "http" | "socks5" => Some(format!("--proxy-server={scheme}://{host}:{port}")),
@@ -82,8 +80,7 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
     let mut windows_browser_args = String::from("--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-blink-features=AutomationControlled");
 
     #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
-    let mut linux_browser_args =
-        String::from("--disable-blink-features=AutomationControlled");
+    let mut linux_browser_args = String::from("--disable-blink-features=AutomationControlled");
 
     if window_config.enable_wasm {
         #[cfg(target_os = "windows")]
