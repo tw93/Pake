@@ -436,16 +436,19 @@ pake ./my-app/index.html --name "my-app" --use-local-file
 ## Docker 使用
 
 ```shell
-# 在Linux上，您可以通过 Docker 运行 Pake CLI。
-docker run -it --rm \ # Run interactively, remove container after exit
-    -v YOUR_DIR:/output \ # Files from container's /output will be in YOU_DIR
+# 在 Linux 上通过 Docker 运行 Pake CLI（AppImage 构建需要 FUSE 权限）
+docker run --rm --privileged \
+    --device /dev/fuse \
+    --security-opt apparmor=unconfined \
+    -v YOUR_DIR:/output \
     ghcr.io/tw93/pake \
     <arguments>
 
-# For example:
-docker run -it --rm \
+# 例如：
+docker run --rm --privileged \
+    --device /dev/fuse \
+    --security-opt apparmor=unconfined \
     -v ./packages:/output \
     ghcr.io/tw93/pake \
-    https://example.com --name MyApp --icon ./icon.png
-
+    https://example.com --name MyApp --icon ./icon.png --targets appimage
 ```

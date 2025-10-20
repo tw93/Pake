@@ -23,7 +23,7 @@ import sharp from 'sharp';
 import * as psl from 'psl';
 
 var name = "pake-cli";
-var version = "3.4.1";
+var version = "3.4.2";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -223,10 +223,11 @@ async function shellExec(command, timeout = 300000, env) {
         let errorMsg = `Error occurred while executing command "${command}". Exit code: ${exitCode}. Details: ${errorMessage}`;
         // Provide helpful guidance for common Linux AppImage build failures
         // caused by strip tool incompatibility with modern glibc (2.38+)
+        const lowerError = errorMessage.toLowerCase();
         if (process.platform === 'linux' &&
-            (errorMessage.includes('linuxdeploy') ||
-                errorMessage.includes('appimage') ||
-                errorMessage.includes('strip'))) {
+            (lowerError.includes('linuxdeploy') ||
+                lowerError.includes('appimage') ||
+                lowerError.includes('strip'))) {
             errorMsg +=
                 '\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
                     'Linux AppImage Build Failed\n' +
@@ -240,6 +241,15 @@ async function shellExec(command, timeout = 300000, env) {
                     '  • Update binutils: sudo apt install binutils (or pacman -S binutils)\n' +
                     '  • Detailed guide: https://github.com/tw93/Pake/blob/main/docs/faq.md\n' +
                     '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
+            if (lowerError.includes('fuse') ||
+                lowerError.includes('operation not permitted') ||
+                lowerError.includes('/dev/fuse')) {
+                errorMsg +=
+                    '\n\nDocker / Container hint:\n' +
+                        '  AppImage tooling needs access to /dev/fuse. When running inside Docker, add:\n' +
+                        '    --privileged --device /dev/fuse --security-opt apparmor=unconfined\n' +
+                        '  or run on the host directly.';
+            }
         }
         throw new Error(errorMsg);
     }
@@ -816,10 +826,12 @@ class BaseBuilder {
         buildSpinner.stop();
         // Show static message to keep the status visible
         logger.warn('✸ Building app...');
-        const buildEnv = {
-            ...this.getBuildEnvironment(),
-            ...(process.env.NO_STRIP && { NO_STRIP: process.env.NO_STRIP }),
+        const baseEnv = this.getBuildEnvironment();
+        let buildEnv = {
+            ...(baseEnv ?? {}),
+            ...(process.env.NO_STRIP ? { NO_STRIP: process.env.NO_STRIP } : {}),
         };
+        const resolveExecEnv = () => Object.keys(buildEnv).length > 0 ? buildEnv : undefined;
         // Warn users about potential AppImage build failures on modern Linux systems.
         // The linuxdeploy tool bundled in Tauri uses an older strip tool that doesn't
         // recognize the .relr.dyn section introduced in glibc 2.38+.
@@ -829,7 +841,28 @@ class BaseBuilder {
                 logger.warn('⚠ If build fails, retry with: NO_STRIP=1 pake <url> --targets appimage');
             }
         }
-        await shellExec(`cd "${npmDirectory}" && ${this.getBuildCommand(packageManager)}`, this.getBuildTimeout(), buildEnv);
+        const buildCommand = `cd "${npmDirectory}" && ${this.getBuildCommand(packageManager)}`;
+        const buildTimeout = this.getBuildTimeout();
+        try {
+            await shellExec(buildCommand, buildTimeout, resolveExecEnv());
+        }
+        catch (error) {
+            const shouldRetryWithoutStrip = process.platform === 'linux' &&
+                this.options.targets === 'appimage' &&
+                !buildEnv.NO_STRIP &&
+                this.isLinuxDeployStripError(error);
+            if (shouldRetryWithoutStrip) {
+                logger.warn('⚠ AppImage build failed during linuxdeploy strip step, retrying with NO_STRIP=1 automatically.');
+                buildEnv = {
+                    ...buildEnv,
+                    NO_STRIP: '1',
+                };
+                await shellExec(buildCommand, buildTimeout, resolveExecEnv());
+            }
+            else {
+                throw error;
+            }
+        }
         // Copy app
         const fileName = this.getFileName();
         const fileType = this.getFileType(target);
@@ -851,6 +884,18 @@ class BaseBuilder {
     }
     getFileType(target) {
         return target;
+    }
+    isLinuxDeployStripError(error) {
+        if (!(error instanceof Error) || !error.message) {
+            return false;
+        }
+        const message = error.message.toLowerCase();
+        return (message.includes('linuxdeploy') ||
+            message.includes('failed to run linuxdeploy') ||
+            message.includes('strip:') ||
+            message.includes('unable to recognise the format of the input file') ||
+            message.includes('appimage tool failed') ||
+            message.includes('strip tool'));
     }
     /**
      * 解析目标架构
@@ -1209,7 +1254,8 @@ class LinuxBuilder extends BaseBuilder {
         // Enable verbose output for AppImage builds when debugging or PAKE_VERBOSE is set.
         // AppImage builds often fail with minimal error messages from linuxdeploy,
         // so verbose mode helps diagnose issues like strip failures and missing dependencies.
-        if (this.options.targets === 'appimage' && (this.options.debug || process.env.PAKE_VERBOSE)) {
+        if (this.options.targets === 'appimage' &&
+            (this.options.debug || process.env.PAKE_VERBOSE)) {
             fullCommand += ' --verbose';
         }
         return fullCommand;

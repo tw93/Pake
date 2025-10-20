@@ -438,16 +438,19 @@ After completing the above steps, your application should be successfully packag
 ## Docker
 
 ```shell
-# On Linux, you can run the Pake CLI via Docker
-docker run -it --rm \ # Run interactively, remove container after exit
-    -v YOUR_DIR:/output \ # Files from container's /output will be in YOU_DIR
+# Run the Pake CLI via Docker (AppImage builds need FUSE access)
+docker run --rm --privileged \
+    --device /dev/fuse \
+    --security-opt apparmor=unconfined \
+    -v YOUR_DIR:/output \
     ghcr.io/tw93/pake \
     <arguments>
 
 # For example:
-docker run -it --rm \
+docker run --rm --privileged \
+    --device /dev/fuse \
+    --security-opt apparmor=unconfined \
     -v ./packages:/output \
     ghcr.io/tw93/pake \
-    https://example.com --name myapp --icon ./icon.png
-
+    https://example.com --name myapp --icon ./icon.png --targets appimage
 ```

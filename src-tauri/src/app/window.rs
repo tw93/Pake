@@ -6,6 +6,22 @@ use tauri::{App, Config, Url, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 #[cfg(target_os = "macos")]
 use tauri::{Theme, TitleBarStyle};
 
+#[cfg(target_os = "windows")]
+fn build_proxy_browser_arg(url: &Url) -> Option<String> {
+    let host = url.host_str()?;
+    let scheme = url.scheme();
+    let port = url.port().or_else(|| match scheme {
+        "http" => Some(80),
+        "socks5" => Some(1080),
+        _ => None,
+    })?;
+
+    match scheme {
+        "http" | "socks5" => Some(format!("--proxy-server={scheme}://{host}:{port}")),
+        _ => None,
+    }
+}
+
 pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> WebviewWindow {
     let package_name = tauri_config.clone().product_name.unwrap();
     let _data_dir = get_data_dir(app.handle(), package_name);
@@ -60,11 +76,34 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         .initialization_script(include_str!("../inject/style.js"))
         .initialization_script(include_str!("../inject/custom.js"));
 
+    #[cfg(target_os = "windows")]
+    let mut windows_browser_args = String::from("--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-blink-features=AutomationControlled");
+
+    #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
+    let mut linux_browser_args = String::from("--disable-blink-features=AutomationControlled");
+
     if window_config.enable_wasm {
-        window_builder = window_builder
-            .additional_browser_args("--enable-features=SharedArrayBuffer")
-            .additional_browser_args("--enable-unsafe-webgpu");
+        #[cfg(target_os = "windows")]
+        {
+            windows_browser_args.push_str(" --enable-features=SharedArrayBuffer");
+            windows_browser_args.push_str(" --enable-unsafe-webgpu");
+        }
+
+        #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
+        {
+            linux_browser_args.push_str(" --enable-features=SharedArrayBuffer");
+            linux_browser_args.push_str(" --enable-unsafe-webgpu");
+        }
+
+        #[cfg(target_os = "macos")]
+        {
+            window_builder = window_builder
+                .additional_browser_args("--enable-features=SharedArrayBuffer")
+                .additional_browser_args("--enable-unsafe-webgpu");
+        }
     }
+
+    let mut parsed_proxy_url: Option<Url> = None;
 
     // Platform-specific configuration must be set before proxy on Windows/Linux
     #[cfg(target_os = "macos")]
@@ -84,19 +123,43 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
     // Windows and Linux: set data_directory before proxy_url
     #[cfg(not(target_os = "macos"))]
     {
-        window_builder = window_builder
-            .data_directory(_data_dir)
-            .additional_browser_args("--disable-blink-features=AutomationControlled")
-            .theme(None);
+        window_builder = window_builder.data_directory(_data_dir).theme(None);
+
+        if !config.proxy_url.is_empty() {
+            if let Ok(proxy_url) = Url::from_str(&config.proxy_url) {
+                parsed_proxy_url = Some(proxy_url.clone());
+                #[cfg(target_os = "windows")]
+                {
+                    if let Some(arg) = build_proxy_browser_arg(&proxy_url) {
+                        windows_browser_args.push(' ');
+                        windows_browser_args.push_str(&arg);
+                    }
+                }
+            }
+        }
+
+        #[cfg(target_os = "windows")]
+        {
+            window_builder = window_builder.additional_browser_args(&windows_browser_args);
+        }
+
+        #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
+        {
+            window_builder = window_builder.additional_browser_args(&linux_browser_args);
+        }
     }
 
     // Set proxy after platform-specific configs (required for Windows/Linux)
-    if !config.proxy_url.is_empty() {
+    if parsed_proxy_url.is_none() && !config.proxy_url.is_empty() {
         if let Ok(proxy_url) = Url::from_str(&config.proxy_url) {
-            window_builder = window_builder.proxy_url(proxy_url);
-            #[cfg(debug_assertions)]
-            println!("Proxy configured: {}", config.proxy_url);
+            parsed_proxy_url = Some(proxy_url);
         }
+    }
+
+    if let Some(proxy_url) = parsed_proxy_url {
+        window_builder = window_builder.proxy_url(proxy_url);
+        #[cfg(debug_assertions)]
+        println!("Proxy configured: {}", config.proxy_url);
     }
 
     window_builder.build().expect("Failed to build window")

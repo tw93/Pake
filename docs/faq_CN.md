@@ -16,12 +16,12 @@ Error: failed to run linuxdeploy
 Error: strip: Unable to recognise the format of the input file
 ```
 
-**解决方案 1：使用 NO_STRIP（推荐）**
+**解决方案 1：自动 NO_STRIP 重试（推荐）**
 
-在构建命令前加上 `NO_STRIP=true`：
+Pake CLI 已在 linuxdeploy 剥离失败时自动使用 `NO_STRIP=1` 进行二次构建。如果你希望一开始就跳过剥离步骤（或在脚本中使用），可以手动设置该变量：
 
 ```bash
-NO_STRIP=true pake https://example.com --name MyApp --targets appimage
+NO_STRIP=1 pake https://example.com --name MyApp --targets appimage
 ```
 
 这会绕过经常在某些 Linux 发行版上出现问题的库文件剥离过程。
@@ -50,7 +50,7 @@ sudo apt install -y \
   pkg-config
 ```
 
-然后使用 `NO_STRIP=true` 再次尝试构建。
+然后再次尝试构建（也可以提前设置 `NO_STRIP=1`）。
 
 **解决方案 3：改用 DEB 格式**
 
@@ -60,15 +60,20 @@ DEB 包在基于 Debian 的系统上更稳定：
 pake https://example.com --name MyApp --targets deb
 ```
 
-**解决方案 4：使用 Docker**
+**解决方案 4：使用 Docker（需开放 FUSE）**
 
-在干净的环境中构建，无需安装依赖：
+在干净的环境中构建，无需安装依赖。AppImage 工具需要访问 `/dev/fuse`，因此需要以特权模式运行（或显式授权 FUSE）：
 
 ```bash
-docker run --rm -v $(pwd)/output:/app/output \
+docker run --rm --privileged \
+  --device /dev/fuse \
+  --security-opt apparmor=unconfined \
+  -v $(pwd)/output:/output \
   ghcr.io/tw93/pake:latest \
-  pake https://example.com --name MyApp --targets appimage
+  https://example.com --name MyApp --targets appimage
 ```
+
+> **提示：** 生成的 AppImage 可能属于 root，需要执行 `sudo chown $(id -nu):$(id -ng) ./output/MyApp.AppImage` 调整所有权。
 
 **原因：**
 
@@ -78,7 +83,7 @@ docker run --rm -v $(pwd)/output:/app/output \
 - 在较新的发行版上构建（Arch、Debian Trixie 等）
 - 缺少 WebKit2GTK 或 GTK 开发库
 
-`NO_STRIP=true` 环境变量是 Tauri 社区推荐的官方解决方法。
+`NO_STRIP=1` 环境变量是 Tauri 社区推荐的官方解决方法。
 
 ---
 

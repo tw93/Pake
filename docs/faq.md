@@ -16,12 +16,12 @@ Error: failed to run linuxdeploy
 Error: strip: Unable to recognise the format of the input file
 ```
 
-**Solution 1: Use NO_STRIP (Recommended)**
+**Solution 1: Automatic NO_STRIP Retry (Recommended)**
 
-Simply add `NO_STRIP=true` before your build command:
+Pake CLI now automatically retries AppImage builds with `NO_STRIP=1` when linuxdeploy fails to strip the binary. To skip the strip step from the very first attempt (or when scripting your own builds), set the variable manually:
 
 ```bash
-NO_STRIP=true pake https://example.com --name MyApp --targets appimage
+NO_STRIP=1 pake https://example.com --name MyApp --targets appimage
 ```
 
 This bypasses the library stripping process that often causes issues on certain Linux distributions.
@@ -50,7 +50,7 @@ sudo apt install -y \
   pkg-config
 ```
 
-Then try building again with `NO_STRIP=true`.
+Then try building again (you can still pre-set `NO_STRIP=1` if you prefer).
 
 **Solution 3: Use DEB Format Instead**
 
@@ -60,15 +60,20 @@ DEB packages are more stable on Debian-based systems:
 pake https://example.com --name MyApp --targets deb
 ```
 
-**Solution 4: Use Docker**
+**Solution 4: Use Docker (with FUSE access)**
 
-Build in a clean environment without installing dependencies:
+Build in a clean environment without installing dependencies. AppImage tooling needs access to `/dev/fuse`, so run the container in privileged mode (or grant FUSE explicitly):
 
 ```bash
-docker run --rm -v $(pwd)/output:/app/output \
+docker run --rm --privileged \
+  --device /dev/fuse \
+  --security-opt apparmor=unconfined \
+  -v $(pwd)/output:/output \
   ghcr.io/tw93/pake:latest \
-  pake https://example.com --name MyApp --targets appimage
+  https://example.com --name MyApp --targets appimage
 ```
+
+> **Tip:** The generated AppImage may be owned by root. Run `sudo chown $(id -nu):$(id -ng) ./output/MyApp.AppImage` afterwards.
 
 **Why This Happens:**
 
@@ -78,7 +83,7 @@ This is a known issue with Tauri's linuxdeploy tool, which can fail when:
 - Building on newer distributions (Arch, Debian Trixie, etc.)
 - Missing WebKit2GTK or GTK development libraries
 
-The `NO_STRIP=true` environment variable is the official workaround recommended by the Tauri community.
+The `NO_STRIP=1` environment variable is the official workaround recommended by the Tauri community.
 
 ---
 

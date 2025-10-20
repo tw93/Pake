@@ -31,11 +31,13 @@ export async function shellExec(
 
     // Provide helpful guidance for common Linux AppImage build failures
     // caused by strip tool incompatibility with modern glibc (2.38+)
+    const lowerError = errorMessage.toLowerCase();
+
     if (
       process.platform === 'linux' &&
-      (errorMessage.includes('linuxdeploy') ||
-        errorMessage.includes('appimage') ||
-        errorMessage.includes('strip'))
+      (lowerError.includes('linuxdeploy') ||
+        lowerError.includes('appimage') ||
+        lowerError.includes('strip'))
     ) {
       errorMsg +=
         '\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
@@ -50,6 +52,18 @@ export async function shellExec(
         '  • Update binutils: sudo apt install binutils (or pacman -S binutils)\n' +
         '  • Detailed guide: https://github.com/tw93/Pake/blob/main/docs/faq.md\n' +
         '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
+
+      if (
+        lowerError.includes('fuse') ||
+        lowerError.includes('operation not permitted') ||
+        lowerError.includes('/dev/fuse')
+      ) {
+        errorMsg +=
+          '\n\nDocker / Container hint:\n' +
+          '  AppImage tooling needs access to /dev/fuse. When running inside Docker, add:\n' +
+          '    --privileged --device /dev/fuse --security-opt apparmor=unconfined\n' +
+          '  or run on the host directly.';
+      }
     }
 
     throw new Error(errorMsg);
