@@ -162,10 +162,14 @@ export default abstract class BaseBuilder {
     // Show static message to keep the status visible
     logger.warn('✸ Building app...');
 
-    const buildEnv = {
-      ...this.getBuildEnvironment(),
-      ...(process.env.NO_STRIP && { NO_STRIP: process.env.NO_STRIP }),
+    const baseEnv = this.getBuildEnvironment();
+    let buildEnv: Record<string, string> = {
+      ...(baseEnv ?? {}),
+      ...(process.env.NO_STRIP ? { NO_STRIP: process.env.NO_STRIP } : {}),
     };
+
+    const resolveExecEnv = () =>
+      Object.keys(buildEnv).length > 0 ? buildEnv : undefined;
 
     // Warn users about potential AppImage build failures on modern Linux systems.
     // The linuxdeploy tool bundled in Tauri uses an older strip tool that doesn't
@@ -181,11 +185,31 @@ export default abstract class BaseBuilder {
       }
     }
 
-    await shellExec(
-      `cd "${npmDirectory}" && ${this.getBuildCommand(packageManager)}`,
-      this.getBuildTimeout(),
-      buildEnv,
-    );
+    const buildCommand = `cd "${npmDirectory}" && ${this.getBuildCommand(packageManager)}`;
+    const buildTimeout = this.getBuildTimeout();
+
+    try {
+      await shellExec(buildCommand, buildTimeout, resolveExecEnv());
+    } catch (error) {
+      const shouldRetryWithoutStrip =
+        process.platform === 'linux' &&
+        this.options.targets === 'appimage' &&
+        !buildEnv.NO_STRIP &&
+        this.isLinuxDeployStripError(error);
+
+      if (shouldRetryWithoutStrip) {
+        logger.warn(
+          '⚠ AppImage build failed during linuxdeploy strip step, retrying with NO_STRIP=1 automatically.',
+        );
+        buildEnv = {
+          ...buildEnv,
+          NO_STRIP: '1',
+        };
+        await shellExec(buildCommand, buildTimeout, resolveExecEnv());
+      } else {
+        throw error;
+      }
+    }
 
     // Copy app
     const fileName = this.getFileName();
@@ -215,6 +239,21 @@ export default abstract class BaseBuilder {
   }
 
   abstract getFileName(): string;
+
+  private isLinuxDeployStripError(error: unknown): boolean {
+    if (!(error instanceof Error) || !error.message) {
+      return false;
+    }
+    const message = error.message.toLowerCase();
+    return (
+      message.includes('linuxdeploy') ||
+      message.includes('failed to run linuxdeploy') ||
+      message.includes('strip:') ||
+      message.includes('unable to recognise the format of the input file') ||
+      message.includes('appimage tool failed') ||
+      message.includes('strip tool')
+    );
+  }
 
   // 架构映射配置
   protected static readonly ARCH_MAPPINGS: Record<
