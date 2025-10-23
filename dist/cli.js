@@ -23,7 +23,7 @@ import sharp from 'sharp';
 import * as psl from 'psl';
 
 var name = "pake-cli";
-var version = "3.4.2";
+var version = "3.4.3";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -73,8 +73,8 @@ var type = "module";
 var exports = "./dist/cli.js";
 var license = "MIT";
 var dependencies = {
-	"@tauri-apps/api": "^2.8.0",
-	"@tauri-apps/cli": "^2.8.4",
+	"@tauri-apps/api": "^2.9.0",
+	"@tauri-apps/cli": "^2.9.0",
 	axios: "^1.12.2",
 	chalk: "^5.6.2",
 	commander: "^12.1.0",
@@ -92,12 +92,12 @@ var dependencies = {
 };
 var devDependencies = {
 	"@rollup/plugin-alias": "^5.1.1",
-	"@rollup/plugin-commonjs": "^28.0.6",
+	"@rollup/plugin-commonjs": "^28.0.8",
 	"@rollup/plugin-json": "^6.1.0",
 	"@rollup/plugin-replace": "^6.0.2",
 	"@rollup/plugin-terser": "^0.4.4",
 	"@types/fs-extra": "^11.0.4",
-	"@types/node": "^20.19.21",
+	"@types/node": "^20.19.23",
 	"@types/page-icon": "^0.3.6",
 	"@types/prompts": "^2.4.9",
 	"@types/tmp": "^0.2.6",
@@ -105,7 +105,7 @@ var devDependencies = {
 	"app-root-path": "^3.1.0",
 	"cross-env": "^7.0.3",
 	prettier: "^3.6.2",
-	rollup: "^4.52.4",
+	rollup: "^4.52.5",
 	"rollup-plugin-typescript2": "^0.36.0",
 	tslib: "^2.8.1",
 	typescript: "^5.9.3"
