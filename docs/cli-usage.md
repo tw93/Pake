@@ -204,6 +204,14 @@ Sets whether to disable web shortcuts in the original Pake container, defaults t
 --disabled-web-shortcuts
 ```
 
+#### [force-internal-navigation]
+
+Keeps every clicked link (even pointing to other domains) inside the Pake window instead of letting the OS open an external browser or helper. Default is `false`.
+
+```shell
+--force-internal-navigation
+```
+
 #### [multi-arch]
 
 Package the application to support both Intel and M1 chips, exclusively for macOS. Default is `false`.

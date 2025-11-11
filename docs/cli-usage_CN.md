@@ -202,6 +202,14 @@ pake https://github.com --name GitHub
 --disabled-web-shortcuts
 ```
 
+#### [force-internal-navigation]
+
+启用后所有点击的链接（即使是跨域）都会在 Pake 窗口内打开，不会再调用外部浏览器或辅助程序。默认 `false`。
+
+```shell
+--force-internal-navigation
+```
+
 #### [multi-arch]
 
 设置打包结果同时支持 Intel 和 M1 芯片，仅适用于 macOS，默认为 `false`。

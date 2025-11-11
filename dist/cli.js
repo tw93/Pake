@@ -23,7 +23,7 @@ import sharp from 'sharp';
 import * as psl from 'psl';
 
 var name = "pake-cli";
-var version = "3.4.3";
+var version = "3.5.1";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -470,7 +470,7 @@ async function mergeConfig(url, options, tauriConf) {
             await fsExtra.copy(sourcePath, destPath);
         }
     }));
-    const { width, height, fullscreen, maximize, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, multiInstance, startToTray, } = options;
+    const { width, height, fullscreen, maximize, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, multiInstance, startToTray, forceInternalNavigation, } = options;
     const { platform } = process;
     const platformHideOnClose = hideOnClose ?? platform === 'darwin';
     const tauriConfWindowOptions = {
@@ -490,6 +490,7 @@ async function mergeConfig(url, options, tauriConf) {
         enable_wasm: wasm,
         enable_drag_drop: enableDragDrop,
         start_to_tray: startToTray && showSystemTray,
+        force_internal_navigation: forceInternalNavigation,
     };
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
     tauriConf.productName = name;
@@ -1331,6 +1332,7 @@ const DEFAULT_PAKE_OPTIONS = {
     keepBinary: false,
     multiInstance: false,
     startToTray: false,
+    forceInternalNavigation: false,
 };
 
 async function checkUpdateTips() {
@@ -1862,6 +1864,9 @@ program
     .addOption(new Option('--start-to-tray', 'Start app minimized to tray')
     .default(DEFAULT_PAKE_OPTIONS.startToTray)
     .hideHelp())
+    .addOption(new Option('--force-internal-navigation', 'Keep every link inside the Pake window instead of opening external handlers')
+    .default(DEFAULT_PAKE_OPTIONS.forceInternalNavigation)
+    .hideHelp())
     .addOption(new Option('--installer-language <string>', 'Installer language')
     .default(DEFAULT_PAKE_OPTIONS.installerLanguage)
     .hideHelp())
@@ -1888,6 +1893,7 @@ program
         return;
     }
     log.setDefaultLevel('info');
+    log.setLevel('info');
     if (options.debug) {
         log.setLevel('debug');
     }

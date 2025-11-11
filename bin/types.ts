@@ -96,6 +96,9 @@ export interface PakeCliOptions {
 
   // Start app minimized to tray, default false
   startToTray: boolean;
+
+  // Force navigation to stay inside the Pake window even for external links
+  forceInternalNavigation: boolean;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {

@@ -17,7 +17,8 @@
       "enable_wasm": false,
       "enable_drag_drop": false,
       "maximize": false,
-      "start_to_tray": false
+      "start_to_tray": false,
+      "force_internal_navigation": false
     }
   ],
   "user_agent": {

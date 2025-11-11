@@ -175,6 +175,14 @@ program
       .hideHelp(),
   )
   .addOption(
+    new Option(
+      '--force-internal-navigation',
+      'Keep every link inside the Pake window instead of opening external handlers',
+    )
+      .default(DEFAULT.forceInternalNavigation)
+      .hideHelp(),
+  )
+  .addOption(
     new Option('--installer-language <string>', 'Installer language')
       .default(DEFAULT.installerLanguage)
       .hideHelp(),
@@ -204,6 +212,7 @@ program
     }
 
     log.setDefaultLevel('info');
+    log.setLevel('info');
     if (options.debug) {
       log.setLevel('debug');
     }
