@@ -6,6 +6,7 @@ import linuxJson from "../src-tauri/tauri.linux.conf.json" with { type: "json" }
 
 import { writeFileSync, existsSync, copyFileSync } from "fs";
 import os from "os";
+import sharp from "sharp";
 
 /**
  * Configuration script for Tauri app generation
@@ -121,19 +122,39 @@ function updateBaseConfigs() {
   }
 }
 
-function ensureIconExists(iconPath, defaultPath, description = "icon") {
+async function ensureRgbaPng(iconPath) {
+  try {
+    const buffer = await sharp(iconPath)
+      .ensureAlpha()
+      .png({ force: true })
+      .toBuffer();
+    writeFileSync(iconPath, buffer);
+  } catch (error) {
+    console.warn(`Failed to normalize ${iconPath} to RGBA: ${error.message}`);
+  }
+}
+
+async function ensureIconExists(
+  iconPath,
+  defaultPath,
+  description = "icon",
+  ensureRgba = false,
+) {
   if (!existsSync(iconPath)) {
-    // For official release apps, icons should already exist
     if (process.env.PAKE_CREATE_APP === "1") {
       console.warn(
         `${description} for ${process.env.NAME} not found at ${iconPath}`,
       );
-      return; // Don't auto-generate for release builds
+      return;
     }
     console.warn(
       `${description} for ${process.env.NAME} not found, using default`,
     );
     copyFileSync(defaultPath, iconPath);
+  }
+
+  if (ensureRgba && existsSync(iconPath)) {
+    await ensureRgbaPng(iconPath);
   }
 }
 
@@ -150,8 +171,13 @@ function updatePlatformConfig(platformConfig, platformVars) {
 
 // Platform-specific handlers
 const platformHandlers = {
-  linux: (config) => {
-    ensureIconExists(config.iconPath, config.defaultIcon, "Linux icon");
+  linux: async (config) => {
+    await ensureIconExists(
+      config.iconPath,
+      config.defaultIcon,
+      "Linux icon",
+      true,
+    );
 
     // Update desktop entry
     linuxJson.bundle.linux.deb.files = {
@@ -162,14 +188,14 @@ const platformHandlers = {
     updatePlatformConfig(linuxJson, config);
   },
 
-  darwin: (config) => {
-    ensureIconExists(config.iconPath, config.defaultIcon, "macOS icon");
+  darwin: async (config) => {
+    await ensureIconExists(config.iconPath, config.defaultIcon, "macOS icon");
     updatePlatformConfig(macosJson, config);
   },
 
-  win32: (config) => {
-    ensureIconExists(config.iconPath, config.defaultIcon, "Windows icon");
-    ensureIconExists(
+  win32: async (config) => {
+    await ensureIconExists(config.iconPath, config.defaultIcon, "Windows icon");
+    await ensureIconExists(
       config.hdIconPath,
       config.hdDefaultIcon,
       "Windows HD icon",
@@ -196,7 +222,7 @@ function saveConfigurations() {
 }
 
 // Main execution
-function main() {
+async function main() {
   try {
     validateEnvironment();
     updateBaseConfigs();
@@ -210,7 +236,7 @@ function main() {
 
     const handler = platformHandlers[platform];
     if (handler) {
-      handler(platformConfig);
+      await handler(platformConfig);
     }
 
     saveConfigurations();

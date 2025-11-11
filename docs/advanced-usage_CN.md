@@ -38,6 +38,44 @@ document.addEventListener("keydown", (e) => {
 });
 ```
 
+## 内置功能
+
+### 下载错误通知
+
+Pake 自动提供用户友好的下载错误通知：
+
+**功能特性：**
+
+- **双语支持**：自动检测浏览器语言（中文/英文）
+- **系统通知**：在授予权限后使用原生操作系统通知
+- **优雅降级**：如果通知不可用则降级到控制台日志
+- **全面覆盖**：处理所有下载类型（HTTP、Data URI、Blob）
+
+**用户体验：**
+
+当下载失败时，用户将看到通知：
+
+- 英文："Download Error - Download failed: filename.pdf"
+- 中文："下载错误 - 下载失败: filename.pdf"
+
+**请求通知权限：**
+
+要启用通知，请在注入的 JavaScript 中添加：
+
+```javascript
+// 在应用启动时请求通知权限
+if (window.Notification && Notification.permission === "default") {
+  Notification.requestPermission();
+}
+```
+
+下载系统自动处理：
+
+- 常规 HTTP(S) 下载
+- Data URI 下载（base64 编码文件）
+- Blob URL 下载（动态生成的文件）
+- 右键菜单发起的下载
+
 ## 容器通信
 
 在网页内容和 Pake 容器之间发送消息。

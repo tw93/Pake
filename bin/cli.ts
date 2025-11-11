@@ -24,8 +24,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
 program
   .addHelpText('beforeAll', logo)
   .usage(`[url] [options]`)
-  .showHelpAfterError()
-  .helpOption(false);
+  .showHelpAfterError();
 
 program
   .argument('[url]', 'The web URL you want to package', validateUrlInput)
@@ -101,6 +100,11 @@ program
       .hideHelp(),
   )
   .addOption(
+    new Option('--maximize', 'Start window maximized')
+      .default(DEFAULT.maximize)
+      .hideHelp(),
+  )
+  .addOption(
     new Option('--dark-mode', 'Force Mac app to use dark mode')
       .default(DEFAULT.darkMode)
       .hideHelp(),
@@ -127,10 +131,16 @@ program
   )
   .addOption(
     new Option(
-      '--hide-on-close',
+      '--hide-on-close [boolean]',
       'Hide window on close instead of exiting (default: true for macOS, false for others)',
     )
       .default(DEFAULT.hideOnClose)
+      .argParser((value) => {
+        if (value === undefined) return true; // --hide-on-close without value
+        if (value === 'true') return true;
+        if (value === 'false') return false;
+        throw new Error('--hide-on-close must be true or false');
+      })
       .hideHelp(),
   )
   .addOption(new Option('--title <string>', 'Window title').hideHelp())
@@ -155,6 +165,24 @@ program
       .hideHelp(),
   )
   .addOption(
+    new Option('--multi-instance', 'Allow multiple app instances')
+      .default(DEFAULT.multiInstance)
+      .hideHelp(),
+  )
+  .addOption(
+    new Option('--start-to-tray', 'Start app minimized to tray')
+      .default(DEFAULT.startToTray)
+      .hideHelp(),
+  )
+  .addOption(
+    new Option(
+      '--force-internal-navigation',
+      'Keep every link inside the Pake window instead of opening external handlers',
+    )
+      .default(DEFAULT.forceInternalNavigation)
+      .hideHelp(),
+  )
+  .addOption(
     new Option('--installer-language <string>', 'Installer language')
       .default(DEFAULT.installerLanguage)
       .hideHelp(),
@@ -163,11 +191,13 @@ program
   .configureHelp({
     sortSubcommands: true,
     optionTerm: (option) => {
-      if (option.flags === '-v, --version') return '';
+      if (option.flags === '-v, --version' || option.flags === '-h, --help')
+        return '';
       return option.flags;
     },
     optionDescription: (option) => {
-      if (option.flags === '-v, --version') return '';
+      if (option.flags === '-v, --version' || option.flags === '-h, --help')
+        return '';
       return option.description;
     },
   })
@@ -182,6 +212,7 @@ program
     }
 
     log.setDefaultLevel('info');
+    log.setLevel('info');
     if (options.debug) {
       log.setLevel('debug');
     }

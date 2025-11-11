@@ -43,9 +43,13 @@ const API_KEYS = {
 /**
  * Generates platform-specific icon paths and handles copying for Windows
  */
+import { generateSafeFilename } from '@/utils/name';
+
 function generateIconPath(appName: string, isDefault = false): string {
-  const safeName = appName.toLowerCase().replace(/[^a-z0-9-_]/g, '_');
-  const baseName = isDefault ? 'icon' : safeName;
+  const safeName = isDefault
+    ? 'icon'
+    : generateSafeFilename(appName).toLowerCase();
+  const baseName = safeName;
 
   if (IS_WIN) {
     return path.join(npmDirectory, 'src-tauri', 'png', `${baseName}_256.ico`);
@@ -122,7 +126,7 @@ async function convertIconFormat(
     await fsExtra.ensureDir(platformOutputDir);
 
     const processedInputPath = await preprocessIcon(inputPath);
-    const iconName = appName.toLowerCase();
+    const iconName = generateSafeFilename(appName).toLowerCase();
 
     // Generate platform-specific format
     if (IS_WIN) {

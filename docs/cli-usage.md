@@ -155,6 +155,15 @@ screen.
 --fullscreen
 ```
 
+#### [maximize]
+
+Determine whether the application launches with a maximized window. Default is `false`. Use the following command to enable
+maximize.
+
+```shell
+--maximize
+```
+
 #### [activation-shortcut]
 
 Set the activation shortcut for the application. Default is empty, so it does not take effect. You can customize the activation shortcut with the following commands, e.g. `CmdOrControl+Shift+P`. Usage can refer to [available-modifiers](https://www.electronjs.org/docs/latest/api/accelerator#available-modifiers).
@@ -193,6 +202,14 @@ Sets whether to disable web shortcuts in the original Pake container, defaults t
 
 ```shell
 --disabled-web-shortcuts
+```
+
+#### [force-internal-navigation]
+
+Keeps every clicked link (even pointing to other domains) inside the Pake window instead of letting the OS open an external browser or helper. Default is `false`.
+
+```shell
+--force-internal-navigation
 ```
 
 #### [multi-arch]
@@ -280,8 +297,26 @@ Specify the system tray icon. This is only effective when the system tray is ena
 Hide window instead of closing the application when clicking close button. Platform-specific default: `true` for macOS, `false` for Windows/Linux.
 
 ```shell
+# Hide on close (default behavior on macOS)
 --hide-on-close
+--hide-on-close true
+
+# Close application immediately (default behavior on Windows/Linux)
+--hide-on-close false
 ```
+
+#### [start-to-tray]
+
+Start the application minimized to system tray instead of showing the window. Must be used with `--show-system-tray`. Default is `false`.
+
+```shell
+--start-to-tray
+
+# Example: Start hidden to tray (must use with --show-system-tray)
+pake https://github.com --name GitHub --show-system-tray --start-to-tray
+```
+
+**Note**: Double-click the tray icon to show/hide the window. If used without `--show-system-tray`, this option is ignored.
 
 #### [title]
 
@@ -339,6 +374,17 @@ pake https://github.com --name GitHub --keep-binary
 ```
 
 **Output**: Creates both installer and standalone executable (`AppName-binary` on Unix, `AppName.exe` on Windows).
+
+#### [multi-instance]
+
+Allow the packaged app to run more than one instance at the same time. Default is `false`, which means launching a second instance simply focuses the existing window. Enable this when you need to open several windows of the same app simultaneously.
+
+```shell
+--multi-instance
+
+# Example: Allow multiple chat windows
+pake https://chat.example.com --name ChatApp --multi-instance
+```
 
 #### [installer-language]
 
@@ -400,16 +446,19 @@ After completing the above steps, your application should be successfully packag
 ## Docker
 
 ```shell
-# On Linux, you can run the Pake CLI via Docker
-docker run -it --rm \ # Run interactively, remove container after exit
-    -v YOUR_DIR:/output \ # Files from container's /output will be in YOU_DIR
+# Run the Pake CLI via Docker (AppImage builds need FUSE access)
+docker run --rm --privileged \
+    --device /dev/fuse \
+    --security-opt apparmor=unconfined \
+    -v YOUR_DIR:/output \
     ghcr.io/tw93/pake \
     <arguments>
 
 # For example:
-docker run -it --rm \
+docker run --rm --privileged \
+    --device /dev/fuse \
+    --security-opt apparmor=unconfined \
     -v ./packages:/output \
     ghcr.io/tw93/pake \
-    https://example.com --name myapp --icon ./icon.png
-
+    https://example.com --name myapp --icon ./icon.png --targets appimage
 ```

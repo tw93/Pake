@@ -154,6 +154,14 @@ pake https://github.com --name GitHub
 --fullscreen
 ```
 
+#### [maximize]
+
+设置应用程序是否在启动时最大化窗口，默认为 `false`。使用以下命令可以设置应用程序启动时窗口最大化。
+
+```shell
+--maximize
+```
+
 #### [activation-shortcut]
 
 设置应用程序的激活快捷键。默认为空，不生效，可以使用以下命令自定义激活快捷键，例如 `CmdOrControl+Shift+P`，使用可参考 [available-modifiers](https://www.electronjs.org/docs/latest/api/accelerator#available-modifiers)。
@@ -192,6 +200,14 @@ pake https://github.com --name GitHub
 
 ```shell
 --disabled-web-shortcuts
+```
+
+#### [force-internal-navigation]
+
+启用后所有点击的链接（即使是跨域）都会在 Pake 窗口内打开，不会再调用外部浏览器或辅助程序。默认 `false`。
+
+```shell
+--force-internal-navigation
 ```
 
 #### [multi-arch]
@@ -279,8 +295,26 @@ pake https://github.com --name GitHub
 点击关闭按钮时隐藏窗口而不是退出应用程序。平台特定默认值：macOS 为 `true`，Windows/Linux 为 `false`。
 
 ```shell
+# 关闭时隐藏（macOS 默认行为）
 --hide-on-close
+--hide-on-close true
+
+# 立即关闭应用程序（Windows/Linux 默认行为）
+--hide-on-close false
 ```
+
+#### [start-to-tray]
+
+启动时将应用程序最小化到系统托盘而不是显示窗口。必须与 `--show-system-tray` 一起使用。默认为 `false`。
+
+```shell
+--start-to-tray
+
+# 示例：启动时隐藏到托盘（必须与 --show-system-tray 一起使用）
+pake https://github.com --name GitHub --show-system-tray --start-to-tray
+```
+
+**注意**：双击托盘图标可以显示/隐藏窗口。如果不与 `--show-system-tray` 一起使用，此选项将被忽略。
 
 #### [title]
 
@@ -338,6 +372,17 @@ pake https://github.com --name GitHub --keep-binary
 ```
 
 **输出结果**：同时创建安装包和独立可执行文件（Unix 系统为 `AppName-binary`，Windows 为 `AppName.exe`）。
+
+#### [multi-instance]
+
+允许打包后的应用同时运行多个实例。默认为 `false`，此时再次启动只会聚焦已有窗口。启用该选项后，可以同时打开同一个应用的多个窗口。
+
+```shell
+--multi-instance
+
+# 示例：允许聊天应用同时开多个窗口
+pake https://chat.example.com --name ChatApp --multi-instance
+```
 
 #### [installer-language]
 
@@ -399,16 +444,19 @@ pake ./my-app/index.html --name "my-app" --use-local-file
 ## Docker 使用
 
 ```shell
-# 在Linux上，您可以通过 Docker 运行 Pake CLI。
-docker run -it --rm \ # Run interactively, remove container after exit
-    -v YOUR_DIR:/output \ # Files from container's /output will be in YOU_DIR
+# 在 Linux 上通过 Docker 运行 Pake CLI（AppImage 构建需要 FUSE 权限）
+docker run --rm --privileged \
+    --device /dev/fuse \
+    --security-opt apparmor=unconfined \
+    -v YOUR_DIR:/output \
     ghcr.io/tw93/pake \
     <arguments>
 
-# For example:
-docker run -it --rm \
+# 例如：
+docker run --rm --privileged \
+    --device /dev/fuse \
+    --security-opt apparmor=unconfined \
     -v ./packages:/output \
     ghcr.io/tw93/pake \
-    https://example.com --name MyApp --icon ./icon.png
-
+    https://example.com --name MyApp --icon ./icon.png --targets appimage
 ```

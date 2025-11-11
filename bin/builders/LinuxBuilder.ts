@@ -78,6 +78,16 @@ export default class LinuxBuilder extends BaseBuilder {
       fullCommand += ` --features ${features.join(',')}`;
     }
 
+    // Enable verbose output for AppImage builds when debugging or PAKE_VERBOSE is set.
+    // AppImage builds often fail with minimal error messages from linuxdeploy,
+    // so verbose mode helps diagnose issues like strip failures and missing dependencies.
+    if (
+      this.options.targets === 'appimage' &&
+      (this.options.debug || process.env.PAKE_VERBOSE)
+    ) {
+      fullCommand += ' --verbose';
+    }
+
     return fullCommand;
   }
 
