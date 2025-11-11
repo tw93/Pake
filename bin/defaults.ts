@@ -30,6 +30,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   keepBinary: false,
   multiInstance: false,
   startToTray: false,
+  forceInternalNavigation: false,
 };
 
 // Just for cli development

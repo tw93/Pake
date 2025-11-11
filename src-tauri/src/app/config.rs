@@ -20,6 +20,8 @@ pub struct WindowConfig {
     pub enable_wasm: bool,
     pub enable_drag_drop: bool,
     pub start_to_tray: bool,
+    #[serde(default)]
+    pub force_internal_navigation: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

@@ -192,6 +192,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const tauri = window.__TAURI__;
   const appWindow = tauri.window.getCurrentWindow();
   const invoke = tauri.core.invoke;
+  const pakeConfig = window["pakeConfig"] || {};
+  const forceInternalNavigation = pakeConfig.force_internal_navigation === true;
 
   if (!document.getElementById("pake-top-dom")) {
     const topDom = document.createElement("div");
@@ -394,9 +396,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Handle _blank links: same domain navigates in-app, cross-domain opens new window
       if (target === "_blank") {
+        if (forceInternalNavigation) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          window.location.href = absoluteUrl;
+          return;
+        }
+
         if (isSameDomain(absoluteUrl)) {
-          // For same-domain links, let the browser/SPA handle it naturally
-          // This prevents full page reload in SPA apps like Discord
+          // For same-domain links, let the browser handle it naturally
           return;
         }
 
@@ -413,6 +421,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (target === "_new") {
+        if (forceInternalNavigation) {
+          return;
+        }
+
         e.preventDefault();
         handleExternalLink(absoluteUrl);
         return;
@@ -435,6 +447,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // Handle regular links: same domain allows normal navigation, cross-domain opens new window
       if (!target || target === "_self") {
         if (!isSameDomain(absoluteUrl)) {
+          if (forceInternalNavigation) {
+            return;
+          }
+
           e.preventDefault();
           e.stopImmediatePropagation();
           const newWindow = originalWindowOpen.call(
@@ -468,6 +484,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const absoluteUrl = hrefUrl.href;
 
       if (!isSameDomain(absoluteUrl)) {
+        if (forceInternalNavigation) {
+          return originalWindowOpen.call(window, absoluteUrl, name, specs);
+        }
+
         handleExternalLink(absoluteUrl);
         return null;
       }
