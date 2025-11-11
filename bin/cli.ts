@@ -212,6 +212,7 @@ program
     }
 
     log.setDefaultLevel('info');
+    log.setLevel('info');
     if (options.debug) {
       log.setLevel('debug');
     }
