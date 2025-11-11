@@ -319,9 +319,13 @@ document.addEventListener("DOMContentLoaded", () => {
           const url = anchorEle.href;
           const filename = anchorEle.download || getFilenameFromUrl(url);
           if (window.blobToUrlCaches.has(url)) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
             downloadFromBlobUrl(url, filename);
             // case: download from dataURL -> convert dataURL ->
           } else if (url.startsWith("data:")) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
             downloadFromDataUri(url, filename);
           }
         },
