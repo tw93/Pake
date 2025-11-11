@@ -422,6 +422,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (target === "_new") {
         if (forceInternalNavigation) {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          window.location.href = absoluteUrl;
           return;
         }
 
