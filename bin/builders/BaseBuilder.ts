@@ -144,8 +144,12 @@ export default abstract class BaseBuilder {
     } catch (error: any) {
       // If installation times out and we haven't tried the mirror yet, retry with mirror
       if (error.message?.includes('timed out') && !usedMirror) {
-        spinner.fail(chalk.yellow('Installation timed out, retrying with CN mirror...'));
-        logger.info('✺ Retrying installation with CN mirror for better speed...');
+        spinner.fail(
+          chalk.yellow('Installation timed out, retrying with CN mirror...'),
+        );
+        logger.info(
+          '✺ Retrying installation with CN mirror for better speed...',
+        );
 
         const retrySpinner = getSpinner('Retrying installation...');
         usedMirror = true;
@@ -158,7 +162,9 @@ export default abstract class BaseBuilder {
             timeout,
             buildEnv,
           );
-          retrySpinner.succeed(chalk.green('Package installed with CN mirror!'));
+          retrySpinner.succeed(
+            chalk.green('Package installed with CN mirror!'),
+          );
         } catch (retryError) {
           retrySpinner.fail(chalk.red('Installation failed'));
           throw retryError;
