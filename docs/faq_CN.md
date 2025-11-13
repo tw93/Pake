@@ -18,6 +18,7 @@ Error: Command timed out after 900000ms: "cd ... && pnpm install"
 **原因分析：**
 
 Windows 首次安装可能较慢，原因包括：
+
 - 本地模块编译（需要 Visual Studio Build Tools）
 - 大量依赖下载（Tauri、Rust 工具链）
 - Windows Defender 实时扫描
@@ -49,6 +50,7 @@ pake https://github.com --name GitHub
 - 必要时使用 VPN 或代理
 
 **预期时间：**
+
 - 首次安装：Windows 上需要 10-15 分钟
 - 后续构建：依赖已缓存，速度会快很多
 

@@ -18,6 +18,7 @@ Error: Command timed out after 900000ms: "cd ... && pnpm install"
 **Why This Happens:**
 
 First-time installation on Windows can be slow due to:
+
 - Native module compilation (requires Visual Studio Build Tools)
 - Large dependency downloads (Tauri, Rust toolchain)
 - Windows Defender real-time scanning
@@ -49,6 +50,7 @@ pake https://github.com --name GitHub
 - Use a VPN or proxy if needed
 
 **Expected Time:**
+
 - First installation: 10-15 minutes on Windows
 - Subsequent builds: Much faster (dependencies cached)
 
