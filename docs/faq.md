@@ -6,6 +6,54 @@ Common issues and solutions when using Pake.
 
 ## Build Issues
 
+### Windows: Installation Timeout During First Build
+
+**Problem:**
+When building for the first time on Windows, you may encounter:
+
+```txt
+Error: Command timed out after 900000ms: "cd ... && pnpm install"
+```
+
+**Why This Happens:**
+
+First-time installation on Windows can be slow due to:
+- Native module compilation (requires Visual Studio Build Tools)
+- Large dependency downloads (Tauri, Rust toolchain)
+- Windows Defender real-time scanning
+- Network connectivity issues
+
+**Solution 1: Automatic Retry (Built-in)**
+
+Pake CLI now automatically retries with CN mirror if the initial installation times out. Simply wait for the retry to complete.
+
+**Solution 2: Manual Installation**
+
+If automatic retry fails, manually install dependencies:
+
+```bash
+# Navigate to pake-cli installation directory
+cd %LOCALAPPDATA%\pnpm\global\5\.pnpm\pake-cli@VERSION\node_modules\pake-cli
+
+# Install with CN mirror
+pnpm install --registry=https://registry.npmmirror.com
+
+# Then retry your build
+pake https://github.com --name GitHub
+```
+
+**Solution 3: Improve Network Speed**
+
+- Use a stable network connection
+- Temporarily disable antivirus software during installation
+- Use a VPN or proxy if needed
+
+**Expected Time:**
+- First installation: 10-15 minutes on Windows
+- Subsequent builds: Much faster (dependencies cached)
+
+---
+
 ### Linux: AppImage Build Fails with "failed to run linuxdeploy"
 
 **Problem:**

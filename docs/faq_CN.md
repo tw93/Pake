@@ -6,6 +6,54 @@
 
 ## 构建问题
 
+### Windows：首次构建时安装超时
+
+**问题描述：**
+在 Windows 上首次构建时，可能遇到：
+
+```txt
+Error: Command timed out after 900000ms: "cd ... && pnpm install"
+```
+
+**原因分析：**
+
+Windows 首次安装可能较慢，原因包括：
+- 本地模块编译（需要 Visual Studio Build Tools）
+- 大量依赖下载（Tauri、Rust 工具链）
+- Windows Defender 实时扫描
+- 网络连接问题
+
+**解决方案 1：自动重试（内置）**
+
+Pake CLI 现在会在初次安装超时后自动使用国内镜像重试。只需等待重试完成即可。
+
+**解决方案 2：手动安装依赖**
+
+如果自动重试失败，可手动安装依赖：
+
+```bash
+# 进入 pake-cli 安装目录
+cd %LOCALAPPDATA%\pnpm\global\5\.pnpm\pake-cli@版本号\node_modules\pake-cli
+
+# 使用国内镜像安装
+pnpm install --registry=https://registry.npmmirror.com
+
+# 然后重新构建
+pake https://github.com --name GitHub
+```
+
+**解决方案 3：改善网络环境**
+
+- 使用稳定的网络连接
+- 安装过程中临时关闭杀毒软件
+- 必要时使用 VPN 或代理
+
+**预期时间：**
+- 首次安装：Windows 上需要 10-15 分钟
+- 后续构建：依赖已缓存，速度会快很多
+
+---
+
 ### Linux：AppImage 构建失败，提示 "failed to run linuxdeploy"
 
 **问题描述：**
