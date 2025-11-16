@@ -6,6 +6,56 @@
 
 ## 构建问题
 
+### Rust 版本错误："feature 'edition2024' is required"
+
+**问题描述：**
+在构建 Pake 或使用 CLI 时，遇到如下错误：
+
+```txt
+error: failed to parse manifest
+Caused by:
+  feature `edition2024` is required
+  this Cargo does not support nightly features, but if you switch to nightly channel you can add `cargo-features = ["edition2024"]`
+  to enable this feature
+```
+
+**原因分析：**
+
+Pake 的依赖项需要 Rust edition2024 支持，该特性仅在 Rust 1.85.0 或更高版本中可用。具体来说：
+
+- 依赖链包括：`tauri` → `image` → `moxcms` → `pxfm v0.1.25`（需要 edition2024）
+- Rust edition2024 在 Rust 1.85.0（2025 年 2 月发布）中成为稳定版
+- 如果您的 Rust 版本较旧（例如 2024 年 8 月的 1.82.0），就会看到此错误
+
+**解决方案：**
+
+将 Rust 工具链更新到 1.85.0 或更高版本：
+
+```bash
+# 更新到最新稳定版 Rust
+rustup update stable
+
+# 或者安装最新稳定版
+rustup install stable
+
+# 验证更新
+rustc --version
+# 应显示：rustc 1.85.0 或更高版本
+```
+
+更新后，重新执行构建命令。
+
+**对于开发环境设置：**
+
+如果您正在设置开发环境，请确保：
+
+- Rust ≥1.85.0（使用 `rustc --version` 检查）
+- Node.js ≥22.0.0（使用 `node --version` 检查）
+
+详见 [CONTRIBUTING.md](../CONTRIBUTING.md) 获取完整的前置条件。
+
+---
+
 ### Windows：首次构建时安装超时
 
 **问题描述：**
