@@ -543,7 +543,7 @@ Pake の開発はこれらのハッカーたちなしにはあり得ませんで
 
 ## サポート
 
-![](https://miaoyan.app/assets/sponsors.svg)
+<a href="https://miaoyan.app/cats.html?name=Pake"><img src="https://miaoyan.app/assets/sponsors.svg" width="1000px" /></a>
 
 1. 私には汤圆と可乐という 2 匹の猫がいます。Pake があなたの生活をより良くしてくれると思ったら、<a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">缶詰をあげてください 🥩</a>。
 2. Pake が気に入ったら、GitHub でスターをつけてください。また、友達に<a href="https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20Rust%E3%81%A7%E3%82%A6%E3%82%A7%E3%83%96%E3%83%9A%E3%83%BC%E3%82%B8%E3%82%92%E3%83%87%E3%82%B9%E3%82%AF%E3%83%88%E3%83%83%E3%83%97%E3%82%A2%E3%83%97%E3%83%AA%E3%81%AB%E5%A4%89%E6%8F%9B%E3%80%81Electron%E3%82%88%E3%82%8A20%E5%80%8D%E5%B0%8F%E3%81%95%E3%81%84%E3%80%81Mac%20Windows%20Linux%E5%AF%BE%E5%BF%9C">推薦</a>することを歓迎します。

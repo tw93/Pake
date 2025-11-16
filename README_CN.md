@@ -545,7 +545,7 @@ Pake 的发展离不开这些优秀的贡献者 ❤️
 
 ## 支持
 
-![](https://miaoyan.app/assets/sponsors.svg)
+<a href="https://miaoyan.app/cats.html?name=Pake"><img src="https://miaoyan.app/assets/sponsors.svg" width="1000px" /></a>
 
 1. 我有两只猫，一只叫汤圆，一只可乐，假如 Pake 让你生活更美好，可以给她们 <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">喂罐头 🥩</a>。
 2. 如果你喜欢 Pake，可以在 Github Star，更欢迎 [推荐](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20一键打包网页生成轻量桌面应用，比%20Electron%20小%2020%20倍，支持%20macOS%20Windows%20Linux) 给志同道合的朋友使用。
