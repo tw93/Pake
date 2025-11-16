@@ -195,8 +195,8 @@ Pake 的发展离不开这些优秀的贡献者 ❤️
 
 <!-- readme: contributors -start -->
 <table>
- <tbody>
-  <tr>
+	<tbody>
+		<tr>
             <td align="center">
                 <a href="https://github.com/tw93">
                     <img src="https://avatars.githubusercontent.com/u/8736212?v=4" width="90;" alt="tw93"/>
@@ -246,8 +246,8 @@ Pake 的发展离不开这些优秀的贡献者 ❤️
                     <sub><b>Bryan Lee</b></sub>
                 </a>
             </td>
-  </tr>
-  <tr>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/essesoul">
                     <img src="https://avatars.githubusercontent.com/u/58624474?v=4" width="90;" alt="essesoul"/>
@@ -297,8 +297,8 @@ Pake 的发展离不开这些优秀的贡献者 ❤️
                     <sub><b>Ikko Eltociear Ashimine</b></sub>
                 </a>
             </td>
-  </tr>
-  <tr>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/kittizz">
                     <img src="https://avatars.githubusercontent.com/u/62899732?v=4" width="90;" alt="kittizz"/>
@@ -348,8 +348,8 @@ Pake 的发展离不开这些优秀的贡献者 ❤️
                     <sub><b>Yue Yang</b></sub>
                 </a>
             </td>
-  </tr>
-  <tr>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/lkieryan">
                     <img src="https://avatars.githubusercontent.com/u/187804088?v=4" width="90;" alt="lkieryan"/>
@@ -399,8 +399,8 @@ Pake 的发展离不开这些优秀的贡献者 ❤️
                     <sub><b>Ayaka Neko</b></sub>
                 </a>
             </td>
-  </tr>
-  <tr>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/claude">
                     <img src="https://avatars.githubusercontent.com/u/81847?v=4" width="90;" alt="claude"/>
@@ -450,8 +450,8 @@ Pake 的发展离不开这些优秀的贡献者 ❤️
                     <sub><b>Johannlai</b></sub>
                 </a>
             </td>
-  </tr>
-  <tr>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/Jason6987">
                     <img src="https://avatars.githubusercontent.com/u/140222795?v=4" width="90;" alt="Jason6987"/>
@@ -501,8 +501,8 @@ Pake 的发展离不开这些优秀的贡献者 ❤️
                     <sub><b>Hyzhao</b></sub>
                 </a>
             </td>
-  </tr>
-  <tr>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/lakca">
                     <img src="https://avatars.githubusercontent.com/u/16255922?v=4" width="90;" alt="lakca"/>
@@ -538,8 +538,8 @@ Pake 的发展离不开这些优秀的贡献者 ❤️
                     <sub><b>贺天卓</b></sub>
                 </a>
             </td>
-  </tr>
- <tbody>
+		</tr>
+	<tbody>
 </table>
 <!-- readme: contributors -end -->
 
