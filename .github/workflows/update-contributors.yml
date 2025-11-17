@@ -24,7 +24,9 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           svgPath: CONTRIBUTORS.svg
-          userNameHeight: 19
+          svgWidth: 1000
+          avatarMargin: 10
+          userNameHeight: 18
           itemTemplate: |
             <g transform="translate({{ x }}, {{ y }})">
               <a xlink:href="{{{ url }}}" class="contributor-link" target="_blank" rel="nofollow sponsored" title="{{{ name }}}" id="{{{ name }}}">
