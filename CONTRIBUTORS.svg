@@ -1,0 +1,18 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="1.1"
+  width="740"
+  height="120"
+>
+  <style>
+    text {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size: 18px;
+      fill: #24292f;
+    }
+  </style>
+  <text x="50%" y="50%" text-anchor="middle" alignment-baseline="middle">
+    Contributors list will appear here after the GitHub Action runs.
+  </text>
+</svg>
