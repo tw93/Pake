@@ -193,8 +193,9 @@ pnpm run build
 
 Pake 的发展离不开这些优秀的贡献者 ❤️
 
-[![Contributors](./CONTRIBUTORS.svg)](https://github.com/tw93/Pake/graphs/contributors)
-
+<a href="https://github.com/tw93/Pake/graphs/contributors">
+  <img src="https://raw.githubusercontent.com/tw93/Pake/main/CONTRIBUTORS.svg?sanitize=true" alt="Contributors" width="1000" />
+</a>
 
 ## 支持
 
