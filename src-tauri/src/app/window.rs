@@ -65,8 +65,16 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         .incognito(window_config.incognito);
 
     if window_config.min_width > 0.0 || window_config.min_height > 0.0 {
-        let min_w = if window_config.min_width > 0.0 { window_config.min_width } else { window_config.width };
-        let min_h = if window_config.min_height > 0.0 { window_config.min_height } else { window_config.height };
+        let min_w = if window_config.min_width > 0.0 {
+            window_config.min_width
+        } else {
+            window_config.width
+        };
+        let min_h = if window_config.min_height > 0.0 {
+            window_config.min_height
+        } else {
+            window_config.height
+        };
         window_builder = window_builder.min_inner_size(min_w, min_h);
     }
 

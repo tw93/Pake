@@ -188,10 +188,7 @@ program
       .hideHelp(),
   )
   .addOption(
-    new Option(
-      '--zoom <number>',
-      'Initial page zoom level (50-200)',
-    )
+    new Option('--zoom <number>', 'Initial page zoom level (50-200)')
       .default(DEFAULT.zoom)
       .argParser((value) => {
         const zoom = parseInt(value);
@@ -203,19 +200,13 @@ program
       .hideHelp(),
   )
   .addOption(
-    new Option(
-      '--min-width <number>',
-      'Minimum window width',
-    )
+    new Option('--min-width <number>', 'Minimum window width')
       .default(DEFAULT.minWidth)
       .argParser(validateNumberInput)
       .hideHelp(),
   )
   .addOption(
-    new Option(
-      '--min-height <number>',
-      'Minimum window height',
-    )
+    new Option('--min-height <number>', 'Minimum window height')
       .default(DEFAULT.minHeight)
       .argParser(validateNumberInput)
       .hideHelp(),
