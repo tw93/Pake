@@ -74,6 +74,10 @@ export async function mergeConfig(
     multiInstance,
     startToTray,
     forceInternalNavigation,
+    zoom,
+    minWidth,
+    minHeight,
+    ignoreCertificateErrors,
   } = options;
 
   const { platform } = process;
@@ -98,6 +102,10 @@ export async function mergeConfig(
     enable_drag_drop: enableDragDrop,
     start_to_tray: startToTray && showSystemTray,
     force_internal_navigation: forceInternalNavigation,
+    zoom,
+    min_width: minWidth,
+    min_height: minHeight,
+    ignore_certificate_errors: ignoreCertificateErrors,
   };
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
 

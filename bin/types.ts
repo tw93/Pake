@@ -99,6 +99,18 @@ export interface PakeCliOptions {
 
   // Force navigation to stay inside the Pake window even for external links
   forceInternalNavigation: boolean;
+
+  // Initial page zoom level (50-200), default 100
+  zoom: number;
+
+  // Minimum window width, default 0 (no limit)
+  minWidth: number;
+
+  // Minimum window height, default 0 (no limit)
+  minHeight: number;
+
+  // Ignore certificate errors (for self-signed certs), default false
+  ignoreCertificateErrors: boolean;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {

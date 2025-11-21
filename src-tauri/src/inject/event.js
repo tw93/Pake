@@ -896,6 +896,8 @@ function setDefaultZoom() {
   const htmlZoom = window.localStorage.getItem("htmlZoom");
   if (htmlZoom) {
     setZoom(htmlZoom);
+  } else if (window.pakeConfig?.zoom && window.pakeConfig.zoom !== 100) {
+    setZoom(`${window.pakeConfig.zoom}%`);
   }
 }
 

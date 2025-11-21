@@ -187,6 +187,47 @@ program
       .default(DEFAULT.installerLanguage)
       .hideHelp(),
   )
+  .addOption(
+    new Option(
+      '--zoom <number>',
+      'Initial page zoom level (50-200)',
+    )
+      .default(DEFAULT.zoom)
+      .argParser((value) => {
+        const zoom = parseInt(value);
+        if (isNaN(zoom) || zoom < 50 || zoom > 200) {
+          throw new Error('--zoom must be a number between 50 and 200');
+        }
+        return zoom;
+      })
+      .hideHelp(),
+  )
+  .addOption(
+    new Option(
+      '--min-width <number>',
+      'Minimum window width',
+    )
+      .default(DEFAULT.minWidth)
+      .argParser(validateNumberInput)
+      .hideHelp(),
+  )
+  .addOption(
+    new Option(
+      '--min-height <number>',
+      'Minimum window height',
+    )
+      .default(DEFAULT.minHeight)
+      .argParser(validateNumberInput)
+      .hideHelp(),
+  )
+  .addOption(
+    new Option(
+      '--ignore-certificate-errors',
+      'Ignore certificate errors (for self-signed certificates)',
+    )
+      .default(DEFAULT.ignoreCertificateErrors)
+      .hideHelp(),
+  )
   .version(packageJson.version, '-v, --version')
   .configureHelp({
     sortSubcommands: true,

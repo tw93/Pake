@@ -22,6 +22,18 @@ pub struct WindowConfig {
     pub start_to_tray: bool,
     #[serde(default)]
     pub force_internal_navigation: bool,
+    #[serde(default = "default_zoom")]
+    pub zoom: u32,
+    #[serde(default)]
+    pub min_width: f64,
+    #[serde(default)]
+    pub min_height: f64,
+    #[serde(default)]
+    pub ignore_certificate_errors: bool,
+}
+
+fn default_zoom() -> u32 {
+    100
 }
 
 #[derive(Debug, Serialize, Deserialize)]

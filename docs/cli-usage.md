@@ -138,6 +138,32 @@ Set the width of the application window. Default is `1200px`.
 --width <number>
 ```
 
+#### [min-width]
+
+Set the minimum width that the window can be resized to. Keeps layouts usable when the window is dragged small.
+
+```shell
+--min-width <number>
+```
+
+#### [min-height]
+
+Set the minimum height that the window can be resized to. Prevents UI breakage caused by very short windows.
+
+```shell
+--min-height <number>
+```
+
+#### [zoom]
+
+Set initial page zoom level (50-200). Default is `100`. Users can still adjust with `Cmd/Ctrl +/-/0` shortcuts.
+
+```shell
+--zoom <number>
+--zoom 80   # 80%
+--zoom 120  # 120%
+```
+
 #### [hide-title-bar]
 
 Enable or disable immersive header. Default is `false`. Use the following command to enable this feature, macOS only.
@@ -437,6 +463,14 @@ Enable developer tools and detailed logging for debugging.
 
 ```shell
 --debug
+```
+
+#### [ignore-certificate-errors]
+
+Ignore TLS certificate validation errors when loading the target URL. Useful for intranet apps, dev servers, or self-signed certificates.
+
+```shell
+--ignore-certificate-errors
 ```
 
 ### Packaging Complete

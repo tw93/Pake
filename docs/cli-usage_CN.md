@@ -138,6 +138,32 @@ pake https://github.com --name GitHub
 --width <number>
 ```
 
+#### [min-width]
+
+设置窗口可以缩放到的最小宽度，防止窗口被拖得过小导致控件错位。
+
+```shell
+--min-width <number>
+```
+
+#### [min-height]
+
+设置窗口可以缩放到的最小高度，避免界面内容因高度过小而错乱。
+
+```shell
+--min-height <number>
+```
+
+#### [zoom]
+
+设置初始页面缩放级别（50-200），默认为 `100`。用户仍可通过快捷键（`Cmd/Ctrl +/-/0`）调整。
+
+```shell
+--zoom <number>
+--zoom 80   # 80%
+--zoom 120  # 120%
+```
+
 #### [hide-title-bar]
 
 设置是否启用沉浸式头部，默认为 `false`（不启用）。当前只对 macOS 上有效。
@@ -435,6 +461,14 @@ pake ./my-app/index.html --name "my-app" --use-local-file
 
 ```shell
 --debug
+```
+
+#### [ignore-certificate-errors]
+
+忽略目标 URL 的 TLS 证书校验错误，适用于内网应用、开发环境、自签名证书。
+
+```shell
+--ignore-certificate-errors
 ```
 
 ### 打包完成

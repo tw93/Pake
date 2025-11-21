@@ -31,6 +31,10 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   multiInstance: false,
   startToTray: false,
   forceInternalNavigation: false,
+  zoom: 100,
+  minWidth: 0,
+  minHeight: 0,
+  ignoreCertificateErrors: false,
 };
 
 // Just for cli development
