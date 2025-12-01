@@ -16,6 +16,11 @@ on:
           - "windows-latest"
           - "macos-latest"
           - "ubuntu-24.04"
+      system_tray:
+        description: "Enable system tray (minimize to tray), supported on Linux/Windows"
+        required: false
+        type: boolean
+        default: false
       url:
         description: "URL"
         required: true
@@ -129,6 +134,7 @@ jobs:
           PKG_CONFIG_PATH: /usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig
           PKG_CONFIG_ALLOW_SYSTEM_LIBS: 1
           PKG_CONFIG_ALLOW_SYSTEM_CFLAGS: 1
+          SYSTEM_TRAY: ${{ inputs.system_tray }} 
 
       - name: Upload archive
         uses: actions/upload-artifact@v4
