@@ -7,6 +7,7 @@ use std::sync::{
     Arc,
 };
 use tauri::{webview::PageLoadEvent, Manager, Url, WebviewWindow};
+use tauri_plugin_window_state::AppHandleExt;
 use tauri_plugin_window_state::Builder as WindowStatePlugin;
 use tauri_plugin_window_state::StateFlags;
 
@@ -384,6 +385,14 @@ pub fn run_app() {
                         let _ = window.hide();
                     });
                     api.prevent_close();
+                } else {
+                    // Save window state before exiting to preserve window position
+                    _window
+                        .app_handle()
+                        .save_window_state(StateFlags::all())
+                        .ok();
+                    // Exit app completely when hide_on_close is false
+                    std::process::exit(0);
                 }
                 // If hide_on_close is false, allow normal close behavior
                 // This lets tauri-plugin-window-state save the window position and size
