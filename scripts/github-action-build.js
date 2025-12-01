@@ -108,6 +108,17 @@ class PakeBuildManager {
       process.env.WIDTH,
     ];
 
+  // 新增：处理系统托盘参数
+    if (process.env.SYSTEM_TRAY === "true") {
+    // 仅在支持的平台添加（参考现有平台配置）
+      if (["linux", "win32"].includes(this.platform)) {
+        params.push("--show-system-tray");
+        console.log("ℹ️  Enabled system tray (minimize to tray)");
+      } else {
+        console.log("⚠️  System tray is not supported on macOS, ignoring option");
+      }
+    }
+
     // Platform-specific parameters
     if (
       this.config.supportsHideTitleBar &&
