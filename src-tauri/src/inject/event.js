@@ -508,7 +508,10 @@ document.addEventListener("DOMContentLoaded", () => {
       ];
 
       const isMatch = oauthPatterns.some(
-        (pattern) => pattern.test(hostname) || pattern.test(pathname) || pattern.test(fullUrl),
+        (pattern) =>
+          pattern.test(hostname) ||
+          pattern.test(pathname) ||
+          pattern.test(fullUrl),
       );
 
       if (isMatch) {
