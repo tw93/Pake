@@ -138,19 +138,19 @@
 
 <br/>
 
-| Mac                         | Windows/Linux                  | 功能               |
-| --------------------------- | ------------------------------ | ------------------ |
-| <kbd>⌘</kbd> + <kbd>[</kbd> | <kbd>Ctrl</kbd> + <kbd>←</kbd> | 返回上一个页面     |
-| <kbd>⌘</kbd> + <kbd>]</kbd> | <kbd>Ctrl</kbd> + <kbd>→</kbd> | 去下一个页面       |
-| <kbd>⌘</kbd> + <kbd>↑</kbd> | <kbd>Ctrl</kbd> + <kbd>↑</kbd> | 自动滚动到页面顶部 |
-| <kbd>⌘</kbd> + <kbd>↓</kbd> | <kbd>Ctrl</kbd> + <kbd>↓</kbd> | 自动滚动到页面底部 |
-| <kbd>⌘</kbd> + <kbd>r</kbd> | <kbd>Ctrl</kbd> + <kbd>r</kbd> | 刷新页面           |
-| <kbd>⌘</kbd> + <kbd>w</kbd> | <kbd>Ctrl</kbd> + <kbd>w</kbd> | 隐藏窗口，非退出   |
-| <kbd>⌘</kbd> + <kbd>-</kbd> | <kbd>Ctrl</kbd> + <kbd>-</kbd> | 缩小页面           |
-| <kbd>⌘</kbd> + <kbd>=</kbd> | <kbd>Ctrl</kbd> + <kbd>=</kbd> | 放大页面           |
-| <kbd>⌘</kbd> + <kbd>0</kbd> | <kbd>Ctrl</kbd> + <kbd>0</kbd> | 重置页面缩放       |
-| <kbd>⌘</kbd> + <kbd>L</kbd> | <kbd>Ctrl</kbd> + <kbd>L</kbd> | 复制当前页面网址   |
-| <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>H</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>H</kbd> | 回到首页           |
+| Mac                                        | Windows/Linux                                     | 功能                |
+| ------------------------------------------ | ------------------------------------------------- | ------------------- |
+| <kbd>⌘</kbd> + <kbd>[</kbd>                | <kbd>Ctrl</kbd> + <kbd>←</kbd>                    | 返回上一个页面      |
+| <kbd>⌘</kbd> + <kbd>]</kbd>                | <kbd>Ctrl</kbd> + <kbd>→</kbd>                    | 去下一个页面        |
+| <kbd>⌘</kbd> + <kbd>↑</kbd>                | <kbd>Ctrl</kbd> + <kbd>↑</kbd>                    | 自动滚动到页面顶部  |
+| <kbd>⌘</kbd> + <kbd>↓</kbd>                | <kbd>Ctrl</kbd> + <kbd>↓</kbd>                    | 自动滚动到页面底部  |
+| <kbd>⌘</kbd> + <kbd>r</kbd>                | <kbd>Ctrl</kbd> + <kbd>r</kbd>                    | 刷新页面            |
+| <kbd>⌘</kbd> + <kbd>w</kbd>                | <kbd>Ctrl</kbd> + <kbd>w</kbd>                    | 隐藏窗口，非退出    |
+| <kbd>⌘</kbd> + <kbd>-</kbd>                | <kbd>Ctrl</kbd> + <kbd>-</kbd>                    | 缩小页面            |
+| <kbd>⌘</kbd> + <kbd>=</kbd>                | <kbd>Ctrl</kbd> + <kbd>=</kbd>                    | 放大页面            |
+| <kbd>⌘</kbd> + <kbd>0</kbd>                | <kbd>Ctrl</kbd> + <kbd>0</kbd>                    | 重置页面缩放        |
+| <kbd>⌘</kbd> + <kbd>L</kbd>                | <kbd>Ctrl</kbd> + <kbd>L</kbd>                    | 复制当前页面网址    |
+| <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>H</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>H</kbd> | 回到首页            |
 | <kbd>⌘</kbd> + <kbd>⌥</kbd> + <kbd>I</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd> | 开启调试 (仅开发版) |
 | <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>⌫</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Del</kbd> | 清除缓存并重启 |
 

@@ -137,19 +137,19 @@
 
 <br/>
 
-| Mac                         | Windows/Linux                  | Function                      |
-| --------------------------- | ------------------------------ | ----------------------------- |
-| <kbd>⌘</kbd> + <kbd>[</kbd> | <kbd>Ctrl</kbd> + <kbd>←</kbd> | Return to the previous page   |
-| <kbd>⌘</kbd> + <kbd>]</kbd> | <kbd>Ctrl</kbd> + <kbd>→</kbd> | Go to the next page           |
-| <kbd>⌘</kbd> + <kbd>↑</kbd> | <kbd>Ctrl</kbd> + <kbd>↑</kbd> | Auto scroll to top of page    |
-| <kbd>⌘</kbd> + <kbd>↓</kbd> | <kbd>Ctrl</kbd> + <kbd>↓</kbd> | Auto scroll to bottom of page |
-| <kbd>⌘</kbd> + <kbd>r</kbd> | <kbd>Ctrl</kbd> + <kbd>r</kbd> | Refresh Page                  |
-| <kbd>⌘</kbd> + <kbd>w</kbd> | <kbd>Ctrl</kbd> + <kbd>w</kbd> | Hide window, not quit         |
-| <kbd>⌘</kbd> + <kbd>-</kbd> | <kbd>Ctrl</kbd> + <kbd>-</kbd> | Zoom out the page             |
-| <kbd>⌘</kbd> + <kbd>=</kbd> | <kbd>Ctrl</kbd> + <kbd>=</kbd> | Zoom in the Page              |
-| <kbd>⌘</kbd> + <kbd>0</kbd> | <kbd>Ctrl</kbd> + <kbd>0</kbd> | Reset the page zoom           |
-| <kbd>⌘</kbd> + <kbd>L</kbd> | <kbd>Ctrl</kbd> + <kbd>L</kbd> | Copy Current Page URL         |
-| <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>H</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>H</kbd> | Go to Home Page |
+| Mac                                        | Windows/Linux                                     | Function                            |
+| ------------------------------------------ | ------------------------------------------------- | ----------------------------------- |
+| <kbd>⌘</kbd> + <kbd>[</kbd>                | <kbd>Ctrl</kbd> + <kbd>←</kbd>                    | Return to the previous page         |
+| <kbd>⌘</kbd> + <kbd>]</kbd>                | <kbd>Ctrl</kbd> + <kbd>→</kbd>                    | Go to the next page                 |
+| <kbd>⌘</kbd> + <kbd>↑</kbd>                | <kbd>Ctrl</kbd> + <kbd>↑</kbd>                    | Auto scroll to top of page          |
+| <kbd>⌘</kbd> + <kbd>↓</kbd>                | <kbd>Ctrl</kbd> + <kbd>↓</kbd>                    | Auto scroll to bottom of page       |
+| <kbd>⌘</kbd> + <kbd>r</kbd>                | <kbd>Ctrl</kbd> + <kbd>r</kbd>                    | Refresh Page                        |
+| <kbd>⌘</kbd> + <kbd>w</kbd>                | <kbd>Ctrl</kbd> + <kbd>w</kbd>                    | Hide window, not quit               |
+| <kbd>⌘</kbd> + <kbd>-</kbd>                | <kbd>Ctrl</kbd> + <kbd>-</kbd>                    | Zoom out the page                   |
+| <kbd>⌘</kbd> + <kbd>=</kbd>                | <kbd>Ctrl</kbd> + <kbd>=</kbd>                    | Zoom in the Page                    |
+| <kbd>⌘</kbd> + <kbd>0</kbd>                | <kbd>Ctrl</kbd> + <kbd>0</kbd>                    | Reset the page zoom                 |
+| <kbd>⌘</kbd> + <kbd>L</kbd>                | <kbd>Ctrl</kbd> + <kbd>L</kbd>                    | Copy Current Page URL               |
+| <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>H</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>H</kbd> | Go to Home Page                     |
 | <kbd>⌘</kbd> + <kbd>⌥</kbd> + <kbd>I</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd> | Toggle Developer Tools (Debug Only) |
 | <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>⌫</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Del</kbd> | Clear Cache & Restart |
 
