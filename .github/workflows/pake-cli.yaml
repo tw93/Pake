@@ -16,6 +16,9 @@ on:
           - "windows-latest"
           - "macos-latest"
           - "ubuntu-24.04"
+      zoom:
+        description: "zoom"
+        required: true
       url:
         description: "URL"
         required: true
@@ -115,7 +118,7 @@ jobs:
       - name: Build with pake-cli
         timeout-minutes: 15
         run: |
-          node ./scripts/github-action-build.js
+          node ./scripts/github-action-build.js --zoom ${{ inputs.zoom }}
         env:
           URL: ${{ inputs.url }}
           NAME: ${{ inputs.name }}
