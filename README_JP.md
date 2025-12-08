@@ -136,18 +136,18 @@
 
 <br/>
 
-| Mac                         | Windows/Linux                  | 機能                           |
-| --------------------------- | ------------------------------ | ------------------------------ |
-| <kbd>⌘</kbd> + <kbd>[</kbd> | <kbd>Ctrl</kbd> + <kbd>←</kbd> | 前のページに戻る               |
-| <kbd>⌘</kbd> + <kbd>]</kbd> | <kbd>Ctrl</kbd> + <kbd>→</kbd> | 次のページに進む               |
-| <kbd>⌘</kbd> + <kbd>↑</kbd> | <kbd>Ctrl</kbd> + <kbd>↑</kbd> | ページのトップに自動スクロール |
-| <kbd>⌘</kbd> + <kbd>↓</kbd> | <kbd>Ctrl</kbd> + <kbd>↓</kbd> | ページの底に自動スクロール     |
-| <kbd>⌘</kbd> + <kbd>r</kbd> | <kbd>Ctrl</kbd> + <kbd>r</kbd> | ページをリフレッシュ           |
-| <kbd>⌘</kbd> + <kbd>w</kbd> | <kbd>Ctrl</kbd> + <kbd>w</kbd> | ウィンドウを隠す、終了しない   |
-| <kbd>⌘</kbd> + <kbd>-</kbd> | <kbd>Ctrl</kbd> + <kbd>-</kbd> | ページを縮小                   |
-| <kbd>⌘</kbd> + <kbd>=</kbd> | <kbd>Ctrl</kbd> + <kbd>=</kbd> | ページを拡大                   |
-| <kbd>⌘</kbd> + <kbd>0</kbd> | <kbd>Ctrl</kbd> + <kbd>0</kbd> | ページのズームをリセット       |
-| <kbd>⌘</kbd> + <kbd>L</kbd> | <kbd>Ctrl</kbd> + <kbd>L</kbd> | 現在のURLをコピー              |
+| Mac                                        | Windows/Linux                                     | 機能                           |
+| ------------------------------------------ | ------------------------------------------------- | ------------------------------ |
+| <kbd>⌘</kbd> + <kbd>[</kbd>                | <kbd>Ctrl</kbd> + <kbd>←</kbd>                    | 前のページに戻る               |
+| <kbd>⌘</kbd> + <kbd>]</kbd>                | <kbd>Ctrl</kbd> + <kbd>→</kbd>                    | 次のページに進む               |
+| <kbd>⌘</kbd> + <kbd>↑</kbd>                | <kbd>Ctrl</kbd> + <kbd>↑</kbd>                    | ページのトップに自動スクロール |
+| <kbd>⌘</kbd> + <kbd>↓</kbd>                | <kbd>Ctrl</kbd> + <kbd>↓</kbd>                    | ページの底に自動スクロール     |
+| <kbd>⌘</kbd> + <kbd>r</kbd>                | <kbd>Ctrl</kbd> + <kbd>r</kbd>                    | ページをリフレッシュ           |
+| <kbd>⌘</kbd> + <kbd>w</kbd>                | <kbd>Ctrl</kbd> + <kbd>w</kbd>                    | ウィンドウを隠す、終了しない   |
+| <kbd>⌘</kbd> + <kbd>-</kbd>                | <kbd>Ctrl</kbd> + <kbd>-</kbd>                    | ページを縮小                   |
+| <kbd>⌘</kbd> + <kbd>=</kbd>                | <kbd>Ctrl</kbd> + <kbd>=</kbd>                    | ページを拡大                   |
+| <kbd>⌘</kbd> + <kbd>0</kbd>                | <kbd>Ctrl</kbd> + <kbd>0</kbd>                    | ページのズームをリセット       |
+| <kbd>⌘</kbd> + <kbd>L</kbd>                | <kbd>Ctrl</kbd> + <kbd>L</kbd>                    | 現在のURLをコピー              |
 | <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>H</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>H</kbd> | ホームページに戻る             |
 | <kbd>⌘</kbd> + <kbd>⌥</kbd> + <kbd>I</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd> | 開発者ツール (デバッグのみ)    |
 
