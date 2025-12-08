@@ -193,5 +193,47 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         println!("Proxy configured: {}", config.proxy_url);
     }
 
+    // Allow navigation to OAuth/authentication domains
+    window_builder = window_builder.on_navigation(|url| {
+        let url_str = url.as_str();
+
+        // Always allow same-origin navigation
+        if url_str.starts_with("http://localhost") || url_str.starts_with("http://127.0.0.1") {
+            return true;
+        }
+
+        // Check for OAuth/authentication domains
+        let auth_patterns = [
+            "accounts.google.com",
+            "login.microsoftonline.com",
+            "github.com/login",
+            "appleid.apple.com",
+            "facebook.com",
+            "twitter.com",
+        ];
+
+        let auth_paths = ["/oauth/", "/auth/", "/authorize", "/login"];
+
+        // Allow if matches auth patterns
+        for pattern in &auth_patterns {
+            if url_str.contains(pattern) {
+                #[cfg(debug_assertions)]
+                println!("Allowing OAuth navigation to: {}", url_str);
+                return true;
+            }
+        }
+
+        for path in &auth_paths {
+            if url_str.contains(path) {
+                #[cfg(debug_assertions)]
+                println!("Allowing auth path navigation to: {}", url_str);
+                return true;
+            }
+        }
+
+        // Allow all other navigation by default
+        true
+    });
+
     window_builder.build().expect("Failed to build window")
 }

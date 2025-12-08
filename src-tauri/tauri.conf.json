@@ -10,7 +10,8 @@
       "id": "pake-tray"
     },
     "security": {
-      "headers": {}
+      "headers": {},
+      "csp": null
     }
   },
   "build": {
