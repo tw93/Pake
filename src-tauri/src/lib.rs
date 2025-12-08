@@ -104,7 +104,6 @@ pub fn run_app() {
                 Some("CmdOrCtrl+Shift+Backspace"),
             )?)?;
 
-
             // Edit Menu
             let edit_menu = Submenu::new(app, "Edit", true)?;
             edit_menu.append(&PredefinedMenuItem::undo(app, None)?)?;
