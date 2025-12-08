@@ -116,7 +116,7 @@ pub fn send_notification(app: AppHandle, params: NotificationParams) -> Result<(
 }
 
 #[command]
-pub fn update_theme_mode(app: AppHandle, mode: String) {
+pub async fn update_theme_mode(app: AppHandle, mode: String) {
     let window = app.get_webview_window("pake").unwrap();
     #[cfg(target_os = "macos")]
     {
@@ -126,5 +126,25 @@ pub fn update_theme_mode(app: AppHandle, mode: String) {
             Theme::Light
         };
         let _ = window.set_theme(Some(theme));
+    }
+}
+
+#[command]
+#[allow(unreachable_code)]
+pub fn clear_cache_and_restart(app: AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("pake") {
+        match window.clear_all_browsing_data() {
+            Ok(_) => {
+                // Clear all browsing data successfully
+                app.restart();
+                Ok(())
+            }
+            Err(e) => {
+                eprintln!("Failed to clear browsing data: {}", e);
+                Err(format!("Failed to clear browsing data: {}", e))
+            }
+        }
+    } else {
+        Err("Main window not found".to_string())
     }
 }

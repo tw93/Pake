@@ -152,6 +152,7 @@
 | <kbd>⌘</kbd> + <kbd>L</kbd> | <kbd>Ctrl</kbd> + <kbd>L</kbd> | 复制当前页面网址   |
 | <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>H</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>H</kbd> | 回到首页           |
 | <kbd>⌘</kbd> + <kbd>⌥</kbd> + <kbd>I</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd> | 开启调试 (仅开发版) |
+| <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>⌫</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Del</kbd> | 清除缓存并重启 |
 
 此外还支持双击头部全屏切换，拖拽头部移动窗口，Mac 用户支持手势返回和前进，新菜单也提供了导航、缩放和窗口控制等选项。
 

@@ -13,7 +13,10 @@ use tauri::menu::{AboutMetadata, Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri_plugin_opener::OpenerExt; // Add this
 
 use app::{
-    invoke::{download_file, download_file_by_binary, send_notification, update_theme_mode},
+    invoke::{
+        clear_cache_and_restart, download_file, download_file_by_binary, send_notification,
+        update_theme_mode,
+    },
     setup::{set_global_shortcut, set_system_tray},
     window::set_window,
 };
@@ -65,6 +68,7 @@ pub fn run_app() {
             download_file_by_binary,
             send_notification,
             update_theme_mode,
+            clear_cache_and_restart,
         ])
         .setup(move |app| {
             // --- Menu Construction Start ---
@@ -91,6 +95,15 @@ pub fn run_app() {
             // File Menu
             let file_menu = Submenu::new(app, "File", true)?;
             file_menu.append(&PredefinedMenuItem::close_window(app, None)?)?;
+            file_menu.append(&PredefinedMenuItem::separator(app)?)?;
+            file_menu.append(&MenuItem::with_id(
+                app,
+                "clear_cache_restart",
+                "Clear Cache & Restart",
+                true,
+                Some("CmdOrCtrl+Shift+Backspace"),
+            )?)?;
+
 
             // Edit Menu
             let edit_menu = Submenu::new(app, "Edit", true)?;
@@ -275,6 +288,13 @@ pub fn run_app() {
                         if let Some(window) = app_handle.get_webview_window("pake") {
                             let _ =
                                 window.eval("navigator.clipboard.writeText(window.location.href)");
+                        }
+                    }
+                    "clear_cache_restart" => {
+                        if let Some(window) = app_handle.get_webview_window("pake") {
+                            if let Ok(_) = window.clear_all_browsing_data() {
+                                app_handle.restart();
+                            }
                         }
                     }
                     "always_on_top" => {
