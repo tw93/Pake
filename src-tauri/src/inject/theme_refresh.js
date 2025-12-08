@@ -62,16 +62,25 @@ document.addEventListener("DOMContentLoaded", () => {
     // This is useful when the site relies purely on CSS media queries without classes.
     if (!detected) {
       const bodyBg = window.getComputedStyle(document.body).backgroundColor;
-      const htmlBg = window.getComputedStyle(document.documentElement).backgroundColor;
-      
+      const htmlBg = window.getComputedStyle(
+        document.documentElement,
+      ).backgroundColor;
+
       // Check body first, then html
       if (bodyBg && bodyBg !== "rgba(0, 0, 0, 0)" && bodyBg !== "transparent") {
         mode = isDarkColor(bodyBg) ? "dark" : "light";
-      } else if (htmlBg && htmlBg !== "rgba(0, 0, 0, 0)" && htmlBg !== "transparent") {
+      } else if (
+        htmlBg &&
+        htmlBg !== "rgba(0, 0, 0, 0)" &&
+        htmlBg !== "transparent"
+      ) {
         mode = isDarkColor(htmlBg) ? "dark" : "light";
       } else {
         // Strategy 3: System Preference (Last Resort)
-        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        if (
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
           mode = "dark";
         }
       }
@@ -91,7 +100,9 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(updateTheme, 100);
 
   // Watch for system theme changes
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", updateTheme);
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addEventListener("change", updateTheme);
 
   // Watch for DOM changes
   // We observe attributes for class changes, and also style changes just in case
@@ -102,12 +113,12 @@ document.addEventListener("DOMContentLoaded", () => {
   observer.observe(document.documentElement, {
     attributes: true,
     attributeFilter: ["class", "data-theme", "style"],
-    subtree: false 
+    subtree: false,
   });
-  
-  observer.observe(document.body, { 
-    attributes: true, 
+
+  observer.observe(document.body, {
+    attributes: true,
     attributeFilter: ["class", "data-theme", "style"],
-    subtree: false
+    subtree: false,
   });
 });
