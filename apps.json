@@ -1,0 +1,34 @@
+{
+  "apps": [
+    {
+      "name": "Google Translate",
+      "url": "https://translate.google.com/?sl=no&tl=vi",
+      "icon": "https://www.gstatic.com/translate/favicon.ico"
+    },
+    {
+      "name": "Gmail",
+      "url": "https://mail.google.com/mail/",
+      "icon": "https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico"
+    },
+    {
+      "name": "Outlook",
+      "url": "https://outlook.office.com/mail/",
+      "icon": "https://res.public.onecdn.static.microsoft/owamail/20250918044.09/resources/images/favicons/mail-seen.ico"
+    },
+    {
+      "name": "Perplexity",
+      "url": "https://www.perplexity.ai/"
+    },
+    {
+      "name": "OneNote",
+      "url": "https://onenote.cloud.microsoft/",
+      "icon": "https://res.cdn.office.net/files/fabric-cdn-prod_20251010.003/assets/brand-icons/product/favicon/onenote.ico"
+    },
+    {
+      "name": "Youtube",
+      "url": "https://www.youtube.com/",
+      "icon": "https://www.youtube.com/s/desktop/d2ab3412/img/favicon.ico",
+      "js_script_url": "https://update.greasyfork.org/scripts/459541/YouTube%E5%8E%BB%E5%B9%BF%E5%91%8A.user.js"
+    }
+  ]
+}

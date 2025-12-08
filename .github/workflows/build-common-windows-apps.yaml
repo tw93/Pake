@@ -1,0 +1,202 @@
+name: Build Common Windows Apps
+
+env:
+  NODE_VERSION: "22.11.0"
+  PNPM_VERSION: "9.14.4"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Apps (Windows x64)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable-x86_64-msvc
+
+      - name: Setup Node.js Environment
+        uses: ./.github/actions/setup-env
+        with:
+          mode: node
+
+      - name: Get Pake version
+        id: pake_version
+        shell: bash
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Pake version: $VERSION"
+
+      - name: Get release counter for app version
+        id: build_counter
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pakeVersion = '${{ steps.pake_version.outputs.version }}';
+            const releasePrefix = `apps-${pakeVersion}-`;
+
+            try {
+              // Get all releases
+              const { data: releases } = await github.rest.repos.listReleases({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 100
+              });
+
+              // Count releases for this version prefix
+              const matchingReleases = releases.filter(r => r.tag_name && r.tag_name.startsWith(releasePrefix));
+              const counter = matchingReleases.length + 1;
+              console.log(`Release counter for ${pakeVersion}: ${counter}`);
+              return counter;
+            } catch (error) {
+              console.log('Error managing counter, using 1:', error.message);
+              return 1;
+            }
+
+      - name: Rust cache restore
+        uses: actions/cache/restore@v4.2.0
+        id: rust_cache
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            src-tauri/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build pake-cli
+        shell: bash
+        run: |
+          echo "Building pake-cli..."
+          pnpm run cli:build
+
+          # Verify build output
+          if [ ! -f "dist/cli.js" ]; then
+            echo "Error: Failed to build pake-cli"
+            exit 1
+          fi
+
+          echo "pake-cli built successfully"
+
+      - name: Build all apps with pake-cli
+        timeout-minutes: 60
+        shell: pwsh
+        run: |
+          Write-Host "Building all apps from apps.json"
+          $baseVersion = "${{ steps.pake_version.outputs.version }}"
+          $buildCounter = "${{ steps.build_counter.outputs.result }}"
+          # Convert X.X.X to X.XX format (e.g., 3.5.2 -> 3.52)
+          $parts = $baseVersion.Split('.')
+          $majorMinor = "$($parts[0]).$($parts[1])$($parts[2])"
+          $semverVersion = "${majorMinor}.${buildCounter}"
+          Write-Host "Version: $semverVersion"
+
+          # Read apps.json
+          $appsData = Get-Content -Path 'apps.json' -Raw | ConvertFrom-Json
+          $apps = $appsData.apps
+          if (-not $apps) {
+            Write-Error 'No apps found in apps.json'
+            exit 1
+          }
+
+          New-Item -Path 'output' -ItemType Directory -Force | Out-Null
+
+          foreach ($app in $apps) {
+            $name = $app.name
+            $url = $app.url
+            $icon = $app.icon
+            $width = if ($app.width) { $app.width } else { 1200 }
+            $height = if ($app.height) { $app.height } else { 780 }
+            $fullscreen = if ($app.fullscreen) { $app.fullscreen } else { $false }
+            $openLastUrl = if ($app.open_last_url) { $app.open_last_url } else { $false }
+            $alwaysOnTop = if ($app.always_on_top) { $app.always_on_top } else { $false }
+            $userAgent = $app.user_agent
+            $disabled = if ($app.disabled) { $app.disabled } else { $false }
+            $jsScriptUrl = $app.js_script_url
+
+            if ($disabled -eq $true) {
+              Write-Host "Skipping $name (disabled)"
+              continue
+            }
+
+            Write-Host "Building $name..."
+            $args = @('dist/cli.js', $url, '--name', $name, '--width', $width, '--height', $height, '--app-version', $semverVersion, '--enable-drag-drop', '--keep-binary')
+            if ($fullscreen -eq $true) { $args += '--fullscreen' }
+            if ($openLastUrl -eq $true) { $args += '--open-last-url' }
+            if ($alwaysOnTop -eq $true) { $args += '--always-on-top' }
+            if ($userAgent) { $args += @('--user-agent', $userAgent) }
+            if ($icon) { $args += @('--icon', $icon) }
+            if ($jsScriptUrl) {
+              $injectDir = Join-Path $PWD 'temp-inject'
+              New-Item -Path $injectDir -ItemType Directory -Force | Out-Null
+              # Use a static safe filename to avoid name-derived surprises
+              $injectPath = Join-Path $injectDir 'script.user.js'
+              Write-Host "Downloading js_script_url for $name from $jsScriptUrl"
+              Invoke-WebRequest -Uri $jsScriptUrl -OutFile $injectPath -UseBasicParsing
+              $args += @('--inject', $injectPath)
+            }
+
+            Write-Host 'Running: node ' + ($args -join ' ')
+            & node @args
+
+            # find newest exe
+            $exe = Get-ChildItem -Path '.' -Filter '*.exe' -File | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+            if (-not $exe) { Write-Error "No .exe produced for $name"; exit 1 }
+            $destName = "$name.exe"
+            Copy-Item -Path $exe.FullName -Destination "output\\$destName" -Force
+            Write-Host "Copied $($exe.Name) -> output\\$destName"
+            Remove-Item -Path $exe.FullName -Force
+            $msi = Get-ChildItem -Path '.' -Filter '*.msi' -ErrorAction SilentlyContinue
+            if ($msi) { Remove-Item -Path $msi.FullName -Force }
+          }
+
+      - name: List output artifacts
+        shell: pwsh
+        run: |
+          Write-Host "Output files:"
+          if (Test-Path output) {
+            Get-ChildItem -Path output -File | ForEach-Object { Write-Host $_.FullName }
+          } else {
+            Write-Error "No output directory found"
+            exit 1
+          }
+
+      - name: Rust cache store
+        uses: actions/cache/save@v4.2.0
+        if: steps.rust_cache.outputs.cache-hit != 'true'
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            src-tauri/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: apps-${{ steps.pake_version.outputs.version }}-${{ steps.build_counter.outputs.result }}
+          name: Apps ${{ steps.pake_version.outputs.version }}-${{ steps.build_counter.outputs.result }}
+          body: |
+            **Apps Release**
+            **Pake Version:** ${{ steps.pake_version.outputs.version }}
+            **Build:** ${{ steps.build_counter.outputs.result }}
+            **Platform:** Windows x64
+
+            This release contains the packaged applications defined in `apps.yml`.
+
+            Built with Pake ${{ steps.pake_version.outputs.version }}
+          files: output/*.exe
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
