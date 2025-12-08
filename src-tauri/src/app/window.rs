@@ -88,6 +88,8 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         .initialization_script(include_str!("../inject/component.js"))
         .initialization_script(include_str!("../inject/event.js"))
         .initialization_script(include_str!("../inject/style.js"))
+        .initialization_script(include_str!("../inject/theme_refresh.js"))
+        .initialization_script(include_str!("../inject/auth.js"))
         .initialization_script(include_str!("../inject/custom.js"));
 
     #[cfg(target_os = "windows")]

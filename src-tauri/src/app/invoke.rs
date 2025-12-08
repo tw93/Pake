@@ -6,6 +6,9 @@ use tauri::http::Method;
 use tauri::{command, AppHandle, Manager, Url, WebviewWindow};
 use tauri_plugin_http::reqwest::{ClientBuilder, Request};
 
+#[cfg(target_os = "macos")]
+use tauri::Theme;
+
 #[derive(serde::Deserialize)]
 pub struct DownloadFileParams {
     url: String,
@@ -110,4 +113,18 @@ pub fn send_notification(app: AppHandle, params: NotificationParams) -> Result<(
         .show()
         .unwrap();
     Ok(())
+}
+
+#[command]
+pub fn update_theme_mode(app: AppHandle, mode: String) {
+    let window = app.get_webview_window("pake").unwrap();
+    #[cfg(target_os = "macos")]
+    {
+        let theme = if mode == "dark" {
+            Theme::Dark
+        } else {
+            Theme::Light
+        };
+        let _ = window.set_theme(Some(theme));
+    }
 }
