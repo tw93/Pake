@@ -2588,7 +2588,7 @@ dependencies = [
 
 [[package]]
 name = "pake"
-version = "3.1.2"
+version = "3.5.4"
 dependencies = [
  "serde",
  "serde_json",
@@ -2598,6 +2598,7 @@ dependencies = [
  "tauri-plugin-http",
  "tauri-plugin-notification",
  "tauri-plugin-oauth",
+ "tauri-plugin-opener",
  "tauri-plugin-shell",
  "tauri-plugin-single-instance",
  "tauri-plugin-window-state",
@@ -4022,9 +4023,9 @@ checksum = "61c41af27dd6d1e27b1b16b489db798443478cef1f06a660c96db617ba5de3b1"
 
 [[package]]
 name = "tauri"
-version = "2.9.0"
+version = "2.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f07c6590706b2fc0ab287b041cf5ce9c435b3850bdae5571e19d9d27584e89d"
+checksum = "15524fc7959bfcaa051ba6d0b3fb1ef18e978de2176c7c6acb977f7fd14d35c7"
 dependencies = [
  "anyhow",
  "bytes",
@@ -4066,7 +4067,6 @@ dependencies = [
  "tokio",
  "tray-icon",
  "url",
- "urlpattern",
  "webkit2gtk",
  "webview2-com",
  "window-vibrancy",
@@ -4075,9 +4075,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-build"
-version = "2.5.0"
+version = "2.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f71be1f494b683ac439e6d61c16ab5c472c6f9c6ee78995b29556d9067c021a1"
+checksum = "17fcb8819fd16463512a12f531d44826ce566f486d7ccd211c9c8cebdaec4e08"
 dependencies = [
  "anyhow",
  "cargo_toml",
@@ -4097,9 +4097,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-codegen"
-version = "2.5.0"
+version = "2.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c1fe64c74cc40f90848281a90058a6db931eb400b60205840e09801ee30f190"
+checksum = "9fa9844cefcf99554a16e0a278156ae73b0d8680bbc0e2ad1e4287aadd8489cf"
 dependencies = [
  "base64 0.22.1",
  "brotli",
@@ -4124,9 +4124,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-macros"
-version = "2.5.0"
+version = "2.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "260c5d2eb036b76206b9fca20b7be3614cfd21046c5396f7959e0e64a4b07f2f"
+checksum = "3764a12f886d8245e66b7ee9b43ccc47883399be2019a61d80cf0f4117446fde"
 dependencies = [
  "heck 0.5.0",
  "proc-macro2",
@@ -4155,9 +4155,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-fs"
-version = "2.4.2"
+version = "2.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "315784ec4be45e90a987687bae7235e6be3d6e9e350d2b75c16b8a4bf22c1db7"
+checksum = "47df422695255ecbe7bac7012440eddaeefd026656171eac9559f5243d3230d9"
 dependencies = [
  "anyhow",
  "dunce",
@@ -4177,9 +4177,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-global-shortcut"
-version = "2.3.0"
+version = "2.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6df9f0f7bf2fe768b85fee4951c2505a35b72c44df1f6403e74e110bc13c5f58"
+checksum = "424af23c7e88d05e4a1a6fc2c7be077912f8c76bd7900fd50aa2b7cbf5a2c405"
 dependencies = [
  "global-hotkey",
  "log",
@@ -4192,9 +4192,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-http"
-version = "2.5.2"
+version = "2.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "938a3d7051c9a82b431e3a0f3468f85715b3442b3c3a3913095e9fa509e2652c"
+checksum = "c00685aceab12643cf024f712ab0448ba8fcadf86f2391d49d2e5aa732aacc70"
 dependencies = [
  "bytes",
  "cookie_store",
@@ -4216,9 +4216,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-notification"
-version = "2.3.1"
+version = "2.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d2fbc86b929b5376ab84b25c060f966d146b2fbd59b6af8264027b343c82c219"
+checksum = "01fc2c5ff41105bd1f7242d8201fdf3efd70749b82fa013a17f2126357d194cc"
 dependencies = [
  "log",
  "notify-rust",
@@ -4249,10 +4249,32 @@ dependencies = [
 ]
 
 [[package]]
-name = "tauri-plugin-shell"
-version = "2.3.1"
+name = "tauri-plugin-opener"
+version = "2.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "54777d0c0d8add34eea3ced84378619ef5b97996bd967d3038c668feefd21071"
+checksum = "c26b72571d25dee25667940027114e60f569fc3974f8cefbe50c2cbc5fd65e3b"
+dependencies = [
+ "dunce",
+ "glob",
+ "objc2-app-kit",
+ "objc2-foundation 0.3.2",
+ "open",
+ "schemars 0.8.22",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-plugin",
+ "thiserror 2.0.17",
+ "url",
+ "windows",
+ "zbus",
+]
+
+[[package]]
+name = "tauri-plugin-shell"
+version = "2.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c374b6db45f2a8a304f0273a15080d98c70cde86178855fc24653ba657a1144c"
 dependencies = [
  "encoding_rs",
  "log",
@@ -4271,9 +4293,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-single-instance"
-version = "2.3.4"
+version = "2.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb9cac815bf11c4a80fb498666bcdad66d65b89e3ae24669e47806febb76389c"
+checksum = "dd707f8c86b4e3004e2c141fa24351f1909ba40ce1b8437e30d5ed5277dd3710"
 dependencies = [
  "serde",
  "serde_json",
@@ -4286,9 +4308,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-window-state"
-version = "2.4.0"
+version = "2.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d5f6fe3291bfa609c7e0b0ee3bedac294d94c7018934086ce782c1d0f2a468e"
+checksum = "73736611e14142408d15353e21e3cca2f12a3cfb523ad0ce85999b6d2ef1a704"
 dependencies = [
  "bitflags 2.10.0",
  "log",
@@ -4301,9 +4323,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-runtime"
-version = "2.9.0"
+version = "2.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3367f0b47df90e9195cd9f04a56b0055a2cba45aa11923c6c253d748778176fc"
+checksum = "87f766fe9f3d1efc4b59b17e7a891ad5ed195fa8d23582abb02e6c9a01137892"
 dependencies = [
  "cookie",
  "dpi",
@@ -4326,9 +4348,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-runtime-wry"
-version = "2.9.0"
+version = "2.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80d91d29ca680c545364cf75ba2f2e3c7ea2ab6376bfa3be26b56fa2463a5b5e"
+checksum = "7950f3bde6bcca6655bc5e76d3d6ec587ceb81032851ab4ddbe1f508bdea2729"
 dependencies = [
  "gtk",
  "http",
@@ -4353,9 +4375,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-utils"
-version = "2.8.0"
+version = "2.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6b8bbe426abdbf52d050e52ed693130dbd68375b9ad82a3fb17efb4c8d85673"
+checksum = "76a423c51176eb3616ee9b516a9fa67fed5f0e78baaba680e44eb5dd2cc37490"
 dependencies = [
  "anyhow",
  "brotli",

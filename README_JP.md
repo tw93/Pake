@@ -145,11 +145,13 @@
 | <kbd>⌘</kbd> + <kbd>r</kbd> | <kbd>Ctrl</kbd> + <kbd>r</kbd> | ページをリフレッシュ           |
 | <kbd>⌘</kbd> + <kbd>w</kbd> | <kbd>Ctrl</kbd> + <kbd>w</kbd> | ウィンドウを隠す、終了しない   |
 | <kbd>⌘</kbd> + <kbd>-</kbd> | <kbd>Ctrl</kbd> + <kbd>-</kbd> | ページを縮小                   |
-| <kbd>⌘</kbd> + <kbd>+</kbd> | <kbd>Ctrl</kbd> + <kbd>+</kbd> | ページを拡大                   |
 | <kbd>⌘</kbd> + <kbd>=</kbd> | <kbd>Ctrl</kbd> + <kbd>=</kbd> | ページを拡大                   |
 | <kbd>⌘</kbd> + <kbd>0</kbd> | <kbd>Ctrl</kbd> + <kbd>0</kbd> | ページのズームをリセット       |
+| <kbd>⌘</kbd> + <kbd>L</kbd> | <kbd>Ctrl</kbd> + <kbd>L</kbd> | 現在のURLをコピー              |
+| <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>H</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>H</kbd> | ホームページに戻る             |
+| <kbd>⌘</kbd> + <kbd>⌥</kbd> + <kbd>I</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd> | 開発者ツール (デバッグのみ)    |
 
-さらに、タイトルバーをダブルクリックして全画面モードに切り替えることができます。Mac ユーザーは、ジェスチャーを使用して前のページまたは次のページに移動することもできます。ウィンドウを移動するには、タイトルバーをドラッグします。
+さらに、タイトルバーをダブルクリックして全画面モードに切り替えることができます。Mac ユーザーは、ジェスチャーを使用して前のページまたは次のページに移動することもできます。新しいメニューには、ナビゲーション、ズーム、ウィンドウ制御などのオプションも用意されています。
 
 </details>
 

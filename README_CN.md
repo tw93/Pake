@@ -147,11 +147,13 @@
 | <kbd>⌘</kbd> + <kbd>r</kbd> | <kbd>Ctrl</kbd> + <kbd>r</kbd> | 刷新页面           |
 | <kbd>⌘</kbd> + <kbd>w</kbd> | <kbd>Ctrl</kbd> + <kbd>w</kbd> | 隐藏窗口，非退出   |
 | <kbd>⌘</kbd> + <kbd>-</kbd> | <kbd>Ctrl</kbd> + <kbd>-</kbd> | 缩小页面           |
-| <kbd>⌘</kbd> + <kbd>+</kbd> | <kbd>Ctrl</kbd> + <kbd>+</kbd> | 放大页面           |
 | <kbd>⌘</kbd> + <kbd>=</kbd> | <kbd>Ctrl</kbd> + <kbd>=</kbd> | 放大页面           |
 | <kbd>⌘</kbd> + <kbd>0</kbd> | <kbd>Ctrl</kbd> + <kbd>0</kbd> | 重置页面缩放       |
+| <kbd>⌘</kbd> + <kbd>L</kbd> | <kbd>Ctrl</kbd> + <kbd>L</kbd> | 复制当前页面网址   |
+| <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>H</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>H</kbd> | 回到首页           |
+| <kbd>⌘</kbd> + <kbd>⌥</kbd> + <kbd>I</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd> | 开启调试 (仅开发版) |
 
-此外还支持双击头部全屏切换，拖拽头部移动窗口，Mac 用户支持手势返回和前进，有其他需求欢迎提出。
+此外还支持双击头部全屏切换，拖拽头部移动窗口，Mac 用户支持手势返回和前进，新菜单也提供了导航、缩放和窗口控制等选项。
 
 </details>
 
