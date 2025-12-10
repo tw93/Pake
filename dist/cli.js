@@ -23,7 +23,7 @@ import sharp from 'sharp';
 import * as psl from 'psl';
 
 var name = "pake-cli";
-var version = "3.6.0";
+var version = "3.6.1";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -1444,8 +1444,8 @@ async function preprocessIcon(inputPath) {
             create: {
                 width: metadata.width || 512,
                 height: metadata.height || 512,
-                channels: 3,
-                background: ICON_CONFIG.whiteBackground,
+                channels: 4,
+                background: { ...ICON_CONFIG.whiteBackground, alpha: 1 },
             },
         })
             .composite([{ input: inputPath }])
@@ -1490,6 +1490,7 @@ async function convertIconFormat(inputPath, appName) {
                 fit: 'contain',
                 background: ICON_CONFIG.transparentBackground,
             })
+                .ensureAlpha()
                 .png()
                 .toFile(outputPath);
             return outputPath;
