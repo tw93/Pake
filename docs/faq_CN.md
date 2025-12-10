@@ -351,3 +351,32 @@ pnpm install -g pake-cli
    - Node.js 和 Rust 版本（`node --version`、`rustc --version`）
    - 完整的错误信息
    - 您使用的构建命令
+
+### Linux: 打包失败，提示 `Can't detect any appindicator library`
+
+**问题描述：**
+在 Linux 上打包时，构建失败并显示以下错误：
+
+```txt
+Can't detect any appindicator library
+```
+
+**原因分析：**
+这个错误表示您的 Linux 系统缺少创建“系统托盘图标”所需的核心库 `libappindicator`。Pake 打包的应用支持系统托盘功能，因此该库是必需的。
+
+**解决方案：**
+您需要在您的 Linux 系统上安装这个缺失的开发库。
+
+- **对于 Debian / Ubuntu 系统：**
+
+  ```bash
+  sudo apt-get update && sudo apt-get install -y libappindicator3-dev
+  ```
+
+- **对于 Fedora / CentOS / RHEL 系统：**
+
+  ```bash
+  sudo dnf install -y libappindicator-devel
+  ```
+
+为了确保打包环境的完整性，推荐一次性安装所有 Tauri 所需的依赖。请参考本文档中关于 `failed to run linuxdeploy` 问题的解决方案，其中包含了完整的依赖列表。

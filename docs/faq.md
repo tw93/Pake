@@ -351,3 +351,32 @@ If your issue isn't covered here:
    - Node.js and Rust versions (`node --version`, `rustc --version`)
    - Complete error message
    - Build command you used
+
+### Linux: Build fails with `Can't detect any appindicator library`
+
+**Issue:**
+When packaging on Linux, the build fails with the following error:
+
+```txt
+Can't detect any appindicator library
+```
+
+**Cause:**
+This error means that your Linux system is missing `libappindicator`, a core library required to create system tray icons. Pake-packaged applications support the system tray feature, so this library is a required dependency.
+
+**Solution:**
+You need to install the missing development library on your Linux system.
+
+- **For Debian / Ubuntu systems:**
+
+  ```bash
+  sudo apt-get update && sudo apt-get install -y libappindicator3-dev
+  ```
+
+- **For Fedora / CentOS / RHEL systems:**
+
+  ```bash
+  sudo dnf install -y libappindicator-devel
+  ```
+
+To ensure a complete build environment, we recommend installing all of Tauri's required dependencies at once. Please refer to the solution for the `failed to run linuxdeploy` issue in this document, which includes a comprehensive list of dependencies.
