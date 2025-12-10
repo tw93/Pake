@@ -117,15 +117,20 @@ pub fn send_notification(app: AppHandle, params: NotificationParams) -> Result<(
 
 #[command]
 pub async fn update_theme_mode(app: AppHandle, mode: String) {
-    let window = app.get_webview_window("pake").unwrap();
     #[cfg(target_os = "macos")]
     {
+        let window = app.get_webview_window("pake").unwrap();
         let theme = if mode == "dark" {
             Theme::Dark
         } else {
             Theme::Light
         };
         let _ = window.set_theme(Some(theme));
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = app;
+        let _ = mode;
     }
 }
 
