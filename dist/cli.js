@@ -23,7 +23,7 @@ import sharp from 'sharp';
 import * as psl from 'psl';
 
 var name = "pake-cli";
-var version = "3.5.3";
+var version = "3.6.0";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -396,12 +396,16 @@ function checkRustInstalled() {
 
 async function combineFiles(files, output) {
     const contents = files.map((file) => {
-        const fileContent = fs.readFileSync(file);
         if (file.endsWith('.css')) {
-            return ("window.addEventListener('DOMContentLoaded', (_event) => { const css = `" +
-                fileContent +
-                "`; const style = document.createElement('style'); style.innerHTML = css; document.head.appendChild(style); });");
+            const fileContent = fs.readFileSync(file, 'utf-8');
+            return `window.addEventListener('DOMContentLoaded', (_event) => {
+        const css = ${JSON.stringify(fileContent)};
+        const style = document.createElement('style');
+        style.innerHTML = css;
+        document.head.appendChild(style);
+      });`;
         }
+        const fileContent = fs.readFileSync(file);
         return ("window.addEventListener('DOMContentLoaded', (_event) => { " +
             fileContent +
             ' });');
