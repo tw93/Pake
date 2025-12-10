@@ -96,8 +96,8 @@ async function preprocessIcon(inputPath: string): Promise<string> {
       create: {
         width: metadata.width || 512,
         height: metadata.height || 512,
-        channels: 3,
-        background: ICON_CONFIG.whiteBackground,
+        channels: 4,
+        background: { ...ICON_CONFIG.whiteBackground, alpha: 1 },
       },
     })
       .composite([{ input: inputPath }])
@@ -156,6 +156,7 @@ async function convertIconFormat(
           fit: 'contain',
           background: ICON_CONFIG.transparentBackground,
         })
+        .ensureAlpha()
         .png()
         .toFile(outputPath);
 
