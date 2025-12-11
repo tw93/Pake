@@ -7,7 +7,7 @@
 
 这个项目每次打开新的页面,都会创建一个新的窗口.(如果前端逻辑是路由跳转,则不会创建新的窗口) <br>
 
-配置 tauri.conf.json, 配置为 `frontendDist:"../dist"` 或者线上的前端项目地址, 例如: `frontendDist:"https://ai.goviewlink.com"`. <br>
+配置 tauri.conf.json, 配置为 `frontendDist:"../dist"` 或者线上的前端项目地址, 例如: `devUrl:"https://ai.goviewlink.com"`. <br>
 
 注意: 本地运行时,你需要 `devUrl:"http://localhost:8080"` 运行自己的前端项目. 打包部署时,你需要将 `dist` 目录复制到 PakePro 项目的 根目录. <br>
 
@@ -22,8 +22,7 @@ npm run dev
 npm run build
 
 # 使用远程前端项目
-# 配置 tauri.conf.json, 配置为 `frontendDist:"https://ai.goviewlink.com"`
-# 配置 pake.json, 配置为 `url_type: "web",` url 为 `https://ai.goviewlink.com`
+# 配置 tauri.conf.json, 配置为 `devUrl:"https://ai.goviewlink.com"`
 ```
 
 ## 项目修改
@@ -49,7 +48,7 @@ A super simple, based on [Pake](https://github.com/tw93/Pake/#) project that can
 
 This project will create a new window each time it opens a new page. (If the front-end logic is route jump, it will not create a new window)
 
-Configure tauri.conf.json, set `frontendDist:"../dist"` or use the online frontend project address, for example: `frontendDist:"https://ai.goviewlink.com"`.
+Configure tauri.conf.json, set `frontendDist:"../dist"` or use the online frontend project address, for example: `devUrl:"https://ai.goviewlink.com"`.
 
 Note: When running locally, you need to run your own front-end project at `http://localhost:8080`. When deploying, you need to copy the `dist` directory to the root directory of the PakePro project. <br>
 
