@@ -16,5 +16,10 @@
   "build": {
     "frontendDist": "http://goviewlink.com:5858",
     "devUrl": "http://localhost:8080"
+  },
+  "plugins": {
+    "shell": {
+      "open": "^((mailto:\\w+)|(tel:\\w+)|(https?://\\w+)|(blob:.*)).+"
+    }
   }
 }
