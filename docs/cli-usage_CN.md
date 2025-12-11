@@ -35,8 +35,8 @@ source ~/.bashrc
 **前置条件：**
 
 - Node.js ≥18.0.0
-- Rust ≥1.78.0（如缺失将自动安装）
-- **Windows/Linux**：详细系统依赖请参考 [高级用法指南](advanced-usage_CN.md#前置条件)
+- Rust ≥1.85.0（如缺失将自动安装）
+- **macOS/Linux**：`curl`、`wget`、`file` 和 `tar`（用于依赖管理）
 
 ## 快速开始
 

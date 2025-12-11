@@ -28,14 +28,33 @@ body:
     attributes:
       label: Pake version
       description: >
-        Please provide the version of Pake you are using. If you are using the main/dev branch, please provide the commit id.
+        Please provide the version of Pake you are using (e.g., `pake --version`). If you are using the main/dev branch, please provide the commit id.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Rust version
+      description: >
+        Please provide the Rust version (e.g., `rustc --version`). This is critical for build issues.
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Package Manager
+      description: Which package manager are you using?
+      options:
+        - npm
+        - pnpm
+        - yarn
+        - bun
+        - other
     validations:
       required: true
   - type: textarea
     attributes:
       label: System version
       description: >
-        Please provide the version of System you are using.
+        Please provide the version of System you are using (e.g., macOS 14.2, Windows 11, Ubuntu 24.04).
     validations:
       required: true
   - type: textarea
@@ -43,6 +62,13 @@ body:
       label: Node.js version
       description: >
         Please provide the Node.js version.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Build Command
+      description: >
+        Please provide the exact command you used to build the app (e.g., `pake https://github.com --name GitHub`).
     validations:
       required: true
   - type: textarea
