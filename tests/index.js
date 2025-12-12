@@ -46,8 +46,8 @@ class PakeTestRunner {
       console.log("\n🧪 Running Project Unit Tests (Vitest)...");
       try {
         execSync("npx vitest run", {
-            stdio: "inherit",
-            cwd: config.PROJECT_ROOT
+          stdio: "inherit",
+          cwd: config.PROJECT_ROOT,
         });
         this.results.push({ name: "Vitest Unit Tests", passed: true });
         testCount++;

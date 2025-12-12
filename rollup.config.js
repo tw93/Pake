@@ -87,23 +87,23 @@ function pakeCliDevPlugin() {
   return {
     name: "pake-cli-dev-plugin",
     buildEnd() {
-      const command = 'node';
+      const command = "node";
       // Pass through arguments, ignoring the first 2 (node rollup) and filtering out rollup-specifics
       // We need to keep only arguments meant for our CLI script
-      const args = process.argv.slice(2).filter(arg => {
-          // Filter out typical rollup flags if they are mixed in
-          // This is a simplistic filter, might need adjustment based on how npm script invokes rollup
-          return !['-c', '-w', '--config', '--watch'].includes(arg);
+      const args = process.argv.slice(2).filter((arg) => {
+        // Filter out typical rollup flags if they are mixed in
+        // This is a simplistic filter, might need adjustment based on how npm script invokes rollup
+        return !["-c", "-w", "--config", "--watch"].includes(arg);
       });
-      const cliCmdArgs = ['./dist/dev.js', ...args];
+      const cliCmdArgs = ["./dist/dev.js", ...args];
 
       cliChildProcess = spawn(command, cliCmdArgs, { detached: true });
 
-      cliChildProcess.stdout.on('data', (data) => {
+      cliChildProcess.stdout.on("data", (data) => {
         console.log(chalk.green(data.toString()));
       });
 
-      cliChildProcess.stderr.on('data', (data) => {
+      cliChildProcess.stderr.on("data", (data) => {
         console.error(chalk.yellow(data.toString()));
       });
 

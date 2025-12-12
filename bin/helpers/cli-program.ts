@@ -1,4 +1,3 @@
-
 import chalk from 'chalk';
 import { program, Option } from 'commander';
 import packageJson from '../../package.json';
@@ -36,7 +35,11 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
       validateNumberInput,
       DEFAULT.height,
     )
-    .option('--use-local-file', 'Use local file packaging', DEFAULT.useLocalFile)
+    .option(
+      '--use-local-file',
+      'Use local file packaging',
+      DEFAULT.useLocalFile,
+    )
     .option('--fullscreen', 'Start in full screen', DEFAULT.fullscreen)
     .option('--hide-title-bar', 'For Mac, hide title bar', DEFAULT.hideTitleBar)
     .option('--multi-arch', 'For Mac, both Intel and M1', DEFAULT.multiArch)

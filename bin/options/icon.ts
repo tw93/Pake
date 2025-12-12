@@ -426,7 +426,11 @@ async function tryGetFavicon(
         }
 
         // Icon generation error on Windows
-        if (IS_WIN && error instanceof Error && error.message.includes('icongen')) {
+        if (
+          IS_WIN &&
+          error instanceof Error &&
+          error.message.includes('icongen')
+        ) {
           return null;
         }
 

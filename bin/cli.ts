@@ -31,4 +31,3 @@ program.action(async (url: string, options: PakeCliOptions) => {
 });
 
 program.parse();
-
