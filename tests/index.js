@@ -46,14 +46,18 @@ class PakeTestRunner {
       console.log("\n🧪 Running Project Unit Tests (Vitest)...");
       try {
         execSync("npm run test:unit", {
-            stdio: "inherit",
-            cwd: config.PROJECT_ROOT
+          stdio: "inherit",
+          cwd: config.PROJECT_ROOT,
         });
         this.results.push({ name: "Vitest Unit Tests", passed: true });
         testCount++;
       } catch (e) {
         console.log("❌ Vitest unit tests failed");
-        this.results.push({ name: "Vitest Unit Tests", passed: false, error: e.message });
+        this.results.push({
+          name: "Vitest Unit Tests",
+          passed: false,
+          error: e.message,
+        });
       }
     }
 
