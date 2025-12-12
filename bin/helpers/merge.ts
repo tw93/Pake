@@ -3,7 +3,11 @@ import fsExtra from 'fs-extra';
 
 import combineFiles from '@/utils/combine';
 import logger from '@/options/logger';
-import { generateSafeFilename, generateIdentifierSafeName, getSafeAppName } from '@/utils/name';
+import {
+  generateSafeFilename,
+  generateIdentifierSafeName,
+  getSafeAppName,
+} from '@/utils/name';
 import { PakeAppOptions, PlatformMap } from '@/types';
 import { tauriConfigDirectory, npmDirectory } from '@/utils/dir';
 

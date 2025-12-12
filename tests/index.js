@@ -53,7 +53,11 @@ class PakeTestRunner {
         testCount++;
       } catch (e) {
         console.log("❌ Vitest unit tests failed");
-        this.results.push({ name: "Vitest Unit Tests", passed: false, error: e.message });
+        this.results.push({
+          name: "Vitest Unit Tests",
+          passed: false,
+          error: e.message,
+        });
       }
     }
 
