@@ -401,6 +401,14 @@ pake https://github.com --name GitHub --keep-binary
 
 **Output**: Creates both installer and standalone executable (`AppName-binary` on Unix, `AppName.exe` on Windows).
 
+#### [iterative-build]
+
+Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging. Default is `false`.
+
+```shell
+--iterative-build
+```
+
 #### [multi-instance]
 
 Allow the packaged app to run more than one instance at the same time. Default is `false`, which means launching a second instance simply focuses the existing window. Enable this when you need to open several windows of the same app simultaneously.

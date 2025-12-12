@@ -40,6 +40,7 @@
     "cli": "cross-env NODE_ENV=development rollup -c -w",
     "cli:build": "cross-env NODE_ENV=production rollup -c",
     "test": "pnpm run cli:build && cross-env PAKE_CREATE_APP=1 node tests/index.js",
+    "test:unit": "vitest run",
     "format": "prettier --write . --ignore-unknown && find tests -name '*.js' -exec sed -i '' 's/[[:space:]]*$//' {} \\; && cd src-tauri && cargo fmt --verbose",
     "format:check": "prettier --check . --ignore-unknown",
     "update": "pnpm update --verbose && cd src-tauri && cargo update",
@@ -84,6 +85,7 @@
     "rollup": "^4.52.5",
     "rollup-plugin-typescript2": "^0.36.0",
     "tslib": "^2.8.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
   }
 }

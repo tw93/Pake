@@ -63,6 +63,7 @@ var scripts = {
 	cli: "cross-env NODE_ENV=development rollup -c -w",
 	"cli:build": "cross-env NODE_ENV=production rollup -c",
 	test: "pnpm run cli:build && cross-env PAKE_CREATE_APP=1 node tests/index.js",
+	"test:unit": "vitest run",
 	format: "prettier --write . --ignore-unknown && find tests -name '*.js' -exec sed -i '' 's/[[:space:]]*$//' {} \\; && cd src-tauri && cargo fmt --verbose",
 	"format:check": "prettier --check . --ignore-unknown",
 	update: "pnpm update --verbose && cd src-tauri && cargo update",
@@ -107,7 +108,8 @@ var devDependencies = {
 	rollup: "^4.52.5",
 	"rollup-plugin-typescript2": "^0.36.0",
 	tslib: "^2.8.1",
-	typescript: "^5.9.3"
+	typescript: "^5.9.3",
+	vitest: "^4.0.15"
 };
 var packageJson = {
 	name: name,
@@ -420,6 +422,9 @@ function generateSafeFilename(name) {
         .replace(/\.+$/g, '')
         .slice(0, 255);
 }
+function getSafeAppName(name) {
+    return generateSafeFilename(name).toLowerCase();
+}
 function generateLinuxPackageName(name) {
     return name
         .toLowerCase()
@@ -447,12 +452,6 @@ function generateIdentifierSafeName(name) {
     return cleaned;
 }
 
-/**
- * Helper function to generate safe lowercase app name for file paths
- */
-function getSafeAppName(name) {
-    return generateSafeFilename(name).toLowerCase();
-}
 async function mergeConfig(url, options, tauriConf) {
     // Ensure .pake directory exists and copy source templates if needed
     const srcTauriDir = path.join(npmDirectory, 'src-tauri');
@@ -1123,7 +1122,7 @@ class MacBuilder extends BaseBuilder {
         this.buildArch = validArchs.includes(options.targets || '')
             ? options.targets
             : 'auto';
-        if (process.env.PAKE_CREATE_APP === '1') {
+        if (options.iterativeBuild || process.env.PAKE_CREATE_APP === '1') {
             this.buildFormat = 'app';
         }
         else {
@@ -1358,7 +1357,18 @@ const DEFAULT_PAKE_OPTIONS = {
     userAgent: '',
     showSystemTray: false,
     multiArch: false,
-    targets: 'deb',
+    targets: (() => {
+        switch (process.platform) {
+            case 'linux':
+                return 'deb';
+            case 'darwin':
+                return 'dmg';
+            case 'win32':
+                return 'msi';
+            default:
+                return 'deb';
+        }
+    })(),
     useLocalFile: false,
     systemTrayIcon: '',
     proxyUrl: '',
@@ -1373,6 +1383,7 @@ const DEFAULT_PAKE_OPTIONS = {
     multiInstance: false,
     startToTray: false,
     forceInternalNavigation: false,
+    iterativeBuild: false,
     zoom: 100,
     minWidth: 0,
     minHeight: 0,
@@ -1935,6 +1946,9 @@ program
     .hideHelp())
     .addOption(new Option('--ignore-certificate-errors', 'Ignore certificate errors (for self-signed certificates)')
     .default(DEFAULT_PAKE_OPTIONS.ignoreCertificateErrors)
+    .hideHelp())
+    .addOption(new Option('--iterative-build', 'Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging')
+    .default(DEFAULT_PAKE_OPTIONS.iterativeBuild)
     .hideHelp())
     .version(packageJson.version, '-v, --version')
     .configureHelp({
