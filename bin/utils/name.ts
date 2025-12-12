@@ -6,6 +6,10 @@ export function generateSafeFilename(name: string): string {
     .slice(0, 255);
 }
 
+export function getSafeAppName(name: string): string {
+  return generateSafeFilename(name).toLowerCase();
+}
+
 export function generateLinuxPackageName(name: string): string {
   return name
     .toLowerCase()

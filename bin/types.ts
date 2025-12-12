@@ -111,6 +111,9 @@ export interface PakeCliOptions {
 
   // Ignore certificate errors (for self-signed certs), default false
   ignoreCertificateErrors: boolean;
+
+  // Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging
+  iterativeBuild: boolean;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {

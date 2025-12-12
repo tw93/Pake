@@ -219,6 +219,14 @@ program
       .default(DEFAULT.ignoreCertificateErrors)
       .hideHelp(),
   )
+  .addOption(
+    new Option(
+      '--iterative-build',
+      'Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging',
+    )
+      .default(DEFAULT.iterativeBuild)
+      .hideHelp(),
+  )
   .version(packageJson.version, '-v, --version')
   .configureHelp({
     sortSubcommands: true,

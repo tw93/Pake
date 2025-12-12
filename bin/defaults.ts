@@ -16,7 +16,18 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   userAgent: '',
   showSystemTray: false,
   multiArch: false,
-  targets: 'deb',
+  targets: (() => {
+    switch (process.platform) {
+      case 'linux':
+        return 'deb';
+      case 'darwin':
+        return 'dmg';
+      case 'win32':
+        return 'msi';
+      default:
+        return 'deb';
+    }
+  })(),
   useLocalFile: false,
   systemTrayIcon: '',
   proxyUrl: '',
@@ -31,6 +42,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   multiInstance: false,
   startToTray: false,
   forceInternalNavigation: false,
+  iterativeBuild: false,
   zoom: 100,
   minWidth: 0,
   minHeight: 0,
