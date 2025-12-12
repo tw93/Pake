@@ -13,8 +13,6 @@ body:
         Please search [issues](https://github.com/tw93/Pake/issues?q=) to check if your issue has already been reported.
       options:
         - label: >
-            我在 [issues](https://github.com/tw93/Pake/issues?q=) 列表中搜索，没有找到类似的内容。
-
             I searched in the [issues](https://github.com/tw93/Pake/issues?q=) and found nothing similar.
           required: true
   - type: textarea
