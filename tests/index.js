@@ -12,7 +12,6 @@ import fs from "fs";
 import path from "path";
 import ora from "ora";
 import config, { TIMEOUTS, TEST_URLS } from "./config.js";
-import { runHelperTests } from "./unit/helpers.test.js";
 
 class PakeTestRunner {
   constructor() {
@@ -40,14 +39,21 @@ class PakeTestRunner {
     let testCount = 0;
 
     if (unit && !quick) {
-      console.log("📋 Running Unit Tests...");
-      await this.runUnitTests();
+      console.log("📋 Running CLI Health Checks...");
+      await this.runCliHealthChecks();
       testCount++;
 
-      // Run helper function tests
-      const helperTestsPassed = await runHelperTests();
-      if (!helperTestsPassed) {
-        console.log("⚠️  Some helper tests failed");
+      console.log("\n🧪 Running Project Unit Tests (Vitest)...");
+      try {
+        execSync("npm run test:unit", {
+            stdio: "inherit",
+            cwd: config.PROJECT_ROOT
+        });
+        this.results.push({ name: "Vitest Unit Tests", passed: true });
+        testCount++;
+      } catch (e) {
+        console.log("❌ Vitest unit tests failed");
+        this.results.push({ name: "Vitest Unit Tests", passed: false, error: e.message });
       }
     }
 
@@ -158,7 +164,7 @@ class PakeTestRunner {
     }
   }
 
-  async runUnitTests() {
+  async runCliHealthChecks() {
     // Version command test
     await this.runTest(
       "Version Command",
