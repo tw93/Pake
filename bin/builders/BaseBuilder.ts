@@ -141,9 +141,13 @@ export default abstract class BaseBuilder {
         );
       }
       spinner.succeed(chalk.green('Package installed!'));
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If installation times out and we haven't tried the mirror yet, retry with mirror
-      if (error.message?.includes('timed out') && !usedMirror) {
+      if (
+        error instanceof Error &&
+        error.message.includes('timed out') &&
+        !usedMirror
+      ) {
         spinner.fail(
           chalk.yellow('Installation timed out, retrying with CN mirror...'),
         );
@@ -187,11 +191,29 @@ export default abstract class BaseBuilder {
   }
 
   async start(url: string) {
+    logger.info('Pake dev server starting...');
     await mergeConfig(url, this.options, tauriConfig);
+
+    const packageManager = await this.detectPackageManager();
+    const configPath = path.join(
+      npmDirectory,
+      'src-tauri',
+      '.pake',
+      'tauri.conf.json',
+    );
+
+    const features = this.getBuildFeatures();
+    const featureArgs =
+      features.length > 0 ? `--features ${features.join(',')}` : '';
+
+    const argSeparator = packageManager === 'npm' ? ' --' : '';
+    const command = `cd "${npmDirectory}" && ${packageManager} run tauri${argSeparator} dev --config "${configPath}" ${featureArgs}`;
+
+    await shellExec(command);
   }
 
   async buildAndCopy(url: string, target: string) {
-    const { name } = this.options;
+    const { name = 'pake-app' } = this.options;
     await mergeConfig(url, this.options, tauriConfig);
 
     // Detect available package manager

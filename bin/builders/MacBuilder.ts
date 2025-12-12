@@ -25,7 +25,7 @@ export default class MacBuilder extends BaseBuilder {
   }
 
   getFileName(): string {
-    const { name } = this.options;
+    const { name = 'pake-app' } = this.options;
 
     if (this.buildFormat === 'app') {
       return name;

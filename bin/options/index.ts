@@ -41,7 +41,7 @@ export default async function handleOptions(
     name = generateLinuxPackageName(name);
   }
 
-  if (!isValidName(name, platform)) {
+  if (name && !isValidName(name, platform)) {
     const LINUX_NAME_ERROR = `✕ Name should only include lowercase letters, numbers, and dashes (not leading dashes). Examples: com-123-xxx, 123pan, pan123, weread, we-read, 123.`;
     const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dashes, and spaces (not leading dashes and spaces). Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read, 123.`;
     const errorMsg =
@@ -62,7 +62,7 @@ export default async function handleOptions(
   };
 
   const iconPath = await handleIcon(appOptions, url);
-  appOptions.icon = iconPath || undefined;
+  appOptions.icon = iconPath || '';
 
   return appOptions;
 }

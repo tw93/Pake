@@ -54,7 +54,7 @@ export async function mergeConfig(
     systemTrayIcon,
     useLocalFile,
     identifier,
-    name,
+    name = 'pake-app',
     resizable = true,
     inject,
     proxyUrl,

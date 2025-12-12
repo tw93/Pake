@@ -17,7 +17,10 @@ export function validateUrlInput(url: string) {
     try {
       return normalizeUrl(url);
     } catch (error) {
-      throw new InvalidArgumentError(error.message);
+      if (error instanceof Error) {
+        throw new InvalidArgumentError(error.message);
+      }
+      throw error;
     }
   }
 

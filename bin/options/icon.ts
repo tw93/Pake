@@ -10,7 +10,7 @@ import sharp from 'sharp';
 import logger from './logger';
 import { getSpinner } from '@/utils/info';
 import { npmDirectory } from '@/utils/dir';
-import { IS_LINUX, IS_WIN } from '@/utils/platform';
+import { IS_LINUX, IS_WIN, IS_MAC } from '@/utils/platform';
 import { PakeAppOptions } from '@/types';
 
 type PlatformIconConfig = {
@@ -106,7 +106,63 @@ async function preprocessIcon(inputPath: string): Promise<string> {
 
     return outputPath;
   } catch (error) {
-    logger.warn(`Failed to add background to icon: ${error.message}`);
+    if (error instanceof Error) {
+      logger.warn(`Failed to add background to icon: ${error.message}`);
+    }
+    return inputPath;
+  }
+}
+
+/**
+ * Applies macOS squircle mask to icon
+ */
+async function applyMacOSMask(inputPath: string): Promise<string> {
+  try {
+    const { path: tempDir } = await dir();
+    const outputPath = path.join(tempDir, 'icon-macos-rounded.png');
+
+    // 1. Create a 1024x1024 rounded rect mask
+    // rx="224" is closer to the smooth Apple squircle look for 1024px
+    const mask = Buffer.from(
+      '<svg width="1024" height="1024"><rect x="0" y="0" width="1024" height="1024" rx="224" ry="224" fill="white"/></svg>',
+    );
+
+    // 2. Load input, resize to 1024, apply mask
+    const maskedBuffer = await sharp(inputPath)
+      .resize(1024, 1024, {
+        fit: 'contain',
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .composite([
+        {
+          input: mask,
+          blend: 'dest-in',
+        },
+      ])
+      .png()
+      .toBuffer();
+
+    // 3. Resize to 840x840 (~18% padding) to solve "too big" visual issue
+    // Native MacOS icons often leave some breathing room
+    await sharp(maskedBuffer)
+      .resize(840, 840, {
+        fit: 'contain',
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .extend({
+        top: 92,
+        bottom: 92,
+        left: 92,
+        right: 92,
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .toFile(outputPath);
+
+    return outputPath;
+  } catch (error) {
+    if (error instanceof Error) {
+      logger.warn(`Failed to apply macOS mask: ${error.message}`);
+    }
     return inputPath;
   }
 }
@@ -164,7 +220,8 @@ async function convertIconFormat(
     }
 
     // macOS
-    await icongen(processedInputPath, platformOutputDir, {
+    const macIconPath = await applyMacOSMask(processedInputPath);
+    await icongen(macIconPath, platformOutputDir, {
       report: false,
       icns: { name: iconName, sizes: PLATFORM_CONFIG.macos.sizes },
     });
@@ -174,7 +231,9 @@ async function convertIconFormat(
     );
     return (await fsExtra.pathExists(outputPath)) ? outputPath : null;
   } catch (error) {
-    logger.warn(`Icon format conversion failed: ${error.message}`);
+    if (error instanceof Error) {
+      logger.warn(`Icon format conversion failed: ${error.message}`);
+    }
     return null;
   }
 }
@@ -356,21 +415,19 @@ async function tryGetFavicon(
           );
           return finalPath;
         }
-      } catch (error) {
-        logger.debug(`Icon service ${serviceUrl} failed: ${error.message}`);
-
-        // Platform-specific error handling
-        if ((IS_LINUX || IS_WIN) && error.code === 'ENOTFOUND') {
-          logger.debug(
-            `DNS resolution failed for ${serviceUrl}, trying next service...`,
-          );
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          logger.debug(`Icon service ${serviceUrl} failed: ${error.message}`);
         }
 
-        // Windows-specific icon conversion errors
-        if (IS_WIN && error.message.includes('icongen')) {
-          logger.debug(
-            `Windows icon conversion failed for ${serviceUrl}, trying next service...`,
-          );
+        // Network error handling
+        if ((IS_LINUX || IS_WIN) && (error as any).code === 'ENOTFOUND') {
+          return null;
+        }
+
+        // Icon generation error on Windows
+        if (IS_WIN && error instanceof Error && error.message.includes('icongen')) {
+          return null;
         }
 
         continue;
@@ -380,7 +437,9 @@ async function tryGetFavicon(
     spinner.warn(`No favicon found for ${domain}. Using default.`);
     return null;
   } catch (error) {
-    logger.warn(`Failed to fetch favicon: ${error.message}`);
+    if (error instanceof Error) {
+      logger.warn(`Failed to fetch favicon: ${error.message}`);
+    }
     return null;
   }
 }
@@ -411,9 +470,9 @@ export async function downloadIcon(
     }
 
     return await saveIconFile(iconData, fileDetails.ext);
-  } catch (error) {
-    if (showSpinner && !(error.response?.status === 404)) {
-      throw error;
+  } catch (error: unknown) {
+    if (showSpinner && !((error as any).response?.status === 404)) {
+      logger.error('Icon download failed!', error);
     }
     return null;
   }
