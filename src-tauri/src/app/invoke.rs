@@ -50,11 +50,11 @@ pub async fn download_file(app: AppHandle, params: DownloadFileParams) -> Result
         .await;
 
     match response {
-        Ok(res) => {
-            let bytes = res.bytes().await.unwrap();
-
+        Ok(mut res) => {
             let mut file = File::create(file_path).unwrap();
-            file.write_all(&bytes).unwrap();
+            while let Some(chunk) = res.chunk().await.unwrap() {
+                file.write_all(&chunk).unwrap();
+            }
             show_toast(
                 &window,
                 &get_download_message_with_lang(MessageType::Success, params.language.clone()),
