@@ -37,7 +37,7 @@ jobs:
           mode: node
 
       - name: Auto-fix Prettier formatting
-        run: npx prettier --write . --ignore-unknown
+        run: npx prettier --write . --ignore-unknown --cache
 
       - name: Auto-fix Rust formatting
         run: cargo fmt --all --manifest-path src-tauri/Cargo.toml
@@ -81,7 +81,17 @@ jobs:
       - uses: rui314/setup-mold@v1
         if: matrix.os == 'ubuntu-latest'
 
+      - name: Cache cargo-hack
+        uses: actions/cache@v4
+        id: cargo-hack-cache
+        with:
+          path: ~/.cargo/bin/cargo-hack
+          key: ${{ runner.os }}-cargo-hack-${{ hashFiles('~/.cargo/bin/cargo-hack') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-hack-
+
       - name: Install cargo-hack
+        if: steps.cargo-hack-cache.outputs.cache-hit != 'true'
         run: cargo install cargo-hack --force
 
       - name: Check Rust formatting

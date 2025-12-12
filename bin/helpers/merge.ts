@@ -179,10 +179,14 @@ export async function mergeConfig(
     const desktopFileName = `${identifier}.desktop`;
 
     // Create desktop file content
+    // Determine if title contains Chinese characters for Name[zh_CN]
+    const chineseName = title && /[\u4e00-\u9fa5]/.test(title) ? title : null;
+
     const desktopContent = `[Desktop Entry]
 Version=1.0
 Type=Application
 Name=${name}
+${chineseName ? `Name[zh_CN]=${chineseName}` : ''}
 Comment=${name}
 Exec=pake-${appNameSafe}
 Icon=${appNameSafe}_512

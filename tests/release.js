@@ -62,8 +62,10 @@ class ReleaseBuildTest {
 
     try {
       // Build config
-      this.log("DEBUG", "Configuring app...");
-      execSync("pnpm run build:config", { stdio: "pipe" });
+      this.log("INFO", `\n📦 Building ${appName}...\n`);
+
+      // Build the app using CLI directly
+      execSync(`pnpm run cli:build`, { stdio: "pipe" });
 
       // Build app
       this.log("DEBUG", "Building app package...");

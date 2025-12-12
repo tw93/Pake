@@ -58,7 +58,6 @@ var scripts = {
 	build: "tauri build",
 	"build:debug": "tauri build --debug",
 	"build:mac": "tauri build --target universal-apple-darwin",
-	"build:config": "chmod +x scripts/configure-tauri.mjs && node scripts/configure-tauri.mjs",
 	analyze: "cd src-tauri && cargo bloat --release --crates",
 	tauri: "tauri",
 	cli: "cross-env NODE_ENV=development rollup -c -w",
@@ -555,10 +554,13 @@ async function mergeConfig(url, options, tauriConf) {
         const identifier = `com.pake.${appNameSafe}`;
         const desktopFileName = `${identifier}.desktop`;
         // Create desktop file content
+        // Determine if title contains Chinese characters for Name[zh_CN]
+        const chineseName = title && /[\u4e00-\u9fa5]/.test(title) ? title : null;
         const desktopContent = `[Desktop Entry]
 Version=1.0
 Type=Application
 Name=${name}
+${chineseName ? `Name[zh_CN]=${chineseName}` : ''}
 Comment=${name}
 Exec=pake-${appNameSafe}
 Icon=${appNameSafe}_512

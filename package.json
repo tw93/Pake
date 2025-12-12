@@ -35,7 +35,6 @@
     "build": "tauri build",
     "build:debug": "tauri build --debug",
     "build:mac": "tauri build --target universal-apple-darwin",
-    "build:config": "chmod +x scripts/configure-tauri.mjs && node scripts/configure-tauri.mjs",
     "analyze": "cd src-tauri && cargo bloat --release --crates",
     "tauri": "tauri",
     "cli": "cross-env NODE_ENV=development rollup -c -w",
