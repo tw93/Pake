@@ -119,10 +119,10 @@
 ## 7. Common AI Tasks
 
 - **Adding a CLI Option**:
-    1. Update `bin/types.ts` (Interface).
-    2. Update `bin/defaults.ts` (Default value).
-    3. Update `bin/cli.ts` (Commander option).
-    4. Update `bin/options/index.ts` (Processing).
-    5. Update `src-tauri/src/app/config.rs` (Struct definition) if it needs to pass to Rust.
+  1. Update `bin/types.ts` (Interface).
+  2. Update `bin/defaults.ts` (Default value).
+  3. Update `bin/cli.ts` (Commander option).
+  4. Update `bin/options/index.ts` (Processing).
+  5. Update `src-tauri/src/app/config.rs` (Struct definition) if it needs to pass to Rust.
 - **Modifying Menu**: Edit `src-tauri/src/lib.rs` inside `setup` closure.
 - **Updating Injected Script**: Edit `src-tauri/src/inject/event.js` or `component.js`.
