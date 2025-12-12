@@ -45,7 +45,7 @@ class PakeTestRunner {
 
       console.log("\n🧪 Running Project Unit Tests (Vitest)...");
       try {
-        execSync("npm run test:unit", {
+        execSync("npx vitest run", {
             stdio: "inherit",
             cwd: config.PROJECT_ROOT
         });

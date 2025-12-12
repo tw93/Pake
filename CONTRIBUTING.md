@@ -38,8 +38,11 @@ cd Pake
 # Install dependencies
 pnpm install
 
-# Start development
+# Start development (Tauri only)
 pnpm run dev
+
+# Start development (CLI Wrapper + Tauri) - Recommended for CLI changes
+pnpm run cli:dev -- https://web.telegram.org/k/
 ```
 
 ### Testing
@@ -51,6 +54,14 @@ pnpm test
 # Build CLI for testing
 pnpm run cli:build
 ```
+
+### Tips
+
+- Use `--iterative-build` flag during development to skip some hefty checks and use app bundle format for faster debugging:
+
+  ```bash
+  pnpm run cli:dev --iterative-build
+  ```
 
 ## Continuous Integration
 

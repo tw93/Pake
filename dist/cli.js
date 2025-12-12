@@ -1,10 +1,9 @@
 #!/usr/bin/env node
-import chalk from 'chalk';
-import { InvalidArgumentError, program, Option } from 'commander';
 import log from 'loglevel';
 import path from 'path';
 import fsExtra from 'fs-extra';
 import { fileURLToPath } from 'url';
+import chalk from 'chalk';
 import prompts from 'prompts';
 import os from 'os';
 import { execa, execaSync } from 'execa';
@@ -21,114 +20,7 @@ import { fileTypeFromBuffer } from 'file-type';
 import icongen from 'icon-gen';
 import sharp from 'sharp';
 import * as psl from 'psl';
-
-var name = "pake-cli";
-var version = "3.6.1";
-var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
-var engines = {
-	node: ">=18.0.0"
-};
-var packageManager = "pnpm@10.15.0";
-var bin = {
-	pake: "./dist/cli.js"
-};
-var repository = {
-	type: "git",
-	url: "https://github.com/tw93/pake.git"
-};
-var author = {
-	name: "Tw93",
-	email: "tw93@qq.com"
-};
-var keywords = [
-	"pake",
-	"pake-cli",
-	"rust",
-	"tauri",
-	"no-electron",
-	"productivity"
-];
-var files = [
-	"dist",
-	"src-tauri"
-];
-var scripts = {
-	start: "pnpm run dev",
-	dev: "pnpm run tauri dev",
-	build: "tauri build",
-	"build:debug": "tauri build --debug",
-	"build:mac": "tauri build --target universal-apple-darwin",
-	analyze: "cd src-tauri && cargo bloat --release --crates",
-	tauri: "tauri",
-	cli: "cross-env NODE_ENV=development rollup -c -w",
-	"cli:build": "cross-env NODE_ENV=production rollup -c",
-	test: "pnpm run cli:build && cross-env PAKE_CREATE_APP=1 node tests/index.js",
-	"test:unit": "vitest run",
-	format: "prettier --write . --ignore-unknown && find tests -name '*.js' -exec sed -i '' 's/[[:space:]]*$//' {} \\; && cd src-tauri && cargo fmt --verbose",
-	"format:check": "prettier --check . --ignore-unknown",
-	update: "pnpm update --verbose && cd src-tauri && cargo update",
-	prepublishOnly: "pnpm run cli:build"
-};
-var type = "module";
-var exports = "./dist/cli.js";
-var license = "MIT";
-var dependencies = {
-	"@tauri-apps/api": "^2.9.0",
-	"@tauri-apps/cli": "^2.9.0",
-	axios: "^1.12.2",
-	chalk: "^5.6.2",
-	commander: "^12.1.0",
-	execa: "^9.6.0",
-	"file-type": "^18.7.0",
-	"fs-extra": "^11.3.2",
-	"icon-gen": "^5.0.0",
-	loglevel: "^1.9.2",
-	ora: "^8.2.0",
-	prompts: "^2.4.2",
-	psl: "^1.15.0",
-	sharp: "^0.33.5",
-	"tmp-promise": "^3.0.3",
-	"update-notifier": "^7.3.1"
-};
-var devDependencies = {
-	"@rollup/plugin-alias": "^5.1.1",
-	"@rollup/plugin-commonjs": "^28.0.8",
-	"@rollup/plugin-json": "^6.1.0",
-	"@rollup/plugin-replace": "^6.0.2",
-	"@rollup/plugin-terser": "^0.4.4",
-	"@types/fs-extra": "^11.0.4",
-	"@types/node": "^20.19.23",
-	"@types/page-icon": "^0.3.6",
-	"@types/prompts": "^2.4.9",
-	"@types/tmp": "^0.2.6",
-	"@types/update-notifier": "^6.0.8",
-	"app-root-path": "^3.1.0",
-	"cross-env": "^7.0.3",
-	prettier: "^3.6.2",
-	rollup: "^4.52.5",
-	"rollup-plugin-typescript2": "^0.36.0",
-	tslib: "^2.8.1",
-	typescript: "^5.9.3",
-	vitest: "^4.0.15"
-};
-var packageJson = {
-	name: name,
-	version: version,
-	description: description,
-	engines: engines,
-	packageManager: packageManager,
-	bin: bin,
-	repository: repository,
-	author: author,
-	keywords: keywords,
-	files: files,
-	scripts: scripts,
-	type: type,
-	exports: exports,
-	license: license,
-	dependencies: dependencies,
-	devDependencies: devDependencies
-};
+import { InvalidArgumentError, program as program$1, Option } from 'commander';
 
 // Convert the current module URL to a file path
 const currentModulePath = fileURLToPath(import.meta.url);
@@ -380,7 +272,12 @@ async function installRust() {
     }
     catch (error) {
         spinner.fail(chalk.red('✕ Rust installation failed!'));
-        console.error(error.message);
+        if (error instanceof Error) {
+            console.error(error.message);
+        }
+        else {
+            console.error(error);
+        }
         process.exit(1);
     }
 }
@@ -472,7 +369,7 @@ async function mergeConfig(url, options, tauriConf) {
             await fsExtra.copy(sourcePath, destPath);
         }
     }));
-    const { width, height, fullscreen, maximize, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, multiInstance, startToTray, forceInternalNavigation, zoom, minWidth, minHeight, ignoreCertificateErrors, } = options;
+    const { width, height, fullscreen, maximize, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name = 'pake-app', resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, multiInstance, startToTray, forceInternalNavigation, zoom, minWidth, minHeight, ignoreCertificateErrors, } = options;
     const { platform } = process;
     const platformHideOnClose = hideOnClose ?? platform === 'darwin';
     const tauriConfWindowOptions = {
@@ -823,7 +720,9 @@ class BaseBuilder {
         }
         catch (error) {
             // If installation times out and we haven't tried the mirror yet, retry with mirror
-            if (error.message?.includes('timed out') && !usedMirror) {
+            if (error instanceof Error &&
+                error.message.includes('timed out') &&
+                !usedMirror) {
                 spinner.fail(chalk.yellow('Installation timed out, retrying with CN mirror...'));
                 logger.info('✺ Retrying installation with CN mirror for better speed...');
                 const retrySpinner = getSpinner('Retrying installation...');
@@ -852,10 +751,18 @@ class BaseBuilder {
         await this.buildAndCopy(url, this.options.targets);
     }
     async start(url) {
+        logger.info('Pake dev server starting...');
         await mergeConfig(url, this.options, tauriConfig);
+        const packageManager = await this.detectPackageManager();
+        const configPath = path.join(npmDirectory, 'src-tauri', '.pake', 'tauri.conf.json');
+        const features = this.getBuildFeatures();
+        const featureArgs = features.length > 0 ? `--features ${features.join(',')}` : '';
+        const argSeparator = packageManager === 'npm' ? ' --' : '';
+        const command = `cd "${npmDirectory}" && ${packageManager} run tauri${argSeparator} dev --config "${configPath}" ${featureArgs}`;
+        await shellExec(command);
     }
     async buildAndCopy(url, target) {
-        const { name } = this.options;
+        const { name = 'pake-app' } = this.options;
         await mergeConfig(url, this.options, tauriConfig);
         // Detect available package manager
         const packageManager = await this.detectPackageManager();
@@ -1131,7 +1038,7 @@ class MacBuilder extends BaseBuilder {
         this.options.targets = this.buildFormat;
     }
     getFileName() {
-        const { name } = this.options;
+        const { name = 'pake-app' } = this.options;
         if (this.buildFormat === 'app') {
             return name;
         }
@@ -1250,7 +1157,7 @@ class LinuxBuilder extends BaseBuilder {
         this.options.targets = this.buildFormat;
     }
     getFileName() {
-        const { name, targets } = this.options;
+        const { name = 'pake-app', targets } = this.options;
         const version = tauriConfig.version;
         let arch;
         if (this.buildArch === 'arm64') {
@@ -1284,7 +1191,7 @@ class LinuxBuilder extends BaseBuilder {
     getBuildCommand(packageManager = 'pnpm') {
         const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
         const buildTarget = this.buildArch === 'arm64'
-            ? this.getTauriTarget(this.buildArch, 'linux')
+            ? (this.getTauriTarget(this.buildArch, 'linux') ?? undefined)
             : undefined;
         let fullCommand = this.buildBaseCommand(packageManager, configPath, buildTarget);
         const features = this.getBuildFeatures();
@@ -1342,52 +1249,112 @@ class BuilderProvider {
     }
 }
 
-const DEFAULT_PAKE_OPTIONS = {
-    icon: '',
-    height: 780,
-    width: 1200,
-    fullscreen: false,
-    maximize: false,
-    hideTitleBar: false,
-    alwaysOnTop: false,
-    appVersion: '1.0.0',
-    darkMode: false,
-    disabledWebShortcuts: false,
-    activationShortcut: '',
-    userAgent: '',
-    showSystemTray: false,
-    multiArch: false,
-    targets: (() => {
-        switch (process.platform) {
-            case 'linux':
-                return 'deb';
-            case 'darwin':
-                return 'dmg';
-            case 'win32':
-                return 'msi';
-            default:
-                return 'deb';
-        }
-    })(),
-    useLocalFile: false,
-    systemTrayIcon: '',
-    proxyUrl: '',
-    debug: false,
-    inject: [],
-    installerLanguage: 'en-US',
-    hideOnClose: undefined, // Platform-specific: true for macOS, false for others
-    incognito: false,
-    wasm: false,
-    enableDragDrop: false,
-    keepBinary: false,
-    multiInstance: false,
-    startToTray: false,
-    forceInternalNavigation: false,
-    iterativeBuild: false,
-    zoom: 100,
-    minWidth: 0,
-    minHeight: 0,
-    ignoreCertificateErrors: false,
+var name = "pake-cli";
+var version = "3.6.1";
+var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
+var engines = {
+	node: ">=18.0.0"
+};
+var packageManager = "pnpm@10.15.0";
+var bin = {
+	pake: "./dist/cli.js"
+};
+var repository = {
+	type: "git",
+	url: "https://github.com/tw93/pake.git"
+};
+var author = {
+	name: "Tw93",
+	email: "tw93@qq.com"
+};
+var keywords = [
+	"pake",
+	"pake-cli",
+	"rust",
+	"tauri",
+	"no-electron",
+	"productivity"
+];
+var files = [
+	"dist",
+	"src-tauri"
+];
+var scripts = {
+	start: "pnpm run dev",
+	dev: "pnpm run tauri dev",
+	build: "tauri build",
+	"build:debug": "tauri build --debug",
+	"build:mac": "tauri build --target universal-apple-darwin",
+	analyze: "cd src-tauri && cargo bloat --release --crates",
+	tauri: "tauri",
+	cli: "cross-env NODE_ENV=development rollup -c -w",
+	"cli:dev": "cross-env NODE_ENV=development rollup -c -w",
+	"cli:build": "cross-env NODE_ENV=production rollup -c",
+	test: "pnpm run cli:build && cross-env PAKE_CREATE_APP=1 node tests/index.js",
+	format: "prettier --write . --ignore-unknown && find tests -name '*.js' -exec sed -i '' 's/[[:space:]]*$//' {} \\; && cd src-tauri && cargo fmt --verbose",
+	"format:check": "prettier --check . --ignore-unknown",
+	update: "pnpm update --verbose && cd src-tauri && cargo update",
+	prepublishOnly: "pnpm run cli:build"
+};
+var type = "module";
+var exports = "./dist/cli.js";
+var license = "MIT";
+var dependencies = {
+	"@tauri-apps/api": "^2.9.0",
+	"@tauri-apps/cli": "^2.9.0",
+	axios: "^1.12.2",
+	chalk: "^5.6.2",
+	commander: "^12.1.0",
+	execa: "^9.6.0",
+	"file-type": "^18.7.0",
+	"fs-extra": "^11.3.2",
+	"icon-gen": "^5.0.0",
+	loglevel: "^1.9.2",
+	ora: "^8.2.0",
+	prompts: "^2.4.2",
+	psl: "^1.15.0",
+	sharp: "^0.33.5",
+	"tmp-promise": "^3.0.3",
+	"update-notifier": "^7.3.1"
+};
+var devDependencies = {
+	"@rollup/plugin-alias": "^5.1.1",
+	"@rollup/plugin-commonjs": "^28.0.8",
+	"@rollup/plugin-json": "^6.1.0",
+	"@rollup/plugin-replace": "^6.0.2",
+	"@rollup/plugin-terser": "^0.4.4",
+	"@types/fs-extra": "^11.0.4",
+	"@types/node": "^20.19.23",
+	"@types/page-icon": "^0.3.6",
+	"@types/prompts": "^2.4.9",
+	"@types/tmp": "^0.2.6",
+	"@types/update-notifier": "^6.0.8",
+	"app-root-path": "^3.1.0",
+	"cross-env": "^7.0.3",
+	prettier: "^3.6.2",
+	rollup: "^4.52.5",
+	"rollup-plugin-typescript2": "^0.36.0",
+	tslib: "^2.8.1",
+	typescript: "^5.9.3",
+	vitest: "^4.0.15"
+};
+var packageJson = {
+	name: name,
+	version: version,
+	description: description,
+	engines: engines,
+	packageManager: packageManager,
+	bin: bin,
+	repository: repository,
+	author: author,
+	keywords: keywords,
+	files: files,
+	scripts: scripts,
+	type: type,
+	exports: exports,
+	license: license,
+	dependencies: dependencies,
+	devDependencies: devDependencies
 };
 
 async function checkUpdateTips() {
@@ -1467,7 +1434,57 @@ async function preprocessIcon(inputPath) {
         return outputPath;
     }
     catch (error) {
-        logger.warn(`Failed to add background to icon: ${error.message}`);
+        if (error instanceof Error) {
+            logger.warn(`Failed to add background to icon: ${error.message}`);
+        }
+        return inputPath;
+    }
+}
+/**
+ * Applies macOS squircle mask to icon
+ */
+async function applyMacOSMask(inputPath) {
+    try {
+        const { path: tempDir } = await dir();
+        const outputPath = path.join(tempDir, 'icon-macos-rounded.png');
+        // 1. Create a 1024x1024 rounded rect mask
+        // rx="224" is closer to the smooth Apple squircle look for 1024px
+        const mask = Buffer.from('<svg width="1024" height="1024"><rect x="0" y="0" width="1024" height="1024" rx="224" ry="224" fill="white"/></svg>');
+        // 2. Load input, resize to 1024, apply mask
+        const maskedBuffer = await sharp(inputPath)
+            .resize(1024, 1024, {
+            fit: 'contain',
+            background: { r: 0, g: 0, b: 0, alpha: 0 },
+        })
+            .composite([
+            {
+                input: mask,
+                blend: 'dest-in',
+            },
+        ])
+            .png()
+            .toBuffer();
+        // 3. Resize to 840x840 (~18% padding) to solve "too big" visual issue
+        // Native MacOS icons often leave some breathing room
+        await sharp(maskedBuffer)
+            .resize(840, 840, {
+            fit: 'contain',
+            background: { r: 0, g: 0, b: 0, alpha: 0 },
+        })
+            .extend({
+            top: 92,
+            bottom: 92,
+            left: 92,
+            right: 92,
+            background: { r: 0, g: 0, b: 0, alpha: 0 },
+        })
+            .toFile(outputPath);
+        return outputPath;
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            logger.warn(`Failed to apply macOS mask: ${error.message}`);
+        }
         return inputPath;
     }
 }
@@ -1509,7 +1526,8 @@ async function convertIconFormat(inputPath, appName) {
             return outputPath;
         }
         // macOS
-        await icongen(processedInputPath, platformOutputDir, {
+        const macIconPath = await applyMacOSMask(processedInputPath);
+        await icongen(macIconPath, platformOutputDir, {
             report: false,
             icns: { name: iconName, sizes: PLATFORM_CONFIG.macos.sizes },
         });
@@ -1517,7 +1535,9 @@ async function convertIconFormat(inputPath, appName) {
         return (await fsExtra.pathExists(outputPath)) ? outputPath : null;
     }
     catch (error) {
-        logger.warn(`Icon format conversion failed: ${error.message}`);
+        if (error instanceof Error) {
+            logger.warn(`Icon format conversion failed: ${error.message}`);
+        }
         return null;
     }
 }
@@ -1655,14 +1675,16 @@ async function tryGetFavicon(url, appName) {
                 }
             }
             catch (error) {
-                logger.debug(`Icon service ${serviceUrl} failed: ${error.message}`);
-                // Platform-specific error handling
-                if ((IS_LINUX || IS_WIN) && error.code === 'ENOTFOUND') {
-                    logger.debug(`DNS resolution failed for ${serviceUrl}, trying next service...`);
+                if (error instanceof Error) {
+                    logger.debug(`Icon service ${serviceUrl} failed: ${error.message}`);
                 }
-                // Windows-specific icon conversion errors
-                if (IS_WIN && error.message.includes('icongen')) {
-                    logger.debug(`Windows icon conversion failed for ${serviceUrl}, trying next service...`);
+                // Network error handling
+                if ((IS_LINUX || IS_WIN) && error.code === 'ENOTFOUND') {
+                    return null;
+                }
+                // Icon generation error on Windows
+                if (IS_WIN && error instanceof Error && error.message.includes('icongen')) {
+                    return null;
                 }
                 continue;
             }
@@ -1671,7 +1693,9 @@ async function tryGetFavicon(url, appName) {
         return null;
     }
     catch (error) {
-        logger.warn(`Failed to fetch favicon: ${error.message}`);
+        if (error instanceof Error) {
+            logger.warn(`Failed to fetch favicon: ${error.message}`);
+        }
         return null;
     }
 }
@@ -1696,7 +1720,7 @@ async function downloadIcon(iconUrl, showSpinner = true, customTimeout) {
     }
     catch (error) {
         if (showSpinner && !(error.response?.status === 404)) {
-            throw error;
+            logger.error('Icon download failed!', error);
         }
         return null;
     }
@@ -1779,7 +1803,7 @@ async function handleOptions(options, url) {
     if (name && platform === 'linux') {
         name = generateLinuxPackageName(name);
     }
-    if (!isValidName(name, platform)) {
+    if (name && !isValidName(name, platform)) {
         const LINUX_NAME_ERROR = `✕ Name should only include lowercase letters, numbers, and dashes (not leading dashes). Examples: com-123-xxx, 123pan, pan123, weread, we-read, 123.`;
         const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dashes, and spaces (not leading dashes and spaces). Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read, 123.`;
         const errorMsg = platform === 'linux' ? LINUX_NAME_ERROR : DEFAULT_NAME_ERROR;
@@ -1798,9 +1822,57 @@ async function handleOptions(options, url) {
         identifier: getIdentifier(url),
     };
     const iconPath = await handleIcon(appOptions, url);
-    appOptions.icon = iconPath || undefined;
+    appOptions.icon = iconPath || '';
     return appOptions;
 }
+
+const DEFAULT_PAKE_OPTIONS = {
+    icon: '',
+    height: 780,
+    width: 1200,
+    fullscreen: false,
+    maximize: false,
+    hideTitleBar: false,
+    alwaysOnTop: false,
+    appVersion: '1.0.0',
+    darkMode: false,
+    disabledWebShortcuts: false,
+    activationShortcut: '',
+    userAgent: '',
+    showSystemTray: false,
+    multiArch: false,
+    targets: (() => {
+        switch (process.platform) {
+            case 'linux':
+                return 'deb';
+            case 'darwin':
+                return 'dmg';
+            case 'win32':
+                return 'msi';
+            default:
+                return 'deb';
+        }
+    })(),
+    useLocalFile: false,
+    systemTrayIcon: '',
+    proxyUrl: '',
+    debug: false,
+    inject: [],
+    installerLanguage: 'en-US',
+    hideOnClose: undefined, // Platform-specific: true for macOS, false for others
+    incognito: false,
+    wasm: false,
+    enableDragDrop: false,
+    keepBinary: false,
+    multiInstance: false,
+    startToTray: false,
+    forceInternalNavigation: false,
+    iterativeBuild: false,
+    zoom: 100,
+    minWidth: 0,
+    minHeight: 0,
+    ignoreCertificateErrors: false,
+};
 
 function validateNumberInput(value) {
     const parsedValue = Number(value);
@@ -1816,155 +1888,158 @@ function validateUrlInput(url) {
             return normalizeUrl(url);
         }
         catch (error) {
-            throw new InvalidArgumentError(error.message);
+            if (error instanceof Error) {
+                throw new InvalidArgumentError(error.message);
+            }
+            throw error;
         }
     }
     return url;
 }
 
-const { green, yellow } = chalk;
-const logo = `${chalk.green(' ____       _')}
+function getCliProgram() {
+    const { green, yellow } = chalk;
+    const logo = `${chalk.green(' ____       _')}
 ${green('|  _ \\ __ _| | _____')}
 ${green('| |_) / _` | |/ / _ \\')}
 ${green('|  __/ (_| |   <  __/')}  ${yellow('https://github.com/tw93/pake')}
 ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with Rust.')}
 `;
-program
-    .addHelpText('beforeAll', logo)
-    .usage(`[url] [options]`)
-    .showHelpAfterError();
-program
-    .argument('[url]', 'The web URL you want to package', validateUrlInput)
-    // Refer to https://github.com/tj/commander.js#custom-option-processing, turn string array into a string connected with custom connectors.
-    // If the platform is Linux, use `-` as the connector, and convert all characters to lowercase.
-    // For example, Google Translate will become google-translate.
-    .option('--name <string>', 'Application name')
-    .option('--icon <string>', 'Application icon', DEFAULT_PAKE_OPTIONS.icon)
-    .option('--width <number>', 'Window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
-    .option('--height <number>', 'Window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
-    .option('--use-local-file', 'Use local file packaging', DEFAULT_PAKE_OPTIONS.useLocalFile)
-    .option('--fullscreen', 'Start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
-    .option('--hide-title-bar', 'For Mac, hide title bar', DEFAULT_PAKE_OPTIONS.hideTitleBar)
-    .option('--multi-arch', 'For Mac, both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
-    .option('--inject <files>', 'Inject local CSS/JS files into the page', (val, previous) => {
-    if (!val)
-        return DEFAULT_PAKE_OPTIONS.inject;
-    // Split by comma and trim whitespace, filter out empty strings
-    const files = val
-        .split(',')
-        .map((item) => item.trim())
-        .filter((item) => item.length > 0);
-    // If previous values exist (from multiple --inject options), merge them
-    return previous ? [...previous, ...files] : files;
-}, DEFAULT_PAKE_OPTIONS.inject)
-    .option('--debug', 'Debug build and more output', DEFAULT_PAKE_OPTIONS.debug)
-    .addOption(new Option('--proxy-url <url>', 'Proxy URL for all network requests (http://, https://, socks5://)')
-    .default(DEFAULT_PAKE_OPTIONS.proxyUrl)
-    .hideHelp())
-    .addOption(new Option('--user-agent <string>', 'Custom user agent')
-    .default(DEFAULT_PAKE_OPTIONS.userAgent)
-    .hideHelp())
-    .addOption(new Option('--targets <string>', 'Build target format for your system').default(DEFAULT_PAKE_OPTIONS.targets))
-    .addOption(new Option('--app-version <string>', 'App version, the same as package.json version')
-    .default(DEFAULT_PAKE_OPTIONS.appVersion)
-    .hideHelp())
-    .addOption(new Option('--always-on-top', 'Always on the top level')
-    .default(DEFAULT_PAKE_OPTIONS.alwaysOnTop)
-    .hideHelp())
-    .addOption(new Option('--maximize', 'Start window maximized')
-    .default(DEFAULT_PAKE_OPTIONS.maximize)
-    .hideHelp())
-    .addOption(new Option('--dark-mode', 'Force Mac app to use dark mode')
-    .default(DEFAULT_PAKE_OPTIONS.darkMode)
-    .hideHelp())
-    .addOption(new Option('--disabled-web-shortcuts', 'Disabled webPage shortcuts')
-    .default(DEFAULT_PAKE_OPTIONS.disabledWebShortcuts)
-    .hideHelp())
-    .addOption(new Option('--activation-shortcut <string>', 'Shortcut key to active App')
-    .default(DEFAULT_PAKE_OPTIONS.activationShortcut)
-    .hideHelp())
-    .addOption(new Option('--show-system-tray', 'Show system tray in app')
-    .default(DEFAULT_PAKE_OPTIONS.showSystemTray)
-    .hideHelp())
-    .addOption(new Option('--system-tray-icon <string>', 'Custom system tray icon')
-    .default(DEFAULT_PAKE_OPTIONS.systemTrayIcon)
-    .hideHelp())
-    .addOption(new Option('--hide-on-close [boolean]', 'Hide window on close instead of exiting (default: true for macOS, false for others)')
-    .default(DEFAULT_PAKE_OPTIONS.hideOnClose)
-    .argParser((value) => {
-    if (value === undefined)
-        return true; // --hide-on-close without value
-    if (value === 'true')
-        return true;
-    if (value === 'false')
-        return false;
-    throw new Error('--hide-on-close must be true or false');
-})
-    .hideHelp())
-    .addOption(new Option('--title <string>', 'Window title').hideHelp())
-    .addOption(new Option('--incognito', 'Launch app in incognito/private mode')
-    .default(DEFAULT_PAKE_OPTIONS.incognito)
-    .hideHelp())
-    .addOption(new Option('--wasm', 'Enable WebAssembly support (Flutter Web, etc.)')
-    .default(DEFAULT_PAKE_OPTIONS.wasm)
-    .hideHelp())
-    .addOption(new Option('--enable-drag-drop', 'Enable drag and drop functionality')
-    .default(DEFAULT_PAKE_OPTIONS.enableDragDrop)
-    .hideHelp())
-    .addOption(new Option('--keep-binary', 'Keep raw binary file alongside installer')
-    .default(DEFAULT_PAKE_OPTIONS.keepBinary)
-    .hideHelp())
-    .addOption(new Option('--multi-instance', 'Allow multiple app instances')
-    .default(DEFAULT_PAKE_OPTIONS.multiInstance)
-    .hideHelp())
-    .addOption(new Option('--start-to-tray', 'Start app minimized to tray')
-    .default(DEFAULT_PAKE_OPTIONS.startToTray)
-    .hideHelp())
-    .addOption(new Option('--force-internal-navigation', 'Keep every link inside the Pake window instead of opening external handlers')
-    .default(DEFAULT_PAKE_OPTIONS.forceInternalNavigation)
-    .hideHelp())
-    .addOption(new Option('--installer-language <string>', 'Installer language')
-    .default(DEFAULT_PAKE_OPTIONS.installerLanguage)
-    .hideHelp())
-    .addOption(new Option('--zoom <number>', 'Initial page zoom level (50-200)')
-    .default(DEFAULT_PAKE_OPTIONS.zoom)
-    .argParser((value) => {
-    const zoom = parseInt(value);
-    if (isNaN(zoom) || zoom < 50 || zoom > 200) {
-        throw new Error('--zoom must be a number between 50 and 200');
-    }
-    return zoom;
-})
-    .hideHelp())
-    .addOption(new Option('--min-width <number>', 'Minimum window width')
-    .default(DEFAULT_PAKE_OPTIONS.minWidth)
-    .argParser(validateNumberInput)
-    .hideHelp())
-    .addOption(new Option('--min-height <number>', 'Minimum window height')
-    .default(DEFAULT_PAKE_OPTIONS.minHeight)
-    .argParser(validateNumberInput)
-    .hideHelp())
-    .addOption(new Option('--ignore-certificate-errors', 'Ignore certificate errors (for self-signed certificates)')
-    .default(DEFAULT_PAKE_OPTIONS.ignoreCertificateErrors)
-    .hideHelp())
-    .addOption(new Option('--iterative-build', 'Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging')
-    .default(DEFAULT_PAKE_OPTIONS.iterativeBuild)
-    .hideHelp())
-    .version(packageJson.version, '-v, --version')
-    .configureHelp({
-    sortSubcommands: true,
-    optionTerm: (option) => {
-        if (option.flags === '-v, --version' || option.flags === '-h, --help')
-            return '';
-        return option.flags;
-    },
-    optionDescription: (option) => {
-        if (option.flags === '-v, --version' || option.flags === '-h, --help')
-            return '';
-        return option.description;
-    },
-})
-    .action(async (url, options) => {
+    return program$1
+        .addHelpText('beforeAll', logo)
+        .usage(`[url] [options]`)
+        .showHelpAfterError()
+        .argument('[url]', 'The web URL you want to package', validateUrlInput)
+        .option('--name <string>', 'Application name')
+        .option('--icon <string>', 'Application icon', DEFAULT_PAKE_OPTIONS.icon)
+        .option('--width <number>', 'Window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
+        .option('--height <number>', 'Window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
+        .option('--use-local-file', 'Use local file packaging', DEFAULT_PAKE_OPTIONS.useLocalFile)
+        .option('--fullscreen', 'Start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
+        .option('--hide-title-bar', 'For Mac, hide title bar', DEFAULT_PAKE_OPTIONS.hideTitleBar)
+        .option('--multi-arch', 'For Mac, both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
+        .option('--inject <files>', 'Inject local CSS/JS files into the page', (val, previous) => {
+        if (!val)
+            return DEFAULT_PAKE_OPTIONS.inject;
+        // Split by comma and trim whitespace, filter out empty strings
+        const files = val
+            .split(',')
+            .map((item) => item.trim())
+            .filter((item) => item.length > 0);
+        // If previous values exist (from multiple --inject options), merge them
+        return previous ? [...previous, ...files] : files;
+    }, DEFAULT_PAKE_OPTIONS.inject)
+        .option('--debug', 'Debug build and more output', DEFAULT_PAKE_OPTIONS.debug)
+        .addOption(new Option('--proxy-url <url>', 'Proxy URL for all network requests (http://, https://, socks5://)')
+        .default(DEFAULT_PAKE_OPTIONS.proxyUrl)
+        .hideHelp())
+        .addOption(new Option('--user-agent <string>', 'Custom user agent')
+        .default(DEFAULT_PAKE_OPTIONS.userAgent)
+        .hideHelp())
+        .addOption(new Option('--targets <string>', 'Build target format for your system').default(DEFAULT_PAKE_OPTIONS.targets))
+        .addOption(new Option('--app-version <string>', 'App version, the same as package.json version')
+        .default(DEFAULT_PAKE_OPTIONS.appVersion)
+        .hideHelp())
+        .addOption(new Option('--always-on-top', 'Always on the top level')
+        .default(DEFAULT_PAKE_OPTIONS.alwaysOnTop)
+        .hideHelp())
+        .addOption(new Option('--maximize', 'Start window maximized')
+        .default(DEFAULT_PAKE_OPTIONS.maximize)
+        .hideHelp())
+        .addOption(new Option('--dark-mode', 'Force Mac app to use dark mode')
+        .default(DEFAULT_PAKE_OPTIONS.darkMode)
+        .hideHelp())
+        .addOption(new Option('--disabled-web-shortcuts', 'Disabled webPage shortcuts')
+        .default(DEFAULT_PAKE_OPTIONS.disabledWebShortcuts)
+        .hideHelp())
+        .addOption(new Option('--activation-shortcut <string>', 'Shortcut key to active App')
+        .default(DEFAULT_PAKE_OPTIONS.activationShortcut)
+        .hideHelp())
+        .addOption(new Option('--show-system-tray', 'Show system tray in app')
+        .default(DEFAULT_PAKE_OPTIONS.showSystemTray)
+        .hideHelp())
+        .addOption(new Option('--system-tray-icon <string>', 'Custom system tray icon')
+        .default(DEFAULT_PAKE_OPTIONS.systemTrayIcon)
+        .hideHelp())
+        .addOption(new Option('--hide-on-close [boolean]', 'Hide window on close instead of exiting (default: true for macOS, false for others)')
+        .default(DEFAULT_PAKE_OPTIONS.hideOnClose)
+        .argParser((value) => {
+        if (value === undefined)
+            return true; // --hide-on-close without value
+        if (value === 'true')
+            return true;
+        if (value === 'false')
+            return false;
+        throw new Error('--hide-on-close must be true or false');
+    })
+        .hideHelp())
+        .addOption(new Option('--title <string>', 'Window title').hideHelp())
+        .addOption(new Option('--incognito', 'Launch app in incognito/private mode')
+        .default(DEFAULT_PAKE_OPTIONS.incognito)
+        .hideHelp())
+        .addOption(new Option('--wasm', 'Enable WebAssembly support (Flutter Web, etc.)')
+        .default(DEFAULT_PAKE_OPTIONS.wasm)
+        .hideHelp())
+        .addOption(new Option('--enable-drag-drop', 'Enable drag and drop functionality')
+        .default(DEFAULT_PAKE_OPTIONS.enableDragDrop)
+        .hideHelp())
+        .addOption(new Option('--keep-binary', 'Keep raw binary file alongside installer')
+        .default(DEFAULT_PAKE_OPTIONS.keepBinary)
+        .hideHelp())
+        .addOption(new Option('--multi-instance', 'Allow multiple app instances')
+        .default(DEFAULT_PAKE_OPTIONS.multiInstance)
+        .hideHelp())
+        .addOption(new Option('--start-to-tray', 'Start app minimized to tray')
+        .default(DEFAULT_PAKE_OPTIONS.startToTray)
+        .hideHelp())
+        .addOption(new Option('--force-internal-navigation', 'Keep every link inside the Pake window instead of opening external handlers')
+        .default(DEFAULT_PAKE_OPTIONS.forceInternalNavigation)
+        .hideHelp())
+        .addOption(new Option('--installer-language <string>', 'Installer language')
+        .default(DEFAULT_PAKE_OPTIONS.installerLanguage)
+        .hideHelp())
+        .addOption(new Option('--zoom <number>', 'Initial page zoom level (50-200)')
+        .default(DEFAULT_PAKE_OPTIONS.zoom)
+        .argParser((value) => {
+        const zoom = parseInt(value);
+        if (isNaN(zoom) || zoom < 50 || zoom > 200) {
+            throw new Error('--zoom must be a number between 50 and 200');
+        }
+        return zoom;
+    })
+        .hideHelp())
+        .addOption(new Option('--min-width <number>', 'Minimum window width')
+        .default(DEFAULT_PAKE_OPTIONS.minWidth)
+        .argParser(validateNumberInput)
+        .hideHelp())
+        .addOption(new Option('--min-height <number>', 'Minimum window height')
+        .default(DEFAULT_PAKE_OPTIONS.minHeight)
+        .argParser(validateNumberInput)
+        .hideHelp())
+        .addOption(new Option('--ignore-certificate-errors', 'Ignore certificate errors (for self-signed certificates)')
+        .default(DEFAULT_PAKE_OPTIONS.ignoreCertificateErrors)
+        .hideHelp())
+        .addOption(new Option('--iterative-build', 'Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging')
+        .default(DEFAULT_PAKE_OPTIONS.iterativeBuild)
+        .hideHelp())
+        .version(packageJson.version, '-v, --version')
+        .configureHelp({
+        sortSubcommands: true,
+        optionTerm: (option) => {
+            if (option.flags === '-v, --version' || option.flags === '-h, --help')
+                return '';
+            return option.flags;
+        },
+        optionDescription: (option) => {
+            if (option.flags === '-v, --version' || option.flags === '-h, --help')
+                return '';
+            return option.description;
+        },
+    });
+}
+
+const program = getCliProgram();
+program.action(async (url, options) => {
     await checkUpdateTips();
     if (!url) {
         program.help({
