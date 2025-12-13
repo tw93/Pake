@@ -1,6 +1,8 @@
 name: Update Contributors
 
 on:
+  push:
+    branches: [main, dev]
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * 0" # Every Sunday at midnight UTC
