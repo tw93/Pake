@@ -30,6 +30,7 @@ jobs:
           svgWidth: 1200
           avatarMargin: 12
           userNameHeight: 20
+          noCommit: true
           itemTemplate: |
             <g transform="translate({{ x }}, {{ y }})">
               <a xlink:href="{{{ url }}}" class="contributor-link" target="_blank" rel="nofollow sponsored" title="{{{ name }}}" id="{{{ name }}}">
@@ -37,3 +38,9 @@ jobs:
                 <text x="32" y="74" text-anchor="middle" alignment-baseline="middle" font-size="10">{{{ name }}}</text>
               </a>
             </g>
+
+      - name: Commit & Push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update contributors [skip ci]"
+          file_pattern: CONTRIBUTORS.svg
