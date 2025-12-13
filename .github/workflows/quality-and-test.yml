@@ -155,9 +155,9 @@ jobs:
       - name: Build CLI
         run: pnpm run cli:build
 
-      - name: Run Release Build Test
-        run: ./tests/release.js
-        timeout-minutes: 30
+      - name: Run CLI Test Suite
+        run: pnpm test
+        timeout-minutes: 40
         env:
           CI: true
           NODE_ENV: test
