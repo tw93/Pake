@@ -1435,17 +1435,19 @@ runner
     // Run release workflow tests as part of the standard suite
     // We skip this if builder tests are explicitly disabled (often used for quick checks)
     if (success && options.realBuild) {
-        console.log("\n📦 Running Release Workflow Test...");
-        console.log("   (This mimics the GitHub Actions release process for popular apps)");
+      console.log("\n📦 Running Release Workflow Test...");
+      console.log(
+        "   (This mimics the GitHub Actions release process for popular apps)",
+      );
 
-        // Pass skipCliBuild=true since "npm test" already builds the CLI
-        const releaseTester = new ReleaseBuildTest();
-        const releaseSuccess = await releaseTester.run({ skipCliBuild: true });
+      // Pass skipCliBuild=true since "npm test" already builds the CLI
+      const releaseTester = new ReleaseBuildTest();
+      const releaseSuccess = await releaseTester.run({ skipCliBuild: true });
 
-        if (!releaseSuccess) {
-            console.error("\n❌ Release workflow tests failed");
-            process.exit(1);
-        }
+      if (!releaseSuccess) {
+        console.error("\n❌ Release workflow tests failed");
+        process.exit(1);
+      }
     }
 
     process.exit(success ? 0 : 1);

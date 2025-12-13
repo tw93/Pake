@@ -468,15 +468,16 @@ export async function downloadIcon(
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-        if (response.status === 404 && !showSpinner) {
-            return null;
-        }
-        throw new Error(`HTTP ${response.status} ${response.statusText}`);
+      if (response.status === 404 && !showSpinner) {
+        return null;
+      }
+      throw new Error(`HTTP ${response.status} ${response.statusText}`);
     }
 
     const arrayBuffer = await response.arrayBuffer();
 
-    if (!arrayBuffer || arrayBuffer.byteLength < ICON_CONFIG.minFileSize) return null;
+    if (!arrayBuffer || arrayBuffer.byteLength < ICON_CONFIG.minFileSize)
+      return null;
 
     const fileDetails = await fileTypeFromBuffer(arrayBuffer);
     if (
@@ -491,9 +492,12 @@ export async function downloadIcon(
     clearTimeout(timeoutId);
     if (showSpinner) {
       if (error instanceof Error && error.name === 'AbortError') {
-         logger.error('Icon download timed out!');
+        logger.error('Icon download timed out!');
       } else {
-         logger.error('Icon download failed!', error instanceof Error ? error.message : String(error));
+        logger.error(
+          'Icon download failed!',
+          error instanceof Error ? error.message : String(error),
+        );
       }
     }
     return null;

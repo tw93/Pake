@@ -79,7 +79,7 @@ class ReleaseBuildTest {
         // Check files immediately after build
         const outputFiles = this.findOutputFiles(config.name);
         if (outputFiles.length === 0) {
-           throw new Error("No output files generated");
+          throw new Error("No output files generated");
         }
       } catch (buildError) {
         throw new Error(`Build failed: ${buildError.message}`);
@@ -162,13 +162,13 @@ class ReleaseBuildTest {
 
     // Build CLI first (unless skipped)
     if (!options.skipCliBuild) {
-        this.log("INFO", "🔨 Building CLI...");
-        try {
-            execSync(`pnpm run cli:build`, { stdio: "pipe" });
-        } catch (e) {
-            this.log("ERROR", "Failed to build CLI");
-            return false;
-        }
+      this.log("INFO", "🔨 Building CLI...");
+      try {
+        execSync(`pnpm run cli:build`, { stdio: "pipe" });
+      } catch (e) {
+        this.log("ERROR", "Failed to build CLI");
+        return false;
+      }
     }
 
     console.log(`Testing apps: ${TEST_APPS.join(", ")}`);
