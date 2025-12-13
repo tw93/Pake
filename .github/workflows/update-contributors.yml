@@ -6,6 +6,10 @@ on:
   schedule:
     - cron: "0 0 * * 0" # Every Sunday at midnight UTC
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   update-contributors:
     runs-on: ubuntu-latest
