@@ -1,5 +1,4 @@
 import path from 'path';
-import axios from 'axios';
 import fsExtra from 'fs-extra';
 import chalk from 'chalk';
 import { dir } from 'tmp-promise';
@@ -456,16 +455,30 @@ export async function downloadIcon(
   showSpinner = true,
   customTimeout?: number,
 ): Promise<string | null> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, customTimeout || 10000);
+
   try {
-    const response = await axios.get(iconUrl, {
-      responseType: 'arraybuffer',
-      timeout: customTimeout || 10000,
+    const response = await fetch(iconUrl, {
+      signal: controller.signal,
     });
 
-    const iconData = response.data;
-    if (!iconData || iconData.byteLength < ICON_CONFIG.minFileSize) return null;
+    clearTimeout(timeoutId);
 
-    const fileDetails = await fileTypeFromBuffer(iconData);
+    if (!response.ok) {
+        if (response.status === 404 && !showSpinner) {
+            return null;
+        }
+        throw new Error(`HTTP ${response.status} ${response.statusText}`);
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+
+    if (!arrayBuffer || arrayBuffer.byteLength < ICON_CONFIG.minFileSize) return null;
+
+    const fileDetails = await fileTypeFromBuffer(arrayBuffer);
     if (
       !fileDetails ||
       !ICON_CONFIG.supportedFormats.includes(fileDetails.ext as any)
@@ -473,10 +486,15 @@ export async function downloadIcon(
       return null;
     }
 
-    return await saveIconFile(iconData, fileDetails.ext);
+    return await saveIconFile(arrayBuffer, fileDetails.ext);
   } catch (error: unknown) {
-    if (showSpinner && !((error as any).response?.status === 404)) {
-      logger.error('Icon download failed!', error);
+    clearTimeout(timeoutId);
+    if (showSpinner) {
+      if (error instanceof Error && error.name === 'AbortError') {
+         logger.error('Icon download timed out!');
+      } else {
+         logger.error('Icon download failed!', error instanceof Error ? error.message : String(error));
+      }
     }
     return null;
   }

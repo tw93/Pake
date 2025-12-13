@@ -8,7 +8,7 @@ import {
   generateIdentifierSafeName,
   getSafeAppName,
 } from '@/utils/name';
-import { PakeAppOptions, PlatformMap } from '@/types';
+import { PakeAppOptions, PlatformMap, WindowConfig } from '@/types';
 import { tauriConfigDirectory, npmDirectory } from '@/utils/dir';
 
 export async function mergeConfig(
@@ -81,7 +81,7 @@ export async function mergeConfig(
 
   const platformHideOnClose = hideOnClose ?? platform === 'darwin';
 
-  const tauriConfWindowOptions = {
+  const tauriConfWindowOptions: Partial<WindowConfig> = {
     width,
     height,
     fullscreen,
@@ -94,7 +94,7 @@ export async function mergeConfig(
     disabled_web_shortcuts: disabledWebShortcuts,
     hide_on_close: platformHideOnClose,
     incognito: incognito,
-    title: title || null,
+    title: title,
     enable_wasm: wasm,
     enable_drag_drop: enableDragDrop,
     start_to_tray: startToTray && showSystemTray,

@@ -14,7 +14,6 @@ import http from 'http';
 import { promisify } from 'util';
 import fs from 'fs';
 import updateNotifier from 'update-notifier';
-import axios from 'axios';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
 import icongen from 'icon-gen';
@@ -385,7 +384,7 @@ async function mergeConfig(url, options, tauriConf) {
         disabled_web_shortcuts: disabledWebShortcuts,
         hide_on_close: platformHideOnClose,
         incognito: incognito,
-        title: title || null,
+        title: title,
         enable_wasm: wasm,
         enable_drag_drop: enableDragDrop,
         start_to_tray: startToTray && showSystemTray,
@@ -1302,7 +1301,6 @@ var license = "MIT";
 var dependencies = {
 	"@tauri-apps/api": "^2.9.0",
 	"@tauri-apps/cli": "^2.9.0",
-	axios: "^1.12.2",
 	chalk: "^5.6.2",
 	commander: "^12.1.0",
 	execa: "^9.6.0",
@@ -1705,24 +1703,40 @@ async function tryGetFavicon(url, appName) {
  * Downloads icon from URL
  */
 async function downloadIcon(iconUrl, showSpinner = true, customTimeout) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+        controller.abort();
+    }, customTimeout || 10000);
     try {
-        const response = await axios.get(iconUrl, {
-            responseType: 'arraybuffer',
-            timeout: customTimeout || 10000,
+        const response = await fetch(iconUrl, {
+            signal: controller.signal,
         });
-        const iconData = response.data;
-        if (!iconData || iconData.byteLength < ICON_CONFIG.minFileSize)
+        clearTimeout(timeoutId);
+        if (!response.ok) {
+            if (response.status === 404 && !showSpinner) {
+                return null;
+            }
+            throw new Error(`HTTP ${response.status} ${response.statusText}`);
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        if (!arrayBuffer || arrayBuffer.byteLength < ICON_CONFIG.minFileSize)
             return null;
-        const fileDetails = await fileTypeFromBuffer(iconData);
+        const fileDetails = await fileTypeFromBuffer(arrayBuffer);
         if (!fileDetails ||
             !ICON_CONFIG.supportedFormats.includes(fileDetails.ext)) {
             return null;
         }
-        return await saveIconFile(iconData, fileDetails.ext);
+        return await saveIconFile(arrayBuffer, fileDetails.ext);
     }
     catch (error) {
-        if (showSpinner && !(error.response?.status === 404)) {
-            logger.error('Icon download failed!', error);
+        clearTimeout(timeoutId);
+        if (showSpinner) {
+            if (error instanceof Error && error.name === 'AbortError') {
+                logger.error('Icon download timed out!');
+            }
+            else {
+                logger.error('Icon download failed!', error instanceof Error ? error.message : String(error));
+            }
         }
         return null;
     }
