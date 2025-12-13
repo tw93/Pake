@@ -1,11 +1,18 @@
 import log from 'loglevel';
+import updateNotifier from 'update-notifier';
+import packageJson from '../package.json';
 import BuilderProvider from './builders/BuilderProvider';
-import { checkUpdateTips } from './helpers/updater';
 import handleInputOptions from './options/index';
 import { getCliProgram } from './helpers/cli-program';
 import { PakeCliOptions } from './types';
 
 const program = getCliProgram();
+
+async function checkUpdateTips() {
+  updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify({
+    isGlobal: true,
+  });
+}
 
 program.action(async (url: string, options: PakeCliOptions) => {
   await checkUpdateTips();
