@@ -9,6 +9,8 @@ use tauri_plugin_window_state::StateFlags;
 #[cfg(target_os = "macos")]
 use std::time::Duration;
 
+const WINDOW_SHOW_DELAY: u64 = 50;
+
 use app::{
     invoke::{
         clear_cache_and_restart, download_file, download_file_by_binary, send_notification,
@@ -69,7 +71,7 @@ pub fn run_app() {
         ])
         .setup(move |app| {
             // --- Menu Construction Start ---
-            let menu = app::menu::get_menu(app.app_handle());
+            let menu = app::menu::get_menu(app.app_handle())?;
             app.set_menu(menu)?;
 
             // Event Handling for Custom Menu Item
@@ -92,7 +94,7 @@ pub fn run_app() {
             if !start_to_tray {
                 let window_clone = window.clone();
                 tauri::async_runtime::spawn(async move {
-                    tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
+                    tokio::time::sleep(tokio::time::Duration::from_millis(WINDOW_SHOW_DELAY)).await;
                     window_clone.show().unwrap();
                 });
             }

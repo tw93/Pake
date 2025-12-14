@@ -58,8 +58,31 @@ on:
         required: false
 
 jobs:
+  build-cli:
+    name: Build CLI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: ./.github/actions/setup-env
+        with:
+          mode: 'node'
+
+      - name: Build CLI
+        run: pnpm run cli:build
+
+      - name: Upload CLI Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pake-cli-dist
+          path: dist/
+          retention-days: 1
+
   build:
     name: ${{ inputs.title }} (${{ matrix.build }})
+    needs: build-cli
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -89,6 +112,12 @@ jobs:
         with:
           mode: ${{ (matrix.build == 'linux' || matrix.build == 'macos') && 'build' || 'node' }}
 
+      - name: Download CLI Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pake-cli-dist
+          path: dist
+
       - name: Rust cache restore
         uses: actions/cache/restore@v4.2.0
         id: cache_store
@@ -108,9 +137,6 @@ jobs:
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
-
-      - name: Build CLI
-        run: pnpm run cli:build
 
       - name: Build for Linux
         if: matrix.os == 'ubuntu-latest'

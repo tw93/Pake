@@ -2,208 +2,171 @@ use tauri::menu::{AboutMetadata, Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::{AppHandle, Manager, Wry};
 use tauri_plugin_opener::OpenerExt;
 
-pub fn get_menu(app: &AppHandle<Wry>) -> Menu<Wry> {
+pub fn get_menu(app: &AppHandle<Wry>) -> tauri::Result<Menu<Wry>> {
     let pake_version = env!("CARGO_PKG_VERSION");
     let pake_menu_item_title = format!("Built with Pake V{}", pake_version);
 
-    // App Menu (macOS specific, e.g., "Pake")
-    let app_menu = Submenu::new(app, "Pake", true).unwrap();
-    let about_metadata = AboutMetadata::default();
-    app_menu
-        .append(&PredefinedMenuItem::about(app, Some("Pake"), Some(about_metadata)).unwrap())
-        .unwrap();
-    app_menu
-        .append(&PredefinedMenuItem::separator(app).unwrap())
-        .unwrap();
-    app_menu
-        .append(&PredefinedMenuItem::services(app, None).unwrap())
-        .unwrap();
-    app_menu
-        .append(&PredefinedMenuItem::separator(app).unwrap())
-        .unwrap();
-    app_menu
-        .append(&PredefinedMenuItem::hide(app, None).unwrap())
-        .unwrap();
-    app_menu
-        .append(&PredefinedMenuItem::hide_others(app, None).unwrap())
-        .unwrap();
-    app_menu
-        .append(&PredefinedMenuItem::show_all(app, None).unwrap())
-        .unwrap();
-    app_menu
-        .append(&PredefinedMenuItem::separator(app).unwrap())
-        .unwrap();
-    app_menu
-        .append(&PredefinedMenuItem::quit(app, None).unwrap())
-        .unwrap();
-
-    // File Menu
-    let file_menu = Submenu::new(app, "File", true).unwrap();
-    file_menu
-        .append(&PredefinedMenuItem::close_window(app, None).unwrap())
-        .unwrap();
-    file_menu
-        .append(&PredefinedMenuItem::separator(app).unwrap())
-        .unwrap();
-    file_menu
-        .append(
-            &MenuItem::with_id(
-                app,
-                "clear_cache_restart",
-                "Clear Cache & Restart",
-                true,
-                Some("CmdOrCtrl+Shift+Backspace"),
-            )
-            .unwrap(),
-        )
-        .unwrap();
-
-    // Edit Menu
-    let edit_menu = Submenu::new(app, "Edit", true).unwrap();
-    edit_menu
-        .append(&PredefinedMenuItem::undo(app, None).unwrap())
-        .unwrap();
-    edit_menu
-        .append(&PredefinedMenuItem::redo(app, None).unwrap())
-        .unwrap();
-    edit_menu
-        .append(&PredefinedMenuItem::separator(app).unwrap())
-        .unwrap();
-    edit_menu
-        .append(&PredefinedMenuItem::cut(app, None).unwrap())
-        .unwrap();
-    edit_menu
-        .append(&PredefinedMenuItem::copy(app, None).unwrap())
-        .unwrap();
-    edit_menu
-        .append(&PredefinedMenuItem::paste(app, None).unwrap())
-        .unwrap();
-    edit_menu
-        .append(&PredefinedMenuItem::select_all(app, None).unwrap())
-        .unwrap();
-    edit_menu
-        .append(&PredefinedMenuItem::separator(app).unwrap())
-        .unwrap();
-    edit_menu
-        .append(&MenuItem::with_id(app, "copy_url", "Copy URL", true, Some("CmdOrCtrl+L")).unwrap())
-        .unwrap();
-
-    // View Menu
-    let view_menu = Submenu::new(app, "View", true).unwrap();
-    view_menu
-        .append(&MenuItem::with_id(app, "reload", "Reload", true, Some("CmdOrCtrl+R")).unwrap())
-        .unwrap();
-    view_menu
-        .append(&PredefinedMenuItem::separator(app).unwrap())
-        .unwrap();
-    view_menu
-        .append(&MenuItem::with_id(app, "zoom_in", "Zoom In", true, Some("CmdOrCtrl+=")).unwrap())
-        .unwrap();
-    view_menu
-        .append(&MenuItem::with_id(app, "zoom_out", "Zoom Out", true, Some("CmdOrCtrl+-")).unwrap())
-        .unwrap();
-    view_menu
-        .append(
-            &MenuItem::with_id(app, "zoom_reset", "Actual Size", true, Some("CmdOrCtrl+0"))
-                .unwrap(),
-        )
-        .unwrap();
-    view_menu
-        .append(&PredefinedMenuItem::separator(app).unwrap())
-        .unwrap();
-    view_menu
-        .append(&PredefinedMenuItem::fullscreen(app, None).unwrap())
-        .unwrap();
-    view_menu
-        .append(&PredefinedMenuItem::separator(app).unwrap())
-        .unwrap();
-    view_menu
-        .append(
-            &MenuItem::with_id(
-                app,
-                "toggle_devtools",
-                "Toggle Developer Tools",
-                cfg!(debug_assertions),
-                Some("CmdOrCtrl+Option+I"),
-            )
-            .unwrap(),
-        )
-        .unwrap();
-
-    // Navigation Menu
-    let navigation_menu = Submenu::new(app, "Navigation", true).unwrap();
-    navigation_menu
-        .append(&MenuItem::with_id(app, "go_back", "Back", true, Some("CmdOrCtrl+[")).unwrap())
-        .unwrap();
-    navigation_menu
-        .append(
-            &MenuItem::with_id(app, "go_forward", "Forward", true, Some("CmdOrCtrl+]")).unwrap(),
-        )
-        .unwrap();
-    navigation_menu
-        .append(
-            &MenuItem::with_id(app, "go_home", "Go Home", true, Some("CmdOrCtrl+Shift+H")).unwrap(),
-        )
-        .unwrap();
-
-    // Window Menu
-    let window_menu = Submenu::new(app, "Window", true).unwrap();
-    window_menu
-        .append(&PredefinedMenuItem::minimize(app, None).unwrap())
-        .unwrap();
-    window_menu
-        .append(&PredefinedMenuItem::maximize(app, None).unwrap())
-        .unwrap();
-    window_menu
-        .append(&PredefinedMenuItem::separator(app).unwrap())
-        .unwrap();
-    window_menu
-        .append(
-            &MenuItem::with_id(
-                app,
-                "always_on_top",
-                "Toggle Always on Top",
-                true,
-                None::<&str>,
-            )
-            .unwrap(),
-        )
-        .unwrap();
-    window_menu
-        .append(&PredefinedMenuItem::separator(app).unwrap())
-        .unwrap();
-    window_menu
-        .append(&PredefinedMenuItem::close_window(app, None).unwrap())
-        .unwrap();
-
-    // Help Menu (Custom)
-    let help_menu = Submenu::new(app, "Help", true).unwrap();
-    let github_item = MenuItem::with_id(
-        app,
-        "pake_github_link",
-        &pake_menu_item_title,
-        true,
-        None::<&str>,
-    )
-    .unwrap();
-    help_menu.append(&github_item).unwrap();
-
-    // Construct the Menu Bar
     let menu = Menu::with_items(
         app,
         &[
-            &app_menu,
-            &file_menu,
-            &edit_menu,
-            &view_menu,
-            &navigation_menu,
-            &window_menu,
-            &help_menu,
+            &app_menu(app)?,
+            &file_menu(app)?,
+            &edit_menu(app)?,
+            &view_menu(app)?,
+            &navigation_menu(app)?,
+            &window_menu(app)?,
+            &help_menu(app, &pake_menu_item_title)?,
         ],
-    )
-    .unwrap();
+    )?;
 
-    menu
+    Ok(menu)
+}
+
+fn app_menu(app: &AppHandle<Wry>) -> tauri::Result<Submenu<Wry>> {
+    let app_menu = Submenu::new(app, "Pake", true)?;
+    let about_metadata = AboutMetadata::default();
+    app_menu.append(&PredefinedMenuItem::about(
+        app,
+        Some("Pake"),
+        Some(about_metadata),
+    )?)?;
+    app_menu.append(&PredefinedMenuItem::separator(app)?)?;
+    app_menu.append(&PredefinedMenuItem::services(app, None)?)?;
+    app_menu.append(&PredefinedMenuItem::separator(app)?)?;
+    app_menu.append(&PredefinedMenuItem::hide(app, None)?)?;
+    app_menu.append(&PredefinedMenuItem::hide_others(app, None)?)?;
+    app_menu.append(&PredefinedMenuItem::show_all(app, None)?)?;
+    app_menu.append(&PredefinedMenuItem::separator(app)?)?;
+    app_menu.append(&PredefinedMenuItem::quit(app, None)?)?;
+    Ok(app_menu)
+}
+
+fn file_menu(app: &AppHandle<Wry>) -> tauri::Result<Submenu<Wry>> {
+    let file_menu = Submenu::new(app, "File", true)?;
+    file_menu.append(&PredefinedMenuItem::close_window(app, None)?)?;
+    file_menu.append(&PredefinedMenuItem::separator(app)?)?;
+    file_menu.append(&MenuItem::with_id(
+        app,
+        "clear_cache_restart",
+        "Clear Cache & Restart",
+        true,
+        Some("CmdOrCtrl+Shift+Backspace"),
+    )?)?;
+    Ok(file_menu)
+}
+
+fn edit_menu(app: &AppHandle<Wry>) -> tauri::Result<Submenu<Wry>> {
+    let edit_menu = Submenu::new(app, "Edit", true)?;
+    edit_menu.append(&PredefinedMenuItem::undo(app, None)?)?;
+    edit_menu.append(&PredefinedMenuItem::redo(app, None)?)?;
+    edit_menu.append(&PredefinedMenuItem::separator(app)?)?;
+    edit_menu.append(&PredefinedMenuItem::cut(app, None)?)?;
+    edit_menu.append(&PredefinedMenuItem::copy(app, None)?)?;
+    edit_menu.append(&PredefinedMenuItem::paste(app, None)?)?;
+    edit_menu.append(&PredefinedMenuItem::select_all(app, None)?)?;
+    edit_menu.append(&PredefinedMenuItem::separator(app)?)?;
+    edit_menu.append(&MenuItem::with_id(
+        app,
+        "copy_url",
+        "Copy URL",
+        true,
+        Some("CmdOrCtrl+L"),
+    )?)?;
+    Ok(edit_menu)
+}
+
+fn view_menu(app: &AppHandle<Wry>) -> tauri::Result<Submenu<Wry>> {
+    let view_menu = Submenu::new(app, "View", true)?;
+    view_menu.append(&MenuItem::with_id(
+        app,
+        "reload",
+        "Reload",
+        true,
+        Some("CmdOrCtrl+R"),
+    )?)?;
+    view_menu.append(&PredefinedMenuItem::separator(app)?)?;
+    view_menu.append(&MenuItem::with_id(
+        app,
+        "zoom_in",
+        "Zoom In",
+        true,
+        Some("CmdOrCtrl+="),
+    )?)?;
+    view_menu.append(&MenuItem::with_id(
+        app,
+        "zoom_out",
+        "Zoom Out",
+        true,
+        Some("CmdOrCtrl+-"),
+    )?)?;
+    view_menu.append(&MenuItem::with_id(
+        app,
+        "zoom_reset",
+        "Actual Size",
+        true,
+        Some("CmdOrCtrl+0"),
+    )?)?;
+    view_menu.append(&PredefinedMenuItem::separator(app)?)?;
+    view_menu.append(&PredefinedMenuItem::fullscreen(app, None)?)?;
+    view_menu.append(&PredefinedMenuItem::separator(app)?)?;
+    view_menu.append(&MenuItem::with_id(
+        app,
+        "toggle_devtools",
+        "Toggle Developer Tools",
+        cfg!(debug_assertions),
+        Some("CmdOrCtrl+Option+I"),
+    )?)?;
+    Ok(view_menu)
+}
+
+fn navigation_menu(app: &AppHandle<Wry>) -> tauri::Result<Submenu<Wry>> {
+    let navigation_menu = Submenu::new(app, "Navigation", true)?;
+    navigation_menu.append(&MenuItem::with_id(
+        app,
+        "go_back",
+        "Back",
+        true,
+        Some("CmdOrCtrl+["),
+    )?)?;
+    navigation_menu.append(&MenuItem::with_id(
+        app,
+        "go_forward",
+        "Forward",
+        true,
+        Some("CmdOrCtrl+]"),
+    )?)?;
+    navigation_menu.append(&MenuItem::with_id(
+        app,
+        "go_home",
+        "Go Home",
+        true,
+        Some("CmdOrCtrl+Shift+H"),
+    )?)?;
+    Ok(navigation_menu)
+}
+
+fn window_menu(app: &AppHandle<Wry>) -> tauri::Result<Submenu<Wry>> {
+    let window_menu = Submenu::new(app, "Window", true)?;
+    window_menu.append(&PredefinedMenuItem::minimize(app, None)?)?;
+    window_menu.append(&PredefinedMenuItem::maximize(app, None)?)?;
+    window_menu.append(&PredefinedMenuItem::separator(app)?)?;
+    window_menu.append(&MenuItem::with_id(
+        app,
+        "always_on_top",
+        "Toggle Always on Top",
+        true,
+        None::<&str>,
+    )?)?;
+    window_menu.append(&PredefinedMenuItem::separator(app)?)?;
+    window_menu.append(&PredefinedMenuItem::close_window(app, None)?)?;
+    Ok(window_menu)
+}
+
+fn help_menu(app: &AppHandle<Wry>, title: &str) -> tauri::Result<Submenu<Wry>> {
+    let help_menu = Submenu::new(app, "Help", true)?;
+    let github_item = MenuItem::with_id(app, "pake_github_link", title, true, None::<&str>)?;
+    help_menu.append(&github_item)?;
+    Ok(help_menu)
 }
 
 pub fn handle_menu_click(app_handle: &AppHandle, id: &str) {
