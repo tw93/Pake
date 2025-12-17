@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import log from 'loglevel';
+import updateNotifier from 'update-notifier';
 import path from 'path';
 import fsExtra from 'fs-extra';
 import { fileURLToPath } from 'url';
@@ -13,13 +14,118 @@ import dns from 'dns';
 import http from 'http';
 import { promisify } from 'util';
 import fs from 'fs';
-import updateNotifier from 'update-notifier';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
 import icongen from 'icon-gen';
 import sharp from 'sharp';
 import * as psl from 'psl';
 import { InvalidArgumentError, program as program$1, Option } from 'commander';
+
+var name = "pake-cli";
+var version = "3.6.3";
+var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
+var engines = {
+	node: ">=18.0.0"
+};
+var packageManager = "pnpm@10.15.0";
+var bin = {
+	pake: "./dist/cli.js"
+};
+var repository = {
+	type: "git",
+	url: "https://github.com/tw93/pake.git"
+};
+var author = {
+	name: "Tw93",
+	email: "tw93@qq.com"
+};
+var keywords = [
+	"pake",
+	"pake-cli",
+	"rust",
+	"tauri",
+	"no-electron",
+	"productivity"
+];
+var files = [
+	"dist",
+	"src-tauri"
+];
+var scripts = {
+	start: "pnpm run dev",
+	dev: "pnpm run tauri dev",
+	build: "tauri build",
+	"build:debug": "tauri build --debug",
+	"build:mac": "tauri build --target universal-apple-darwin",
+	analyze: "cd src-tauri && cargo bloat --release --crates",
+	tauri: "tauri",
+	cli: "cross-env NODE_ENV=development rollup -c -w",
+	"cli:build": "cross-env NODE_ENV=production rollup -c",
+	test: "pnpm run cli:build && cross-env PAKE_CREATE_APP=1 node tests/index.js",
+	format: "prettier --write . --ignore-unknown && find tests -name '*.js' -exec sed -i '' 's/[[:space:]]*$//' {} \\; && cd src-tauri && cargo fmt --verbose",
+	"format:check": "prettier --check . --ignore-unknown",
+	update: "pnpm update --verbose && cd src-tauri && cargo update",
+	prepublishOnly: "pnpm run cli:build"
+};
+var type = "module";
+var exports = "./dist/cli.js";
+var license = "MIT";
+var dependencies = {
+	"@tauri-apps/api": "^2.9.0",
+	"@tauri-apps/cli": "^2.9.0",
+	chalk: "^5.6.2",
+	commander: "^12.1.0",
+	execa: "^9.6.0",
+	"file-type": "^18.7.0",
+	"fs-extra": "^11.3.2",
+	"icon-gen": "^5.0.0",
+	loglevel: "^1.9.2",
+	ora: "^8.2.0",
+	prompts: "^2.4.2",
+	psl: "^1.15.0",
+	sharp: "^0.33.5",
+	"tmp-promise": "^3.0.3",
+	"update-notifier": "^7.3.1"
+};
+var devDependencies = {
+	"@rollup/plugin-alias": "^5.1.1",
+	"@rollup/plugin-commonjs": "^28.0.8",
+	"@rollup/plugin-json": "^6.1.0",
+	"@rollup/plugin-replace": "^6.0.2",
+	"@rollup/plugin-terser": "^0.4.4",
+	"@types/fs-extra": "^11.0.4",
+	"@types/node": "^20.19.23",
+	"@types/page-icon": "^0.3.6",
+	"@types/prompts": "^2.4.9",
+	"@types/tmp": "^0.2.6",
+	"@types/update-notifier": "^6.0.8",
+	"app-root-path": "^3.1.0",
+	"cross-env": "^7.0.3",
+	prettier: "^3.6.2",
+	rollup: "^4.52.5",
+	"rollup-plugin-typescript2": "^0.36.0",
+	tslib: "^2.8.1",
+	typescript: "^5.9.3",
+	vitest: "^4.0.15"
+};
+var packageJson = {
+	name: name,
+	version: version,
+	description: description,
+	engines: engines,
+	packageManager: packageManager,
+	bin: bin,
+	repository: repository,
+	author: author,
+	keywords: keywords,
+	files: files,
+	scripts: scripts,
+	type: type,
+	exports: exports,
+	license: license,
+	dependencies: dependencies,
+	devDependencies: devDependencies
+};
 
 // Convert the current module URL to a file path
 const currentModulePath = fileURLToPath(import.meta.url);
@@ -1248,119 +1354,6 @@ class BuilderProvider {
     }
 }
 
-var name = "pake-cli";
-var version = "3.6.2";
-var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
-var engines = {
-	node: ">=18.0.0"
-};
-var packageManager = "pnpm@10.15.0";
-var bin = {
-	pake: "./dist/cli.js"
-};
-var repository = {
-	type: "git",
-	url: "https://github.com/tw93/pake.git"
-};
-var author = {
-	name: "Tw93",
-	email: "tw93@qq.com"
-};
-var keywords = [
-	"pake",
-	"pake-cli",
-	"rust",
-	"tauri",
-	"no-electron",
-	"productivity"
-];
-var files = [
-	"dist",
-	"src-tauri"
-];
-var scripts = {
-	start: "pnpm run dev",
-	dev: "pnpm run tauri dev",
-	build: "tauri build",
-	"build:debug": "tauri build --debug",
-	"build:mac": "tauri build --target universal-apple-darwin",
-	analyze: "cd src-tauri && cargo bloat --release --crates",
-	tauri: "tauri",
-	cli: "cross-env NODE_ENV=development rollup -c -w",
-	"cli:dev": "cross-env NODE_ENV=development rollup -c -w",
-	"cli:build": "cross-env NODE_ENV=production rollup -c",
-	test: "pnpm run cli:build && cross-env PAKE_CREATE_APP=1 node tests/index.js",
-	format: "prettier --write . --ignore-unknown && find tests -name '*.js' -exec sed -i '' 's/[[:space:]]*$//' {} \\; && cd src-tauri && cargo fmt --verbose",
-	"format:check": "prettier --check . --ignore-unknown",
-	update: "pnpm update --verbose && cd src-tauri && cargo update",
-	prepublishOnly: "pnpm run cli:build"
-};
-var type = "module";
-var exports = "./dist/cli.js";
-var license = "MIT";
-var dependencies = {
-	"@tauri-apps/api": "^2.9.0",
-	"@tauri-apps/cli": "^2.9.0",
-	chalk: "^5.6.2",
-	commander: "^12.1.0",
-	execa: "^9.6.0",
-	"file-type": "^18.7.0",
-	"fs-extra": "^11.3.2",
-	"icon-gen": "^5.0.0",
-	loglevel: "^1.9.2",
-	ora: "^8.2.0",
-	prompts: "^2.4.2",
-	psl: "^1.15.0",
-	sharp: "^0.33.5",
-	"tmp-promise": "^3.0.3",
-	"update-notifier": "^7.3.1"
-};
-var devDependencies = {
-	"@rollup/plugin-alias": "^5.1.1",
-	"@rollup/plugin-commonjs": "^28.0.8",
-	"@rollup/plugin-json": "^6.1.0",
-	"@rollup/plugin-replace": "^6.0.2",
-	"@rollup/plugin-terser": "^0.4.4",
-	"@types/fs-extra": "^11.0.4",
-	"@types/node": "^20.19.23",
-	"@types/page-icon": "^0.3.6",
-	"@types/prompts": "^2.4.9",
-	"@types/tmp": "^0.2.6",
-	"@types/update-notifier": "^6.0.8",
-	"app-root-path": "^3.1.0",
-	"cross-env": "^7.0.3",
-	prettier: "^3.6.2",
-	rollup: "^4.52.5",
-	"rollup-plugin-typescript2": "^0.36.0",
-	tslib: "^2.8.1",
-	typescript: "^5.9.3",
-	vitest: "^4.0.15"
-};
-var packageJson = {
-	name: name,
-	version: version,
-	description: description,
-	engines: engines,
-	packageManager: packageManager,
-	bin: bin,
-	repository: repository,
-	author: author,
-	keywords: keywords,
-	files: files,
-	scripts: scripts,
-	type: type,
-	exports: exports,
-	license: license,
-	dependencies: dependencies,
-	devDependencies: devDependencies
-};
-
-async function checkUpdateTips() {
-    updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify({
-        isGlobal: true,
-    });
-}
-
 const ICON_CONFIG = {
     minFileSize: 100,
     supportedFormats: ['png', 'ico', 'jpeg', 'jpg', 'webp', 'icns'],
@@ -2055,6 +2048,11 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
 }
 
 const program = getCliProgram();
+async function checkUpdateTips() {
+    updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify({
+        isGlobal: true,
+    });
+}
 program.action(async (url, options) => {
     await checkUpdateTips();
     if (!url) {
