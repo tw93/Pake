@@ -153,6 +153,10 @@ jobs:
           mv src-tauri/target/release/bundle/deb/*.deb output/linux/${{inputs.title}}_`arch`.deb
           mv src-tauri/target/release/bundle/appimage/*.AppImage output/linux/"${{inputs.title}}"_`arch`.AppImage
 
+          if [ -f "src-tauri/png/${{ inputs.name }}_512.png" ]; then
+            cp "src-tauri/png/${{ inputs.name }}_512.png" output/linux/
+          fi
+
       - name: Build for macOS
         if: matrix.os == 'macos-latest'
         timeout-minutes: 25
@@ -164,6 +168,12 @@ jobs:
 
           mkdir -p output/macos
           mv src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg output/macos/"${{inputs.title}}".dmg
+
+          if [ -f "src-tauri/png/${{ inputs.name }}_512.png" ]; then
+            cp "src-tauri/png/${{ inputs.name }}_512.png" output/macos/
+          elif [ -f "src-tauri/icons/${{ inputs.name }}.icns" ]; then
+             cp "src-tauri/icons/${{ inputs.name }}.icns" output/macos/
+          fi
 
       - name: Build for Windows
         if: matrix.os == 'windows-latest'
@@ -184,6 +194,18 @@ jobs:
             Get-ChildItem -Path "src-tauri\target\" -Recurse -Name "*.msi" | Write-Host
             exit 1
           }
+
+
+
+          $pngPath = "src-tauri\png\${{ inputs.name }}_512.png"
+          $icoPath = "src-tauri\png\${{ inputs.name }}_256.ico"
+
+          if (Test-Path $pngPath) {
+            Copy-Item -Path $pngPath -Destination "output\windows\"
+          } elseif (Test-Path $icoPath) {
+            Copy-Item -Path $icoPath -Destination "output\windows\"
+          }
+
           git checkout -- src-tauri/Cargo.lock
 
       - name: Rust cache store
