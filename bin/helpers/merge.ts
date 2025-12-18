@@ -113,7 +113,10 @@ export async function mergeConfig(
 
   // Always set mainBinaryName to ensure binary uniqueness
   const linuxBinaryName = `pake-${generateLinuxPackageName(name)}`;
-  tauriConf.mainBinaryName = platform === 'linux' ? linuxBinaryName : `pake-${generateIdentifierSafeName(name)}`;
+  tauriConf.mainBinaryName =
+    platform === 'linux'
+      ? linuxBinaryName
+      : `pake-${generateIdentifierSafeName(name)}`;
 
   if (platform == 'win32') {
     tauriConf.bundle.windows.wix.language[0] = installerLanguage;
