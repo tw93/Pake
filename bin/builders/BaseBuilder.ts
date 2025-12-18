@@ -7,7 +7,10 @@ import { PakeAppOptions } from '@/types';
 import { checkRustInstalled, ensureRustEnv, installRust } from '@/helpers/rust';
 import { mergeConfig } from '@/helpers/merge';
 import tauriConfig from '@/helpers/tauriConfig';
-import { generateIdentifierSafeName, generateLinuxPackageName } from '@/utils/name';
+import {
+  generateIdentifierSafeName,
+  generateLinuxPackageName,
+} from '@/utils/name';
 import { npmDirectory } from '@/utils/dir';
 import { getSpinner } from '@/utils/info';
 import { shellExec } from '@/utils/shell';
@@ -538,7 +541,10 @@ export default abstract class BaseBuilder {
     const extension = process.platform === 'win32' ? '.exe' : '';
 
     // Use unique binary name for all platforms to avoid conflicts
-    const nameToUse = process.platform === 'linux' ? generateLinuxPackageName(appName) : generateIdentifierSafeName(appName);
+    const nameToUse =
+      process.platform === 'linux'
+        ? generateLinuxPackageName(appName)
+        : generateIdentifierSafeName(appName);
     return `pake-${nameToUse}${extension}`;
   }
 
