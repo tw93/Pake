@@ -54,33 +54,8 @@ on:
         required: false
 
 jobs:
-  build-cli:
-    name: Build CLI
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js Environment
-        uses: ./.github/actions/setup-env
-        with:
-          mode: 'node'
-
-      - name: Build CLI
-        run: pnpm run cli:build
-
-      - name: Upload CLI Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: pake-cli-dist
-          path: dist/
-          retention-days: 1
-
   build:
     name: ${{ inputs.title }} (${{ matrix.build }})
-    needs: build-cli
-    if: always() && (needs.build-cli.result == 'success' || needs.build-cli.result == 'skipped')
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -256,5 +231,5 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           allowUpdates: true
-          artifacts: "output/*/*.*"
+          artifacts: "output/*/*.deb,output/*/*.AppImage,output/*/*.dmg,output/*/*.msi"
           token: ${{ secrets.GITHUB_TOKEN }}
