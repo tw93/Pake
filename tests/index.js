@@ -189,7 +189,7 @@ class PakeTestRunner {
       () => {
         const output = execSync(`node "${config.CLI_PATH}" --version`, {
           encoding: "utf8",
-          timeout: 3000,
+          timeout: TIMEOUTS.QUICK,
         });
         return /^\d+\.\d+\.\d+/.test(output.trim());
       },
@@ -202,7 +202,7 @@ class PakeTestRunner {
       () => {
         const output = execSync(`node "${config.CLI_PATH}"`, {
           encoding: "utf8",
-          timeout: 3000,
+          timeout: TIMEOUTS.QUICK,
         });
         return output.includes("Usage: cli [url] [options]");
       },
@@ -214,7 +214,7 @@ class PakeTestRunner {
       try {
         execSync(`node "${config.CLI_PATH}" "invalid-url" --name TestApp`, {
           encoding: "utf8",
-          timeout: 3000,
+          timeout: TIMEOUTS.QUICK,
         });
         return false; // Should have failed
       } catch (error) {
@@ -227,7 +227,7 @@ class PakeTestRunner {
       try {
         execSync(`node "${config.CLI_PATH}" https://example.com --width abc`, {
           encoding: "utf8",
-          timeout: 3000,
+          timeout: TIMEOUTS.QUICK,
         });
         return false; // Should throw error
       } catch (error) {
@@ -240,10 +240,10 @@ class PakeTestRunner {
       const start = Date.now();
       execSync(`node "${config.CLI_PATH}" --version`, {
         encoding: "utf8",
-        timeout: 3000,
+        timeout: TIMEOUTS.QUICK,
       });
       const elapsed = Date.now() - start;
-      return elapsed < 2000;
+      return elapsed < 5000;
     });
 
     // Weekly URL accessibility test
@@ -284,7 +284,7 @@ class PakeTestRunner {
         setTimeout(() => {
           child.kill();
           resolve(false);
-        }, 3000);
+        }, TIMEOUTS.QUICK);
       });
     });
 

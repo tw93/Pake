@@ -22,7 +22,7 @@ import * as psl from 'psl';
 import { InvalidArgumentError, program as program$1, Option } from 'commander';
 
 var name = "pake-cli";
-var version = "3.6.4";
+var version = "3.7.0";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -1391,9 +1391,7 @@ const API_KEYS = {
     brandfetch: ['1idqvJC0CeFSeyp3Yf7', '1idej-yhU_ThggIHFyG'],
 };
 function generateIconPath(appName, isDefault = false) {
-    const safeName = isDefault
-        ? 'icon'
-        : generateSafeFilename(appName).toLowerCase();
+    const safeName = isDefault ? 'icon' : getIconBaseName(appName);
     const baseName = safeName;
     if (IS_WIN) {
         return path.join(npmDirectory, 'src-tauri', 'png', `${baseName}_256.ico`);
@@ -1402,6 +1400,12 @@ function generateIconPath(appName, isDefault = false) {
         return path.join(npmDirectory, 'src-tauri', 'png', `${baseName}_512.png`);
     }
     return path.join(npmDirectory, 'src-tauri', 'icons', `${baseName}.icns`);
+}
+function getIconBaseName(appName) {
+    const baseName = IS_LINUX
+        ? generateLinuxPackageName(appName)
+        : generateSafeFilename(appName).toLowerCase();
+    return baseName || 'pake-app';
 }
 async function copyWindowsIconIfNeeded(convertedPath, appName) {
     if (!IS_WIN || !convertedPath.endsWith('.ico')) {
@@ -1507,7 +1511,7 @@ async function convertIconFormat(inputPath, appName) {
         const platformOutputDir = path.join(outputDir, 'converted-icons');
         await fsExtra.ensureDir(platformOutputDir);
         const processedInputPath = await preprocessIcon(inputPath);
-        const iconName = generateSafeFilename(appName).toLowerCase();
+        const iconName = getIconBaseName(appName);
         // Generate platform-specific format
         if (IS_WIN) {
             // Support multiple sizes for better Windows compatibility
@@ -1686,16 +1690,6 @@ async function tryGetFavicon(url, appName) {
                 if (error instanceof Error) {
                     logger.debug(`Icon service ${serviceUrl} failed: ${error.message}`);
                 }
-                // Network error handling
-                if ((IS_LINUX || IS_WIN) && error.code === 'ENOTFOUND') {
-                    return null;
-                }
-                // Icon generation error on Windows
-                if (IS_WIN &&
-                    error instanceof Error &&
-                    error.message.includes('icongen')) {
-                    return null;
-                }
                 continue;
             }
         }
@@ -1807,6 +1801,18 @@ function resolveAppName(name, platform) {
     const domain = getDomain(name) || 'pake';
     return platform !== 'linux' ? capitalizeFirstLetter(domain) : domain;
 }
+function resolveLocalAppName(filePath, platform) {
+    const baseName = path.parse(filePath).name || 'pake-app';
+    if (platform === 'linux') {
+        return generateLinuxPackageName(baseName) || 'pake-app';
+    }
+    const normalized = baseName
+        .replace(/[^a-zA-Z0-9\u4e00-\u9fff -]/g, '')
+        .replace(/^[ -]+/, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    return normalized || 'pake-app';
+}
 function isValidName(name, platform) {
     const platformRegexMapping = {
         linux: /^[a-z0-9\u4e00-\u9fff][a-z0-9\u4e00-\u9fff-]*$/,
@@ -1821,10 +1827,12 @@ async function handleOptions(options, url) {
     let name = options.name;
     const pathExists = await fsExtra.pathExists(url);
     if (!options.name) {
-        const defaultName = pathExists ? '' : resolveAppName(url, platform);
+        const defaultName = pathExists
+            ? resolveLocalAppName(url, platform)
+            : resolveAppName(url, platform);
         const promptMessage = 'Enter your application name';
         const namePrompt = await promptText(promptMessage, defaultName);
-        name = namePrompt || defaultName;
+        name = namePrompt?.trim() || defaultName;
     }
     if (name && platform === 'linux') {
         name = generateLinuxPackageName(name);
