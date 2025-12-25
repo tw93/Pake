@@ -1,3 +1,6 @@
+// Menu functionality is only used on macOS
+#![cfg(target_os = "macos")]
+
 use tauri::menu::{AboutMetadata, Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::{AppHandle, Manager, Wry};
 use tauri_plugin_opener::OpenerExt;

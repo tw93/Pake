@@ -331,6 +331,10 @@ Terminal=false
     }
   }
 
+  // Ensure trayIcon object exists before setting iconPath
+  if (!tauriConf.app.trayIcon) {
+    tauriConf.app.trayIcon = {};
+  }
   tauriConf.app.trayIcon.iconPath = trayIconPath;
   tauriConf.pake.system_tray_path = trayIconPath;
 

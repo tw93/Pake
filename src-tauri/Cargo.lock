@@ -2539,7 +2539,7 @@ dependencies = [
 
 [[package]]
 name = "pake"
-version = "3.7.1"
+version = "3.7.2"
 dependencies = [
  "serde",
  "serde_json",
