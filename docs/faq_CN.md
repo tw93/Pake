@@ -4,9 +4,29 @@
 
 使用 Pake 时的常见问题和解决方案。
 
+## 目录
+
+- [构建问题](#构建问题)
+  - [Rust 版本错误:"feature 'edition2024' is required"](#rust-版本错误feature-edition2024-is-required)
+  - [Linux：Ubuntu 24.04 构建报错 "Can't detect any appindicator library"](#linuxubuntu-2404-构建报错-cant-detect-any-appindicator-library)
+  - [Linux：AppImage 构建失败，提示 "failed to run linuxdeploy"](#linuxappimage-构建失败提示-failed-to-run-linuxdeploy)
+  - [Linux:"cargo: command not found" 即使已安装 Rust](#linuxcargo-command-not-found-即使已安装-rust)
+  - [Windows：首次构建时安装超时](#windows首次构建时安装超时)
+  - [Windows：缺少 Visual Studio 构建工具](#windows缺少-visual-studio-构建工具)
+  - [macOS：构建失败，出现模块编译错误](#macos构建失败出现模块编译错误)
+- [运行时问题](#运行时问题)
+  - [应用窗口太小/太大](#应用窗口太小太大)
+  - [应用图标显示不正确](#应用图标显示不正确)
+  - [网站功能不工作（登录、上传等）](#网站功能不工作登录上传等)
+- [安装问题](#安装问题)
+  - [全局安装时权限被拒绝](#全局安装时权限被拒绝)
+- [获取帮助](#获取帮助)
+
+---
+
 ## 构建问题
 
-### Rust 版本错误："feature 'edition2024' is required"
+### Rust 版本错误:"feature 'edition2024' is required"
 
 **问题描述：**
 在构建 Pake 或使用 CLI 时，遇到如下错误：
@@ -56,53 +76,27 @@ rustc --version
 
 ---
 
-### Windows：首次构建时安装超时
+### Linux：Ubuntu 24.04 构建报错 "Can't detect any appindicator library"
 
 **问题描述：**
-在 Windows 上首次构建时，可能遇到：
+在 Ubuntu 24.04 或更新版本上构建时，可能遇到以下错误：
 
 ```txt
-Error: Command timed out after 900000ms: "cd ... && pnpm install"
+Can't detect any appindicator library
 ```
 
-**原因分析：**
+或者在之前的版本中可能看到关于 Icon RGBA 的报错。
 
-Windows 首次安装可能较慢，原因包括：
+**解决方案：**
 
-- 本地模块编译（需要 Visual Studio Build Tools）
-- 大量依赖下载（Tauri、Rust 工具链）
-- Windows Defender 实时扫描
-- 网络连接问题
+这是因为 Ubuntu 24.04+ 使用 `libayatana-appindicator3-dev` 替代了旧的 `libappindicator3-dev`。
 
-**解决方案 1：自动重试（内置）**
-
-Pake CLI 现在会在初次安装超时后自动使用国内镜像重试。只需等待重试完成即可。
-
-**解决方案 2：手动安装依赖**
-
-如果自动重试失败，可手动安装依赖：
+请安装正确的依赖库：
 
 ```bash
-# 进入 pake-cli 安装目录
-cd %LOCALAPPDATA%\pnpm\global\5\.pnpm\pake-cli@版本号\node_modules\pake-cli
-
-# 使用国内镜像安装
-pnpm install --registry=https://registry.npmmirror.com
-
-# 然后重新构建
-pake https://github.com --name GitHub
+sudo apt-get update
+sudo apt-get install -y libayatana-appindicator3-dev
 ```
-
-**解决方案 3：改善网络环境**
-
-- 使用稳定的网络连接
-- 安装过程中临时关闭杀毒软件
-- 必要时使用 VPN 或代理
-
-**预期时间：**
-
-- 首次安装：Windows 上需要 10-15 分钟
-- 后续构建：依赖已缓存，速度会快很多
 
 ---
 
@@ -187,7 +181,7 @@ docker run --rm --privileged \
 
 ---
 
-### Linux："cargo: command not found" 即使已安装 Rust
+### Linux:"cargo: command not found" 即使已安装 Rust
 
 **问题描述：**
 已安装 Rust 但 Pake 仍然提示 "cargo: command not found"。
@@ -204,6 +198,71 @@ source ~/.cargo/env
 ```
 
 然后再次尝试构建。
+
+---
+
+### Windows：首次构建时安装超时
+
+**问题描述：**
+在 Windows 上首次构建时，可能遇到：
+
+```txt
+Error: Command timed out after 900000ms: "cd ... && pnpm install"
+```
+
+**原因分析：**
+
+Windows 首次安装可能较慢，原因包括：
+
+- 本地模块编译（需要 Visual Studio Build Tools）
+- 大量依赖下载（Tauri、Rust 工具链）
+- Windows Defender 实时扫描
+- 网络连接问题
+
+**解决方案 1：自动重试（内置）**
+
+Pake CLI 现在会在初次安装超时后自动使用国内镜像重试。只需等待重试完成即可。
+
+**解决方案 2：手动安装依赖**
+
+如果自动重试失败，可手动安装依赖：
+
+```bash
+# 进入 pake-cli 安装目录
+cd %LOCALAPPDATA%\pnpm\global\5\.pnpm\pake-cli@版本号\node_modules\pake-cli
+
+# 使用国内镜像安装
+pnpm install --registry=https://registry.npmmirror.com
+
+# 然后重新构建
+pake https://github.com --name GitHub
+```
+
+**解决方案 3：改善网络环境**
+
+- 使用稳定的网络连接
+- 安装过程中临时关闭杀毒软件
+- 必要时使用 VPN 或代理
+
+**预期时间：**
+
+- 首次安装：Windows 上需要 10-15 分钟
+- 后续构建：依赖已缓存，速度会快很多
+
+---
+
+### Windows：缺少 Visual Studio 构建工具
+
+**问题描述：**
+构建失败，提示缺少 MSVC 或 Windows SDK。
+
+**解决方案：**
+
+安装 Visual Studio 构建工具：
+
+1. 下载 [Visual Studio Build Tools](https://visualstudio.microsoft.com/zh-hans/downloads/#build-tools-for-visual-studio-2022)
+2. 安装时选择"使用 C++ 的桌面开发"
+3. ARM64 支持：在"单个组件"下额外选择"MSVC v143 - VS 2022 C++ ARM64 构建工具"
 
 ---
 
@@ -225,21 +284,6 @@ EOF
 ```
 
 此文件已在 `.gitignore` 中，不会被提交。
-
----
-
-### Windows：缺少 Visual Studio 构建工具
-
-**问题描述：**
-构建失败，提示缺少 MSVC 或 Windows SDK。
-
-**解决方案：**
-
-安装 Visual Studio 构建工具：
-
-1. 下载 [Visual Studio Build Tools](https://visualstudio.microsoft.com/zh-hans/downloads/#build-tools-for-visual-studio-2022)
-2. 安装时选择"使用 C++ 的桌面开发"
-3. ARM64 支持：在"单个组件"下额外选择"MSVC v143 - VS 2022 C++ ARM64 构建工具"
 
 ---
 
@@ -351,3 +395,32 @@ pnpm install -g pake-cli
    - Node.js 和 Rust 版本（`node --version`、`rustc --version`）
    - 完整的错误信息
    - 您使用的构建命令
+
+### Linux: 打包失败，提示 `Can't detect any appindicator library`
+
+**问题描述：**
+在 Linux 上打包时，构建失败并显示以下错误：
+
+```txt
+Can't detect any appindicator library
+```
+
+**原因分析：**
+这个错误表示您的 Linux 系统缺少创建“系统托盘图标”所需的核心库 `libappindicator`。Pake 打包的应用支持系统托盘功能，因此该库是必需的。
+
+**解决方案：**
+您需要在您的 Linux 系统上安装这个缺失的开发库。
+
+- **对于 Debian / Ubuntu 系统：**
+
+  ```bash
+  sudo apt-get update && sudo apt-get install -y libappindicator3-dev
+  ```
+
+- **对于 Fedora / CentOS / RHEL 系统：**
+
+  ```bash
+  sudo dnf install -y libappindicator-devel
+  ```
+
+为了确保打包环境的完整性，推荐一次性安装所有 Tauri 所需的依赖。请参考本文档中关于 `failed to run linuxdeploy` 问题的解决方案，其中包含了完整的依赖列表。

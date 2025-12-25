@@ -3,16 +3,14 @@ import fsExtra from 'fs-extra';
 
 import combineFiles from '@/utils/combine';
 import logger from '@/options/logger';
-import { generateSafeFilename, generateIdentifierSafeName } from '@/utils/name';
-import { PakeAppOptions, PlatformMap } from '@/types';
+import {
+  generateSafeFilename,
+  generateIdentifierSafeName,
+  getSafeAppName,
+  generateLinuxPackageName,
+} from '@/utils/name';
+import { PakeAppOptions, PlatformMap, WindowConfig } from '@/types';
 import { tauriConfigDirectory, npmDirectory } from '@/utils/dir';
-
-/**
- * Helper function to generate safe lowercase app name for file paths
- */
-function getSafeAppName(name: string): string {
-  return generateSafeFilename(name).toLowerCase();
-}
 
 export async function mergeConfig(
   url: string,
@@ -61,7 +59,7 @@ export async function mergeConfig(
     systemTrayIcon,
     useLocalFile,
     identifier,
-    name,
+    name = 'pake-app',
     resizable = true,
     inject,
     proxyUrl,
@@ -84,7 +82,7 @@ export async function mergeConfig(
 
   const platformHideOnClose = hideOnClose ?? platform === 'darwin';
 
-  const tauriConfWindowOptions = {
+  const tauriConfWindowOptions: Partial<WindowConfig> = {
     width,
     height,
     fullscreen,
@@ -97,7 +95,7 @@ export async function mergeConfig(
     disabled_web_shortcuts: disabledWebShortcuts,
     hide_on_close: platformHideOnClose,
     incognito: incognito,
-    title: title || null,
+    title: title,
     enable_wasm: wasm,
     enable_drag_drop: enableDragDrop,
     start_to_tray: startToTray && showSystemTray,
@@ -113,9 +111,12 @@ export async function mergeConfig(
   tauriConf.identifier = identifier;
   tauriConf.version = appVersion;
 
-  if (platform === 'linux') {
-    tauriConf.mainBinaryName = `pake-${generateIdentifierSafeName(name)}`;
-  }
+  // Always set mainBinaryName to ensure binary uniqueness
+  const linuxBinaryName = `pake-${generateLinuxPackageName(name)}`;
+  tauriConf.mainBinaryName =
+    platform === 'linux'
+      ? linuxBinaryName
+      : `pake-${generateIdentifierSafeName(name)}`;
 
   if (platform == 'win32') {
     tauriConf.bundle.windows.wix.language[0] = installerLanguage;
@@ -174,21 +175,26 @@ export async function mergeConfig(
     delete tauriConf.bundle.linux.deb.files;
 
     // Generate correct desktop file configuration
-    const appNameSafe = getSafeAppName(name);
-    const identifier = `com.pake.${appNameSafe}`;
-    const desktopFileName = `${identifier}.desktop`;
+    const linuxName = generateLinuxPackageName(name);
+    const desktopFileName = `com.pake.${linuxName}.desktop`;
+    const iconName = `${linuxName}_512`;
 
     // Create desktop file content
+    // Determine if title contains Chinese characters for Name[zh_CN]
+    const chineseName = title && /[\u4e00-\u9fa5]/.test(title) ? title : null;
+
     const desktopContent = `[Desktop Entry]
 Version=1.0
 Type=Application
 Name=${name}
+${chineseName ? `Name[zh_CN]=${chineseName}` : ''}
 Comment=${name}
-Exec=pake-${appNameSafe}
-Icon=${appNameSafe}_512
-Categories=Network;WebBrowser;
+Exec=${linuxBinaryName}
+Icon=${iconName}
+Categories=Network;WebBrowser;Utility;
 MimeType=text/html;text/xml;application/xhtml_xml;
 StartupNotify=true
+Terminal=false
 `;
 
     // Write desktop file to src-tauri/assets directory where Tauri expects it
@@ -199,8 +205,17 @@ StartupNotify=true
 
     // Set up desktop file in bundle configuration
     // Use absolute path from src-tauri directory to assets
+    const desktopInstallPath = `/usr/share/applications/${desktopFileName}`;
     tauriConf.bundle.linux.deb.files = {
-      [`/usr/share/applications/${desktopFileName}`]: `assets/${desktopFileName}`,
+      [desktopInstallPath]: `assets/${desktopFileName}`,
+    };
+
+    // Add desktop file support for RPM
+    if (!tauriConf.bundle.linux.rpm) {
+      tauriConf.bundle.linux.rpm = {};
+    }
+    tauriConf.bundle.linux.rpm.files = {
+      [desktopInstallPath]: `assets/${desktopFileName}`,
     };
 
     const validTargets = [
@@ -243,7 +258,7 @@ StartupNotify=true
     },
     linux: {
       fileExt: '.png',
-      path: `png/${safeAppName}_512.png`,
+      path: `png/${generateLinuxPackageName(name)}_512.png`,
       defaultIcon: 'png/icon_512.png',
       message: 'Linux icon must be .png and 512x512px.',
     },

@@ -1,3 +1,4 @@
+import path from 'path';
 import fsExtra from 'fs-extra';
 import logger from '@/options/logger';
 
@@ -10,6 +11,22 @@ import { PakeAppOptions, PakeCliOptions, PlatformMap } from '@/types';
 function resolveAppName(name: string, platform: NodeJS.Platform): string {
   const domain = getDomain(name) || 'pake';
   return platform !== 'linux' ? capitalizeFirstLetter(domain) : domain;
+}
+
+function resolveLocalAppName(
+  filePath: string,
+  platform: NodeJS.Platform,
+): string {
+  const baseName = path.parse(filePath).name || 'pake-app';
+  if (platform === 'linux') {
+    return generateLinuxPackageName(baseName) || 'pake-app';
+  }
+  const normalized = baseName
+    .replace(/[^a-zA-Z0-9\u4e00-\u9fff -]/g, '')
+    .replace(/^[ -]+/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return normalized || 'pake-app';
 }
 
 function isValidName(name: string, platform: NodeJS.Platform): boolean {
@@ -31,17 +48,19 @@ export default async function handleOptions(
 
   const pathExists = await fsExtra.pathExists(url);
   if (!options.name) {
-    const defaultName = pathExists ? '' : resolveAppName(url, platform);
+    const defaultName = pathExists
+      ? resolveLocalAppName(url, platform)
+      : resolveAppName(url, platform);
     const promptMessage = 'Enter your application name';
     const namePrompt = await promptText(promptMessage, defaultName);
-    name = namePrompt || defaultName;
+    name = namePrompt?.trim() || defaultName;
   }
 
   if (name && platform === 'linux') {
     name = generateLinuxPackageName(name);
   }
 
-  if (!isValidName(name, platform)) {
+  if (name && !isValidName(name, platform)) {
     const LINUX_NAME_ERROR = `✕ Name should only include lowercase letters, numbers, and dashes (not leading dashes). Examples: com-123-xxx, 123pan, pan123, weread, we-read, 123.`;
     const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dashes, and spaces (not leading dashes and spaces). Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read, 123.`;
     const errorMsg =
@@ -62,7 +81,7 @@ export default async function handleOptions(
   };
 
   const iconPath = await handleIcon(appOptions, url);
-  appOptions.icon = iconPath || undefined;
+  appOptions.icon = iconPath || '';
 
   return appOptions;
 }

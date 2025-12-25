@@ -52,6 +52,7 @@ jobs:
       title: ${{ matrix.config.title }}
       name_zh: ${{ matrix.config.name_zh }}
       url: ${{ matrix.config.url }}
+      icon: ${{ matrix.config.icon }}
 
   # Publish Docker image (runs in parallel with app builds)
   publish-docker:
@@ -93,5 +94,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          no-cache: true
           platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

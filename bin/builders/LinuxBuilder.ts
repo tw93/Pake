@@ -23,7 +23,7 @@ export default class LinuxBuilder extends BaseBuilder {
   }
 
   getFileName() {
-    const { name, targets } = this.options;
+    const { name = 'pake-app', targets } = this.options;
     const version = tauriConfig.version;
 
     let arch: string;
@@ -64,7 +64,7 @@ export default class LinuxBuilder extends BaseBuilder {
 
     const buildTarget =
       this.buildArch === 'arm64'
-        ? this.getTauriTarget(this.buildArch, 'linux')
+        ? (this.getTauriTarget(this.buildArch, 'linux') ?? undefined)
         : undefined;
 
     let fullCommand = this.buildBaseCommand(

@@ -32,29 +32,48 @@ pub struct NotificationParams {
 
 #[command]
 pub async fn download_file(app: AppHandle, params: DownloadFileParams) -> Result<(), String> {
-    let window: WebviewWindow = app.get_webview_window("pake").unwrap();
+    let window: WebviewWindow = app.get_webview_window("pake").ok_or("Window not found")?;
+
     show_toast(
         &window,
         &get_download_message_with_lang(MessageType::Start, params.language.clone()),
     );
 
-    let output_path = app.path().download_dir().unwrap().join(params.filename);
-    let file_path = check_file_or_append(output_path.to_str().unwrap());
-    let client = ClientBuilder::new().build().unwrap();
+    let download_dir = app
+        .path()
+        .download_dir()
+        .map_err(|e| format!("Failed to get download dir: {}", e))?;
 
-    let response = client
-        .execute(Request::new(
-            Method::GET,
-            Url::from_str(&params.url).unwrap(),
-        ))
-        .await;
+    let output_path = download_dir.join(&params.filename);
+
+    let path_str = output_path.to_str().ok_or("Invalid output path")?;
+
+    let file_path = check_file_or_append(path_str);
+
+    let client = ClientBuilder::new()
+        .build()
+        .map_err(|e| format!("Failed to build client: {}", e))?;
+
+    let url = Url::from_str(&params.url).map_err(|e| format!("Invalid URL: {}", e))?;
+
+    let request = Request::new(Method::GET, url);
+
+    let response = client.execute(request).await;
 
     match response {
-        Ok(res) => {
-            let bytes = res.bytes().await.unwrap();
+        Ok(mut res) => {
+            let mut file =
+                File::create(file_path).map_err(|e| format!("Failed to create file: {}", e))?;
 
-            let mut file = File::create(file_path).unwrap();
-            file.write_all(&bytes).unwrap();
+            while let Some(chunk) = res
+                .chunk()
+                .await
+                .map_err(|e| format!("Failed to get chunk: {}", e))?
+            {
+                file.write_all(&chunk)
+                    .map_err(|e| format!("Failed to write chunk: {}", e))?;
+            }
+
             show_toast(
                 &window,
                 &get_download_message_with_lang(MessageType::Success, params.language.clone()),
@@ -76,15 +95,25 @@ pub async fn download_file_by_binary(
     app: AppHandle,
     params: BinaryDownloadParams,
 ) -> Result<(), String> {
-    let window: WebviewWindow = app.get_webview_window("pake").unwrap();
+    let window: WebviewWindow = app.get_webview_window("pake").ok_or("Window not found")?;
+
     show_toast(
         &window,
         &get_download_message_with_lang(MessageType::Start, params.language.clone()),
     );
-    let output_path = app.path().download_dir().unwrap().join(params.filename);
-    let file_path = check_file_or_append(output_path.to_str().unwrap());
-    let download_file_result = fs::write(file_path, &params.binary);
-    match download_file_result {
+
+    let download_dir = app
+        .path()
+        .download_dir()
+        .map_err(|e| format!("Failed to get download dir: {}", e))?;
+
+    let output_path = download_dir.join(&params.filename);
+
+    let path_str = output_path.to_str().ok_or("Invalid output path")?;
+
+    let file_path = check_file_or_append(path_str);
+
+    match fs::write(file_path, &params.binary) {
         Ok(_) => {
             show_toast(
                 &window,
@@ -111,21 +140,27 @@ pub fn send_notification(app: AppHandle, params: NotificationParams) -> Result<(
         .body(&params.body)
         .icon(&params.icon)
         .show()
-        .unwrap();
+        .map_err(|e| format!("Failed to show notification: {}", e))?;
     Ok(())
 }
 
 #[command]
 pub async fn update_theme_mode(app: AppHandle, mode: String) {
-    let window = app.get_webview_window("pake").unwrap();
     #[cfg(target_os = "macos")]
     {
-        let theme = if mode == "dark" {
-            Theme::Dark
-        } else {
-            Theme::Light
-        };
-        let _ = window.set_theme(Some(theme));
+        if let Some(window) = app.get_webview_window("pake") {
+            let theme = if mode == "dark" {
+                Theme::Dark
+            } else {
+                Theme::Light
+            };
+            let _ = window.set_theme(Some(theme));
+        }
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = app;
+        let _ = mode;
     }
 }
 

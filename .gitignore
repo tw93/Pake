@@ -23,6 +23,7 @@ dist-ssr
 output
 *.msi
 *.deb
+*.desktop
 *.AppImage
 *.dmg
 *.app

@@ -6,6 +6,10 @@ export function generateSafeFilename(name: string): string {
     .slice(0, 255);
 }
 
+export function getSafeAppName(name: string): string {
+  return generateSafeFilename(name).toLowerCase();
+}
+
 export function generateLinuxPackageName(name: string): string {
   return name
     .toLowerCase()
@@ -42,7 +46,7 @@ export function generateIdentifierSafeName(name: string): string {
 export function generateWindowsFilename(name: string): string {
   return name
     .replace(/[<>:"/\\|?*]/g, '_')
-    .replace(/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i, '${name}_')
+    .replace(/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i, '$&_')
     .slice(0, 255);
 }
 

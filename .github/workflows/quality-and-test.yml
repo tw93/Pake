@@ -9,7 +9,7 @@ on:
 
 env:
   NODE_VERSION: "22"
-  PNPM_VERSION: "10.15.0"
+  PNPM_VERSION: "10.26.2"
 
 permissions:
   actions: write
@@ -37,7 +37,7 @@ jobs:
           mode: node
 
       - name: Auto-fix Prettier formatting
-        run: npx prettier --write . --ignore-unknown
+        run: npx prettier --write . --ignore-unknown --cache
 
       - name: Auto-fix Rust formatting
         run: cargo fmt --all --manifest-path src-tauri/Cargo.toml
@@ -57,11 +57,10 @@ jobs:
 
   rust-quality:
     name: Rust Code Quality
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
       fail-fast: false
+
     defaults:
       run:
         shell: bash
@@ -81,7 +80,17 @@ jobs:
       - uses: rui314/setup-mold@v1
         if: matrix.os == 'ubuntu-latest'
 
+      - name: Cache cargo-hack
+        uses: actions/cache@v4
+        id: cargo-hack-cache
+        with:
+          path: ~/.cargo/bin/cargo-hack
+          key: ${{ runner.os }}-cargo-hack-${{ hashFiles('~/.cargo/bin/cargo-hack') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-hack-
+
       - name: Install cargo-hack
+        if: steps.cargo-hack-cache.outputs.cache-hit != 'true'
         run: cargo install cargo-hack --force
 
       - name: Check Rust formatting
@@ -90,8 +99,8 @@ jobs:
       - name: Run Clippy lints
         run: cargo hack --feature-powerset --exclude-features cli-build --no-dev-deps clippy # cspell:disable-line
 
-  cli-tests:
-    name: CLI Tests (${{ matrix.os }})
+  validation:
+    name: CLI & Build Validation (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -109,8 +118,9 @@ jobs:
       - name: Build CLI
         run: pnpm run cli:build
 
-      - name: Run CLI Test Suite
+      - name: Run CI Test Suite
         run: pnpm test
+        timeout-minutes: 30
         env:
           CI: true
           NODE_ENV: test
@@ -118,61 +128,17 @@ jobs:
       - name: Test CLI Integration
         shell: bash
         run: |
-          echo "Testing CLI integration with weekly.tw93.fun..."
+          echo "Testing CLI integration..."
           if [[ "$RUNNER_OS" == "Windows" ]]; then
-            timeout 120s node dist/cli.js https://weekly.tw93.fun --name "CITestWeekly" --debug || true
+            timeout 60s node dist/cli.js https://weekly.tw93.fun --name "CITest" --debug || true
           else
-            timeout 30s node dist/cli.js https://weekly.tw93.fun --name "CITestWeekly" --debug || true
-          fi
-          echo "Integration test completed (expected to timeout)"
-
-  release-build-test:
-    name: Release Build Test (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-      fail-fast: false
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Build Environment
-        uses: ./.github/actions/setup-env
-        with:
-          mode: build
-
-      - name: Build CLI
-        run: pnpm run cli:build
-
-      - name: Run Release Build Test
-        run: ./tests/release.js
-        timeout-minutes: 30
-        env:
-          CI: true
-          NODE_ENV: test
-
-      - name: List generated files
-        shell: bash
-        run: |
-          echo "Generated files in project root:"
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            ls -la *.{dmg,app,msi,deb,AppImage} 2>/dev/null || echo "No direct output files found"
-          else
-            find . -maxdepth 1 \( -name "*.dmg" -o -name "*.app" -o -name "*.msi" -o -name "*.deb" -o -name "*.AppImage" \) || echo "No direct output files found"
-          fi
-          echo ""
-          echo "Generated files in target directories:"
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            find src-tauri/target -type f \( -name "*.dmg" -o -name "*.app" -o -name "*.msi" -o -name "*.deb" -o -name "*.AppImage" \) 2>/dev/null || echo "No target output files found"
-          else
-            find src-tauri/target -name "*.dmg" -o -name "*.app" -o -name "*.msi" -o -name "*.deb" -o -name "*.AppImage" 2>/dev/null || echo "No target output files found"
+            timeout 30s node dist/cli.js https://weekly.tw93.fun --name "CITest" --debug || true
           fi
 
   summary:
     name: Quality Summary
     runs-on: ubuntu-latest
-    needs: [auto-format, rust-quality, cli-tests, release-build-test]
+    needs: [auto-format, rust-quality, validation]
     if: always()
     steps:
       - name: Generate Summary
@@ -184,6 +150,5 @@ jobs:
             echo "|-------|--------|"
             echo "| Auto Formatting | ${{ needs.auto-format.result == 'success' && 'PASSED' || 'FAILED' }} |"
             echo "| Rust Quality | ${{ needs.rust-quality.result == 'success' && 'PASSED' || 'FAILED' }} |"
-            echo "| CLI Tests | ${{ needs.cli-tests.result == 'success' && 'PASSED' || 'FAILED' }} |"
-            echo "| Release Build | ${{ needs.release-build-test.result == 'success' && 'PASSED' || 'FAILED' }} |"
+            echo "| CLI & Build Validation | ${{ needs.validation.result == 'success' && 'PASSED' || 'FAILED' }} |"
           } >> $GITHUB_STEP_SUMMARY

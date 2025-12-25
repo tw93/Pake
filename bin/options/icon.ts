@@ -1,5 +1,4 @@
 import path from 'path';
-import axios from 'axios';
 import fsExtra from 'fs-extra';
 import chalk from 'chalk';
 import { dir } from 'tmp-promise';
@@ -10,7 +9,7 @@ import sharp from 'sharp';
 import logger from './logger';
 import { getSpinner } from '@/utils/info';
 import { npmDirectory } from '@/utils/dir';
-import { IS_LINUX, IS_WIN } from '@/utils/platform';
+import { IS_LINUX, IS_WIN, IS_MAC } from '@/utils/platform';
 import { PakeAppOptions } from '@/types';
 
 type PlatformIconConfig = {
@@ -43,12 +42,10 @@ const API_KEYS = {
 /**
  * Generates platform-specific icon paths and handles copying for Windows
  */
-import { generateSafeFilename } from '@/utils/name';
+import { generateLinuxPackageName, generateSafeFilename } from '@/utils/name';
 
 function generateIconPath(appName: string, isDefault = false): string {
-  const safeName = isDefault
-    ? 'icon'
-    : generateSafeFilename(appName).toLowerCase();
+  const safeName = isDefault ? 'icon' : getIconBaseName(appName);
   const baseName = safeName;
 
   if (IS_WIN) {
@@ -58,6 +55,13 @@ function generateIconPath(appName: string, isDefault = false): string {
     return path.join(npmDirectory, 'src-tauri', 'png', `${baseName}_512.png`);
   }
   return path.join(npmDirectory, 'src-tauri', 'icons', `${baseName}.icns`);
+}
+
+function getIconBaseName(appName: string): string {
+  const baseName = IS_LINUX
+    ? generateLinuxPackageName(appName)
+    : generateSafeFilename(appName).toLowerCase();
+  return baseName || 'pake-app';
 }
 
 async function copyWindowsIconIfNeeded(
@@ -96,8 +100,8 @@ async function preprocessIcon(inputPath: string): Promise<string> {
       create: {
         width: metadata.width || 512,
         height: metadata.height || 512,
-        channels: 3,
-        background: ICON_CONFIG.whiteBackground,
+        channels: 4,
+        background: { ...ICON_CONFIG.whiteBackground, alpha: 1 },
       },
     })
       .composite([{ input: inputPath }])
@@ -106,7 +110,63 @@ async function preprocessIcon(inputPath: string): Promise<string> {
 
     return outputPath;
   } catch (error) {
-    logger.warn(`Failed to add background to icon: ${error.message}`);
+    if (error instanceof Error) {
+      logger.warn(`Failed to add background to icon: ${error.message}`);
+    }
+    return inputPath;
+  }
+}
+
+/**
+ * Applies macOS squircle mask to icon
+ */
+async function applyMacOSMask(inputPath: string): Promise<string> {
+  try {
+    const { path: tempDir } = await dir();
+    const outputPath = path.join(tempDir, 'icon-macos-rounded.png');
+
+    // 1. Create a 1024x1024 rounded rect mask
+    // rx="224" is closer to the smooth Apple squircle look for 1024px
+    const mask = Buffer.from(
+      '<svg width="1024" height="1024"><rect x="0" y="0" width="1024" height="1024" rx="224" ry="224" fill="white"/></svg>',
+    );
+
+    // 2. Load input, resize to 1024, apply mask
+    const maskedBuffer = await sharp(inputPath)
+      .resize(1024, 1024, {
+        fit: 'contain',
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .composite([
+        {
+          input: mask,
+          blend: 'dest-in',
+        },
+      ])
+      .png()
+      .toBuffer();
+
+    // 3. Resize to 840x840 (~18% padding) to solve "too big" visual issue
+    // Native MacOS icons often leave some breathing room
+    await sharp(maskedBuffer)
+      .resize(840, 840, {
+        fit: 'contain',
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .extend({
+        top: 92,
+        bottom: 92,
+        left: 92,
+        right: 92,
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .toFile(outputPath);
+
+    return outputPath;
+  } catch (error) {
+    if (error instanceof Error) {
+      logger.warn(`Failed to apply macOS mask: ${error.message}`);
+    }
     return inputPath;
   }
 }
@@ -126,7 +186,7 @@ async function convertIconFormat(
     await fsExtra.ensureDir(platformOutputDir);
 
     const processedInputPath = await preprocessIcon(inputPath);
-    const iconName = generateSafeFilename(appName).toLowerCase();
+    const iconName = getIconBaseName(appName);
 
     // Generate platform-specific format
     if (IS_WIN) {
@@ -156,6 +216,7 @@ async function convertIconFormat(
           fit: 'contain',
           background: ICON_CONFIG.transparentBackground,
         })
+        .ensureAlpha()
         .png()
         .toFile(outputPath);
 
@@ -163,7 +224,8 @@ async function convertIconFormat(
     }
 
     // macOS
-    await icongen(processedInputPath, platformOutputDir, {
+    const macIconPath = await applyMacOSMask(processedInputPath);
+    await icongen(macIconPath, platformOutputDir, {
       report: false,
       icns: { name: iconName, sizes: PLATFORM_CONFIG.macos.sizes },
     });
@@ -173,7 +235,9 @@ async function convertIconFormat(
     );
     return (await fsExtra.pathExists(outputPath)) ? outputPath : null;
   } catch (error) {
-    logger.warn(`Icon format conversion failed: ${error.message}`);
+    if (error instanceof Error) {
+      logger.warn(`Icon format conversion failed: ${error.message}`);
+    }
     return null;
   }
 }
@@ -355,23 +419,10 @@ async function tryGetFavicon(
           );
           return finalPath;
         }
-      } catch (error) {
-        logger.debug(`Icon service ${serviceUrl} failed: ${error.message}`);
-
-        // Platform-specific error handling
-        if ((IS_LINUX || IS_WIN) && error.code === 'ENOTFOUND') {
-          logger.debug(
-            `DNS resolution failed for ${serviceUrl}, trying next service...`,
-          );
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          logger.debug(`Icon service ${serviceUrl} failed: ${error.message}`);
         }
-
-        // Windows-specific icon conversion errors
-        if (IS_WIN && error.message.includes('icongen')) {
-          logger.debug(
-            `Windows icon conversion failed for ${serviceUrl}, trying next service...`,
-          );
-        }
-
         continue;
       }
     }
@@ -379,7 +430,9 @@ async function tryGetFavicon(
     spinner.warn(`No favicon found for ${domain}. Using default.`);
     return null;
   } catch (error) {
-    logger.warn(`Failed to fetch favicon: ${error.message}`);
+    if (error instanceof Error) {
+      logger.warn(`Failed to fetch favicon: ${error.message}`);
+    }
     return null;
   }
 }
@@ -392,16 +445,31 @@ export async function downloadIcon(
   showSpinner = true,
   customTimeout?: number,
 ): Promise<string | null> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, customTimeout || 10000);
+
   try {
-    const response = await axios.get(iconUrl, {
-      responseType: 'arraybuffer',
-      timeout: customTimeout || 10000,
+    const response = await fetch(iconUrl, {
+      signal: controller.signal,
     });
 
-    const iconData = response.data;
-    if (!iconData || iconData.byteLength < ICON_CONFIG.minFileSize) return null;
+    clearTimeout(timeoutId);
 
-    const fileDetails = await fileTypeFromBuffer(iconData);
+    if (!response.ok) {
+      if (response.status === 404 && !showSpinner) {
+        return null;
+      }
+      throw new Error(`HTTP ${response.status} ${response.statusText}`);
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+
+    if (!arrayBuffer || arrayBuffer.byteLength < ICON_CONFIG.minFileSize)
+      return null;
+
+    const fileDetails = await fileTypeFromBuffer(arrayBuffer);
     if (
       !fileDetails ||
       !ICON_CONFIG.supportedFormats.includes(fileDetails.ext as any)
@@ -409,10 +477,18 @@ export async function downloadIcon(
       return null;
     }
 
-    return await saveIconFile(iconData, fileDetails.ext);
-  } catch (error) {
-    if (showSpinner && !(error.response?.status === 404)) {
-      throw error;
+    return await saveIconFile(arrayBuffer, fileDetails.ext);
+  } catch (error: unknown) {
+    clearTimeout(timeoutId);
+    if (showSpinner) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        logger.error('Icon download timed out!');
+      } else {
+        logger.error(
+          'Icon download failed!',
+          error instanceof Error ? error.message : String(error),
+        );
+      }
     }
     return null;
   }

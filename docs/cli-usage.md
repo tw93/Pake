@@ -35,8 +35,8 @@ source ~/.bashrc
 **Prerequisites:**
 
 - Node.js ≥18.0.0
-- Rust ≥1.78.0 (installed automatically if missing)
-- **Windows/Linux**: See [system dependencies guide](advanced-usage.md#prerequisites) for platform-specific requirements
+- Rust ≥1.85.0 (installed automatically if missing)
+- **macOS/Linux**: `curl`, `wget`, `file` and `tar` used for dependency management
 
 ## Quick Start
 
@@ -400,6 +400,14 @@ pake https://github.com --name GitHub --keep-binary
 ```
 
 **Output**: Creates both installer and standalone executable (`AppName-binary` on Unix, `AppName.exe` on Windows).
+
+#### [iterative-build]
+
+Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging. Default is `false`.
+
+```shell
+--iterative-build
+```
 
 #### [multi-instance]
 

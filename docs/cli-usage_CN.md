@@ -35,8 +35,8 @@ source ~/.bashrc
 **前置条件：**
 
 - Node.js ≥18.0.0
-- Rust ≥1.78.0（如缺失将自动安装）
-- **Windows/Linux**：详细系统依赖请参考 [高级用法指南](advanced-usage_CN.md#前置条件)
+- Rust ≥1.85.0（如缺失将自动安装）
+- **macOS/Linux**：`curl`、`wget`、`file` 和 `tar`（用于依赖管理）
 
 ## 快速开始
 
@@ -398,6 +398,14 @@ pake https://github.com --name GitHub --keep-binary
 ```
 
 **输出结果**：同时创建安装包和独立可执行文件（Unix 系统为 `AppName-binary`，Windows 为 `AppName.exe`）。
+
+#### [iterative-build]
+
+开启快速构建模式（仅生成 app，不生成 dmg/deb/msi），适用于调试。默认为 `false`。
+
+```shell
+--iterative-build
+```
 
 #### [multi-instance]
 

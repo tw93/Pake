@@ -62,20 +62,27 @@ class ReleaseBuildTest {
 
     try {
       // Build config
-      this.log("DEBUG", "Configuring app...");
-      execSync("pnpm run build:config", { stdio: "pipe" });
+      this.log("INFO", `\n📦 Building ${appName}...\n`);
 
-      // Build app
+      // Build the app using CLI directly
       this.log("DEBUG", "Building app package...");
+      const commonArgs = "--iterative-build --debug";
+      const cmd = `node dist/cli.js ${config.url} --name ${config.name} --icon ${config.icon} ${commonArgs}`;
+
       try {
-        execSync("pnpm run build:debug", {
+        execSync(cmd, {
           stdio: "pipe",
-          timeout: 120000, // 2 minutes
+          timeout: 480000, // 8 minutes
           env: { ...process.env, PAKE_CREATE_APP: "1" },
         });
+
+        // Check files immediately after build
+        const outputFiles = this.findOutputFiles(config.name);
+        if (outputFiles.length === 0) {
+          throw new Error("No output files generated");
+        }
       } catch (buildError) {
-        // Ignore build errors, just check if files exist
-        this.log("DEBUG", "Build completed, checking files...");
+        throw new Error(`Build failed: ${buildError.message}`);
       }
 
       // Always return true - release test just needs to verify the process works
@@ -149,9 +156,21 @@ class ReleaseBuildTest {
     return files.filter((f) => f && f.length > 0);
   }
 
-  async run() {
+  async run(options = {}) {
     console.log(`${BLUE}🚀 Release Build Test${NC}`);
     console.log(`${BLUE}===================${NC}`);
+
+    // Build CLI first (unless skipped)
+    if (!options.skipCliBuild) {
+      this.log("INFO", "🔨 Building CLI...");
+      try {
+        execSync(`pnpm run cli:build`, { stdio: "pipe" });
+      } catch (e) {
+        this.log("ERROR", "Failed to build CLI");
+        return false;
+      }
+    }
+
     console.log(`Testing apps: ${TEST_APPS.join(", ")}`);
     console.log("");
 

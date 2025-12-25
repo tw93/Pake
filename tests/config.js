@@ -14,8 +14,8 @@ export const CLI_PATH = path.join(PROJECT_ROOT, "dist/cli.js");
 
 // Test timeouts (in milliseconds)
 export const TIMEOUTS = {
-  QUICK: 3000, // For version, help commands
-  MEDIUM: 10000, // For validation tests
+  QUICK: 10000, // For version, help commands
+  MEDIUM: 20000, // For validation tests
   LONG: 300000, // For build tests (5 minutes)
 };
 

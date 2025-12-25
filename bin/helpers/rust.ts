@@ -88,7 +88,11 @@ export async function installRust() {
     ensureRustEnv();
   } catch (error) {
     spinner.fail(chalk.red('✕ Rust installation failed!'));
-    console.error(error.message);
+    if (error instanceof Error) {
+      console.error(error.message);
+    } else {
+      console.error(error);
+    }
     process.exit(1);
   }
 }

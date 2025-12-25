@@ -15,7 +15,7 @@ export default class MacBuilder extends BaseBuilder {
       ? options.targets
       : 'auto';
 
-    if (process.env.PAKE_CREATE_APP === '1') {
+    if (options.iterativeBuild || process.env.PAKE_CREATE_APP === '1') {
       this.buildFormat = 'app';
     } else {
       this.buildFormat = 'dmg';
@@ -25,7 +25,7 @@ export default class MacBuilder extends BaseBuilder {
   }
 
   getFileName(): string {
-    const { name } = this.options;
+    const { name = 'pake-app' } = this.options;
 
     if (this.buildFormat === 'app') {
       return name;

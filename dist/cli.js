@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-import chalk from 'chalk';
-import { InvalidArgumentError, program, Option } from 'commander';
 import log from 'loglevel';
+import updateNotifier from 'update-notifier';
 import path from 'path';
 import fsExtra from 'fs-extra';
 import { fileURLToPath } from 'url';
+import chalk from 'chalk';
 import prompts from 'prompts';
 import os from 'os';
 import { execa, execaSync } from 'execa';
@@ -14,21 +14,20 @@ import dns from 'dns';
 import http from 'http';
 import { promisify } from 'util';
 import fs from 'fs';
-import updateNotifier from 'update-notifier';
-import axios from 'axios';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
 import icongen from 'icon-gen';
 import sharp from 'sharp';
 import * as psl from 'psl';
+import { InvalidArgumentError, program as program$1, Option } from 'commander';
 
 var name = "pake-cli";
-var version = "3.5.3";
+var version = "3.7.0";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
 };
-var packageManager = "pnpm@10.15.0";
+var packageManager = "pnpm@10.26.2";
 var bin = {
 	pake: "./dist/cli.js"
 };
@@ -58,7 +57,6 @@ var scripts = {
 	build: "tauri build",
 	"build:debug": "tauri build --debug",
 	"build:mac": "tauri build --target universal-apple-darwin",
-	"build:config": "chmod +x scripts/configure-tauri.mjs && node scripts/configure-tauri.mjs",
 	analyze: "cd src-tauri && cargo bloat --release --crates",
 	tauri: "tauri",
 	cli: "cross-env NODE_ENV=development rollup -c -w",
@@ -70,45 +68,50 @@ var scripts = {
 	prepublishOnly: "pnpm run cli:build"
 };
 var type = "module";
-var exports = "./dist/cli.js";
+var exports$1 = "./dist/cli.js";
 var license = "MIT";
 var dependencies = {
-	"@tauri-apps/api": "^2.9.0",
-	"@tauri-apps/cli": "^2.9.0",
-	axios: "^1.12.2",
+	"@tauri-apps/api": "^2.9.1",
+	"@tauri-apps/cli": "^2.9.6",
 	chalk: "^5.6.2",
-	commander: "^12.1.0",
-	execa: "^9.6.0",
-	"file-type": "^18.7.0",
-	"fs-extra": "^11.3.2",
+	commander: "^14.0.2",
+	execa: "^9.6.1",
+	"file-type": "^21.1.1",
+	"fs-extra": "^11.3.3",
 	"icon-gen": "^5.0.0",
 	loglevel: "^1.9.2",
-	ora: "^8.2.0",
+	ora: "^9.0.0",
 	prompts: "^2.4.2",
 	psl: "^1.15.0",
-	sharp: "^0.33.5",
+	sharp: "^0.34.5",
 	"tmp-promise": "^3.0.3",
 	"update-notifier": "^7.3.1"
 };
 var devDependencies = {
-	"@rollup/plugin-alias": "^5.1.1",
-	"@rollup/plugin-commonjs": "^28.0.8",
+	"@rollup/plugin-alias": "^6.0.0",
+	"@rollup/plugin-commonjs": "^29.0.0",
 	"@rollup/plugin-json": "^6.1.0",
-	"@rollup/plugin-replace": "^6.0.2",
+	"@rollup/plugin-replace": "^6.0.3",
 	"@rollup/plugin-terser": "^0.4.4",
 	"@types/fs-extra": "^11.0.4",
-	"@types/node": "^20.19.23",
+	"@types/node": "^25.0.3",
 	"@types/page-icon": "^0.3.6",
 	"@types/prompts": "^2.4.9",
 	"@types/tmp": "^0.2.6",
 	"@types/update-notifier": "^6.0.8",
 	"app-root-path": "^3.1.0",
-	"cross-env": "^7.0.3",
-	prettier: "^3.6.2",
-	rollup: "^4.52.5",
+	"cross-env": "^10.1.0",
+	prettier: "^3.7.4",
+	rollup: "^4.54.0",
 	"rollup-plugin-typescript2": "^0.36.0",
 	tslib: "^2.8.1",
-	typescript: "^5.9.3"
+	typescript: "^5.9.3",
+	vitest: "^4.0.16"
+};
+var pnpm = {
+	overrides: {
+		sharp: "^0.34.5"
+	}
 };
 var packageJson = {
 	name: name,
@@ -123,10 +126,11 @@ var packageJson = {
 	files: files,
 	scripts: scripts,
 	type: type,
-	exports: exports,
+	exports: exports$1,
 	license: license,
 	dependencies: dependencies,
-	devDependencies: devDependencies
+	devDependencies: devDependencies,
+	pnpm: pnpm
 };
 
 // Convert the current module URL to a file path
@@ -379,7 +383,12 @@ async function installRust() {
     }
     catch (error) {
         spinner.fail(chalk.red('✕ Rust installation failed!'));
-        console.error(error.message);
+        if (error instanceof Error) {
+            console.error(error.message);
+        }
+        else {
+            console.error(error);
+        }
         process.exit(1);
     }
 }
@@ -396,12 +405,16 @@ function checkRustInstalled() {
 
 async function combineFiles(files, output) {
     const contents = files.map((file) => {
-        const fileContent = fs.readFileSync(file);
         if (file.endsWith('.css')) {
-            return ("window.addEventListener('DOMContentLoaded', (_event) => { const css = `" +
-                fileContent +
-                "`; const style = document.createElement('style'); style.innerHTML = css; document.head.appendChild(style); });");
+            const fileContent = fs.readFileSync(file, 'utf-8');
+            return `window.addEventListener('DOMContentLoaded', (_event) => {
+        const css = ${JSON.stringify(fileContent)};
+        const style = document.createElement('style');
+        style.innerHTML = css;
+        document.head.appendChild(style);
+      });`;
         }
+        const fileContent = fs.readFileSync(file);
         return ("window.addEventListener('DOMContentLoaded', (_event) => { " +
             fileContent +
             ' });');
@@ -416,6 +429,9 @@ function generateSafeFilename(name) {
         .replace(/\s+/g, '_')
         .replace(/\.+$/g, '')
         .slice(0, 255);
+}
+function getSafeAppName(name) {
+    return generateSafeFilename(name).toLowerCase();
 }
 function generateLinuxPackageName(name) {
     return name
@@ -444,12 +460,6 @@ function generateIdentifierSafeName(name) {
     return cleaned;
 }
 
-/**
- * Helper function to generate safe lowercase app name for file paths
- */
-function getSafeAppName(name) {
-    return generateSafeFilename(name).toLowerCase();
-}
 async function mergeConfig(url, options, tauriConf) {
     // Ensure .pake directory exists and copy source templates if needed
     const srcTauriDir = path.join(npmDirectory, 'src-tauri');
@@ -470,7 +480,7 @@ async function mergeConfig(url, options, tauriConf) {
             await fsExtra.copy(sourcePath, destPath);
         }
     }));
-    const { width, height, fullscreen, maximize, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name, resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, multiInstance, startToTray, forceInternalNavigation, zoom, minWidth, minHeight, ignoreCertificateErrors, } = options;
+    const { width, height, fullscreen, maximize, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name = 'pake-app', resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, multiInstance, startToTray, forceInternalNavigation, zoom, minWidth, minHeight, ignoreCertificateErrors, } = options;
     const { platform } = process;
     const platformHideOnClose = hideOnClose ?? platform === 'darwin';
     const tauriConfWindowOptions = {
@@ -486,7 +496,7 @@ async function mergeConfig(url, options, tauriConf) {
         disabled_web_shortcuts: disabledWebShortcuts,
         hide_on_close: platformHideOnClose,
         incognito: incognito,
-        title: title || null,
+        title: title,
         enable_wasm: wasm,
         enable_drag_drop: enableDragDrop,
         start_to_tray: startToTray && showSystemTray,
@@ -500,9 +510,12 @@ async function mergeConfig(url, options, tauriConf) {
     tauriConf.productName = name;
     tauriConf.identifier = identifier;
     tauriConf.version = appVersion;
-    if (platform === 'linux') {
-        tauriConf.mainBinaryName = `pake-${generateIdentifierSafeName(name)}`;
-    }
+    // Always set mainBinaryName to ensure binary uniqueness
+    const linuxBinaryName = `pake-${generateLinuxPackageName(name)}`;
+    tauriConf.mainBinaryName =
+        platform === 'linux'
+            ? linuxBinaryName
+            : `pake-${generateIdentifierSafeName(name)}`;
     if (platform == 'win32') {
         tauriConf.bundle.windows.wix.language[0] = installerLanguage;
     }
@@ -547,20 +560,24 @@ async function mergeConfig(url, options, tauriConf) {
         // Remove hardcoded desktop files and regenerate with correct app name
         delete tauriConf.bundle.linux.deb.files;
         // Generate correct desktop file configuration
-        const appNameSafe = getSafeAppName(name);
-        const identifier = `com.pake.${appNameSafe}`;
-        const desktopFileName = `${identifier}.desktop`;
+        const linuxName = generateLinuxPackageName(name);
+        const desktopFileName = `com.pake.${linuxName}.desktop`;
+        const iconName = `${linuxName}_512`;
         // Create desktop file content
+        // Determine if title contains Chinese characters for Name[zh_CN]
+        const chineseName = title && /[\u4e00-\u9fa5]/.test(title) ? title : null;
         const desktopContent = `[Desktop Entry]
 Version=1.0
 Type=Application
 Name=${name}
+${chineseName ? `Name[zh_CN]=${chineseName}` : ''}
 Comment=${name}
-Exec=pake-${appNameSafe}
-Icon=${appNameSafe}_512
-Categories=Network;WebBrowser;
+Exec=${linuxBinaryName}
+Icon=${iconName}
+Categories=Network;WebBrowser;Utility;
 MimeType=text/html;text/xml;application/xhtml_xml;
 StartupNotify=true
+Terminal=false
 `;
         // Write desktop file to src-tauri/assets directory where Tauri expects it
         const srcAssetsDir = path.join(npmDirectory, 'src-tauri/assets');
@@ -569,8 +586,16 @@ StartupNotify=true
         await fsExtra.writeFile(srcDesktopFilePath, desktopContent);
         // Set up desktop file in bundle configuration
         // Use absolute path from src-tauri directory to assets
+        const desktopInstallPath = `/usr/share/applications/${desktopFileName}`;
         tauriConf.bundle.linux.deb.files = {
-            [`/usr/share/applications/${desktopFileName}`]: `assets/${desktopFileName}`,
+            [desktopInstallPath]: `assets/${desktopFileName}`,
+        };
+        // Add desktop file support for RPM
+        if (!tauriConf.bundle.linux.rpm) {
+            tauriConf.bundle.linux.rpm = {};
+        }
+        tauriConf.bundle.linux.rpm.files = {
+            [desktopInstallPath]: `assets/${desktopFileName}`,
         };
         const validTargets = [
             'deb',
@@ -608,7 +633,7 @@ StartupNotify=true
         },
         linux: {
             fileExt: '.png',
-            path: `png/${safeAppName}_512.png`,
+            path: `png/${generateLinuxPackageName(name)}_512.png`,
             defaultIcon: 'png/icon_512.png',
             message: 'Linux icon must be .png and 512x512px.',
         },
@@ -818,7 +843,9 @@ class BaseBuilder {
         }
         catch (error) {
             // If installation times out and we haven't tried the mirror yet, retry with mirror
-            if (error.message?.includes('timed out') && !usedMirror) {
+            if (error instanceof Error &&
+                error.message.includes('timed out') &&
+                !usedMirror) {
                 spinner.fail(chalk.yellow('Installation timed out, retrying with CN mirror...'));
                 logger.info('✺ Retrying installation with CN mirror for better speed...');
                 const retrySpinner = getSpinner('Retrying installation...');
@@ -847,10 +874,18 @@ class BaseBuilder {
         await this.buildAndCopy(url, this.options.targets);
     }
     async start(url) {
+        logger.info('Pake dev server starting...');
         await mergeConfig(url, this.options, tauriConfig);
+        const packageManager = await this.detectPackageManager();
+        const configPath = path.join(npmDirectory, 'src-tauri', '.pake', 'tauri.conf.json');
+        const features = this.getBuildFeatures();
+        const featureArgs = features.length > 0 ? `--features ${features.join(',')}` : '';
+        const argSeparator = packageManager === 'npm' ? ' --' : '';
+        const command = `cd "${npmDirectory}" && ${packageManager} run tauri${argSeparator} dev --config "${configPath}" ${featureArgs}`;
+        await shellExec(command);
     }
     async buildAndCopy(url, target) {
-        const { name } = this.options;
+        const { name = 'pake-app' } = this.options;
         await mergeConfig(url, this.options, tauriConfig);
         // Detect available package manager
         const packageManager = await this.detectPackageManager();
@@ -1066,12 +1101,11 @@ class BaseBuilder {
      */
     getBinaryName(appName) {
         const extension = process.platform === 'win32' ? '.exe' : '';
-        // Linux uses the unique binary name we set in merge.ts
-        if (process.platform === 'linux') {
-            return `pake-${generateIdentifierSafeName(appName)}${extension}`;
-        }
-        // Windows and macOS use 'pake' as binary name
-        return `pake${extension}`;
+        // Use unique binary name for all platforms to avoid conflicts
+        const nameToUse = process.platform === 'linux'
+            ? generateLinuxPackageName(appName)
+            : generateIdentifierSafeName(appName);
+        return `pake-${nameToUse}${extension}`;
     }
     /**
      * Check if this build has architecture-specific target
@@ -1117,7 +1151,7 @@ class MacBuilder extends BaseBuilder {
         this.buildArch = validArchs.includes(options.targets || '')
             ? options.targets
             : 'auto';
-        if (process.env.PAKE_CREATE_APP === '1') {
+        if (options.iterativeBuild || process.env.PAKE_CREATE_APP === '1') {
             this.buildFormat = 'app';
         }
         else {
@@ -1126,7 +1160,7 @@ class MacBuilder extends BaseBuilder {
         this.options.targets = this.buildFormat;
     }
     getFileName() {
-        const { name } = this.options;
+        const { name = 'pake-app' } = this.options;
         if (this.buildFormat === 'app') {
             return name;
         }
@@ -1245,7 +1279,7 @@ class LinuxBuilder extends BaseBuilder {
         this.options.targets = this.buildFormat;
     }
     getFileName() {
-        const { name, targets } = this.options;
+        const { name = 'pake-app', targets } = this.options;
         const version = tauriConfig.version;
         let arch;
         if (this.buildArch === 'arm64') {
@@ -1279,7 +1313,7 @@ class LinuxBuilder extends BaseBuilder {
     getBuildCommand(packageManager = 'pnpm') {
         const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
         const buildTarget = this.buildArch === 'arm64'
-            ? this.getTauriTarget(this.buildArch, 'linux')
+            ? (this.getTauriTarget(this.buildArch, 'linux') ?? undefined)
             : undefined;
         let fullCommand = this.buildBaseCommand(packageManager, configPath, buildTarget);
         const features = this.getBuildFeatures();
@@ -1337,48 +1371,6 @@ class BuilderProvider {
     }
 }
 
-const DEFAULT_PAKE_OPTIONS = {
-    icon: '',
-    height: 780,
-    width: 1200,
-    fullscreen: false,
-    maximize: false,
-    hideTitleBar: false,
-    alwaysOnTop: false,
-    appVersion: '1.0.0',
-    darkMode: false,
-    disabledWebShortcuts: false,
-    activationShortcut: '',
-    userAgent: '',
-    showSystemTray: false,
-    multiArch: false,
-    targets: 'deb',
-    useLocalFile: false,
-    systemTrayIcon: '',
-    proxyUrl: '',
-    debug: false,
-    inject: [],
-    installerLanguage: 'en-US',
-    hideOnClose: undefined, // Platform-specific: true for macOS, false for others
-    incognito: false,
-    wasm: false,
-    enableDragDrop: false,
-    keepBinary: false,
-    multiInstance: false,
-    startToTray: false,
-    forceInternalNavigation: false,
-    zoom: 100,
-    minWidth: 0,
-    minHeight: 0,
-    ignoreCertificateErrors: false,
-};
-
-async function checkUpdateTips() {
-    updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify({
-        isGlobal: true,
-    });
-}
-
 const ICON_CONFIG = {
     minFileSize: 100,
     supportedFormats: ['png', 'ico', 'jpeg', 'jpg', 'webp', 'icns'],
@@ -1399,9 +1391,7 @@ const API_KEYS = {
     brandfetch: ['1idqvJC0CeFSeyp3Yf7', '1idej-yhU_ThggIHFyG'],
 };
 function generateIconPath(appName, isDefault = false) {
-    const safeName = isDefault
-        ? 'icon'
-        : generateSafeFilename(appName).toLowerCase();
+    const safeName = isDefault ? 'icon' : getIconBaseName(appName);
     const baseName = safeName;
     if (IS_WIN) {
         return path.join(npmDirectory, 'src-tauri', 'png', `${baseName}_256.ico`);
@@ -1410,6 +1400,12 @@ function generateIconPath(appName, isDefault = false) {
         return path.join(npmDirectory, 'src-tauri', 'png', `${baseName}_512.png`);
     }
     return path.join(npmDirectory, 'src-tauri', 'icons', `${baseName}.icns`);
+}
+function getIconBaseName(appName) {
+    const baseName = IS_LINUX
+        ? generateLinuxPackageName(appName)
+        : generateSafeFilename(appName).toLowerCase();
+    return baseName || 'pake-app';
 }
 async function copyWindowsIconIfNeeded(convertedPath, appName) {
     if (!IS_WIN || !convertedPath.endsWith('.ico')) {
@@ -1440,8 +1436,8 @@ async function preprocessIcon(inputPath) {
             create: {
                 width: metadata.width || 512,
                 height: metadata.height || 512,
-                channels: 3,
-                background: ICON_CONFIG.whiteBackground,
+                channels: 4,
+                background: { ...ICON_CONFIG.whiteBackground, alpha: 1 },
             },
         })
             .composite([{ input: inputPath }])
@@ -1450,7 +1446,57 @@ async function preprocessIcon(inputPath) {
         return outputPath;
     }
     catch (error) {
-        logger.warn(`Failed to add background to icon: ${error.message}`);
+        if (error instanceof Error) {
+            logger.warn(`Failed to add background to icon: ${error.message}`);
+        }
+        return inputPath;
+    }
+}
+/**
+ * Applies macOS squircle mask to icon
+ */
+async function applyMacOSMask(inputPath) {
+    try {
+        const { path: tempDir } = await dir();
+        const outputPath = path.join(tempDir, 'icon-macos-rounded.png');
+        // 1. Create a 1024x1024 rounded rect mask
+        // rx="224" is closer to the smooth Apple squircle look for 1024px
+        const mask = Buffer.from('<svg width="1024" height="1024"><rect x="0" y="0" width="1024" height="1024" rx="224" ry="224" fill="white"/></svg>');
+        // 2. Load input, resize to 1024, apply mask
+        const maskedBuffer = await sharp(inputPath)
+            .resize(1024, 1024, {
+            fit: 'contain',
+            background: { r: 0, g: 0, b: 0, alpha: 0 },
+        })
+            .composite([
+            {
+                input: mask,
+                blend: 'dest-in',
+            },
+        ])
+            .png()
+            .toBuffer();
+        // 3. Resize to 840x840 (~18% padding) to solve "too big" visual issue
+        // Native MacOS icons often leave some breathing room
+        await sharp(maskedBuffer)
+            .resize(840, 840, {
+            fit: 'contain',
+            background: { r: 0, g: 0, b: 0, alpha: 0 },
+        })
+            .extend({
+            top: 92,
+            bottom: 92,
+            left: 92,
+            right: 92,
+            background: { r: 0, g: 0, b: 0, alpha: 0 },
+        })
+            .toFile(outputPath);
+        return outputPath;
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            logger.warn(`Failed to apply macOS mask: ${error.message}`);
+        }
         return inputPath;
     }
 }
@@ -1465,7 +1511,7 @@ async function convertIconFormat(inputPath, appName) {
         const platformOutputDir = path.join(outputDir, 'converted-icons');
         await fsExtra.ensureDir(platformOutputDir);
         const processedInputPath = await preprocessIcon(inputPath);
-        const iconName = generateSafeFilename(appName).toLowerCase();
+        const iconName = getIconBaseName(appName);
         // Generate platform-specific format
         if (IS_WIN) {
             // Support multiple sizes for better Windows compatibility
@@ -1486,12 +1532,14 @@ async function convertIconFormat(inputPath, appName) {
                 fit: 'contain',
                 background: ICON_CONFIG.transparentBackground,
             })
+                .ensureAlpha()
                 .png()
                 .toFile(outputPath);
             return outputPath;
         }
         // macOS
-        await icongen(processedInputPath, platformOutputDir, {
+        const macIconPath = await applyMacOSMask(processedInputPath);
+        await icongen(macIconPath, platformOutputDir, {
             report: false,
             icns: { name: iconName, sizes: PLATFORM_CONFIG.macos.sizes },
         });
@@ -1499,7 +1547,9 @@ async function convertIconFormat(inputPath, appName) {
         return (await fsExtra.pathExists(outputPath)) ? outputPath : null;
     }
     catch (error) {
-        logger.warn(`Icon format conversion failed: ${error.message}`);
+        if (error instanceof Error) {
+            logger.warn(`Icon format conversion failed: ${error.message}`);
+        }
         return null;
     }
 }
@@ -1637,14 +1687,8 @@ async function tryGetFavicon(url, appName) {
                 }
             }
             catch (error) {
-                logger.debug(`Icon service ${serviceUrl} failed: ${error.message}`);
-                // Platform-specific error handling
-                if ((IS_LINUX || IS_WIN) && error.code === 'ENOTFOUND') {
-                    logger.debug(`DNS resolution failed for ${serviceUrl}, trying next service...`);
-                }
-                // Windows-specific icon conversion errors
-                if (IS_WIN && error.message.includes('icongen')) {
-                    logger.debug(`Windows icon conversion failed for ${serviceUrl}, trying next service...`);
+                if (error instanceof Error) {
+                    logger.debug(`Icon service ${serviceUrl} failed: ${error.message}`);
                 }
                 continue;
             }
@@ -1653,7 +1697,9 @@ async function tryGetFavicon(url, appName) {
         return null;
     }
     catch (error) {
-        logger.warn(`Failed to fetch favicon: ${error.message}`);
+        if (error instanceof Error) {
+            logger.warn(`Failed to fetch favicon: ${error.message}`);
+        }
         return null;
     }
 }
@@ -1661,24 +1707,40 @@ async function tryGetFavicon(url, appName) {
  * Downloads icon from URL
  */
 async function downloadIcon(iconUrl, showSpinner = true, customTimeout) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+        controller.abort();
+    }, customTimeout || 10000);
     try {
-        const response = await axios.get(iconUrl, {
-            responseType: 'arraybuffer',
-            timeout: customTimeout || 10000,
+        const response = await fetch(iconUrl, {
+            signal: controller.signal,
         });
-        const iconData = response.data;
-        if (!iconData || iconData.byteLength < ICON_CONFIG.minFileSize)
+        clearTimeout(timeoutId);
+        if (!response.ok) {
+            if (response.status === 404 && !showSpinner) {
+                return null;
+            }
+            throw new Error(`HTTP ${response.status} ${response.statusText}`);
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        if (!arrayBuffer || arrayBuffer.byteLength < ICON_CONFIG.minFileSize)
             return null;
-        const fileDetails = await fileTypeFromBuffer(iconData);
+        const fileDetails = await fileTypeFromBuffer(arrayBuffer);
         if (!fileDetails ||
             !ICON_CONFIG.supportedFormats.includes(fileDetails.ext)) {
             return null;
         }
-        return await saveIconFile(iconData, fileDetails.ext);
+        return await saveIconFile(arrayBuffer, fileDetails.ext);
     }
     catch (error) {
-        if (showSpinner && !(error.response?.status === 404)) {
-            throw error;
+        clearTimeout(timeoutId);
+        if (showSpinner) {
+            if (error instanceof Error && error.name === 'AbortError') {
+                logger.error('Icon download timed out!');
+            }
+            else {
+                logger.error('Icon download failed!', error instanceof Error ? error.message : String(error));
+            }
         }
         return null;
     }
@@ -1739,6 +1801,18 @@ function resolveAppName(name, platform) {
     const domain = getDomain(name) || 'pake';
     return platform !== 'linux' ? capitalizeFirstLetter(domain) : domain;
 }
+function resolveLocalAppName(filePath, platform) {
+    const baseName = path.parse(filePath).name || 'pake-app';
+    if (platform === 'linux') {
+        return generateLinuxPackageName(baseName) || 'pake-app';
+    }
+    const normalized = baseName
+        .replace(/[^a-zA-Z0-9\u4e00-\u9fff -]/g, '')
+        .replace(/^[ -]+/, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    return normalized || 'pake-app';
+}
 function isValidName(name, platform) {
     const platformRegexMapping = {
         linux: /^[a-z0-9\u4e00-\u9fff][a-z0-9\u4e00-\u9fff-]*$/,
@@ -1753,15 +1827,17 @@ async function handleOptions(options, url) {
     let name = options.name;
     const pathExists = await fsExtra.pathExists(url);
     if (!options.name) {
-        const defaultName = pathExists ? '' : resolveAppName(url, platform);
+        const defaultName = pathExists
+            ? resolveLocalAppName(url, platform)
+            : resolveAppName(url, platform);
         const promptMessage = 'Enter your application name';
         const namePrompt = await promptText(promptMessage, defaultName);
-        name = namePrompt || defaultName;
+        name = namePrompt?.trim() || defaultName;
     }
     if (name && platform === 'linux') {
         name = generateLinuxPackageName(name);
     }
-    if (!isValidName(name, platform)) {
+    if (name && !isValidName(name, platform)) {
         const LINUX_NAME_ERROR = `✕ Name should only include lowercase letters, numbers, and dashes (not leading dashes). Examples: com-123-xxx, 123pan, pan123, weread, we-read, 123.`;
         const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dashes, and spaces (not leading dashes and spaces). Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read, 123.`;
         const errorMsg = platform === 'linux' ? LINUX_NAME_ERROR : DEFAULT_NAME_ERROR;
@@ -1780,9 +1856,57 @@ async function handleOptions(options, url) {
         identifier: getIdentifier(url),
     };
     const iconPath = await handleIcon(appOptions, url);
-    appOptions.icon = iconPath || undefined;
+    appOptions.icon = iconPath || '';
     return appOptions;
 }
+
+const DEFAULT_PAKE_OPTIONS = {
+    icon: '',
+    height: 780,
+    width: 1200,
+    fullscreen: false,
+    maximize: false,
+    hideTitleBar: false,
+    alwaysOnTop: false,
+    appVersion: '1.0.0',
+    darkMode: false,
+    disabledWebShortcuts: false,
+    activationShortcut: '',
+    userAgent: '',
+    showSystemTray: false,
+    multiArch: false,
+    targets: (() => {
+        switch (process.platform) {
+            case 'linux':
+                return 'deb';
+            case 'darwin':
+                return 'dmg';
+            case 'win32':
+                return 'msi';
+            default:
+                return 'deb';
+        }
+    })(),
+    useLocalFile: false,
+    systemTrayIcon: '',
+    proxyUrl: '',
+    debug: false,
+    inject: [],
+    installerLanguage: 'en-US',
+    hideOnClose: undefined, // Platform-specific: true for macOS, false for others
+    incognito: false,
+    wasm: false,
+    enableDragDrop: false,
+    keepBinary: false,
+    multiInstance: false,
+    startToTray: false,
+    forceInternalNavigation: false,
+    iterativeBuild: false,
+    zoom: 100,
+    minWidth: 0,
+    minHeight: 0,
+    ignoreCertificateErrors: false,
+};
 
 function validateNumberInput(value) {
     const parsedValue = Number(value);
@@ -1798,152 +1922,163 @@ function validateUrlInput(url) {
             return normalizeUrl(url);
         }
         catch (error) {
-            throw new InvalidArgumentError(error.message);
+            if (error instanceof Error) {
+                throw new InvalidArgumentError(error.message);
+            }
+            throw error;
         }
     }
     return url;
 }
 
-const { green, yellow } = chalk;
-const logo = `${chalk.green(' ____       _')}
+function getCliProgram() {
+    const { green, yellow } = chalk;
+    const logo = `${chalk.green(' ____       _')}
 ${green('|  _ \\ __ _| | _____')}
 ${green('| |_) / _` | |/ / _ \\')}
 ${green('|  __/ (_| |   <  __/')}  ${yellow('https://github.com/tw93/pake')}
 ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with Rust.')}
 `;
-program
-    .addHelpText('beforeAll', logo)
-    .usage(`[url] [options]`)
-    .showHelpAfterError();
-program
-    .argument('[url]', 'The web URL you want to package', validateUrlInput)
-    // Refer to https://github.com/tj/commander.js#custom-option-processing, turn string array into a string connected with custom connectors.
-    // If the platform is Linux, use `-` as the connector, and convert all characters to lowercase.
-    // For example, Google Translate will become google-translate.
-    .option('--name <string>', 'Application name')
-    .option('--icon <string>', 'Application icon', DEFAULT_PAKE_OPTIONS.icon)
-    .option('--width <number>', 'Window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
-    .option('--height <number>', 'Window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
-    .option('--use-local-file', 'Use local file packaging', DEFAULT_PAKE_OPTIONS.useLocalFile)
-    .option('--fullscreen', 'Start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
-    .option('--hide-title-bar', 'For Mac, hide title bar', DEFAULT_PAKE_OPTIONS.hideTitleBar)
-    .option('--multi-arch', 'For Mac, both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
-    .option('--inject <files>', 'Inject local CSS/JS files into the page', (val, previous) => {
-    if (!val)
-        return DEFAULT_PAKE_OPTIONS.inject;
-    // Split by comma and trim whitespace, filter out empty strings
-    const files = val
-        .split(',')
-        .map((item) => item.trim())
-        .filter((item) => item.length > 0);
-    // If previous values exist (from multiple --inject options), merge them
-    return previous ? [...previous, ...files] : files;
-}, DEFAULT_PAKE_OPTIONS.inject)
-    .option('--debug', 'Debug build and more output', DEFAULT_PAKE_OPTIONS.debug)
-    .addOption(new Option('--proxy-url <url>', 'Proxy URL for all network requests (http://, https://, socks5://)')
-    .default(DEFAULT_PAKE_OPTIONS.proxyUrl)
-    .hideHelp())
-    .addOption(new Option('--user-agent <string>', 'Custom user agent')
-    .default(DEFAULT_PAKE_OPTIONS.userAgent)
-    .hideHelp())
-    .addOption(new Option('--targets <string>', 'Build target format for your system').default(DEFAULT_PAKE_OPTIONS.targets))
-    .addOption(new Option('--app-version <string>', 'App version, the same as package.json version')
-    .default(DEFAULT_PAKE_OPTIONS.appVersion)
-    .hideHelp())
-    .addOption(new Option('--always-on-top', 'Always on the top level')
-    .default(DEFAULT_PAKE_OPTIONS.alwaysOnTop)
-    .hideHelp())
-    .addOption(new Option('--maximize', 'Start window maximized')
-    .default(DEFAULT_PAKE_OPTIONS.maximize)
-    .hideHelp())
-    .addOption(new Option('--dark-mode', 'Force Mac app to use dark mode')
-    .default(DEFAULT_PAKE_OPTIONS.darkMode)
-    .hideHelp())
-    .addOption(new Option('--disabled-web-shortcuts', 'Disabled webPage shortcuts')
-    .default(DEFAULT_PAKE_OPTIONS.disabledWebShortcuts)
-    .hideHelp())
-    .addOption(new Option('--activation-shortcut <string>', 'Shortcut key to active App')
-    .default(DEFAULT_PAKE_OPTIONS.activationShortcut)
-    .hideHelp())
-    .addOption(new Option('--show-system-tray', 'Show system tray in app')
-    .default(DEFAULT_PAKE_OPTIONS.showSystemTray)
-    .hideHelp())
-    .addOption(new Option('--system-tray-icon <string>', 'Custom system tray icon')
-    .default(DEFAULT_PAKE_OPTIONS.systemTrayIcon)
-    .hideHelp())
-    .addOption(new Option('--hide-on-close [boolean]', 'Hide window on close instead of exiting (default: true for macOS, false for others)')
-    .default(DEFAULT_PAKE_OPTIONS.hideOnClose)
-    .argParser((value) => {
-    if (value === undefined)
-        return true; // --hide-on-close without value
-    if (value === 'true')
-        return true;
-    if (value === 'false')
-        return false;
-    throw new Error('--hide-on-close must be true or false');
-})
-    .hideHelp())
-    .addOption(new Option('--title <string>', 'Window title').hideHelp())
-    .addOption(new Option('--incognito', 'Launch app in incognito/private mode')
-    .default(DEFAULT_PAKE_OPTIONS.incognito)
-    .hideHelp())
-    .addOption(new Option('--wasm', 'Enable WebAssembly support (Flutter Web, etc.)')
-    .default(DEFAULT_PAKE_OPTIONS.wasm)
-    .hideHelp())
-    .addOption(new Option('--enable-drag-drop', 'Enable drag and drop functionality')
-    .default(DEFAULT_PAKE_OPTIONS.enableDragDrop)
-    .hideHelp())
-    .addOption(new Option('--keep-binary', 'Keep raw binary file alongside installer')
-    .default(DEFAULT_PAKE_OPTIONS.keepBinary)
-    .hideHelp())
-    .addOption(new Option('--multi-instance', 'Allow multiple app instances')
-    .default(DEFAULT_PAKE_OPTIONS.multiInstance)
-    .hideHelp())
-    .addOption(new Option('--start-to-tray', 'Start app minimized to tray')
-    .default(DEFAULT_PAKE_OPTIONS.startToTray)
-    .hideHelp())
-    .addOption(new Option('--force-internal-navigation', 'Keep every link inside the Pake window instead of opening external handlers')
-    .default(DEFAULT_PAKE_OPTIONS.forceInternalNavigation)
-    .hideHelp())
-    .addOption(new Option('--installer-language <string>', 'Installer language')
-    .default(DEFAULT_PAKE_OPTIONS.installerLanguage)
-    .hideHelp())
-    .addOption(new Option('--zoom <number>', 'Initial page zoom level (50-200)')
-    .default(DEFAULT_PAKE_OPTIONS.zoom)
-    .argParser((value) => {
-    const zoom = parseInt(value);
-    if (isNaN(zoom) || zoom < 50 || zoom > 200) {
-        throw new Error('--zoom must be a number between 50 and 200');
-    }
-    return zoom;
-})
-    .hideHelp())
-    .addOption(new Option('--min-width <number>', 'Minimum window width')
-    .default(DEFAULT_PAKE_OPTIONS.minWidth)
-    .argParser(validateNumberInput)
-    .hideHelp())
-    .addOption(new Option('--min-height <number>', 'Minimum window height')
-    .default(DEFAULT_PAKE_OPTIONS.minHeight)
-    .argParser(validateNumberInput)
-    .hideHelp())
-    .addOption(new Option('--ignore-certificate-errors', 'Ignore certificate errors (for self-signed certificates)')
-    .default(DEFAULT_PAKE_OPTIONS.ignoreCertificateErrors)
-    .hideHelp())
-    .version(packageJson.version, '-v, --version')
-    .configureHelp({
-    sortSubcommands: true,
-    optionTerm: (option) => {
-        if (option.flags === '-v, --version' || option.flags === '-h, --help')
-            return '';
-        return option.flags;
-    },
-    optionDescription: (option) => {
-        if (option.flags === '-v, --version' || option.flags === '-h, --help')
-            return '';
-        return option.description;
-    },
-})
-    .action(async (url, options) => {
+    return program$1
+        .addHelpText('beforeAll', logo)
+        .usage(`[url] [options]`)
+        .showHelpAfterError()
+        .argument('[url]', 'The web URL you want to package', validateUrlInput)
+        .option('--name <string>', 'Application name')
+        .option('--icon <string>', 'Application icon', DEFAULT_PAKE_OPTIONS.icon)
+        .option('--width <number>', 'Window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
+        .option('--height <number>', 'Window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
+        .option('--use-local-file', 'Use local file packaging', DEFAULT_PAKE_OPTIONS.useLocalFile)
+        .option('--fullscreen', 'Start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
+        .option('--hide-title-bar', 'For Mac, hide title bar', DEFAULT_PAKE_OPTIONS.hideTitleBar)
+        .option('--multi-arch', 'For Mac, both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
+        .option('--inject <files>', 'Inject local CSS/JS files into the page', (val, previous) => {
+        if (!val)
+            return DEFAULT_PAKE_OPTIONS.inject;
+        // Split by comma and trim whitespace, filter out empty strings
+        const files = val
+            .split(',')
+            .map((item) => item.trim())
+            .filter((item) => item.length > 0);
+        // If previous values exist (from multiple --inject options), merge them
+        return previous ? [...previous, ...files] : files;
+    }, DEFAULT_PAKE_OPTIONS.inject)
+        .option('--debug', 'Debug build and more output', DEFAULT_PAKE_OPTIONS.debug)
+        .addOption(new Option('--proxy-url <url>', 'Proxy URL for all network requests (http://, https://, socks5://)')
+        .default(DEFAULT_PAKE_OPTIONS.proxyUrl)
+        .hideHelp())
+        .addOption(new Option('--user-agent <string>', 'Custom user agent')
+        .default(DEFAULT_PAKE_OPTIONS.userAgent)
+        .hideHelp())
+        .addOption(new Option('--targets <string>', 'Build target format for your system').default(DEFAULT_PAKE_OPTIONS.targets))
+        .addOption(new Option('--app-version <string>', 'App version, the same as package.json version')
+        .default(DEFAULT_PAKE_OPTIONS.appVersion)
+        .hideHelp())
+        .addOption(new Option('--always-on-top', 'Always on the top level')
+        .default(DEFAULT_PAKE_OPTIONS.alwaysOnTop)
+        .hideHelp())
+        .addOption(new Option('--maximize', 'Start window maximized')
+        .default(DEFAULT_PAKE_OPTIONS.maximize)
+        .hideHelp())
+        .addOption(new Option('--dark-mode', 'Force Mac app to use dark mode')
+        .default(DEFAULT_PAKE_OPTIONS.darkMode)
+        .hideHelp())
+        .addOption(new Option('--disabled-web-shortcuts', 'Disabled webPage shortcuts')
+        .default(DEFAULT_PAKE_OPTIONS.disabledWebShortcuts)
+        .hideHelp())
+        .addOption(new Option('--activation-shortcut <string>', 'Shortcut key to active App')
+        .default(DEFAULT_PAKE_OPTIONS.activationShortcut)
+        .hideHelp())
+        .addOption(new Option('--show-system-tray', 'Show system tray in app')
+        .default(DEFAULT_PAKE_OPTIONS.showSystemTray)
+        .hideHelp())
+        .addOption(new Option('--system-tray-icon <string>', 'Custom system tray icon')
+        .default(DEFAULT_PAKE_OPTIONS.systemTrayIcon)
+        .hideHelp())
+        .addOption(new Option('--hide-on-close [boolean]', 'Hide window on close instead of exiting (default: true for macOS, false for others)')
+        .default(DEFAULT_PAKE_OPTIONS.hideOnClose)
+        .argParser((value) => {
+        if (value === undefined)
+            return true; // --hide-on-close without value
+        if (value === 'true')
+            return true;
+        if (value === 'false')
+            return false;
+        throw new Error('--hide-on-close must be true or false');
+    })
+        .hideHelp())
+        .addOption(new Option('--title <string>', 'Window title').hideHelp())
+        .addOption(new Option('--incognito', 'Launch app in incognito/private mode')
+        .default(DEFAULT_PAKE_OPTIONS.incognito)
+        .hideHelp())
+        .addOption(new Option('--wasm', 'Enable WebAssembly support (Flutter Web, etc.)')
+        .default(DEFAULT_PAKE_OPTIONS.wasm)
+        .hideHelp())
+        .addOption(new Option('--enable-drag-drop', 'Enable drag and drop functionality')
+        .default(DEFAULT_PAKE_OPTIONS.enableDragDrop)
+        .hideHelp())
+        .addOption(new Option('--keep-binary', 'Keep raw binary file alongside installer')
+        .default(DEFAULT_PAKE_OPTIONS.keepBinary)
+        .hideHelp())
+        .addOption(new Option('--multi-instance', 'Allow multiple app instances')
+        .default(DEFAULT_PAKE_OPTIONS.multiInstance)
+        .hideHelp())
+        .addOption(new Option('--start-to-tray', 'Start app minimized to tray')
+        .default(DEFAULT_PAKE_OPTIONS.startToTray)
+        .hideHelp())
+        .addOption(new Option('--force-internal-navigation', 'Keep every link inside the Pake window instead of opening external handlers')
+        .default(DEFAULT_PAKE_OPTIONS.forceInternalNavigation)
+        .hideHelp())
+        .addOption(new Option('--installer-language <string>', 'Installer language')
+        .default(DEFAULT_PAKE_OPTIONS.installerLanguage)
+        .hideHelp())
+        .addOption(new Option('--zoom <number>', 'Initial page zoom level (50-200)')
+        .default(DEFAULT_PAKE_OPTIONS.zoom)
+        .argParser((value) => {
+        const zoom = parseInt(value);
+        if (isNaN(zoom) || zoom < 50 || zoom > 200) {
+            throw new Error('--zoom must be a number between 50 and 200');
+        }
+        return zoom;
+    })
+        .hideHelp())
+        .addOption(new Option('--min-width <number>', 'Minimum window width')
+        .default(DEFAULT_PAKE_OPTIONS.minWidth)
+        .argParser(validateNumberInput)
+        .hideHelp())
+        .addOption(new Option('--min-height <number>', 'Minimum window height')
+        .default(DEFAULT_PAKE_OPTIONS.minHeight)
+        .argParser(validateNumberInput)
+        .hideHelp())
+        .addOption(new Option('--ignore-certificate-errors', 'Ignore certificate errors (for self-signed certificates)')
+        .default(DEFAULT_PAKE_OPTIONS.ignoreCertificateErrors)
+        .hideHelp())
+        .addOption(new Option('--iterative-build', 'Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging')
+        .default(DEFAULT_PAKE_OPTIONS.iterativeBuild)
+        .hideHelp())
+        .version(packageJson.version, '-v, --version')
+        .configureHelp({
+        sortSubcommands: true,
+        optionTerm: (option) => {
+            if (option.flags === '-v, --version' || option.flags === '-h, --help')
+                return '';
+            return option.flags;
+        },
+        optionDescription: (option) => {
+            if (option.flags === '-v, --version' || option.flags === '-h, --help')
+                return '';
+            return option.description;
+        },
+    });
+}
+
+const program = getCliProgram();
+async function checkUpdateTips() {
+    updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify({
+        isGlobal: true,
+    });
+}
+program.action(async (url, options) => {
     await checkUpdateTips();
     if (!url) {
         program.help({

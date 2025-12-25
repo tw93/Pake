@@ -159,7 +159,7 @@ Understanding Pake's codebase structure will help you navigate and contribute ef
 ### Prerequisites
 
 - Node.js ≥22.0.0 (recommended LTS, older versions ≥18.0.0 may work)
-- Rust ≥1.89.0 (recommended stable, older versions ≥1.78.0 may work)
+- Rust ≥1.85.0 (recommended stable)
 
 #### Platform-Specific Requirements
 

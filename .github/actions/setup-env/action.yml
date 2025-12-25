@@ -5,7 +5,7 @@ inputs:
   mode:
     description: |
       Setup mode:
-      - build: Complete environment (Node + Rust + System deps + Cache)  
+      - build: Complete environment (Node + Rust + System deps + Cache)
       - node: Node.js only (pnpm + Node 22)
       - rust: Rust only (toolchain + targets)
     required: false
@@ -29,7 +29,7 @@ runs:
         case "$MODE" in
           build|full)
             echo "SETUP_NODE=true" >> $GITHUB_ENV
-            echo "SETUP_RUST=true" >> $GITHUB_ENV  
+            echo "SETUP_RUST=true" >> $GITHUB_ENV
             echo "SETUP_SYSTEM=true" >> $GITHUB_ENV
             ;;
           node|node-only)
@@ -53,7 +53,7 @@ runs:
       if: env.SETUP_NODE == 'true'
       uses: pnpm/action-setup@v4
       with:
-        version: "10.15.0"
+        version: "10.26.2"
         run_install: false
 
     - name: Setup Node.js
@@ -103,9 +103,9 @@ runs:
       with:
         packages: >
           libdbus-1-dev libsoup-3.0-dev libjavascriptcoregtk-4.1-dev libwebkit2gtk-4.1-dev
-          build-essential curl wget file libxdo-dev libssl-dev libgtk-3-dev 
+          build-essential curl wget file libxdo-dev libssl-dev libgtk-3-dev
           libayatana-appindicator3-dev librsvg2-dev gnome-video-effects
-          libglib2.0-dev libgirepository1.0-dev 
+          libglib2.0-dev libgirepository1.0-dev
           pkg-config
         version: 1.1
 
@@ -115,39 +115,40 @@ runs:
       run: |
         echo "PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/share/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig" >> $GITHUB_ENV
 
-    - name: Install WIX Toolset
+    - name: Cache WIX Toolset
       if: env.SETUP_SYSTEM == 'true' && runner.os == 'Windows'
+      uses: actions/cache@v4
+      id: wix-cache
+      with:
+        path: C:\Program Files (x86)\WiX Toolset v3.11
+        key: windows-wix-3.11.2
+
+    - name: Install WIX Toolset
+      if: env.SETUP_SYSTEM == 'true' && runner.os == 'Windows' && steps.wix-cache.outputs.cache-hit != 'true'
       shell: powershell
       run: |
         try {
           # Download and install WIX Toolset v3.11
           Invoke-WebRequest -Uri "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311.exe" -OutFile "wix311.exe"
           Start-Process -FilePath "wix311.exe" -ArgumentList "/quiet" -Wait
-
-          # Add WIX to PATH
-          $wixPath = "${env:ProgramFiles(x86)}\WiX Toolset v3.11\bin"
-          if (Test-Path $wixPath) {
-            echo $wixPath >> $env:GITHUB_PATH
-            Write-Host "✅ WIX Toolset installed successfully"
-          } else {
-            Write-Warning "WIX installation path not found"
-          }
+          Write-Host "✅ WIX Toolset installed successfully"
         } catch {
           Write-Error "Failed to install WIX Toolset: $($_.Exception.Message)"
           exit 1
         }
 
+    - name: Add WIX to PATH
+      if: env.SETUP_SYSTEM == 'true' && runner.os == 'Windows'
+      shell: powershell
+      run: |
+        $wixPath = "${env:ProgramFiles(x86)}\WiX Toolset v3.11\bin"
+        if (Test-Path $wixPath) {
+          echo $wixPath >> $env:GITHUB_PATH
+        }
+
     # Build optimizations (caching)
     - name: Setup Rust cache
       if: inputs.mode == 'build'
-      uses: actions/cache@v4
+      uses: swatinem/rust-cache@v2
       with:
-        path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          src-tauri/target/
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-
+        workspaces: "src-tauri -> target"

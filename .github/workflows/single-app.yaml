@@ -2,7 +2,11 @@ name: Build Single Popular App
 
 env:
   NODE_VERSION: "22"
-  PNPM_VERSION: "10.15.0"
+  PNPM_VERSION: "10.26.2"
+
+concurrency:
+  group: build-app-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   workflow_dispatch:
@@ -23,6 +27,9 @@ on:
         description: "App URL"
         required: true
         default: "https://twitter.com/"
+      icon:
+        description: "App Icon"
+        required: false
   workflow_call:
     inputs:
       name:
@@ -45,10 +52,37 @@ on:
         required: true
         type: string
         default: "https://twitter.com/"
+      icon:
+        description: "App Icon"
+        type: string
+        required: false
 
 jobs:
+  build-cli:
+    name: Build CLI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: ./.github/actions/setup-env
+        with:
+          mode: 'node'
+
+      - name: Build CLI
+        run: pnpm run cli:build
+
+      - name: Upload CLI Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pake-cli-dist
+          path: dist/
+          retention-days: 1
+
   build:
     name: ${{ inputs.title }} (${{ matrix.build }})
+    needs: build-cli
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -78,6 +112,16 @@ jobs:
         with:
           mode: ${{ (matrix.build == 'linux' || matrix.build == 'macos') && 'build' || 'node' }}
 
+      - name: Download CLI Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pake-cli-dist
+          path: dist
+
+      - name: Setup mold linker
+        if: matrix.os == 'ubuntu-latest'
+        uses: rui314/setup-mold@v1
+
       - name: Rust cache restore
         uses: actions/cache/restore@v4.2.0
         id: cache_store
@@ -88,38 +132,62 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             src-tauri/target/
-          key: ${{ runner.os }}-cargo-${{ inputs.name }}-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-pake-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Config App
-        env:
-          NAME: ${{ inputs.name }}
-          TITLE: ${{ inputs.title }}
-          NAME_ZH: ${{ inputs.name_zh }}
-          URL: ${{ inputs.url }}
-        run: pnpm run build:config
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
 
       - name: Build for Linux
         if: matrix.os == 'ubuntu-latest'
-        timeout-minutes: 15
+        timeout-minutes: 20
         run: |
-          pnpm run tauri build
+          ARGS="${{ inputs.url }} --name ${{ inputs.name }}"
+          if [ -n "${{ inputs.icon }}" ]; then ARGS="$ARGS --icon ${{ inputs.icon }}"; fi
+
+          # Build once with multiple targets (faster than separate builds)
+          node dist/cli.js $ARGS --targets deb,appimage
+
           mkdir -p output/linux
           mv src-tauri/target/release/bundle/deb/*.deb output/linux/${{inputs.title}}_`arch`.deb
           mv src-tauri/target/release/bundle/appimage/*.AppImage output/linux/"${{inputs.title}}"_`arch`.AppImage
 
+          if [ -f "src-tauri/png/${{ inputs.name }}_512.png" ]; then
+            cp "src-tauri/png/${{ inputs.name }}_512.png" output/linux/
+          fi
+
       - name: Build for macOS
         if: matrix.os == 'macos-latest'
-        timeout-minutes: 20
+        timeout-minutes: 25
         run: |
-          pnpm run build:mac
+          ARGS="${{ inputs.url }} --name ${{ inputs.name }}"
+          if [ -n "${{ inputs.icon }}" ]; then ARGS="$ARGS --icon ${{ inputs.icon }}"; fi
+
+          node dist/cli.js $ARGS --targets universal --multi-arch
+
           mkdir -p output/macos
           mv src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg output/macos/"${{inputs.title}}".dmg
 
+          if [ -f "src-tauri/png/${{ inputs.name }}_512.png" ]; then
+            cp "src-tauri/png/${{ inputs.name }}_512.png" output/macos/
+          elif [ -f "src-tauri/icons/${{ inputs.name }}.icns" ]; then
+             cp "src-tauri/icons/${{ inputs.name }}.icns" output/macos/
+          fi
+
       - name: Build for Windows
         if: matrix.os == 'windows-latest'
-        timeout-minutes: 15
+        timeout-minutes: 20
         run: |
-          pnpm run build
+          $args = "${{ inputs.url }}", "--name", "${{ inputs.name }}"
+          if ("${{ inputs.icon }}" -ne "") { $args += "--icon", "${{ inputs.icon }}" }
+          $args += "--targets", "x64"
+
+          node dist/cli.js $args
+
           New-Item -Path "output\windows" -ItemType Directory -Force
           $msiFiles = Get-ChildItem -Path "src-tauri\target\release\bundle\msi\*.msi" -ErrorAction SilentlyContinue
           if ($msiFiles) {
@@ -129,6 +197,18 @@ jobs:
             Get-ChildItem -Path "src-tauri\target\" -Recurse -Name "*.msi" | Write-Host
             exit 1
           }
+
+
+
+          $pngPath = "src-tauri\png\${{ inputs.name }}_512.png"
+          $icoPath = "src-tauri\png\${{ inputs.name }}_256.ico"
+
+          if (Test-Path $pngPath) {
+            Copy-Item -Path $pngPath -Destination "output\windows\"
+          } elseif (Test-Path $icoPath) {
+            Copy-Item -Path $icoPath -Destination "output\windows\"
+          }
+
           git checkout -- src-tauri/Cargo.lock
 
       - name: Rust cache store
@@ -141,7 +221,7 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             src-tauri/target/
-          key: ${{ runner.os }}-cargo-${{ inputs.name }}-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-pake-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

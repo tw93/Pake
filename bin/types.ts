@@ -111,8 +111,52 @@ export interface PakeCliOptions {
 
   // Ignore certificate errors (for self-signed certs), default false
   ignoreCertificateErrors: boolean;
+
+  // Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging
+  iterativeBuild: boolean;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {
   identifier: string;
+}
+
+export interface PlatformSpecific<T> {
+  macos: T;
+  linux: T;
+  windows: T;
+}
+
+export interface WindowConfig {
+  url: string;
+  hide_title_bar: boolean;
+  fullscreen: boolean;
+  maximize: boolean;
+  width: number;
+  height: number;
+  resizable: boolean;
+  url_type: string;
+  always_on_top: boolean;
+  dark_mode: boolean;
+  disabled_web_shortcuts: boolean;
+  activation_shortcut: string;
+  hide_on_close: boolean;
+  incognito: boolean;
+  title?: string;
+  enable_wasm: boolean;
+  enable_drag_drop: boolean;
+  start_to_tray: boolean;
+  force_internal_navigation: boolean;
+  zoom: number;
+  min_width: number;
+  min_height: number;
+  ignore_certificate_errors: boolean;
+}
+
+export interface PakeConfig {
+  windows: WindowConfig[];
+  user_agent: PlatformSpecific<string>;
+  system_tray: PlatformSpecific<boolean>;
+  system_tray_path: string;
+  proxy_url: string;
+  multi_instance: boolean;
 }

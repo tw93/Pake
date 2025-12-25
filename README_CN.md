@@ -177,7 +177,7 @@ pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/week
 
 ## 定制开发
 
-需要 Rust `>=1.89` 和 Node `>=22`，详细安装指南参考 [Tauri 文档](https://tauri.app/start/prerequisites/)。不熟悉开发环境建议直接使用命令行工具。
+需要 Rust `>=1.85` 和 Node `>=22`，详细安装指南参考 [Tauri 文档](https://tauri.app/start/prerequisites/)。不熟悉开发环境建议直接使用命令行工具。
 
 ```bash
 # 安装依赖
