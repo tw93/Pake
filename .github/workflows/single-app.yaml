@@ -281,7 +281,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.title }}-${{ matrix.build }}
+          name: ${{ inputs.title }}-${{ matrix.build }}-${{ github.run_attempt }}
           path: output/*/*.*
           retention-days: 3
 
