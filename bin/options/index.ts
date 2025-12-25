@@ -1,3 +1,4 @@
+import path from 'path';
 import fsExtra from 'fs-extra';
 import logger from '@/options/logger';
 
@@ -10,6 +11,22 @@ import { PakeAppOptions, PakeCliOptions, PlatformMap } from '@/types';
 function resolveAppName(name: string, platform: NodeJS.Platform): string {
   const domain = getDomain(name) || 'pake';
   return platform !== 'linux' ? capitalizeFirstLetter(domain) : domain;
+}
+
+function resolveLocalAppName(
+  filePath: string,
+  platform: NodeJS.Platform,
+): string {
+  const baseName = path.parse(filePath).name || 'pake-app';
+  if (platform === 'linux') {
+    return generateLinuxPackageName(baseName) || 'pake-app';
+  }
+  const normalized = baseName
+    .replace(/[^a-zA-Z0-9\u4e00-\u9fff -]/g, '')
+    .replace(/^[ -]+/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return normalized || 'pake-app';
 }
 
 function isValidName(name: string, platform: NodeJS.Platform): boolean {
@@ -31,10 +48,12 @@ export default async function handleOptions(
 
   const pathExists = await fsExtra.pathExists(url);
   if (!options.name) {
-    const defaultName = pathExists ? '' : resolveAppName(url, platform);
+    const defaultName = pathExists
+      ? resolveLocalAppName(url, platform)
+      : resolveAppName(url, platform);
     const promptMessage = 'Enter your application name';
     const namePrompt = await promptText(promptMessage, defaultName);
-    name = namePrompt || defaultName;
+    name = namePrompt?.trim() || defaultName;
   }
 
   if (name && platform === 'linux') {
