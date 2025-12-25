@@ -129,10 +129,6 @@ jobs:
             exit 1
           fi
 
-          if [ -f "src-tauri/png/${{ inputs.name }}_512.png" ]; then
-            cp "src-tauri/png/${{ inputs.name }}_512.png" output/linux/
-          fi
-
       - name: Build for macOS
         if: matrix.os == 'macos-latest'
         timeout-minutes: 25
@@ -157,12 +153,6 @@ jobs:
             echo "  - src-tauri/target/universal-apple-darwin/release/bundle/dmg/"
             find . -name "*.dmg" -type f
             exit 1
-          fi
-
-          if [ -f "src-tauri/png/${{ inputs.name }}_512.png" ]; then
-            cp "src-tauri/png/${{ inputs.name }}_512.png" output/macos/
-          elif [ -f "src-tauri/icons/${{ inputs.name }}.icns" ]; then
-             cp "src-tauri/icons/${{ inputs.name }}.icns" output/macos/
           fi
 
       - name: Build for Windows
@@ -206,17 +196,6 @@ jobs:
             }
           }
 
-
-
-          $pngPath = "src-tauri\png\${{ inputs.name }}_512.png"
-          $icoPath = "src-tauri\png\${{ inputs.name }}_256.ico"
-
-          if (Test-Path $pngPath) {
-            Copy-Item -Path $pngPath -Destination "output\windows\"
-          } elseif (Test-Path $icoPath) {
-            Copy-Item -Path $icoPath -Destination "output\windows\"
-          }
-
           git checkout -- src-tauri/Cargo.lock
 
       - name: Upload artifacts
@@ -226,10 +205,26 @@ jobs:
           path: output/*/*.*
           retention-days: 3
 
-      - name: Upload to release
+      - name: Upload to release (Linux)
         uses: ncipollo/release-action@v1 # cspell:disable-line
-        if: startsWith(github.ref, 'refs/tags/')
+        if: matrix.os == 'ubuntu-latest' && startsWith(github.ref, 'refs/tags/')
         with:
           allowUpdates: true
-          artifacts: "output/*/*.deb,output/*/*.AppImage,output/*/*.dmg,output/*/*.msi"
+          artifacts: "output/linux/*.deb,output/linux/*.AppImage"
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload to release (macOS)
+        uses: ncipollo/release-action@v1 # cspell:disable-line
+        if: matrix.os == 'macos-latest' && startsWith(github.ref, 'refs/tags/')
+        with:
+          allowUpdates: true
+          artifacts: "output/macos/*.dmg"
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload to release (Windows)
+        uses: ncipollo/release-action@v1 # cspell:disable-line
+        if: matrix.os == 'windows-latest' && startsWith(github.ref, 'refs/tags/')
+        with:
+          allowUpdates: true
+          artifacts: "output/windows/*.msi"
           token: ${{ secrets.GITHUB_TOKEN }}
