@@ -5,7 +5,7 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "packageManager": "pnpm@10.15.0",
+  "packageManager": "pnpm@10.26.2",
   "bin": {
     "pake": "./dist/cli.js"
   },
