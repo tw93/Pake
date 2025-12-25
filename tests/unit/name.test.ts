@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { getSafeAppName, generateLinuxPackageName, generateIdentifierSafeName } from '@/utils/name';
+import {
+  getSafeAppName,
+  generateLinuxPackageName,
+  generateIdentifierSafeName,
+} from '@/utils/name';
 
 describe('getSafeAppName', () => {
   it('should handle simple names', () => {

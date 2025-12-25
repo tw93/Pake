@@ -650,7 +650,10 @@ class PakeTestRunner {
   async runLocalFileTest() {
     await this.runTest("Local File Build Handling", async () => {
       const testFile = path.join(config.PROJECT_ROOT, "test-local.html");
-      fs.writeFileSync(testFile, "<html><body><h1>Hello Pake</h1></body></html>");
+      fs.writeFileSync(
+        testFile,
+        "<html><body><h1>Hello Pake</h1></body></html>",
+      );
       this.trackTempFile(testFile);
 
       try {
@@ -732,7 +735,9 @@ class PakeTestRunner {
           const platform = process.platform;
           const expectedFiles = outputFiles[platform] || outputFiles.darwin;
 
-          console.log(`[Integration] Starting real build test for GitHub.com...`);
+          console.log(
+            `[Integration] Starting real build test for GitHub.com...`,
+          );
           console.log(`[Note] Platform: ${platform}`);
           console.log(`[Note] Expected app directory: ${expectedFiles.app}`);
           console.log(
@@ -836,7 +841,9 @@ class PakeTestRunner {
           child.on("close", (code) => {
             clearTimeout(timeout);
 
-            console.log(`   [Status] Build process finished with exit code: ${code}`);
+            console.log(
+              `   [Status] Build process finished with exit code: ${code}`,
+            );
 
             const foundFiles = this.findBuildOutputFiles(testName, platform);
 
@@ -856,7 +863,7 @@ class PakeTestRunner {
               });
               console.log("   [Success] Build artifacts tracked for cleanup");
               // Track files for cleanup
-              foundFiles.forEach(f => this.trackTempFile(f.path));
+              foundFiles.forEach((f) => this.trackTempFile(f.path));
               resolve(true);
             } else if (code === 0 && buildStarted && compilationStarted) {
               console.log(
@@ -865,7 +872,9 @@ class PakeTestRunner {
               this.debugBuildDirectories();
               resolve(false);
             } else {
-              console.log(`   [FAIL] Build process failed with exit code: ${code}`);
+              console.log(
+                `   [FAIL] Build process failed with exit code: ${code}`,
+              );
               if (buildStarted) {
                 console.log(
                   "   [Status] Build was started but failed during execution",
@@ -878,7 +887,9 @@ class PakeTestRunner {
                 }
                 this.debugBuildDirectories();
               } else {
-                console.log("   [Status] Build failed before starting compilation");
+                console.log(
+                  "   [Status] Build failed before starting compilation",
+                );
                 if (errorOutput.trim()) {
                   console.log("   [Check] Error details:");
                   errorOutput.split("\n").forEach((line) => {
@@ -914,9 +925,13 @@ class PakeTestRunner {
           const appFile = path.join(config.PROJECT_ROOT, `${testName}.app`);
           const dmgFile = path.join(config.PROJECT_ROOT, `${testName}.dmg`);
 
-          console.log(`[Integration] Starting multi-arch build test for GitHub.com...`);
+          console.log(
+            `[Integration] Starting multi-arch build test for GitHub.com...`,
+          );
           console.log(`[Note] Expected output: ${appFile}`);
-          console.log(`[Build]  Building Universal Binary (Intel + Apple Silicon)`);
+          console.log(
+            `[Build]  Building Universal Binary (Intel + Apple Silicon)`,
+          );
 
           const command = `node "${config.CLI_PATH}" "https://github.com" --name "${testName}" --width 1200 --height 800 --hide-title-bar --multi-arch`;
 
@@ -980,11 +995,15 @@ class PakeTestRunner {
             const foundFiles = this.findBuildOutputFiles(testName, "darwin");
 
             if (foundFiles.length > 0) {
-              console.log("   [Success] Multi-arch build completed successfully!");
+              console.log(
+                "   [Success] Multi-arch build completed successfully!",
+              );
               foundFiles.forEach((file) => {
                 console.log(`   [App] Found: ${file.path} (${file.type})`);
               });
-              console.log("   [Multi] Universal binary preserved for inspection");
+              console.log(
+                "   [Multi] Universal binary preserved for inspection",
+              );
               child.kill("SIGTERM");
               resolve(true);
             } else {
@@ -1023,7 +1042,9 @@ class PakeTestRunner {
               foundFiles.forEach((file) => {
                 console.log(`   [App] ${file.type}: ${file.path}`);
               });
-              console.log("   [Multi] Universal binary preserved for inspection");
+              console.log(
+                "   [Multi] Universal binary preserved for inspection",
+              );
 
               // Verify it's actually a universal binary
               const appFile = foundFiles.find((f) => f.type.includes("App"));
@@ -1047,7 +1068,9 @@ class PakeTestRunner {
                     );
                   }
                 } catch (error) {
-                  console.log("   [Warn]  Could not verify binary architecture");
+                  console.log(
+                    "   [Warn]  Could not verify binary architecture",
+                  );
                 }
               }
 
@@ -1249,7 +1272,9 @@ class PakeTestRunner {
           }
         }
       } catch (error) {
-        console.log(`      [Warn]  Could not read ${location}: ${error.message}`);
+        console.log(
+          `      [Warn]  Could not read ${location}: ${error.message}`,
+        );
       }
     }
 
@@ -1267,7 +1292,9 @@ class PakeTestRunner {
       try {
         this.listTargetContents(targetDir);
       } catch (error) {
-        console.log(`   [Warn]  Could not list target contents: ${error.message}`);
+        console.log(
+          `   [Warn]  Could not list target contents: ${error.message}`,
+        );
       }
     } else {
       console.log(`   [FAIL] Target directory does not exist: ${targetDir}`);
@@ -1358,7 +1385,7 @@ class PakeTestRunner {
       "githubmultiarch",
       "githubconfigtest",
       "localapp",
-      "proxytest"
+      "proxytest",
     ];
 
     testNames.forEach((name) => {
@@ -1413,17 +1440,22 @@ class PakeTestRunner {
       "GitHubConfigTest",
       "LocalApp",
       "ProxyTest",
-      "URLTest"
+      "URLTest",
     ];
 
     const extensions = [".app", ".dmg", ".msi", ".deb", ".exe", ".AppImage"];
 
     try {
       const files = fs.readdirSync(config.PROJECT_ROOT);
-      files.forEach(file => {
+      files.forEach((file) => {
         // Check if file matches any test name pattern and extension
-        const isTestArtifact = testPatterns.some(pattern => file.includes(pattern)) &&
-                              (extensions.some(ext => file.endsWith(ext)) || (!file.includes(".") && !fs.statSync(path.join(config.PROJECT_ROOT, file)).isDirectory())); // Linux binary often has no extension
+        const isTestArtifact =
+          testPatterns.some((pattern) => file.includes(pattern)) &&
+          (extensions.some((ext) => file.endsWith(ext)) ||
+            (!file.includes(".") &&
+              !fs
+                .statSync(path.join(config.PROJECT_ROOT, file))
+                .isDirectory())); // Linux binary often has no extension
 
         if (isTestArtifact) {
           const fullPath = path.join(config.PROJECT_ROOT, file);
@@ -1435,9 +1467,8 @@ class PakeTestRunner {
       // Also clean src-tauri/.pake directory if it exists
       const pakeDir = path.join(config.PROJECT_ROOT, "src-tauri", ".pake");
       if (fs.existsSync(pakeDir)) {
-         fs.rmSync(pakeDir, { recursive: true, force: true });
+        fs.rmSync(pakeDir, { recursive: true, force: true });
       }
-
     } catch (e) {
       console.warn("   [Warn]  Cleanup warning:", e.message);
     }
