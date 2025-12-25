@@ -22,7 +22,7 @@ import * as psl from 'psl';
 import { InvalidArgumentError, program as program$1, Option } from 'commander';
 
 var name = "pake-cli";
-var version = "3.7.0";
+var version = "3.7.1";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -1304,7 +1304,9 @@ class LinuxBuilder extends BaseBuilder {
     }
     async build(url) {
         const targetTypes = ['deb', 'appimage', 'rpm'];
-        const requestedTargets = this.options.targets.split(',').map((t) => t.trim());
+        const requestedTargets = this.options.targets
+            .split(',')
+            .map((t) => t.trim());
         for (const target of targetTypes) {
             if (requestedTargets.includes(target)) {
                 await this.buildAndCopy(url, target);
