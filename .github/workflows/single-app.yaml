@@ -100,7 +100,13 @@ jobs:
         timeout-minutes: 20
         run: |
           ARGS="${{ inputs.url }} --name ${{ inputs.name }}"
-          if [ -n "${{ inputs.icon }}" ]; then ARGS="$ARGS --icon ${{ inputs.icon }}"; fi
+
+          # Auto-detect local icon or use provided icon
+          if [ -n "${{ inputs.icon }}" ]; then
+            ARGS="$ARGS --icon ${{ inputs.icon }}"
+          elif [ -f "src-tauri/png/${{ inputs.name }}_512.png" ]; then
+            ARGS="$ARGS --icon src-tauri/png/${{ inputs.name }}_512.png"
+          fi
 
           # Build once with multiple targets (faster than separate builds)
           node dist/cli.js $ARGS --targets deb,appimage
@@ -133,8 +139,14 @@ jobs:
         if: matrix.os == 'macos-latest'
         timeout-minutes: 25
         run: |
-          ARGS="${{ inputs.url }} --name ${{ inputs.name }}"
-          if [ -n "${{ inputs.icon }}" ]; then ARGS="$ARGS --icon ${{ inputs.icon }}"; fi
+          ARGS="${{ inputs.url }} --name ${{ inputs.name }} --hide-title-bar"
+
+          # Auto-detect local icon or use provided icon
+          if [ -n "${{ inputs.icon }}" ]; then
+            ARGS="$ARGS --icon ${{ inputs.icon }}"
+          elif [ -f "src-tauri/icons/${{ inputs.name }}.icns" ]; then
+            ARGS="$ARGS --icon src-tauri/icons/${{ inputs.name }}.icns"
+          fi
 
           node dist/cli.js $ARGS --targets universal --multi-arch
 
@@ -160,7 +172,14 @@ jobs:
         timeout-minutes: 20
         run: |
           $args = "${{ inputs.url }}", "--name", "${{ inputs.name }}"
-          if ("${{ inputs.icon }}" -ne "") { $args += "--icon", "${{ inputs.icon }}" }
+
+          # Auto-detect local icon or use provided icon
+          if ("${{ inputs.icon }}" -ne "") {
+            $args += "--icon", "${{ inputs.icon }}"
+          } elseif (Test-Path "src-tauri\png\${{ inputs.name }}_256.ico") {
+            $args += "--icon", "src-tauri\png\${{ inputs.name }}_256.ico"
+          }
+
           $args += "--targets", "x64"
 
           node dist/cli.js $args
