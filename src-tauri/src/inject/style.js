@@ -435,6 +435,14 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       top: 28px;
     }
 
+    .flex.w-full.h-full.overflow-hidden{
+      padding-top:20px;
+    }
+
+    .text-sidebar-foreground .bg-sidebar{
+      padding-top:30px;
+    }
+
     #pake-top-dom:active {
       cursor: grabbing;
       cursor: -webkit-grabbing;

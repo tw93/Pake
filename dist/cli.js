@@ -1304,8 +1304,9 @@ class LinuxBuilder extends BaseBuilder {
     }
     async build(url) {
         const targetTypes = ['deb', 'appimage', 'rpm'];
+        const requestedTargets = this.options.targets.split(',').map((t) => t.trim());
         for (const target of targetTypes) {
-            if (this.options.targets === target) {
+            if (requestedTargets.includes(target)) {
                 await this.buildAndCopy(url, target);
             }
         }
