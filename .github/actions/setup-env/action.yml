@@ -53,7 +53,7 @@ runs:
       if: env.SETUP_NODE == 'true'
       uses: pnpm/action-setup@v4
       with:
-        version: "10.15.0"
+        version: "10.26.2"
         run_install: false
 
     - name: Setup Node.js
@@ -149,14 +149,6 @@ runs:
     # Build optimizations (caching)
     - name: Setup Rust cache
       if: inputs.mode == 'build'
-      uses: actions/cache@v4
+      uses: swatinem/rust-cache@v2
       with:
-        path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          src-tauri/target/
-        key: ${{ runner.os }}-cargo-pake-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-pake-
+        workspaces: "src-tauri -> target"

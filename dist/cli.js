@@ -27,7 +27,7 @@ var description = "🤱🏻 Turn any webpage into a desktop app with one command
 var engines = {
 	node: ">=18.0.0"
 };
-var packageManager = "pnpm@10.15.0";
+var packageManager = "pnpm@10.26.2";
 var bin = {
 	pake: "./dist/cli.js"
 };
@@ -68,45 +68,50 @@ var scripts = {
 	prepublishOnly: "pnpm run cli:build"
 };
 var type = "module";
-var exports = "./dist/cli.js";
+var exports$1 = "./dist/cli.js";
 var license = "MIT";
 var dependencies = {
-	"@tauri-apps/api": "^2.9.0",
-	"@tauri-apps/cli": "^2.9.0",
+	"@tauri-apps/api": "^2.9.1",
+	"@tauri-apps/cli": "^2.9.6",
 	chalk: "^5.6.2",
-	commander: "^12.1.0",
-	execa: "^9.6.0",
-	"file-type": "^18.7.0",
-	"fs-extra": "^11.3.2",
+	commander: "^14.0.2",
+	execa: "^9.6.1",
+	"file-type": "^21.1.1",
+	"fs-extra": "^11.3.3",
 	"icon-gen": "^5.0.0",
 	loglevel: "^1.9.2",
-	ora: "^8.2.0",
+	ora: "^9.0.0",
 	prompts: "^2.4.2",
 	psl: "^1.15.0",
-	sharp: "^0.33.5",
+	sharp: "^0.34.5",
 	"tmp-promise": "^3.0.3",
 	"update-notifier": "^7.3.1"
 };
 var devDependencies = {
-	"@rollup/plugin-alias": "^5.1.1",
-	"@rollup/plugin-commonjs": "^28.0.8",
+	"@rollup/plugin-alias": "^6.0.0",
+	"@rollup/plugin-commonjs": "^29.0.0",
 	"@rollup/plugin-json": "^6.1.0",
-	"@rollup/plugin-replace": "^6.0.2",
+	"@rollup/plugin-replace": "^6.0.3",
 	"@rollup/plugin-terser": "^0.4.4",
 	"@types/fs-extra": "^11.0.4",
-	"@types/node": "^20.19.23",
+	"@types/node": "^25.0.3",
 	"@types/page-icon": "^0.3.6",
 	"@types/prompts": "^2.4.9",
 	"@types/tmp": "^0.2.6",
 	"@types/update-notifier": "^6.0.8",
 	"app-root-path": "^3.1.0",
-	"cross-env": "^7.0.3",
-	prettier: "^3.6.2",
-	rollup: "^4.52.5",
+	"cross-env": "^10.1.0",
+	prettier: "^3.7.4",
+	rollup: "^4.54.0",
 	"rollup-plugin-typescript2": "^0.36.0",
 	tslib: "^2.8.1",
 	typescript: "^5.9.3",
-	vitest: "^4.0.15"
+	vitest: "^4.0.16"
+};
+var pnpm = {
+	overrides: {
+		sharp: "^0.34.5"
+	}
 };
 var packageJson = {
 	name: name,
@@ -121,10 +126,11 @@ var packageJson = {
 	files: files,
 	scripts: scripts,
 	type: type,
-	exports: exports,
+	exports: exports$1,
 	license: license,
 	dependencies: dependencies,
-	devDependencies: devDependencies
+	devDependencies: devDependencies,
+	pnpm: pnpm
 };
 
 // Convert the current module URL to a file path
@@ -506,7 +512,10 @@ async function mergeConfig(url, options, tauriConf) {
     tauriConf.version = appVersion;
     // Always set mainBinaryName to ensure binary uniqueness
     const linuxBinaryName = `pake-${generateLinuxPackageName(name)}`;
-    tauriConf.mainBinaryName = platform === 'linux' ? linuxBinaryName : `pake-${generateIdentifierSafeName(name)}`;
+    tauriConf.mainBinaryName =
+        platform === 'linux'
+            ? linuxBinaryName
+            : `pake-${generateIdentifierSafeName(name)}`;
     if (platform == 'win32') {
         tauriConf.bundle.windows.wix.language[0] = installerLanguage;
     }
@@ -1093,7 +1102,9 @@ class BaseBuilder {
     getBinaryName(appName) {
         const extension = process.platform === 'win32' ? '.exe' : '';
         // Use unique binary name for all platforms to avoid conflicts
-        const nameToUse = process.platform === 'linux' ? generateLinuxPackageName(appName) : generateIdentifierSafeName(appName);
+        const nameToUse = process.platform === 'linux'
+            ? generateLinuxPackageName(appName)
+            : generateIdentifierSafeName(appName);
         return `pake-${nameToUse}${extension}`;
     }
     /**

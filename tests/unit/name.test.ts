@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getSafeAppName } from './name';
+import { getSafeAppName, generateLinuxPackageName, generateIdentifierSafeName } from '@/utils/name';
 
 describe('getSafeAppName', () => {
   it('should handle simple names', () => {
@@ -82,5 +82,46 @@ describe('getSafeAppName', () => {
     const longName = 'A'.repeat(300);
     const expected = 'a'.repeat(255);
     expect(getSafeAppName(longName)).toBe(expected);
+  });
+});
+
+describe('generateLinuxPackageName', () => {
+  it('should handle simple names', () => {
+    expect(generateLinuxPackageName('MyApp')).toBe('myapp');
+  });
+
+  it('should replace spaces and special characters with hyphens', () => {
+    expect(generateLinuxPackageName('My App! @123')).toBe('my-app-123');
+  });
+
+  it('should handle multiple hyphens', () => {
+    expect(generateLinuxPackageName('my--app')).toBe('my-app');
+  });
+
+  it('should handle Chinese characters', () => {
+    expect(generateLinuxPackageName('我的应用')).toBe('我的应用');
+  });
+
+  it('should trim leading/trailing hyphens', () => {
+    expect(generateLinuxPackageName('--my-app--')).toBe('my-app');
+  });
+});
+
+describe('generateIdentifierSafeName', () => {
+  it('should handle alphanumeric names', () => {
+    expect(generateIdentifierSafeName('MyApp123')).toBe('myapp123');
+  });
+
+  it('should remove special characters', () => {
+    expect(generateIdentifierSafeName('My-App! @#')).toBe('myapp');
+  });
+
+  it('should handle Chinese characters', () => {
+    expect(generateIdentifierSafeName('我的应用App')).toBe('我的应用app');
+  });
+
+  it('should provide fallback for names without alphanumeric/Chinese', () => {
+    expect(generateIdentifierSafeName('!@#$')).not.toBe('');
+    expect(generateIdentifierSafeName('!@#$')).not.toBe('!@#$');
   });
 });

@@ -2,7 +2,7 @@ name: Build Single Popular App
 
 env:
   NODE_VERSION: "22"
-  PNPM_VERSION: "10.15.0"
+  PNPM_VERSION: "10.26.2"
 
 concurrency:
   group: build-app-${{ github.workflow }}-${{ github.ref }}
@@ -118,6 +118,10 @@ jobs:
           name: pake-cli-dist
           path: dist
 
+      - name: Setup mold linker
+        if: matrix.os == 'ubuntu-latest'
+        uses: rui314/setup-mold@v1
+
       - name: Rust cache restore
         uses: actions/cache/restore@v4.2.0
         id: cache_store
@@ -146,8 +150,7 @@ jobs:
           if [ -n "${{ inputs.icon }}" ]; then ARGS="$ARGS --icon ${{ inputs.icon }}"; fi
 
           # Build once with multiple targets (faster than separate builds)
-          node dist/cli.js $ARGS --targets deb
-          node dist/cli.js $ARGS --targets appimage
+          node dist/cli.js $ARGS --targets deb,appimage
 
           mkdir -p output/linux
           mv src-tauri/target/release/bundle/deb/*.deb output/linux/${{inputs.title}}_`arch`.deb
