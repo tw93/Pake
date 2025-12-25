@@ -6,9 +6,6 @@ use tauri::Manager;
 use tauri_plugin_window_state::Builder as WindowStatePlugin;
 use tauri_plugin_window_state::StateFlags;
 
-#[cfg(target_os = "macos")]
-use std::time::Duration;
-
 const WINDOW_SHOW_DELAY: u64 = 50;
 
 use app::{
