@@ -5,7 +5,7 @@ env:
   PNPM_VERSION: "10.26.2"
 
 concurrency:
-  group: build-app-${{ github.workflow }}-${{ github.ref }}
+  group: build-app-${{ github.workflow }}-${{ github.ref }}-${{ inputs.name }}
   cancel-in-progress: true
 
 on:
@@ -110,7 +110,7 @@ jobs:
       - name: Setup Node.js Environment
         uses: ./.github/actions/setup-env
         with:
-          mode: ${{ (matrix.build == 'linux' || matrix.build == 'macos') && 'build' || 'node' }}
+          mode: build
 
       - name: Download CLI Artifact
         uses: actions/download-artifact@v4
@@ -121,26 +121,6 @@ jobs:
       - name: Setup mold linker
         if: matrix.os == 'ubuntu-latest'
         uses: rui314/setup-mold@v1
-
-      - name: Rust cache restore
-        uses: actions/cache/restore@v4.2.0
-        id: cache_store
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            src-tauri/target/
-          key: ${{ runner.os }}-cargo-pake-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
 
       - name: Build for Linux
         if: matrix.os == 'ubuntu-latest'
@@ -265,18 +245,6 @@ jobs:
           }
 
           git checkout -- src-tauri/Cargo.lock
-
-      - name: Rust cache store
-        uses: actions/cache/save@v4.2.0
-        if: steps.cache_store.outputs.cache-hit != 'true'
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            src-tauri/target/
-          key: ${{ runner.os }}-cargo-pake-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
