@@ -68,7 +68,7 @@ var scripts = {
 	prepublishOnly: "pnpm run cli:build"
 };
 var type = "module";
-var exports$1 = "./dist/cli.js";
+var exports = "./dist/cli.js";
 var license = "MIT";
 var dependencies = {
 	"@tauri-apps/api": "^2.9.1",
@@ -126,7 +126,7 @@ var packageJson = {
 	files: files,
 	scripts: scripts,
 	type: type,
-	exports: exports$1,
+	exports: exports,
 	license: license,
 	dependencies: dependencies,
 	devDependencies: devDependencies,
@@ -1639,6 +1639,14 @@ async function handleIcon(options, url) {
         const resolvedPath = path.resolve(options.icon);
         const result = await processIcon(resolvedPath, options.name || '');
         return result || resolvedPath;
+    }
+    // Check for existing local icon before downloading
+    if (options.name) {
+        const localIconPath = generateIconPath(options.name);
+        if (await fsExtra.pathExists(localIconPath)) {
+            logger.info(`✼ Using existing local icon: ${localIconPath}`);
+            return localIconPath;
+        }
     }
     // Try favicon from website
     if (url && options.name) {
