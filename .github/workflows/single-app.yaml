@@ -4,10 +4,6 @@ env:
   NODE_VERSION: "22"
   PNPM_VERSION: "10.26.2"
 
-concurrency:
-  group: build-app-${{ github.workflow }}-${{ github.ref }}-${{ inputs.name }}
-  cancel-in-progress: true
-
 on:
   workflow_dispatch:
     inputs:
@@ -60,6 +56,7 @@ on:
 jobs:
   build-cli:
     name: Build CLI
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -83,6 +80,7 @@ jobs:
   build:
     name: ${{ inputs.title }} (${{ matrix.build }})
     needs: build-cli
+    if: always() && (needs.build-cli.result == 'success' || needs.build-cli.result == 'skipped')
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -249,7 +247,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.title }}-${{ matrix.build }}-${{ github.run_attempt }}
+          name: ${{ inputs.title }}-${{ matrix.build }}
           path: output/*/*.*
           retention-days: 3
 
