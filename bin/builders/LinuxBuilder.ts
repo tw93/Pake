@@ -52,7 +52,9 @@ export default class LinuxBuilder extends BaseBuilder {
 
   async build(url: string) {
     const targetTypes = ['deb', 'appimage', 'rpm'];
-    const requestedTargets = this.options.targets.split(',').map((t: string) => t.trim());
+    const requestedTargets = this.options.targets
+      .split(',')
+      .map((t: string) => t.trim());
 
     for (const target of targetTypes) {
       if (requestedTargets.includes(target)) {
