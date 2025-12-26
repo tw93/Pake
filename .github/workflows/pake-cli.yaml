@@ -23,7 +23,7 @@ on:
         description: "Name, English, Linux no capital"
         required: true
       icon:
-        description: "Icon, Image URL, Optional"
+        description: "Icon URL, auto-fetch if empty"
         required: false
       width:
         description: "Width, Optional"
