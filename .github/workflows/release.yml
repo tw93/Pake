@@ -16,6 +16,8 @@ on:
         default: false
 
 env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "10.26.2"
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 

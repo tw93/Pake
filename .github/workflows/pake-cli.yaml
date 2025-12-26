@@ -128,7 +128,7 @@ jobs:
             ARGS="$ARGS --targets ${{ inputs.targets }}"
           fi
 
-          echo "🔧 Running: node dist/cli.js $ARGS"
+          echo "Running: node dist/cli.js $ARGS"
           node dist/cli.js $ARGS
 
           mkdir -p output
@@ -136,8 +136,23 @@ jobs:
           # Move generated packages to output directory
           if [ "${{ runner.os }}" == "macOS" ]; then
             if [ -f "${{ inputs.name }}.dmg" ]; then
+              # Ad-hoc sign the DMG to reduce quarantine issues
+              echo "Signing DMG file..."
+              codesign --force --sign - "${{ inputs.name }}.dmg"
+
               mv "${{ inputs.name }}.dmg" output/
             fi
+
+            # Create usage instructions for Artifacts downloads
+            cat > output/README.txt << 'EOF'
+          Important: If you downloaded this from GitHub Actions Artifacts
+
+          If the DMG shows a "damaged" error, run this in Terminal:
+
+            xattr -cr /path/to/downloaded.dmg
+
+          Then open the DMG file normally.
+          EOF
           elif [ "${{ runner.os }}" == "Linux" ]; then
             if [ -f "${{ inputs.name }}.deb" ]; then
               mv "${{ inputs.name }}.deb" output/
@@ -145,11 +160,6 @@ jobs:
             if [ -f "${{ inputs.name }}.AppImage" ]; then
               mv "${{ inputs.name }}.AppImage" output/
             fi
-          fi
-
-          # Copy icon if exists
-          if [ -f "src-tauri/png/${{ inputs.name }}_512.png" ]; then
-            cp "src-tauri/png/${{ inputs.name }}_512.png" output/
           fi
 
       - name: Build App (Windows)
@@ -179,7 +189,7 @@ jobs:
             $args += "--hide-title-bar"
           }
 
-          Write-Host "🔧 Running: node dist/cli.js $($args -join ' ')"
+          Write-Host "Running: node dist/cli.js $($args -join ' ')"
           node dist/cli.js $args
 
           New-Item -Path "output" -ItemType Directory -Force
@@ -187,11 +197,6 @@ jobs:
           # Move generated package to output directory
           if (Test-Path "${{ inputs.name }}.msi") {
             Move-Item -Path "${{ inputs.name }}.msi" -Destination "output/"
-          }
-
-          # Copy icon if exists
-          if (Test-Path "src-tauri\png\${{ inputs.name }}_512.png") {
-            Copy-Item -Path "src-tauri\png\${{ inputs.name }}_512.png" -Destination "output\"
           }
 
           git checkout -- src-tauri/Cargo.lock

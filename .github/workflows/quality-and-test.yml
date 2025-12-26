@@ -78,7 +78,6 @@ jobs:
         run: rustup component add rustfmt clippy
 
       - uses: rui314/setup-mold@v1
-        if: matrix.os == 'ubuntu-latest'
 
       - name: Cache cargo-hack
         uses: actions/cache@v4
@@ -148,7 +147,7 @@ jobs:
             echo ""
             echo "| Check | Status |"
             echo "|-------|--------|"
-            echo "| Auto Formatting | ${{ needs.auto-format.result == 'success' && 'PASSED' || 'FAILED' }} |"
+            echo "| Auto Formatting | ${{ needs.auto-format.result == 'success' && 'PASSED' || needs.auto-format.result == 'skipped' && 'SKIPPED' || 'FAILED' }} |"
             echo "| Rust Quality | ${{ needs.rust-quality.result == 'success' && 'PASSED' || 'FAILED' }} |"
             echo "| CLI & Build Validation | ${{ needs.validation.result == 'success' && 'PASSED' || 'FAILED' }} |"
           } >> $GITHUB_STEP_SUMMARY
