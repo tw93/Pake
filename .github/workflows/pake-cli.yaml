@@ -131,35 +131,10 @@ jobs:
           echo "Running: node dist/cli.js $ARGS"
           node dist/cli.js $ARGS
 
-          mkdir -p output
-
-          # Move generated packages to output directory
-          if [ "${{ runner.os }}" == "macOS" ]; then
-            if [ -f "${{ inputs.name }}.dmg" ]; then
-              # Ad-hoc sign the DMG to reduce quarantine issues
-              echo "Signing DMG file..."
-              codesign --force --sign - "${{ inputs.name }}.dmg"
-
-              mv "${{ inputs.name }}.dmg" output/
-            fi
-
-            # Create usage instructions for Artifacts downloads
-            cat > output/README.txt << 'EOF'
-          Important: If you downloaded this from GitHub Actions Artifacts
-
-          If the DMG shows a "damaged" error, run this in Terminal:
-
-            xattr -cr /path/to/downloaded.dmg
-
-          Then open the DMG file normally.
-          EOF
-          elif [ "${{ runner.os }}" == "Linux" ]; then
-            if [ -f "${{ inputs.name }}.deb" ]; then
-              mv "${{ inputs.name }}.deb" output/
-            fi
-            if [ -f "${{ inputs.name }}.AppImage" ]; then
-              mv "${{ inputs.name }}.AppImage" output/
-            fi
+          # Ad-hoc sign the DMG on macOS to reduce quarantine issues
+          if [ "${{ runner.os }}" == "macOS" ] && [ -f "${{ inputs.name }}.dmg" ]; then
+            echo "Signing DMG file..."
+            codesign --force --sign - "${{ inputs.name }}.dmg"
           fi
 
       - name: Build App (Windows)
@@ -192,20 +167,40 @@ jobs:
           Write-Host "Running: node dist/cli.js $($args -join ' ')"
           node dist/cli.js $args
 
-          New-Item -Path "output" -ItemType Directory -Force
-
-          # Move generated package to output directory
-          if (Test-Path "${{ inputs.name }}.msi") {
-            Move-Item -Path "${{ inputs.name }}.msi" -Destination "output/"
-          }
-
           git checkout -- src-tauri/Cargo.lock
 
-      - name: Upload Artifacts
+      - name: Upload DMG (macOS)
+        if: runner.os == 'macOS'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.name }}-${{ runner.os }}
-          path: output/*
+          name: ${{ inputs.name }}-macOS
+          path: ${{ inputs.name }}.dmg
+          retention-days: 3
+
+      - name: Upload DEB (Linux)
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.name }}-Linux-deb
+          path: ${{ inputs.name }}.deb
+          retention-days: 3
+          if-no-files-found: ignore
+
+      - name: Upload AppImage (Linux)
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.name }}-Linux-AppImage
+          path: ${{ inputs.name }}.AppImage
+          retention-days: 3
+          if-no-files-found: ignore
+
+      - name: Upload MSI (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.name }}-Windows
+          path: ${{ inputs.name }}.msi
           retention-days: 3
 
       - name: Rust cache store
