@@ -22,7 +22,7 @@ import * as psl from 'psl';
 import { InvalidArgumentError, program as program$1, Option } from 'commander';
 
 var name = "pake-cli";
-var version = "3.7.2";
+var version = "3.7.3";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -68,7 +68,7 @@ var scripts = {
 	prepublishOnly: "pnpm run cli:build"
 };
 var type = "module";
-var exports = "./dist/cli.js";
+var exports$1 = "./dist/cli.js";
 var license = "MIT";
 var dependencies = {
 	"@tauri-apps/api": "^2.9.1",
@@ -111,7 +111,11 @@ var devDependencies = {
 var pnpm = {
 	overrides: {
 		sharp: "^0.34.5"
-	}
+	},
+	onlyBuiltDependencies: [
+		"esbuild",
+		"sharp"
+	]
 };
 var packageJson = {
 	name: name,
@@ -126,7 +130,7 @@ var packageJson = {
 	files: files,
 	scripts: scripts,
 	type: type,
-	exports: exports,
+	exports: exports$1,
 	license: license,
 	dependencies: dependencies,
 	devDependencies: devDependencies,

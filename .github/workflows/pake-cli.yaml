@@ -131,33 +131,6 @@ jobs:
           echo "Running: node dist/cli.js $ARGS"
           node dist/cli.js $ARGS
 
-          # Ad-hoc sign the .app bundle on macOS before packaging
-          if [ "${{ runner.os }}" == "macOS" ]; then
-            # Find the .app bundle
-            APP_BUNDLE=$(find src-tauri/target -name "*.app" -type d | grep -E "(release|universal)" | head -1)
-
-            if [ -n "$APP_BUNDLE" ]; then
-              echo "Signing app bundle: $APP_BUNDLE"
-              codesign --force --deep --sign - "$APP_BUNDLE"
-
-              # Re-create DMG if it exists
-              if [ -f "${{ inputs.name }}.dmg" ]; then
-                echo "Re-creating DMG with signed app..."
-                rm "${{ inputs.name }}.dmg"
-
-                # Create a temporary directory for DMG contents
-                TMP_DIR=$(mktemp -d)
-                cp -R "$APP_BUNDLE" "$TMP_DIR/"
-
-                # Create new DMG
-                hdiutil create -volname "${{ inputs.name }}" -srcfolder "$TMP_DIR" -ov -format UDZO "${{ inputs.name }}.dmg"
-
-                # Clean up
-                rm -rf "$TMP_DIR"
-              fi
-            fi
-          fi
-
       - name: Build App (Windows)
         if: runner.os == 'Windows'
         timeout-minutes: 25
