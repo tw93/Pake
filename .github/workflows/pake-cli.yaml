@@ -17,46 +17,41 @@ on:
           - "macos-latest"
           - "ubuntu-24.04"
       url:
-        description: "URL"
+        description: "Website URL"
         required: true
       name:
-        description: "Name, English, Linux no capital"
+        description: "App name (lowercase for Linux)"
         required: true
       icon:
         description: "Icon URL, auto-fetch if empty"
         required: false
       width:
-        description: "Width, Optional"
+        description: "Window width (px)"
         required: false
         default: "1200"
       height:
-        description: "Height, Optional"
+        description: "Window height (px)"
         required: false
         default: "780"
       fullscreen:
-        description: "Fullscreen, At startup, Optional"
+        description: "Start in fullscreen mode"
         required: false
         type: boolean
         default: false
       hide_title_bar:
-        description: "Hide TitleBar, MacOS only, Optional"
+        description: "Hide title bar (macOS only)"
         required: false
         type: boolean
         default: false
       multi_arch:
-        description: "MultiArch, MacOS only, Optional"
+        description: "Universal binary (macOS only)"
         required: false
         type: boolean
         default: false
       targets:
-        description: "Targets, Linux only, Optional"
+        description: "Package formats (comma-separated: deb,appimage,rpm)"
         required: false
         default: "deb"
-        type: choice
-        options:
-          - "deb"
-          - "appimage"
-          - "rpm"
 
 jobs:
   build:
@@ -204,7 +199,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.name }}-${{ runner.os }}-${{ github.run_attempt }}
+          name: ${{ inputs.name }}-${{ runner.os }}
           path: output/*
           retention-days: 3
 
