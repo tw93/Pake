@@ -90,6 +90,9 @@
     "overrides": {
       "sharp": "^0.34.5"
     },
-    "onlyBuiltDependencies": ["esbuild", "sharp"]
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp"
+    ]
   }
 }
