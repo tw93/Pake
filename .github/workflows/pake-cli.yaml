@@ -1,0 +1,221 @@
+name: Build App With Pake CLI
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "10.26.2"
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Platform"
+        required: true
+        default: "macos-latest"
+        type: choice
+        options:
+          - "windows-latest"
+          - "macos-latest"
+          - "ubuntu-24.04"
+      url:
+        description: "URL"
+        required: true
+      name:
+        description: "Name, English, Linux no capital"
+        required: true
+      icon:
+        description: "Icon, Image URL, Optional"
+        required: false
+      width:
+        description: "Width, Optional"
+        required: false
+        default: "1200"
+      height:
+        description: "Height, Optional"
+        required: false
+        default: "780"
+      fullscreen:
+        description: "Fullscreen, At startup, Optional"
+        required: false
+        type: boolean
+        default: false
+      hide_title_bar:
+        description: "Hide TitleBar, MacOS only, Optional"
+        required: false
+        type: boolean
+        default: false
+      multi_arch:
+        description: "MultiArch, MacOS only, Optional"
+        required: false
+        type: boolean
+        default: false
+      targets:
+        description: "Targets, Linux only, Optional"
+        required: false
+        default: "deb"
+        type: choice
+        options:
+          - "deb"
+          - "appimage"
+          - "rpm"
+
+jobs:
+  build:
+    name: ${{ inputs.platform }}
+    runs-on: ${{ inputs.platform }}
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Setup Node.js Environment
+        uses: ./.github/actions/setup-env
+        with:
+          mode: build
+
+      - name: Build CLI
+        run: pnpm run cli:build
+
+      - name: Setup mold linker
+        if: runner.os == 'Linux'
+        uses: rui314/setup-mold@v1
+
+      - name: Rust cache restore
+        uses: actions/cache/restore@v4.2.0
+        id: cache_store
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            src-tauri/target/
+          key: ${{ runner.os }}-cargo-pake-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build App (Linux/macOS)
+        if: runner.os != 'Windows'
+        timeout-minutes: 25
+        shell: bash
+        run: |
+          ARGS="${{ inputs.url }} --name ${{ inputs.name }}"
+
+          if [ -n "${{ inputs.icon }}" ]; then
+            ARGS="$ARGS --icon ${{ inputs.icon }}"
+          fi
+
+          if [ -n "${{ inputs.width }}" ]; then
+            ARGS="$ARGS --width ${{ inputs.width }}"
+          fi
+
+          if [ -n "${{ inputs.height }}" ]; then
+            ARGS="$ARGS --height ${{ inputs.height }}"
+          fi
+
+          if [ "${{ inputs.fullscreen }}" == "true" ]; then
+            ARGS="$ARGS --fullscreen"
+          fi
+
+          if [ "${{ inputs.hide_title_bar }}" == "true" ]; then
+            ARGS="$ARGS --hide-title-bar"
+          fi
+
+          if [ "${{ inputs.multi_arch }}" == "true" ]; then
+            ARGS="$ARGS --multi-arch"
+          fi
+
+          if [ -n "${{ inputs.targets }}" ] && [ "${{ runner.os }}" == "Linux" ]; then
+            ARGS="$ARGS --targets ${{ inputs.targets }}"
+          fi
+
+          echo "🔧 Running: node dist/cli.js $ARGS"
+          node dist/cli.js $ARGS
+
+          mkdir -p output
+
+          # Move generated packages to output directory
+          if [ "${{ runner.os }}" == "macOS" ]; then
+            if [ -f "${{ inputs.name }}.dmg" ]; then
+              mv "${{ inputs.name }}.dmg" output/
+            fi
+          elif [ "${{ runner.os }}" == "Linux" ]; then
+            if [ -f "${{ inputs.name }}.deb" ]; then
+              mv "${{ inputs.name }}.deb" output/
+            fi
+            if [ -f "${{ inputs.name }}.AppImage" ]; then
+              mv "${{ inputs.name }}.AppImage" output/
+            fi
+          fi
+
+          # Copy icon if exists
+          if [ -f "src-tauri/png/${{ inputs.name }}_512.png" ]; then
+            cp "src-tauri/png/${{ inputs.name }}_512.png" output/
+          fi
+
+      - name: Build App (Windows)
+        if: runner.os == 'Windows'
+        timeout-minutes: 25
+        shell: pwsh
+        run: |
+          $args = "${{ inputs.url }}", "--name", "${{ inputs.name }}"
+
+          if ("${{ inputs.icon }}" -ne "") {
+            $args += "--icon", "${{ inputs.icon }}"
+          }
+
+          if ("${{ inputs.width }}" -ne "") {
+            $args += "--width", "${{ inputs.width }}"
+          }
+
+          if ("${{ inputs.height }}" -ne "") {
+            $args += "--height", "${{ inputs.height }}"
+          }
+
+          if ("${{ inputs.fullscreen }}" -eq "true") {
+            $args += "--fullscreen"
+          }
+
+          if ("${{ inputs.hide_title_bar }}" -eq "true") {
+            $args += "--hide-title-bar"
+          }
+
+          Write-Host "🔧 Running: node dist/cli.js $($args -join ' ')"
+          node dist/cli.js $args
+
+          New-Item -Path "output" -ItemType Directory -Force
+
+          # Move generated package to output directory
+          if (Test-Path "${{ inputs.name }}.msi") {
+            Move-Item -Path "${{ inputs.name }}.msi" -Destination "output/"
+          }
+
+          # Copy icon if exists
+          if (Test-Path "src-tauri\png\${{ inputs.name }}_512.png") {
+            Copy-Item -Path "src-tauri\png\${{ inputs.name }}_512.png" -Destination "output\"
+          }
+
+          git checkout -- src-tauri/Cargo.lock
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.name }}-${{ runner.os }}-${{ github.run_attempt }}
+          path: output/*
+          retention-days: 3
+
+      - name: Rust cache store
+        uses: actions/cache/save@v4.2.0
+        if: steps.cache_store.outputs.cache-hit != 'true'
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            src-tauri/target/
+          key: ${{ runner.os }}-cargo-pake-${{ hashFiles('**/Cargo.lock') }}
