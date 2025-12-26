@@ -344,6 +344,15 @@ export async function handleIcon(
     return result || resolvedPath;
   }
 
+  // Check for existing local icon before downloading
+  if (options.name) {
+    const localIconPath = generateIconPath(options.name);
+    if (await fsExtra.pathExists(localIconPath)) {
+      logger.info(`✼ Using existing local icon: ${localIconPath}`);
+      return localIconPath;
+    }
+  }
+
   // Try favicon from website
   if (url && options.name) {
     const faviconPath = await tryGetFavicon(url, options.name);

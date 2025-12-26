@@ -39,10 +39,34 @@ jobs:
           echo "apps_name=$(jq -c '[.[] | .name]' default_app_list.json)" >> $GITHUB_OUTPUT
           echo "apps_config=$(jq -c '.' default_app_list.json)" >> $GITHUB_OUTPUT
 
-  build-popular-apps:
-    name: ${{ matrix.config.title }}
+  build-cli:
+    name: Build CLI
     needs: release-apps
     if: needs.release-apps.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: ./.github/actions/setup-env
+        with:
+          mode: 'node'
+
+      - name: Build CLI
+        run: pnpm run cli:build
+
+      - name: Upload CLI Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pake-cli-dist
+          path: dist/
+          retention-days: 1
+
+  build-popular-apps:
+    name: ${{ matrix.config.title }}
+    needs: [release-apps, build-cli]
+    if: needs.release-apps.result == 'success' && needs.build-cli.result == 'success'
     strategy:
       matrix:
         config: ${{ fromJSON(needs.release-apps.outputs.apps_config) }}

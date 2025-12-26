@@ -4,10 +4,6 @@ env:
   NODE_VERSION: "22"
   PNPM_VERSION: "10.26.2"
 
-concurrency:
-  group: build-app-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 on:
   workflow_dispatch:
     inputs:
@@ -58,31 +54,8 @@ on:
         required: false
 
 jobs:
-  build-cli:
-    name: Build CLI
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js Environment
-        uses: ./.github/actions/setup-env
-        with:
-          mode: 'node'
-
-      - name: Build CLI
-        run: pnpm run cli:build
-
-      - name: Upload CLI Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: pake-cli-dist
-          path: dist/
-          retention-days: 1
-
   build:
     name: ${{ inputs.title }} (${{ matrix.build }})
-    needs: build-cli
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -110,7 +83,7 @@ jobs:
       - name: Setup Node.js Environment
         uses: ./.github/actions/setup-env
         with:
-          mode: ${{ (matrix.build == 'linux' || matrix.build == 'macos') && 'build' || 'node' }}
+          mode: build
 
       - name: Download CLI Artifact
         uses: actions/download-artifact@v4
@@ -122,32 +95,18 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         uses: rui314/setup-mold@v1
 
-      - name: Rust cache restore
-        uses: actions/cache/restore@v4.2.0
-        id: cache_store
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            src-tauri/target/
-          key: ${{ runner.os }}-cargo-pake-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-
       - name: Build for Linux
         if: matrix.os == 'ubuntu-latest'
         timeout-minutes: 20
         run: |
           ARGS="${{ inputs.url }} --name ${{ inputs.name }}"
-          if [ -n "${{ inputs.icon }}" ]; then ARGS="$ARGS --icon ${{ inputs.icon }}"; fi
+
+          # Auto-detect local icon or use provided icon
+          if [ -n "${{ inputs.icon }}" ]; then
+            ARGS="$ARGS --icon ${{ inputs.icon }}"
+          elif [ -f "src-tauri/png/${{ inputs.name }}_512.png" ]; then
+            ARGS="$ARGS --icon src-tauri/png/${{ inputs.name }}_512.png"
+          fi
 
           # Build once with multiple targets (faster than separate builds)
           node dist/cli.js $ARGS --targets deb,appimage
@@ -176,16 +135,18 @@ jobs:
             exit 1
           fi
 
-          if [ -f "src-tauri/png/${{ inputs.name }}_512.png" ]; then
-            cp "src-tauri/png/${{ inputs.name }}_512.png" output/linux/
-          fi
-
       - name: Build for macOS
         if: matrix.os == 'macos-latest'
         timeout-minutes: 25
         run: |
-          ARGS="${{ inputs.url }} --name ${{ inputs.name }}"
-          if [ -n "${{ inputs.icon }}" ]; then ARGS="$ARGS --icon ${{ inputs.icon }}"; fi
+          ARGS="${{ inputs.url }} --name ${{ inputs.name }} --hide-title-bar"
+
+          # Auto-detect local icon or use provided icon
+          if [ -n "${{ inputs.icon }}" ]; then
+            ARGS="$ARGS --icon ${{ inputs.icon }}"
+          elif [ -f "src-tauri/icons/${{ inputs.name }}.icns" ]; then
+            ARGS="$ARGS --icon src-tauri/icons/${{ inputs.name }}.icns"
+          fi
 
           node dist/cli.js $ARGS --targets universal --multi-arch
 
@@ -206,18 +167,19 @@ jobs:
             exit 1
           fi
 
-          if [ -f "src-tauri/png/${{ inputs.name }}_512.png" ]; then
-            cp "src-tauri/png/${{ inputs.name }}_512.png" output/macos/
-          elif [ -f "src-tauri/icons/${{ inputs.name }}.icns" ]; then
-             cp "src-tauri/icons/${{ inputs.name }}.icns" output/macos/
-          fi
-
       - name: Build for Windows
         if: matrix.os == 'windows-latest'
         timeout-minutes: 20
         run: |
           $args = "${{ inputs.url }}", "--name", "${{ inputs.name }}"
-          if ("${{ inputs.icon }}" -ne "") { $args += "--icon", "${{ inputs.icon }}" }
+
+          # Auto-detect local icon or use provided icon
+          if ("${{ inputs.icon }}" -ne "") {
+            $args += "--icon", "${{ inputs.icon }}"
+          } elseif (Test-Path "src-tauri\png\${{ inputs.name }}_256.ico") {
+            $args += "--icon", "src-tauri\png\${{ inputs.name }}_256.ico"
+          }
+
           $args += "--targets", "x64"
 
           node dist/cli.js $args
@@ -253,42 +215,35 @@ jobs:
             }
           }
 
-
-
-          $pngPath = "src-tauri\png\${{ inputs.name }}_512.png"
-          $icoPath = "src-tauri\png\${{ inputs.name }}_256.ico"
-
-          if (Test-Path $pngPath) {
-            Copy-Item -Path $pngPath -Destination "output\windows\"
-          } elseif (Test-Path $icoPath) {
-            Copy-Item -Path $icoPath -Destination "output\windows\"
-          }
-
           git checkout -- src-tauri/Cargo.lock
-
-      - name: Rust cache store
-        uses: actions/cache/save@v4.2.0
-        if: steps.cache_store.outputs.cache-hit != 'true'
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            src-tauri/target/
-          key: ${{ runner.os }}-cargo-pake-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.title }}-${{ matrix.build }}-${{ github.run_attempt }}
+          name: ${{ inputs.title }}-${{ matrix.build }}
           path: output/*/*.*
           retention-days: 3
 
-      - name: Upload to release
+      - name: Upload to release (Linux)
         uses: ncipollo/release-action@v1 # cspell:disable-line
-        if: startsWith(github.ref, 'refs/tags/')
+        if: matrix.os == 'ubuntu-latest' && startsWith(github.ref, 'refs/tags/')
         with:
           allowUpdates: true
-          artifacts: "output/*/*.*"
+          artifacts: "output/linux/*.deb,output/linux/*.AppImage"
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload to release (macOS)
+        uses: ncipollo/release-action@v1 # cspell:disable-line
+        if: matrix.os == 'macos-latest' && startsWith(github.ref, 'refs/tags/')
+        with:
+          allowUpdates: true
+          artifacts: "output/macos/*.dmg"
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload to release (Windows)
+        uses: ncipollo/release-action@v1 # cspell:disable-line
+        if: matrix.os == 'windows-latest' && startsWith(github.ref, 'refs/tags/')
+        with:
+          allowUpdates: true
+          artifacts: "output/windows/*.msi"
           token: ${{ secrets.GITHUB_TOKEN }}
