@@ -66,10 +66,7 @@ runs:
     - name: Install dependencies
       if: env.SETUP_NODE == 'true'
       shell: bash
-      run: pnpm install --frozen-lockfile --config.ignore-scripts=false
-      env:
-        # Suppress build script warnings in CI
-        PNPM_IGNORE_BUILD_APPROVALS: true
+      run: pnpm install --frozen-lockfile
 
     # Rust Environment Setup
     - name: Setup Rust for Linux
