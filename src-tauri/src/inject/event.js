@@ -124,6 +124,34 @@ const ALL_DOWNLOADABLE_EXTENSIONS = Object.values(
   DOWNLOADABLE_FILE_EXTENSIONS,
 ).flat();
 
+const PREVIEWABLE_MEDIA_EXTENSIONS = [
+  "png",
+  "jpg",
+  "jpeg",
+  "gif",
+  "webp",
+  "svg",
+  "bmp",
+  "tiff",
+  "tif",
+  "avif",
+  "heic",
+  "heif",
+  "mp4",
+  "webm",
+  "mov",
+  "m4v",
+  "mkv",
+  "avi",
+  "ogv",
+  "mp3",
+  "wav",
+  "ogg",
+  "flac",
+  "aac",
+  "m4a",
+];
+
 const DOWNLOAD_PATH_PATTERNS = [
   "/download/",
   "/files/",
@@ -164,24 +192,43 @@ function showDownloadError(filename) {
   }
 }
 
+function getExtension(url) {
+  try {
+    const pathname = new URL(url).pathname.toLowerCase();
+    const extensionIndex = pathname.lastIndexOf(".");
+    return extensionIndex > -1 ? pathname.slice(extensionIndex + 1) : "";
+  } catch (e) {
+    return "";
+  }
+}
+
+function isPreviewableMedia(url) {
+  const extension = getExtension(url);
+  return PREVIEWABLE_MEDIA_EXTENSIONS.includes(extension);
+}
+
 // Unified file detection - replaces both isDownloadLink and isFileLink
 function isDownloadableFile(url) {
   try {
+    const extension = getExtension(url);
+    if (PREVIEWABLE_MEDIA_EXTENSIONS.includes(extension)) {
+      return false;
+    }
+
     const urlObj = new URL(url);
-    const pathname = urlObj.pathname.toLowerCase();
+    const hasDownloadHints =
+      urlObj.searchParams.has("download") ||
+      urlObj.searchParams.has("attachment");
 
-    // Get file extension
-    const extension = pathname.substring(pathname.lastIndexOf(".") + 1);
-
-    const fileExtensions = ALL_DOWNLOADABLE_EXTENSIONS;
+    if (hasDownloadHints) {
+      return true;
+    }
 
     return (
-      fileExtensions.includes(extension) ||
-      // Check for download hints
-      urlObj.searchParams.has("download") ||
-      urlObj.searchParams.has("attachment") ||
-      // Check for common download paths
-      DOWNLOAD_PATH_PATTERNS.some((pattern) => pathname.includes(pattern))
+      ALL_DOWNLOADABLE_EXTENSIONS.includes(extension) ||
+      DOWNLOAD_PATH_PATTERNS.some((pattern) =>
+        urlObj.pathname.toLowerCase().includes(pattern),
+      )
     );
   } catch (e) {
     return false;
@@ -455,6 +502,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Handle regular links: same domain allows normal navigation, cross-domain opens new window
       if (!target || target === "_self") {
+        // Optimization: Allow previewable media to be handled by the app/browser directly
+        // This fixes issues where CDN links are treated as external
+        if (isPreviewableMedia(absoluteUrl)) {
+          return;
+        }
+
         if (!isSameDomain(absoluteUrl)) {
           if (forceInternalNavigation) {
             return;

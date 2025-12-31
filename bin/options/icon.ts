@@ -42,12 +42,10 @@ const API_KEYS = {
 /**
  * Generates platform-specific icon paths and handles copying for Windows
  */
-import { generateSafeFilename } from '@/utils/name';
+import { generateLinuxPackageName, generateSafeFilename } from '@/utils/name';
 
 function generateIconPath(appName: string, isDefault = false): string {
-  const safeName = isDefault
-    ? 'icon'
-    : generateSafeFilename(appName).toLowerCase();
+  const safeName = isDefault ? 'icon' : getIconBaseName(appName);
   const baseName = safeName;
 
   if (IS_WIN) {
@@ -57,6 +55,13 @@ function generateIconPath(appName: string, isDefault = false): string {
     return path.join(npmDirectory, 'src-tauri', 'png', `${baseName}_512.png`);
   }
   return path.join(npmDirectory, 'src-tauri', 'icons', `${baseName}.icns`);
+}
+
+function getIconBaseName(appName: string): string {
+  const baseName = IS_LINUX
+    ? generateLinuxPackageName(appName)
+    : generateSafeFilename(appName).toLowerCase();
+  return baseName || 'pake-app';
 }
 
 async function copyWindowsIconIfNeeded(
@@ -181,7 +186,7 @@ async function convertIconFormat(
     await fsExtra.ensureDir(platformOutputDir);
 
     const processedInputPath = await preprocessIcon(inputPath);
-    const iconName = generateSafeFilename(appName).toLowerCase();
+    const iconName = getIconBaseName(appName);
 
     // Generate platform-specific format
     if (IS_WIN) {
@@ -418,21 +423,6 @@ async function tryGetFavicon(
         if (error instanceof Error) {
           logger.debug(`Icon service ${serviceUrl} failed: ${error.message}`);
         }
-
-        // Network error handling
-        if ((IS_LINUX || IS_WIN) && (error as any).code === 'ENOTFOUND') {
-          return null;
-        }
-
-        // Icon generation error on Windows
-        if (
-          IS_WIN &&
-          error instanceof Error &&
-          error.message.includes('icongen')
-        ) {
-          return null;
-        }
-
         continue;
       }
     }

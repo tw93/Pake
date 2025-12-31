@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import log from 'loglevel';
+import updateNotifier from 'update-notifier';
 import path from 'path';
 import fsExtra from 'fs-extra';
 import { fileURLToPath } from 'url';
@@ -13,13 +14,124 @@ import dns from 'dns';
 import http from 'http';
 import { promisify } from 'util';
 import fs from 'fs';
-import updateNotifier from 'update-notifier';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
 import icongen from 'icon-gen';
 import sharp from 'sharp';
 import * as psl from 'psl';
 import { InvalidArgumentError, program as program$1, Option } from 'commander';
+
+var name = "pake-cli";
+var version = "3.7.0";
+var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
+var engines = {
+	node: ">=18.0.0"
+};
+var packageManager = "pnpm@10.26.2";
+var bin = {
+	pake: "./dist/cli.js"
+};
+var repository = {
+	type: "git",
+	url: "https://github.com/tw93/pake.git"
+};
+var author = {
+	name: "Tw93",
+	email: "tw93@qq.com"
+};
+var keywords = [
+	"pake",
+	"pake-cli",
+	"rust",
+	"tauri",
+	"no-electron",
+	"productivity"
+];
+var files = [
+	"dist",
+	"src-tauri"
+];
+var scripts = {
+	start: "pnpm run dev",
+	dev: "pnpm run tauri dev",
+	build: "tauri build",
+	"build:debug": "tauri build --debug",
+	"build:mac": "tauri build --target universal-apple-darwin",
+	analyze: "cd src-tauri && cargo bloat --release --crates",
+	tauri: "tauri",
+	cli: "cross-env NODE_ENV=development rollup -c -w",
+	"cli:build": "cross-env NODE_ENV=production rollup -c",
+	test: "pnpm run cli:build && cross-env PAKE_CREATE_APP=1 node tests/index.js",
+	format: "prettier --write . --ignore-unknown && find tests -name '*.js' -exec sed -i '' 's/[[:space:]]*$//' {} \\; && cd src-tauri && cargo fmt --verbose",
+	"format:check": "prettier --check . --ignore-unknown",
+	update: "pnpm update --verbose && cd src-tauri && cargo update",
+	prepublishOnly: "pnpm run cli:build"
+};
+var type = "module";
+var exports$1 = "./dist/cli.js";
+var license = "MIT";
+var dependencies = {
+	"@tauri-apps/api": "^2.9.1",
+	"@tauri-apps/cli": "^2.9.6",
+	chalk: "^5.6.2",
+	commander: "^14.0.2",
+	execa: "^9.6.1",
+	"file-type": "^21.1.1",
+	"fs-extra": "^11.3.3",
+	"icon-gen": "^5.0.0",
+	loglevel: "^1.9.2",
+	ora: "^9.0.0",
+	prompts: "^2.4.2",
+	psl: "^1.15.0",
+	sharp: "^0.34.5",
+	"tmp-promise": "^3.0.3",
+	"update-notifier": "^7.3.1"
+};
+var devDependencies = {
+	"@rollup/plugin-alias": "^6.0.0",
+	"@rollup/plugin-commonjs": "^29.0.0",
+	"@rollup/plugin-json": "^6.1.0",
+	"@rollup/plugin-replace": "^6.0.3",
+	"@rollup/plugin-terser": "^0.4.4",
+	"@types/fs-extra": "^11.0.4",
+	"@types/node": "^25.0.3",
+	"@types/page-icon": "^0.3.6",
+	"@types/prompts": "^2.4.9",
+	"@types/tmp": "^0.2.6",
+	"@types/update-notifier": "^6.0.8",
+	"app-root-path": "^3.1.0",
+	"cross-env": "^10.1.0",
+	prettier: "^3.7.4",
+	rollup: "^4.54.0",
+	"rollup-plugin-typescript2": "^0.36.0",
+	tslib: "^2.8.1",
+	typescript: "^5.9.3",
+	vitest: "^4.0.16"
+};
+var pnpm = {
+	overrides: {
+		sharp: "^0.34.5"
+	}
+};
+var packageJson = {
+	name: name,
+	version: version,
+	description: description,
+	engines: engines,
+	packageManager: packageManager,
+	bin: bin,
+	repository: repository,
+	author: author,
+	keywords: keywords,
+	files: files,
+	scripts: scripts,
+	type: type,
+	exports: exports$1,
+	license: license,
+	dependencies: dependencies,
+	devDependencies: devDependencies,
+	pnpm: pnpm
+};
 
 // Convert the current module URL to a file path
 const currentModulePath = fileURLToPath(import.meta.url);
@@ -399,9 +511,12 @@ async function mergeConfig(url, options, tauriConf) {
     tauriConf.productName = name;
     tauriConf.identifier = identifier;
     tauriConf.version = appVersion;
-    if (platform === 'linux') {
-        tauriConf.mainBinaryName = `pake-${generateIdentifierSafeName(name)}`;
-    }
+    // Always set mainBinaryName to ensure binary uniqueness
+    const linuxBinaryName = `pake-${generateLinuxPackageName(name)}`;
+    tauriConf.mainBinaryName =
+        platform === 'linux'
+            ? linuxBinaryName
+            : `pake-${generateIdentifierSafeName(name)}`;
     if (platform == 'win32') {
         tauriConf.bundle.windows.wix.language[0] = installerLanguage;
     }
@@ -446,9 +561,9 @@ async function mergeConfig(url, options, tauriConf) {
         // Remove hardcoded desktop files and regenerate with correct app name
         delete tauriConf.bundle.linux.deb.files;
         // Generate correct desktop file configuration
-        const appNameSafe = getSafeAppName(name);
-        const identifier = `com.pake.${appNameSafe}`;
-        const desktopFileName = `${identifier}.desktop`;
+        const linuxName = generateLinuxPackageName(name);
+        const desktopFileName = `com.pake.${linuxName}.desktop`;
+        const iconName = `${linuxName}_512`;
         // Create desktop file content
         // Determine if title contains Chinese characters for Name[zh_CN]
         const chineseName = title && /[\u4e00-\u9fa5]/.test(title) ? title : null;
@@ -458,11 +573,12 @@ Type=Application
 Name=${name}
 ${chineseName ? `Name[zh_CN]=${chineseName}` : ''}
 Comment=${name}
-Exec=pake-${appNameSafe}
-Icon=${appNameSafe}_512
-Categories=Network;WebBrowser;
+Exec=${linuxBinaryName}
+Icon=${iconName}
+Categories=Network;WebBrowser;Utility;
 MimeType=text/html;text/xml;application/xhtml_xml;
 StartupNotify=true
+Terminal=false
 `;
         // Write desktop file to src-tauri/assets directory where Tauri expects it
         const srcAssetsDir = path.join(npmDirectory, 'src-tauri/assets');
@@ -471,8 +587,16 @@ StartupNotify=true
         await fsExtra.writeFile(srcDesktopFilePath, desktopContent);
         // Set up desktop file in bundle configuration
         // Use absolute path from src-tauri directory to assets
+        const desktopInstallPath = `/usr/share/applications/${desktopFileName}`;
         tauriConf.bundle.linux.deb.files = {
-            [`/usr/share/applications/${desktopFileName}`]: `assets/${desktopFileName}`,
+            [desktopInstallPath]: `assets/${desktopFileName}`,
+        };
+        // Add desktop file support for RPM
+        if (!tauriConf.bundle.linux.rpm) {
+            tauriConf.bundle.linux.rpm = {};
+        }
+        tauriConf.bundle.linux.rpm.files = {
+            [desktopInstallPath]: `assets/${desktopFileName}`,
         };
         const validTargets = [
             'deb',
@@ -510,7 +634,7 @@ StartupNotify=true
         },
         linux: {
             fileExt: '.png',
-            path: `png/${safeAppName}_512.png`,
+            path: `png/${generateLinuxPackageName(name)}_512.png`,
             defaultIcon: 'png/icon_512.png',
             message: 'Linux icon must be .png and 512x512px.',
         },
@@ -978,12 +1102,11 @@ class BaseBuilder {
      */
     getBinaryName(appName) {
         const extension = process.platform === 'win32' ? '.exe' : '';
-        // Linux uses the unique binary name we set in merge.ts
-        if (process.platform === 'linux') {
-            return `pake-${generateIdentifierSafeName(appName)}${extension}`;
-        }
-        // Windows and macOS use 'pake' as binary name
-        return `pake${extension}`;
+        // Use unique binary name for all platforms to avoid conflicts
+        const nameToUse = process.platform === 'linux'
+            ? generateLinuxPackageName(appName)
+            : generateIdentifierSafeName(appName);
+        return `pake-${nameToUse}${extension}`;
     }
     /**
      * Check if this build has architecture-specific target
@@ -1249,119 +1372,6 @@ class BuilderProvider {
     }
 }
 
-var name = "pake-cli";
-var version = "3.6.2";
-var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
-var engines = {
-	node: ">=18.0.0"
-};
-var packageManager = "pnpm@10.15.0";
-var bin = {
-	pake: "./dist/cli.js"
-};
-var repository = {
-	type: "git",
-	url: "https://github.com/tw93/pake.git"
-};
-var author = {
-	name: "Tw93",
-	email: "tw93@qq.com"
-};
-var keywords = [
-	"pake",
-	"pake-cli",
-	"rust",
-	"tauri",
-	"no-electron",
-	"productivity"
-];
-var files = [
-	"dist",
-	"src-tauri"
-];
-var scripts = {
-	start: "pnpm run dev",
-	dev: "pnpm run tauri dev",
-	build: "tauri build",
-	"build:debug": "tauri build --debug",
-	"build:mac": "tauri build --target universal-apple-darwin",
-	analyze: "cd src-tauri && cargo bloat --release --crates",
-	tauri: "tauri",
-	cli: "cross-env NODE_ENV=development rollup -c -w",
-	"cli:dev": "cross-env NODE_ENV=development rollup -c -w",
-	"cli:build": "cross-env NODE_ENV=production rollup -c",
-	test: "pnpm run cli:build && cross-env PAKE_CREATE_APP=1 node tests/index.js",
-	format: "prettier --write . --ignore-unknown && find tests -name '*.js' -exec sed -i '' 's/[[:space:]]*$//' {} \\; && cd src-tauri && cargo fmt --verbose",
-	"format:check": "prettier --check . --ignore-unknown",
-	update: "pnpm update --verbose && cd src-tauri && cargo update",
-	prepublishOnly: "pnpm run cli:build"
-};
-var type = "module";
-var exports = "./dist/cli.js";
-var license = "MIT";
-var dependencies = {
-	"@tauri-apps/api": "^2.9.0",
-	"@tauri-apps/cli": "^2.9.0",
-	chalk: "^5.6.2",
-	commander: "^12.1.0",
-	execa: "^9.6.0",
-	"file-type": "^18.7.0",
-	"fs-extra": "^11.3.2",
-	"icon-gen": "^5.0.0",
-	loglevel: "^1.9.2",
-	ora: "^8.2.0",
-	prompts: "^2.4.2",
-	psl: "^1.15.0",
-	sharp: "^0.33.5",
-	"tmp-promise": "^3.0.3",
-	"update-notifier": "^7.3.1"
-};
-var devDependencies = {
-	"@rollup/plugin-alias": "^5.1.1",
-	"@rollup/plugin-commonjs": "^28.0.8",
-	"@rollup/plugin-json": "^6.1.0",
-	"@rollup/plugin-replace": "^6.0.2",
-	"@rollup/plugin-terser": "^0.4.4",
-	"@types/fs-extra": "^11.0.4",
-	"@types/node": "^20.19.23",
-	"@types/page-icon": "^0.3.6",
-	"@types/prompts": "^2.4.9",
-	"@types/tmp": "^0.2.6",
-	"@types/update-notifier": "^6.0.8",
-	"app-root-path": "^3.1.0",
-	"cross-env": "^7.0.3",
-	prettier: "^3.6.2",
-	rollup: "^4.52.5",
-	"rollup-plugin-typescript2": "^0.36.0",
-	tslib: "^2.8.1",
-	typescript: "^5.9.3",
-	vitest: "^4.0.15"
-};
-var packageJson = {
-	name: name,
-	version: version,
-	description: description,
-	engines: engines,
-	packageManager: packageManager,
-	bin: bin,
-	repository: repository,
-	author: author,
-	keywords: keywords,
-	files: files,
-	scripts: scripts,
-	type: type,
-	exports: exports,
-	license: license,
-	dependencies: dependencies,
-	devDependencies: devDependencies
-};
-
-async function checkUpdateTips() {
-    updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify({
-        isGlobal: true,
-    });
-}
-
 const ICON_CONFIG = {
     minFileSize: 100,
     supportedFormats: ['png', 'ico', 'jpeg', 'jpg', 'webp', 'icns'],
@@ -1382,9 +1392,7 @@ const API_KEYS = {
     brandfetch: ['1idqvJC0CeFSeyp3Yf7', '1idej-yhU_ThggIHFyG'],
 };
 function generateIconPath(appName, isDefault = false) {
-    const safeName = isDefault
-        ? 'icon'
-        : generateSafeFilename(appName).toLowerCase();
+    const safeName = isDefault ? 'icon' : getIconBaseName(appName);
     const baseName = safeName;
     if (IS_WIN) {
         return path.join(npmDirectory, 'src-tauri', 'png', `${baseName}_256.ico`);
@@ -1393,6 +1401,12 @@ function generateIconPath(appName, isDefault = false) {
         return path.join(npmDirectory, 'src-tauri', 'png', `${baseName}_512.png`);
     }
     return path.join(npmDirectory, 'src-tauri', 'icons', `${baseName}.icns`);
+}
+function getIconBaseName(appName) {
+    const baseName = IS_LINUX
+        ? generateLinuxPackageName(appName)
+        : generateSafeFilename(appName).toLowerCase();
+    return baseName || 'pake-app';
 }
 async function copyWindowsIconIfNeeded(convertedPath, appName) {
     if (!IS_WIN || !convertedPath.endsWith('.ico')) {
@@ -1498,7 +1512,7 @@ async function convertIconFormat(inputPath, appName) {
         const platformOutputDir = path.join(outputDir, 'converted-icons');
         await fsExtra.ensureDir(platformOutputDir);
         const processedInputPath = await preprocessIcon(inputPath);
-        const iconName = generateSafeFilename(appName).toLowerCase();
+        const iconName = getIconBaseName(appName);
         // Generate platform-specific format
         if (IS_WIN) {
             // Support multiple sizes for better Windows compatibility
@@ -1677,16 +1691,6 @@ async function tryGetFavicon(url, appName) {
                 if (error instanceof Error) {
                     logger.debug(`Icon service ${serviceUrl} failed: ${error.message}`);
                 }
-                // Network error handling
-                if ((IS_LINUX || IS_WIN) && error.code === 'ENOTFOUND') {
-                    return null;
-                }
-                // Icon generation error on Windows
-                if (IS_WIN &&
-                    error instanceof Error &&
-                    error.message.includes('icongen')) {
-                    return null;
-                }
                 continue;
             }
         }
@@ -1798,6 +1802,18 @@ function resolveAppName(name, platform) {
     const domain = getDomain(name) || 'pake';
     return platform !== 'linux' ? capitalizeFirstLetter(domain) : domain;
 }
+function resolveLocalAppName(filePath, platform) {
+    const baseName = path.parse(filePath).name || 'pake-app';
+    if (platform === 'linux') {
+        return generateLinuxPackageName(baseName) || 'pake-app';
+    }
+    const normalized = baseName
+        .replace(/[^a-zA-Z0-9\u4e00-\u9fff -]/g, '')
+        .replace(/^[ -]+/, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    return normalized || 'pake-app';
+}
 function isValidName(name, platform) {
     const platformRegexMapping = {
         linux: /^[a-z0-9\u4e00-\u9fff][a-z0-9\u4e00-\u9fff-]*$/,
@@ -1812,10 +1828,12 @@ async function handleOptions(options, url) {
     let name = options.name;
     const pathExists = await fsExtra.pathExists(url);
     if (!options.name) {
-        const defaultName = pathExists ? '' : resolveAppName(url, platform);
+        const defaultName = pathExists
+            ? resolveLocalAppName(url, platform)
+            : resolveAppName(url, platform);
         const promptMessage = 'Enter your application name';
         const namePrompt = await promptText(promptMessage, defaultName);
-        name = namePrompt || defaultName;
+        name = namePrompt?.trim() || defaultName;
     }
     if (name && platform === 'linux') {
         name = generateLinuxPackageName(name);
@@ -2060,6 +2078,11 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
 }
 
 const program = getCliProgram();
+async function checkUpdateTips() {
+    updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify({
+        isGlobal: true,
+    });
+}
 program.action(async (url, options) => {
     await checkUpdateTips();
     if (!url) {

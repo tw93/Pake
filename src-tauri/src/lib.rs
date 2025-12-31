@@ -71,13 +71,16 @@ pub fn run_app() {
         ])
         .setup(move |app| {
             // --- Menu Construction Start ---
-            let menu = app::menu::get_menu(app.app_handle())?;
-            app.set_menu(menu)?;
+            #[cfg(target_os = "macos")]
+            {
+                let menu = app::menu::get_menu(app.app_handle())?;
+                app.set_menu(menu)?;
 
-            // Event Handling for Custom Menu Item
-            app.on_menu_event(move |app_handle, event| {
-                app::menu::handle_menu_click(app_handle, event.id().as_ref());
-            });
+                // Event Handling for Custom Menu Item
+                app.on_menu_event(move |app_handle, event| {
+                    app::menu::handle_menu_click(app_handle, event.id().as_ref());
+                });
+            }
             // --- Menu Construction End ---
 
             let window = set_window(app, &pake_config, &tauri_config);

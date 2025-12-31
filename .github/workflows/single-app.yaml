@@ -2,7 +2,7 @@ name: Build Single Popular App
 
 env:
   NODE_VERSION: "22"
-  PNPM_VERSION: "10.15.0"
+  PNPM_VERSION: "10.26.2"
 
 concurrency:
   group: build-app-${{ github.workflow }}-${{ github.ref }}
@@ -118,6 +118,10 @@ jobs:
           name: pake-cli-dist
           path: dist
 
+      - name: Setup mold linker
+        if: matrix.os == 'ubuntu-latest'
+        uses: rui314/setup-mold@v1
+
       - name: Rust cache restore
         uses: actions/cache/restore@v4.2.0
         id: cache_store
@@ -146,12 +150,15 @@ jobs:
           if [ -n "${{ inputs.icon }}" ]; then ARGS="$ARGS --icon ${{ inputs.icon }}"; fi
 
           # Build once with multiple targets (faster than separate builds)
-          node dist/cli.js $ARGS --targets deb
-          node dist/cli.js $ARGS --targets appimage
+          node dist/cli.js $ARGS --targets deb,appimage
 
           mkdir -p output/linux
           mv src-tauri/target/release/bundle/deb/*.deb output/linux/${{inputs.title}}_`arch`.deb
           mv src-tauri/target/release/bundle/appimage/*.AppImage output/linux/"${{inputs.title}}"_`arch`.AppImage
+
+          if [ -f "src-tauri/png/${{ inputs.name }}_512.png" ]; then
+            cp "src-tauri/png/${{ inputs.name }}_512.png" output/linux/
+          fi
 
       - name: Build for macOS
         if: matrix.os == 'macos-latest'
@@ -164,6 +171,12 @@ jobs:
 
           mkdir -p output/macos
           mv src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg output/macos/"${{inputs.title}}".dmg
+
+          if [ -f "src-tauri/png/${{ inputs.name }}_512.png" ]; then
+            cp "src-tauri/png/${{ inputs.name }}_512.png" output/macos/
+          elif [ -f "src-tauri/icons/${{ inputs.name }}.icns" ]; then
+             cp "src-tauri/icons/${{ inputs.name }}.icns" output/macos/
+          fi
 
       - name: Build for Windows
         if: matrix.os == 'windows-latest'
@@ -184,6 +197,18 @@ jobs:
             Get-ChildItem -Path "src-tauri\target\" -Recurse -Name "*.msi" | Write-Host
             exit 1
           }
+
+
+
+          $pngPath = "src-tauri\png\${{ inputs.name }}_512.png"
+          $icoPath = "src-tauri\png\${{ inputs.name }}_256.ico"
+
+          if (Test-Path $pngPath) {
+            Copy-Item -Path $pngPath -Destination "output\windows\"
+          } elseif (Test-Path $icoPath) {
+            Copy-Item -Path $icoPath -Destination "output\windows\"
+          }
+
           git checkout -- src-tauri/Cargo.lock
 
       - name: Rust cache store
