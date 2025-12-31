@@ -75,6 +75,7 @@ export async function mergeConfig(
     minWidth,
     minHeight,
     ignoreCertificateErrors,
+    enableTauriNewWindow,
   } = options;
 
   const { platform } = process;
@@ -103,6 +104,7 @@ export async function mergeConfig(
     min_width: minWidth,
     min_height: minHeight,
     ignore_certificate_errors: ignoreCertificateErrors,
+    enable_tauri_new_window: enableTauriNewWindow,
   };
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
 

@@ -368,7 +368,7 @@ async function mergeConfig(url, options, tauriConf) {
             await fsExtra.copy(sourcePath, destPath);
         }
     }));
-    const { width, height, fullscreen, maximize, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name = 'pake-app', resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, multiInstance, startToTray, forceInternalNavigation, zoom, minWidth, minHeight, ignoreCertificateErrors, } = options;
+    const { width, height, fullscreen, maximize, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name = 'pake-app', resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, multiInstance, startToTray, forceInternalNavigation, zoom, minWidth, minHeight, ignoreCertificateErrors, enableTauriNewWindow, } = options;
     const { platform } = process;
     const platformHideOnClose = hideOnClose ?? platform === 'darwin';
     const tauriConfWindowOptions = {
@@ -393,6 +393,7 @@ async function mergeConfig(url, options, tauriConf) {
         min_width: minWidth,
         min_height: minHeight,
         ignore_certificate_errors: ignoreCertificateErrors,
+        enable_tauri_new_window: enableTauriNewWindow,
     };
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
     tauriConf.productName = name;
@@ -1888,6 +1889,7 @@ const DEFAULT_PAKE_OPTIONS = {
     minWidth: 0,
     minHeight: 0,
     ignoreCertificateErrors: false,
+    enableTauriNewWindow: false,
 };
 
 function validateNumberInput(value) {
@@ -2037,6 +2039,9 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .hideHelp())
         .addOption(new Option('--iterative-build', 'Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging')
         .default(DEFAULT_PAKE_OPTIONS.iterativeBuild)
+        .hideHelp())
+        .addOption(new Option('--enable-tauri-new-window', "Enable Tauri's new window handling (instead of using external browser)")
+        .default(DEFAULT_PAKE_OPTIONS.enableTauriNewWindow)
         .hideHelp())
         .version(packageJson.version, '-v, --version')
         .configureHelp({
