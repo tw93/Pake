@@ -479,6 +479,14 @@ pake ./my-app/index.html --name "my-app" --use-local-file
 --ignore-certificate-errors
 ```
 
+#### [enable-tauri-new-window]
+
+使用 Tauri API 打开新视窗，适用于第三方登入弹出视窗授权
+
+```shell
+--enable-tauri-new-window
+```
+
 ### 打包完成
 
 完成上述步骤后，您的应用程序应该已经成功打包。请注意，根据您的系统配置和网络状况，打包过程可能需要一些时间。请耐心等待，一旦打包完成，您就可以在指定的目录中找到应用程序安装包。
