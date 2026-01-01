@@ -222,10 +222,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .hideHelp(),
     )
     .addOption(
-      new Option(
-        '--new-window',
-        'Allow new window for third-party login',
-      )
+      new Option('--new-window', 'Allow new window for third-party login')
         .default(DEFAULT.newWindow)
         .hideHelp(),
     )
