@@ -153,9 +153,13 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         };
         window_builder = window_builder.title_bar_style(title_bar_style);
 
-        if window_config.dark_mode {
-            window_builder = window_builder.theme(Some(Theme::Dark));
-        }
+        // Default to following system theme (None), only force dark when explicitly set
+        let theme = if window_config.dark_mode {
+            Some(Theme::Dark)
+        } else {
+            None // Follow system theme
+        };
+        window_builder = window_builder.theme(theme);
     }
 
     // Windows and Linux: set data_directory before proxy_url
