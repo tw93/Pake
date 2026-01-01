@@ -19,7 +19,7 @@ pub struct WindowConfig {
     pub title: Option<String>,
     pub enable_wasm: bool,
     pub enable_drag_drop: bool,
-    pub enable_tauri_new_window: bool,
+    pub new_window: bool,
     pub start_to_tray: bool,
     #[serde(default)]
     pub force_internal_navigation: bool,

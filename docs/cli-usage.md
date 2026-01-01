@@ -481,12 +481,12 @@ Ignore TLS certificate validation errors when loading the target URL. Useful for
 --ignore-certificate-errors
 ```
 
-#### [enable-tauri-new-window]
+#### [new-window]
 
-Use the Tauri API to open a new window. Useful for third-party login pop-up authorization.
+Allow new window for third-party login authorization.
 
 ```shell
---enable-tauri-new-window
+--new-window
 ```
 
 ### Packaging Complete

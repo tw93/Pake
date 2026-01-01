@@ -479,12 +479,12 @@ pake ./my-app/index.html --name "my-app" --use-local-file
 --ignore-certificate-errors
 ```
 
-#### [enable-tauri-new-window]
+#### [new-window]
 
-使用 Tauri API 打开新视窗，适用于第三方登入弹出视窗授权
+允许弹出新窗口，适用于第三方登录授权。
 
 ```shell
---enable-tauri-new-window
+--new-window
 ```
 
 ### 打包完成

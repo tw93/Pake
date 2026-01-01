@@ -223,10 +223,10 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     )
     .addOption(
       new Option(
-        '--enable-tauri-new-window',
-        "Enable Tauri's new window handling (instead of using external browser)",
+        '--new-window',
+        'Allow new window for third-party login',
       )
-        .default(DEFAULT.enableTauriNewWindow)
+        .default(DEFAULT.newWindow)
         .hideHelp(),
     )
     .version(packageJson.version, '-v, --version')

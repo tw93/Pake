@@ -115,8 +115,8 @@ export interface PakeCliOptions {
   // Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging
   iterativeBuild: boolean;
 
-  // Enable Tauri's new window handling (instead of using external browser), default false
-  enableTauriNewWindow: boolean;
+  // Allow new window for third-party login, default false
+  newWindow: boolean;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {
@@ -153,7 +153,7 @@ export interface WindowConfig {
   min_width: number;
   min_height: number;
   ignore_certificate_errors: boolean;
-  enable_tauri_new_window: boolean;
+  new_window: boolean;
 }
 
 export interface PakeConfig {
