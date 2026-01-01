@@ -481,6 +481,14 @@ Ignore TLS certificate validation errors when loading the target URL. Useful for
 --ignore-certificate-errors
 ```
 
+#### [enable-tauri-new-window]
+
+Use the Tauri API to open a new window. Useful for third-party login pop-up authorization.
+
+```shell
+--enable-tauri-new-window
+```
+
 ### Packaging Complete
 
 After completing the above steps, your application should be successfully packaged. Please note that the packaging process may take some time depending on your system configuration and network conditions. Be patient, and once the packaging is complete, you can find the application installer in the specified directory.

@@ -82,6 +82,12 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         window_builder = window_builder.disable_drag_drop_handler();
     }
 
+    if window_config.enable_tauri_new_window {
+        window_builder = window_builder.on_new_window(move |_url, _features| {
+            tauri::webview::NewWindowResponse::Allow
+        })
+    }
+
     // Add initialization scripts
     window_builder = window_builder
         .initialization_script(&config_script)

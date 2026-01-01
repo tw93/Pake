@@ -221,6 +221,14 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .default(DEFAULT.iterativeBuild)
         .hideHelp(),
     )
+    .addOption(
+      new Option(
+        '--enable-tauri-new-window',
+        "Enable Tauri's new window handling (instead of using external browser)",
+      )
+        .default(DEFAULT.enableTauriNewWindow)
+        .hideHelp(),
+    )
     .version(packageJson.version, '-v, --version')
     .configureHelp({
       sortSubcommands: true,
