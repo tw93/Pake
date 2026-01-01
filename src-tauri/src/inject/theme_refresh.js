@@ -53,5 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
   observer.observe(document.body, config);
 
   // Watch for system theme changes (though window should handle this natively now)
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", updateTheme);
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addEventListener("change", updateTheme);
 });
