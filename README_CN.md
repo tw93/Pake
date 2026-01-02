@@ -1,4 +1,4 @@
-<h4 align="right"><a href="README.md">English</a> | <strong>简体中文</strong> | <a href="README_JP.md">日本語</a></h4>
+<h4 align="right"><a href="README.md">English</a> | <strong>简体中文</strong></h4>
 <p align="center">
     <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
 </p>
