@@ -99,7 +99,9 @@ export default class LinuxBuilder extends BaseBuilder {
     // so verbose mode helps diagnose issues like strip failures and missing dependencies.
     if (
       this.currentBuildType === 'appimage' &&
-      (this.options.targets.includes('appimage') || this.options.debug || process.env.PAKE_VERBOSE)
+      (this.options.targets.includes('appimage') ||
+        this.options.debug ||
+        process.env.PAKE_VERBOSE)
     ) {
       fullCommand += ' --verbose';
     }
