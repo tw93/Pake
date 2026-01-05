@@ -6,6 +6,7 @@ import tauriConfig from '@/helpers/tauriConfig';
 export default class LinuxBuilder extends BaseBuilder {
   private buildFormat: string;
   private buildArch: string;
+  private currentBuildType: string = '';
 
   constructor(options: PakeAppOptions) {
     super(options);
@@ -43,7 +44,7 @@ export default class LinuxBuilder extends BaseBuilder {
       }
     }
 
-    if (targets === 'rpm') {
+    if (this.currentBuildType === 'rpm') {
       return `${name}-${version}-1.${arch}`;
     }
 
@@ -58,9 +59,16 @@ export default class LinuxBuilder extends BaseBuilder {
 
     for (const target of targetTypes) {
       if (requestedTargets.includes(target)) {
+        this.currentBuildType = target;
         await this.buildAndCopy(url, target);
       }
     }
+  }
+
+  // Override buildAndCopy to ensure currentBuildType is synced if called directly, though the loop above handles it most of the time.
+  async buildAndCopy(url: string, target: string) {
+    this.currentBuildType = target;
+    await super.buildAndCopy(url, target);
   }
 
   protected getBuildCommand(packageManager: string = 'pnpm'): string {
@@ -82,12 +90,16 @@ export default class LinuxBuilder extends BaseBuilder {
       fullCommand += ` --features ${features.join(',')}`;
     }
 
+    if (this.currentBuildType) {
+      fullCommand += ` --bundles ${this.currentBuildType}`;
+    }
+
     // Enable verbose output for AppImage builds when debugging or PAKE_VERBOSE is set.
     // AppImage builds often fail with minimal error messages from linuxdeploy,
     // so verbose mode helps diagnose issues like strip failures and missing dependencies.
     if (
-      this.options.targets === 'appimage' &&
-      (this.options.debug || process.env.PAKE_VERBOSE)
+      this.currentBuildType === 'appimage' &&
+      (this.options.targets.includes('appimage') || this.options.debug || process.env.PAKE_VERBOSE)
     ) {
       fullCommand += ' --verbose';
     }

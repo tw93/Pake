@@ -19,7 +19,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   targets: (() => {
     switch (process.platform) {
       case 'linux':
-        return 'deb';
+        return 'deb,appimage';
       case 'darwin':
         return 'dmg';
       case 'win32':
