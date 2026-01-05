@@ -22,7 +22,7 @@ import * as psl from 'psl';
 import { InvalidArgumentError, program as program$1, Option } from 'commander';
 
 var name = "pake-cli";
-var version = "3.7.4";
+var version = "3.7.5";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -843,10 +843,10 @@ class BaseBuilder {
                 logger.info(`✺ Located in China, using ${packageManager}/rsProxy CN mirror.`);
                 const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
                 await fsExtra.copy(projectCnConf, projectConf);
-                await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`, timeout, buildEnv);
+                await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`, timeout, { ...buildEnv, CI: 'true' });
             }
             else {
-                await shellExec(`cd "${npmDirectory}" && ${packageManager} install${peerDepsOption}`, timeout, buildEnv);
+                await shellExec(`cd "${npmDirectory}" && ${packageManager} install${peerDepsOption}`, timeout, { ...buildEnv, CI: 'true' });
             }
             spinner.succeed(chalk.green('Package installed!'));
         }
@@ -862,7 +862,7 @@ class BaseBuilder {
                 try {
                     const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
                     await fsExtra.copy(projectCnConf, projectConf);
-                    await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`, timeout, buildEnv);
+                    await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`, timeout, { ...buildEnv, CI: 'true' });
                     retrySpinner.succeed(chalk.green('Package installed with CN mirror!'));
                 }
                 catch (retryError) {
@@ -1276,6 +1276,7 @@ class WinBuilder extends BaseBuilder {
 class LinuxBuilder extends BaseBuilder {
     constructor(options) {
         super(options);
+        this.currentBuildType = '';
         const target = options.targets || 'deb';
         if (target.includes('-arm64')) {
             this.buildFormat = target.replace('-arm64', '');
@@ -1306,7 +1307,7 @@ class LinuxBuilder extends BaseBuilder {
                 }
             }
         }
-        if (targets === 'rpm') {
+        if (this.currentBuildType === 'rpm') {
             return `${name}-${version}-1.${arch}`;
         }
         return `${name}_${version}_${arch}`;
@@ -1318,9 +1319,15 @@ class LinuxBuilder extends BaseBuilder {
             .map((t) => t.trim());
         for (const target of targetTypes) {
             if (requestedTargets.includes(target)) {
+                this.currentBuildType = target;
                 await this.buildAndCopy(url, target);
             }
         }
+    }
+    // Override buildAndCopy to ensure currentBuildType is synced if called directly, though the loop above handles it most of the time.
+    async buildAndCopy(url, target) {
+        this.currentBuildType = target;
+        await super.buildAndCopy(url, target);
     }
     getBuildCommand(packageManager = 'pnpm') {
         const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
@@ -1332,11 +1339,14 @@ class LinuxBuilder extends BaseBuilder {
         if (features.length > 0) {
             fullCommand += ` --features ${features.join(',')}`;
         }
+        if (this.currentBuildType) {
+            fullCommand += ` --bundles ${this.currentBuildType}`;
+        }
         // Enable verbose output for AppImage builds when debugging or PAKE_VERBOSE is set.
         // AppImage builds often fail with minimal error messages from linuxdeploy,
         // so verbose mode helps diagnose issues like strip failures and missing dependencies.
-        if (this.options.targets === 'appimage' &&
-            (this.options.debug || process.env.PAKE_VERBOSE)) {
+        if (this.currentBuildType === 'appimage' &&
+            (this.options.targets.includes('appimage') || this.options.debug || process.env.PAKE_VERBOSE)) {
             fullCommand += ' --verbose';
         }
         return fullCommand;
@@ -1898,7 +1908,7 @@ const DEFAULT_PAKE_OPTIONS = {
     targets: (() => {
         switch (process.platform) {
             case 'linux':
-                return 'deb';
+                return 'deb,appimage';
             case 'darwin':
                 return 'dmg';
             case 'win32':
