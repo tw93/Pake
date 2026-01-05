@@ -105,6 +105,8 @@ pub fn run_app() {
                     {
                         if init_fullscreen {
                             window_clone.set_fullscreen(true).unwrap();
+                            // Ensure webview maintains focus for input after fullscreen
+                            let _ = window_clone.set_focus();
                         }
                     }
                 });
@@ -123,6 +125,14 @@ pub fn run_app() {
                             if window.is_fullscreen().unwrap_or(false) {
                                 window.set_fullscreen(false).unwrap();
                                 tokio::time::sleep(Duration::from_millis(900)).await;
+                            }
+                        }
+                        #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
+                        {
+                            if window.is_fullscreen().unwrap_or(false) {
+                                window.set_fullscreen(false).unwrap();
+                                // Restore focus after exiting fullscreen to fix input issues
+                                let _ = window.set_focus();
                             }
                         }
                         window.minimize().unwrap();
