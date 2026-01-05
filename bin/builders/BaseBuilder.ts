@@ -134,13 +134,13 @@ export default abstract class BaseBuilder {
         await shellExec(
           `cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`,
           timeout,
-          buildEnv,
+          { ...buildEnv, CI: 'true' },
         );
       } else {
         await shellExec(
           `cd "${npmDirectory}" && ${packageManager} install${peerDepsOption}`,
           timeout,
-          buildEnv,
+          { ...buildEnv, CI: 'true' },
         );
       }
       spinner.succeed(chalk.green('Package installed!'));
@@ -167,7 +167,7 @@ export default abstract class BaseBuilder {
           await shellExec(
             `cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`,
             timeout,
-            buildEnv,
+            { ...buildEnv, CI: 'true' },
           );
           retrySpinner.succeed(
             chalk.green('Package installed with CN mirror!'),
