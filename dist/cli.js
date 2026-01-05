@@ -1346,7 +1346,9 @@ class LinuxBuilder extends BaseBuilder {
         // AppImage builds often fail with minimal error messages from linuxdeploy,
         // so verbose mode helps diagnose issues like strip failures and missing dependencies.
         if (this.currentBuildType === 'appimage' &&
-            (this.options.targets.includes('appimage') || this.options.debug || process.env.PAKE_VERBOSE)) {
+            (this.options.targets.includes('appimage') ||
+                this.options.debug ||
+                process.env.PAKE_VERBOSE)) {
             fullCommand += ' --verbose';
         }
         return fullCommand;
