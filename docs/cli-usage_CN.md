@@ -265,7 +265,7 @@ pake https://github.com --name GitHub
 
 指定构建目标架构或格式：
 
-- **Linux**: `deb`, `appimage`, `deb-arm64`, `appimage-arm64`（默认：`deb`）
+- **Linux**: `deb`, `appimage`, `rpm`, `deb-arm64`, `appimage-arm64`, `rpm-arm64`（默认：`deb`, `appimage`）
 - **Windows**: `x64`, `arm64`（未指定时自动检测）
 - **macOS**: `intel`, `apple`, `universal`（未指定时自动检测）
 

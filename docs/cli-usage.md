@@ -267,7 +267,7 @@ Package the application to support both Intel and M1 chips, exclusively for macO
 
 Specify the build target architecture or format:
 
-- **Linux**: `deb`, `appimage`, `deb-arm64`, `appimage-arm64` (default: `deb`)
+- **Linux**: `deb`, `appimage`, `rpm`, `deb-arm64`, `appimage-arm64`, `rpm-arm64` (default: `deb`, `appimage`)
 - **Windows**: `x64`, `arm64` (auto-detects if not specified)
 - **macOS**: `intel`, `apple`, `universal` (auto-detects if not specified)
 
