@@ -99,6 +99,14 @@ pub fn run_app() {
                 tauri::async_runtime::spawn(async move {
                     tokio::time::sleep(tokio::time::Duration::from_millis(WINDOW_SHOW_DELAY)).await;
                     window_clone.show().unwrap();
+
+                    // Fixed: Linux fullscreen issue with virtual keyboard
+                    #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
+                    {
+                        if init_fullscreen {
+                            window_clone.set_fullscreen(true).unwrap();
+                        }
+                    }
                 });
             }
 

@@ -58,11 +58,15 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         .visible(false)
         .user_agent(user_agent)
         .resizable(window_config.resizable)
-        .fullscreen(window_config.fullscreen)
         .maximized(window_config.maximize)
         .inner_size(window_config.width, window_config.height)
         .always_on_top(window_config.always_on_top)
         .incognito(window_config.incognito);
+
+    #[cfg(any(target_os = "windows", target_os = "macos"))]
+    {
+        window_builder = window_builder.fullscreen(window_config.fullscreen);
+    }
 
     if window_config.min_width > 0.0 || window_config.min_height > 0.0 {
         let min_w = if window_config.min_width > 0.0 {
