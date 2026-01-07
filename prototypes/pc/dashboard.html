@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>工作台 - 公交广告管理系统</title>
+    <!-- Font Awesome 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -46,7 +48,7 @@
             align-items: center;
             justify-content: center;
             color: #fff;
-            font-weight: bold;
+            font-size: 20px;
             margin-right: 16px;
         }
 
@@ -66,6 +68,10 @@
             color: #595959;
             cursor: pointer;
             position: relative;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.3s;
         }
 
         .header-item:hover {
@@ -184,6 +190,11 @@
             border-radius: 4px;
             padding: 24px;
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .stat-title {
@@ -308,16 +319,20 @@
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
+            background: #fff;
         }
 
         .action-button:hover {
             border-color: #1890FF;
             color: #1890FF;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
         }
 
         .action-icon {
             font-size: 24px;
             margin-bottom: 8px;
+            color: #1890FF;
         }
 
         .action-text {
@@ -334,6 +349,8 @@
             align-items: center;
             justify-content: center;
             color: #8C8C8C;
+            flex-direction: column;
+            gap: 12px;
         }
 
         .status-tag {
@@ -366,27 +383,60 @@
             color: #F5222D;
             border: 1px solid #FFCCC7;
         }
+
+        /* AI助手浮动按钮 */
+        .ai-assistant-fab {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+            z-index: 999;
+        }
+
+        .ai-assistant-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .ai-assistant-fab:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
     <!-- 顶部导航栏 -->
     <div class="header">
         <div class="header-left">
-            <div class="logo">广告</div>
+            <div class="logo">
+                <i class="fas fa-bus"></i>
+            </div>
             <div class="system-name">公交广告管理系统</div>
         </div>
         <div class="header-right">
             <div class="header-item">
+                <i class="fas fa-bell"></i>
                 <span>消息</span>
                 <span class="badge">5</span>
             </div>
             <div class="header-item">
+                <i class="fas fa-question-circle"></i>
                 <span>帮助</span>
             </div>
             <div class="user-info">
                 <div class="avatar">张</div>
                 <span>张经理</span>
-                <span>▼</span>
+                <i class="fas fa-chevron-down"></i>
             </div>
         </div>
     </div>
@@ -395,39 +445,47 @@
     <div class="sidebar">
         <div class="menu">
             <div class="menu-item active">
-                <span class="menu-icon">■</span>
+                <i class="fas fa-home menu-icon"></i>
                 <span>工作台</span>
             </div>
             <div class="menu-item">
-                <span class="menu-icon">◆</span>
+                <i class="fas fa-layer-group menu-icon"></i>
                 <span>资源管理</span>
             </div>
             <div class="menu-item">
-                <span class="menu-icon">●</span>
+                <i class="fas fa-file-invoice menu-icon"></i>
                 <span>订单管理</span>
             </div>
             <div class="menu-item">
-                <span class="menu-icon">▲</span>
+                <i class="fas fa-upload menu-icon"></i>
                 <span>上刊管理</span>
             </div>
             <div class="menu-item">
-                <span class="menu-icon">★</span>
+                <i class="fas fa-search-location menu-icon"></i>
                 <span>巡检管理</span>
             </div>
             <div class="menu-item">
-                <span class="menu-icon">◎</span>
+                <i class="fas fa-check-circle menu-icon"></i>
                 <span>审核中心</span>
             </div>
             <div class="menu-item">
-                <span class="menu-icon">¥</span>
+                <i class="fas fa-dollar-sign menu-icon"></i>
                 <span>财务管理</span>
             </div>
             <div class="menu-item">
-                <span class="menu-icon">▣</span>
+                <i class="fas fa-chart-bar menu-icon"></i>
                 <span>数据报表</span>
             </div>
             <div class="menu-item">
-                <span class="menu-icon">⚙</span>
+                <i class="fas fa-robot menu-icon"></i>
+                <span>智能助手</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-book menu-icon"></i>
+                <span>知识库</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-cog menu-icon"></i>
                 <span>系统管理</span>
             </div>
         </div>
@@ -443,31 +501,31 @@
         <!-- 数据统计卡片 -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-title">今日订单</div>
+                <div class="stat-title"><i class="fas fa-file-alt"></i> 今日订单</div>
                 <div class="stat-value">12</div>
                 <div class="stat-trend trend-up">
-                    <span>↑</span>
+                    <i class="fas fa-arrow-up"></i>
                     <span>15% 较昨日</span>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-title">本月营收</div>
+                <div class="stat-title"><i class="fas fa-yen-sign"></i> 本月营收</div>
                 <div class="stat-value">¥128.5万</div>
                 <div class="stat-trend trend-up">
-                    <span>↑</span>
+                    <i class="fas fa-arrow-up"></i>
                     <span>8% 较上月</span>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-title">资源利用率</div>
+                <div class="stat-title"><i class="fas fa-percentage"></i> 资源利用率</div>
                 <div class="stat-value">78.5%</div>
                 <div class="stat-trend trend-down">
-                    <span>↓</span>
+                    <i class="fas fa-arrow-down"></i>
                     <span>3% 较上月</span>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-title">待审核</div>
+                <div class="stat-title"><i class="fas fa-tasks"></i> 待审核</div>
                 <div class="stat-value">8</div>
                 <div class="stat-trend">
                     <span style="color: #8C8C8C;">待处理</span>
@@ -480,42 +538,42 @@
             <!-- 待办事项 -->
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">待办事项</h3>
-                    <span class="card-extra">查看全部 →</span>
+                    <h3 class="card-title"><i class="fas fa-clipboard-list"></i> 待办事项</h3>
+                    <span class="card-extra">查看全部 <i class="fas fa-arrow-right"></i></span>
                 </div>
                 <ul class="todo-list">
                     <li class="todo-item">
                         <div class="todo-content">
-                            <div class="todo-title">订单编号 AD202601070015 需要审核</div>
-                            <div class="todo-meta">客户:上海某科技公司 | 金额:¥28,000 | 30分钟前</div>
+                            <div class="todo-title"><i class="fas fa-file-invoice"></i> 订单编号 AD202601070015 需要审核</div>
+                            <div class="todo-meta"><i class="far fa-building"></i> 客户:上海某科技公司 | <i class="fas fa-yen-sign"></i> 金额:¥28,000 | <i class="far fa-clock"></i> 30分钟前</div>
                         </div>
                         <span class="todo-badge urgent">紧急</span>
                     </li>
                     <li class="todo-item">
                         <div class="todo-content">
-                            <div class="todo-title">1路线-车辆A001 画面破损需要修补</div>
-                            <div class="todo-meta">巡检员:李师傅 | 1小时前</div>
+                            <div class="todo-title"><i class="fas fa-tools"></i> 1路线-车辆A001 画面破损需要修补</div>
+                            <div class="todo-meta"><i class="fas fa-user"></i> 巡检员:李师傅 | <i class="far fa-clock"></i> 1小时前</div>
                         </div>
                         <span class="todo-badge">待处理</span>
                     </li>
                     <li class="todo-item">
                         <div class="todo-content">
-                            <div class="todo-title">5个上刊任务计划明日执行</div>
-                            <div class="todo-meta">执行人:王师傅 | 2小时前</div>
+                            <div class="todo-title"><i class="fas fa-upload"></i> 5个上刊任务计划明日执行</div>
+                            <div class="todo-meta"><i class="fas fa-user"></i> 执行人:王师傅 | <i class="far fa-clock"></i> 2小时前</div>
                         </div>
                         <span class="todo-badge">待确认</span>
                     </li>
                     <li class="todo-item">
                         <div class="todo-content">
-                            <div class="todo-title">客户"XX广告公司"申请开具发票</div>
-                            <div class="todo-meta">金额:¥50,000 | 3小时前</div>
+                            <div class="todo-title"><i class="fas fa-file-invoice-dollar"></i> 客户"XX广告公司"申请开具发票</div>
+                            <div class="todo-meta"><i class="fas fa-yen-sign"></i> 金额:¥50,000 | <i class="far fa-clock"></i> 3小时前</div>
                         </div>
                         <span class="todo-badge">待处理</span>
                     </li>
                     <li class="todo-item">
                         <div class="todo-content">
-                            <div class="todo-title">订单 AD202601050008 即将到期</div>
-                            <div class="todo-meta">到期时间:2026-01-10 | 需安排下刊</div>
+                            <div class="todo-title"><i class="fas fa-calendar-times"></i> 订单 AD202601050008 即将到期</div>
+                            <div class="todo-meta"><i class="far fa-calendar-alt"></i> 到期时间:2026-01-10 | 需安排下刊</div>
                         </div>
                         <span class="todo-badge">提醒</span>
                     </li>
@@ -525,31 +583,31 @@
             <!-- 快捷操作 -->
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">快捷操作</h3>
+                    <h3 class="card-title"><i class="fas fa-bolt"></i> 快捷操作</h3>
                 </div>
                 <div class="quick-actions">
                     <div class="action-button" onclick="location.href='order-create.html'">
-                        <div class="action-icon">+</div>
+                        <div class="action-icon"><i class="fas fa-plus-circle"></i></div>
                         <div class="action-text">新建订单</div>
                     </div>
                     <div class="action-button" onclick="location.href='resource-list.html'">
-                        <div class="action-icon">◆</div>
+                        <div class="action-icon"><i class="fas fa-search"></i></div>
                         <div class="action-text">资源查询</div>
                     </div>
                     <div class="action-button">
-                        <div class="action-icon">▲</div>
+                        <div class="action-icon"><i class="fas fa-calendar-check"></i></div>
                         <div class="action-text">上刊计划</div>
                     </div>
                     <div class="action-button">
-                        <div class="action-icon">◎</div>
+                        <div class="action-icon"><i class="fas fa-check-double"></i></div>
                         <div class="action-text">审核中心</div>
                     </div>
                     <div class="action-button">
-                        <div class="action-icon">★</div>
+                        <div class="action-icon"><i class="fas fa-map-marked-alt"></i></div>
                         <div class="action-text">巡检记录</div>
                     </div>
                     <div class="action-button">
-                        <div class="action-icon">¥</div>
+                        <div class="action-icon"><i class="fas fa-calculator"></i></div>
                         <div class="action-text">财务结算</div>
                     </div>
                 </div>
@@ -559,13 +617,19 @@
         <!-- 数据图表 -->
         <div class="card" style="margin-top: 16px;">
             <div class="card-header">
-                <h3 class="card-title">近30天营收趋势</h3>
-                <span class="card-extra">切换视图 →</span>
+                <h3 class="card-title"><i class="fas fa-chart-line"></i> 近30天营收趋势</h3>
+                <span class="card-extra">切换视图 <i class="fas fa-exchange-alt"></i></span>
             </div>
             <div class="chart-placeholder">
-                [数据图表区域 - 可接入ECharts等图表库]
+                <i class="fas fa-chart-area" style="font-size: 48px; color: #D9D9D9;"></i>
+                <div>[数据图表区域 - 可接入ECharts等图表库]</div>
             </div>
         </div>
+    </div>
+
+    <!-- AI助手浮动按钮 -->
+    <div class="ai-assistant-fab" onclick="location.href='ai-assistant.html'" title="AI智能助手">
+        <i class="fas fa-robot"></i>
     </div>
 
     <script>
@@ -584,6 +648,10 @@
                     window.location.href = 'publish-list.html';
                 } else if (text === '数据报表') {
                     window.location.href = 'report.html';
+                } else if (text === '智能助手') {
+                    window.location.href = 'ai-assistant.html';
+                } else if (text === '知识库') {
+                    window.location.href = 'knowledge-base.html';
                 }
             });
         });

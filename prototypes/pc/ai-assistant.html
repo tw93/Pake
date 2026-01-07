@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI智能助手 - 公交广告管理系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #F0F2F5;
+        }
+
+        .header {
+            height: 64px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: #1890FF;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 20px;
+            margin-right: 16px;
+        }
+
+        .system-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header-item {
+            color: #595959;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1890FF;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .sidebar {
+            width: 200px;
+            background: #001529;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+
+        .menu {
+            padding: 16px 0;
+        }
+
+        .menu-item {
+            padding: 12px 24px;
+            color: rgba(255, 255, 255, 0.65);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .menu-item.active {
+            background: #1890FF;
+            color: #fff;
+        }
+
+        .menu-icon {
+            width: 16px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 200px;
+            margin-top: 64px;
+            padding: 24px;
+            min-height: calc(100vh - 64px);
+        }
+
+        /* AI助手容器 */
+        .ai-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 16px;
+            height: calc(100vh - 112px);
+        }
+
+        /* 左侧功能面板 */
+        .ai-sidebar {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow-y: auto;
+        }
+
+        .ai-sidebar-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #262626;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-function-list {
+            list-style: none;
+        }
+
+        .ai-function-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #595959;
+        }
+
+        .ai-function-item:hover {
+            background: #F0F2F5;
+            color: #1890FF;
+        }
+
+        .ai-function-item.active {
+            background: #E6F7FF;
+            color: #1890FF;
+        }
+
+        .ai-function-icon {
+            font-size: 16px;
+        }
+
+        /* 历史会话 */
+        .history-section {
+            margin-top: 24px;
+        }
+
+        .history-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+            color: #8C8C8C;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item:hover {
+            background: #F0F2F5;
+            color: #595959;
+        }
+
+        .history-time {
+            font-size: 11px;
+            color: #BFBFBF;
+        }
+
+        /* 聊天区域 */
+        .chat-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #F0F0F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .ai-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 20px;
+        }
+
+        .ai-info h3 {
+            font-size: 16px;
+            color: #262626;
+            margin-bottom: 4px;
+        }
+
+        .ai-status {
+            font-size: 12px;
+            color: #52C41A;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 3px;
+            background: #52C41A;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: 1px solid #D9D9D9;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            color: #595959;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            color: #1890FF;
+            border-color: #1890FF;
+        }
+
+        /* 消息区域 */
+        .messages-container {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 18px;
+            flex-shrink: 0;
+        }
+
+        .message-avatar.ai {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .message-avatar.user {
+            background: #1890FF;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .message-content {
+            max-width: 70%;
+        }
+
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .message.ai .message-bubble {
+            background: #F0F2F5;
+            color: #262626;
+        }
+
+        .message.user .message-bubble {
+            background: #1890FF;
+            color: #fff;
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: #8C8C8C;
+            margin-top: 4px;
+            padding: 0 4px;
+        }
+
+        /* 建议卡片 */
+        .suggestion-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .suggestion-card {
+            padding: 12px;
+            border: 1px solid #D9D9D9;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #fff;
+        }
+
+        .suggestion-card:hover {
+            border-color: #1890FF;
+            box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+        }
+
+        .suggestion-icon {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: #1890FF;
+        }
+
+        .suggestion-text {
+            font-size: 13px;
+            color: #595959;
+        }
+
+        /* 输入区域 */
+        .input-container {
+            padding: 20px 24px;
+            border-top: 1px solid #F0F0F0;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .input-box {
+            flex: 1;
+            position: relative;
+        }
+
+        .message-input {
+            width: 100%;
+            padding: 12px 48px 12px 16px;
+            border: 1px solid #D9D9D9;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+            font-family: inherit;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #1890FF;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+        }
+
+        .input-actions {
+            position: absolute;
+            right: 8px;
+            bottom: 8px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .input-action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: none;
+            color: #8C8C8C;
+            cursor: pointer;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .input-action-btn:hover {
+            background: #F0F2F5;
+            color: #1890FF;
+        }
+
+        .send-btn {
+            padding: 12px 24px;
+            background: #1890FF;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s;
+        }
+
+        .send-btn:hover {
+            background: #40a9ff;
+        }
+
+        .send-btn:disabled {
+            background: #D9D9D9;
+            cursor: not-allowed;
+        }
+
+        /* 快捷提示 */
+        .quick-prompts {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .quick-prompt {
+            padding: 6px 12px;
+            background: #F0F2F5;
+            border-radius: 16px;
+            font-size: 12px;
+            color: #595959;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quick-prompt:hover {
+            background: #E6F7FF;
+            color: #1890FF;
+        }
+
+        /* 数据卡片（在AI回复中） */
+        .data-card {
+            background: #F7F9FC;
+            border: 1px solid #E8ECF0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+
+        .data-card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #262626;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .data-list {
+            list-style: none;
+        }
+
+        .data-item {
+            padding: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #E8ECF0;
+            font-size: 13px;
+        }
+
+        .data-item:last-child {
+            border-bottom: none;
+        }
+
+        .data-label {
+            color: #8C8C8C;
+        }
+
+        .data-value {
+            color: #262626;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">
+                <i class="fas fa-bus"></i>
+            </div>
+            <div class="system-name">公交广告管理系统</div>
+        </div>
+        <div class="header-right">
+            <div class="header-item">
+                <i class="fas fa-bell"></i>
+                <span>消息</span>
+            </div>
+            <div class="user-info">
+                <div class="avatar">张</div>
+                <span>张经理</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- 左侧菜单 -->
+    <div class="sidebar">
+        <div class="menu">
+            <div class="menu-item" onclick="location.href='dashboard.html'">
+                <i class="fas fa-home menu-icon"></i>
+                <span>工作台</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-layer-group menu-icon"></i>
+                <span>资源管理</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-file-invoice menu-icon"></i>
+                <span>订单管理</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-upload menu-icon"></i>
+                <span>上刊管理</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-search-location menu-icon"></i>
+                <span>巡检管理</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-check-circle menu-icon"></i>
+                <span>审核中心</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-dollar-sign menu-icon"></i>
+                <span>财务管理</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-chart-bar menu-icon"></i>
+                <span>数据报表</span>
+            </div>
+            <div class="menu-item active">
+                <i class="fas fa-robot menu-icon"></i>
+                <span>智能助手</span>
+            </div>
+            <div class="menu-item" onclick="location.href='knowledge-base.html'">
+                <i class="fas fa-book menu-icon"></i>
+                <span>知识库</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-cog menu-icon"></i>
+                <span>系统管理</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <div class="ai-container">
+            <!-- 左侧功能面板 -->
+            <div class="ai-sidebar">
+                <div class="ai-sidebar-title">
+                    <i class="fas fa-magic"></i>
+                    AI助手功能
+                </div>
+                <ul class="ai-function-list">
+                    <li class="ai-function-item active">
+                        <i class="fas fa-comments ai-function-icon"></i>
+                        <span>智能对话</span>
+                    </li>
+                    <li class="ai-function-item">
+                        <i class="fas fa-search ai-function-icon"></i>
+                        <span>信息查询</span>
+                    </li>
+                    <li class="ai-function-item">
+                        <i class="fas fa-lightbulb ai-function-icon"></i>
+                        <span>资源推荐</span>
+                    </li>
+                    <li class="ai-function-item">
+                        <i class="fas fa-chart-line ai-function-icon"></i>
+                        <span>价格预测</span>
+                    </li>
+                    <li class="ai-function-item">
+                        <i class="fas fa-brain ai-function-icon"></i>
+                        <span>智能分析</span>
+                    </li>
+                    <li class="ai-function-item">
+                        <i class="fas fa-exclamation-triangle ai-function-icon"></i>
+                        <span>问题诊断</span>
+                    </li>
+                    <li class="ai-function-item">
+                        <i class="fas fa-file-alt ai-function-icon"></i>
+                        <span>文档生成</span>
+                    </li>
+                </ul>
+
+                <div class="history-section">
+                    <div class="ai-sidebar-title">
+                        <i class="fas fa-history"></i>
+                        历史会话
+                    </div>
+                    <div class="history-item">
+                        <span>1路线资源查询</span>
+                        <span class="history-time">10:30</span>
+                    </div>
+                    <div class="history-item">
+                        <span>订单AD2026...分析</span>
+                        <span class="history-time">昨天</span>
+                    </div>
+                    <div class="history-item">
+                        <span>价格趋势预测</span>
+                        <span class="history-time">2天前</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 聊天区域 -->
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="chat-title">
+                        <div class="ai-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="ai-info">
+                            <h3>广告助手 - AdBot</h3>
+                            <div class="ai-status">
+                                <span class="status-dot"></span>
+                                <span>在线服务中</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-actions">
+                        <button class="action-btn">
+                            <i class="fas fa-download"></i>
+                            导出对话
+                        </button>
+                        <button class="action-btn">
+                            <i class="fas fa-trash-alt"></i>
+                            清空对话
+                        </button>
+                    </div>
+                </div>
+
+                <div class="messages-container">
+                    <!-- AI欢迎消息 -->
+                    <div class="message ai">
+                        <div class="message-avatar ai">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                你好！我是广告助手AdBot，可以帮你处理以下事项：
+                                <ul style="margin-top: 12px; padding-left: 20px;">
+                                    <li>查询订单、资源、客户等信息</li>
+                                    <li>智能推荐最佳投放资源</li>
+                                    <li>预测价格趋势和市场变化</li>
+                                    <li>分析经营数据和提供决策建议</li>
+                                    <li>诊断系统问题和优化建议</li>
+                                </ul>
+                            </div>
+                            <div class="message-time">09:00</div>
+
+                            <!-- 建议操作卡片 -->
+                            <div class="suggestion-cards">
+                                <div class="suggestion-card">
+                                    <div class="suggestion-icon"><i class="fas fa-search"></i></div>
+                                    <div class="suggestion-text">查询订单 AD202601070015</div>
+                                </div>
+                                <div class="suggestion-card">
+                                    <div class="suggestion-icon"><i class="fas fa-lightbulb"></i></div>
+                                    <div class="suggestion-text">推荐1路线可用资源</div>
+                                </div>
+                                <div class="suggestion-card">
+                                    <div class="suggestion-icon"><i class="fas fa-chart-line"></i></div>
+                                    <div class="suggestion-text">本月营收数据分析</div>
+                                </div>
+                                <div class="suggestion-card">
+                                    <div class="suggestion-icon"><i class="fas fa-calculator"></i></div>
+                                    <div class="suggestion-text">计算广告投放成本</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 用户消息示例 -->
+                    <div class="message user">
+                        <div class="message-avatar user">张</div>
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                帮我查询订单 AD202601070015 的详细信息
+                            </div>
+                            <div class="message-time">10:15</div>
+                        </div>
+                    </div>
+
+                    <!-- AI回复示例 -->
+                    <div class="message ai">
+                        <div class="message-avatar ai">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                已为您查询到订单 AD202601070015 的详细信息：
+
+                                <div class="data-card">
+                                    <div class="data-card-title">
+                                        <i class="fas fa-file-invoice"></i>
+                                        订单基本信息
+                                    </div>
+                                    <ul class="data-list">
+                                        <li class="data-item">
+                                            <span class="data-label">客户名称</span>
+                                            <span class="data-value">上海某科技公司</span>
+                                        </li>
+                                        <li class="data-item">
+                                            <span class="data-label">广告主</span>
+                                            <span class="data-value">某品牌手机</span>
+                                        </li>
+                                        <li class="data-item">
+                                            <span class="data-label">投放周期</span>
+                                            <span class="data-value">2026-01-15 至 2026-04-15</span>
+                                        </li>
+                                        <li class="data-item">
+                                            <span class="data-label">资源数量</span>
+                                            <span class="data-value">5个广告位</span>
+                                        </li>
+                                        <li class="data-item">
+                                            <span class="data-label">合同金额</span>
+                                            <span class="data-value" style="color: #1890FF;">¥28,000</span>
+                                        </li>
+                                        <li class="data-item">
+                                            <span class="data-label">订单状态</span>
+                                            <span class="data-value" style="color: #FAAD14;">待审核</span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                该订单目前处于待审核状态，建议尽快审核以确保按时上刊。
+                            </div>
+                            <div class="message-time">10:15</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-container">
+                    <div class="quick-prompts">
+                        <div class="quick-prompt">查询今日订单</div>
+                        <div class="quick-prompt">推荐优质资源</div>
+                        <div class="quick-prompt">生成月度报表</div>
+                        <div class="quick-prompt">分析客户画像</div>
+                    </div>
+                    <div class="input-wrapper">
+                        <div class="input-box">
+                            <textarea
+                                class="message-input"
+                                placeholder="输入您的问题，AI助手将为您解答..."
+                                rows="1"
+                            ></textarea>
+                            <div class="input-actions">
+                                <button class="input-action-btn" title="语音输入">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
+                                <button class="input-action-btn" title="上传文件">
+                                    <i class="fas fa-paperclip"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button class="send-btn">
+                            <span>发送</span>
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 自动调整输入框高度
+        const textarea = document.querySelector('.message-input');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // 快捷提示点击
+        document.querySelectorAll('.quick-prompt').forEach(prompt => {
+            prompt.addEventListener('click', function() {
+                textarea.value = this.textContent;
+                textarea.focus();
+            });
+        });
+
+        // 建议卡片点击
+        document.querySelectorAll('.suggestion-card').forEach(card => {
+            card.addEventListener('click', function() {
+                textarea.value = this.querySelector('.suggestion-text').textContent;
+                textarea.focus();
+            });
+        });
+
+        // 发送按钮
+        document.querySelector('.send-btn').addEventListener('click', function() {
+            const message = textarea.value.trim();
+            if (message) {
+                // 这里可以添加发送消息的逻辑
+                console.log('发送消息:', message);
+                textarea.value = '';
+                textarea.style.height = 'auto';
+            }
+        });
+
+        // 回车发送（Shift+Enter换行）
+        textarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                document.querySelector('.send-btn').click();
+            }
+        });
+    </script>
+</body>
+</html>

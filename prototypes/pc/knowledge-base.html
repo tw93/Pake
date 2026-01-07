@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>广告知识库 - 公交广告管理系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #F0F2F5;
+        }
+
+        .header {
+            height: 64px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: #1890FF;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 20px;
+            margin-right: 16px;
+        }
+
+        .system-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header-item {
+            color: #595959;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1890FF;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .sidebar {
+            width: 200px;
+            background: #001529;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+
+        .menu {
+            padding: 16px 0;
+        }
+
+        .menu-item {
+            padding: 12px 24px;
+            color: rgba(255, 255, 255, 0.65);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .menu-item.active {
+            background: #1890FF;
+            color: #fff;
+        }
+
+        .menu-icon {
+            width: 16px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 200px;
+            margin-top: 64px;
+            padding: 24px;
+            min-height: calc(100vh - 64px);
+        }
+
+        /* 搜索栏 */
+        .search-section {
+            background: linear-gradient(135deg, #1890FF 0%, #096dd9 100%);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 24px;
+            color: #fff;
+        }
+
+        .search-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .search-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 24px;
+        }
+
+        .search-box {
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            height: 48px;
+            padding: 0 52px 0 20px;
+            border: none;
+            border-radius: 24px;
+            font-size: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #1890FF;
+            color: #fff;
+            border-radius: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-btn:hover {
+            background: #40a9ff;
+        }
+
+        /* 知识库内容 */
+        .kb-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 24px;
+        }
+
+        /* 分类侧边栏 */
+        .category-sidebar {
+            background: #fff;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            height: fit-content;
+        }
+
+        .category-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #262626;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-list {
+            list-style: none;
+        }
+
+        .category-item {
+            padding: 10px 12px;
+            margin-bottom: 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: #595959;
+        }
+
+        .category-item:hover {
+            background: #F0F2F5;
+            color: #1890FF;
+        }
+
+        .category-item.active {
+            background: #E6F7FF;
+            color: #1890FF;
+            font-weight: 500;
+        }
+
+        .category-count {
+            font-size: 12px;
+            color: #8C8C8C;
+            background: #F0F0F0;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .category-item.active .category-count {
+            background: #91D5FF;
+            color: #fff;
+        }
+
+        /* 文章列表 */
+        .articles-container {
+            background: #fff;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .articles-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .articles-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .view-options {
+            display: flex;
+            gap: 8px;
+        }
+
+        .view-btn {
+            padding: 6px 12px;
+            border: 1px solid #D9D9D9;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            color: #595959;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .view-btn.active {
+            background: #1890FF;
+            color: #fff;
+            border-color: #1890FF;
+        }
+
+        /* 文章卡片 */
+        .article-card {
+            padding: 20px;
+            border: 1px solid #F0F0F0;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .article-card:hover {
+            border-color: #1890FF;
+            box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1);
+        }
+
+        .article-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .article-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #262626;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .article-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        .tag-law {
+            background: #FFF1F0;
+            color: #F5222D;
+        }
+
+        .tag-guide {
+            background: #E6F7FF;
+            color: #1890FF;
+        }
+
+        .tag-faq {
+            background: #FFF7E6;
+            color: #FAAD14;
+        }
+
+        .tag-practice {
+            background: #F6FFED;
+            color: #52C41A;
+        }
+
+        .article-meta {
+            font-size: 12px;
+            color: #8C8C8C;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .article-summary {
+            font-size: 14px;
+            color: #595959;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .article-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .article-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: #8C8C8C;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .read-more {
+            color: #1890FF;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* 热门文章 */
+        .hot-articles {
+            background: #FFF7E6;
+            border: 1px solid #FFD591;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .hot-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #FAAD14;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hot-list {
+            list-style: none;
+        }
+
+        .hot-item {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #595959;
+            cursor: pointer;
+        }
+
+        .hot-item:hover {
+            color: #1890FF;
+        }
+
+        .hot-number {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            background: #F0F0F0;
+            color: #595959;
+        }
+
+        .hot-item:nth-child(1) .hot-number,
+        .hot-item:nth-child(2) .hot-number,
+        .hot-item:nth-child(3) .hot-number {
+            background: #FAAD14;
+            color: #fff;
+        }
+
+        /* 分页 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+        .page-btn {
+            padding: 6px 12px;
+            border: 1px solid #D9D9D9;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            color: #595959;
+        }
+
+        .page-btn:hover {
+            border-color: #1890FF;
+            color: #1890FF;
+        }
+
+        .page-btn.active {
+            background: #1890FF;
+            color: #fff;
+            border-color: #1890FF;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">
+                <i class="fas fa-bus"></i>
+            </div>
+            <div class="system-name">公交广告管理系统</div>
+        </div>
+        <div class="header-right">
+            <div class="header-item">
+                <i class="fas fa-bell"></i>
+                <span>消息</span>
+            </div>
+            <div class="user-info">
+                <div class="avatar">张</div>
+                <span>张经理</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- 左侧菜单 -->
+    <div class="sidebar">
+        <div class="menu">
+            <div class="menu-item" onclick="location.href='dashboard.html'">
+                <i class="fas fa-home menu-icon"></i>
+                <span>工作台</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-layer-group menu-icon"></i>
+                <span>资源管理</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-file-invoice menu-icon"></i>
+                <span>订单管理</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-upload menu-icon"></i>
+                <span>上刊管理</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-search-location menu-icon"></i>
+                <span>巡检管理</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-check-circle menu-icon"></i>
+                <span>审核中心</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-dollar-sign menu-icon"></i>
+                <span>财务管理</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-chart-bar menu-icon"></i>
+                <span>数据报表</span>
+            </div>
+            <div class="menu-item" onclick="location.href='ai-assistant.html'">
+                <i class="fas fa-robot menu-icon"></i>
+                <span>智能助手</span>
+            </div>
+            <div class="menu-item active">
+                <i class="fas fa-book menu-icon"></i>
+                <span>知识库</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-cog menu-icon"></i>
+                <span>系统管理</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 搜索区域 -->
+        <div class="search-section">
+            <h1 class="search-title"><i class="fas fa-book"></i> 广告知识库</h1>
+            <p class="search-subtitle">为您提供全面的广告行业知识、法规政策、操作指南和最佳实践</p>
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="搜索知识库内容...">
+                <button class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 知识库内容 -->
+        <div class="kb-container">
+            <!-- 分类侧边栏 -->
+            <div class="category-sidebar">
+                <div class="category-title">
+                    <i class="fas fa-folder-open"></i>
+                    知识分类
+                </div>
+                <ul class="category-list">
+                    <li class="category-item active">
+                        <span><i class="fas fa-th-large"></i> 全部内容</span>
+                        <span class="category-count">156</span>
+                    </li>
+                    <li class="category-item">
+                        <span><i class="fas fa-gavel"></i> 广告法规</span>
+                        <span class="category-count">32</span>
+                    </li>
+                    <li class="category-item">
+                        <span><i class="fas fa-book-open"></i> 操作指南</span>
+                        <span class="category-count">45</span>
+                    </li>
+                    <li class="category-item">
+                        <span><i class="fas fa-question-circle"></i> 常见问题</span>
+                        <span class="category-count">38</span>
+                    </li>
+                    <li class="category-item">
+                        <span><i class="fas fa-lightbulb"></i> 最佳实践</span>
+                        <span class="category-count">28</span>
+                    </li>
+                    <li class="category-item">
+                        <span><i class="fas fa-industry"></i> 行业规范</span>
+                        <span class="category-count">13</span>
+                    </li>
+                </ul>
+
+                <div style="margin-top: 24px;">
+                    <div class="category-title">
+                        <i class="fas fa-tags"></i>
+                        热门标签
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;">
+                        <span style="padding: 4px 12px; background: #F0F2F5; border-radius: 12px; font-size: 12px; cursor: pointer;">广告审核</span>
+                        <span style="padding: 4px 12px; background: #F0F2F5; border-radius: 12px; font-size: 12px; cursor: pointer;">合同签订</span>
+                        <span style="padding: 4px 12px; background: #F0F2F5; border-radius: 12px; font-size: 12px; cursor: pointer;">价格策略</span>
+                        <span style="padding: 4px 12px; background: #F0F2F5; border-radius: 12px; font-size: 12px; cursor: pointer;">上刊流程</span>
+                        <span style="padding: 4px 12px; background: #F0F2F5; border-radius: 12px; font-size: 12px; cursor: pointer;">巡检规范</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 文章列表 -->
+            <div class="articles-container">
+                <div class="articles-header">
+                    <h2 class="articles-title">全部内容 (156篇)</h2>
+                    <div class="view-options">
+                        <button class="view-btn active">
+                            <i class="fas fa-list"></i>
+                            列表视图
+                        </button>
+                        <button class="view-btn">
+                            <i class="fas fa-th-large"></i>
+                            卡片视图
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 热门推荐 -->
+                <div class="hot-articles">
+                    <div class="hot-title">
+                        <i class="fas fa-fire"></i>
+                        热门文章
+                    </div>
+                    <ul class="hot-list">
+                        <li class="hot-item">
+                            <span class="hot-number">1</span>
+                            <span>《广告法》修订最新解读及合规要点</span>
+                        </li>
+                        <li class="hot-item">
+                            <span class="hot-number">2</span>
+                            <span>公交车身广告上刊标准操作流程</span>
+                        </li>
+                        <li class="hot-item">
+                            <span class="hot-number">3</span>
+                            <span>如何提高广告资源利用率的5个技巧</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 文章列表 -->
+                <div class="article-card">
+                    <div class="article-header">
+                        <div>
+                            <div class="article-title">
+                                <span>《广告法》第二十八条虚假广告认定标准详解</span>
+                                <span class="article-tag tag-law">法规政策</span>
+                            </div>
+                            <div class="article-meta">
+                                <span><i class="far fa-user"></i> 法务部</span>
+                                <span><i class="far fa-calendar-alt"></i> 2026-01-05</span>
+                                <span><i class="far fa-clock"></i> 阅读需5分钟</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="article-summary">
+                        本文详细解读《广告法》第二十八条关于虚假广告的认定标准，包括虚假宣传的常见形式、法律责任以及合规建议。帮助广告从业人员准确理解法律条文，避免违规风险...
+                    </div>
+                    <div class="article-footer">
+                        <div class="article-stats">
+                            <span class="stat-item"><i class="far fa-eye"></i> 2,345</span>
+                            <span class="stat-item"><i class="far fa-thumbs-up"></i> 156</span>
+                            <span class="stat-item"><i class="far fa-comment"></i> 23</span>
+                        </div>
+                        <div class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="article-card">
+                    <div class="article-header">
+                        <div>
+                            <div class="article-title">
+                                <span>公交车身广告上刊标准操作流程（SOP）</span>
+                                <span class="article-tag tag-guide">操作指南</span>
+                            </div>
+                            <div class="article-meta">
+                                <span><i class="far fa-user"></i> 运营部</span>
+                                <span><i class="far fa-calendar-alt"></i> 2026-01-03</span>
+                                <span><i class="far fa-clock"></i> 阅读需8分钟</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="article-summary">
+                        本SOP详细规定了公交车身广告从接单到上刊完成的全流程操作规范，包括素材验收、现场勘察、安装施工、质量检查等环节的具体要求和注意事项...
+                    </div>
+                    <div class="article-footer">
+                        <div class="article-stats">
+                            <span class="stat-item"><i class="far fa-eye"></i> 3,521</span>
+                            <span class="stat-item"><i class="far fa-thumbs-up"></i> 289</span>
+                            <span class="stat-item"><i class="far fa-comment"></i> 45</span>
+                        </div>
+                        <div class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="article-card">
+                    <div class="article-header">
+                        <div>
+                            <div class="article-title">
+                                <span>广告内容审核中常见的10个问题及解决方案</span>
+                                <span class="article-tag tag-faq">常见问题</span>
+                            </div>
+                            <div class="article-meta">
+                                <span><i class="far fa-user"></i> 审核中心</span>
+                                <span><i class="far fa-calendar-alt"></i> 2025-12-28</span>
+                                <span><i class="far fa-clock"></i> 阅读需6分钟</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="article-summary">
+                        总结了广告内容审核过程中最常遇到的10类问题，包括资质缺失、内容违规、素材不合规等，并提供了针对性的解决方案和预防措施...
+                    </div>
+                    <div class="article-footer">
+                        <div class="article-stats">
+                            <span class="stat-item"><i class="far fa-eye"></i> 1,856</span>
+                            <span class="stat-item"><i class="far fa-thumbs-up"></i> 124</span>
+                            <span class="stat-item"><i class="far fa-comment"></i> 18</span>
+                        </div>
+                        <div class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="article-card">
+                    <div class="article-header">
+                        <div>
+                            <div class="article-title">
+                                <span>如何提高广告资源利用率：数据驱动的5个策略</span>
+                                <span class="article-tag tag-practice">最佳实践</span>
+                            </div>
+                            <div class="article-meta">
+                                <span><i class="far fa-user"></i> 数据分析部</span>
+                                <span><i class="far fa-calendar-alt"></i> 2025-12-25</span>
+                                <span><i class="far fa-clock"></i> 阅读需10分钟</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="article-summary">
+                        基于大量实际案例和数据分析，总结出提升广告资源利用率的5个核心策略，包括动态定价、智能匹配、需求预测、淡季促销和客户分级管理...
+                    </div>
+                    <div class="article-footer">
+                        <div class="article-stats">
+                            <span class="stat-item"><i class="far fa-eye"></i> 2,987</span>
+                            <span class="stat-item"><i class="far fa-thumbs-up"></i> 234</span>
+                            <span class="stat-item"><i class="far fa-comment"></i> 32</span>
+                        </div>
+                        <div class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="article-card">
+                    <div class="article-header">
+                        <div>
+                            <div class="article-title">
+                                <span>户外广告行业安全生产管理规定</span>
+                                <span class="article-tag tag-law">法规政策</span>
+                            </div>
+                            <div class="article-meta">
+                                <span><i class="far fa-user"></i> 安全管理部</span>
+                                <span><i class="far fa-calendar-alt"></i> 2025-12-20</span>
+                                <span><i class="far fa-clock"></i> 阅读需7分钟</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="article-summary">
+                        系统介绍户外广告行业的安全生产要求，涵盖高空作业安全、设备维护规范、应急预案制定等方面，确保广告安装和维护过程的安全性...
+                    </div>
+                    <div class="article-footer">
+                        <div class="article-stats">
+                            <span class="stat-item"><i class="far fa-eye"></i> 1,456</span>
+                            <span class="stat-item"><i class="far fa-thumbs-up"></i> 98</span>
+                            <span class="stat-item"><i class="far fa-comment"></i> 15</span>
+                        </div>
+                        <div class="read-more">
+                            阅读全文 <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分页 -->
+                <div class="pagination">
+                    <button class="page-btn"><i class="fas fa-chevron-left"></i></button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">4</button>
+                    <button class="page-btn">5</button>
+                    <button class="page-btn">...</button>
+                    <button class="page-btn">16</button>
+                    <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 分类切换
+        document.querySelectorAll('.category-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.category-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // 视图切换
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // 搜索功能
+        document.querySelector('.search-btn').addEventListener('click', function() {
+            const query = document.querySelector('.search-input').value;
+            if (query) {
+                console.log('搜索:', query);
+                // 这里可以添加搜索逻辑
+            }
+        });
+
+        // 回车搜索
+        document.querySelector('.search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.querySelector('.search-btn').click();
+            }
+        });
+    </script>
+</body>
+</html>
