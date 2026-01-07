@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>资源管理 - 公交广告管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #F0F2F5;
+        }
+
+        /* 复用通用样式 */
+        .header {
+            height: 64px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: #1890FF;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            margin-right: 16px;
+        }
+
+        .system-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header-item {
+            color: #595959;
+            cursor: pointer;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1890FF;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .sidebar {
+            width: 200px;
+            background: #001529;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+
+        .menu {
+            padding: 16px 0;
+        }
+
+        .menu-item {
+            padding: 12px 24px;
+            color: rgba(255, 255, 255, 0.65);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .menu-item.active {
+            background: #1890FF;
+            color: #fff;
+        }
+
+        .menu-icon {
+            width: 16px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 200px;
+            margin-top: 64px;
+            padding: 24px;
+            min-height: calc(100vh - 64px);
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 20px;
+            color: #262626;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #1890FF;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #40a9ff;
+        }
+
+        .btn-default {
+            background: #fff;
+            color: #595959;
+            border: 1px solid #D9D9D9;
+        }
+
+        .btn-default:hover {
+            color: #1890FF;
+            border-color: #1890FF;
+        }
+
+        /* 筛选区域 */
+        .filter-card {
+            background: #fff;
+            border-radius: 4px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            color: #262626;
+            margin-bottom: 8px;
+        }
+
+        .filter-input {
+            height: 32px;
+            border: 1px solid #D9D9D9;
+            border-radius: 4px;
+            padding: 0 12px;
+            font-size: 14px;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #1890FF;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* 表格样式 */
+        .table-card {
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .table-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #F0F0F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 16px;
+            color: #262626;
+            font-weight: 600;
+        }
+
+        .table-extra {
+            font-size: 14px;
+            color: #8C8C8C;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #FAFAFA;
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 14px;
+            color: #262626;
+            font-weight: 600;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        td {
+            padding: 16px;
+            font-size: 14px;
+            color: #595959;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        tbody tr:hover {
+            background: #FAFAFA;
+        }
+
+        .status-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-size: 12px;
+        }
+
+        .status-available {
+            background: #F6FFED;
+            color: #52C41A;
+            border: 1px solid #B7EB8F;
+        }
+
+        .status-booked {
+            background: #E6F7FF;
+            color: #1890FF;
+            border: 1px solid #91D5FF;
+        }
+
+        .status-published {
+            background: #FFF7E6;
+            color: #FAAD14;
+            border: 1px solid #FFD591;
+        }
+
+        .status-maintenance {
+            background: #FFF1F0;
+            color: #F5222D;
+            border: 1px solid #FFCCC7;
+        }
+
+        .action-link {
+            color: #1890FF;
+            cursor: pointer;
+            margin-right: 12px;
+            text-decoration: none;
+        }
+
+        .action-link:hover {
+            color: #40a9ff;
+        }
+
+        .resource-image {
+            width: 60px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+            background: #F0F0F0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8C8C8C;
+            font-size: 12px;
+        }
+
+        /* 分页 */
+        .pagination {
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: #595959;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .page-btn {
+            padding: 4px 12px;
+            border: 1px solid #D9D9D9;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .page-btn:hover {
+            border-color: #1890FF;
+            color: #1890FF;
+        }
+
+        .page-btn.active {
+            background: #1890FF;
+            color: #fff;
+            border-color: #1890FF;
+        }
+
+        .page-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">广告</div>
+            <div class="system-name">公交广告管理系统</div>
+        </div>
+        <div class="header-right">
+            <div class="header-item">消息</div>
+            <div class="header-item">帮助</div>
+            <div class="user-info">
+                <div class="avatar">张</div>
+                <span>张经理</span>
+                <span>▼</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 左侧菜单 -->
+    <div class="sidebar">
+        <div class="menu">
+            <div class="menu-item" onclick="location.href='dashboard.html'">
+                <span class="menu-icon">■</span>
+                <span>工作台</span>
+            </div>
+            <div class="menu-item active">
+                <span class="menu-icon">◆</span>
+                <span>资源管理</span>
+            </div>
+            <div class="menu-item" onclick="location.href='order-list.html'">
+                <span class="menu-icon">●</span>
+                <span>订单管理</span>
+            </div>
+            <div class="menu-item" onclick="location.href='publish-list.html'">
+                <span class="menu-icon">▲</span>
+                <span>上刊管理</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">★</span>
+                <span>巡检管理</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">◎</span>
+                <span>审核中心</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">¥</span>
+                <span>财务管理</span>
+            </div>
+            <div class="menu-item" onclick="location.href='report.html'">
+                <span class="menu-icon">▣</span>
+                <span>数据报表</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">⚙</span>
+                <span>系统管理</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">资源管理</h1>
+            <div class="header-actions">
+                <button class="btn btn-default">导出</button>
+                <button class="btn btn-default">批量导入</button>
+                <button class="btn btn-primary">+ 新增资源</button>
+            </div>
+        </div>
+
+        <!-- 筛选区域 -->
+        <div class="filter-card">
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label class="filter-label">资源编号</label>
+                    <input type="text" class="filter-input" placeholder="请输入资源编号">
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">资源类型</label>
+                    <select class="filter-input">
+                        <option value="">全部</option>
+                        <option value="1">车身广告</option>
+                        <option value="2">车内广告</option>
+                        <option value="3">站台广告</option>
+                        <option value="4">LED屏</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">所属线路</label>
+                    <select class="filter-input">
+                        <option value="">全部</option>
+                        <option value="1">1路</option>
+                        <option value="2">2路</option>
+                        <option value="3">5路</option>
+                        <option value="4">10路</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">资源状态</label>
+                    <select class="filter-input">
+                        <option value="">全部</option>
+                        <option value="0">空闲</option>
+                        <option value="1">已预订</option>
+                        <option value="2">已上刊</option>
+                        <option value="3">维护中</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-primary">查询</button>
+                <button class="btn btn-default">重置</button>
+            </div>
+        </div>
+
+        <!-- 表格区域 -->
+        <div class="table-card">
+            <div class="table-header">
+                <h3 class="table-title">资源列表</h3>
+                <span class="table-extra">共 128 条记录</span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>资源编号</th>
+                        <th>资源名称</th>
+                        <th>类型</th>
+                        <th>线路</th>
+                        <th>车牌/位置</th>
+                        <th>规格</th>
+                        <th>刊例价(元/月)</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>RES202601001</td>
+                        <td>1路车身-左侧</td>
+                        <td>车身广告</td>
+                        <td>1路</td>
+                        <td>沪A·12345</td>
+                        <td>12m×1.5m</td>
+                        <td>¥8,000</td>
+                        <td><span class="status-tag status-available">空闲</span></td>
+                        <td>
+                            <a href="#" class="action-link">查看</a>
+                            <a href="#" class="action-link">编辑</a>
+                            <a href="#" class="action-link">预订</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>RES202601002</td>
+                        <td>1路车身-右侧</td>
+                        <td>车身广告</td>
+                        <td>1路</td>
+                        <td>沪A·12345</td>
+                        <td>12m×1.5m</td>
+                        <td>¥8,000</td>
+                        <td><span class="status-tag status-published">已上刊</span></td>
+                        <td>
+                            <a href="#" class="action-link">查看</a>
+                            <a href="#" class="action-link">详情</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>RES202601003</td>
+                        <td>2路车内-拉手</td>
+                        <td>车内广告</td>
+                        <td>2路</td>
+                        <td>沪A·23456</td>
+                        <td>20cm×30cm×20个</td>
+                        <td>¥3,500</td>
+                        <td><span class="status-tag status-booked">已预订</span></td>
+                        <td>
+                            <a href="#" class="action-link">查看</a>
+                            <a href="#" class="action-link">编辑</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>RES202601004</td>
+                        <td>人民广场站-候车亭</td>
+                        <td>站台广告</td>
+                        <td>-</td>
+                        <td>人民广场站A出口</td>
+                        <td>3.5m×2m</td>
+                        <td>¥15,000</td>
+                        <td><span class="status-tag status-available">空闲</span></td>
+                        <td>
+                            <a href="#" class="action-link">查看</a>
+                            <a href="#" class="action-link">编辑</a>
+                            <a href="#" class="action-link">预订</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>RES202601005</td>
+                        <td>5路车尾-LED屏</td>
+                        <td>LED屏</td>
+                        <td>5路</td>
+                        <td>沪A·34567</td>
+                        <td>1.2m×0.8m</td>
+                        <td>¥12,000</td>
+                        <td><span class="status-tag status-maintenance">维护中</span></td>
+                        <td>
+                            <a href="#" class="action-link">查看</a>
+                            <a href="#" class="action-link">编辑</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>RES202601006</td>
+                        <td>10路车身-左侧</td>
+                        <td>车身广告</td>
+                        <td>10路</td>
+                        <td>沪A·45678</td>
+                        <td>12m×1.5m</td>
+                        <td>¥9,500</td>
+                        <td><span class="status-tag status-published">已上刊</span></td>
+                        <td>
+                            <a href="#" class="action-link">查看</a>
+                            <a href="#" class="action-link">详情</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>RES202601007</td>
+                        <td>10路车身-右侧</td>
+                        <td>车身广告</td>
+                        <td>10路</td>
+                        <td>沪A·45678</td>
+                        <td>12m×1.5m</td>
+                        <td>¥9,500</td>
+                        <td><span class="status-tag status-available">空闲</span></td>
+                        <td>
+                            <a href="#" class="action-link">查看</a>
+                            <a href="#" class="action-link">编辑</a>
+                            <a href="#" class="action-link">预订</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>RES202601008</td>
+                        <td>静安寺站-灯箱</td>
+                        <td>站台广告</td>
+                        <td>-</td>
+                        <td>静安寺站B出口</td>
+                        <td>3m×2m</td>
+                        <td>¥18,000</td>
+                        <td><span class="status-tag status-published">已上刊</span></td>
+                        <td>
+                            <a href="#" class="action-link">查看</a>
+                            <a href="#" class="action-link">详情</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>RES202601009</td>
+                        <td>1路车内-椅背</td>
+                        <td>车内广告</td>
+                        <td>1路</td>
+                        <td>沪A·12345</td>
+                        <td>30cm×20cm×30个</td>
+                        <td>¥4,000</td>
+                        <td><span class="status-tag status-booked">已预订</span></td>
+                        <td>
+                            <a href="#" class="action-link">查看</a>
+                            <a href="#" class="action-link">编辑</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>RES202601010</td>
+                        <td>5路车身-车尾</td>
+                        <td>车身广告</td>
+                        <td>5路</td>
+                        <td>沪A·34567</td>
+                        <td>4m×2m</td>
+                        <td>¥6,500</td>
+                        <td><span class="status-tag status-available">空闲</span></td>
+                        <td>
+                            <a href="#" class="action-link">查看</a>
+                            <a href="#" class="action-link">编辑</a>
+                            <a href="#" class="action-link">预订</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- 分页 -->
+            <div class="pagination">
+                <div class="pagination-info">显示 1-10 条,共 128 条</div>
+                <div class="pagination-controls">
+                    <button class="page-btn" disabled>上一页</button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">4</button>
+                    <button class="page-btn">5</button>
+                    <button class="page-btn">...</button>
+                    <button class="page-btn">13</button>
+                    <button class="page-btn">下一页</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

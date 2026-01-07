@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单管理 - 公交广告管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #F0F2F5;
+        }
+
+        /* 复用通用样式 */
+        .header {
+            height: 64px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: #1890FF;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            margin-right: 16px;
+        }
+
+        .system-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header-item {
+            color: #595959;
+            cursor: pointer;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1890FF;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .sidebar {
+            width: 200px;
+            background: #001529;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+
+        .menu {
+            padding: 16px 0;
+        }
+
+        .menu-item {
+            padding: 12px 24px;
+            color: rgba(255, 255, 255, 0.65);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .menu-item.active {
+            background: #1890FF;
+            color: #fff;
+        }
+
+        .menu-icon {
+            width: 16px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 200px;
+            margin-top: 64px;
+            padding: 24px;
+            min-height: calc(100vh - 64px);
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 20px;
+            color: #262626;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #1890FF;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #40a9ff;
+        }
+
+        .btn-default {
+            background: #fff;
+            color: #595959;
+            border: 1px solid #D9D9D9;
+        }
+
+        .btn-default:hover {
+            color: #1890FF;
+            border-color: #1890FF;
+        }
+
+        /* 标签页 */
+        .tabs-card {
+            background: #fff;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .tabs-header {
+            display: flex;
+            border-bottom: 1px solid #F0F0F0;
+            padding: 0 24px;
+        }
+
+        .tab-item {
+            padding: 16px 24px;
+            cursor: pointer;
+            color: #595959;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tab-item:hover {
+            color: #1890FF;
+        }
+
+        .tab-item.active {
+            color: #1890FF;
+            border-bottom-color: #1890FF;
+        }
+
+        .tab-badge {
+            position: absolute;
+            top: 12px;
+            right: 8px;
+            background: #F5222D;
+            color: #fff;
+            font-size: 12px;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        /* 筛选区域 */
+        .filter-card {
+            background: #fff;
+            border-radius: 4px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            color: #262626;
+            margin-bottom: 8px;
+        }
+
+        .filter-input {
+            height: 32px;
+            border: 1px solid #D9D9D9;
+            border-radius: 4px;
+            padding: 0 12px;
+            font-size: 14px;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #1890FF;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* 表格样式 */
+        .table-card {
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .table-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #F0F0F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 16px;
+            color: #262626;
+            font-weight: 600;
+        }
+
+        .table-extra {
+            font-size: 14px;
+            color: #8C8C8C;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #FAFAFA;
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 14px;
+            color: #262626;
+            font-weight: 600;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        td {
+            padding: 16px;
+            font-size: 14px;
+            color: #595959;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        tbody tr:hover {
+            background: #FAFAFA;
+        }
+
+        .status-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-size: 12px;
+        }
+
+        .status-pending {
+            background: #FFF7E6;
+            color: #FAAD14;
+            border: 1px solid #FFD591;
+        }
+
+        .status-approved {
+            background: #E6F7FF;
+            color: #1890FF;
+            border: 1px solid #91D5FF;
+        }
+
+        .status-published {
+            background: #F6FFED;
+            color: #52C41A;
+            border: 1px solid #B7EB8F;
+        }
+
+        .status-rejected {
+            background: #FFF1F0;
+            color: #F5222D;
+            border: 1px solid #FFCCC7;
+        }
+
+        .status-completed {
+            background: #FAFAFA;
+            color: #595959;
+            border: 1px solid #D9D9D9;
+        }
+
+        .action-link {
+            color: #1890FF;
+            cursor: pointer;
+            margin-right: 12px;
+            text-decoration: none;
+        }
+
+        .action-link:hover {
+            color: #40a9ff;
+        }
+
+        .action-link.danger {
+            color: #F5222D;
+        }
+
+        .action-link.danger:hover {
+            color: #ff4d4f;
+        }
+
+        /* 分页 */
+        .pagination {
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: #595959;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .page-btn {
+            padding: 4px 12px;
+            border: 1px solid #D9D9D9;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .page-btn:hover {
+            border-color: #1890FF;
+            color: #1890FF;
+        }
+
+        .page-btn.active {
+            background: #1890FF;
+            color: #fff;
+            border-color: #1890FF;
+        }
+
+        .page-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">广告</div>
+            <div class="system-name">公交广告管理系统</div>
+        </div>
+        <div class="header-right">
+            <div class="header-item">消息</div>
+            <div class="header-item">帮助</div>
+            <div class="user-info">
+                <div class="avatar">张</div>
+                <span>张经理</span>
+                <span>▼</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 左侧菜单 -->
+    <div class="sidebar">
+        <div class="menu">
+            <div class="menu-item" onclick="location.href='dashboard.html'">
+                <span class="menu-icon">■</span>
+                <span>工作台</span>
+            </div>
+            <div class="menu-item" onclick="location.href='resource-list.html'">
+                <span class="menu-icon">◆</span>
+                <span>资源管理</span>
+            </div>
+            <div class="menu-item active">
+                <span class="menu-icon">●</span>
+                <span>订单管理</span>
+            </div>
+            <div class="menu-item" onclick="location.href='publish-list.html'">
+                <span class="menu-icon">▲</span>
+                <span>上刊管理</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">★</span>
+                <span>巡检管理</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">◎</span>
+                <span>审核中心</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">¥</span>
+                <span>财务管理</span>
+            </div>
+            <div class="menu-item" onclick="location.href='report.html'">
+                <span class="menu-icon">▣</span>
+                <span>数据报表</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">⚙</span>
+                <span>系统管理</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">订单管理</h1>
+            <div class="header-actions">
+                <button class="btn btn-default">导出</button>
+                <button class="btn btn-primary" onclick="location.href='order-create.html'">+ 新建订单</button>
+            </div>
+        </div>
+
+        <!-- 标签页 -->
+        <div class="tabs-card">
+            <div class="tabs-header">
+                <div class="tab-item active">
+                    全部订单
+                </div>
+                <div class="tab-item">
+                    待审核
+                    <span class="tab-badge">8</span>
+                </div>
+                <div class="tab-item">
+                    待上刊
+                </div>
+                <div class="tab-item">
+                    执行中
+                </div>
+                <div class="tab-item">
+                    已完成
+                </div>
+                <div class="tab-item">
+                    已取消
+                </div>
+            </div>
+        </div>
+
+        <!-- 筛选区域 -->
+        <div class="filter-card">
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label class="filter-label">订单编号</label>
+                    <input type="text" class="filter-input" placeholder="请输入订单编号">
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">客户名称</label>
+                    <input type="text" class="filter-input" placeholder="请输入客户名称">
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">订单状态</label>
+                    <select class="filter-input">
+                        <option value="">全部</option>
+                        <option value="1">待审核</option>
+                        <option value="2">审核通过</option>
+                        <option value="3">待上刊</option>
+                        <option value="4">已上刊</option>
+                        <option value="5">已完成</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">创建时间</label>
+                    <input type="date" class="filter-input">
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-primary">查询</button>
+                <button class="btn btn-default">重置</button>
+            </div>
+        </div>
+
+        <!-- 表格区域 -->
+        <div class="table-card">
+            <div class="table-header">
+                <h3 class="table-title">订单列表</h3>
+                <span class="table-extra">共 86 条记录</span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>订单编号</th>
+                        <th>客户名称</th>
+                        <th>广告主</th>
+                        <th>投放周期</th>
+                        <th>资源数量</th>
+                        <th>合同金额</th>
+                        <th>状态</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>AD202601070015</td>
+                        <td>上海某科技公司</td>
+                        <td>某品牌手机</td>
+                        <td>2026-01-15 至 2026-04-15</td>
+                        <td>5</td>
+                        <td>¥28,000</td>
+                        <td><span class="status-tag status-pending">待审核</span></td>
+                        <td>2026-01-07 09:30</td>
+                        <td>
+                            <a href="order-detail.html" class="action-link">查看</a>
+                            <a href="#" class="action-link">审核</a>
+                            <a href="#" class="action-link">编辑</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>AD202601070014</td>
+                        <td>XX广告传媒</td>
+                        <td>某饮料品牌</td>
+                        <td>2026-01-10 至 2026-03-10</td>
+                        <td>8</td>
+                        <td>¥45,000</td>
+                        <td><span class="status-tag status-approved">待上刊</span></td>
+                        <td>2026-01-07 08:15</td>
+                        <td>
+                            <a href="order-detail.html" class="action-link">查看</a>
+                            <a href="#" class="action-link">安排上刊</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>AD202601060012</td>
+                        <td>某教育机构</td>
+                        <td>某培训学校</td>
+                        <td>2026-01-08 至 2026-07-08</td>
+                        <td>12</td>
+                        <td>¥98,000</td>
+                        <td><span class="status-tag status-published">已上刊</span></td>
+                        <td>2026-01-06 14:20</td>
+                        <td>
+                            <a href="order-detail.html" class="action-link">查看</a>
+                            <a href="#" class="action-link">巡检</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>AD202601060011</td>
+                        <td>某地产公司</td>
+                        <td>某楼盘项目</td>
+                        <td>2026-01-05 至 2026-02-05</td>
+                        <td>3</td>
+                        <td>¥18,000</td>
+                        <td><span class="status-tag status-pending">待审核</span></td>
+                        <td>2026-01-06 11:45</td>
+                        <td>
+                            <a href="order-detail.html" class="action-link">查看</a>
+                            <a href="#" class="action-link">审核</a>
+                            <a href="#" class="action-link">编辑</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>AD202601050010</td>
+                        <td>某电商平台</td>
+                        <td>某购物节活动</td>
+                        <td>2026-01-01 至 2026-01-31</td>
+                        <td>20</td>
+                        <td>¥156,000</td>
+                        <td><span class="status-tag status-published">已上刊</span></td>
+                        <td>2026-01-05 10:00</td>
+                        <td>
+                            <a href="order-detail.html" class="action-link">查看</a>
+                            <a href="#" class="action-link">巡检</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>AD202601050009</td>
+                        <td>某汽车品牌</td>
+                        <td>新车上市推广</td>
+                        <td>2026-01-12 至 2026-06-12</td>
+                        <td>15</td>
+                        <td>¥225,000</td>
+                        <td><span class="status-tag status-approved">待上刊</span></td>
+                        <td>2026-01-05 09:30</td>
+                        <td>
+                            <a href="order-detail.html" class="action-link">查看</a>
+                            <a href="#" class="action-link">安排上刊</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>AD202601040008</td>
+                        <td>某餐饮连锁</td>
+                        <td>新店开业</td>
+                        <td>2025-12-28 至 2026-01-28</td>
+                        <td>6</td>
+                        <td>¥32,000</td>
+                        <td><span class="status-tag status-published">已上刊</span></td>
+                        <td>2026-01-04 16:20</td>
+                        <td>
+                            <a href="order-detail.html" class="action-link">查看</a>
+                            <a href="#" class="action-link">巡检</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>AD202601030007</td>
+                        <td>某金融机构</td>
+                        <td>理财产品推广</td>
+                        <td>2025-12-15 至 2026-01-02</td>
+                        <td>4</td>
+                        <td>¥22,000</td>
+                        <td><span class="status-tag status-completed">已完成</span></td>
+                        <td>2026-01-03 10:15</td>
+                        <td>
+                            <a href="order-detail.html" class="action-link">查看</a>
+                            <a href="#" class="action-link">结算</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>AD202601020006</td>
+                        <td>某服装品牌</td>
+                        <td>冬季新品上市</td>
+                        <td>2026-01-20 至 2026-03-20</td>
+                        <td>10</td>
+                        <td>¥68,000</td>
+                        <td><span class="status-tag status-pending">待审核</span></td>
+                        <td>2026-01-02 14:30</td>
+                        <td>
+                            <a href="order-detail.html" class="action-link">查看</a>
+                            <a href="#" class="action-link">审核</a>
+                            <a href="#" class="action-link">编辑</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>AD202512300005</td>
+                        <td>某药品公司</td>
+                        <td>感冒药推广</td>
+                        <td>2025-12-10 至 2025-12-31</td>
+                        <td>2</td>
+                        <td>¥8,500</td>
+                        <td><span class="status-tag status-rejected">已驳回</span></td>
+                        <td>2025-12-30 11:20</td>
+                        <td>
+                            <a href="order-detail.html" class="action-link">查看</a>
+                            <a href="#" class="action-link danger">删除</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- 分页 -->
+            <div class="pagination">
+                <div class="pagination-info">显示 1-10 条,共 86 条</div>
+                <div class="pagination-controls">
+                    <button class="page-btn" disabled>上一页</button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">4</button>
+                    <button class="page-btn">5</button>
+                    <button class="page-btn">...</button>
+                    <button class="page-btn">9</button>
+                    <button class="page-btn">下一页</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

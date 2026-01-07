@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据报表 - 公交广告管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #F0F2F5;
+        }
+
+        .header {
+            height: 64px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: #1890FF;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            margin-right: 16px;
+        }
+
+        .system-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header-item {
+            color: #595959;
+            cursor: pointer;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1890FF;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .sidebar {
+            width: 200px;
+            background: #001529;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+
+        .menu {
+            padding: 16px 0;
+        }
+
+        .menu-item {
+            padding: 12px 24px;
+            color: rgba(255, 255, 255, 0.65);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .menu-item.active {
+            background: #1890FF;
+            color: #fff;
+        }
+
+        .menu-icon {
+            width: 16px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 200px;
+            margin-top: 64px;
+            padding: 24px;
+            min-height: calc(100vh - 64px);
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 20px;
+            color: #262626;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .date-range {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .date-input {
+            height: 32px;
+            border: 1px solid #D9D9D9;
+            border-radius: 4px;
+            padding: 0 12px;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #1890FF;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #40a9ff;
+        }
+
+        .btn-default {
+            background: #fff;
+            color: #595959;
+            border: 1px solid #D9D9D9;
+        }
+
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border-radius: 4px;
+            padding: 24px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .stat-title {
+            font-size: 14px;
+            color: #8C8C8C;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .icon-blue {
+            background: #E6F7FF;
+            color: #1890FF;
+        }
+
+        .icon-green {
+            background: #F6FFED;
+            color: #52C41A;
+        }
+
+        .icon-orange {
+            background: #FFF7E6;
+            color: #FAAD14;
+        }
+
+        .icon-purple {
+            background: #F9F0FF;
+            color: #722ED1;
+        }
+
+        .stat-value {
+            font-size: 30px;
+            color: #262626;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .stat-trend {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .trend-up {
+            color: #52C41A;
+        }
+
+        .trend-down {
+            color: #F5222D;
+        }
+
+        /* 图表卡片 */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 4px;
+            padding: 24px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .card-title {
+            font-size: 16px;
+            color: #262626;
+            font-weight: 600;
+        }
+
+        .card-extra {
+            font-size: 14px;
+            color: #1890FF;
+            cursor: pointer;
+        }
+
+        .chart-placeholder {
+            height: 300px;
+            background: #FAFAFA;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8C8C8C;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* 排行榜 */
+        .rank-list {
+            list-style: none;
+        }
+
+        .rank-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .rank-item:last-child {
+            border-bottom: none;
+        }
+
+        .rank-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+
+        .rank-1 {
+            background: #FFD700;
+            color: #fff;
+        }
+
+        .rank-2 {
+            background: #C0C0C0;
+            color: #fff;
+        }
+
+        .rank-3 {
+            background: #CD7F32;
+            color: #fff;
+        }
+
+        .rank-other {
+            background: #F0F0F0;
+            color: #595959;
+        }
+
+        .rank-content {
+            flex: 1;
+        }
+
+        .rank-name {
+            font-size: 14px;
+            color: #262626;
+            margin-bottom: 4px;
+        }
+
+        .rank-meta {
+            font-size: 12px;
+            color: #8C8C8C;
+        }
+
+        .rank-value {
+            font-size: 16px;
+            color: #1890FF;
+            font-weight: 600;
+        }
+
+        /* 表格 */
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #FAFAFA;
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 14px;
+            color: #262626;
+            font-weight: 600;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        td {
+            padding: 16px;
+            font-size: 14px;
+            color: #595959;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        tbody tr:hover {
+            background: #FAFAFA;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #F0F0F0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #1890FF;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">广告</div>
+            <div class="system-name">公交广告管理系统</div>
+        </div>
+        <div class="header-right">
+            <div class="header-item">消息</div>
+            <div class="header-item">帮助</div>
+            <div class="user-info">
+                <div class="avatar">张</div>
+                <span>张经理</span>
+                <span>▼</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 左侧菜单 -->
+    <div class="sidebar">
+        <div class="menu">
+            <div class="menu-item" onclick="location.href='dashboard.html'">
+                <span class="menu-icon">■</span>
+                <span>工作台</span>
+            </div>
+            <div class="menu-item" onclick="location.href='resource-list.html'">
+                <span class="menu-icon">◆</span>
+                <span>资源管理</span>
+            </div>
+            <div class="menu-item" onclick="location.href='order-list.html'">
+                <span class="menu-icon">●</span>
+                <span>订单管理</span>
+            </div>
+            <div class="menu-item" onclick="location.href='publish-list.html'">
+                <span class="menu-icon">▲</span>
+                <span>上刊管理</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">★</span>
+                <span>巡检管理</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">◎</span>
+                <span>审核中心</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">¥</span>
+                <span>财务管理</span>
+            </div>
+            <div class="menu-item active">
+                <span class="menu-icon">▣</span>
+                <span>数据报表</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">⚙</span>
+                <span>系统管理</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">数据报表</h1>
+            <div class="header-actions">
+                <div class="date-range">
+                    <input type="date" class="date-input" value="2026-01-01">
+                    <span>至</span>
+                    <input type="date" class="date-input" value="2026-01-07">
+                </div>
+                <button class="btn btn-primary">查询</button>
+                <button class="btn btn-default">导出报表</button>
+            </div>
+        </div>
+
+        <!-- 核心指标卡片 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title">本月营收</div>
+                    <div class="stat-icon icon-blue">¥</div>
+                </div>
+                <div class="stat-value">¥385.6万</div>
+                <div class="stat-trend trend-up">
+                    <span>↑ 15.2%</span>
+                    <span style="color: #8C8C8C;">较上月</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title">本月订单</div>
+                    <div class="stat-icon icon-green">●</div>
+                </div>
+                <div class="stat-value">156</div>
+                <div class="stat-trend trend-up">
+                    <span>↑ 8.5%</span>
+                    <span style="color: #8C8C8C;">较上月</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title">资源利用率</div>
+                    <div class="stat-icon icon-orange">▣</div>
+                </div>
+                <div class="stat-value">82.3%</div>
+                <div class="stat-trend trend-down">
+                    <span>↓ 2.1%</span>
+                    <span style="color: #8C8C8C;">较上月</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title">客户数量</div>
+                    <div class="stat-icon icon-purple">◆</div>
+                </div>
+                <div class="stat-value">89</div>
+                <div class="stat-trend trend-up">
+                    <span>↑ 12</span>
+                    <span style="color: #8C8C8C;">新增客户</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 图表区域 -->
+        <div class="chart-grid">
+            <!-- 营收趋势 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">近12个月营收趋势</h3>
+                    <span class="card-extra">切换视图 →</span>
+                </div>
+                <div class="chart-placeholder">
+                    <div>[营收趋势折线图]</div>
+                    <div style="font-size: 12px;">可接入ECharts图表库展示数据</div>
+                </div>
+            </div>
+
+            <!-- 订单状态分布 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">订单状态分布</h3>
+                </div>
+                <div class="chart-placeholder">
+                    <div>[饼图]</div>
+                    <div style="font-size: 12px;">展示各状态订单占比</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-grid">
+            <!-- 资源类型分析 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">资源类型销售额分析</h3>
+                </div>
+                <div class="chart-placeholder">
+                    <div>[柱状图]</div>
+                    <div style="font-size: 12px;">展示各资源类型销售情况</div>
+                </div>
+            </div>
+
+            <!-- 线路排行榜 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">线路营收TOP10</h3>
+                    <span class="card-extra">查看全部 →</span>
+                </div>
+                <ul class="rank-list">
+                    <li class="rank-item">
+                        <div class="rank-number rank-1">1</div>
+                        <div class="rank-content">
+                            <div class="rank-name">1路</div>
+                            <div class="rank-meta">28个广告位 | 利用率 95%</div>
+                        </div>
+                        <div class="rank-value">¥45.2万</div>
+                    </li>
+                    <li class="rank-item">
+                        <div class="rank-number rank-2">2</div>
+                        <div class="rank-content">
+                            <div class="rank-name">10路</div>
+                            <div class="rank-meta">32个广告位 | 利用率 88%</div>
+                        </div>
+                        <div class="rank-value">¥38.6万</div>
+                    </li>
+                    <li class="rank-item">
+                        <div class="rank-number rank-3">3</div>
+                        <div class="rank-content">
+                            <div class="rank-name">5路</div>
+                            <div class="rank-meta">25个广告位 | 利用率 92%</div>
+                        </div>
+                        <div class="rank-value">¥32.8万</div>
+                    </li>
+                    <li class="rank-item">
+                        <div class="rank-number rank-other">4</div>
+                        <div class="rank-content">
+                            <div class="rank-name">2路</div>
+                            <div class="rank-meta">20个广告位 | 利用率 85%</div>
+                        </div>
+                        <div class="rank-value">¥28.5万</div>
+                    </li>
+                    <li class="rank-item">
+                        <div class="rank-number rank-other">5</div>
+                        <div class="rank-content">
+                            <div class="rank-name">15路</div>
+                            <div class="rank-meta">18个广告位 | 利用率 78%</div>
+                        </div>
+                        <div class="rank-value">¥22.3万</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 详细数据表 -->
+        <div class="card full-width">
+            <div class="card-header">
+                <h3 class="card-title">资源销售明细</h3>
+                <span class="card-extra">导出Excel →</span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>线路</th>
+                        <th>资源总数</th>
+                        <th>已售数量</th>
+                        <th>利用率</th>
+                        <th>本月营收</th>
+                        <th>同比增长</th>
+                        <th>刊例价总额</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1路</td>
+                        <td>28</td>
+                        <td>26</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div class="progress-bar" style="width: 100px;">
+                                    <div class="progress-fill" style="width: 92.8%;"></div>
+                                </div>
+                                <span>92.8%</span>
+                            </div>
+                        </td>
+                        <td>¥45.2万</td>
+                        <td style="color: #52C41A;">+15.2%</td>
+                        <td>¥48.7万</td>
+                    </tr>
+                    <tr>
+                        <td>10路</td>
+                        <td>32</td>
+                        <td>28</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div class="progress-bar" style="width: 100px;">
+                                    <div class="progress-fill" style="width: 87.5%;"></div>
+                                </div>
+                                <span>87.5%</span>
+                            </div>
+                        </td>
+                        <td>¥38.6万</td>
+                        <td style="color: #52C41A;">+8.3%</td>
+                        <td>¥44.1万</td>
+                    </tr>
+                    <tr>
+                        <td>5路</td>
+                        <td>25</td>
+                        <td>23</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div class="progress-bar" style="width: 100px;">
+                                    <div class="progress-fill" style="width: 92%;"></div>
+                                </div>
+                                <span>92.0%</span>
+                            </div>
+                        </td>
+                        <td>¥32.8万</td>
+                        <td style="color: #52C41A;">+12.5%</td>
+                        <td>¥35.6万</td>
+                    </tr>
+                    <tr>
+                        <td>2路</td>
+                        <td>20</td>
+                        <td>17</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div class="progress-bar" style="width: 100px;">
+                                    <div class="progress-fill" style="width: 85%;"></div>
+                                </div>
+                                <span>85.0%</span>
+                            </div>
+                        </td>
+                        <td>¥28.5万</td>
+                        <td style="color: #F5222D;">-2.1%</td>
+                        <td>¥33.5万</td>
+                    </tr>
+                    <tr>
+                        <td>15路</td>
+                        <td>18</td>
+                        <td>14</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div class="progress-bar" style="width: 100px;">
+                                    <div class="progress-fill" style="width: 77.7%;"></div>
+                                </div>
+                                <span>77.7%</span>
+                            </div>
+                        </td>
+                        <td>¥22.3万</td>
+                        <td style="color: #52C41A;">+5.8%</td>
+                        <td>¥28.7万</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>巡检中心 - 公交广告上刊小程序</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #F7F8FA;
+            padding-bottom: 60px;
+        }
+
+        .navbar {
+            background: #fff;
+            padding: 12px 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .navbar-icon {
+            font-size: 20px;
+            color: #595959;
+            cursor: pointer;
+        }
+
+        /* 扫码区域 */
+        .scan-section {
+            background: linear-gradient(135deg, #1890FF 0%, #096dd9 100%);
+            padding: 40px 20px;
+            text-align: center;
+            color: #fff;
+        }
+
+        .scan-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .scan-icon:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .scan-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .scan-desc {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* 统计卡片 */
+        .stats-section {
+            padding: 16px;
+            background: #fff;
+            margin-top: -20px;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 12px;
+            background: #F7F8FA;
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #262626;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #8C8C8C;
+        }
+
+        /* 快捷功能 */
+        .quick-section {
+            padding: 0 16px 16px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #262626;
+            margin-bottom: 12px;
+        }
+
+        .quick-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .quick-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s;
+        }
+
+        .quick-card:active {
+            transform: translateY(2px);
+        }
+
+        .quick-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 12px;
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .icon-scan {
+            background: #E6F7FF;
+            color: #1890FF;
+        }
+
+        .icon-manual {
+            background: #FFF7E6;
+            color: #FAAD14;
+        }
+
+        .icon-problem {
+            background: #FFF1F0;
+            color: #F5222D;
+        }
+
+        .icon-record {
+            background: #F6FFED;
+            color: #52C41A;
+        }
+
+        .quick-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #262626;
+            margin-bottom: 4px;
+        }
+
+        .quick-desc {
+            font-size: 12px;
+            color: #8C8C8C;
+        }
+
+        /* 巡检记录 */
+        .record-section {
+            padding: 16px;
+        }
+
+        .record-list {
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .record-item {
+            padding: 16px;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .record-item:last-child {
+            border-bottom: none;
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .record-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .status-tag {
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-size: 12px;
+        }
+
+        .status-normal {
+            background: #F6FFED;
+            color: #52C41A;
+            border: 1px solid #B7EB8F;
+        }
+
+        .status-abnormal {
+            background: #FFF1F0;
+            color: #F5222D;
+            border: 1px solid #FFCCC7;
+        }
+
+        .record-info {
+            font-size: 12px;
+            color: #8C8C8C;
+            margin-bottom: 4px;
+        }
+
+        .record-photos {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .photo-thumb {
+            width: 60px;
+            height: 60px;
+            border-radius: 4px;
+            object-fit: cover;
+            background: #F0F0F0;
+        }
+
+        /* 底部导航 */
+        .tabbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            display: flex;
+            border-top: 1px solid #F0F0F0;
+            padding: 8px 0;
+        }
+
+        .tab-item {
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .tab-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+            color: #8C8C8C;
+        }
+
+        .tab-text {
+            font-size: 12px;
+            color: #8C8C8C;
+        }
+
+        .tab-item.active .tab-icon,
+        .tab-item.active .tab-text {
+            color: #1890FF;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-title">巡检中心</div>
+            <div class="navbar-icon">⋮</div>
+        </div>
+    </div>
+
+    <!-- 扫码区域 -->
+    <div class="scan-section">
+        <div class="scan-icon">⊞</div>
+        <div class="scan-title">扫码巡检</div>
+        <div class="scan-desc">扫描资源二维码进行快速巡检</div>
+    </div>
+
+    <!-- 统计卡片 -->
+    <div class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value">256</div>
+                <div class="stat-label">累计巡检</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">8</div>
+                <div class="stat-label">今日巡检</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">2</div>
+                <div class="stat-label">发现问题</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 快捷功能 -->
+    <div class="quick-section">
+        <div class="section-title">快捷功能</div>
+        <div class="quick-grid">
+            <div class="quick-card">
+                <div class="quick-icon icon-scan">⊞</div>
+                <div class="quick-title">扫码巡检</div>
+                <div class="quick-desc">扫描二维码快速记录</div>
+            </div>
+            <div class="quick-card">
+                <div class="quick-icon icon-manual">✎</div>
+                <div class="quick-title">手动巡检</div>
+                <div class="quick-desc">手动选择资源巡检</div>
+            </div>
+            <div class="quick-card">
+                <div class="quick-icon icon-problem">!</div>
+                <div class="quick-title">问题上报</div>
+                <div class="quick-desc">快速上报现场问题</div>
+            </div>
+            <div class="quick-card">
+                <div class="quick-icon icon-record">📋</div>
+                <div class="quick-title">巡检记录</div>
+                <div class="quick-desc">查看历史巡检记录</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 今日巡检记录 -->
+    <div class="record-section">
+        <div class="section-title">今日巡检记录</div>
+        <div class="record-list">
+            <div class="record-item">
+                <div class="record-header">
+                    <div class="record-title">RES202601001 - 1路车身-左侧</div>
+                    <span class="status-tag status-normal">正常</span>
+                </div>
+                <div class="record-info">车牌号: 沪A·12345 | 巡检时间: 今天 10:30</div>
+                <div class="record-info">巡检人: 王师傅</div>
+                <div class="record-photos">
+                    <img src="placeholder.jpg" class="photo-thumb" alt="照片1" onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\'><rect fill=\'%23ddd\' width=\'60\' height=\'60\'/></svg>'">
+                    <img src="placeholder.jpg" class="photo-thumb" alt="照片2" onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\'><rect fill=\'%23ddd\' width=\'60\' height=\'60\'/></svg>'">
+                    <img src="placeholder.jpg" class="photo-thumb" alt="照片3" onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\'><rect fill=\'%23ddd\' width=\'60\' height=\'60\'/></svg>'">
+                </div>
+            </div>
+
+            <div class="record-item">
+                <div class="record-header">
+                    <div class="record-title">RES202601002 - 1路车身-右侧</div>
+                    <span class="status-tag status-abnormal">异常</span>
+                </div>
+                <div class="record-info">车牌号: 沪A·12345 | 巡检时间: 今天 10:35</div>
+                <div class="record-info">问题: 画面右下角有破损,建议修补</div>
+                <div class="record-photos">
+                    <img src="placeholder.jpg" class="photo-thumb" alt="照片1" onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\'><rect fill=\'%23f5222d\' width=\'60\' height=\'60\'/><text x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23fff\' font-size=\'12\'>破损</text></svg>'">
+                    <img src="placeholder.jpg" class="photo-thumb" alt="照片2" onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\'><rect fill=\'%23ddd\' width=\'60\' height=\'60\'/></svg>'">
+                </div>
+            </div>
+
+            <div class="record-item">
+                <div class="record-header">
+                    <div class="record-title">RES202601007 - 10路车身-右侧</div>
+                    <span class="status-tag status-normal">正常</span>
+                </div>
+                <div class="record-info">车牌号: 沪A·45678 | 巡检时间: 今天 09:15</div>
+                <div class="record-info">巡检人: 王师傅</div>
+                <div class="record-photos">
+                    <img src="placeholder.jpg" class="photo-thumb" alt="照片1" onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\'><rect fill=\'%23ddd\' width=\'60\' height=\'60\'/></svg>'">
+                    <img src="placeholder.jpg" class="photo-thumb" alt="照片2" onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\'><rect fill=\'%23ddd\' width=\'60\' height=\'60\'/></svg>'">
+                </div>
+            </div>
+
+            <div class="record-item">
+                <div class="record-header">
+                    <div class="record-title">RES202601010 - 5路车身-车尾</div>
+                    <span class="status-tag status-normal">正常</span>
+                </div>
+                <div class="record-info">车牌号: 沪A·34567 | 巡检时间: 今天 08:45</div>
+                <div class="record-info">巡检人: 王师傅</div>
+                <div class="record-photos">
+                    <img src="placeholder.jpg" class="photo-thumb" alt="照片1" onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\'><rect fill=\'%23ddd\' width=\'60\' height=\'60\'/></svg>'">
+                    <img src="placeholder.jpg" class="photo-thumb" alt="照片2" onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\'><rect fill=\'%23ddd\' width=\'60\' height=\'60\'/></svg>'">
+                    <img src="placeholder.jpg" class="photo-thumb" alt="照片3" onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\'><rect fill=\'%23ddd\' width=\'60\' height=\'60\'/></svg>'">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="tabbar">
+        <div class="tab-item" onclick="location.href='index.html'">
+            <div class="tab-icon">■</div>
+            <div class="tab-text">工作台</div>
+        </div>
+        <div class="tab-item" onclick="location.href='task-list.html'">
+            <div class="tab-icon">📋</div>
+            <div class="tab-text">任务</div>
+        </div>
+        <div class="tab-item active">
+            <div class="tab-icon">★</div>
+            <div class="tab-text">巡检</div>
+        </div>
+        <div class="tab-item" onclick="location.href='profile.html'">
+            <div class="tab-icon">◎</div>
+            <div class="tab-text">我的</div>
+        </div>
+    </div>
+</body>
+</html>

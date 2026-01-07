@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公交广告管理系统 - 登录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+            width: 400px;
+            padding: 48px 40px;
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            width: 56px;
+            height: 56px;
+            background: #1890FF;
+            border-radius: 12px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .system-title {
+            font-size: 24px;
+            color: #262626;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .system-subtitle {
+            font-size: 14px;
+            color: #8C8C8C;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            color: #262626;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 40px;
+            border: 1px solid #D9D9D9;
+            border-radius: 4px;
+            padding: 0 12px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #1890FF;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: #BFBFBF;
+        }
+
+        .remember-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #595959;
+            cursor: pointer;
+        }
+
+        .checkbox-label input {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .forgot-link {
+            font-size: 14px;
+            color: #1890FF;
+            text-decoration: none;
+        }
+
+        .forgot-link:hover {
+            color: #40a9ff;
+        }
+
+        .login-button {
+            width: 100%;
+            height: 40px;
+            background: #1890FF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .login-button:hover {
+            background: #40a9ff;
+        }
+
+        .login-button:active {
+            background: #096dd9;
+        }
+
+        .footer-info {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 12px;
+            color: #8C8C8C;
+        }
+
+        .version-info {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo-section">
+            <div class="logo">广告</div>
+            <h1 class="system-title">公交广告管理系统</h1>
+            <p class="system-subtitle">Transit Advertising Management System</p>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label class="form-label">账号</label>
+                <input type="text" class="form-input" placeholder="请输入账号" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">密码</label>
+                <input type="password" class="form-input" placeholder="请输入密码" required>
+            </div>
+
+            <div class="remember-row">
+                <label class="checkbox-label">
+                    <input type="checkbox">
+                    记住密码
+                </label>
+                <a href="#" class="forgot-link">忘记密码?</a>
+            </div>
+
+            <button type="submit" class="login-button">登录</button>
+
+            <div class="footer-info">
+                登录即代表您同意《用户协议》和《隐私政策》
+            </div>
+        </form>
+    </div>
+
+    <div class="version-info">Version 1.0.0</div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // 模拟登录,跳转到主页
+            window.location.href = 'dashboard.html';
+        });
+    </script>
+</body>
+</html>

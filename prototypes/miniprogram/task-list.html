@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>任务中心 - 公交广告上刊小程序</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #F7F8FA;
+            padding-bottom: 60px;
+        }
+
+        /* 顶部导航 */
+        .navbar {
+            background: #fff;
+            padding: 12px 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-content {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-back {
+            font-size: 20px;
+            color: #595959;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+
+        .navbar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        /* 标签页 */
+        .tabs {
+            background: #fff;
+            display: flex;
+            padding: 0 16px;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .tab-item {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            color: #595959;
+            font-size: 14px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .tab-item.active {
+            color: #1890FF;
+            font-weight: 600;
+        }
+
+        .tab-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 3px;
+            background: #1890FF;
+            border-radius: 2px;
+        }
+
+        .tab-badge {
+            position: absolute;
+            top: 8px;
+            right: 20%;
+            background: #F5222D;
+            color: #fff;
+            font-size: 10px;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        /* 任务列表 */
+        .task-list {
+            padding: 12px 16px;
+        }
+
+        .task-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .task-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #262626;
+            margin-bottom: 4px;
+        }
+
+        .task-id {
+            font-size: 12px;
+            color: #8C8C8C;
+        }
+
+        .status-tag {
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-size: 12px;
+        }
+
+        .status-urgent {
+            background: #FFF1F0;
+            color: #F5222D;
+            border: 1px solid #FFCCC7;
+        }
+
+        .status-normal {
+            background: #E6F7FF;
+            color: #1890FF;
+            border: 1px solid #91D5FF;
+        }
+
+        .task-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #595959;
+        }
+
+        .info-label {
+            color: #8C8C8C;
+            margin-right: 8px;
+            min-width: 60px;
+        }
+
+        .task-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid #F0F0F0;
+        }
+
+        .task-time {
+            font-size: 12px;
+            color: #8C8C8C;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 6px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #1890FF;
+            color: #fff;
+        }
+
+        .btn-default {
+            background: #fff;
+            color: #595959;
+            border: 1px solid #D9D9D9;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            color: #D9D9D9;
+            margin-bottom: 16px;
+        }
+
+        .empty-text {
+            font-size: 14px;
+            color: #8C8C8C;
+        }
+
+        /* 底部导航 */
+        .tabbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            display: flex;
+            border-top: 1px solid #F0F0F0;
+            padding: 8px 0;
+        }
+
+        .tab-item-nav {
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .tab-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+            color: #8C8C8C;
+        }
+
+        .tab-text {
+            font-size: 12px;
+            color: #8C8C8C;
+        }
+
+        .tab-item-nav.active .tab-icon,
+        .tab-item-nav.active .tab-text {
+            color: #1890FF;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-back" onclick="history.back()">←</div>
+            <div class="navbar-title">任务中心</div>
+        </div>
+    </div>
+
+    <!-- 标签页 -->
+    <div class="tabs">
+        <div class="tab-item active">
+            全部
+        </div>
+        <div class="tab-item">
+            待上刊
+            <span class="tab-badge">5</span>
+        </div>
+        <div class="tab-item">
+            待巡检
+            <span class="tab-badge">8</span>
+        </div>
+        <div class="tab-item">
+            待修补
+            <span class="tab-badge">2</span>
+        </div>
+        <div class="tab-item">
+            已完成
+        </div>
+    </div>
+
+    <!-- 任务列表 -->
+    <div class="task-list">
+        <!-- 上刊任务 -->
+        <div class="task-card">
+            <div class="task-header">
+                <div>
+                    <div class="task-title">上刊任务</div>
+                    <div class="task-id">订单编号: AD202601070014</div>
+                </div>
+                <span class="status-tag status-urgent">紧急</span>
+            </div>
+            <div class="task-info">
+                <div class="info-row">
+                    <span class="info-label">资源数量:</span>
+                    <span>8个广告位</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">计划日期:</span>
+                    <span>2026-01-10</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">客户名称:</span>
+                    <span>XX广告传媒</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">广告主:</span>
+                    <span>某饮料品牌</span>
+                </div>
+            </div>
+            <div class="task-footer">
+                <div class="task-time">分配时间: 30分钟前</div>
+                <div class="task-actions">
+                    <button class="btn btn-default">查看详情</button>
+                    <button class="btn btn-primary" onclick="location.href='publish-task.html'">开始上刊</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 巡检任务 -->
+        <div class="task-card">
+            <div class="task-header">
+                <div>
+                    <div class="task-title">巡检任务</div>
+                    <div class="task-id">任务编号: INS20260107001</div>
+                </div>
+                <span class="status-tag status-normal">正常</span>
+            </div>
+            <div class="task-info">
+                <div class="info-row">
+                    <span class="info-label">巡检线路:</span>
+                    <span>1路</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">资源数量:</span>
+                    <span>12个广告位</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">计划日期:</span>
+                    <span>今天</span>
+                </div>
+            </div>
+            <div class="task-footer">
+                <div class="task-time">分配时间: 1小时前</div>
+                <div class="task-actions">
+                    <button class="btn btn-default">查看详情</button>
+                    <button class="btn btn-primary" onclick="location.href='inspect-task.html'">开始巡检</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 修补任务 -->
+        <div class="task-card">
+            <div class="task-header">
+                <div>
+                    <div class="task-title">修补工单</div>
+                    <div class="task-id">工单编号: REP20260107002</div>
+                </div>
+                <span class="status-tag status-urgent">紧急</span>
+            </div>
+            <div class="task-info">
+                <div class="info-row">
+                    <span class="info-label">资源位置:</span>
+                    <span>1路车身-左侧 (沪A·12345)</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">问题描述:</span>
+                    <span>画面破损,需要更换</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">要求时间:</span>
+                    <span>今天内完成</span>
+                </div>
+            </div>
+            <div class="task-footer">
+                <div class="task-time">上报时间: 2小时前</div>
+                <div class="task-actions">
+                    <button class="btn btn-default">查看详情</button>
+                    <button class="btn btn-primary" onclick="location.href='repair-task.html'">开始修补</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 下刊任务 -->
+        <div class="task-card">
+            <div class="task-header">
+                <div>
+                    <div class="task-title">下刊任务</div>
+                    <div class="task-id">订单编号: AD202601030007</div>
+                </div>
+                <span class="status-tag status-normal">正常</span>
+            </div>
+            <div class="task-info">
+                <div class="info-row">
+                    <span class="info-label">资源数量:</span>
+                    <span>4个广告位</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">到期日期:</span>
+                    <span>2026-01-08</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">客户名称:</span>
+                    <span>某金融机构</span>
+                </div>
+            </div>
+            <div class="task-footer">
+                <div class="task-time">分配时间: 昨天</div>
+                <div class="task-actions">
+                    <button class="btn btn-default">查看详情</button>
+                    <button class="btn btn-primary" onclick="location.href='remove-task.html'">开始下刊</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 已完成任务 -->
+        <div class="task-card" style="opacity: 0.7;">
+            <div class="task-header">
+                <div>
+                    <div class="task-title">上刊任务</div>
+                    <div class="task-id">订单编号: AD202601060012</div>
+                </div>
+                <span class="status-tag" style="background: #F6FFED; color: #52C41A; border-color: #B7EB8F;">已完成</span>
+            </div>
+            <div class="task-info">
+                <div class="info-row">
+                    <span class="info-label">资源数量:</span>
+                    <span>12个广告位 (已完成)</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">完成时间:</span>
+                    <span>2026-01-06 15:30</span>
+                </div>
+            </div>
+            <div class="task-footer">
+                <div class="task-time">总耗时: 3小时20分钟</div>
+                <div class="task-actions">
+                    <button class="btn btn-default">查看详情</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="tabbar">
+        <div class="tab-item-nav" onclick="location.href='index.html'">
+            <div class="tab-icon">■</div>
+            <div class="tab-text">工作台</div>
+        </div>
+        <div class="tab-item-nav active">
+            <div class="tab-icon">📋</div>
+            <div class="tab-text">任务</div>
+        </div>
+        <div class="tab-item-nav" onclick="location.href='inspect.html'">
+            <div class="tab-icon">★</div>
+            <div class="tab-text">巡检</div>
+        </div>
+        <div class="tab-item-nav" onclick="location.href='profile.html'">
+            <div class="tab-icon">◎</div>
+            <div class="tab-text">我的</div>
+        </div>
+    </div>
+</body>
+</html>

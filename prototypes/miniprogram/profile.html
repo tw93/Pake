@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>个人中心 - 公交广告上刊小程序</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #F7F8FA;
+            padding-bottom: 60px;
+        }
+
+        /* 用户信息卡片 */
+        .user-header {
+            background: linear-gradient(135deg, #1890FF 0%, #096dd9 100%);
+            padding: 24px 16px;
+            color: #fff;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .user-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 32px;
+            background: rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-right: 16px;
+        }
+
+        .user-detail {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .user-role {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        .user-phone {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .user-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        /* 菜单组 */
+        .menu-group {
+            margin: 12px 16px;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #F0F0F0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .menu-item:active {
+            background: #FAFAFA;
+        }
+
+        .menu-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-right: 12px;
+        }
+
+        .icon-blue {
+            background: #E6F7FF;
+            color: #1890FF;
+        }
+
+        .icon-green {
+            background: #F6FFED;
+            color: #52C41A;
+        }
+
+        .icon-orange {
+            background: #FFF7E6;
+            color: #FAAD14;
+        }
+
+        .icon-purple {
+            background: #F9F0FF;
+            color: #722ED1;
+        }
+
+        .icon-red {
+            background: #FFF1F0;
+            color: #F5222D;
+        }
+
+        .icon-gray {
+            background: #FAFAFA;
+            color: #595959;
+        }
+
+        .menu-content {
+            flex: 1;
+        }
+
+        .menu-title {
+            font-size: 15px;
+            color: #262626;
+            margin-bottom: 2px;
+        }
+
+        .menu-desc {
+            font-size: 12px;
+            color: #8C8C8C;
+        }
+
+        .menu-arrow {
+            font-size: 16px;
+            color: #BFBFBF;
+        }
+
+        .menu-badge {
+            background: #F5222D;
+            color: #fff;
+            font-size: 10px;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            margin-right: 8px;
+        }
+
+        /* 底部导航 */
+        .tabbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            display: flex;
+            border-top: 1px solid #F0F0F0;
+            padding: 8px 0;
+        }
+
+        .tab-item {
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .tab-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+            color: #8C8C8C;
+        }
+
+        .tab-text {
+            font-size: 12px;
+            color: #8C8C8C;
+        }
+
+        .tab-item.active .tab-icon,
+        .tab-item.active .tab-text {
+            color: #1890FF;
+        }
+
+        /* 退出登录按钮 */
+        .logout-button {
+            margin: 24px 16px;
+            padding: 12px;
+            background: #fff;
+            border-radius: 8px;
+            text-align: center;
+            color: #F5222D;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .logout-button:active {
+            background: #FAFAFA;
+        }
+    </style>
+</head>
+<body>
+    <!-- 用户信息头部 -->
+    <div class="user-header">
+        <div class="user-info">
+            <div class="user-avatar">王</div>
+            <div class="user-detail">
+                <div class="user-name">王师傅</div>
+                <div class="user-role">上刊执行人员</div>
+                <div class="user-phone">138-1234-5678</div>
+            </div>
+        </div>
+        <div class="user-stats">
+            <div class="stat-item">
+                <div class="stat-value">128</div>
+                <div class="stat-label">累计上刊</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">256</div>
+                <div class="stat-label">累计巡检</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">45</div>
+                <div class="stat-label">修补工单</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">98%</div>
+                <div class="stat-label">完成率</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 我的工作 -->
+    <div class="menu-group">
+        <div class="menu-item">
+            <div class="menu-icon icon-blue">📋</div>
+            <div class="menu-content">
+                <div class="menu-title">我的任务</div>
+                <div class="menu-desc">查看所有分配给我的任务</div>
+            </div>
+            <span class="menu-badge">8</span>
+            <div class="menu-arrow">›</div>
+        </div>
+        <div class="menu-item">
+            <div class="menu-icon icon-green">✓</div>
+            <div class="menu-content">
+                <div class="menu-title">完成记录</div>
+                <div class="menu-desc">查看已完成的任务记录</div>
+            </div>
+            <div class="menu-arrow">›</div>
+        </div>
+        <div class="menu-item">
+            <div class="menu-icon icon-orange">⌚</div>
+            <div class="menu-content">
+                <div class="menu-title">工作统计</div>
+                <div class="menu-desc">查看我的工作数据分析</div>
+            </div>
+            <div class="menu-arrow">›</div>
+        </div>
+    </div>
+
+    <!-- 常用功能 -->
+    <div class="menu-group">
+        <div class="menu-item">
+            <div class="menu-icon icon-purple">★</div>
+            <div class="menu-content">
+                <div class="menu-title">巡检记录</div>
+                <div class="menu-desc">查看历史巡检记录</div>
+            </div>
+            <div class="menu-arrow">›</div>
+        </div>
+        <div class="menu-item">
+            <div class="menu-icon icon-red">!</div>
+            <div class="menu-content">
+                <div class="menu-title">问题工单</div>
+                <div class="menu-desc">查看我上报的问题</div>
+            </div>
+            <span class="menu-badge">2</span>
+            <div class="menu-arrow">›</div>
+        </div>
+        <div class="menu-item">
+            <div class="menu-icon icon-blue">◎</div>
+            <div class="menu-content">
+                <div class="menu-title">考勤打卡</div>
+                <div class="menu-desc">上下班打卡记录</div>
+            </div>
+            <div class="menu-arrow">›</div>
+        </div>
+    </div>
+
+    <!-- 设置 -->
+    <div class="menu-group">
+        <div class="menu-item">
+            <div class="menu-icon icon-gray">●</div>
+            <div class="menu-content">
+                <div class="menu-title">消息通知</div>
+                <div class="menu-desc">管理消息推送设置</div>
+            </div>
+            <div class="menu-arrow">›</div>
+        </div>
+        <div class="menu-item">
+            <div class="menu-icon icon-gray">◆</div>
+            <div class="menu-content">
+                <div class="menu-title">个人信息</div>
+                <div class="menu-desc">修改个人资料</div>
+            </div>
+            <div class="menu-arrow">›</div>
+        </div>
+        <div class="menu-item">
+            <div class="menu-icon icon-gray">?</div>
+            <div class="menu-content">
+                <div class="menu-title">帮助中心</div>
+                <div class="menu-desc">使用帮助和常见问题</div>
+            </div>
+            <div class="menu-arrow">›</div>
+        </div>
+        <div class="menu-item">
+            <div class="menu-icon icon-gray">i</div>
+            <div class="menu-content">
+                <div class="menu-title">关于我们</div>
+                <div class="menu-desc">版本 1.0.0</div>
+            </div>
+            <div class="menu-arrow">›</div>
+        </div>
+    </div>
+
+    <!-- 退出登录 -->
+    <div class="logout-button">
+        退出登录
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="tabbar">
+        <div class="tab-item" onclick="location.href='index.html'">
+            <div class="tab-icon">■</div>
+            <div class="tab-text">工作台</div>
+        </div>
+        <div class="tab-item" onclick="location.href='task-list.html'">
+            <div class="tab-icon">📋</div>
+            <div class="tab-text">任务</div>
+        </div>
+        <div class="tab-item" onclick="location.href='inspect.html'">
+            <div class="tab-icon">★</div>
+            <div class="tab-text">巡检</div>
+        </div>
+        <div class="tab-item active">
+            <div class="tab-icon">◎</div>
+            <div class="tab-text">我的</div>
+        </div>
+    </div>
+</body>
+</html>

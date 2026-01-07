@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工作台 - 公交广告管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #F0F2F5;
+        }
+
+        /* 顶部导航栏 */
+        .header {
+            height: 64px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: #1890FF;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            margin-right: 16px;
+        }
+
+        .system-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header-item {
+            color: #595959;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .header-item:hover {
+            color: #1890FF;
+        }
+
+        .badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #F5222D;
+            color: #fff;
+            font-size: 12px;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1890FF;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* 左侧菜单 */
+        .sidebar {
+            width: 200px;
+            background: #001529;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+
+        .menu {
+            padding: 16px 0;
+        }
+
+        .menu-item {
+            padding: 12px 24px;
+            color: rgba(255, 255, 255, 0.65);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .menu-item.active {
+            background: #1890FF;
+            color: #fff;
+        }
+
+        .menu-icon {
+            width: 16px;
+            text-align: center;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            margin-left: 200px;
+            margin-top: 64px;
+            padding: 24px;
+            min-height: calc(100vh - 64px);
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 20px;
+            color: #262626;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .page-description {
+            font-size: 14px;
+            color: #8C8C8C;
+        }
+
+        /* 数据卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border-radius: 4px;
+            padding: 24px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-title {
+            font-size: 14px;
+            color: #8C8C8C;
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            color: #262626;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .stat-trend {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .trend-up {
+            color: #52C41A;
+        }
+
+        .trend-down {
+            color: #F5222D;
+        }
+
+        /* 内容区域 */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 4px;
+            padding: 24px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .card-title {
+            font-size: 16px;
+            color: #262626;
+            font-weight: 600;
+        }
+
+        .card-extra {
+            font-size: 14px;
+            color: #1890FF;
+            cursor: pointer;
+        }
+
+        /* 待办事项 */
+        .todo-list {
+            list-style: none;
+        }
+
+        .todo-item {
+            padding: 16px 0;
+            border-bottom: 1px solid #F0F0F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+
+        .todo-content {
+            flex: 1;
+        }
+
+        .todo-title {
+            font-size: 14px;
+            color: #262626;
+            margin-bottom: 4px;
+        }
+
+        .todo-meta {
+            font-size: 12px;
+            color: #8C8C8C;
+        }
+
+        .todo-badge {
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-size: 12px;
+            background: #FFF7E6;
+            color: #FAAD14;
+        }
+
+        .todo-badge.urgent {
+            background: #FFF1F0;
+            color: #F5222D;
+        }
+
+        /* 快捷操作 */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .action-button {
+            padding: 16px;
+            border: 1px solid #D9D9D9;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .action-button:hover {
+            border-color: #1890FF;
+            color: #1890FF;
+        }
+
+        .action-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .action-text {
+            font-size: 14px;
+            color: #595959;
+        }
+
+        /* 数据图表占位 */
+        .chart-placeholder {
+            height: 300px;
+            background: #FAFAFA;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8C8C8C;
+        }
+
+        .status-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-size: 12px;
+        }
+
+        .status-success {
+            background: #F6FFED;
+            color: #52C41A;
+            border: 1px solid #B7EB8F;
+        }
+
+        .status-processing {
+            background: #E6F7FF;
+            color: #1890FF;
+            border: 1px solid #91D5FF;
+        }
+
+        .status-warning {
+            background: #FFF7E6;
+            color: #FAAD14;
+            border: 1px solid #FFD591;
+        }
+
+        .status-error {
+            background: #FFF1F0;
+            color: #F5222D;
+            border: 1px solid #FFCCC7;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">广告</div>
+            <div class="system-name">公交广告管理系统</div>
+        </div>
+        <div class="header-right">
+            <div class="header-item">
+                <span>消息</span>
+                <span class="badge">5</span>
+            </div>
+            <div class="header-item">
+                <span>帮助</span>
+            </div>
+            <div class="user-info">
+                <div class="avatar">张</div>
+                <span>张经理</span>
+                <span>▼</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 左侧菜单 -->
+    <div class="sidebar">
+        <div class="menu">
+            <div class="menu-item active">
+                <span class="menu-icon">■</span>
+                <span>工作台</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">◆</span>
+                <span>资源管理</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">●</span>
+                <span>订单管理</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">▲</span>
+                <span>上刊管理</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">★</span>
+                <span>巡检管理</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">◎</span>
+                <span>审核中心</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">¥</span>
+                <span>财务管理</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">▣</span>
+                <span>数据报表</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">⚙</span>
+                <span>系统管理</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">工作台</h1>
+            <p class="page-description">欢迎回来,这是您今天的工作概览</p>
+        </div>
+
+        <!-- 数据统计卡片 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">今日订单</div>
+                <div class="stat-value">12</div>
+                <div class="stat-trend trend-up">
+                    <span>↑</span>
+                    <span>15% 较昨日</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">本月营收</div>
+                <div class="stat-value">¥128.5万</div>
+                <div class="stat-trend trend-up">
+                    <span>↑</span>
+                    <span>8% 较上月</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">资源利用率</div>
+                <div class="stat-value">78.5%</div>
+                <div class="stat-trend trend-down">
+                    <span>↓</span>
+                    <span>3% 较上月</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">待审核</div>
+                <div class="stat-value">8</div>
+                <div class="stat-trend">
+                    <span style="color: #8C8C8C;">待处理</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="content-grid">
+            <!-- 待办事项 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">待办事项</h3>
+                    <span class="card-extra">查看全部 →</span>
+                </div>
+                <ul class="todo-list">
+                    <li class="todo-item">
+                        <div class="todo-content">
+                            <div class="todo-title">订单编号 AD202601070015 需要审核</div>
+                            <div class="todo-meta">客户:上海某科技公司 | 金额:¥28,000 | 30分钟前</div>
+                        </div>
+                        <span class="todo-badge urgent">紧急</span>
+                    </li>
+                    <li class="todo-item">
+                        <div class="todo-content">
+                            <div class="todo-title">1路线-车辆A001 画面破损需要修补</div>
+                            <div class="todo-meta">巡检员:李师傅 | 1小时前</div>
+                        </div>
+                        <span class="todo-badge">待处理</span>
+                    </li>
+                    <li class="todo-item">
+                        <div class="todo-content">
+                            <div class="todo-title">5个上刊任务计划明日执行</div>
+                            <div class="todo-meta">执行人:王师傅 | 2小时前</div>
+                        </div>
+                        <span class="todo-badge">待确认</span>
+                    </li>
+                    <li class="todo-item">
+                        <div class="todo-content">
+                            <div class="todo-title">客户"XX广告公司"申请开具发票</div>
+                            <div class="todo-meta">金额:¥50,000 | 3小时前</div>
+                        </div>
+                        <span class="todo-badge">待处理</span>
+                    </li>
+                    <li class="todo-item">
+                        <div class="todo-content">
+                            <div class="todo-title">订单 AD202601050008 即将到期</div>
+                            <div class="todo-meta">到期时间:2026-01-10 | 需安排下刊</div>
+                        </div>
+                        <span class="todo-badge">提醒</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 快捷操作 -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">快捷操作</h3>
+                </div>
+                <div class="quick-actions">
+                    <div class="action-button" onclick="location.href='order-create.html'">
+                        <div class="action-icon">+</div>
+                        <div class="action-text">新建订单</div>
+                    </div>
+                    <div class="action-button" onclick="location.href='resource-list.html'">
+                        <div class="action-icon">◆</div>
+                        <div class="action-text">资源查询</div>
+                    </div>
+                    <div class="action-button">
+                        <div class="action-icon">▲</div>
+                        <div class="action-text">上刊计划</div>
+                    </div>
+                    <div class="action-button">
+                        <div class="action-icon">◎</div>
+                        <div class="action-text">审核中心</div>
+                    </div>
+                    <div class="action-button">
+                        <div class="action-icon">★</div>
+                        <div class="action-text">巡检记录</div>
+                    </div>
+                    <div class="action-button">
+                        <div class="action-icon">¥</div>
+                        <div class="action-text">财务结算</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据图表 -->
+        <div class="card" style="margin-top: 16px;">
+            <div class="card-header">
+                <h3 class="card-title">近30天营收趋势</h3>
+                <span class="card-extra">切换视图 →</span>
+            </div>
+            <div class="chart-placeholder">
+                [数据图表区域 - 可接入ECharts等图表库]
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 菜单切换功能
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+
+                const text = this.textContent.trim();
+                if (text === '资源管理') {
+                    window.location.href = 'resource-list.html';
+                } else if (text === '订单管理') {
+                    window.location.href = 'order-list.html';
+                } else if (text === '上刊管理') {
+                    window.location.href = 'publish-list.html';
+                } else if (text === '数据报表') {
+                    window.location.href = 'report.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

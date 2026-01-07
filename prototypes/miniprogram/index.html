@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>工作台 - 公交广告上刊小程序</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #F7F8FA;
+            padding-bottom: 60px;
+        }
+
+        /* 顶部导航 */
+        .navbar {
+            background: #fff;
+            padding: 12px 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .navbar-icon {
+            font-size: 20px;
+            color: #595959;
+            cursor: pointer;
+        }
+
+        /* 用户信息卡片 */
+        .user-card {
+            background: linear-gradient(135deg, #1890FF 0%, #096dd9 100%);
+            margin: 12px 16px;
+            border-radius: 8px;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .user-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 16px;
+        }
+
+        .user-detail {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .user-role {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .user-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        /* 今日任务 */
+        .section {
+            margin: 12px 16px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .section-more {
+            font-size: 14px;
+            color: #1890FF;
+        }
+
+        .task-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .task-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .task-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .icon-orange {
+            background: #FFF7E6;
+            color: #FAAD14;
+        }
+
+        .icon-blue {
+            background: #E6F7FF;
+            color: #1890FF;
+        }
+
+        .icon-green {
+            background: #F6FFED;
+            color: #52C41A;
+        }
+
+        .icon-red {
+            background: #FFF1F0;
+            color: #F5222D;
+        }
+
+        .task-count {
+            font-size: 24px;
+            font-weight: 600;
+            color: #262626;
+            margin-bottom: 4px;
+        }
+
+        .task-label {
+            font-size: 14px;
+            color: #8C8C8C;
+        }
+
+        /* 快捷操作 */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            background: #fff;
+            padding: 20px 16px;
+            border-radius: 8px;
+        }
+
+        .action-item {
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .action-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 8px;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: #F0F2F5;
+            color: #595959;
+        }
+
+        .action-text {
+            font-size: 12px;
+            color: #595959;
+        }
+
+        /* 最新消息 */
+        .message-list {
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .message-item {
+            padding: 16px;
+            border-bottom: 1px solid #F0F0F0;
+            display: flex;
+            align-items: center;
+        }
+
+        .message-item:last-child {
+            border-bottom: none;
+        }
+
+        .message-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            background: #E6F7FF;
+            color: #1890FF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 18px;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-title {
+            font-size: 14px;
+            color: #262626;
+            margin-bottom: 4px;
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: #8C8C8C;
+        }
+
+        .message-badge {
+            width: 8px;
+            height: 8px;
+            border-radius: 4px;
+            background: #F5222D;
+        }
+
+        /* 底部导航 */
+        .tabbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            display: flex;
+            border-top: 1px solid #F0F0F0;
+            padding: 8px 0;
+        }
+
+        .tab-item {
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .tab-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+            color: #8C8C8C;
+        }
+
+        .tab-text {
+            font-size: 12px;
+            color: #8C8C8C;
+        }
+
+        .tab-item.active .tab-icon,
+        .tab-item.active .tab-text {
+            color: #1890FF;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-title">工作台</div>
+            <div class="navbar-icon">≡</div>
+        </div>
+    </div>
+
+    <!-- 用户信息卡片 -->
+    <div class="user-card">
+        <div class="user-info">
+            <div class="user-avatar">王</div>
+            <div class="user-detail">
+                <div class="user-name">王师傅</div>
+                <div class="user-role">上刊执行人员</div>
+            </div>
+        </div>
+        <div class="user-stats">
+            <div class="stat-item">
+                <div class="stat-value">128</div>
+                <div class="stat-label">累计上刊</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">256</div>
+                <div class="stat-label">累计巡检</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">98%</div>
+                <div class="stat-label">完成率</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 今日任务 -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-title">今日任务</div>
+            <div class="section-more">查看全部 →</div>
+        </div>
+        <div class="task-grid">
+            <div class="task-card" onclick="location.href='task-list.html?type=publish'">
+                <div class="task-icon icon-orange">▲</div>
+                <div class="task-count">5</div>
+                <div class="task-label">待上刊</div>
+            </div>
+            <div class="task-card" onclick="location.href='task-list.html?type=inspect'">
+                <div class="task-icon icon-blue">★</div>
+                <div class="task-count">8</div>
+                <div class="task-label">待巡检</div>
+            </div>
+            <div class="task-card" onclick="location.href='task-list.html?type=repair'">
+                <div class="task-icon icon-red">◆</div>
+                <div class="task-count">2</div>
+                <div class="task-label">待修补</div>
+            </div>
+            <div class="task-card" onclick="location.href='task-list.html?type=remove'">
+                <div class="task-icon icon-green">▼</div>
+                <div class="task-count">3</div>
+                <div class="task-label">待下刊</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 快捷操作 -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-title">快捷操作</div>
+        </div>
+        <div class="quick-actions">
+            <div class="action-item" onclick="location.href='scan.html'">
+                <div class="action-icon">⊞</div>
+                <div class="action-text">扫码巡检</div>
+            </div>
+            <div class="action-item" onclick="location.href='report-problem.html'">
+                <div class="action-icon">!</div>
+                <div class="action-text">问题上报</div>
+            </div>
+            <div class="action-item" onclick="location.href='task-list.html'">
+                <div class="action-icon">📋</div>
+                <div class="action-text">我的任务</div>
+            </div>
+            <div class="action-item" onclick="location.href='history.html'">
+                <div class="action-icon">⌚</div>
+                <div class="action-text">历史记录</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 最新消息 -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-title">最新消息</div>
+            <div class="section-more">更多 →</div>
+        </div>
+        <div class="message-list">
+            <div class="message-item">
+                <div class="message-icon">●</div>
+                <div class="message-content">
+                    <div class="message-title">新的上刊任务已分配</div>
+                    <div class="message-time">订单 AD202601070014 | 30分钟前</div>
+                </div>
+                <div class="message-badge"></div>
+            </div>
+            <div class="message-item">
+                <div class="message-icon">★</div>
+                <div class="message-content">
+                    <div class="message-title">巡检任务提醒</div>
+                    <div class="message-time">1路线8个资源需要巡检 | 1小时前</div>
+                </div>
+            </div>
+            <div class="message-item">
+                <div class="message-icon">◆</div>
+                <div class="message-content">
+                    <div class="message-title">修补工单已完成</div>
+                    <div class="message-time">工单 #12345 已验收通过 | 2小时前</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="tabbar">
+        <div class="tab-item active">
+            <div class="tab-icon">■</div>
+            <div class="tab-text">工作台</div>
+        </div>
+        <div class="tab-item" onclick="location.href='task-list.html'">
+            <div class="tab-icon">📋</div>
+            <div class="tab-text">任务</div>
+        </div>
+        <div class="tab-item" onclick="location.href='inspect.html'">
+            <div class="tab-icon">★</div>
+            <div class="tab-text">巡检</div>
+        </div>
+        <div class="tab-item" onclick="location.href='profile.html'">
+            <div class="tab-icon">◎</div>
+            <div class="tab-text">我的</div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上刊管理 - 公交广告管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #F0F2F5;
+        }
+
+        .header {
+            height: 64px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: #1890FF;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            margin-right: 16px;
+        }
+
+        .system-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header-item {
+            color: #595959;
+            cursor: pointer;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1890FF;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .sidebar {
+            width: 200px;
+            background: #001529;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+
+        .menu {
+            padding: 16px 0;
+        }
+
+        .menu-item {
+            padding: 12px 24px;
+            color: rgba(255, 255, 255, 0.65);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .menu-item.active {
+            background: #1890FF;
+            color: #fff;
+        }
+
+        .menu-icon {
+            width: 16px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 200px;
+            margin-top: 64px;
+            padding: 24px;
+            min-height: calc(100vh - 64px);
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 20px;
+            color: #262626;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #1890FF;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #40a9ff;
+        }
+
+        .btn-default {
+            background: #fff;
+            color: #595959;
+            border: 1px solid #D9D9D9;
+        }
+
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-title {
+            font-size: 14px;
+            color: #8C8C8C;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            color: #262626;
+            font-weight: 600;
+        }
+
+        /* 看板视图 */
+        .kanban-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kanban-column {
+            background: #F5F5F5;
+            border-radius: 4px;
+            padding: 16px;
+        }
+
+        .kanban-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .kanban-title {
+            font-size: 14px;
+            color: #262626;
+            font-weight: 600;
+        }
+
+        .kanban-count {
+            background: #1890FF;
+            color: #fff;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .kanban-card {
+            background: #fff;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .kanban-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .kanban-card-title {
+            font-size: 14px;
+            color: #262626;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .kanban-card-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #8C8C8C;
+            margin-bottom: 8px;
+        }
+
+        .kanban-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 8px;
+            border-top: 1px solid #F0F0F0;
+        }
+
+        .kanban-user {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: #595959;
+        }
+
+        .user-avatar-small {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #1890FF;
+            color: #fff;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-tag {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-size: 12px;
+        }
+
+        .status-urgent {
+            background: #FFF1F0;
+            color: #F5222D;
+        }
+
+        .status-normal {
+            background: #E6F7FF;
+            color: #1890FF;
+        }
+
+        /* 列表视图 */
+        .table-card {
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .table-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #F0F0F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 16px;
+            color: #262626;
+            font-weight: 600;
+        }
+
+        .view-switcher {
+            display: flex;
+            gap: 8px;
+        }
+
+        .view-btn {
+            padding: 4px 12px;
+            border: 1px solid #D9D9D9;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            color: #595959;
+        }
+
+        .view-btn.active {
+            background: #1890FF;
+            color: #fff;
+            border-color: #1890FF;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #FAFAFA;
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 14px;
+            color: #262626;
+            font-weight: 600;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        td {
+            padding: 16px;
+            font-size: 14px;
+            color: #595959;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        tbody tr:hover {
+            background: #FAFAFA;
+        }
+
+        .action-link {
+            color: #1890FF;
+            cursor: pointer;
+            margin-right: 12px;
+            text-decoration: none;
+        }
+
+        .action-link:hover {
+            color: #40a9ff;
+        }
+
+        .status-planned {
+            background: #FFF7E6;
+            color: #FAAD14;
+            border: 1px solid #FFD591;
+        }
+
+        .status-processing {
+            background: #E6F7FF;
+            color: #1890FF;
+            border: 1px solid #91D5FF;
+        }
+
+        .status-completed {
+            background: #F6FFED;
+            color: #52C41A;
+            border: 1px solid #B7EB8F;
+        }
+
+        .status-exception {
+            background: #FFF1F0;
+            color: #F5222D;
+            border: 1px solid #FFCCC7;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">广告</div>
+            <div class="system-name">公交广告管理系统</div>
+        </div>
+        <div class="header-right">
+            <div class="header-item">消息</div>
+            <div class="header-item">帮助</div>
+            <div class="user-info">
+                <div class="avatar">张</div>
+                <span>张经理</span>
+                <span>▼</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 左侧菜单 -->
+    <div class="sidebar">
+        <div class="menu">
+            <div class="menu-item" onclick="location.href='dashboard.html'">
+                <span class="menu-icon">■</span>
+                <span>工作台</span>
+            </div>
+            <div class="menu-item" onclick="location.href='resource-list.html'">
+                <span class="menu-icon">◆</span>
+                <span>资源管理</span>
+            </div>
+            <div class="menu-item" onclick="location.href='order-list.html'">
+                <span class="menu-icon">●</span>
+                <span>订单管理</span>
+            </div>
+            <div class="menu-item active">
+                <span class="menu-icon">▲</span>
+                <span>上刊管理</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">★</span>
+                <span>巡检管理</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">◎</span>
+                <span>审核中心</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">¥</span>
+                <span>财务管理</span>
+            </div>
+            <div class="menu-item" onclick="location.href='report.html'">
+                <span class="menu-icon">▣</span>
+                <span>数据报表</span>
+            </div>
+            <div class="menu-item">
+                <span class="menu-icon">⚙</span>
+                <span>系统管理</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">上刊管理</h1>
+            <div class="header-actions">
+                <button class="btn btn-default">导出</button>
+                <button class="btn btn-primary">+ 创建上刊计划</button>
+            </div>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">今日上刊任务</div>
+                <div class="stat-value">8</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">进行中</div>
+                <div class="stat-value">5</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">已完成</div>
+                <div class="stat-value">12</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">异常情况</div>
+                <div class="stat-value" style="color: #F5222D;">2</div>
+            </div>
+        </div>
+
+        <!-- 看板视图 -->
+        <div class="kanban-container">
+            <!-- 待上刊 -->
+            <div class="kanban-column">
+                <div class="kanban-header">
+                    <span class="kanban-title">待上刊</span>
+                    <span class="kanban-count">6</span>
+                </div>
+                <div class="kanban-card">
+                    <div class="kanban-card-title">订单 AD202601070014</div>
+                    <div class="kanban-card-meta">
+                        <span>8个资源</span>
+                        <span class="status-tag status-urgent">紧急</span>
+                    </div>
+                    <div class="kanban-card-meta">
+                        <span>计划:2026-01-10</span>
+                    </div>
+                    <div class="kanban-card-footer">
+                        <div class="kanban-user">
+                            <div class="user-avatar-small">王</div>
+                            <span>王师傅</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="kanban-card">
+                    <div class="kanban-card-title">订单 AD202601050009</div>
+                    <div class="kanban-card-meta">
+                        <span>15个资源</span>
+                        <span class="status-tag status-normal">正常</span>
+                    </div>
+                    <div class="kanban-card-meta">
+                        <span>计划:2026-01-12</span>
+                    </div>
+                    <div class="kanban-card-footer">
+                        <div class="kanban-user">
+                            <div class="user-avatar-small">李</div>
+                            <span>李师傅</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="kanban-card">
+                    <div class="kanban-card-title">订单 AD202601020006</div>
+                    <div class="kanban-card-meta">
+                        <span>10个资源</span>
+                        <span class="status-tag status-normal">正常</span>
+                    </div>
+                    <div class="kanban-card-meta">
+                        <span>计划:2026-01-20</span>
+                    </div>
+                    <div class="kanban-card-footer">
+                        <div class="kanban-user">
+                            <div class="user-avatar-small">张</div>
+                            <span>张师傅</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 进行中 -->
+            <div class="kanban-column">
+                <div class="kanban-header">
+                    <span class="kanban-title">进行中</span>
+                    <span class="kanban-count" style="background: #1890FF;">5</span>
+                </div>
+                <div class="kanban-card">
+                    <div class="kanban-card-title">订单 AD202601060012</div>
+                    <div class="kanban-card-meta">
+                        <span>12个资源</span>
+                        <span style="color: #1890FF;">进度:8/12</span>
+                    </div>
+                    <div class="kanban-card-meta">
+                        <span>今天 09:30开始</span>
+                    </div>
+                    <div class="kanban-card-footer">
+                        <div class="kanban-user">
+                            <div class="user-avatar-small">王</div>
+                            <span>王师傅</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="kanban-card">
+                    <div class="kanban-card-title">订单 AD202601050010</div>
+                    <div class="kanban-card-meta">
+                        <span>20个资源</span>
+                        <span style="color: #1890FF;">进度:15/20</span>
+                    </div>
+                    <div class="kanban-card-meta">
+                        <span>今天 08:00开始</span>
+                    </div>
+                    <div class="kanban-card-footer">
+                        <div class="kanban-user">
+                            <div class="user-avatar-small">李</div>
+                            <span>李师傅</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 已完成 -->
+            <div class="kanban-column">
+                <div class="kanban-header">
+                    <span class="kanban-title">已完成</span>
+                    <span class="kanban-count" style="background: #52C41A;">12</span>
+                </div>
+                <div class="kanban-card">
+                    <div class="kanban-card-title">订单 AD202601040008</div>
+                    <div class="kanban-card-meta">
+                        <span>6个资源</span>
+                        <span style="color: #52C41A;">✓ 已完成</span>
+                    </div>
+                    <div class="kanban-card-meta">
+                        <span>完成时间:今天 10:30</span>
+                    </div>
+                    <div class="kanban-card-footer">
+                        <div class="kanban-user">
+                            <div class="user-avatar-small">张</div>
+                            <span>张师傅</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="kanban-card">
+                    <div class="kanban-card-title">订单 AD202601030005</div>
+                    <div class="kanban-card-meta">
+                        <span>3个资源</span>
+                        <span style="color: #52C41A;">✓ 已完成</span>
+                    </div>
+                    <div class="kanban-card-meta">
+                        <span>完成时间:昨天 16:20</span>
+                    </div>
+                    <div class="kanban-card-footer">
+                        <div class="kanban-user">
+                            <div class="user-avatar-small">王</div>
+                            <span>王师傅</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 异常 -->
+            <div class="kanban-column">
+                <div class="kanban-header">
+                    <span class="kanban-title">异常</span>
+                    <span class="kanban-count" style="background: #F5222D;">2</span>
+                </div>
+                <div class="kanban-card">
+                    <div class="kanban-card-title">订单 AD202601020003</div>
+                    <div class="kanban-card-meta">
+                        <span>4个资源</span>
+                        <span class="status-tag status-urgent">异常</span>
+                    </div>
+                    <div class="kanban-card-meta">
+                        <span style="color: #F5222D;">素材尺寸不符</span>
+                    </div>
+                    <div class="kanban-card-footer">
+                        <div class="kanban-user">
+                            <div class="user-avatar-small">李</div>
+                            <span>李师傅</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="kanban-card">
+                    <div class="kanban-card-title">订单 AD202601010001</div>
+                    <div class="kanban-card-meta">
+                        <span>2个资源</span>
+                        <span class="status-tag status-urgent">异常</span>
+                    </div>
+                    <div class="kanban-card-meta">
+                        <span style="color: #F5222D;">车辆无法安装</span>
+                    </div>
+                    <div class="kanban-card-footer">
+                        <div class="kanban-user">
+                            <div class="user-avatar-small">张</div>
+                            <span>张师傅</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 列表视图 -->
+        <div class="table-card">
+            <div class="table-header">
+                <h3 class="table-title">上刊计划列表</h3>
+                <div class="view-switcher">
+                    <button class="view-btn active">看板视图</button>
+                    <button class="view-btn">列表视图</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

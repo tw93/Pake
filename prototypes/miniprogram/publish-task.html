@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>上刊作业 - 公交广告上刊小程序</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #F7F8FA;
+            padding-bottom: 80px;
+        }
+
+        /* 顶部导航 */
+        .navbar {
+            background: #fff;
+            padding: 12px 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-content {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-back {
+            font-size: 20px;
+            color: #595959;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+
+        .navbar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        /* 进度指示器 */
+        .progress-bar {
+            background: #fff;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 16px;
+            background: #D9D9D9;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .step.active .step-number {
+            background: #1890FF;
+        }
+
+        .step.completed .step-number {
+            background: #52C41A;
+        }
+
+        .step-label {
+            font-size: 12px;
+            color: #8C8C8C;
+        }
+
+        .step.active .step-label {
+            color: #1890FF;
+            font-weight: 600;
+        }
+
+        .progress-line {
+            height: 2px;
+            background: #F0F0F0;
+            margin-bottom: 16px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #1890FF;
+            width: 50%;
+            transition: width 0.3s;
+        }
+
+        /* 任务信息卡片 */
+        .card {
+            background: #fff;
+            margin: 12px 16px;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #262626;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .info-row {
+            display: flex;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .info-label {
+            color: #8C8C8C;
+            min-width: 80px;
+        }
+
+        .info-value {
+            flex: 1;
+            color: #262626;
+        }
+
+        /* 资源列表 */
+        .resource-item {
+            background: #F7F8FA;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .resource-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .resource-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .resource-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #262626;
+        }
+
+        .resource-status {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 2px;
+        }
+
+        .status-pending {
+            background: #FFF7E6;
+            color: #FAAD14;
+        }
+
+        .status-done {
+            background: #F6FFED;
+            color: #52C41A;
+        }
+
+        .resource-info {
+            font-size: 12px;
+            color: #8C8C8C;
+            margin-bottom: 8px;
+        }
+
+        .resource-action {
+            text-align: right;
+        }
+
+        .btn-link {
+            color: #1890FF;
+            font-size: 14px;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+
+        /* 表单项 */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            color: #262626;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .required {
+            color: #F5222D;
+            margin-right: 4px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #D9D9D9;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #1890FF;
+        }
+
+        textarea.form-input {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        /* 照片上传 */
+        .photo-upload {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .photo-item {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .photo-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-add {
+            width: 100%;
+            height: 100%;
+            background: #FAFAFA;
+            border: 2px dashed #D9D9D9;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #8C8C8C;
+            cursor: pointer;
+        }
+
+        .photo-add-icon {
+            font-size: 32px;
+            margin-bottom: 4px;
+        }
+
+        .photo-add-text {
+            font-size: 12px;
+        }
+
+        .photo-delete {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 24px;
+            height: 24px;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* 底部操作栏 */
+        .footer-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            padding: 12px 16px;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 0;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-default {
+            background: #fff;
+            color: #595959;
+            border: 1px solid #D9D9D9;
+        }
+
+        .btn-primary {
+            background: #1890FF;
+            color: #fff;
+        }
+
+        .btn-success {
+            background: #52C41A;
+            color: #fff;
+        }
+
+        /* 地图占位 */
+        .map-container {
+            height: 200px;
+            background: #F0F0F0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8C8C8C;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-back" onclick="history.back()">←</div>
+            <div class="navbar-title">上刊作业 - AD202601070014</div>
+        </div>
+    </div>
+
+    <!-- 进度指示器 -->
+    <div class="progress-bar">
+        <div class="progress-steps">
+            <div class="step completed">
+                <div class="step-number">✓</div>
+                <div class="step-label">接受任务</div>
+            </div>
+            <div class="step active">
+                <div class="step-number">2</div>
+                <div class="step-label">现场作业</div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-label">提交完成</div>
+            </div>
+        </div>
+        <div class="progress-line">
+            <div class="progress-fill" style="width: 50%;"></div>
+        </div>
+    </div>
+
+    <!-- 任务信息 -->
+    <div class="card">
+        <div class="card-title">任务信息</div>
+        <div class="info-row">
+            <div class="info-label">订单编号:</div>
+            <div class="info-value">AD202601070014</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">客户名称:</div>
+            <div class="info-value">XX广告传媒</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">广告主:</div>
+            <div class="info-value">某饮料品牌</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">计划日期:</div>
+            <div class="info-value">2026-01-10</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">资源数量:</div>
+            <div class="info-value">8个广告位</div>
+        </div>
+    </div>
+
+    <!-- 资源位置导航 -->
+    <div class="card">
+        <div class="card-title">当前资源位置</div>
+        <div class="map-container">
+            [地图导航 - 可接入腾讯地图/百度地图]<br>
+            显示车辆实时位置和导航路线
+        </div>
+        <div class="info-row">
+            <div class="info-label">资源编号:</div>
+            <div class="info-value">RES202601001</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">资源名称:</div>
+            <div class="info-value">1路车身-左侧</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">车牌号:</div>
+            <div class="info-value">沪A·12345</div>
+        </div>
+    </div>
+
+    <!-- 上刊信息填写 -->
+    <div class="card">
+        <div class="card-title">上刊信息</div>
+
+        <div class="form-group">
+            <div class="form-label">
+                <span class="required">*</span>
+                <span>上刊前照片</span>
+            </div>
+            <div class="photo-upload">
+                <div class="photo-item">
+                    <img src="placeholder.jpg" class="photo-preview" alt="照片1" onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect fill=\'%23ddd\' width=\'200\' height=\'200\'/><text x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23999\'>示例图片</text></svg>'">
+                    <div class="photo-delete">×</div>
+                </div>
+                <div class="photo-add">
+                    <div class="photo-add-icon">+</div>
+                    <div class="photo-add-text">添加照片</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="form-label">
+                <span class="required">*</span>
+                <span>上刊后照片 (至少3张)</span>
+            </div>
+            <div class="photo-upload">
+                <div class="photo-item">
+                    <img src="placeholder.jpg" class="photo-preview" alt="照片1" onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect fill=\'%23ddd\' width=\'200\' height=\'200\'/><text x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23999\'>正面</text></svg>'">
+                    <div class="photo-delete">×</div>
+                </div>
+                <div class="photo-item">
+                    <img src="placeholder.jpg" class="photo-preview" alt="照片2" onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect fill=\'%23ddd\' width=\'200\' height=\'200\'/><text x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23999\'>侧面</text></svg>'">
+                    <div class="photo-delete">×</div>
+                </div>
+                <div class="photo-item">
+                    <img src="placeholder.jpg" class="photo-preview" alt="照片3" onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect fill=\'%23ddd\' width=\'200\' height=\'200\'/><text x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23999\'>细节</text></svg>'">
+                    <div class="photo-delete">×</div>
+                </div>
+                <div class="photo-add">
+                    <div class="photo-add-icon">+</div>
+                    <div class="photo-add-text">添加照片</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="form-label">
+                <span class="required">*</span>
+                <span>画面质量</span>
+            </div>
+            <select class="form-input">
+                <option value="">请选择</option>
+                <option value="1">完好</option>
+                <option value="2">轻微瑕疵</option>
+                <option value="3">有瑕疵</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <div class="form-label">
+                <span class="required">*</span>
+                <span>实际尺寸</span>
+            </div>
+            <input type="text" class="form-input" placeholder="如: 12m×1.5m">
+        </div>
+
+        <div class="form-group">
+            <div class="form-label">安装方式</div>
+            <select class="form-input">
+                <option value="">请选择</option>
+                <option value="1">贴附</option>
+                <option value="2">铆钉固定</option>
+                <option value="3">框架固定</option>
+                <option value="4">其他</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <div class="form-label">特殊情况说明</div>
+            <textarea class="form-input" placeholder="如有特殊情况请填写..."></textarea>
+        </div>
+    </div>
+
+    <!-- 其他资源 -->
+    <div class="card">
+        <div class="card-title">其他资源 (7/8)</div>
+
+        <div class="resource-item">
+            <div class="resource-header">
+                <div class="resource-name">RES202601007 - 10路车身-右侧</div>
+                <span class="resource-status status-pending">待上刊</span>
+            </div>
+            <div class="resource-info">车牌号: 沪A·45678 | 规格: 12m×1.5m</div>
+            <div class="resource-action">
+                <button class="btn-link">前往上刊 →</button>
+            </div>
+        </div>
+
+        <div class="resource-item">
+            <div class="resource-header">
+                <div class="resource-name">RES202601010 - 5路车身-车尾</div>
+                <span class="resource-status status-pending">待上刊</span>
+            </div>
+            <div class="resource-info">车牌号: 沪A·34567 | 规格: 4m×2m</div>
+            <div class="resource-action">
+                <button class="btn-link">前往上刊 →</button>
+            </div>
+        </div>
+
+        <div class="resource-item">
+            <div class="resource-header">
+                <div class="resource-name">RES202601003 - 2路车内-拉手</div>
+                <span class="resource-status status-done">已完成</span>
+            </div>
+            <div class="resource-info">车牌号: 沪A·23456 | 完成时间: 今天 10:30</div>
+        </div>
+    </div>
+
+    <!-- 底部操作栏 -->
+    <div class="footer-bar">
+        <button class="btn btn-default" onclick="history.back()">暂存草稿</button>
+        <button class="btn btn-success">提交完成</button>
+    </div>
+</body>
+</html>
