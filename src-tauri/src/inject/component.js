@@ -39,8 +39,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let wasInBody = false;
 
     // Inject fullscreen styles
-    const styleEl = document.createElement('style');
-    styleEl.id = 'pake-fullscreen-style';
+    const styleEl = document.createElement("style");
+    styleEl.id = "pake-fullscreen-style";
     styleEl.textContent = `
       body.pake-fullscreen-active {
         overflow: hidden !important;
@@ -69,11 +69,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Find the actual video element
     function findMediaElement() {
-      const videos = document.querySelectorAll('video');
+      const videos = document.querySelectorAll("video");
       if (videos.length > 0) {
         let largestVideo = videos[0];
         let maxArea = 0;
-        videos.forEach(video => {
+        videos.forEach((video) => {
           const rect = video.getBoundingClientRect();
           const area = rect.width * rect.height;
           if (area > maxArea || !video.paused) {
@@ -127,8 +127,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Apply fullscreen
-      targetElement.classList.add('pake-fullscreen-element');
-      document.body.classList.add('pake-fullscreen-active');
+      targetElement.classList.add("pake-fullscreen-element");
+      document.body.classList.add("pake-fullscreen-active");
 
       if (!wasInBody) {
         document.body.appendChild(targetElement);
@@ -136,11 +136,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Fullscreen window
       appWindow.setFullscreen(true).then(() => {
-        const event = new Event('fullscreenchange', { bubbles: true });
+        const event = new Event("fullscreenchange", { bubbles: true });
         document.dispatchEvent(event);
         element.dispatchEvent(event);
 
-        const webkitEvent = new Event('webkitfullscreenchange', { bubbles: true });
+        const webkitEvent = new Event("webkitfullscreenchange", {
+          bubbles: true,
+        });
         document.dispatchEvent(webkitEvent);
         element.dispatchEvent(webkitEvent);
       });
@@ -158,17 +160,20 @@ document.addEventListener("DOMContentLoaded", () => {
       const targetElement = actualFullscreenElement;
 
       // Restore styles and position
-      targetElement.classList.remove('pake-fullscreen-element');
-      document.body.classList.remove('pake-fullscreen-active');
+      targetElement.classList.remove("pake-fullscreen-element");
+      document.body.classList.remove("pake-fullscreen-active");
 
       if (originalStyles) {
-        Object.keys(originalStyles).forEach(key => {
+        Object.keys(originalStyles).forEach((key) => {
           targetElement.style[key] = originalStyles[key];
         });
       }
 
       if (!wasInBody && originalParent) {
-        if (originalNextSibling && originalNextSibling.parentNode === originalParent) {
+        if (
+          originalNextSibling &&
+          originalNextSibling.parentNode === originalParent
+        ) {
           originalParent.insertBefore(targetElement, originalNextSibling);
         } else if (originalParent.isConnected) {
           originalParent.appendChild(targetElement);
@@ -185,38 +190,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Exit window fullscreen
       return appWindow.setFullscreen(false).then(() => {
-        const event = new Event('fullscreenchange', { bubbles: true });
+        const event = new Event("fullscreenchange", { bubbles: true });
         document.dispatchEvent(event);
         exitingElement.dispatchEvent(event);
 
-        const webkitEvent = new Event('webkitfullscreenchange', { bubbles: true });
+        const webkitEvent = new Event("webkitfullscreenchange", {
+          bubbles: true,
+        });
         document.dispatchEvent(webkitEvent);
         exitingElement.dispatchEvent(webkitEvent);
       });
     }
 
     // Override fullscreenEnabled
-    Object.defineProperty(document, 'fullscreenEnabled', {
+    Object.defineProperty(document, "fullscreenEnabled", {
       get: () => true,
-      configurable: true
+      configurable: true,
     });
-    Object.defineProperty(document, 'webkitFullscreenEnabled', {
+    Object.defineProperty(document, "webkitFullscreenEnabled", {
       get: () => true,
-      configurable: true
+      configurable: true,
     });
 
     // Override fullscreenElement
-    Object.defineProperty(document, 'fullscreenElement', {
+    Object.defineProperty(document, "fullscreenElement", {
       get: () => fullscreenElement,
-      configurable: true
+      configurable: true,
     });
-    Object.defineProperty(document, 'webkitFullscreenElement', {
+    Object.defineProperty(document, "webkitFullscreenElement", {
       get: () => fullscreenElement,
-      configurable: true
+      configurable: true,
     });
-    Object.defineProperty(document, 'webkitCurrentFullScreenElement', {
+    Object.defineProperty(document, "webkitCurrentFullScreenElement", {
       get: () => fullscreenElement,
-      configurable: true
+      configurable: true,
     });
 
     // Override requestFullscreen
@@ -236,21 +243,28 @@ document.addEventListener("DOMContentLoaded", () => {
     document.webkitCancelFullScreen = exitFullscreen;
 
     // Handle Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && fullscreenElement) {
-        exitFullscreen();
-      }
-    }, true);
+    document.addEventListener(
+      "keydown",
+      (e) => {
+        if (e.key === "Escape" && fullscreenElement) {
+          exitFullscreen();
+        }
+      },
+      true,
+    );
 
     // Monitor window fullscreen changes
     let lastFullscreenState = false;
     setInterval(() => {
-      appWindow.isFullscreen().then(isFullscreen => {
-        if (lastFullscreenState && !isFullscreen && fullscreenElement) {
-          exitFullscreen();
-        }
-        lastFullscreenState = isFullscreen;
-      }).catch(() => {});
+      appWindow
+        .isFullscreen()
+        .then((isFullscreen) => {
+          if (lastFullscreenState && !isFullscreen && fullscreenElement) {
+            exitFullscreen();
+          }
+          lastFullscreenState = isFullscreen;
+        })
+        .catch(() => {});
     }, 500);
   }
 
