@@ -1,6 +1,6 @@
 [package]
 name = "pake"
-version = "3.7.6"
+version = "3.7.8"
 description = "🤱🏻 Turn any webpage into a desktop app with Rust."
 authors = ["Tw93"]
 license = "MIT"

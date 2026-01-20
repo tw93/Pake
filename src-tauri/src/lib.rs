@@ -135,6 +135,8 @@ pub fn run_app() {
                                 let _ = window.set_focus();
                             }
                         }
+                        // On macOS, directly hide without minimize to avoid duplicate Dock icons
+                        #[cfg(not(target_os = "macos"))]
                         window.minimize().unwrap();
                         window.hide().unwrap();
                     });
@@ -145,8 +147,24 @@ pub fn run_app() {
                 }
             }
         })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app, event| {
+            // Handle macOS dock icon click to reopen hidden window
+            #[cfg(target_os = "macos")]
+            if let tauri::RunEvent::Reopen {
+                has_visible_windows,
+                ..
+            } = event
+            {
+                if !has_visible_windows {
+                    if let Some(window) = app.get_webview_window("pake") {
+                        let _ = window.show();
+                        let _ = window.set_focus();
+                    }
+                }
+            }
+        });
 }
 
 pub fn run() {
