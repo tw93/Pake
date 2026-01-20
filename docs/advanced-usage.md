@@ -237,7 +237,7 @@ For CLI development with hot reloading, modify the `DEFAULT_DEV_PAKE_OPTIONS` co
 ```typescript
 export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
   ...DEFAULT_PAKE_OPTIONS,
-  url: "https://weekly.tw93.fun/",
+  url: "https://weekly.tw93.fun/en",
   name: "Weekly",
 };
 ```
