@@ -104,7 +104,7 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
     #[cfg(target_os = "windows")]
     let mut windows_browser_args = String::from("--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-blink-features=AutomationControlled");
 
-    #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
+    #[cfg(target_os = "linux")]
     let mut linux_browser_args = String::from("--disable-blink-features=AutomationControlled");
 
     if window_config.ignore_certificate_errors {
@@ -113,7 +113,7 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
             windows_browser_args.push_str(" --ignore-certificate-errors");
         }
 
-        #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
+        #[cfg(target_os = "linux")]
         {
             linux_browser_args.push_str(" --ignore-certificate-errors");
         }
@@ -131,7 +131,7 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
             windows_browser_args.push_str(" --enable-unsafe-webgpu");
         }
 
-        #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
+        #[cfg(target_os = "linux")]
         {
             linux_browser_args.push_str(" --enable-features=SharedArrayBuffer");
             linux_browser_args.push_str(" --enable-unsafe-webgpu");
@@ -189,7 +189,7 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
             window_builder = window_builder.additional_browser_args(&windows_browser_args);
         }
 
-        #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
+        #[cfg(target_os = "linux")]
         {
             window_builder = window_builder.additional_browser_args(&linux_browser_args);
         }

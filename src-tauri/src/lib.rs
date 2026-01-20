@@ -22,6 +22,13 @@ use app::{
 use util::get_pake_config;
 
 pub fn run_app() {
+    #[cfg(target_os = "linux")]
+    {
+        if std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").is_err() {
+            std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+        }
+    }
+
     let (pake_config, tauri_config) = get_pake_config();
     let tauri_app = tauri::Builder::default();
 
@@ -101,7 +108,7 @@ pub fn run_app() {
                     window_clone.show().unwrap();
 
                     // Fixed: Linux fullscreen issue with virtual keyboard
-                    #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
+                    #[cfg(target_os = "linux")]
                     {
                         if init_fullscreen {
                             window_clone.set_fullscreen(true).unwrap();
@@ -127,7 +134,7 @@ pub fn run_app() {
                                 tokio::time::sleep(Duration::from_millis(900)).await;
                             }
                         }
-                        #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
+                        #[cfg(target_os = "linux")]
                         {
                             if window.is_fullscreen().unwrap_or(false) {
                                 window.set_fullscreen(false).unwrap();
