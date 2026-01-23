@@ -13,7 +13,7 @@ pub fn set_system_tray(
     app: &AppHandle,
     show_system_tray: bool,
     tray_icon_path: &str,
-    init_fullscreen: bool,
+    _init_fullscreen: bool,
 ) -> tauri::Result<()> {
     if !show_system_tray {
         app.remove_tray_by_id("pake-tray");
@@ -42,7 +42,7 @@ pub fn set_system_tray(
                 if let Some(window) = app.get_webview_window("pake") {
                     window.show().unwrap();
                     #[cfg(target_os = "linux")]
-                    if init_fullscreen && !window.is_fullscreen().unwrap_or(false) {
+                    if _init_fullscreen && !window.is_fullscreen().unwrap_or(false) {
                         let _ = window.set_fullscreen(true);
                         let _ = window.set_focus();
                     }
@@ -65,7 +65,7 @@ pub fn set_system_tray(
                             window.show().unwrap();
                             window.set_focus().unwrap();
                             #[cfg(target_os = "linux")]
-                            if init_fullscreen && !window.is_fullscreen().unwrap_or(false) {
+                            if _init_fullscreen && !window.is_fullscreen().unwrap_or(false) {
                                 let _ = window.set_fullscreen(true);
                             }
                         }
@@ -95,7 +95,7 @@ pub fn set_system_tray(
 pub fn set_global_shortcut(
     app: &AppHandle,
     shortcut: String,
-    init_fullscreen: bool,
+    _init_fullscreen: bool,
 ) -> tauri::Result<()> {
     if shortcut.is_empty() {
         return Ok(());
@@ -128,7 +128,7 @@ pub fn set_global_shortcut(
                                     window.show().unwrap();
                                     window.set_focus().unwrap();
                                     #[cfg(target_os = "linux")]
-                                    if init_fullscreen && !window.is_fullscreen().unwrap_or(false) {
+                                    if _init_fullscreen && !window.is_fullscreen().unwrap_or(false) {
                                         let _ = window.set_fullscreen(true);
                                     }
                                 }

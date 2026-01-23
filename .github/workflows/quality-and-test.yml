@@ -129,9 +129,9 @@ jobs:
         run: |
           echo "Testing CLI integration..."
           if [[ "$RUNNER_OS" == "Windows" ]]; then
-            timeout 60s node dist/cli.js https://weekly.tw93.fun --name "CITest" --debug || true
+            timeout 60s PAKE_CREATE_APP=1 node dist/cli.js https://weekly.tw93.fun --name "CITest" --debug --iterative-build || true
           else
-            timeout 30s node dist/cli.js https://weekly.tw93.fun --name "CITest" --debug || true
+            timeout 30s PAKE_CREATE_APP=1 node dist/cli.js https://weekly.tw93.fun --name "CITest" --debug --iterative-build || true
           fi
 
   summary:
