@@ -261,7 +261,7 @@ export default abstract class BaseBuilder {
     } catch (error) {
       const shouldRetryWithoutStrip =
         process.platform === 'linux' &&
-        this.options.targets === 'appimage' &&
+        target === 'appimage' &&
         !buildEnv.NO_STRIP &&
         this.isLinuxDeployStripError(error);
 
