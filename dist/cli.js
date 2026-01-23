@@ -22,7 +22,7 @@ import * as psl from 'psl';
 import { InvalidArgumentError, program as program$1, Option } from 'commander';
 
 var name = "pake-cli";
-var version = "3.7.8";
+var version = "3.8.0";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -914,7 +914,7 @@ class BaseBuilder {
         // Warn users about potential AppImage build failures on modern Linux systems.
         // The linuxdeploy tool bundled in Tauri uses an older strip tool that doesn't
         // recognize the .relr.dyn section introduced in glibc 2.38+.
-        if (process.platform === 'linux' && this.options.targets === 'appimage') {
+        if (process.platform === 'linux' && target === 'appimage') {
             if (!buildEnv.NO_STRIP) {
                 logger.warn('⚠ Building AppImage on Linux may fail due to strip incompatibility with glibc 2.38+');
                 logger.warn('⚠ If build fails, retry with: NO_STRIP=1 pake <url> --targets appimage');
@@ -927,7 +927,7 @@ class BaseBuilder {
         }
         catch (error) {
             const shouldRetryWithoutStrip = process.platform === 'linux' &&
-                this.options.targets === 'appimage' &&
+                target === 'appimage' &&
                 !buildEnv.NO_STRIP &&
                 this.isLinuxDeployStripError(error);
             if (shouldRetryWithoutStrip) {
@@ -1291,18 +1291,20 @@ class LinuxBuilder extends BaseBuilder {
     getFileName() {
         const { name = 'pake-app', targets } = this.options;
         const version = tauriConfig.version;
+        const buildType = this.currentBuildType || targets.split(',').map((t) => t.trim())[0];
         let arch;
         if (this.buildArch === 'arm64') {
-            arch = targets === 'rpm' || targets === 'appimage' ? 'aarch64' : 'arm64';
+            arch =
+                buildType === 'rpm' || buildType === 'appimage' ? 'aarch64' : 'arm64';
         }
         else {
             if (this.buildArch === 'x64') {
-                arch = targets === 'rpm' ? 'x86_64' : 'amd64';
+                arch = buildType === 'rpm' ? 'x86_64' : 'amd64';
             }
             else {
                 arch = this.buildArch;
                 if (this.buildArch === 'arm64' &&
-                    (targets === 'rpm' || targets === 'appimage')) {
+                    (buildType === 'rpm' || buildType === 'appimage')) {
                     arch = 'aarch64';
                 }
             }
