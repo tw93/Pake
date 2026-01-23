@@ -242,7 +242,7 @@ export default abstract class BaseBuilder {
     // Warn users about potential AppImage build failures on modern Linux systems.
     // The linuxdeploy tool bundled in Tauri uses an older strip tool that doesn't
     // recognize the .relr.dyn section introduced in glibc 2.38+.
-    if (process.platform === 'linux' && this.options.targets === 'appimage') {
+    if (process.platform === 'linux' && target === 'appimage') {
       if (!buildEnv.NO_STRIP) {
         logger.warn(
           '⚠ Building AppImage on Linux may fail due to strip incompatibility with glibc 2.38+',

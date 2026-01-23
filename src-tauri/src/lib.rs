@@ -95,9 +95,10 @@ pub fn run_app() {
                 app.app_handle(),
                 show_system_tray,
                 &pake_config.system_tray_path,
+                init_fullscreen,
             )
             .unwrap();
-            set_global_shortcut(app.app_handle(), activation_shortcut).unwrap();
+            set_global_shortcut(app.app_handle(), activation_shortcut, init_fullscreen).unwrap();
 
             // Show window after state restoration to prevent position flashing
             // Unless start_to_tray is enabled, then keep it hidden
