@@ -54,7 +54,7 @@ pub fn set_system_tray(
             }
             _ => (),
         })
-        .on_tray_icon_event(|tray, event| match event {
+        .on_tray_icon_event(move |tray, event| match event {
             TrayIconEvent::Click { button, .. } => {
                 if button == tauri::tray::MouseButton::Left {
                     if let Some(window) = tray.app_handle().get_webview_window("pake") {
