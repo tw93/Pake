@@ -12,7 +12,19 @@ const shortcuts = {
 
 function setZoom(zoom) {
   const html = document.getElementsByTagName("html")[0];
-  html.style.zoom = zoom;
+  const body = document.body;
+  const zoomValue = parseFloat(zoom) / 100;
+  const isWindows = /windows/i.test(navigator.userAgent);
+
+  if (isWindows) {
+    body.style.transform = `scale(${zoomValue})`;
+    body.style.transformOrigin = "top left";
+    body.style.width = `${100 / zoomValue}%`;
+    body.style.height = `${100 / zoomValue}%`;
+  } else {
+    html.style.zoom = zoom;
+  }
+
   window.localStorage.setItem("htmlZoom", zoom);
 }
 
