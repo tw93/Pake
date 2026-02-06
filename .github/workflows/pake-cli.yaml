@@ -98,38 +98,38 @@ jobs:
         timeout-minutes: 25
         shell: bash
         run: |
-          ARGS="${{ inputs.url }} --name ${{ inputs.name }}"
+          ARGS=("${{ inputs.url }}" "--name" "${{ inputs.name }}")
 
           if [ -n "${{ inputs.icon }}" ]; then
-            ARGS="$ARGS --icon ${{ inputs.icon }}"
+            ARGS+=("--icon" "${{ inputs.icon }}")
           fi
 
           if [ -n "${{ inputs.width }}" ]; then
-            ARGS="$ARGS --width ${{ inputs.width }}"
+            ARGS+=("--width" "${{ inputs.width }}")
           fi
 
           if [ -n "${{ inputs.height }}" ]; then
-            ARGS="$ARGS --height ${{ inputs.height }}"
+            ARGS+=("--height" "${{ inputs.height }}")
           fi
 
           if [ "${{ inputs.fullscreen }}" == "true" ]; then
-            ARGS="$ARGS --fullscreen"
+            ARGS+=("--fullscreen")
           fi
 
           if [ "${{ inputs.hide_title_bar }}" == "true" ]; then
-            ARGS="$ARGS --hide-title-bar"
+            ARGS+=("--hide-title-bar")
           fi
 
           if [ "${{ inputs.multi_arch }}" == "true" ]; then
-            ARGS="$ARGS --multi-arch"
+            ARGS+=("--multi-arch")
           fi
 
           if [ -n "${{ inputs.targets }}" ] && [ "${{ runner.os }}" == "Linux" ]; then
-            ARGS="$ARGS --targets ${{ inputs.targets }}"
+            ARGS+=("--targets" "${{ inputs.targets }}")
           fi
 
-          echo "Running: node dist/cli.js $ARGS"
-          node dist/cli.js $ARGS
+          echo "Running: node dist/cli.js ${ARGS[@]}"
+          node dist/cli.js "${ARGS[@]}"
 
       - name: Build App (Windows)
         if: runner.os == 'Windows'
