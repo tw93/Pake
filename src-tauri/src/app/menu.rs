@@ -66,6 +66,13 @@ fn edit_menu(app: &AppHandle<Wry>) -> tauri::Result<Submenu<Wry>> {
     edit_menu.append(&PredefinedMenuItem::cut(app, None)?)?;
     edit_menu.append(&PredefinedMenuItem::copy(app, None)?)?;
     edit_menu.append(&PredefinedMenuItem::paste(app, None)?)?;
+    edit_menu.append(&MenuItem::with_id(
+        app,
+        "paste_and_match_style",
+        "Paste and Match Style",
+        true,
+        Some("CmdOrCtrl+Shift+Option+V"),
+    )?)?;
     edit_menu.append(&PredefinedMenuItem::select_all(app, None)?)?;
     edit_menu.append(&PredefinedMenuItem::separator(app)?)?;
     edit_menu.append(&MenuItem::with_id(
@@ -227,6 +234,11 @@ pub fn handle_menu_click(app_handle: &AppHandle, id: &str) {
         "copy_url" => {
             if let Some(window) = app_handle.get_webview_window("pake") {
                 let _ = window.eval("navigator.clipboard.writeText(window.location.href)");
+            }
+        }
+        "paste_and_match_style" => {
+            if let Some(window) = app_handle.get_webview_window("pake") {
+                let _ = window.eval("triggerPasteAsPlainText()");
             }
         }
         "clear_cache_restart" => {

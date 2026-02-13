@@ -22,6 +22,13 @@ use app::{
 use util::get_pake_config;
 
 pub fn run_app() {
+    #[cfg(target_os = "linux")]
+    {
+        if std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").is_err() {
+            std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+        }
+    }
+
     let (pake_config, tauri_config) = get_pake_config();
     let tauri_app = tauri::Builder::default();
 
@@ -88,9 +95,10 @@ pub fn run_app() {
                 app.app_handle(),
                 show_system_tray,
                 &pake_config.system_tray_path,
+                init_fullscreen,
             )
             .unwrap();
-            set_global_shortcut(app.app_handle(), activation_shortcut).unwrap();
+            set_global_shortcut(app.app_handle(), activation_shortcut, init_fullscreen).unwrap();
 
             // Show window after state restoration to prevent position flashing
             // Unless start_to_tray is enabled, then keep it hidden
@@ -101,11 +109,17 @@ pub fn run_app() {
                     window_clone.show().unwrap();
 
                     // Fixed: Linux fullscreen issue with virtual keyboard
-                    #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
+                    #[cfg(target_os = "linux")]
                     {
                         if init_fullscreen {
                             window_clone.set_fullscreen(true).unwrap();
                             // Ensure webview maintains focus for input after fullscreen
+                            let _ = window_clone.set_focus();
+                        } else {
+                            // Fix: Ubuntu 24.04/GNOME window buttons non-functional until resize (#1122)
+                            // The window manager needs time to process the MapWindow event before
+                            // accepting focus requests. Without this, decorations remain non-interactive.
+                            tokio::time::sleep(tokio::time::Duration::from_millis(30)).await;
                             let _ = window_clone.set_focus();
                         }
                     }
@@ -127,7 +141,7 @@ pub fn run_app() {
                                 tokio::time::sleep(Duration::from_millis(900)).await;
                             }
                         }
-                        #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
+                        #[cfg(target_os = "linux")]
                         {
                             if window.is_fullscreen().unwrap_or(false) {
                                 window.set_fullscreen(false).unwrap();
@@ -135,6 +149,8 @@ pub fn run_app() {
                                 let _ = window.set_focus();
                             }
                         }
+                        // On macOS, directly hide without minimize to avoid duplicate Dock icons
+                        #[cfg(not(target_os = "macos"))]
                         window.minimize().unwrap();
                         window.hide().unwrap();
                     });
@@ -145,8 +161,24 @@ pub fn run_app() {
                 }
             }
         })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|_app, _event| {
+            // Handle macOS dock icon click to reopen hidden window
+            #[cfg(target_os = "macos")]
+            if let tauri::RunEvent::Reopen {
+                has_visible_windows,
+                ..
+            } = _event
+            {
+                if !has_visible_windows {
+                    if let Some(window) = _app.get_webview_window("pake") {
+                        let _ = window.show();
+                        let _ = window.set_focus();
+                    }
+                }
+            }
+        });
 }
 
 pub fn run() {

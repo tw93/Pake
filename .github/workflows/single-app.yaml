@@ -73,7 +73,7 @@ jobs:
             rust: stable
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -86,7 +86,7 @@ jobs:
           mode: build
 
       - name: Download CLI Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: pake-cli-dist
           path: dist
@@ -99,17 +99,17 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         timeout-minutes: 20
         run: |
-          ARGS="${{ inputs.url }} --name ${{ inputs.name }}"
+          ARGS=("${{ inputs.url }}" "--name" "${{ inputs.name }}")
 
           # Auto-detect local icon or use provided icon
           if [ -n "${{ inputs.icon }}" ]; then
-            ARGS="$ARGS --icon ${{ inputs.icon }}"
+            ARGS+=("--icon" "${{ inputs.icon }}")
           elif [ -f "src-tauri/png/${{ inputs.name }}_512.png" ]; then
-            ARGS="$ARGS --icon src-tauri/png/${{ inputs.name }}_512.png"
+            ARGS+=("--icon" "src-tauri/png/${{ inputs.name }}_512.png")
           fi
 
           # Build once with multiple targets (faster than separate builds)
-          node dist/cli.js $ARGS --targets deb,appimage
+          node dist/cli.js "${ARGS[@]}" --targets deb,appimage
 
           mkdir -p output/linux
 
@@ -139,16 +139,16 @@ jobs:
         if: matrix.os == 'macos-latest'
         timeout-minutes: 25
         run: |
-          ARGS="${{ inputs.url }} --name ${{ inputs.name }} --hide-title-bar"
+          ARGS=("${{ inputs.url }}" "--name" "${{ inputs.name }}" "--hide-title-bar")
 
           # Auto-detect local icon or use provided icon
           if [ -n "${{ inputs.icon }}" ]; then
-            ARGS="$ARGS --icon ${{ inputs.icon }}"
+            ARGS+=("--icon" "${{ inputs.icon }}")
           elif [ -f "src-tauri/icons/${{ inputs.name }}.icns" ]; then
-            ARGS="$ARGS --icon src-tauri/icons/${{ inputs.name }}.icns"
+            ARGS+=("--icon" "src-tauri/icons/${{ inputs.name }}.icns")
           fi
 
-          node dist/cli.js $ARGS --targets universal --multi-arch
+          node dist/cli.js "${ARGS[@]}" --targets universal --multi-arch
 
           mkdir -p output/macos
 
@@ -218,7 +218,7 @@ jobs:
           git checkout -- src-tauri/Cargo.lock
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ inputs.title }}-${{ matrix.build }}
           path: output/*/*.*

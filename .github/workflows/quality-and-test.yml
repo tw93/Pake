@@ -27,7 +27,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -66,7 +66,7 @@ jobs:
         shell: bash
         working-directory: src-tauri
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Rust Environment
         uses: ./.github/actions/setup-env
@@ -80,7 +80,7 @@ jobs:
       - uses: rui314/setup-mold@v1
 
       - name: Cache cargo-hack
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cargo-hack-cache
         with:
           path: ~/.cargo/bin/cargo-hack
@@ -107,7 +107,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Build Environment
         uses: ./.github/actions/setup-env
@@ -129,9 +129,9 @@ jobs:
         run: |
           echo "Testing CLI integration..."
           if [[ "$RUNNER_OS" == "Windows" ]]; then
-            timeout 60s node dist/cli.js https://weekly.tw93.fun --name "CITest" --debug || true
+            timeout 60s PAKE_CREATE_APP=1 node dist/cli.js https://weekly.tw93.fun --name "CITest" --debug --iterative-build || true
           else
-            timeout 30s node dist/cli.js https://weekly.tw93.fun --name "CITest" --debug || true
+            timeout 30s PAKE_CREATE_APP=1 node dist/cli.js https://weekly.tw93.fun --name "CITest" --debug --iterative-build || true
           fi
 
   summary:

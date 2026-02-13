@@ -13,6 +13,7 @@ pub fn set_system_tray(
     app: &AppHandle,
     show_system_tray: bool,
     tray_icon_path: &str,
+    _init_fullscreen: bool,
 ) -> tauri::Result<()> {
     if !show_system_tray {
         app.remove_tray_by_id("pake-tray");
@@ -40,6 +41,11 @@ pub fn set_system_tray(
             "show_app" => {
                 if let Some(window) = app.get_webview_window("pake") {
                     window.show().unwrap();
+                    #[cfg(target_os = "linux")]
+                    if _init_fullscreen && !window.is_fullscreen().unwrap_or(false) {
+                        let _ = window.set_fullscreen(true);
+                        let _ = window.set_focus();
+                    }
                 }
             }
             "quit" => {
@@ -48,7 +54,7 @@ pub fn set_system_tray(
             }
             _ => (),
         })
-        .on_tray_icon_event(|tray, event| match event {
+        .on_tray_icon_event(move |tray, event| match event {
             TrayIconEvent::Click { button, .. } => {
                 if button == tauri::tray::MouseButton::Left {
                     if let Some(window) = tray.app_handle().get_webview_window("pake") {
@@ -58,6 +64,10 @@ pub fn set_system_tray(
                         } else {
                             window.show().unwrap();
                             window.set_focus().unwrap();
+                            #[cfg(target_os = "linux")]
+                            if _init_fullscreen && !window.is_fullscreen().unwrap_or(false) {
+                                let _ = window.set_fullscreen(true);
+                            }
                         }
                     }
                 }
@@ -82,7 +92,11 @@ pub fn set_system_tray(
     Ok(())
 }
 
-pub fn set_global_shortcut(app: &AppHandle, shortcut: String) -> tauri::Result<()> {
+pub fn set_global_shortcut(
+    app: &AppHandle,
+    shortcut: String,
+    _init_fullscreen: bool,
+) -> tauri::Result<()> {
     if shortcut.is_empty() {
         return Ok(());
     }
@@ -113,6 +127,11 @@ pub fn set_global_shortcut(app: &AppHandle, shortcut: String) -> tauri::Result<(
                                 } else {
                                     window.show().unwrap();
                                     window.set_focus().unwrap();
+                                    #[cfg(target_os = "linux")]
+                                    if _init_fullscreen && !window.is_fullscreen().unwrap_or(false)
+                                    {
+                                        let _ = window.set_fullscreen(true);
+                                    }
                                 }
                             }
                         }

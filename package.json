@@ -1,6 +1,6 @@
 {
   "name": "pake-cli",
-  "version": "3.7.7",
+  "version": "3.8.4",
   "description": "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。",
   "engines": {
     "node": ">=18.0.0"
@@ -49,16 +49,16 @@
   "exports": "./dist/cli.js",
   "license": "MIT",
   "dependencies": {
-    "@tauri-apps/api": "^2.9.1",
-    "@tauri-apps/cli": "^2.9.6",
+    "@tauri-apps/api": "~2.10.1",
+    "@tauri-apps/cli": "^2.10.0",
     "chalk": "^5.6.2",
-    "commander": "^14.0.2",
+    "commander": "^14.0.3",
     "execa": "^9.6.1",
-    "file-type": "^21.1.1",
+    "file-type": "^21.3.0",
     "fs-extra": "^11.3.3",
     "icon-gen": "^5.0.0",
     "loglevel": "^1.9.2",
-    "ora": "^9.0.0",
+    "ora": "^9.3.0",
     "prompts": "^2.4.2",
     "psl": "^1.15.0",
     "sharp": "^0.34.5",
@@ -72,19 +72,19 @@
     "@rollup/plugin-replace": "^6.0.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^25.0.3",
+    "@types/node": "^25.2.1",
     "@types/page-icon": "^0.3.6",
     "@types/prompts": "^2.4.9",
     "@types/tmp": "^0.2.6",
     "@types/update-notifier": "^6.0.8",
     "app-root-path": "^3.1.0",
     "cross-env": "^10.1.0",
-    "prettier": "^3.7.4",
-    "rollup": "^4.54.0",
+    "prettier": "^3.8.1",
+    "rollup": "^4.57.1",
     "rollup-plugin-typescript2": "^0.36.0",
     "tslib": "^2.8.1",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.18"
   },
   "pnpm": {
     "overrides": {

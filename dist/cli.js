@@ -22,7 +22,7 @@ import * as psl from 'psl';
 import { InvalidArgumentError, program as program$1, Option } from 'commander';
 
 var name = "pake-cli";
-var version = "3.7.7";
+var version = "3.8.4";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -71,16 +71,16 @@ var type = "module";
 var exports$1 = "./dist/cli.js";
 var license = "MIT";
 var dependencies = {
-	"@tauri-apps/api": "^2.9.1",
-	"@tauri-apps/cli": "^2.9.6",
+	"@tauri-apps/api": "~2.10.1",
+	"@tauri-apps/cli": "^2.10.0",
 	chalk: "^5.6.2",
-	commander: "^14.0.2",
+	commander: "^14.0.3",
 	execa: "^9.6.1",
-	"file-type": "^21.1.1",
+	"file-type": "^21.3.0",
 	"fs-extra": "^11.3.3",
 	"icon-gen": "^5.0.0",
 	loglevel: "^1.9.2",
-	ora: "^9.0.0",
+	ora: "^9.3.0",
 	prompts: "^2.4.2",
 	psl: "^1.15.0",
 	sharp: "^0.34.5",
@@ -94,19 +94,19 @@ var devDependencies = {
 	"@rollup/plugin-replace": "^6.0.3",
 	"@rollup/plugin-terser": "^0.4.4",
 	"@types/fs-extra": "^11.0.4",
-	"@types/node": "^25.0.3",
+	"@types/node": "^25.2.1",
 	"@types/page-icon": "^0.3.6",
 	"@types/prompts": "^2.4.9",
 	"@types/tmp": "^0.2.6",
 	"@types/update-notifier": "^6.0.8",
 	"app-root-path": "^3.1.0",
 	"cross-env": "^10.1.0",
-	prettier: "^3.7.4",
-	rollup: "^4.54.0",
+	prettier: "^3.8.1",
+	rollup: "^4.57.1",
 	"rollup-plugin-typescript2": "^0.36.0",
 	tslib: "^2.8.1",
 	typescript: "^5.9.3",
-	vitest: "^4.0.16"
+	vitest: "^4.0.18"
 };
 var pnpm = {
 	overrides: {
@@ -914,7 +914,7 @@ class BaseBuilder {
         // Warn users about potential AppImage build failures on modern Linux systems.
         // The linuxdeploy tool bundled in Tauri uses an older strip tool that doesn't
         // recognize the .relr.dyn section introduced in glibc 2.38+.
-        if (process.platform === 'linux' && this.options.targets === 'appimage') {
+        if (process.platform === 'linux' && target === 'appimage') {
             if (!buildEnv.NO_STRIP) {
                 logger.warn('⚠ Building AppImage on Linux may fail due to strip incompatibility with glibc 2.38+');
                 logger.warn('⚠ If build fails, retry with: NO_STRIP=1 pake <url> --targets appimage');
@@ -927,7 +927,7 @@ class BaseBuilder {
         }
         catch (error) {
             const shouldRetryWithoutStrip = process.platform === 'linux' &&
-                this.options.targets === 'appimage' &&
+                target === 'appimage' &&
                 !buildEnv.NO_STRIP &&
                 this.isLinuxDeployStripError(error);
             if (shouldRetryWithoutStrip) {
@@ -1291,18 +1291,20 @@ class LinuxBuilder extends BaseBuilder {
     getFileName() {
         const { name = 'pake-app', targets } = this.options;
         const version = tauriConfig.version;
+        const buildType = this.currentBuildType || targets.split(',').map((t) => t.trim())[0];
         let arch;
         if (this.buildArch === 'arm64') {
-            arch = targets === 'rpm' || targets === 'appimage' ? 'aarch64' : 'arm64';
+            arch =
+                buildType === 'rpm' || buildType === 'appimage' ? 'aarch64' : 'arm64';
         }
         else {
             if (this.buildArch === 'x64') {
-                arch = targets === 'rpm' ? 'x86_64' : 'amd64';
+                arch = buildType === 'rpm' ? 'x86_64' : 'amd64';
             }
             else {
                 arch = this.buildArch;
                 if (this.buildArch === 'arm64' &&
-                    (targets === 'rpm' || targets === 'appimage')) {
+                    (buildType === 'rpm' || buildType === 'appimage')) {
                     arch = 'aarch64';
                 }
             }

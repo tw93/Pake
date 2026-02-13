@@ -26,18 +26,21 @@ export default class LinuxBuilder extends BaseBuilder {
   getFileName() {
     const { name = 'pake-app', targets } = this.options;
     const version = tauriConfig.version;
+    const buildType =
+      this.currentBuildType || targets.split(',').map((t) => t.trim())[0];
 
     let arch: string;
     if (this.buildArch === 'arm64') {
-      arch = targets === 'rpm' || targets === 'appimage' ? 'aarch64' : 'arm64';
+      arch =
+        buildType === 'rpm' || buildType === 'appimage' ? 'aarch64' : 'arm64';
     } else {
       if (this.buildArch === 'x64') {
-        arch = targets === 'rpm' ? 'x86_64' : 'amd64';
+        arch = buildType === 'rpm' ? 'x86_64' : 'amd64';
       } else {
         arch = this.buildArch;
         if (
           this.buildArch === 'arm64' &&
-          (targets === 'rpm' || targets === 'appimage')
+          (buildType === 'rpm' || buildType === 'appimage')
         ) {
           arch = 'aarch64';
         }

@@ -12,7 +12,19 @@ const shortcuts = {
 
 function setZoom(zoom) {
   const html = document.getElementsByTagName("html")[0];
-  html.style.zoom = zoom;
+  const body = document.body;
+  const zoomValue = parseFloat(zoom) / 100;
+  const isWindows = /windows/i.test(navigator.userAgent);
+
+  if (isWindows) {
+    body.style.transform = `scale(${zoomValue})`;
+    body.style.transformOrigin = "top left";
+    body.style.width = `${100 / zoomValue}%`;
+    body.style.height = `${100 / zoomValue}%`;
+  } else {
+    html.style.zoom = zoom;
+  }
+
   window.localStorage.setItem("htmlZoom", zoom);
 }
 
@@ -29,6 +41,16 @@ function zoomOut() {
   zoomCommon((currentZoom) => `${Math.max(parseInt(currentZoom) - 10, 30)}%`);
 }
 
+let pasteAsPlainTextPending = false;
+
+function triggerPasteAsPlainText() {
+  pasteAsPlainTextPending = true;
+  document.execCommand("paste");
+  setTimeout(() => {
+    pasteAsPlainTextPending = false;
+  }, 100);
+}
+
 function handleShortcut(event) {
   if (shortcuts[event.key]) {
     event.preventDefault();
@@ -36,7 +58,6 @@ function handleShortcut(event) {
   }
 }
 
-// Configuration constants
 const DOWNLOADABLE_FILE_EXTENSIONS = {
   documents: [
     "pdf",
@@ -277,6 +298,22 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  document.addEventListener(
+    "paste",
+    (event) => {
+      if (pasteAsPlainTextPending) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        const text = event.clipboardData?.getData("text/plain") || "";
+        if (text) {
+          document.execCommand("insertText", false, text);
+        }
+      }
+    },
+    true,
+  );
 
   // Collect blob urls to blob by overriding window.URL.createObjectURL
   function collectUrlToBlobs() {

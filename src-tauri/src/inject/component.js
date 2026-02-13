@@ -24,6 +24,9 @@ document.addEventListener("DOMContentLoaded", () => {
 // This bridges the HTML5 Fullscreen API to Tauri's native window fullscreen
 // Works for all video sites (YouTube, Vimeo, Bilibili, etc.)
 (function () {
+  if (window.__PAKE_FULLSCREEN_POLYFILL__) return;
+  window.__PAKE_FULLSCREEN_POLYFILL__ = true;
+
   function initFullscreenPolyfill() {
     if (!window.__TAURI__ || !document.head) {
       setTimeout(initFullscreenPolyfill, 100);
@@ -37,11 +40,13 @@ document.addEventListener("DOMContentLoaded", () => {
     let originalParent = null;
     let originalNextSibling = null;
     let wasInBody = false;
+    let monitorId = null;
 
     // Inject fullscreen styles
-    const styleEl = document.createElement("style");
-    styleEl.id = "pake-fullscreen-style";
-    styleEl.textContent = `
+    if (!document.getElementById("pake-fullscreen-style")) {
+      const styleEl = document.createElement("style");
+      styleEl.id = "pake-fullscreen-style";
+      styleEl.textContent = `
       body.pake-fullscreen-active {
         overflow: hidden !important;
       }
@@ -65,7 +70,28 @@ document.addEventListener("DOMContentLoaded", () => {
         object-fit: contain !important;
       }
     `;
-    document.head.appendChild(styleEl);
+      document.head.appendChild(styleEl);
+    }
+
+    function startFullscreenMonitor() {
+      if (monitorId) return;
+      monitorId = setInterval(() => {
+        appWindow
+          .isFullscreen()
+          .then((isFullscreen) => {
+            if (fullscreenElement && !isFullscreen) {
+              exitFullscreen();
+            }
+          })
+          .catch(() => {});
+      }, 500);
+    }
+
+    function stopFullscreenMonitor() {
+      if (!monitorId) return;
+      clearInterval(monitorId);
+      monitorId = null;
+    }
 
     // Find the actual video element
     function findMediaElement() {
@@ -136,6 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Fullscreen window
       appWindow.setFullscreen(true).then(() => {
+        startFullscreenMonitor();
         const event = new Event("fullscreenchange", { bubbles: true });
         document.dispatchEvent(event);
         element.dispatchEvent(event);
@@ -155,6 +182,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!fullscreenElement) {
         return Promise.resolve();
       }
+
+      stopFullscreenMonitor();
 
       const exitingElement = fullscreenElement;
       const targetElement = actualFullscreenElement;
@@ -252,20 +281,6 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       true,
     );
-
-    // Monitor window fullscreen changes
-    let lastFullscreenState = false;
-    setInterval(() => {
-      appWindow
-        .isFullscreen()
-        .then((isFullscreen) => {
-          if (lastFullscreenState && !isFullscreen && fullscreenElement) {
-            exitFullscreen();
-          }
-          lastFullscreenState = isFullscreen;
-        })
-        .catch(() => {});
-    }, 500);
   }
 
   initFullscreenPolyfill();
