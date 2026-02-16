@@ -7,11 +7,6 @@ use tauri::{App, Config, Url, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 use tauri::{Theme, TitleBarStyle};
 
 #[cfg(target_os = "windows")]
-fn get_windows_scale_factor() -> f64 {
-    dpi::SystemDpi::new().scale_factor() as f64
-}
-
-#[cfg(target_os = "windows")]
 fn build_proxy_browser_arg(url: &Url) -> Option<String> {
     let host = url.host_str()?;
     let scheme = url.scheme();
@@ -67,7 +62,12 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
 
     #[cfg(target_os = "windows")]
     {
-        let scale_factor = get_windows_scale_factor();
+        let scale_factor = app
+            .primary_monitor()
+            .ok()
+            .flatten()
+            .map(|m| m.scale_factor())
+            .unwrap_or(1.0);
         let logical_width = window_config.width / scale_factor;
         let logical_height = window_config.height / scale_factor;
         window_builder = window_builder.inner_size(logical_width, logical_height);
