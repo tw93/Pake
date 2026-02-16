@@ -7,6 +7,11 @@ use tauri::{App, Config, Url, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 use tauri::{Theme, TitleBarStyle};
 
 #[cfg(target_os = "windows")]
+fn get_windows_scale_factor() -> f64 {
+    dpi::SystemDpi::new().scale_factor() as f64
+}
+
+#[cfg(target_os = "windows")]
 fn build_proxy_browser_arg(url: &Url) -> Option<String> {
     let host = url.host_str()?;
     let scheme = url.scheme();
@@ -58,8 +63,22 @@ pub fn set_window(app: &mut App, config: &PakeConfig, tauri_config: &Config) -> 
         .visible(false)
         .user_agent(user_agent)
         .resizable(window_config.resizable)
-        .maximized(window_config.maximize)
-        .inner_size(window_config.width, window_config.height)
+        .maximized(window_config.maximize);
+
+    #[cfg(target_os = "windows")]
+    {
+        let scale_factor = get_windows_scale_factor();
+        let logical_width = window_config.width / scale_factor;
+        let logical_height = window_config.height / scale_factor;
+        window_builder = window_builder.inner_size(logical_width, logical_height);
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        window_builder = window_builder.inner_size(window_config.width, window_config.height);
+    }
+
+    window_builder = window_builder
         .always_on_top(window_config.always_on_top)
         .incognito(window_config.incognito);
 

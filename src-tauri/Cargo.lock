@@ -2527,6 +2527,7 @@ dependencies = [
 name = "pake"
 version = "3.8.4"
 dependencies = [
+ "dpi",
  "serde",
  "serde_json",
  "tauri",
