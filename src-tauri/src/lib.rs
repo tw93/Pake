@@ -155,10 +155,9 @@ pub fn run_app() {
                         window.hide().unwrap();
                     });
                     api.prevent_close();
-                } else {
-                    // Exit app completely when hide_on_close is false
-                    std::process::exit(0);
                 }
+                // If hide_on_close is false, allow normal close behavior
+                // This lets tauri-plugin-window-state save the window position and size
             }
         })
         .build(tauri::generate_context!())
