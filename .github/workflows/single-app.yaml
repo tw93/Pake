@@ -52,6 +52,19 @@ on:
         description: "App Icon"
         type: string
         required: false
+    secrets:
+      PAKE_SIGNING_IDENTITY:
+        required: false
+      PAKE_CERTIFICATE_P12:
+        required: false
+      PAKE_CERTIFICATE_PASSWORD:
+        required: false
+      PAKE_NOTARIZE_APPLE_ID:
+        required: false
+      PAKE_NOTARIZE_TEAM_ID:
+        required: false
+      PAKE_NOTARIZE_PASSWORD:
+        required: false
 
 jobs:
   build:
@@ -194,7 +207,8 @@ jobs:
         env:
           TAURI_BUNDLER_DMG_IGNORE_CI: "true"
         run: |
-          ARGS=("${{ inputs.url }}" "--name" "${{ inputs.name }}" "--hide-title-bar")
+          # Use title as app product name on macOS to preserve display casing in .app
+          ARGS=("${{ inputs.url }}" "--name" "${{ inputs.title }}" "--hide-title-bar")
 
           # Auto-detect local icon or use provided icon
           if [ -n "${{ inputs.icon }}" ]; then
@@ -209,7 +223,9 @@ jobs:
 
           # The CLI copies the DMG to project root and removes it from bundle directory
           # Check project root first, then fallback to bundle directory
-          if [ -f "${{ inputs.name }}.dmg" ]; then
+          if [ -f "${{ inputs.title }}.dmg" ]; then
+            mv "${{ inputs.title }}.dmg" output/macos/"${{inputs.title}}".dmg
+          elif [ -f "${{ inputs.name }}.dmg" ]; then
             mv "${{ inputs.name }}.dmg" output/macos/"${{inputs.title}}".dmg
           elif [ -n "$(ls src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg 2>/dev/null)" ]; then
             mv src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg output/macos/"${{inputs.title}}".dmg

@@ -73,6 +73,7 @@ jobs:
       matrix:
         config: ${{ fromJSON(needs.release-apps.outputs.apps_config) }}
     uses: ./.github/workflows/single-app.yaml
+    secrets: inherit
     with:
       name: ${{ matrix.config.name }}
       title: ${{ matrix.config.title }}
