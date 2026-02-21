@@ -272,7 +272,8 @@ jobs:
         if: matrix.os == 'windows-latest'
         timeout-minutes: 20
         run: |
-          $args = "${{ inputs.url }}", "--name", "${{ inputs.name }}"
+          # Use title as app product name on Windows to preserve display casing
+          $args = "${{ inputs.url }}", "--name", "${{ inputs.title }}"
 
           # Auto-detect local icon or use provided icon
           if ("${{ inputs.icon }}" -ne "") {
@@ -289,10 +290,13 @@ jobs:
 
           # The CLI copies the MSI to project root and removes it from bundle directory
           # Check project root first, then fallback to bundle directories
-          $projectRootMsi = "${{ inputs.name }}.msi"
+          $projectRootMsi = "${{ inputs.title }}.msi"
+          $legacyProjectRootMsi = "${{ inputs.name }}.msi"
 
           if (Test-Path $projectRootMsi) {
             Move-Item -Path $projectRootMsi -Destination "output\windows\${{inputs.title}}_x64.msi"
+          } elseif (Test-Path $legacyProjectRootMsi) {
+            Move-Item -Path $legacyProjectRootMsi -Destination "output\windows\${{inputs.title}}_x64.msi"
           } else {
             # Check architecture-specific path (x64 builds)
             $msiFiles = Get-ChildItem -Path "src-tauri\target\x86_64-pc-windows-msvc\release\bundle\msi\*.msi" -ErrorAction SilentlyContinue
@@ -308,6 +312,7 @@ jobs:
               Write-Error "No MSI files found in expected locations"
               Write-Host "Searched paths:"
               Write-Host "  - $projectRootMsi (project root)"
+              Write-Host "  - $legacyProjectRootMsi (project root)"
               Write-Host "  - src-tauri\target\x86_64-pc-windows-msvc\release\bundle\msi\"
               Write-Host "  - src-tauri\target\release\bundle\msi\"
               Write-Host "`nAll MSI files in target directory:"
