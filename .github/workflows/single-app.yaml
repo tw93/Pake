@@ -191,6 +191,8 @@ jobs:
       - name: Build for macOS
         if: matrix.os == 'macos-latest'
         timeout-minutes: 25
+        env:
+          TAURI_BUNDLER_DMG_IGNORE_CI: "true"
         run: |
           ARGS=("${{ inputs.url }}" "--name" "${{ inputs.name }}" "--hide-title-bar")
 

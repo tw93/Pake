@@ -22,7 +22,7 @@ import * as psl from 'psl';
 import { InvalidArgumentError, program as program$1, Option } from 'commander';
 
 var name = "pake-cli";
-var version = "3.8.7";
+var version = "3.9.0";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -94,7 +94,7 @@ var devDependencies = {
 	"@rollup/plugin-replace": "^6.0.3",
 	"@rollup/plugin-terser": "^0.4.4",
 	"@types/fs-extra": "^11.0.4",
-	"@types/node": "^25.2.1",
+	"@types/node": "^25.3.0",
 	"@types/page-icon": "^0.3.6",
 	"@types/prompts": "^2.4.9",
 	"@types/tmp": "^0.2.6",
@@ -102,7 +102,7 @@ var devDependencies = {
 	"app-root-path": "^3.1.0",
 	"cross-env": "^10.1.0",
 	prettier: "^3.8.1",
-	rollup: "^4.57.1",
+	rollup: "^4.58.0",
 	"rollup-plugin-typescript2": "^0.36.0",
 	tslib: "^2.8.1",
 	typescript: "^5.9.3",
