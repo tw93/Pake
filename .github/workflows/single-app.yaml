@@ -86,14 +86,67 @@ jobs:
           mode: build
 
       - name: Download CLI Artifact
+        if: github.event_name != 'workflow_dispatch'
         uses: actions/download-artifact@v7
         with:
           name: pake-cli-dist
           path: dist
 
+      - name: Build CLI (workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        run: pnpm run cli:build
+
       - name: Setup mold linker
         if: matrix.os == 'ubuntu-latest'
         uses: rui314/setup-mold@v1
+
+      - name: Prepare macOS signing
+        if: matrix.os == 'macos-latest'
+        env:
+          PAKE_SIGNING_IDENTITY: ${{ secrets.PAKE_SIGNING_IDENTITY }}
+          PAKE_CERTIFICATE_P12: ${{ secrets.PAKE_CERTIFICATE_P12 }}
+          PAKE_CERTIFICATE_PASSWORD: ${{ secrets.PAKE_CERTIFICATE_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          SIGNING_IDENTITY="${PAKE_SIGNING_IDENTITY:-}"
+
+          if [ -n "${PAKE_CERTIFICATE_P12:-}" ] && [ -n "${PAKE_CERTIFICATE_PASSWORD:-}" ]; then
+            echo "Importing macOS signing certificate..."
+            KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
+            KEYCHAIN_PASSWORD="$(openssl rand -base64 16)"
+
+            security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+            security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+            security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+            echo "$PAKE_CERTIFICATE_P12" | base64 --decode > "$RUNNER_TEMP/certificate.p12"
+            security import "$RUNNER_TEMP/certificate.p12" -P "$PAKE_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+            security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+            security list-keychain -d user -s "$KEYCHAIN_PATH"
+
+            if [ -z "$SIGNING_IDENTITY" ]; then
+              SIGNING_IDENTITY="$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" | sed -n 's/.*"\(Developer ID Application:.*\)".*/\1/p' | head -n 1)"
+            fi
+          else
+            echo "No certificate secret configured, fallback to ad-hoc signing."
+          fi
+
+          if [ -z "$SIGNING_IDENTITY" ]; then
+            SIGNING_IDENTITY="-"
+          fi
+
+          SIGNING_IDENTITY="$SIGNING_IDENTITY" node <<'NODE'
+          const fs = require('fs');
+          const file = 'src-tauri/tauri.macos.conf.json';
+          const config = JSON.parse(fs.readFileSync(file, 'utf8'));
+          config.bundle ??= {};
+          config.bundle.macOS ??= {};
+          config.bundle.macOS.signingIdentity = process.env.SIGNING_IDENTITY || '-';
+          fs.writeFileSync(file, `${JSON.stringify(config, null, 2)}\n`);
+          NODE
+
+          echo "Using signing identity: $SIGNING_IDENTITY"
 
       - name: Build for Linux
         if: matrix.os == 'ubuntu-latest'
@@ -166,6 +219,36 @@ jobs:
             find . -name "*.dmg" -type f
             exit 1
           fi
+
+      - name: Notarize macOS DMG
+        if: matrix.os == 'macos-latest'
+        env:
+          PAKE_NOTARIZE_APPLE_ID: ${{ secrets.PAKE_NOTARIZE_APPLE_ID }}
+          PAKE_NOTARIZE_TEAM_ID: ${{ secrets.PAKE_NOTARIZE_TEAM_ID }}
+          PAKE_NOTARIZE_PASSWORD: ${{ secrets.PAKE_NOTARIZE_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${PAKE_NOTARIZE_APPLE_ID:-}" ] || [ -z "${PAKE_NOTARIZE_TEAM_ID:-}" ] || [ -z "${PAKE_NOTARIZE_PASSWORD:-}" ]; then
+            echo "Notarization secrets not configured, skipping notarization."
+            exit 0
+          fi
+
+          DMG_PATH="output/macos/${{inputs.title}}.dmg"
+          if [ ! -f "$DMG_PATH" ]; then
+            echo "Error: DMG file not found at $DMG_PATH"
+            exit 1
+          fi
+
+          echo "Submitting DMG to Apple notarization service..."
+          xcrun notarytool submit "$DMG_PATH" \
+            --apple-id "$PAKE_NOTARIZE_APPLE_ID" \
+            --team-id "$PAKE_NOTARIZE_TEAM_ID" \
+            --password "$PAKE_NOTARIZE_PASSWORD" \
+            --wait
+
+          echo "Stapling notarization ticket..."
+          xcrun stapler staple "$DMG_PATH"
 
       - name: Build for Windows
         if: matrix.os == 'windows-latest'
