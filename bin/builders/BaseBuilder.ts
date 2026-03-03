@@ -1,3 +1,4 @@
+import os from 'os';
 import path from 'path';
 import fsExtra from 'fs-extra';
 import chalk from 'chalk';
@@ -312,14 +313,32 @@ export default abstract class BaseBuilder {
     appName: string,
   ): Promise<void> {
     const { execa } = await import('execa');
-    const volumePath = `/Volumes/${appName}`;
-    const appSource = path.join(volumePath, `${appName}.app`);
-    const appDest = `/Applications/${appName}.app`;
+    const mountRoot = path.join(os.tmpdir(), 'pake-install-');
+    const mountPoint = await fsExtra.mkdtemp(mountRoot);
+    let attached = false;
 
     try {
       logger.info(`- Installing ${appName} to /Applications...`);
 
-      await execa('hdiutil', ['attach', dmgPath]);
+      await execa('hdiutil', [
+        'attach',
+        dmgPath,
+        '-nobrowse',
+        '-readonly',
+        '-mountpoint',
+        mountPoint,
+      ]);
+      attached = true;
+
+      const entries = await fsExtra.readdir(mountPoint);
+      const appBundleName = entries.find((entry) => entry.endsWith('.app'));
+
+      if (!appBundleName) {
+        throw new Error('No .app bundle found inside mounted DMG');
+      }
+
+      const appSource = path.join(mountPoint, appBundleName);
+      const appDest = path.join('/Applications', appBundleName);
 
       // Remove existing installation if present
       if (await fsExtra.pathExists(appDest)) {
@@ -327,18 +346,27 @@ export default abstract class BaseBuilder {
       }
 
       await fsExtra.copy(appSource, appDest);
-      await execa('hdiutil', ['detach', volumePath]);
+
+      await execa('hdiutil', ['detach', mountPoint]);
+      attached = false;
       await fsExtra.remove(dmgPath);
 
-      logger.success(`✔ ${appName} installed to /Applications`);
+      logger.success(
+        `✔ ${appBundleName.replace(/\.app$/, '')} installed to /Applications`,
+      );
       logger.success(`✔ Installer DMG removed`);
     } catch (error) {
-      // Attempt cleanup on failure
-      try {
-        await execa('hdiutil', ['detach', volumePath]).catch(() => {});
-      } catch {}
       logger.error(`✕ Failed to install ${appName}: ${error}`);
       logger.info(`  The DMG is still available at: ${dmgPath}`);
+    } finally {
+      if (attached) {
+        await execa('hdiutil', ['detach', mountPoint]).catch(async () => {
+          await execa('hdiutil', ['detach', mountPoint, '-force']).catch(
+            () => undefined,
+          );
+        });
+      }
+      await fsExtra.remove(mountPoint).catch(() => undefined);
     }
   }
 
