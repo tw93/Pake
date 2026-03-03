@@ -962,6 +962,38 @@ class BaseBuilder {
             const binaryPath = this.getRawBinaryPath(name);
             logger.success('✔ Raw binary located in', path.resolve(binaryPath));
         }
+        // Auto-install to /Applications on macOS
+        if (IS_MAC && fileType === 'dmg' && this.options.install) {
+            await this.installDmgToApplications(distPath, name);
+        }
+    }
+    async installDmgToApplications(dmgPath, appName) {
+        const { execa } = await import('execa');
+        const volumePath = `/Volumes/${appName}`;
+        const appSource = path.join(volumePath, `${appName}.app`);
+        const appDest = `/Applications/${appName}.app`;
+        try {
+            logger.info(`- Installing ${appName} to /Applications...`);
+            await execa('hdiutil', ['attach', dmgPath]);
+            // Remove existing installation if present
+            if (await fsExtra.pathExists(appDest)) {
+                await fsExtra.remove(appDest);
+            }
+            await fsExtra.copy(appSource, appDest);
+            await execa('hdiutil', ['detach', volumePath]);
+            await fsExtra.remove(dmgPath);
+            logger.success(`✔ ${appName} installed to /Applications`);
+            logger.success(`✔ Installer DMG removed`);
+        }
+        catch (error) {
+            // Attempt cleanup on failure
+            try {
+                await execa('hdiutil', ['detach', volumePath]).catch(() => { });
+            }
+            catch { }
+            logger.error(`✕ Failed to install ${appName}: ${error}`);
+            logger.info(`  The DMG is still available at: ${dmgPath}`);
+        }
     }
     getFileType(target) {
         return target;
@@ -2051,6 +2083,7 @@ const DEFAULT_PAKE_OPTIONS = {
     minHeight: 0,
     ignoreCertificateErrors: false,
     newWindow: false,
+    install: false,
 };
 
 function validateNumberInput(value) {
@@ -2210,6 +2243,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .addOption(new Option('--new-window', 'Allow new window for third-party login')
         .default(DEFAULT_PAKE_OPTIONS.newWindow)
         .hideHelp())
+        .option('--install', 'Auto-install app to /Applications (macOS) after build and remove installer', DEFAULT_PAKE_OPTIONS.install)
         .version(packageJson.version, '-v, --version')
         .configureHelp({
         sortSubcommands: true,

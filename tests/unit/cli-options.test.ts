@@ -21,4 +21,11 @@ describe('CLI options', () => {
     expect(option).toBeDefined();
     expect(option?.defaultValue).toBe('');
   });
+
+  it('registers --install option', () => {
+    const option = program.options.find((item) => item.long === '--install');
+
+    expect(option).toBeDefined();
+    expect(option?.defaultValue).toBe(false);
+  });
 });

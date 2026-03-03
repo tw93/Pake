@@ -300,6 +300,46 @@ export default abstract class BaseBuilder {
       const binaryPath = this.getRawBinaryPath(name);
       logger.success('✔ Raw binary located in', path.resolve(binaryPath));
     }
+
+    // Auto-install to /Applications on macOS
+    if (IS_MAC && fileType === 'dmg' && this.options.install) {
+      await this.installDmgToApplications(distPath, name);
+    }
+  }
+
+  private async installDmgToApplications(
+    dmgPath: string,
+    appName: string,
+  ): Promise<void> {
+    const { execa } = await import('execa');
+    const volumePath = `/Volumes/${appName}`;
+    const appSource = path.join(volumePath, `${appName}.app`);
+    const appDest = `/Applications/${appName}.app`;
+
+    try {
+      logger.info(`- Installing ${appName} to /Applications...`);
+
+      await execa('hdiutil', ['attach', dmgPath]);
+
+      // Remove existing installation if present
+      if (await fsExtra.pathExists(appDest)) {
+        await fsExtra.remove(appDest);
+      }
+
+      await fsExtra.copy(appSource, appDest);
+      await execa('hdiutil', ['detach', volumePath]);
+      await fsExtra.remove(dmgPath);
+
+      logger.success(`✔ ${appName} installed to /Applications`);
+      logger.success(`✔ Installer DMG removed`);
+    } catch (error) {
+      // Attempt cleanup on failure
+      try {
+        await execa('hdiutil', ['detach', volumePath]).catch(() => {});
+      } catch {}
+      logger.error(`✕ Failed to install ${appName}: ${error}`);
+      logger.info(`  The DMG is still available at: ${dmgPath}`);
+    }
   }
 
   protected getFileType(target: string): string {
