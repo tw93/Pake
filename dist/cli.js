@@ -4,9 +4,9 @@ import updateNotifier from 'update-notifier';
 import path from 'path';
 import fsExtra from 'fs-extra';
 import { fileURLToPath } from 'url';
+import os from 'os';
 import chalk from 'chalk';
 import prompts from 'prompts';
-import os from 'os';
 import { execa, execaSync } from 'execa';
 import crypto from 'crypto';
 import ora from 'ora';
@@ -961,6 +961,57 @@ class BaseBuilder {
         if (this.options.keepBinary) {
             const binaryPath = this.getRawBinaryPath(name);
             logger.success('✔ Raw binary located in', path.resolve(binaryPath));
+        }
+        // Auto-install to /Applications on macOS
+        if (IS_MAC && fileType === 'dmg' && this.options.install) {
+            await this.installDmgToApplications(distPath, name);
+        }
+    }
+    async installDmgToApplications(dmgPath, appName) {
+        const { execa } = await import('execa');
+        const mountRoot = path.join(os.tmpdir(), 'pake-install-');
+        const mountPoint = await fsExtra.mkdtemp(mountRoot);
+        let attached = false;
+        try {
+            logger.info(`- Installing ${appName} to /Applications...`);
+            await execa('hdiutil', [
+                'attach',
+                dmgPath,
+                '-nobrowse',
+                '-readonly',
+                '-mountpoint',
+                mountPoint,
+            ]);
+            attached = true;
+            const entries = await fsExtra.readdir(mountPoint);
+            const appBundleName = entries.find((entry) => entry.endsWith('.app'));
+            if (!appBundleName) {
+                throw new Error('No .app bundle found inside mounted DMG');
+            }
+            const appSource = path.join(mountPoint, appBundleName);
+            const appDest = path.join('/Applications', appBundleName);
+            // Remove existing installation if present
+            if (await fsExtra.pathExists(appDest)) {
+                await fsExtra.remove(appDest);
+            }
+            await fsExtra.copy(appSource, appDest);
+            await execa('hdiutil', ['detach', mountPoint]);
+            attached = false;
+            await fsExtra.remove(dmgPath);
+            logger.success(`✔ ${appBundleName.replace(/\.app$/, '')} installed to /Applications`);
+            logger.success(`✔ Installer DMG removed`);
+        }
+        catch (error) {
+            logger.error(`✕ Failed to install ${appName}: ${error}`);
+            logger.info(`  The DMG is still available at: ${dmgPath}`);
+        }
+        finally {
+            if (attached) {
+                await execa('hdiutil', ['detach', mountPoint]).catch(async () => {
+                    await execa('hdiutil', ['detach', mountPoint, '-force']).catch(() => undefined);
+                });
+            }
+            await fsExtra.remove(mountPoint).catch(() => undefined);
         }
     }
     getFileType(target) {
@@ -2051,6 +2102,7 @@ const DEFAULT_PAKE_OPTIONS = {
     minHeight: 0,
     ignoreCertificateErrors: false,
     newWindow: false,
+    install: false,
 };
 
 function validateNumberInput(value) {
@@ -2210,6 +2262,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .addOption(new Option('--new-window', 'Allow new window for third-party login')
         .default(DEFAULT_PAKE_OPTIONS.newWindow)
         .hideHelp())
+        .option('--install', 'Auto-install app to /Applications (macOS) after build and remove installer', DEFAULT_PAKE_OPTIONS.install)
         .version(packageJson.version, '-v, --version')
         .configureHelp({
         sortSubcommands: true,
