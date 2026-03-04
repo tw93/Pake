@@ -38,3 +38,9 @@ src-tauri/.cargo/
 src-tauri/.pake/
 src-tauri/gen
 *.tmp
+
+# AI assistant docs (do not commit)
+.claude/
+AGENTS.md
+AGENT.md
+CLAUDE.md
