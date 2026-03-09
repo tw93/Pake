@@ -526,7 +526,7 @@ pake ./my-app/index.html --name "my-app" --use-local-file
 
 #### [new-window]
 
-允许弹出新窗口，适用于第三方登录授权。
+允许网站打开新窗口，例如登录授权弹窗、额外标签页或分支会话页面。
 
 ```shell
 --new-window

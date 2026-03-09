@@ -2231,7 +2231,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .addOption(new Option('--iterative-build', 'Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging')
         .default(DEFAULT_PAKE_OPTIONS.iterativeBuild)
         .hideHelp())
-        .addOption(new Option('--new-window', 'Allow new window for third-party login')
+        .addOption(new Option('--new-window', 'Allow sites to open new windows (for auth flows, tabs, branches)')
         .default(DEFAULT_PAKE_OPTIONS.newWindow)
         .hideHelp())
         .option('--install', 'Auto-install app to /Applications (macOS) after build and remove local bundle', DEFAULT_PAKE_OPTIONS.install)

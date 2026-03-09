@@ -6,6 +6,8 @@
     "macOS": {
       "signingIdentity": "-",
       "hardenedRuntime": true,
+      "entitlements": "entitlements.plist",
+      "infoPlist": "Info.plist",
       "dmg": {
         "background": "assets/macos/dmg/background.png",
         "windowSize": {

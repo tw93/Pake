@@ -26,6 +26,10 @@ on:
       icon:
         description: "App Icon"
         required: false
+      new_window:
+        description: "Allow sites to open new windows"
+        required: false
+        default: false
   workflow_call:
     inputs:
       name:
@@ -52,6 +56,11 @@ on:
         description: "App Icon"
         type: string
         required: false
+      new_window:
+        description: "Allow sites to open new windows"
+        type: boolean
+        required: false
+        default: false
     secrets:
       PAKE_SIGNING_IDENTITY:
         required: false
@@ -174,6 +183,10 @@ jobs:
             ARGS+=("--icon" "src-tauri/png/${{ inputs.name }}_512.png")
           fi
 
+          if [ "${{ inputs.new_window }}" = "true" ]; then
+            ARGS+=("--new-window")
+          fi
+
           # Build once with multiple targets (faster than separate builds)
           node dist/cli.js "${ARGS[@]}" --targets deb,appimage
 
@@ -215,6 +228,10 @@ jobs:
             ARGS+=("--icon" "${{ inputs.icon }}")
           elif [ -f "src-tauri/icons/${{ inputs.name }}.icns" ]; then
             ARGS+=("--icon" "src-tauri/icons/${{ inputs.name }}.icns")
+          fi
+
+          if [ "${{ inputs.new_window }}" = "true" ]; then
+            ARGS+=("--new-window")
           fi
 
           node dist/cli.js "${ARGS[@]}" --targets universal --multi-arch
@@ -280,6 +297,10 @@ jobs:
             $args += "--icon", "${{ inputs.icon }}"
           } elseif (Test-Path "src-tauri\png\${{ inputs.name }}_256.ico") {
             $args += "--icon", "src-tauri\png\${{ inputs.name }}_256.ico"
+          }
+
+          if ("${{ inputs.new_window }}" -eq "true") {
+            $args += "--new-window"
           }
 
           $args += "--targets", "x64"

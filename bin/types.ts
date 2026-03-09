@@ -121,7 +121,7 @@ export interface PakeCliOptions {
   // Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging
   iterativeBuild: boolean;
 
-  // Allow new window for third-party login, default false
+  // Allow sites to open new windows, default false
   newWindow: boolean;
 
   // Auto-install app to /Applications (macOS) after build, default false

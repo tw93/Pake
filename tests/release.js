@@ -66,7 +66,7 @@ class ReleaseBuildTest {
 
       // Build the app using CLI directly
       this.log("DEBUG", "Building app package...");
-      const commonArgs = "--iterative-build --debug";
+      const commonArgs = `${config.new_window ? "--new-window " : ""}--iterative-build --debug`;
       const cmd = `node dist/cli.js ${config.url} --name ${config.name} --icon ${config.icon} ${commonArgs}`;
 
       try {

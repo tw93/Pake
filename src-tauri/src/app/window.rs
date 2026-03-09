@@ -1,7 +1,10 @@
 use crate::app::config::PakeConfig;
 use crate::util::get_data_dir;
 use std::{path::PathBuf, str::FromStr, sync::Mutex};
-use tauri::{AppHandle, Config, Manager, Url, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
+use tauri::{
+    webview::{NewWindowFeatures, NewWindowResponse},
+    AppHandle, Config, Manager, Url, WebviewUrl, WebviewWindow, WebviewWindowBuilder,
+};
 
 #[cfg(target_os = "macos")]
 use tauri::{Theme, TitleBarStyle};
@@ -54,6 +57,31 @@ pub fn open_additional_window(app: &AppHandle) -> tauri::Result<WebviewWindow> {
     build_window_with_label(app, &state.pake_config, &state.tauri_config, &label)
 }
 
+fn open_requested_window(
+    app: &AppHandle,
+    config: &PakeConfig,
+    tauri_config: &Config,
+    target_url: Url,
+    features: NewWindowFeatures,
+) -> tauri::Result<WebviewWindow> {
+    let state = app.state::<MultiWindowState>();
+    let label = state.next_window_label();
+    let window = build_window(
+        app,
+        config,
+        tauri_config,
+        &label,
+        WebviewUrl::External("about:blank".parse().unwrap()),
+        true,
+        Some(features),
+    )?;
+
+    let _ = window.set_title(target_url.as_str());
+    let _ = window.set_focus();
+
+    Ok(window)
+}
+
 pub fn open_additional_window_safe(app: &AppHandle) {
     #[cfg(target_os = "windows")]
     {
@@ -81,6 +109,28 @@ fn build_window_with_label(
     tauri_config: &Config,
     label: &str,
 ) -> tauri::Result<WebviewWindow> {
+    let window_config = config
+        .windows
+        .first()
+        .expect("At least one window configuration is required");
+    let url = match window_config.url_type.as_str() {
+        "web" => WebviewUrl::App(window_config.url.parse().unwrap()),
+        "local" => WebviewUrl::App(PathBuf::from(&window_config.url)),
+        _ => panic!("url type can only be web or local"),
+    };
+
+    build_window(app, config, tauri_config, label, url, false, None)
+}
+
+fn build_window(
+    app: &AppHandle,
+    config: &PakeConfig,
+    tauri_config: &Config,
+    label: &str,
+    url: WebviewUrl,
+    visible: bool,
+    new_window_features: Option<NewWindowFeatures>,
+) -> tauri::Result<WebviewWindow> {
     let package_name = tauri_config.clone().product_name.unwrap();
     let _data_dir = get_data_dir(app, package_name);
 
@@ -90,12 +140,6 @@ fn build_window_with_label(
         .expect("At least one window configuration is required");
 
     let user_agent = config.user_agent.get();
-
-    let url = match window_config.url_type.as_str() {
-        "web" => WebviewUrl::App(window_config.url.parse().unwrap()),
-        "local" => WebviewUrl::App(PathBuf::from(&window_config.url)),
-        _ => panic!("url type can only be web or local"),
-    };
 
     let config_script = format!(
         "window.pakeConfig = {}",
@@ -113,7 +157,7 @@ fn build_window_with_label(
 
     let mut window_builder = WebviewWindowBuilder::new(app, label, url)
         .title(effective_title)
-        .visible(false)
+        .visible(visible)
         .user_agent(user_agent)
         .resizable(window_config.resizable)
         .maximized(window_config.maximize);
@@ -164,8 +208,24 @@ fn build_window_with_label(
     }
 
     if window_config.new_window {
-        window_builder = window_builder
-            .on_new_window(move |_url, _features| tauri::webview::NewWindowResponse::Allow);
+        let app_handle = app.clone();
+        let popup_config = config.clone();
+        let popup_tauri_config = tauri_config.clone();
+        window_builder = window_builder.on_new_window(move |target_url, features| {
+            match open_requested_window(
+                &app_handle,
+                &popup_config,
+                &popup_tauri_config,
+                target_url,
+                features,
+            ) {
+                Ok(window) => NewWindowResponse::Create { window },
+                Err(error) => {
+                    eprintln!("[Pake] Failed to open requested window: {error}");
+                    NewWindowResponse::Deny
+                }
+            }
+        });
     }
 
     // Add initialization scripts
@@ -283,6 +343,10 @@ fn build_window_with_label(
         window_builder = window_builder.proxy_url(proxy_url);
         #[cfg(debug_assertions)]
         println!("Proxy configured: {}", config.proxy_url);
+    }
+
+    if let Some(features) = new_window_features {
+        window_builder = window_builder.window_features(features).focused(true);
     }
 
     // Allow navigation to OAuth/authentication domains

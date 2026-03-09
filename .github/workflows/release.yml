@@ -96,6 +96,7 @@ jobs:
       name_zh: ${{ matrix.config.name_zh }}
       url: ${{ matrix.config.url }}
       icon: ${{ matrix.config.icon }}
+      new_window: ${{ matrix.config.new_window || false }}
 
   # Publish Docker image (runs in parallel with app builds)
   publish-docker:

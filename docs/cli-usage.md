@@ -528,7 +528,7 @@ Ignore TLS certificate validation errors when loading the target URL. Useful for
 
 #### [new-window]
 
-Allow new window for third-party login authorization.
+Allow sites to open new windows, such as authentication popups, extra tabs, or branch views.
 
 ```shell
 --new-window
