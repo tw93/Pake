@@ -177,7 +177,7 @@ First-time packaging requires environment setup and may be slower, subsequent bu
 
 ## Development
 
-Requires Rust `>=1.85` and Node `>=22`. For detailed installation guide, see [Tauri documentation](https://tauri.app/start/prerequisites/). If unfamiliar with development environment, use the CLI tool instead.
+Requires Rust `>=1.85` and Node `>=22`. For detailed installation guide, see [Tauri documentation](https://v2.tauri.app/start/prerequisites/). If unfamiliar with development environment, use the CLI tool instead.
 
 ```bash
 # Install dependencies

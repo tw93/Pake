@@ -465,7 +465,7 @@ pake https://chat.example.com --name ChatApp --multi-window
 
 #### [installer-language]
 
-设置 Windows 安装包语言。支持 `zh-CN`、`ja-JP`，更多在 [Tauri 文档](https://tauri.app/distribute/windows-installer/#internationalization)。默认为 `en-US`。
+设置 Windows 安装包语言。支持 `zh-CN`、`ja-JP`，更多在 [Tauri 文档](https://v2.tauri.app/distribute/windows-installer/#internationalization)。默认为 `en-US`。
 
 ```shell
 --installer-language <language>

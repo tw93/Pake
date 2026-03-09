@@ -169,7 +169,7 @@ pake ./my-app/index.html --name my-static-app --use-local-file
 
 **Windows:**
 
-- **重要**：请先参阅 [Tauri 依赖项指南](https://tauri.app/start/prerequisites/)
+- **重要**：请先参阅 [Tauri 依赖项指南](https://v2.tauri.app/start/prerequisites/)
 - Windows 10 SDK (10.0.19041.0) 和 Visual Studio Build Tools 2022 (≥17.2)
 - 必需的运行库：
   1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
@@ -252,78 +252,51 @@ pnpm run cli:dev
 
 ### 测试指南
 
-统一的 CLI 构建测试套件，用于验证多平台打包功能。
+统一的 CLI 构建与发布验证指南，用于验证多平台打包功能。
 
 #### 运行测试
 
 ```bash
 # 完整测试套件（推荐）
-pnpm test                   # 运行完整测试套件，包含真实构建测试（8-12分钟）
+pnpm test                   # 构建 CLI，运行 Vitest 套件，再执行真实构建和发布流程 smoke test
 
-# 开发时快速测试
-pnpm test -- --no-build     # 跳过构建测试，仅验证核心功能（30秒）
+# 跳过真实构建和发布流程 smoke test
+pnpm test -- --no-build
+
+# 仅运行快速 Vitest 套件
+npx vitest run
 
 # 构建 CLI 以供测试
 pnpm run cli:build
+
+# 单独运行发布流程 smoke test
+node ./tests/release.js
 ```
 
 #### 🚀 完整测试套件包含
 
-- ✅ **单元测试**：CLI命令、参数验证、响应时间
-- ✅ **集成测试**：进程管理、文件权限、依赖解析
-- ✅ **构建器测试**：平台检测、架构检测、文件命名
-- ✅ **真实构建测试**：完整的GitHub.com应用打包验证
+- ✅ **Vitest 套件**：单元、集成、构建器和 CLI 选项覆盖
+- ✅ **真实构建 smoke test**：按平台验证实际打包流程
+- ✅ **发布流程 smoke test**：验证 popular apps 的发布构建路径
 
 #### 测试内容详情
 
-**单元测试（6个）**
+- `pnpm test` 会运行 [`tests/index.js`](../tests/index.js) 这个主测试入口，它会：
+- 先构建 CLI，
+- 再运行 Vitest 套件，
+- 如果没有传 `--no-build`，继续执行真实构建 smoke test，
+- 然后在真实构建成功后继续执行发布流程 smoke test。
 
-- 版本命令 (`--version`)
-- 帮助命令 (`--help`)
-- URL 验证（有效/无效链接）
-- 参数验证（数字类型检查）
-- CLI 响应时间（<2秒）
-- Weekly URL 可访问性
+常用可选参数：
 
-**集成测试（3个）**
+- `--no-unit`：跳过单元测试
+- `--no-integration`：跳过集成测试
+- `--no-builder`：跳过构建器测试
+- `--no-build`：跳过真实构建 smoke test 以及后续的发布流程 smoke test
+- `--e2e`：增加端到端配置测试
+- `--pake-cli`：增加 GitHub Actions 相关检查
 
-- 进程生成和管理
-- 文件系统权限检查
-- 依赖包解析验证
-
-**构建测试（3个）**
-
-- 平台检测（macOS/Windows/Linux）
-- 架构检测（Intel/ARM64）
-- 文件命名模式验证
-
-**真实构建测试（重点）**
-
-_macOS_: 🔥 多架构构建（通用二进制）
-
-- 编译 Intel + Apple Silicon 双架构
-- 检测 `.app` 文件生成：`GitHubMultiArch.app`
-- 备用检测：`src-tauri/target/universal-apple-darwin/release/bundle/macos/`
-- 验证通用二进制：`file` 命令检查架构
-
-_Windows_: 单架构构建
-
-- 检测 EXE 文件：`src-tauri/target/x86_64-pc-windows-msvc/release/pake.exe`
-- 检测 MSI 安装包：`src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi`
-
-_Linux_: 单架构构建
-
-- 检测 DEB 包：`src-tauri/target/release/bundle/deb/*.deb`
-- 检测 AppImage：`src-tauri/target/release/bundle/appimage/*.AppImage`
-
-#### 发布构建测试
-
-```bash
-# 实际构建测试（固定测试 weread + twitter 两个应用）
-node ./tests/release.js
-```
-
-真实构建2个应用包，验证完整的打包流程和 release.yml 逻辑是否正常工作。
+如果只想单独验证发布流程，可以直接运行 `node ./tests/release.js`。
 
 #### 故障排除
 
@@ -331,8 +304,6 @@ node ./tests/release.js
 - **测试超时**：构建测试需要较长时间完成
 - **构建失败**：检查 Rust 工具链 `rustup update`
 - **权限错误**：确保有写入权限
-
-总计：**13 个测试**，全部通过表示 CLI 功能正常。提交代码前建议运行 `pnpm test` 确保所有平台构建正常。
 
 ### 常见构建问题
 

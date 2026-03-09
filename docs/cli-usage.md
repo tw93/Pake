@@ -467,7 +467,7 @@ pake https://chat.example.com --name ChatApp --multi-window
 
 #### [installer-language]
 
-Set the Windows Installer language. Options include `zh-CN`, `ja-JP`, More at [Tauri Document](https://tauri.app/distribute/windows-installer/#internationalization). Default is `en-US`.
+Set the Windows Installer language. Options include `zh-CN`, `ja-JP`, More at [Tauri docs](https://v2.tauri.app/distribute/windows-installer/#internationalization). Default is `en-US`.
 
 ```shell
 --installer-language <language>

@@ -169,7 +169,7 @@ Understanding Pake's codebase structure will help you navigate and contribute ef
 
 **Windows:**
 
-- **CRITICAL**: Consult [Tauri prerequisites](https://tauri.app/start/prerequisites/) before proceeding
+- **CRITICAL**: Consult [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) before proceeding
 - Windows 10 SDK (10.0.19041.0) and Visual Studio Build Tools 2022 (≥17.2)
 - Required redistributables:
   1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
@@ -252,78 +252,51 @@ This script reads the configuration and packages the specified app in watch mode
 
 ### Testing Guide
 
-Comprehensive CLI build test suite for validating multi-platform packaging functionality.
+Comprehensive CLI build and release validation guidance for multi-platform packaging.
 
 #### Running Tests
 
 ```bash
 # Complete test suite (recommended)
-pnpm test                   # Run full test suite including real build tests (8-12 minutes)
+pnpm test                   # Build the CLI, run the Vitest suite, then run real build + release workflow smoke tests
 
-# Quick testing during development
-pnpm test -- --no-build     # Skip build tests, validate core functionality only (30 seconds)
+# Skip the real build and release workflow smoke tests
+pnpm test -- --no-build
 
-# Build CLI for testing
+# Run the fast Vitest suite only
+npx vitest run
+
+# Build the CLI explicitly
 pnpm run cli:build
+
+# Run the release workflow smoke test directly
+node ./tests/release.js
 ```
 
 #### 🚀 Complete Test Suite Includes
 
-- ✅ **Unit Tests**: CLI commands, parameter validation, response time
-- ✅ **Integration Tests**: Process management, file permissions, dependency resolution
-- ✅ **Builder Tests**: Platform detection, architecture detection, file naming
-- ✅ **Real Build Tests**: Complete GitHub.com app packaging validation
+- ✅ **Vitest suite**: unit, integration, builder, and CLI option coverage
+- ✅ **Real build smoke test**: platform-aware packaging validation
+- ✅ **Release workflow smoke test**: verifies the release build path used for popular apps
 
 #### Test Details
 
-**Unit Tests (6 tests)**
+- `pnpm test` runs the main CLI test runner in [`tests/index.js`](../tests/index.js), which:
+- builds the CLI,
+- runs the Vitest suite,
+- runs the real build smoke test unless `--no-build` is passed,
+- and then runs the release workflow smoke test when the real build phase succeeds.
 
-- Version command (`--version`)
-- Help command (`--help`)
-- URL validation (valid/invalid links)
-- Parameter validation (number type checking)
-- CLI response time (<2 seconds)
-- Weekly URL accessibility
+Useful optional flags:
 
-**Integration Tests (3 tests)**
+- `--no-unit`: skip unit tests
+- `--no-integration`: skip integration tests
+- `--no-builder`: skip builder tests
+- `--no-build`: skip the real build smoke test and the follow-up release workflow smoke test
+- `--e2e`: add end-to-end configuration tests
+- `--pake-cli`: add GitHub Actions related checks
 
-- Process spawning and management
-- File system permission checks
-- Dependency package resolution validation
-
-**Builder Tests (3 tests)**
-
-- Platform detection (macOS/Windows/Linux)
-- Architecture detection (Intel/ARM64)
-- File naming pattern verification
-
-**Real Build Tests (Focus)**
-
-_macOS_: 🔥 Multi-architecture build (Universal binary)
-
-- Compile Intel + Apple Silicon dual architecture
-- Detect `.app` file generation: `GitHubMultiArch.app`
-- Fallback detection: `src-tauri/target/universal-apple-darwin/release/bundle/macos/`
-- Verify universal binary: `file` command architecture check
-
-_Windows_: Single architecture build
-
-- Detect EXE file: `src-tauri/target/x86_64-pc-windows-msvc/release/pake.exe`
-- Detect MSI installer: `src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi`
-
-_Linux_: Single architecture build
-
-- Detect DEB package: `src-tauri/target/release/bundle/deb/*.deb`
-- Detect AppImage: `src-tauri/target/release/bundle/appimage/*.AppImage`
-
-#### Release Build Testing
-
-```bash
-# Actual build testing (tests weread + twitter apps)
-node ./tests/release.js
-```
-
-Real build of 2 application packages to verify complete packaging flow and release.yml logic.
+If you only want the release workflow smoke test, run `node ./tests/release.js` directly.
 
 #### Troubleshooting
 
@@ -331,8 +304,6 @@ Real build of 2 application packages to verify complete packaging flow and relea
 - **Test timeout**: Build tests require extended time to complete
 - **Build failures**: Check Rust toolchain with `rustup update`
 - **Permission errors**: Ensure write permissions are available
-
-Total: **13 tests** - all passing indicates CLI functionality is working properly. Recommend running `pnpm test` before code commits to ensure all platforms build correctly.
 
 ### Common Build Issues
 
