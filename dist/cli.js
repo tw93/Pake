@@ -962,6 +962,27 @@ class BaseBuilder {
             const binaryPath = this.getRawBinaryPath(name);
             logger.success('✔ Raw binary located in', path.resolve(binaryPath));
         }
+        if (IS_MAC && fileType === 'app' && this.options.install) {
+            await this.installAppToApplications(distPath, name);
+        }
+    }
+    async installAppToApplications(appBundlePath, appName) {
+        try {
+            logger.info(`- Installing ${appName} to /Applications...`);
+            const appBundleName = path.basename(appBundlePath);
+            const appDest = path.join('/Applications', appBundleName);
+            if (await fsExtra.pathExists(appDest)) {
+                await fsExtra.remove(appDest);
+            }
+            await fsExtra.copy(appBundlePath, appDest);
+            await fsExtra.remove(appBundlePath);
+            logger.success(`✔ ${appBundleName.replace(/\.app$/, '')} installed to /Applications`);
+            logger.success('✔ Local app bundle removed');
+        }
+        catch (error) {
+            logger.error(`✕ Failed to install ${appName}: ${error}`);
+            logger.info(`  The app bundle is still available at: ${appBundlePath}`);
+        }
     }
     getFileType(target) {
         return target;
@@ -1162,7 +1183,9 @@ class MacBuilder extends BaseBuilder {
         this.buildArch = validArchs.includes(options.targets || '')
             ? options.targets
             : 'auto';
-        if (options.iterativeBuild || process.env.PAKE_CREATE_APP === '1') {
+        if (options.iterativeBuild ||
+            options.install ||
+            process.env.PAKE_CREATE_APP === '1') {
             this.buildFormat = 'app';
         }
         else {
@@ -2051,6 +2074,7 @@ const DEFAULT_PAKE_OPTIONS = {
     minHeight: 0,
     ignoreCertificateErrors: false,
     newWindow: false,
+    install: false,
 };
 
 function validateNumberInput(value) {
@@ -2210,6 +2234,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .addOption(new Option('--new-window', 'Allow new window for third-party login')
         .default(DEFAULT_PAKE_OPTIONS.newWindow)
         .hideHelp())
+        .option('--install', 'Auto-install app to /Applications (macOS) after build and remove local bundle', DEFAULT_PAKE_OPTIONS.install)
         .version(packageJson.version, '-v, --version')
         .configureHelp({
         sortSubcommands: true,

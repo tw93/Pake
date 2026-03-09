@@ -123,6 +123,9 @@ export interface PakeCliOptions {
 
   // Allow new window for third-party login, default false
   newWindow: boolean;
+
+  // Auto-install app to /Applications (macOS) after build, default false
+  install: boolean;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {

@@ -300,6 +300,37 @@ export default abstract class BaseBuilder {
       const binaryPath = this.getRawBinaryPath(name);
       logger.success('✔ Raw binary located in', path.resolve(binaryPath));
     }
+
+    if (IS_MAC && fileType === 'app' && this.options.install) {
+      await this.installAppToApplications(distPath, name);
+    }
+  }
+
+  private async installAppToApplications(
+    appBundlePath: string,
+    appName: string,
+  ): Promise<void> {
+    try {
+      logger.info(`- Installing ${appName} to /Applications...`);
+
+      const appBundleName = path.basename(appBundlePath);
+      const appDest = path.join('/Applications', appBundleName);
+
+      if (await fsExtra.pathExists(appDest)) {
+        await fsExtra.remove(appDest);
+      }
+
+      await fsExtra.copy(appBundlePath, appDest);
+      await fsExtra.remove(appBundlePath);
+
+      logger.success(
+        `✔ ${appBundleName.replace(/\.app$/, '')} installed to /Applications`,
+      );
+      logger.success('✔ Local app bundle removed');
+    } catch (error) {
+      logger.error(`✕ Failed to install ${appName}: ${error}`);
+      logger.info(`  The app bundle is still available at: ${appBundlePath}`);
+    }
   }
 
   protected getFileType(target: string): string {
