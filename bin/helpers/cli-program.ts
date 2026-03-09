@@ -244,7 +244,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     )
     .option(
       '--install',
-      'Auto-install app to /Applications (macOS) after build and remove installer',
+      'Auto-install app to /Applications (macOS) after build and remove local bundle',
       DEFAULT.install,
     )
     .version(packageJson.version, '-v, --version')
