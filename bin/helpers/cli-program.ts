@@ -223,6 +223,20 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     )
     .addOption(
       new Option(
+        '--refresh-interval <number>',
+        'Auto-refresh page interval in seconds (0 disables)',
+      )
+        .default(DEFAULT.refreshInterval)
+        .argParser((value) => {
+          const interval = parseInt(value);
+          if (isNaN(interval) || interval < 0) {
+            throw new Error('--refresh-interval must be a number >= 0');
+          }
+          return interval;
+        }),
+    )
+    .addOption(
+      new Option(
         '--ignore-certificate-errors',
         'Ignore certificate errors (for self-signed certificates)',
       )

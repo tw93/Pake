@@ -263,6 +263,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const pakeConfig = window["pakeConfig"] || {};
   const forceInternalNavigation = pakeConfig.force_internal_navigation === true;
   const internalUrlRegex = pakeConfig.internal_url_regex || "";
+  const refreshIntervalSeconds = Number(pakeConfig.refresh_interval || 0);
+  let autoRefreshTimer = null;
   let internalUrlPattern = null;
   if (internalUrlRegex) {
     try {
@@ -304,6 +306,60 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       if (/macintosh|mac os x/i.test(navigator.userAgent) && event.metaKey) {
         handleShortcut(event);
+      }
+    });
+  }
+
+  function shouldDeferAutoRefresh() {
+    if (document.hidden) {
+      return true;
+    }
+
+    const activeElement = document.activeElement;
+    if (!activeElement) {
+      return false;
+    }
+
+    const tagName = activeElement.tagName;
+    return (
+      activeElement.isContentEditable ||
+      tagName === "INPUT" ||
+      tagName === "TEXTAREA" ||
+      tagName === "SELECT"
+    );
+  }
+
+  function scheduleAutoRefresh(delayMs = refreshIntervalSeconds * 1000) {
+    if (refreshIntervalSeconds <= 0) {
+      return;
+    }
+
+    if (autoRefreshTimer) {
+      clearTimeout(autoRefreshTimer);
+    }
+
+    autoRefreshTimer = window.setTimeout(() => {
+      if (shouldDeferAutoRefresh()) {
+        scheduleAutoRefresh(5000);
+        return;
+      }
+
+      window.location.reload();
+    }, delayMs);
+  }
+
+  if (refreshIntervalSeconds > 0) {
+    scheduleAutoRefresh();
+
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) {
+        scheduleAutoRefresh();
+      }
+    });
+
+    window.addEventListener("beforeunload", () => {
+      if (autoRefreshTimer) {
+        clearTimeout(autoRefreshTimer);
       }
     });
   }

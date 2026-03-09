@@ -118,6 +118,9 @@ export interface PakeCliOptions {
   // Ignore certificate errors (for self-signed certs), default false
   ignoreCertificateErrors: boolean;
 
+  // Auto-refresh page interval in seconds, default 0 (disabled)
+  refreshInterval: number;
+
   // Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging
   iterativeBuild: boolean;
 
@@ -163,6 +166,7 @@ export interface WindowConfig {
   min_width: number;
   min_height: number;
   ignore_certificate_errors: boolean;
+  refresh_interval: number;
   new_window: boolean;
 }
 

@@ -29,4 +29,13 @@ describe('CLI options', () => {
     expect(option?.defaultValue).toBe(false);
     expect(option?.hidden).toBe(false);
   });
+
+  it('registers --refresh-interval option', () => {
+    const option = program.options.find(
+      (item) => item.long === '--refresh-interval',
+    );
+
+    expect(option).toBeDefined();
+    expect(option?.defaultValue).toBe(0);
+  });
 });

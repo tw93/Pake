@@ -78,6 +78,7 @@ export async function mergeConfig(
     minWidth,
     minHeight,
     ignoreCertificateErrors,
+    refreshInterval,
     newWindow,
   } = options;
 
@@ -108,6 +109,7 @@ export async function mergeConfig(
     min_width: minWidth,
     min_height: minHeight,
     ignore_certificate_errors: ignoreCertificateErrors,
+    refresh_interval: refreshInterval,
     new_window: newWindow,
   };
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });

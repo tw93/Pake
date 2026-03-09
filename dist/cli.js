@@ -484,7 +484,7 @@ async function mergeConfig(url, options, tauriConf) {
             await fsExtra.copy(sourcePath, destPath);
         }
     }));
-    const { width, height, fullscreen, maximize, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name = 'pake-app', resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, multiInstance, multiWindow, startToTray, forceInternalNavigation, internalUrlRegex, zoom, minWidth, minHeight, ignoreCertificateErrors, newWindow, } = options;
+    const { width, height, fullscreen, maximize, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name = 'pake-app', resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, multiInstance, multiWindow, startToTray, forceInternalNavigation, internalUrlRegex, zoom, minWidth, minHeight, ignoreCertificateErrors, refreshInterval, newWindow, } = options;
     const { platform } = process;
     const platformHideOnClose = hideOnClose ?? platform === 'darwin';
     const tauriConfWindowOptions = {
@@ -510,6 +510,7 @@ async function mergeConfig(url, options, tauriConf) {
         min_width: minWidth,
         min_height: minHeight,
         ignore_certificate_errors: ignoreCertificateErrors,
+        refresh_interval: refreshInterval,
         new_window: newWindow,
     };
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
@@ -2073,6 +2074,7 @@ const DEFAULT_PAKE_OPTIONS = {
     minWidth: 0,
     minHeight: 0,
     ignoreCertificateErrors: false,
+    refreshInterval: 0,
     newWindow: false,
     install: false,
 };
@@ -2225,6 +2227,15 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .default(DEFAULT_PAKE_OPTIONS.minHeight)
         .argParser(validateNumberInput)
         .hideHelp())
+        .addOption(new Option('--refresh-interval <number>', 'Auto-refresh page interval in seconds (0 disables)')
+        .default(DEFAULT_PAKE_OPTIONS.refreshInterval)
+        .argParser((value) => {
+        const interval = parseInt(value);
+        if (isNaN(interval) || interval < 0) {
+            throw new Error('--refresh-interval must be a number >= 0');
+        }
+        return interval;
+    }))
         .addOption(new Option('--ignore-certificate-errors', 'Ignore certificate errors (for self-signed certificates)')
         .default(DEFAULT_PAKE_OPTIONS.ignoreCertificateErrors)
         .hideHelp())

@@ -49,6 +49,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   minWidth: 0,
   minHeight: 0,
   ignoreCertificateErrors: false,
+  refreshInterval: 0,
   newWindow: false,
   install: false,
 };

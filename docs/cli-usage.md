@@ -370,6 +370,19 @@ Set the window title bar text. macOS shows no title if not specified; Windows/Li
 --title "Google Translate"
 ```
 
+#### [refresh-interval]
+
+Auto-refresh the current page at a fixed interval in seconds. Default is `0` (disabled).
+
+When enabled, Pake defers the refresh while the page is hidden or while the user is actively focused in an input, textarea, select, or contenteditable field.
+
+```shell
+--refresh-interval <number>
+
+# Example: refresh every 5 minutes
+pake https://news.ycombinator.com --name HackerNews --refresh-interval 300
+```
+
 #### [incognito]
 
 Launch the application in incognito/private browsing mode. Default is `false`. When enabled, the webview will run in private mode, which means it won't store cookies, local storage, or browsing history. This is useful for privacy-sensitive applications.
