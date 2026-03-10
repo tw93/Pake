@@ -3,13 +3,17 @@ use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder},
-    tray::TrayIconBuilder,
+    tray::{TrayIconBuilder, TrayIconEvent},
     AppHandle, Manager,
 };
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
-pub fn set_system_tray(app: &AppHandle, show_system_tray: bool) -> tauri::Result<()> {
+pub fn set_system_tray(
+    app: &AppHandle,
+    show_system_tray: bool,
+    tray_icon_path: &str,
+) -> tauri::Result<()> {
     if !show_system_tray {
         app.remove_tray_by_id("pake-tray");
         return Ok(());
@@ -44,7 +48,34 @@ pub fn set_system_tray(app: &AppHandle, show_system_tray: bool) -> tauri::Result
             }
             _ => (),
         })
-        .icon(app.default_window_icon().unwrap().clone())
+        .on_tray_icon_event(|tray, event| match event {
+            TrayIconEvent::Click { button, .. } => {
+                if button == tauri::tray::MouseButton::Left {
+                    if let Some(window) = tray.app_handle().get_webview_window("pake") {
+                        let is_visible = window.is_visible().unwrap_or(false);
+                        if is_visible {
+                            window.hide().unwrap();
+                        } else {
+                            window.show().unwrap();
+                            window.set_focus().unwrap();
+                        }
+                    }
+                }
+            }
+            _ => {}
+        })
+        .icon(if tray_icon_path.is_empty() {
+            app.default_window_icon()
+                .unwrap_or_else(|| panic!("Failed to get default window icon"))
+                .clone()
+        } else {
+            tauri::image::Image::from_path(tray_icon_path).unwrap_or_else(|_| {
+                // If custom tray icon fails to load, fallback to default
+                app.default_window_icon()
+                    .unwrap_or_else(|| panic!("Failed to get default window icon"))
+                    .clone()
+            })
+        })
         .build(app)?;
 
     tray.set_icon_as_template(false)?;

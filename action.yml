@@ -1,0 +1,112 @@
+name: "Pake Web App Builder"
+description: "Transform any webpage into a lightweight desktop app using Rust and Tauri"
+author: "tw93"
+branding:
+  icon: "package"
+  color: "blue"
+
+inputs:
+  url:
+    description: "Target URL to package"
+    required: true
+
+  name:
+    description: "Application name"
+    required: true
+
+  output-dir:
+    description: "Output directory for packages"
+    required: false
+    default: "dist"
+
+  icon:
+    description: "Custom app icon URL or path"
+    required: false
+
+  width:
+    description: "Window width"
+    required: false
+    default: "1200"
+
+  height:
+    description: "Window height"
+    required: false
+    default: "780"
+
+  debug:
+    description: "Enable debug mode"
+    required: false
+    default: "false"
+
+outputs:
+  package-path:
+    description: "Path to the generated package"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Environment
+      shell: bash
+      run: |
+        # Install Node.js dependencies
+        npm install
+
+        # Build Pake CLI if not exists
+        if [ ! -f "dist/cli.js" ]; then
+          npm run cli:build
+        fi
+
+        # Ensure node is accessible in subsequent steps
+        echo "$(npm bin)" >> $GITHUB_PATH
+
+        # Install Rust/Cargo if needed
+        if ! command -v cargo &> /dev/null; then
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          source ~/.cargo/env
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        fi
+
+    - name: Build Pake App
+      shell: bash
+      run: |
+        # Build arguments
+        ARGS=("${{ inputs.url }}")
+
+        ARGS+=("--name" "${{ inputs.name }}")
+
+        if [ -n "${{ inputs.icon }}" ]; then
+          ARGS+=("--icon" "${{ inputs.icon }}")
+        fi
+
+        ARGS+=("--width" "${{ inputs.width }}")
+        ARGS+=("--height" "${{ inputs.height }}")
+
+        if [ "${{ inputs.debug }}" == "true" ]; then
+          ARGS+=("--debug")
+        fi
+
+        # Create output directory
+        mkdir -p "${{ inputs.output-dir }}"
+        export PAKE_CREATE_APP=1
+
+        # Run Pake CLI
+        echo "🔧 Running: node dist/cli.js ${ARGS[*]}"
+        node dist/cli.js "${ARGS[@]}"
+
+        # Find generated package and set output
+        PACKAGE=$(find src-tauri/target -type f \( -name "*.deb" -o -name "*.exe" -o -name "*.msi" -o -name "*.dmg" \) 2>/dev/null | head -1)
+
+        # If no file packages found, look for .app directory (macOS)
+        if [ -z "$PACKAGE" ]; then
+          PACKAGE=$(find src-tauri/target -type d -name "*.app" 2>/dev/null | head -1)
+        fi
+        if [ -n "$PACKAGE" ]; then
+          # Move to output directory
+          BASENAME=$(basename "$PACKAGE")
+          mv "$PACKAGE" "${{ inputs.output-dir }}/$BASENAME" 2>/dev/null || cp -r "$PACKAGE" "${{ inputs.output-dir }}/$BASENAME"
+          echo "package-path=${{ inputs.output-dir }}/$BASENAME" >> $GITHUB_OUTPUT
+          echo "✅ Package created: ${{ inputs.output-dir }}/$BASENAME"
+        else
+          echo "❌ No package found"
+          exit 1
+        fi

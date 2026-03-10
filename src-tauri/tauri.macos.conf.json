@@ -2,7 +2,6 @@
   "bundle": {
     "icon": ["icons/goview_32.icns"],
     "active": true,
-    "macOS": {},
     "targets": ["dmg"]
   }
 }

@@ -1,0 +1,54 @@
+# Development files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Development directories
+node_modules/
+.vscode/
+.idea/
+
+# Build artifacts
+dist-ssr/
+*.local
+
+# Development configs
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+.nyc_output/
+
+# Documentation source
+docs/
+*.md
+!README.md
+
+# Development scripts
+script/
+rollup.config.js
+tsconfig.json
+.prettierrc*
+.eslintrc*
+
+# Tauri development files
+src-tauri/target/
+src-tauri/.cargo/config.toml
+src-tauri/.pake/
+src-tauri/gen/
+output/

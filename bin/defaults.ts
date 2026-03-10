@@ -5,6 +5,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   height: 832,
   width: 1200,
   fullscreen: false,
+  maximize: false,
   resizable: true,
   hideTitleBar: false,
   alwaysOnTop: false,
@@ -18,10 +19,18 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   targets: 'deb',
   useLocalFile: false,
   systemTrayIcon: '',
-  proxyUrl: "",
+  proxyUrl: '',
   debug: false,
   inject: [],
   installerLanguage: 'en-US',
+  hideOnClose: false, // Platform-specific: true for macOS, false for others
+  incognito: false,
+  wasm: false,
+  enableDragDrop: false,
+  keepBinary: false,
+  multiInstance: false,
+  startToTray: false,
+  forceInternalNavigation: false,
 };
 
 // Just for cli development

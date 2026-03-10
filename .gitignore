@@ -20,16 +20,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.npmrc
 output
 *.msi
 *.deb
 *.AppImage
 *.dmg
+*.app
 
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
 dist
 !dist/about_pake.html
 !dist/cli.js
@@ -39,3 +36,4 @@ src-tauri/.cargo/
 .next
 src-tauri/.pake/
 src-tauri/gen
+*.tmp

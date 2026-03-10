@@ -1,7 +1,7 @@
 {
   "productName": "GoviewPro",
   "identifier": "com.pake.GoviewPro",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "app": {
     "withGlobalTauri": true,
     "trayIcon": {
@@ -17,15 +17,9 @@
     "frontendDist": "http://goviewlink.com:5858",
     "devUrl": "http://localhost:8080"
   },
-  "bundle": {
-    "createUpdaterArtifacts": true
-  },
   "plugins": {
-    "updater": {
-      "pubkey": "your public key",
-      "endpoints": [
-        "https://github.com/username/reponame/releases/latest.json"
-      ]
+    "shell": {
+      "open": "^((mailto:\\w+)|(tel:\\w+)|(https?://\\w+)|(blob:.*)).+"
     }
   }
 }
