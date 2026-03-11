@@ -2,7 +2,6 @@
 !dist/.gitkeep
 !dist/about_pake.html
 !dist/cli.js
-.claude/
 .DS_Store
 .idea
 .next
