@@ -1,46 +1,45 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-output
-*.msi
-*.deb
-*.desktop
-*.AppImage
-*.dmg
-*.app
-
-dist
+!dist/.gitkeep
 !dist/about_pake.html
 !dist/cli.js
-!dist/.gitkeep
-src-tauri/.cargo/config.toml
-src-tauri/.cargo/
+.claude/
+.DS_Store
+.idea
 .next
+.vscode
+*.app
+*.AppImage
+*.deb
+*.desktop
+*.dmg
+*.local
+*.log
+*.msi
+*.njsproj
+*.ntvs*
+*.sln
+*.suo
+*.sw?
+*.tmp
+# AI assistant docs (do not commit)
+# AI Assistant files
+# Editor directories and files
+# Logs
+AGENT.md
+AGENTS.md
+CLAUDE.md
+dist
+dist-ssr
+journal/
+lerna-debug.log*
+logs
+node_modules
+npm-debug.log*
+output
+pnpm-debug.log*
+src-tauri/.cargo/
+src-tauri/.cargo/config.toml
 src-tauri/.pake/
 src-tauri/gen
-*.tmp
-
-# AI assistant docs (do not commit)
-.claude/
-AGENTS.md
-AGENT.md
-CLAUDE.md
+yarn-debug.log*
+yarn-error.log*
