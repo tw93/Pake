@@ -24,6 +24,7 @@
 # AI Assistant files
 # Editor directories and files
 # Logs
+.claude/
 AGENT.md
 AGENTS.md
 CLAUDE.md
