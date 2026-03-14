@@ -4,7 +4,11 @@ import logger from '@/options/logger';
 
 import { handleIcon } from './icon';
 import { getDomain } from '@/utils/url';
-import { getIdentifier, promptText, capitalizeFirstLetter } from '@/utils/info';
+import {
+  promptText,
+  capitalizeFirstLetter,
+  resolveIdentifier,
+} from '@/utils/info';
 import { generateLinuxPackageName } from '@/utils/name';
 import { PakeAppOptions, PakeCliOptions, PlatformMap } from '@/types';
 
@@ -60,6 +64,8 @@ export default async function handleOptions(
     name = generateLinuxPackageName(name);
   }
 
+  const resolvedName = name || 'pake-app';
+
   if (name && !isValidName(name, platform)) {
     const LINUX_NAME_ERROR = `✕ Name should only include lowercase letters, numbers, and dashes (not leading dashes). Examples: com-123-xxx, 123pan, pan123, weread, we-read, 123.`;
     const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dashes, and spaces (not leading dashes and spaces). Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read, 123.`;
@@ -76,8 +82,8 @@ export default async function handleOptions(
 
   const appOptions: PakeAppOptions = {
     ...options,
-    name,
-    identifier: getIdentifier(url),
+    name: resolvedName,
+    identifier: resolveIdentifier(url, resolvedName, options.identifier),
   };
 
   const iconPath = await handleIcon(appOptions, url);

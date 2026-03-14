@@ -3,14 +3,27 @@ import prompts from 'prompts';
 import ora from 'ora';
 import chalk from 'chalk';
 
-// Generates an identifier based on the given URL.
-export function getIdentifier(url: string) {
+// Generates a stable identifier based on the app URL and name.
+export function getIdentifier(url: string, name: string) {
   const postFixHash = crypto
     .createHash('md5')
-    .update(url)
+    .update(`${url}::${name}`)
     .digest('hex')
     .substring(0, 6);
   return `com.pake.${postFixHash}`;
+}
+
+export function resolveIdentifier(
+  url: string,
+  name: string,
+  customIdentifier?: string,
+) {
+  const trimmedIdentifier = customIdentifier?.trim();
+  if (trimmedIdentifier) {
+    return trimmedIdentifier;
+  }
+
+  return getIdentifier(url, name);
 }
 
 export async function promptText(

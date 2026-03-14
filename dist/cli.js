@@ -171,14 +171,21 @@ let tauriConfig = {
     pake: pakeConf,
 };
 
-// Generates an identifier based on the given URL.
-function getIdentifier(url) {
+// Generates a stable identifier based on the app URL and name.
+function getIdentifier(url, name) {
     const postFixHash = crypto
         .createHash('md5')
-        .update(url)
+        .update(`${url}::${name}`)
         .digest('hex')
         .substring(0, 6);
     return `com.pake.${postFixHash}`;
+}
+function resolveIdentifier(url, name, customIdentifier) {
+    const trimmedIdentifier = customIdentifier?.trim();
+    if (trimmedIdentifier) {
+        return trimmedIdentifier;
+    }
+    return getIdentifier(url, name);
 }
 async function promptText(message, initial) {
     const response = await prompts({
@@ -2002,6 +2009,7 @@ async function handleOptions(options, url) {
     if (name && platform === 'linux') {
         name = generateLinuxPackageName(name);
     }
+    const resolvedName = name || 'pake-app';
     if (name && !isValidName(name, platform)) {
         const LINUX_NAME_ERROR = `✕ Name should only include lowercase letters, numbers, and dashes (not leading dashes). Examples: com-123-xxx, 123pan, pan123, weread, we-read, 123.`;
         const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dashes, and spaces (not leading dashes and spaces). Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read, 123.`;
@@ -2017,8 +2025,8 @@ async function handleOptions(options, url) {
     }
     const appOptions = {
         ...options,
-        name,
-        identifier: getIdentifier(url),
+        name: resolvedName,
+        identifier: resolveIdentifier(url, resolvedName, options.identifier),
     };
     const iconPath = await handleIcon(appOptions, url);
     appOptions.icon = iconPath || '';
@@ -2114,6 +2122,8 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .showHelpAfterError()
         .argument('[url]', 'The web URL you want to package', validateUrlInput)
         .option('--name <string>', 'Application name')
+        .addOption(new Option('--identifier <string>', 'Application identifier / bundle ID')
+        .hideHelp())
         .option('--icon <string>', 'Application icon', DEFAULT_PAKE_OPTIONS.icon)
         .option('--width <number>', 'Window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
         .option('--height <number>', 'Window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
