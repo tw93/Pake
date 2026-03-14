@@ -129,6 +129,12 @@ export interface PakeCliOptions {
 
   // Auto-install app to /Applications (macOS) after build, default false
   install: boolean;
+
+  // Request camera entitlement on macOS, default false
+  camera: boolean;
+
+  // Request microphone entitlement on macOS, default false
+  microphone: boolean;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {

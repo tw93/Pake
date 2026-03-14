@@ -124,6 +124,20 @@ pake ./my-app/index.html --name my-static-app --use-local-file
 
 要求：Pake CLI >= 3.0.0
 
+## macOS 摄像头与麦克风权限
+
+Pake 构建的应用默认不申请摄像头或麦克风权限。对于需要这些权限的站点（例如视频会议或语音输入），在构建时传入对应的标志：
+
+```bash
+pake https://chatgpt.com --name ChatGPT --microphone
+pake https://meet.google.com --name GoogleMeet --camera --microphone
+```
+
+- `--microphone` — 申请麦克风权限（`com.apple.security.device.audio-input`）
+- `--camera` — 申请摄像头权限（`com.apple.security.device.camera`）
+
+macOS 会在首次使用时向用户弹出权限确认对话框。请仅在确实需要的站点上添加这些标志。
+
 ## 同一站点生成多个独立应用
 
 如果你需要为同一个站点生成多个彼此独立的应用，例如两个不同登录态的 Gmail，可以直接使用不同的应用名称进行构建：

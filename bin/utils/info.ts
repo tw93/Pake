@@ -3,11 +3,15 @@ import prompts from 'prompts';
 import ora from 'ora';
 import chalk from 'chalk';
 
-// Generates a stable identifier based on the app URL and name.
-export function getIdentifier(url: string, name: string) {
+// Generates a stable identifier based on the app URL (and optionally name).
+// When name is provided it is included in the hash so two apps wrapping
+// the same URL can coexist. Omitting name preserves backward compatibility
+// with identifiers generated before V3.10.1.
+export function getIdentifier(url: string, name?: string) {
+  const hashInput = name ? `${url}::${name}` : url;
   const postFixHash = crypto
     .createHash('md5')
-    .update(`${url}::${name}`)
+    .update(hashInput)
     .digest('hex')
     .substring(0, 6);
   return `com.pake.${postFixHash}`;
@@ -15,7 +19,7 @@ export function getIdentifier(url: string, name: string) {
 
 export function resolveIdentifier(
   url: string,
-  name: string,
+  explicitName: string | undefined,
   customIdentifier?: string,
 ) {
   const trimmedIdentifier = customIdentifier?.trim();
@@ -23,7 +27,7 @@ export function resolveIdentifier(
     return trimmedIdentifier;
   }
 
-  return getIdentifier(url, name);
+  return getIdentifier(url, explicitName);
 }
 
 export async function promptText(

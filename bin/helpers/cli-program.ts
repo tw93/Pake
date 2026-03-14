@@ -256,6 +256,16 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
       'Auto-install app to /Applications (macOS) after build and remove local bundle',
       DEFAULT.install,
     )
+    .addOption(
+      new Option('--camera', 'Request camera permission on macOS')
+        .default(DEFAULT.camera)
+        .hideHelp(),
+    )
+    .addOption(
+      new Option('--microphone', 'Request microphone permission on macOS')
+        .default(DEFAULT.microphone)
+        .hideHelp(),
+    )
     .version(packageJson.version, '-v, --version')
     .configureHelp({
       sortSubcommands: true,

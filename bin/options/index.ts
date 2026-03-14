@@ -64,8 +64,6 @@ export default async function handleOptions(
     name = generateLinuxPackageName(name);
   }
 
-  const resolvedName = name || 'pake-app';
-
   if (name && !isValidName(name, platform)) {
     const LINUX_NAME_ERROR = `✕ Name should only include lowercase letters, numbers, and dashes (not leading dashes). Examples: com-123-xxx, 123pan, pan123, weread, we-read, 123.`;
     const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dashes, and spaces (not leading dashes and spaces). Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read, 123.`;
@@ -80,10 +78,12 @@ export default async function handleOptions(
     }
   }
 
+  const resolvedName = name || 'pake-app';
+
   const appOptions: PakeAppOptions = {
     ...options,
     name: resolvedName,
-    identifier: resolveIdentifier(url, resolvedName, options.identifier),
+    identifier: resolveIdentifier(url, options.name, options.identifier),
   };
 
   const iconPath = await handleIcon(appOptions, url);

@@ -171,21 +171,25 @@ let tauriConfig = {
     pake: pakeConf,
 };
 
-// Generates a stable identifier based on the app URL and name.
+// Generates a stable identifier based on the app URL (and optionally name).
+// When name is provided it is included in the hash so two apps wrapping
+// the same URL can coexist. Omitting name preserves backward compatibility
+// with identifiers generated before V3.10.1.
 function getIdentifier(url, name) {
+    const hashInput = name ? `${url}::${name}` : url;
     const postFixHash = crypto
         .createHash('md5')
-        .update(`${url}::${name}`)
+        .update(hashInput)
         .digest('hex')
         .substring(0, 6);
     return `com.pake.${postFixHash}`;
 }
-function resolveIdentifier(url, name, customIdentifier) {
+function resolveIdentifier(url, explicitName, customIdentifier) {
     const trimmedIdentifier = customIdentifier?.trim();
     if (trimmedIdentifier) {
         return trimmedIdentifier;
     }
-    return getIdentifier(url, name);
+    return getIdentifier(url, explicitName);
 }
 async function promptText(message, initial) {
     const response = await prompts({
@@ -491,7 +495,7 @@ async function mergeConfig(url, options, tauriConf) {
             await fsExtra.copy(sourcePath, destPath);
         }
     }));
-    const { width, height, fullscreen, maximize, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name = 'pake-app', resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, multiInstance, multiWindow, startToTray, forceInternalNavigation, internalUrlRegex, zoom, minWidth, minHeight, ignoreCertificateErrors, newWindow, } = options;
+    const { width, height, fullscreen, maximize, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name = 'pake-app', resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, multiInstance, multiWindow, startToTray, forceInternalNavigation, internalUrlRegex, zoom, minWidth, minHeight, ignoreCertificateErrors, newWindow, camera, microphone, } = options;
     const { platform } = process;
     const platformHideOnClose = hideOnClose ?? platform === 'darwin';
     const tauriConfWindowOptions = {
@@ -746,6 +750,26 @@ Terminal=false
             },
         };
     }
+    // Write entitlements dynamically on macOS so camera/microphone are opt-in
+    if (platform === 'darwin') {
+        const entitlementEntries = [];
+        if (camera) {
+            entitlementEntries.push('    <key>com.apple.security.device.camera</key>\n    <true/>');
+        }
+        if (microphone) {
+            entitlementEntries.push('    <key>com.apple.security.device.audio-input</key>\n    <true/>');
+        }
+        const entitlementsContent = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+${entitlementEntries.join('\n')}
+  </dict>
+</plist>
+`;
+        const entitlementsPath = path.join(npmDirectory, 'src-tauri', 'entitlements.plist');
+        await fsExtra.writeFile(entitlementsPath, entitlementsContent);
+    }
     // Save config file.
     const platformConfigPaths = {
         win32: 'tauri.windows.conf.json',
@@ -978,17 +1002,14 @@ class BaseBuilder {
             logger.info(`- Installing ${appName} to /Applications...`);
             const appBundleName = path.basename(appBundlePath);
             const appDest = path.join('/Applications', appBundleName);
-            if (await fsExtra.pathExists(appDest)) {
-                await fsExtra.remove(appDest);
-            }
-            await fsExtra.copy(appBundlePath, appDest);
-            await fsExtra.remove(appBundlePath);
+            // fsExtra.move uses fs.rename (atomic on same filesystem) and falls back
+            // to copy+remove only when moving across volumes.
+            await fsExtra.move(appBundlePath, appDest, { overwrite: true });
             logger.success(`✔ ${appBundleName.replace(/\.app$/, '')} installed to /Applications`);
-            logger.success('✔ Local app bundle removed');
         }
         catch (error) {
             logger.error(`✕ Failed to install ${appName}: ${error}`);
-            logger.info(`  The app bundle is still available at: ${appBundlePath}`);
+            logger.info(`  App bundle still available at: ${appBundlePath}`);
         }
     }
     getFileType(target) {
@@ -2009,7 +2030,6 @@ async function handleOptions(options, url) {
     if (name && platform === 'linux') {
         name = generateLinuxPackageName(name);
     }
-    const resolvedName = name || 'pake-app';
     if (name && !isValidName(name, platform)) {
         const LINUX_NAME_ERROR = `✕ Name should only include lowercase letters, numbers, and dashes (not leading dashes). Examples: com-123-xxx, 123pan, pan123, weread, we-read, 123.`;
         const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dashes, and spaces (not leading dashes and spaces). Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read, 123.`;
@@ -2023,10 +2043,11 @@ async function handleOptions(options, url) {
             process.exit(1);
         }
     }
+    const resolvedName = name || 'pake-app';
     const appOptions = {
         ...options,
         name: resolvedName,
-        identifier: resolveIdentifier(url, resolvedName, options.identifier),
+        identifier: resolveIdentifier(url, options.name, options.identifier),
     };
     const iconPath = await handleIcon(appOptions, url);
     appOptions.icon = iconPath || '';
@@ -2083,6 +2104,8 @@ const DEFAULT_PAKE_OPTIONS = {
     ignoreCertificateErrors: false,
     newWindow: false,
     install: false,
+    camera: false,
+    microphone: false,
 };
 
 function validateNumberInput(value) {
@@ -2122,8 +2145,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .showHelpAfterError()
         .argument('[url]', 'The web URL you want to package', validateUrlInput)
         .option('--name <string>', 'Application name')
-        .addOption(new Option('--identifier <string>', 'Application identifier / bundle ID')
-        .hideHelp())
+        .addOption(new Option('--identifier <string>', 'Application identifier / bundle ID').hideHelp())
         .option('--icon <string>', 'Application icon', DEFAULT_PAKE_OPTIONS.icon)
         .option('--width <number>', 'Window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
         .option('--height <number>', 'Window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
@@ -2245,6 +2267,12 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .default(DEFAULT_PAKE_OPTIONS.newWindow)
         .hideHelp())
         .option('--install', 'Auto-install app to /Applications (macOS) after build and remove local bundle', DEFAULT_PAKE_OPTIONS.install)
+        .addOption(new Option('--camera', 'Request camera permission on macOS')
+        .default(DEFAULT_PAKE_OPTIONS.camera)
+        .hideHelp())
+        .addOption(new Option('--microphone', 'Request microphone permission on macOS')
+        .default(DEFAULT_PAKE_OPTIONS.microphone)
+        .hideHelp())
         .version(packageJson.version, '-v, --version')
         .configureHelp({
         sortSubcommands: true,

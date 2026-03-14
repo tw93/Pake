@@ -316,20 +316,16 @@ export default abstract class BaseBuilder {
       const appBundleName = path.basename(appBundlePath);
       const appDest = path.join('/Applications', appBundleName);
 
-      if (await fsExtra.pathExists(appDest)) {
-        await fsExtra.remove(appDest);
-      }
-
-      await fsExtra.copy(appBundlePath, appDest);
-      await fsExtra.remove(appBundlePath);
+      // fsExtra.move uses fs.rename (atomic on same filesystem) and falls back
+      // to copy+remove only when moving across volumes.
+      await fsExtra.move(appBundlePath, appDest, { overwrite: true });
 
       logger.success(
         `✔ ${appBundleName.replace(/\.app$/, '')} installed to /Applications`,
       );
-      logger.success('✔ Local app bundle removed');
     } catch (error) {
       logger.error(`✕ Failed to install ${appName}: ${error}`);
-      logger.info(`  The app bundle is still available at: ${appBundlePath}`);
+      logger.info(`  App bundle still available at: ${appBundlePath}`);
     }
   }
 

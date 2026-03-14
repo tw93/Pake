@@ -79,6 +79,8 @@ export async function mergeConfig(
     minHeight,
     ignoreCertificateErrors,
     newWindow,
+    camera,
+    microphone,
   } = options;
 
   const { platform } = process;
@@ -383,6 +385,35 @@ Terminal=false
         'Cross-Origin-Embedder-Policy': 'require-corp',
       },
     };
+  }
+
+  // Write entitlements dynamically on macOS so camera/microphone are opt-in
+  if (platform === 'darwin') {
+    const entitlementEntries: string[] = [];
+    if (camera) {
+      entitlementEntries.push(
+        '    <key>com.apple.security.device.camera</key>\n    <true/>',
+      );
+    }
+    if (microphone) {
+      entitlementEntries.push(
+        '    <key>com.apple.security.device.audio-input</key>\n    <true/>',
+      );
+    }
+    const entitlementsContent = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+${entitlementEntries.join('\n')}
+  </dict>
+</plist>
+`;
+    const entitlementsPath = path.join(
+      npmDirectory,
+      'src-tauri',
+      'entitlements.plist',
+    );
+    await fsExtra.writeFile(entitlementsPath, entitlementsContent);
   }
 
   // Save config file.

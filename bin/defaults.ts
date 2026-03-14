@@ -51,6 +51,8 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   ignoreCertificateErrors: false,
   newWindow: false,
   install: false,
+  camera: false,
+  microphone: false,
 };
 
 // Just for cli development

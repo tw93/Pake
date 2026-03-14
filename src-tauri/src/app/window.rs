@@ -57,6 +57,13 @@ pub fn open_additional_window(app: &AppHandle) -> tauri::Result<WebviewWindow> {
     build_window_with_label(app, &state.pake_config, &state.tauri_config, &label)
 }
 
+struct WindowBuildOptions<'a> {
+    label: &'a str,
+    url: WebviewUrl,
+    visible: bool,
+    new_window_features: Option<NewWindowFeatures>,
+}
+
 fn open_requested_window(
     app: &AppHandle,
     config: &PakeConfig,
@@ -70,13 +77,16 @@ fn open_requested_window(
         app,
         config,
         tauri_config,
-        &label,
-        WebviewUrl::External("about:blank".parse().unwrap()),
-        true,
-        Some(features),
+        WindowBuildOptions {
+            label: &label,
+            url: WebviewUrl::External("about:blank".parse().unwrap()),
+            visible: true,
+            new_window_features: Some(features),
+        },
     )?;
 
-    let _ = window.set_title(target_url.as_str());
+    let title = target_url.host_str().unwrap_or(target_url.as_str());
+    let _ = window.set_title(title);
     let _ = window.set_focus();
 
     Ok(window)
@@ -119,18 +129,31 @@ fn build_window_with_label(
         _ => panic!("url type can only be web or local"),
     };
 
-    build_window(app, config, tauri_config, label, url, false, None)
+    build_window(
+        app,
+        config,
+        tauri_config,
+        WindowBuildOptions {
+            label,
+            url,
+            visible: false,
+            new_window_features: None,
+        },
+    )
 }
 
 fn build_window(
     app: &AppHandle,
     config: &PakeConfig,
     tauri_config: &Config,
-    label: &str,
-    url: WebviewUrl,
-    visible: bool,
-    new_window_features: Option<NewWindowFeatures>,
+    opts: WindowBuildOptions,
 ) -> tauri::Result<WebviewWindow> {
+    let WindowBuildOptions {
+        label,
+        url,
+        visible,
+        new_window_features,
+    } = opts;
     let package_name = tauri_config.clone().product_name.unwrap();
     let _data_dir = get_data_dir(app, package_name);
 
