@@ -381,6 +381,10 @@ This is usually due to web compatibility issues. Try:
 
 3. **Check if the site requires specific permissions** that may not be available in WebView
 
+4. **Be aware of embedded-webview sign-in limits**
+
+   Some authentication providers, especially Google, may block sign-in inside embedded webviews. Because Pake packages sites into a desktop webview, Google properties or sites that rely on Google OAuth may still fail to sign in even when `--new-window` or `--multi-window` is enabled. This is provider policy, not a packaging bug. In those cases, use the normal browser, a browser-installed app, or a native desktop client.
+
 ---
 
 ## Installation Issues

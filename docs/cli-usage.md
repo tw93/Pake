@@ -458,6 +458,8 @@ This is different from `--multi-instance`:
 
 When enabled, relaunching an already running app opens a new window instead of only focusing the existing one.
 
+This can improve popup-based authentication flows, but it cannot bypass provider policy. Some providers, especially Google, may still reject sign-in inside embedded webviews.
+
 ```shell
 --multi-window
 
@@ -529,6 +531,8 @@ Ignore TLS certificate validation errors when loading the target URL. Useful for
 #### [new-window]
 
 Allow sites to open new windows, such as authentication popups, extra tabs, or branch views.
+
+This can help sites that rely on popup auth windows, but it does not guarantee in-app sign-in. Some providers, especially Google, may block authentication inside embedded webviews regardless of this option.
 
 ```shell
 --new-window

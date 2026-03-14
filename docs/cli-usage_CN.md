@@ -456,6 +456,8 @@ pake https://chat.example.com --name ChatApp --multi-instance
 
 启用后，如果应用已在运行，再次启动会新开一个窗口，而不是仅聚焦已有窗口。
 
+这个选项可以改善基于弹窗的认证流程，但不能绕过认证提供方的策略限制。某些提供方，尤其是 Google，仍然可能拒绝在嵌入式 WebView 中完成登录。
+
 ```shell
 --multi-window
 
@@ -527,6 +529,8 @@ pake ./my-app/index.html --name "my-app" --use-local-file
 #### [new-window]
 
 允许网站打开新窗口，例如登录授权弹窗、额外标签页或分支会话页面。
+
+这个选项可以帮助依赖弹窗授权窗口的网站，但不能保证一定能在应用内完成登录。某些提供方，尤其是 Google，可能仍然会阻止在嵌入式 WebView 中进行认证。
 
 ```shell
 --new-window
