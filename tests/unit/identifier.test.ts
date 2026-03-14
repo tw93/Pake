@@ -17,8 +17,8 @@ describe('identifier generation', () => {
   });
 
   it('prefers a custom identifier when provided', () => {
-    expect(
-      resolveIdentifier(url, 'Work Gmail', 'com.example.work-gmail'),
-    ).toBe('com.example.work-gmail');
+    expect(resolveIdentifier(url, 'Work Gmail', 'com.example.work-gmail')).toBe(
+      'com.example.work-gmail',
+    );
   });
 });

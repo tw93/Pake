@@ -23,8 +23,10 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     .argument('[url]', 'The web URL you want to package', validateUrlInput)
     .option('--name <string>', 'Application name')
     .addOption(
-      new Option('--identifier <string>', 'Application identifier / bundle ID')
-        .hideHelp(),
+      new Option(
+        '--identifier <string>',
+        'Application identifier / bundle ID',
+      ).hideHelp(),
     )
     .option('--icon <string>', 'Application icon', DEFAULT.icon)
     .option(
