@@ -352,6 +352,33 @@ Pake 可以自动转换图标，但提供正确的格式更可靠。
    pake https://example.com --inject ./fix.js
    ```
 
+   对于需要定时刷新的页面，建议把这类行为放在一个小的注入脚本里，而不是增加专门的 Pake 参数：
+
+   ```javascript
+   function isEditing(element) {
+     if (!element) return false;
+     const tagName = element.tagName;
+     return (
+       element.isContentEditable ||
+       tagName === "INPUT" ||
+       tagName === "TEXTAREA" ||
+       tagName === "SELECT"
+     );
+   }
+
+   setInterval(() => {
+     if (!document.hidden && !isEditing(document.activeElement)) {
+       window.location.reload();
+     }
+   }, 300000);
+   ```
+
+   将其保存为 `refresh.js`，然后这样打包：
+
+   ```bash
+   pake https://news.ycombinator.com --name HackerNews --inject ./refresh.js
+   ```
+
 3. **检查网站是否需要 WebView 中可能不可用的特定权限**
 
 ---

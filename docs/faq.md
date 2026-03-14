@@ -352,6 +352,33 @@ This is usually due to web compatibility issues. Try:
    pake https://example.com --inject ./fix.js
    ```
 
+   For pages that need periodic reloads, you can keep this behavior in a small injected script instead of adding a dedicated Pake option:
+
+   ```javascript
+   function isEditing(element) {
+     if (!element) return false;
+     const tagName = element.tagName;
+     return (
+       element.isContentEditable ||
+       tagName === "INPUT" ||
+       tagName === "TEXTAREA" ||
+       tagName === "SELECT"
+     );
+   }
+
+   setInterval(() => {
+     if (!document.hidden && !isEditing(document.activeElement)) {
+       window.location.reload();
+     }
+   }, 300000);
+   ```
+
+   Save it as `refresh.js` and package with:
+
+   ```bash
+   pake https://news.ycombinator.com --name HackerNews --inject ./refresh.js
+   ```
+
 3. **Check if the site requires specific permissions** that may not be available in WebView
 
 ---
