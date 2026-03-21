@@ -399,6 +399,26 @@ function generateIconServiceUrls(domain: string): string[] {
 }
 
 /**
+ * Generates dashboard-icons URLs for an app name.
+ * Uses walkxcode/dashboard-icons as a final fallback for selfhosted apps.
+ * Keeps matching conservative to avoid overriding valid site-specific icons.
+ */
+function generateDashboardIconUrls(appName: string): string[] {
+  const baseUrl = 'https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png';
+  const name = appName.toLowerCase().trim();
+  const slugs = new Set<string>();
+
+  // Exact name
+  slugs.add(name);
+  // Replace spaces with hyphens
+  slugs.add(name.replace(/\s+/g, '-'));
+
+  return [...slugs]
+    .filter((s) => s.length > 0)
+    .map((slug) => `${baseUrl}/${slug}.png`);
+}
+
+/**
  * Attempts to fetch favicon from website
  */
 async function tryGetFavicon(
@@ -409,13 +429,13 @@ async function tryGetFavicon(
     const domain = new URL(url).hostname;
     const spinner = getSpinner(`Fetching icon from ${domain}...`);
 
-    const serviceUrls = generateIconServiceUrls(domain);
-
     const isCI =
       process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
     const downloadTimeout = isCI
       ? ICON_CONFIG.downloadTimeout.ci
       : ICON_CONFIG.downloadTimeout.default;
+
+    const serviceUrls = generateIconServiceUrls(domain);
 
     for (const serviceUrl of serviceUrls) {
       try {
@@ -442,6 +462,37 @@ async function tryGetFavicon(
           logger.debug(`Icon service ${serviceUrl} failed: ${error.message}`);
         }
         continue;
+      }
+    }
+
+    // Final fallback for selfhosted apps behind auth where domain-based
+    // services cannot access the site favicon.
+    if (appName) {
+      const dashboardIconUrls = generateDashboardIconUrls(appName);
+      for (const iconUrl of dashboardIconUrls) {
+        try {
+          const iconPath = await downloadIcon(iconUrl, false, downloadTimeout);
+          if (!iconPath) continue;
+
+          const convertedPath = await convertIconFormat(iconPath, appName);
+          if (convertedPath) {
+            const finalPath = await copyWindowsIconIfNeeded(
+              convertedPath,
+              appName,
+            );
+            spinner.succeed(
+              chalk.green(
+                `Icon found via dashboard-icons fallback for "${appName}"!`,
+              ),
+            );
+            return finalPath;
+          }
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            logger.debug(`Dashboard icon ${iconUrl} failed: ${error.message}`);
+          }
+          continue;
+        }
       }
     }
 
