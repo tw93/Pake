@@ -121,6 +121,9 @@ export interface PakeCliOptions {
   // Ignore certificate errors (for self-signed certs), default false
   ignoreCertificateErrors: boolean;
 
+  // Enable geolocation access in the WebView, default false
+  geolocation: boolean;
+
   // Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging
   iterativeBuild: boolean;
 
@@ -173,6 +176,7 @@ export interface WindowConfig {
   min_height: number;
   ignore_certificate_errors: boolean;
   new_window: boolean;
+  enable_geolocation: boolean;
 }
 
 export interface PakeConfig {

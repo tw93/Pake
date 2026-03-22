@@ -81,6 +81,7 @@ export async function mergeConfig(
     newWindow,
     camera,
     microphone,
+    geolocation,
   } = options;
 
   const { platform } = process;
@@ -111,6 +112,7 @@ export async function mergeConfig(
     min_height: minHeight,
     ignore_certificate_errors: ignoreCertificateErrors,
     new_window: newWindow,
+    enable_geolocation: geolocation,
   };
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
 

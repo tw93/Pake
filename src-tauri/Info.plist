@@ -5,6 +5,8 @@
     <string>Request camera access</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Request microphone access</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Request location access</string>
     <key>NSAppTransportSecurity</key>
     <dict>
       <key>NSAllowsArbitraryLoads</key>
