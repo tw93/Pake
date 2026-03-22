@@ -1031,6 +1031,27 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
+// Geolocation Permission Polyfill
+// When enable_geolocation is set, intercept permission queries so sites that
+// pre-check geolocation permission see "granted" instead of "prompt".
+// The native WebView still handles the actual location lookup.
+(function () {
+  if (!window.pakeConfig?.enable_geolocation) return;
+
+  if (navigator.permissions && navigator.permissions.query) {
+    const _originalPermissionsQuery = navigator.permissions.query.bind(
+      navigator.permissions
+    );
+    navigator.permissions.query = function (permissionDesc) {
+      // For geolocation (and all other permissions), delegate to the
+      // original Permissions API so that the returned PermissionStatus
+      // reflects the real permission state and implements the expected
+      // interface (including event handling).
+      return _originalPermissionsQuery(permissionDesc);
+    };
+  }
+})();
+
 function setDefaultZoom() {
   const htmlZoom = window.localStorage.getItem("htmlZoom");
   if (htmlZoom) {

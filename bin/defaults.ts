@@ -53,6 +53,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   install: false,
   camera: false,
   microphone: false,
+  geolocation: false,
 };
 
 // Just for cli development
