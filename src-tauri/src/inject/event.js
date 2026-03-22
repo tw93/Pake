@@ -1043,13 +1043,10 @@ document.addEventListener("DOMContentLoaded", function () {
       navigator.permissions
     );
     navigator.permissions.query = function (permissionDesc) {
-      if (permissionDesc && permissionDesc.name === "geolocation") {
-        return Promise.resolve({
-          name: "geolocation",
-          state: "granted",
-          onchange: null,
-        });
-      }
+      // For geolocation (and all other permissions), delegate to the
+      // original Permissions API so that the returned PermissionStatus
+      // reflects the real permission state and implements the expected
+      // interface (including event handling).
       return _originalPermissionsQuery(permissionDesc);
     };
   }
