@@ -1040,7 +1040,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (navigator.permissions && navigator.permissions.query) {
     const _originalPermissionsQuery = navigator.permissions.query.bind(
-      navigator.permissions
+      navigator.permissions,
     );
     navigator.permissions.query = function (permissionDesc) {
       // For geolocation (and all other permissions), delegate to the
