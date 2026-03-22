@@ -6,7 +6,7 @@
     <key>NSMicrophoneUsageDescription</key>
     <string>Request microphone access</string>
     <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Request location access</string>
+    <string>This app uses your location to provide location-based features while you use the app.</string>
     <key>NSAppTransportSecurity</key>
     <dict>
       <key>NSAllowsArbitraryLoads</key>
