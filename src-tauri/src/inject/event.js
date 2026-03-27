@@ -23,6 +23,7 @@ function setZoom(zoom) {
     body.style.height = `${100 / zoomValue}%`;
   } else {
     html.style.zoom = zoom;
+    window.dispatchEvent(new Event("resize"));
   }
 
   window.localStorage.setItem("htmlZoom", zoom);
@@ -336,14 +337,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function convertBlobUrlToBinary(blobUrl) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const blob = window.blobToUrlCaches.get(blobUrl);
+      if (!blob) {
+        fetch(blobUrl)
+          .then((res) => res.arrayBuffer())
+          .then((buffer) => resolve(Array.from(new Uint8Array(buffer))))
+          .catch(reject);
+        return;
+      }
       const reader = new FileReader();
-
       reader.readAsArrayBuffer(blob);
       reader.onload = () => {
         resolve(Array.from(new Uint8Array(reader.result)));
       };
+      reader.onerror = () => reject(reader.error);
     });
   }
 

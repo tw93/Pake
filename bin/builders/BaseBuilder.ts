@@ -316,6 +316,12 @@ export default abstract class BaseBuilder {
       const appBundleName = path.basename(appBundlePath);
       const appDest = path.join('/Applications', appBundleName);
 
+      if (await fsExtra.pathExists(appDest)) {
+        logger.warn(
+          `  Existing ${appBundleName} in /Applications will be replaced.`,
+        );
+      }
+
       // fsExtra.move uses fs.rename (atomic on same filesystem) and falls back
       // to copy+remove only when moving across volumes.
       await fsExtra.move(appBundlePath, appDest, { overwrite: true });
