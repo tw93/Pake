@@ -17,10 +17,10 @@ on:
           - "macos-latest"
           - "ubuntu-24.04"
       url:
-        description: "Website URL"
+        description: https://actividades-matem-ticas-1-primaria.vercel.app
         required: true
       name:
-        description: "App name (lowercase for Linux)"
+        description: Actividades Matemáticas 1°
         required: true
       icon:
         description: "Icon URL, auto-fetch if empty"
