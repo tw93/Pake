@@ -79,7 +79,7 @@ fn open_requested_window(
         tauri_config,
         WindowBuildOptions {
             label: &label,
-            url: WebviewUrl::External("about:blank".parse().unwrap()),
+            url: WebviewUrl::External(target_url.clone()),
             visible: true,
             new_window_features: Some(features),
         },
@@ -369,50 +369,29 @@ fn build_window(
     }
 
     if let Some(features) = new_window_features {
-        window_builder = window_builder.window_features(features).focused(true);
+        // macOS popup webviews must reuse the opener webview configuration.
+        #[cfg(target_os = "macos")]
+        {
+            if let Some(position) = features.position() {
+                window_builder = window_builder.position(position.x, position.y);
+            }
+
+            if let Some(size) = features.size() {
+                window_builder = window_builder.inner_size(size.width, size.height);
+            }
+
+            window_builder = window_builder
+                .with_webview_configuration(features.opener().target_configuration.clone())
+                .focused(true);
+        }
+
+        #[cfg(not(target_os = "macos"))]
+        {
+            window_builder = window_builder.window_features(features).focused(true);
+        }
     }
 
-    // Allow navigation to OAuth/authentication domains
-    window_builder = window_builder.on_navigation(|url| {
-        let url_str = url.as_str();
-
-        // Always allow same-origin navigation
-        if url_str.starts_with("http://localhost") || url_str.starts_with("http://127.0.0.1") {
-            return true;
-        }
-
-        // Check for OAuth/authentication domains
-        let auth_patterns = [
-            "accounts.google.com",
-            "login.microsoftonline.com",
-            "github.com/login",
-            "appleid.apple.com",
-            "facebook.com",
-            "twitter.com",
-        ];
-
-        let auth_paths = ["/oauth/", "/auth/", "/authorize", "/login"];
-
-        // Allow if matches auth patterns
-        for pattern in &auth_patterns {
-            if url_str.contains(pattern) {
-                #[cfg(debug_assertions)]
-                println!("Allowing OAuth navigation to: {}", url_str);
-                return true;
-            }
-        }
-
-        for path in &auth_paths {
-            if url_str.contains(path) {
-                #[cfg(debug_assertions)]
-                println!("Allowing auth path navigation to: {}", url_str);
-                return true;
-            }
-        }
-
-        // Allow all other navigation by default
-        true
-    });
+    window_builder = window_builder.on_navigation(|_| true);
 
     window_builder.build()
 }

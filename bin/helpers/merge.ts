@@ -295,7 +295,20 @@ Terminal=false
       // Avoid copying if source and destination are the same
       const absoluteDestPath = path.resolve(iconPath);
       if (resolvedIconPath !== absoluteDestPath) {
-        await fsExtra.copy(resolvedIconPath, iconPath);
+        try {
+          await fsExtra.copy(resolvedIconPath, iconPath);
+        } catch (error) {
+          if (
+            !(
+              error instanceof Error &&
+              error.message.includes(
+                'Source and destination must not be the same',
+              )
+            )
+          ) {
+            throw error;
+          }
+        }
       }
     }
 

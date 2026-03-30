@@ -47,3 +47,10 @@ yarn-error.log*
 # Generated code review graph files
 code-review-graph.mmd
 code-review-graph.json
+
+# Local test artifacts
+test-local.html
+src-tauri/icons/testapp.icns
+src-tauri/icons/localapp.icns
+src-tauri/icons/urltest.icns
+src-tauri/icons/githubmultiarch.icns

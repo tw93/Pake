@@ -22,7 +22,7 @@ import * as psl from 'psl';
 import { InvalidArgumentError, program as program$1, Option } from 'commander';
 
 var name = "pake-cli";
-var version = "3.10.1";
+var version = "3.11.2";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -682,7 +682,15 @@ Terminal=false
             // Avoid copying if source and destination are the same
             const absoluteDestPath = path.resolve(iconPath);
             if (resolvedIconPath !== absoluteDestPath) {
-                await fsExtra.copy(resolvedIconPath, iconPath);
+                try {
+                    await fsExtra.copy(resolvedIconPath, iconPath);
+                }
+                catch (error) {
+                    if (!(error instanceof Error &&
+                        error.message.includes('Source and destination must not be the same'))) {
+                        throw error;
+                    }
+                }
             }
         }
         if (updateIconPath) {
@@ -796,13 +804,20 @@ class BaseBuilder {
         this.options = options;
     }
     getBuildEnvironment() {
-        return IS_MAC
-            ? {
-                CFLAGS: '-fno-modules',
-                CXXFLAGS: '-fno-modules',
-                MACOSX_DEPLOYMENT_TARGET: '14.0',
-            }
-            : undefined;
+        if (!IS_MAC) {
+            return undefined;
+        }
+        const currentPath = process.env.PATH || '';
+        const systemToolsPath = '/usr/bin';
+        const buildPath = currentPath.startsWith(`${systemToolsPath}:`)
+            ? currentPath
+            : `${systemToolsPath}:${currentPath}`;
+        return {
+            CFLAGS: '-fno-modules',
+            CXXFLAGS: '-fno-modules',
+            MACOSX_DEPLOYMENT_TARGET: '14.0',
+            PATH: buildPath,
+        };
     }
     getInstallTimeout() {
         // Windows needs more time due to native compilation and antivirus scanning
@@ -832,6 +847,21 @@ class BaseBuilder {
             catch {
                 throw new Error('Neither pnpm nor npm is available. Please install a package manager.');
             }
+        }
+    }
+    async copyFileWithSamePathGuard(sourcePath, destinationPath) {
+        if (path.resolve(sourcePath) === path.resolve(destinationPath)) {
+            return;
+        }
+        try {
+            await fsExtra.copy(sourcePath, destinationPath, { overwrite: true });
+        }
+        catch (error) {
+            if (error instanceof Error &&
+                error.message.includes('Source and destination must not be the same')) {
+                return;
+            }
+            throw error;
         }
     }
     async prepare() {
@@ -879,7 +909,7 @@ class BaseBuilder {
             if (isChina) {
                 logger.info(`✺ Located in China, using ${packageManager}/rsProxy CN mirror.`);
                 const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
-                await fsExtra.copy(projectCnConf, projectConf);
+                await this.copyFileWithSamePathGuard(projectCnConf, projectConf);
                 await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`, timeout, { ...buildEnv, CI: 'true' });
             }
             else {
@@ -898,7 +928,7 @@ class BaseBuilder {
                 usedMirror = true;
                 try {
                     const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
-                    await fsExtra.copy(projectCnConf, projectConf);
+                    await this.copyFileWithSamePathGuard(projectCnConf, projectConf);
                     await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`, timeout, { ...buildEnv, CI: 'true' });
                     retrySpinner.succeed(chalk.green('Package installed with CN mirror!'));
                 }
@@ -1034,33 +1064,21 @@ class BaseBuilder {
             message.includes('appimage tool failed') ||
             message.includes('strip tool'));
     }
-    /**
-     * 解析目标架构
-     */
     resolveTargetArch(requestedArch) {
         if (requestedArch === 'auto' || !requestedArch) {
             return process.arch;
         }
         return requestedArch;
     }
-    /**
-     * 获取Tauri构建目标
-     */
     getTauriTarget(arch, platform = process.platform) {
         const platformMappings = BaseBuilder.ARCH_MAPPINGS[platform];
         if (!platformMappings)
             return null;
         return platformMappings[arch] || null;
     }
-    /**
-     * 获取架构显示名称（用于文件名）
-     */
     getArchDisplayName(arch) {
         return BaseBuilder.ARCH_DISPLAY_NAMES[arch] || arch;
     }
-    /**
-     * 构建基础构建命令
-     */
     buildBaseCommand(packageManager, configPath, target) {
         const baseCommand = this.options.debug
             ? `${packageManager} run build:debug`
@@ -1077,9 +1095,6 @@ class BaseBuilder {
         }
         return fullCommand;
     }
-    /**
-     * 获取构建特性列表
-     */
     getBuildFeatures() {
         const features = ['cli-build'];
         // Add macos-proxy feature for modern macOS (Darwin 23+ = macOS 14+)
@@ -1188,7 +1203,6 @@ class BaseBuilder {
     }
 }
 BaseBuilder.packageManagerCache = null;
-// 架构映射配置
 BaseBuilder.ARCH_MAPPINGS = {
     darwin: {
         arm64: 'aarch64-apple-darwin',
@@ -1204,7 +1218,6 @@ BaseBuilder.ARCH_MAPPINGS = {
         x64: 'x86_64-unknown-linux-gnu',
     },
 };
-// 架构名称映射（用于文件名生成）
 BaseBuilder.ARCH_DISPLAY_NAMES = {
     arm64: 'aarch64',
     x64: 'x64',

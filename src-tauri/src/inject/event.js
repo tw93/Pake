@@ -534,7 +534,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Handle _blank links: same domain navigates in-app, cross-domain opens new window
+      // Handle _blank links: internal links stay in-app, external links open in the system browser
       if (target === "_blank") {
         if (forceInternalNavigation) {
           e.preventDefault();
@@ -550,13 +550,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         e.preventDefault();
         e.stopImmediatePropagation();
-        const newWindow = originalWindowOpen.call(
-          window,
-          absoluteUrl,
-          "_blank",
-          "width=1200,height=800,scrollbars=yes,resizable=yes",
-        );
-        if (!newWindow) handleExternalLink(absoluteUrl);
+        handleExternalLink(absoluteUrl);
         return;
       }
 
@@ -587,7 +581,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Handle regular links: internal URLs allow normal navigation, external opens new window
+      // Handle regular links: internal URLs allow normal navigation, external links open in the system browser
       if (!target || target === "_self") {
         // Optimization: Allow previewable media to be handled by the app/browser directly
         // This fixes issues where CDN links are treated as external
@@ -602,13 +596,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           e.preventDefault();
           e.stopImmediatePropagation();
-          const newWindow = originalWindowOpen.call(
-            window,
-            absoluteUrl,
-            "_blank",
-            "width=1200,height=800,scrollbars=yes,resizable=yes",
-          );
-          if (!newWindow) handleExternalLink(absoluteUrl);
+          handleExternalLink(absoluteUrl);
         }
       }
     }
