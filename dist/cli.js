@@ -429,7 +429,7 @@ async function combineFiles(files, output) {
             return `window.addEventListener('DOMContentLoaded', (_event) => {
         const css = ${JSON.stringify(fileContent)};
         const style = document.createElement('style');
-        style.innerHTML = css;
+        style.textContent = css;
         document.head.appendChild(style);
       });`;
         }

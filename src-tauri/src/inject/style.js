@@ -119,15 +119,18 @@ window.addEventListener("DOMContentLoaded", (_event) => {
 
     #react-root [data-testid="placementTracking"] article,
     #react-root a[href*="quick_promote_web"],
-    #react-root [data-testid="AppTabBar_Explore_Link"],
     #react-root a[href*="/lists"][role="link"][aria-label],
     #react-root a[href*="/i/communitynotes"][role="link"][aria-label],
     #react-root a[role="link"][aria-label="Communities"],
+    #react-root a[role="link"][aria-label="Premium"],
+    #react-root a[role="link"][aria-label="SuperGrok"],
     #react-root a[href*="/i/verified-orgs-signup"][role="link"][aria-label] {
       display: none !important;
     }
 
     #react-root [data-testid="DMDrawer"],
+    #react-root [data-testid="GrokDrawer"],
+    #react-root [data-testid="chat-drawer-root"],
     #root > main > footer.justify-center.ease-in {
       visibility: hidden !important;
     }
