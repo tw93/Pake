@@ -231,6 +231,28 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       }
     }
 
+    @media only screen and (min-width: 1000px) and (max-width: 1264px) {
+      #react-root [data-testid="sidebarColumn"] form[role="search"] {
+        visibility: visible !important;
+        position: fixed !important;
+        top: 12px !important;
+        right: 16px !important;
+      }
+
+      #react-root [data-testid="sidebarColumn"] input[placeholder="Search"] {
+        width: 150px;
+      }
+
+      #react-root [data-testid="sidebarColumn"] form[role="search"]:focus-within {
+        width: 280px !important;
+        backdrop-filter: blur(12px) !important;
+      }
+
+      #react-root [data-testid="sidebarColumn"] input[placeholder="Search"]:focus {
+        width: 234px !important;
+      }
+    }
+
     @media only screen and (min-width: 1265px) {
       #react-root [data-testid="sidebarColumn"] form[role="search"] {
         visibility: visible !important;
@@ -239,7 +261,7 @@ window.addEventListener("DOMContentLoaded", (_event) => {
         right: 16px !important;
       }
 
-      #react-root [data-testid="sidebarColumn"] input[placeholder="Search Twitter"] {
+      #react-root [data-testid="sidebarColumn"] input[placeholder="Search"] {
         width: 150px;
       }
 
@@ -248,7 +270,7 @@ window.addEventListener("DOMContentLoaded", (_event) => {
         backdrop-filter: blur(12px) !important;
       }
 
-      #react-root [data-testid="sidebarColumn"] input[placeholder="Search Twitter"]:focus {
+      #react-root [data-testid="sidebarColumn"] input[placeholder="Search"]:focus {
         width: 328px !important;
       }
 
@@ -471,7 +493,7 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       }
     }
   `;
-  const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+  const isMac = /Mac/i.test(navigator.userAgent);
   if (window["pakeConfig"]?.hide_title_bar && isMac) {
     const topPaddingStyleElement = document.createElement("style");
     topPaddingStyleElement.textContent = topPaddingCSS;
