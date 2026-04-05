@@ -300,7 +300,7 @@ window.addEventListener("DOMContentLoaded", (_event) => {
     }
   `;
   const contentStyleElement = document.createElement("style");
-  contentStyleElement.innerHTML = contentCSS;
+  contentStyleElement.textContent = contentCSS;
   document.head.appendChild(contentStyleElement);
 
   // Top spacing adapts to head-hiding scenarios
@@ -474,7 +474,7 @@ window.addEventListener("DOMContentLoaded", (_event) => {
   const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
   if (window["pakeConfig"]?.hide_title_bar && isMac) {
     const topPaddingStyleElement = document.createElement("style");
-    topPaddingStyleElement.innerHTML = topPaddingCSS;
+    topPaddingStyleElement.textContent = topPaddingCSS;
     document.head.appendChild(topPaddingStyleElement);
   }
 });
