@@ -1043,10 +1043,20 @@ document.addEventListener("DOMContentLoaded", function () {
       navigator.permissions,
     );
     navigator.permissions.query = function (permissionDesc) {
-      // For geolocation (and all other permissions), delegate to the
-      // original Permissions API so that the returned PermissionStatus
-      // reflects the real permission state and implements the expected
-      // interface (including event handling).
+      if (permissionDesc && permissionDesc.name === "geolocation") {
+        // Return a PermissionStatus-like object reporting "granted" so that
+        // sites pre-checking geolocation permission proceed without blocking.
+        // The native WebView still handles the actual location lookup.
+        return Promise.resolve({
+          state: "granted",
+          status: "granted",
+          name: permissionDesc.name,
+          onchange: null,
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          dispatchEvent: () => false,
+        });
+      }
       return _originalPermissionsQuery(permissionDesc);
     };
   }

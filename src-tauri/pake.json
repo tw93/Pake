@@ -20,7 +20,8 @@
       "start_to_tray": false,
       "force_internal_navigation": false,
       "internal_url_regex": "",
-      "new_window": false
+      "new_window": false,
+      "enable_geolocation": false
     }
   ],
   "user_agent": {
