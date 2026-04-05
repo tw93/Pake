@@ -33,7 +33,7 @@
     "name": "twitter",
     "title": "Twitter",
     "name_zh": "推特",
-    "url": "https://twitter.com/"
+    "url": "https://x.com/"
   },
   {
     "name": "youtube",
@@ -45,8 +45,7 @@
     "name": "chatgpt",
     "title": "ChatGPT",
     "name_zh": "ChatGPT",
-    "url": "https://chatgpt.com/",
-    "new_window": true
+    "url": "https://chatgpt.com/"
   },
   {
     "name": "flomo",

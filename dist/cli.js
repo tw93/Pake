@@ -22,7 +22,7 @@ import * as psl from 'psl';
 import { InvalidArgumentError, program as program$1, Option } from 'commander';
 
 var name = "pake-cli";
-var version = "3.10.1";
+var version = "3.11.2";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -182,11 +182,15 @@ function getIdentifier(url, name) {
         .update(hashInput)
         .digest('hex')
         .substring(0, 6);
-    return `com.pake.${postFixHash}`;
+    return `com.pake.a${postFixHash}`;
 }
 function resolveIdentifier(url, explicitName, customIdentifier) {
     const trimmedIdentifier = customIdentifier?.trim();
     if (trimmedIdentifier) {
+        if (!/^[a-zA-Z][a-zA-Z0-9.-]*[a-zA-Z0-9]$/.test(trimmedIdentifier)) {
+            throw new Error(`Invalid identifier "${trimmedIdentifier}". Must start with a letter, ` +
+                `contain only letters, digits, hyphens, and dots, and end with a letter or digit.`);
+        }
         return trimmedIdentifier;
     }
     return getIdentifier(url, explicitName);
@@ -425,7 +429,7 @@ async function combineFiles(files, output) {
             return `window.addEventListener('DOMContentLoaded', (_event) => {
         const css = ${JSON.stringify(fileContent)};
         const style = document.createElement('style');
-        style.innerHTML = css;
+        style.textContent = css;
         document.head.appendChild(style);
       });`;
         }
@@ -678,7 +682,15 @@ Terminal=false
             // Avoid copying if source and destination are the same
             const absoluteDestPath = path.resolve(iconPath);
             if (resolvedIconPath !== absoluteDestPath) {
-                await fsExtra.copy(resolvedIconPath, iconPath);
+                try {
+                    await fsExtra.copy(resolvedIconPath, iconPath);
+                }
+                catch (error) {
+                    if (!(error instanceof Error &&
+                        error.message.includes('Source and destination must not be the same'))) {
+                        throw error;
+                    }
+                }
             }
         }
         if (updateIconPath) {
@@ -792,13 +804,20 @@ class BaseBuilder {
         this.options = options;
     }
     getBuildEnvironment() {
-        return IS_MAC
-            ? {
-                CFLAGS: '-fno-modules',
-                CXXFLAGS: '-fno-modules',
-                MACOSX_DEPLOYMENT_TARGET: '14.0',
-            }
-            : undefined;
+        if (!IS_MAC) {
+            return undefined;
+        }
+        const currentPath = process.env.PATH || '';
+        const systemToolsPath = '/usr/bin';
+        const buildPath = currentPath.startsWith(`${systemToolsPath}:`)
+            ? currentPath
+            : `${systemToolsPath}:${currentPath}`;
+        return {
+            CFLAGS: '-fno-modules',
+            CXXFLAGS: '-fno-modules',
+            MACOSX_DEPLOYMENT_TARGET: '14.0',
+            PATH: buildPath,
+        };
     }
     getInstallTimeout() {
         // Windows needs more time due to native compilation and antivirus scanning
@@ -828,6 +847,21 @@ class BaseBuilder {
             catch {
                 throw new Error('Neither pnpm nor npm is available. Please install a package manager.');
             }
+        }
+    }
+    async copyFileWithSamePathGuard(sourcePath, destinationPath) {
+        if (path.resolve(sourcePath) === path.resolve(destinationPath)) {
+            return;
+        }
+        try {
+            await fsExtra.copy(sourcePath, destinationPath, { overwrite: true });
+        }
+        catch (error) {
+            if (error instanceof Error &&
+                error.message.includes('Source and destination must not be the same')) {
+                return;
+            }
+            throw error;
         }
     }
     async prepare() {
@@ -875,7 +909,7 @@ class BaseBuilder {
             if (isChina) {
                 logger.info(`✺ Located in China, using ${packageManager}/rsProxy CN mirror.`);
                 const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
-                await fsExtra.copy(projectCnConf, projectConf);
+                await this.copyFileWithSamePathGuard(projectCnConf, projectConf);
                 await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`, timeout, { ...buildEnv, CI: 'true' });
             }
             else {
@@ -894,7 +928,7 @@ class BaseBuilder {
                 usedMirror = true;
                 try {
                     const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
-                    await fsExtra.copy(projectCnConf, projectConf);
+                    await this.copyFileWithSamePathGuard(projectCnConf, projectConf);
                     await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`, timeout, { ...buildEnv, CI: 'true' });
                     retrySpinner.succeed(chalk.green('Package installed with CN mirror!'));
                 }
@@ -1002,6 +1036,9 @@ class BaseBuilder {
             logger.info(`- Installing ${appName} to /Applications...`);
             const appBundleName = path.basename(appBundlePath);
             const appDest = path.join('/Applications', appBundleName);
+            if (await fsExtra.pathExists(appDest)) {
+                logger.warn(`  Existing ${appBundleName} in /Applications will be replaced.`);
+            }
             // fsExtra.move uses fs.rename (atomic on same filesystem) and falls back
             // to copy+remove only when moving across volumes.
             await fsExtra.move(appBundlePath, appDest, { overwrite: true });
@@ -1027,33 +1064,21 @@ class BaseBuilder {
             message.includes('appimage tool failed') ||
             message.includes('strip tool'));
     }
-    /**
-     * 解析目标架构
-     */
     resolveTargetArch(requestedArch) {
         if (requestedArch === 'auto' || !requestedArch) {
             return process.arch;
         }
         return requestedArch;
     }
-    /**
-     * 获取Tauri构建目标
-     */
     getTauriTarget(arch, platform = process.platform) {
         const platformMappings = BaseBuilder.ARCH_MAPPINGS[platform];
         if (!platformMappings)
             return null;
         return platformMappings[arch] || null;
     }
-    /**
-     * 获取架构显示名称（用于文件名）
-     */
     getArchDisplayName(arch) {
         return BaseBuilder.ARCH_DISPLAY_NAMES[arch] || arch;
     }
-    /**
-     * 构建基础构建命令
-     */
     buildBaseCommand(packageManager, configPath, target) {
         const baseCommand = this.options.debug
             ? `${packageManager} run build:debug`
@@ -1070,9 +1095,6 @@ class BaseBuilder {
         }
         return fullCommand;
     }
-    /**
-     * 获取构建特性列表
-     */
     getBuildFeatures() {
         const features = ['cli-build'];
         // Add macos-proxy feature for modern macOS (Darwin 23+ = macOS 14+)
@@ -1181,7 +1203,6 @@ class BaseBuilder {
     }
 }
 BaseBuilder.packageManagerCache = null;
-// 架构映射配置
 BaseBuilder.ARCH_MAPPINGS = {
     darwin: {
         arm64: 'aarch64-apple-darwin',
@@ -1197,7 +1218,6 @@ BaseBuilder.ARCH_MAPPINGS = {
         x64: 'x86_64-unknown-linux-gnu',
     },
 };
-// 架构名称映射（用于文件名生成）
 BaseBuilder.ARCH_DISPLAY_NAMES = {
     arm64: 'aarch64',
     x64: 'x64',
@@ -1856,17 +1876,34 @@ function generateIconServiceUrls(domain) {
     ];
 }
 /**
+ * Generates dashboard-icons URLs for an app name.
+ * Uses walkxcode/dashboard-icons as a final fallback for selfhosted apps.
+ * Keeps matching conservative to avoid overriding valid site-specific icons.
+ */
+function generateDashboardIconUrls(appName) {
+    const baseUrl = 'https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png';
+    const name = appName.toLowerCase().trim();
+    const slugs = new Set();
+    // Exact name
+    slugs.add(name);
+    // Replace spaces with hyphens
+    slugs.add(name.replace(/\s+/g, '-'));
+    return [...slugs]
+        .filter((s) => s.length > 0)
+        .map((slug) => `${baseUrl}/${slug}.png`);
+}
+/**
  * Attempts to fetch favicon from website
  */
 async function tryGetFavicon(url, appName) {
     try {
         const domain = new URL(url).hostname;
         const spinner = getSpinner(`Fetching icon from ${domain}...`);
-        const serviceUrls = generateIconServiceUrls(domain);
         const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
         const downloadTimeout = isCI
             ? ICON_CONFIG.downloadTimeout.ci
             : ICON_CONFIG.downloadTimeout.default;
+        const serviceUrls = generateIconServiceUrls(domain);
         for (const serviceUrl of serviceUrls) {
             try {
                 const faviconPath = await downloadIcon(serviceUrl, false, downloadTimeout);
@@ -1884,6 +1921,30 @@ async function tryGetFavicon(url, appName) {
                     logger.debug(`Icon service ${serviceUrl} failed: ${error.message}`);
                 }
                 continue;
+            }
+        }
+        // Final fallback for selfhosted apps behind auth where domain-based
+        // services cannot access the site favicon.
+        if (appName) {
+            const dashboardIconUrls = generateDashboardIconUrls(appName);
+            for (const iconUrl of dashboardIconUrls) {
+                try {
+                    const iconPath = await downloadIcon(iconUrl, false, downloadTimeout);
+                    if (!iconPath)
+                        continue;
+                    const convertedPath = await convertIconFormat(iconPath, appName);
+                    if (convertedPath) {
+                        const finalPath = await copyWindowsIconIfNeeded(convertedPath, appName);
+                        spinner.succeed(chalk.green(`Icon found via dashboard-icons fallback for "${appName}"!`));
+                        return finalPath;
+                    }
+                }
+                catch (error) {
+                    if (error instanceof Error) {
+                        logger.debug(`Dashboard icon ${iconUrl} failed: ${error.message}`);
+                    }
+                    continue;
+                }
             }
         }
         spinner.warn(`No favicon found for ${domain}. Using default.`);

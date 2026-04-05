@@ -27,13 +27,22 @@ export default abstract class BaseBuilder {
   }
 
   private getBuildEnvironment() {
-    return IS_MAC
-      ? {
-          CFLAGS: '-fno-modules',
-          CXXFLAGS: '-fno-modules',
-          MACOSX_DEPLOYMENT_TARGET: '14.0',
-        }
-      : undefined;
+    if (!IS_MAC) {
+      return undefined;
+    }
+
+    const currentPath = process.env.PATH || '';
+    const systemToolsPath = '/usr/bin';
+    const buildPath = currentPath.startsWith(`${systemToolsPath}:`)
+      ? currentPath
+      : `${systemToolsPath}:${currentPath}`;
+
+    return {
+      CFLAGS: '-fno-modules',
+      CXXFLAGS: '-fno-modules',
+      MACOSX_DEPLOYMENT_TARGET: '14.0',
+      PATH: buildPath,
+    };
   }
 
   private getInstallTimeout(): number {
@@ -68,6 +77,28 @@ export default abstract class BaseBuilder {
           'Neither pnpm nor npm is available. Please install a package manager.',
         );
       }
+    }
+  }
+
+  private async copyFileWithSamePathGuard(
+    sourcePath: string,
+    destinationPath: string,
+  ): Promise<void> {
+    if (path.resolve(sourcePath) === path.resolve(destinationPath)) {
+      return;
+    }
+
+    try {
+      await fsExtra.copy(sourcePath, destinationPath, { overwrite: true });
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message.includes('Source and destination must not be the same')
+      ) {
+        return;
+      }
+
+      throw error;
     }
   }
 
@@ -130,7 +161,7 @@ export default abstract class BaseBuilder {
           `✺ Located in China, using ${packageManager}/rsProxy CN mirror.`,
         );
         const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
-        await fsExtra.copy(projectCnConf, projectConf);
+        await this.copyFileWithSamePathGuard(projectCnConf, projectConf);
         await shellExec(
           `cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`,
           timeout,
@@ -163,7 +194,7 @@ export default abstract class BaseBuilder {
 
         try {
           const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
-          await fsExtra.copy(projectCnConf, projectConf);
+          await this.copyFileWithSamePathGuard(projectCnConf, projectConf);
           await shellExec(
             `cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`,
             timeout,
@@ -316,6 +347,12 @@ export default abstract class BaseBuilder {
       const appBundleName = path.basename(appBundlePath);
       const appDest = path.join('/Applications', appBundleName);
 
+      if (await fsExtra.pathExists(appDest)) {
+        logger.warn(
+          `  Existing ${appBundleName} in /Applications will be replaced.`,
+        );
+      }
+
       // fsExtra.move uses fs.rename (atomic on same filesystem) and falls back
       // to copy+remove only when moving across volumes.
       await fsExtra.move(appBundlePath, appDest, { overwrite: true });
@@ -350,7 +387,6 @@ export default abstract class BaseBuilder {
     );
   }
 
-  // 架构映射配置
   protected static readonly ARCH_MAPPINGS: Record<
     string,
     Record<string, string>
@@ -370,16 +406,12 @@ export default abstract class BaseBuilder {
     },
   };
 
-  // 架构名称映射（用于文件名生成）
   protected static readonly ARCH_DISPLAY_NAMES: Record<string, string> = {
     arm64: 'aarch64',
     x64: 'x64',
     universal: 'universal',
   };
 
-  /**
-   * 解析目标架构
-   */
   protected resolveTargetArch(requestedArch?: string): string {
     if (requestedArch === 'auto' || !requestedArch) {
       return process.arch;
@@ -387,9 +419,6 @@ export default abstract class BaseBuilder {
     return requestedArch;
   }
 
-  /**
-   * 获取Tauri构建目标
-   */
   protected getTauriTarget(
     arch: string,
     platform: NodeJS.Platform = process.platform,
@@ -399,16 +428,10 @@ export default abstract class BaseBuilder {
     return platformMappings[arch] || null;
   }
 
-  /**
-   * 获取架构显示名称（用于文件名）
-   */
   protected getArchDisplayName(arch: string): string {
     return BaseBuilder.ARCH_DISPLAY_NAMES[arch] || arch;
   }
 
-  /**
-   * 构建基础构建命令
-   */
   protected buildBaseCommand(
     packageManager: string,
     configPath: string,
@@ -434,9 +457,6 @@ export default abstract class BaseBuilder {
     return fullCommand;
   }
 
-  /**
-   * 获取构建特性列表
-   */
   protected getBuildFeatures(): string[] {
     const features = ['cli-build'];
 

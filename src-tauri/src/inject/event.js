@@ -23,6 +23,7 @@ function setZoom(zoom) {
     body.style.height = `${100 / zoomValue}%`;
   } else {
     html.style.zoom = zoom;
+    window.dispatchEvent(new Event("resize"));
   }
 
   window.localStorage.setItem("htmlZoom", zoom);
@@ -336,14 +337,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function convertBlobUrlToBinary(blobUrl) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const blob = window.blobToUrlCaches.get(blobUrl);
+      if (!blob) {
+        fetch(blobUrl)
+          .then((res) => res.arrayBuffer())
+          .then((buffer) => resolve(Array.from(new Uint8Array(buffer))))
+          .catch(reject);
+        return;
+      }
       const reader = new FileReader();
-
       reader.readAsArrayBuffer(blob);
       reader.onload = () => {
         resolve(Array.from(new Uint8Array(reader.result)));
       };
+      reader.onerror = () => reject(reader.error);
     });
   }
 
@@ -526,7 +534,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Handle _blank links: same domain navigates in-app, cross-domain opens new window
+      // Handle _blank links: internal links stay in-app, external links open in the system browser
       if (target === "_blank") {
         if (forceInternalNavigation) {
           e.preventDefault();
@@ -542,13 +550,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         e.preventDefault();
         e.stopImmediatePropagation();
-        const newWindow = originalWindowOpen.call(
-          window,
-          absoluteUrl,
-          "_blank",
-          "width=1200,height=800,scrollbars=yes,resizable=yes",
-        );
-        if (!newWindow) handleExternalLink(absoluteUrl);
+        handleExternalLink(absoluteUrl);
         return;
       }
 
@@ -579,7 +581,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Handle regular links: internal URLs allow normal navigation, external opens new window
+      // Handle regular links: internal URLs allow normal navigation, external links open in the system browser
       if (!target || target === "_self") {
         // Optimization: Allow previewable media to be handled by the app/browser directly
         // This fixes issues where CDN links are treated as external
@@ -594,13 +596,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           e.preventDefault();
           e.stopImmediatePropagation();
-          const newWindow = originalWindowOpen.call(
-            window,
-            absoluteUrl,
-            "_blank",
-            "width=1200,height=800,scrollbars=yes,resizable=yes",
-          );
-          if (!newWindow) handleExternalLink(absoluteUrl);
+          handleExternalLink(absoluteUrl);
         }
       }
     }

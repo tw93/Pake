@@ -1381,6 +1381,7 @@ class PakeTestRunner {
     const iconsDir = path.join(config.PROJECT_ROOT, "src-tauri/icons");
     const testNames = [
       "urltest",
+      "testapp",
       "githubapp",
       "githubmultiarch",
       "githubconfigtest",
@@ -1468,6 +1469,11 @@ class PakeTestRunner {
       const pakeDir = path.join(config.PROJECT_ROOT, "src-tauri", ".pake");
       if (fs.existsSync(pakeDir)) {
         fs.rmSync(pakeDir, { recursive: true, force: true });
+      }
+
+      const localTestFile = path.join(config.PROJECT_ROOT, "test-local.html");
+      if (fs.existsSync(localTestFile)) {
+        fs.rmSync(localTestFile, { force: true });
       }
     } catch (e) {
       console.warn("   [Warn]  Cleanup warning:", e.message);
