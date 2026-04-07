@@ -1470,6 +1470,85 @@ class BuilderProvider {
     }
 }
 
+const LOCAL_HOST_SUFFIXES = [
+    '.local',
+    '.lan',
+    '.internal',
+    '.home',
+    '.localdomain',
+];
+const IPV4_ADDRESS_PATTERN = /^(\d{1,3}\.){3}\d{1,3}$/;
+function normalize(value) {
+    return value.trim().toLowerCase();
+}
+function simplify(value) {
+    return normalize(value).replace(/[\s._-]+/g, '');
+}
+function generateDashboardIconSlugs(appName) {
+    const normalizedName = normalize(appName);
+    if (!normalizedName) {
+        return [];
+    }
+    const slugs = new Set([
+        normalizedName,
+        normalizedName.replace(/\s+/g, '-'),
+    ]);
+    return [...slugs].filter(Boolean);
+}
+function isLikelyLocalHostname(hostname) {
+    const normalizedHostname = normalize(hostname);
+    if (!normalizedHostname) {
+        return false;
+    }
+    return (normalizedHostname === 'localhost' ||
+        IPV4_ADDRESS_PATTERN.test(normalizedHostname) ||
+        normalizedHostname.includes(':') ||
+        !normalizedHostname.includes('.') ||
+        LOCAL_HOST_SUFFIXES.some((suffix) => normalizedHostname.endsWith(suffix)));
+}
+function shouldPreferDashboardIcons(url, appName) {
+    if (!appName) {
+        return false;
+    }
+    try {
+        const hostname = new URL(url).hostname.toLowerCase();
+        if (!hostname) {
+            return false;
+        }
+        if (isLikelyLocalHostname(hostname)) {
+            return true;
+        }
+        const parsed = psl.parse(hostname);
+        if (!('domain' in parsed) || !parsed.domain) {
+            return true;
+        }
+        const registrableDomain = parsed.domain.toLowerCase();
+        if (hostname === registrableDomain) {
+            return false;
+        }
+        const subdomain = 'subdomain' in parsed && typeof parsed.subdomain === 'string'
+            ? parsed.subdomain
+            : '';
+        if (!subdomain) {
+            return false;
+        }
+        const productLabel = subdomain.split('.').pop() || '';
+        const rootLabel = registrableDomain.split('.')[0] || '';
+        const normalizedAppName = simplify(appName);
+        return (normalizedAppName.length > 0 &&
+            simplify(productLabel) === normalizedAppName &&
+            simplify(rootLabel) !== normalizedAppName);
+    }
+    catch {
+        return false;
+    }
+}
+function getIconSourcePriority(url, appName) {
+    return shouldPreferDashboardIcons(url, appName)
+        ? ['dashboard', 'domain']
+        : ['domain', 'dashboard'];
+}
+
 const ICO_HEADER_SIZE = 6;
 const ICO_DIR_ENTRY_SIZE = 16;
 const ICO_TYPE_ICON = 1;
@@ -1574,8 +1653,7 @@ async function writeIcoWithPreferredSize(sourcePath, outputPath, preferredSize) 
 
 const ICON_CONFIG = {
     minFileSize: 100,
-    supportedFormats: ['png', 'ico', 'jpeg', 'jpg', 'webp', 'icns'],
-    whiteBackground: { r: 255, g: 255, b: 255 },
+    supportedFormats: ['png', 'ico', 'jpeg', 'jpg', 'webp', 'icns', 'svg'],
     transparentBackground: { r: 255, g: 255, b: 255, alpha: 0 },
     downloadTimeout: {
         ci: 5000,
@@ -1591,6 +1669,9 @@ const API_KEYS = {
     logoDev: ['pk_JLLMUKGZRpaG5YclhXaTkg', 'pk_Ph745P8mQSeYFfW2Wk039A'],
     brandfetch: ['1idqvJC0CeFSeyp3Yf7', '1idej-yhU_ThggIHFyG'],
 };
+/**
+ * Generates platform-specific icon paths and handles copying for Windows
+ */
 function generateIconPath(appName, isDefault = false) {
     const safeName = isDefault ? 'icon' : getIconBaseName(appName);
     const baseName = safeName;
@@ -1628,31 +1709,23 @@ async function copyWindowsIconIfNeeded(convertedPath, appName) {
     }
 }
 /**
- * Adds white background to transparent icons only
+ * Normalizes icon inputs to PNG while preserving alpha.
  */
 async function preprocessIcon(inputPath) {
     try {
-        const metadata = await sharp(inputPath).metadata();
-        if (metadata.channels !== 4)
-            return inputPath; // No transparency
+        const extension = path.extname(inputPath).toLowerCase();
+        const shouldNormalize = ['.png', '.jpeg', '.jpg', '.webp', '.svg'].includes(extension);
+        if (!shouldNormalize) {
+            return inputPath;
+        }
         const { path: tempDir } = await dir();
-        const outputPath = path.join(tempDir, 'icon-with-background.png');
-        await sharp({
-            create: {
-                width: metadata.width || 512,
-                height: metadata.height || 512,
-                channels: 4,
-                background: { ...ICON_CONFIG.whiteBackground, alpha: 1 },
-            },
-        })
-            .composite([{ input: inputPath }])
-            .png()
-            .toFile(outputPath);
+        const outputPath = path.join(tempDir, 'icon-normalized.png');
+        await sharp(inputPath).ensureAlpha().png().toFile(outputPath);
         return outputPath;
     }
     catch (error) {
         if (error instanceof Error) {
-            logger.warn(`Failed to add background to icon: ${error.message}`);
+            logger.warn(`Failed to normalize icon: ${error.message}`);
         }
         return inputPath;
     }
@@ -1882,15 +1955,71 @@ function generateIconServiceUrls(domain) {
  */
 function generateDashboardIconUrls(appName) {
     const baseUrl = 'https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png';
-    const name = appName.toLowerCase().trim();
-    const slugs = new Set();
-    // Exact name
-    slugs.add(name);
-    // Replace spaces with hyphens
-    slugs.add(name.replace(/\s+/g, '-'));
-    return [...slugs]
-        .filter((s) => s.length > 0)
-        .map((slug) => `${baseUrl}/${slug}.png`);
+    return generateDashboardIconSlugs(appName).map((slug) => `${baseUrl}/${slug}.png`);
+}
+function isSupportedIconFormat(extension) {
+    return ICON_CONFIG.supportedFormats.includes(extension);
+}
+function looksLikeSvg(arrayBuffer) {
+    const sample = Buffer.from(arrayBuffer)
+        .toString('utf-8', 0, Math.min(arrayBuffer.byteLength, 512))
+        .trimStart()
+        .toLowerCase();
+    return (sample.startsWith('<svg') ||
+        (sample.startsWith('<?xml') && sample.includes('<svg')));
+}
+function getUrlExtension(iconUrl) {
+    try {
+        return path.extname(new URL(iconUrl).pathname).slice(1).toLowerCase();
+    }
+    catch {
+        return path.extname(iconUrl).slice(1).toLowerCase();
+    }
+}
+async function detectDownloadedIconExtension(response, arrayBuffer, iconUrl) {
+    const fileDetails = await fileTypeFromBuffer(arrayBuffer);
+    if (fileDetails && isSupportedIconFormat(fileDetails.ext)) {
+        return fileDetails.ext;
+    }
+    const contentType = response.headers.get('content-type')?.split(';')[0].trim();
+    if (contentType === 'image/svg+xml' && looksLikeSvg(arrayBuffer)) {
+        return 'svg';
+    }
+    if (getUrlExtension(iconUrl) === 'svg' && looksLikeSvg(arrayBuffer)) {
+        return 'svg';
+    }
+    return null;
+}
+async function resolveIconFromUrl(iconUrl, appName, downloadTimeout) {
+    const iconPath = await downloadIcon(iconUrl, false, downloadTimeout);
+    if (!iconPath) {
+        return null;
+    }
+    const convertedPath = await convertIconFormat(iconPath, appName);
+    if (!convertedPath) {
+        return null;
+    }
+    return await copyWindowsIconIfNeeded(convertedPath, appName);
+}
+async function tryResolveIconSource(source, domain, appName, downloadTimeout) {
+    const iconUrls = source === 'dashboard'
+        ? generateDashboardIconUrls(appName)
+        : generateIconServiceUrls(domain);
+    for (const iconUrl of iconUrls) {
+        try {
+            const resolvedPath = await resolveIconFromUrl(iconUrl, appName, downloadTimeout);
+            if (resolvedPath) {
+                return resolvedPath;
+            }
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                const label = source === 'dashboard' ? 'Dashboard icon' : 'Icon service';
+                logger.debug(`${label} ${iconUrl} failed: ${error.message}`);
+            }
+        }
+    }
+    return null;
 }
 /**
  * Attempts to fetch favicon from website
@@ -1903,49 +2032,16 @@ async function tryGetFavicon(url, appName) {
         const downloadTimeout = isCI
             ? ICON_CONFIG.downloadTimeout.ci
             : ICON_CONFIG.downloadTimeout.default;
-        const serviceUrls = generateIconServiceUrls(domain);
-        for (const serviceUrl of serviceUrls) {
-            try {
-                const faviconPath = await downloadIcon(serviceUrl, false, downloadTimeout);
-                if (!faviconPath)
-                    continue;
-                const convertedPath = await convertIconFormat(faviconPath, appName);
-                if (convertedPath) {
-                    const finalPath = await copyWindowsIconIfNeeded(convertedPath, appName);
-                    spinner.succeed(chalk.green('Icon fetched and converted successfully!'));
-                    return finalPath;
-                }
-            }
-            catch (error) {
-                if (error instanceof Error) {
-                    logger.debug(`Icon service ${serviceUrl} failed: ${error.message}`);
-                }
+        const sourcePriority = getIconSourcePriority(url, appName);
+        for (const source of sourcePriority) {
+            const resolvedIconPath = await tryResolveIconSource(source, domain, appName, downloadTimeout);
+            if (!resolvedIconPath) {
                 continue;
             }
-        }
-        // Final fallback for selfhosted apps behind auth where domain-based
-        // services cannot access the site favicon.
-        if (appName) {
-            const dashboardIconUrls = generateDashboardIconUrls(appName);
-            for (const iconUrl of dashboardIconUrls) {
-                try {
-                    const iconPath = await downloadIcon(iconUrl, false, downloadTimeout);
-                    if (!iconPath)
-                        continue;
-                    const convertedPath = await convertIconFormat(iconPath, appName);
-                    if (convertedPath) {
-                        const finalPath = await copyWindowsIconIfNeeded(convertedPath, appName);
-                        spinner.succeed(chalk.green(`Icon found via dashboard-icons fallback for "${appName}"!`));
-                        return finalPath;
-                    }
-                }
-                catch (error) {
-                    if (error instanceof Error) {
-                        logger.debug(`Dashboard icon ${iconUrl} failed: ${error.message}`);
-                    }
-                    continue;
-                }
-            }
+            spinner.succeed(chalk.green(source === 'dashboard'
+                ? `Icon found via dashboard-icons for "${appName}"!`
+                : 'Icon fetched and converted successfully!'));
+            return resolvedIconPath;
         }
         spinner.warn(`No favicon found for ${domain}. Using default.`);
         return null;
@@ -1979,12 +2075,11 @@ async function downloadIcon(iconUrl, showSpinner = true, customTimeout) {
         const arrayBuffer = await response.arrayBuffer();
         if (!arrayBuffer || arrayBuffer.byteLength < ICON_CONFIG.minFileSize)
             return null;
-        const fileDetails = await fileTypeFromBuffer(arrayBuffer);
-        if (!fileDetails ||
-            !ICON_CONFIG.supportedFormats.includes(fileDetails.ext)) {
+        const extension = await detectDownloadedIconExtension(response, arrayBuffer, iconUrl);
+        if (!extension) {
             return null;
         }
-        return await saveIconFile(arrayBuffer, fileDetails.ext);
+        return await saveIconFile(arrayBuffer, extension);
     }
     catch (error) {
         clearTimeout(timeoutId);

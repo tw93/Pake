@@ -257,6 +257,21 @@ function isDownloadableFile(url) {
   }
 }
 
+function normalizeAnchorHref(rawHref) {
+  return typeof rawHref === "string" ? rawHref.trim() : "";
+}
+
+function shouldBypassPakeLinkHandling(rawHref) {
+  const normalizedHref = normalizeAnchorHref(rawHref).toLowerCase();
+  if (!normalizedHref) {
+    return false;
+  }
+
+  return (
+    normalizedHref.startsWith("javascript:") || normalizedHref.startsWith("#")
+  );
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const tauri = window.__TAURI__;
   const appWindow = tauri.window.getCurrentWindow();
@@ -506,6 +521,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const anchorElement = e.target.closest("a");
 
     if (anchorElement && anchorElement.href) {
+      const rawHref = anchorElement.getAttribute("href") || "";
+      if (shouldBypassPakeLinkHandling(rawHref)) {
+        return;
+      }
+
       const target = anchorElement.target;
       const hrefUrl = new URL(anchorElement.href);
       const absoluteUrl = hrefUrl.href;
@@ -611,6 +631,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // Rewrite the window.open function.
   const originalWindowOpen = window.open;
   window.open = function (url, name, specs) {
+    const normalizedUrl = normalizeAnchorHref(url);
+    if (normalizedUrl.startsWith("#")) {
+      window.location.href = new URL(normalizedUrl, window.location.href).href;
+      return window;
+    }
+
+    if (shouldBypassPakeLinkHandling(url)) {
+      return originalWindowOpen.call(window, url, name, specs);
+    }
+
     // Allow authentication popups to open normally
     if (window.isAuthPopup(url, name)) {
       return originalWindowOpen.call(window, url, name, specs);
