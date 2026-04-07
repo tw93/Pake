@@ -141,3 +141,41 @@ export async function writeIcoWithPreferredSize(
     return false;
   }
 }
+
+/**
+ * Builds an ICO file from an array of PNG buffers using the PNG-in-ICO format
+ * (supported since Windows Vista). This preserves alpha transparency.
+ */
+export function buildIcoFromPngBuffers(
+  frames: Array<{ size: number; png: Buffer }>,
+): Buffer {
+  const count = frames.length;
+  const headerSize = ICO_HEADER_SIZE + count * ICO_DIR_ENTRY_SIZE;
+  const totalPayload = frames.reduce((acc, f) => acc + f.png.length, 0);
+  const output = Buffer.alloc(headerSize + totalPayload);
+
+  output.writeUInt16LE(0, 0);
+  output.writeUInt16LE(ICO_TYPE_ICON, 2);
+  output.writeUInt16LE(count, 4);
+
+  let currentOffset = headerSize;
+  for (let i = 0; i < count; i++) {
+    const { size, png } = frames[i];
+    const entryOffset = ICO_HEADER_SIZE + i * ICO_DIR_ENTRY_SIZE;
+    const sizeByte = size >= 256 ? 0 : size;
+
+    output.writeUInt8(sizeByte, entryOffset);
+    output.writeUInt8(sizeByte, entryOffset + 1);
+    output.writeUInt8(0, entryOffset + 2);
+    output.writeUInt8(0, entryOffset + 3);
+    output.writeUInt16LE(1, entryOffset + 4);
+    output.writeUInt16LE(32, entryOffset + 6);
+    output.writeUInt32LE(png.length, entryOffset + 8);
+    output.writeUInt32LE(currentOffset, entryOffset + 12);
+
+    png.copy(output, currentOffset);
+    currentOffset += png.length;
+  }
+
+  return output;
+}

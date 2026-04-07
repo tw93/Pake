@@ -17,7 +17,7 @@ import {
 } from '@/utils/icon-source';
 import { generateLinuxPackageName, generateSafeFilename } from '@/utils/name';
 import { PakeAppOptions } from '@/types';
-import { writeIcoWithPreferredSize } from '@/utils/ico';
+import { writeIcoWithPreferredSize, buildIcoFromPngBuffers } from '@/utils/ico';
 
 type PlatformIconConfig = {
   format: string;
@@ -207,18 +207,26 @@ async function convertIconFormat(
 
     // Generate platform-specific format
     if (IS_WIN) {
-      // Support multiple sizes for better Windows compatibility
-      await icongen(processedInputPath, platformOutputDir, {
-        report: false,
-        ico: {
-          name: `${iconName}_256`,
-          sizes: PLATFORM_CONFIG.win.sizes,
-        },
-      });
-      return path.join(
+      const icoPath = path.join(
         platformOutputDir,
         `${iconName}_256${PLATFORM_CONFIG.win.format}`,
       );
+      const frames = await Promise.all(
+        (PLATFORM_CONFIG.win.sizes as number[]).map(async (size) => {
+          const png = await sharp(processedInputPath)
+            .resize(size, size, {
+              fit: 'contain',
+              background: { r: 0, g: 0, b: 0, alpha: 0 },
+            })
+            .ensureAlpha()
+            .png()
+            .toBuffer();
+          return { size, png };
+        }),
+      );
+      const icoBuffer = buildIcoFromPngBuffers(frames);
+      await fsExtra.outputFile(icoPath, icoBuffer);
+      return icoPath;
     }
 
     if (IS_LINUX) {
