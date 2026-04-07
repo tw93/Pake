@@ -1650,10 +1650,48 @@ async function writeIcoWithPreferredSize(sourcePath, outputPath, preferredSize) 
         return false;
     }
 }
+/**
+ * Builds an ICO file from an array of PNG buffers using the PNG-in-ICO format
+ * (supported since Windows Vista). This preserves alpha transparency.
+ */
+function buildIcoFromPngBuffers(frames) {
+    const count = frames.length;
+    const headerSize = ICO_HEADER_SIZE + count * ICO_DIR_ENTRY_SIZE;
+    const totalPayload = frames.reduce((acc, f) => acc + f.png.length, 0);
+    const output = Buffer.alloc(headerSize + totalPayload);
+    output.writeUInt16LE(0, 0);
+    output.writeUInt16LE(ICO_TYPE_ICON, 2);
+    output.writeUInt16LE(count, 4);
+    let currentOffset = headerSize;
+    for (let i = 0; i < count; i++) {
+        const { size, png } = frames[i];
+        const entryOffset = ICO_HEADER_SIZE + i * ICO_DIR_ENTRY_SIZE;
+        const sizeByte = size >= 256 ? 0 : size;
+        output.writeUInt8(sizeByte, entryOffset);
+        output.writeUInt8(sizeByte, entryOffset + 1);
+        output.writeUInt8(0, entryOffset + 2);
+        output.writeUInt8(0, entryOffset + 3);
+        output.writeUInt16LE(1, entryOffset + 4);
+        output.writeUInt16LE(32, entryOffset + 6);
+        output.writeUInt32LE(png.length, entryOffset + 8);
+        output.writeUInt32LE(currentOffset, entryOffset + 12);
+        png.copy(output, currentOffset);
+        currentOffset += png.length;
+    }
+    return output;
+}
 
 const ICON_CONFIG = {
     minFileSize: 100,
-    supportedFormats: ['png', 'ico', 'jpeg', 'jpg', 'webp', 'icns', 'svg'],
+    supportedFormats: [
+        'png',
+        'ico',
+        'jpeg',
+        'jpg',
+        'webp',
+        'icns',
+        'svg',
+    ],
     transparentBackground: { r: 255, g: 255, b: 255, alpha: 0 },
     downloadTimeout: {
         ci: 5000,
@@ -1792,15 +1830,21 @@ async function convertIconFormat(inputPath, appName) {
         const iconName = getIconBaseName(appName);
         // Generate platform-specific format
         if (IS_WIN) {
-            // Support multiple sizes for better Windows compatibility
-            await icongen(processedInputPath, platformOutputDir, {
-                report: false,
-                ico: {
-                    name: `${iconName}_256`,
-                    sizes: PLATFORM_CONFIG.win.sizes,
-                },
-            });
-            return path.join(platformOutputDir, `${iconName}_256${PLATFORM_CONFIG.win.format}`);
+            const icoPath = path.join(platformOutputDir, `${iconName}_256${PLATFORM_CONFIG.win.format}`);
+            const frames = await Promise.all(PLATFORM_CONFIG.win.sizes.map(async (size) => {
+                const png = await sharp(processedInputPath)
+                    .resize(size, size, {
+                    fit: 'contain',
+                    background: { r: 0, g: 0, b: 0, alpha: 0 },
+                })
+                    .ensureAlpha()
+                    .png()
+                    .toBuffer();
+                return { size, png };
+            }));
+            const icoBuffer = buildIcoFromPngBuffers(frames);
+            await fsExtra.outputFile(icoPath, icoBuffer);
+            return icoPath;
         }
         if (IS_LINUX) {
             const outputPath = path.join(platformOutputDir, `${iconName}_${PLATFORM_CONFIG.linux.size}${PLATFORM_CONFIG.linux.format}`);
@@ -1981,7 +2025,10 @@ async function detectDownloadedIconExtension(response, arrayBuffer, iconUrl) {
     if (fileDetails && isSupportedIconFormat(fileDetails.ext)) {
         return fileDetails.ext;
     }
-    const contentType = response.headers.get('content-type')?.split(';')[0].trim();
+    const contentType = response.headers
+        .get('content-type')
+        ?.split(';')[0]
+        .trim();
     if (contentType === 'image/svg+xml' && looksLikeSvg(arrayBuffer)) {
         return 'svg';
     }
