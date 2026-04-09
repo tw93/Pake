@@ -1,10 +1,7 @@
 import chalk from 'chalk';
 import { program, Option } from 'commander';
 import packageJson from '../../package.json';
-import {
-  DEFAULT_PAKE_OPTIONS as DEFAULT,
-  DEFAULT_PAKE_OPTIONS,
-} from '../defaults';
+import { DEFAULT_PAKE_OPTIONS as DEFAULT } from '../defaults';
 import { validateNumberInput, validateUrlInput } from '../utils/validate';
 
 export function getCliProgram() {
@@ -72,7 +69,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         '--proxy-url <url>',
         'Proxy URL for all network requests (http://, https://, socks5://)',
       )
-        .default(DEFAULT_PAKE_OPTIONS.proxyUrl)
+        .default(DEFAULT.proxyUrl)
         .hideHelp(),
     )
     .addOption(
@@ -116,7 +113,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     )
     .addOption(
       new Option('--activation-shortcut <string>', 'Shortcut key to active App')
-        .default(DEFAULT_PAKE_OPTIONS.activationShortcut)
+        .default(DEFAULT.activationShortcut)
         .hideHelp(),
     )
     .addOption(
@@ -251,10 +248,13 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .default(DEFAULT.newWindow)
         .hideHelp(),
     )
-    .option(
-      '--install',
-      'Auto-install app to /Applications (macOS) after build and remove local bundle',
-      DEFAULT.install,
+    .addOption(
+      new Option(
+        '--install',
+        'Auto-install app to /Applications (macOS) after build and remove local bundle',
+      )
+        .default(DEFAULT.install)
+        .hideHelp(),
     )
     .addOption(
       new Option('--camera', 'Request camera permission on macOS')

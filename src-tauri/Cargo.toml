@@ -20,7 +20,7 @@ tauri-build = { version = "2.5.5", features = [] }
 [dependencies]
 serde_json = "1.0.149"
 serde = { version = "1.0.228", features = ["derive"] }
-tokio = { version = "1.49.0", features = ["full"] }
+tokio = { version = "1.49.0", features = ["time"] }
 tauri = { version = "2.10.2", features = [
   "tray-icon",
   "image-ico",
@@ -48,7 +48,7 @@ custom-protocol = ["tauri/custom-protocol"]
 
 [profile.release]
 panic = "abort"
-codegen-units = 16
+codegen-units = 1
 lto = "thin"
 opt-level = "z"
 strip = true

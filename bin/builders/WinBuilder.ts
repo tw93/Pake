@@ -33,18 +33,7 @@ export default class WinBuilder extends BaseBuilder {
       );
     }
 
-    let fullCommand = this.buildBaseCommand(
-      packageManager,
-      configPath,
-      buildTarget,
-    );
-
-    const features = this.getBuildFeatures();
-    if (features.length > 0) {
-      fullCommand += ` --features ${features.join(',')}`;
-    }
-
-    return fullCommand;
+    return this.buildBaseCommand(packageManager, configPath, buildTarget);
   }
 
   protected getBasePath(): string {

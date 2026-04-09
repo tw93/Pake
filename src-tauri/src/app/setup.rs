@@ -47,12 +47,12 @@ pub fn set_system_tray(
             }
             "hide_app" => {
                 if let Some(window) = app.get_webview_window("pake") {
-                    window.minimize().unwrap();
+                    let _ = window.minimize();
                 }
             }
             "show_app" => {
                 if let Some(window) = app.get_webview_window("pake") {
-                    window.show().unwrap();
+                    let _ = window.show();
                     #[cfg(target_os = "linux")]
                     if _init_fullscreen && !window.is_fullscreen().unwrap_or(false) {
                         let _ = window.set_fullscreen(true);
@@ -61,8 +61,8 @@ pub fn set_system_tray(
                 }
             }
             "quit" => {
-                app.save_window_state(StateFlags::all()).unwrap();
-                std::process::exit(0);
+                let _ = app.save_window_state(StateFlags::all());
+                app.exit(0);
             }
             _ => (),
         })
@@ -72,10 +72,10 @@ pub fn set_system_tray(
                     if let Some(window) = tray.app_handle().get_webview_window("pake") {
                         let is_visible = window.is_visible().unwrap_or(false);
                         if is_visible {
-                            window.hide().unwrap();
+                            let _ = window.hide();
                         } else {
-                            window.show().unwrap();
-                            window.set_focus().unwrap();
+                            let _ = window.show();
+                            let _ = window.set_focus();
                             #[cfg(target_os = "linux")]
                             if _init_fullscreen && !window.is_fullscreen().unwrap_or(false) {
                                 let _ = window.set_fullscreen(true);
@@ -114,7 +114,10 @@ pub fn set_global_shortcut(
     }
 
     let app_handle = app.clone();
-    let shortcut_hotkey = Shortcut::from_str(&shortcut).unwrap();
+    let shortcut_hotkey = match Shortcut::from_str(&shortcut) {
+        Ok(s) => s,
+        Err(_) => return Ok(()),
+    };
     let last_triggered = Arc::new(Mutex::new(Instant::now()));
 
     app_handle
@@ -133,12 +136,12 @@ pub fn set_global_shortcut(
 
                         if shortcut_hotkey.eq(event) {
                             if let Some(window) = app.get_webview_window("pake") {
-                                let is_visible = window.is_visible().unwrap();
+                                let is_visible = window.is_visible().unwrap_or(false);
                                 if is_visible {
-                                    window.hide().unwrap();
+                                    let _ = window.hide();
                                 } else {
-                                    window.show().unwrap();
-                                    window.set_focus().unwrap();
+                                    let _ = window.show();
+                                    let _ = window.set_focus();
                                     #[cfg(target_os = "linux")]
                                     if _init_fullscreen && !window.is_fullscreen().unwrap_or(false)
                                     {
@@ -153,7 +156,7 @@ pub fn set_global_shortcut(
         )
         .expect("Failed to set global shortcut");
 
-    app.global_shortcut().register(shortcut_hotkey).unwrap();
+    let _ = app.global_shortcut().register(shortcut_hotkey);
 
     Ok(())
 }

@@ -15,7 +15,7 @@ import {
   getIconSourcePriority,
   type IconSource,
 } from '@/utils/icon-source';
-import { generateLinuxPackageName, generateSafeFilename } from '@/utils/name';
+import { generateLinuxPackageName, getSafeAppName } from '@/utils/name';
 import { PakeAppOptions } from '@/types';
 import { writeIcoWithPreferredSize, buildIcoFromPngBuffers } from '@/utils/ico';
 
@@ -74,7 +74,7 @@ function generateIconPath(appName: string, isDefault = false): string {
 function getIconBaseName(appName: string): string {
   const baseName = IS_LINUX
     ? generateLinuxPackageName(appName)
-    : generateSafeFilename(appName).toLowerCase();
+    : getSafeAppName(appName);
   return baseName || 'pake-app';
 }
 

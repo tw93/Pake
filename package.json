@@ -73,7 +73,6 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^25.3.2",
-    "@types/page-icon": "^0.3.6",
     "@types/prompts": "^2.4.9",
     "@types/tmp": "^0.2.6",
     "@types/update-notifier": "^6.0.8",

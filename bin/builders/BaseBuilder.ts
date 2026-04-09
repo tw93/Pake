@@ -125,7 +125,7 @@ export default abstract class BaseBuilder {
         await installRust();
       } else {
         logger.error('✕ Rust required to package your webapp.');
-        process.exit(0);
+        process.exit(1);
       }
     }
 
@@ -454,6 +454,11 @@ export default abstract class BaseBuilder {
       fullCommand += ' --verbose';
     }
 
+    const features = this.getBuildFeatures();
+    if (features.length > 0) {
+      fullCommand += ` --features ${features.join(',')}`;
+    }
+
     return fullCommand;
   }
 
@@ -485,12 +490,6 @@ export default abstract class BaseBuilder {
     // For macOS, use app bundles by default unless DMG is explicitly requested
     if (IS_MAC && this.options.targets === 'app') {
       fullCommand += ' --bundles app';
-    }
-
-    // Add features
-    const features = this.getBuildFeatures();
-    if (features.length > 0) {
-      fullCommand += ` --features ${features.join(',')}`;
     }
 
     return fullCommand;

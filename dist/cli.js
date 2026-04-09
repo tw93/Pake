@@ -95,7 +95,6 @@ var devDependencies = {
 	"@rollup/plugin-terser": "^0.4.4",
 	"@types/fs-extra": "^11.0.4",
 	"@types/node": "^25.3.2",
-	"@types/page-icon": "^0.3.6",
 	"@types/prompts": "^2.4.9",
 	"@types/tmp": "^0.2.6",
 	"@types/update-notifier": "^6.0.8",
@@ -289,7 +288,7 @@ const logger = {
         log.error(...msg.map((m) => chalk.red(m)));
     },
     warn(...msg) {
-        log.info(...msg.map((m) => chalk.yellow(m)));
+        log.warn(...msg.map((m) => chalk.yellow(m)));
     },
     success(...msg) {
         log.info(...msg.map((m) => chalk.green(m)));
@@ -537,13 +536,12 @@ async function mergeConfig(url, options, tauriConf) {
         platform === 'linux'
             ? linuxBinaryName
             : `pake-${generateIdentifierSafeName(name)}`;
-    if (platform == 'win32') {
+    if (platform === 'win32') {
         tauriConf.bundle.windows.wix.language[0] = installerLanguage;
     }
     const pathExists = await fsExtra.pathExists(url);
     if (pathExists) {
         logger.warn('✼ Your input might be a local file.');
-        tauriConf.pake.windows[0].url_type = 'local';
         const fileName = path.basename(url);
         const dirName = path.dirname(url);
         const distDir = path.join(npmDirectory, 'dist');
@@ -726,11 +724,6 @@ Terminal=false
             logger.warn(`✼ Default system tray icon will remain unchanged.`);
         }
     }
-    // Ensure trayIcon object exists before setting iconPath
-    if (!tauriConf.app.trayIcon) {
-        tauriConf.app.trayIcon = {};
-    }
-    tauriConf.app.trayIcon.iconPath = trayIconPath;
     tauriConf.pake.system_tray_path = trayIconPath;
     delete tauriConf.app.trayIcon;
     const injectFilePath = path.join(npmDirectory, `src-tauri/src/inject/custom.js`);
@@ -884,7 +877,7 @@ class BaseBuilder {
             }
             else {
                 logger.error('✕ Rust required to package your webapp.');
-                process.exit(0);
+                process.exit(1);
             }
         }
         const isChina = await isChinaDomain('www.npmjs.com');
@@ -2469,7 +2462,9 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .addOption(new Option('--new-window', 'Allow sites to open new windows (for auth flows, tabs, branches)')
         .default(DEFAULT_PAKE_OPTIONS.newWindow)
         .hideHelp())
-        .option('--install', 'Auto-install app to /Applications (macOS) after build and remove local bundle', DEFAULT_PAKE_OPTIONS.install)
+        .addOption(new Option('--install', 'Auto-install app to /Applications (macOS) after build and remove local bundle')
+        .default(DEFAULT_PAKE_OPTIONS.install)
+        .hideHelp())
         .addOption(new Option('--camera', 'Request camera permission on macOS')
         .default(DEFAULT_PAKE_OPTIONS.camera)
         .hideHelp())

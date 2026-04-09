@@ -88,11 +88,6 @@ export default class LinuxBuilder extends BaseBuilder {
       buildTarget,
     );
 
-    const features = this.getBuildFeatures();
-    if (features.length > 0) {
-      fullCommand += ` --features ${features.join(',')}`;
-    }
-
     if (this.currentBuildType) {
       fullCommand += ` --bundles ${this.currentBuildType}`;
     }
