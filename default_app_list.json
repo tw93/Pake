@@ -1,5 +1,11 @@
 [
   {
+    "name": "wechat",
+    "title": "WeChat",
+    "name_zh": "微信",
+    "url": "https://wx.qq.com/"
+  },
+  {
     "name": "deepseek",
     "title": "DeepSeek",
     "name_zh": "DeepSeek",
