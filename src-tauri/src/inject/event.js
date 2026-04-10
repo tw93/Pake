@@ -1027,23 +1027,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("DOMContentLoaded", function () {
   let permVal = "granted";
+  let lastNotifTime = 0;
+  let lastNotif = null;
+
+  window.addEventListener("focus", () => {
+    if (lastNotif?.onclick && Date.now() - lastNotifTime < 5000) {
+      lastNotif.onclick(new Event("click"));
+      lastNotif = null;
+    }
+  });
+
   window.Notification = function (title, options) {
     const { invoke } = window.__TAURI__.core;
     const body = options?.body || "";
     let icon = options?.icon || "";
 
-    // If the icon is a relative path, convert to full path using URI
     if (icon.startsWith("/")) {
       icon = window.location.origin + icon;
     }
 
-    invoke("send_notification", {
-      params: {
-        title,
-        body,
-        icon,
-      },
+    const notif = {
+      onclick: null,
+      onclose: null,
+      onshow: null,
+      onerror: null,
+      close: () => {},
+    };
+
+    lastNotifTime = Date.now();
+    lastNotif = notif;
+
+    invoke("send_notification", { params: { title, body, icon } }).then(() => {
+      if (notif.onshow) notif.onshow(new Event("show"));
     });
+
+    return notif;
   };
 
   window.Notification.requestPermission = async () => "granted";
