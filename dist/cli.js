@@ -13,13 +13,14 @@ import ora from 'ora';
 import dns from 'dns';
 import http from 'http';
 import { promisify } from 'util';
-import fs from 'fs';
+import fs from 'fs/promises';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
 import icongen from 'icon-gen';
 import sharp from 'sharp';
 import * as psl from 'psl';
 import { InvalidArgumentError, program as program$1, Option } from 'commander';
+import fs$1 from 'fs';
 
 var name = "pake-cli";
 var version = "3.11.2";
@@ -422,9 +423,9 @@ function checkRustInstalled() {
 }
 
 async function combineFiles(files, output) {
-    const contents = files.map((file) => {
+    const contents = await Promise.all(files.map(async (file) => {
         if (file.endsWith('.css')) {
-            const fileContent = fs.readFileSync(file, 'utf-8');
+            const fileContent = await fs.readFile(file, 'utf-8');
             return `window.addEventListener('DOMContentLoaded', (_event) => {
         const css = ${JSON.stringify(fileContent)};
         const style = document.createElement('style');
@@ -432,12 +433,12 @@ async function combineFiles(files, output) {
         document.head.appendChild(style);
       });`;
         }
-        const fileContent = fs.readFileSync(file);
+        const fileContent = await fs.readFile(file);
         return ("window.addEventListener('DOMContentLoaded', (_event) => { " +
             fileContent +
             ' });');
-    });
-    fs.writeFileSync(output, contents.join('\n'));
+    }));
+    await fs.writeFile(output, contents.join('\n'));
     return files;
 }
 
@@ -478,11 +479,9 @@ function generateIdentifierSafeName(name) {
     return cleaned;
 }
 
-async function mergeConfig(url, options, tauriConf) {
-    // Ensure .pake directory exists and copy source templates if needed
+async function copyTemplateConfigs() {
     const srcTauriDir = path.join(npmDirectory, 'src-tauri');
     await fsExtra.ensureDir(tauriConfigDirectory);
-    // Copy source config files to .pake directory (as templates)
     const sourceFiles = [
         'tauri.conf.json',
         'tauri.macos.conf.json',
@@ -498,47 +497,8 @@ async function mergeConfig(url, options, tauriConf) {
             await fsExtra.copy(sourcePath, destPath);
         }
     }));
-    const { width, height, fullscreen, maximize, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, systemTrayIcon, useLocalFile, identifier, name = 'pake-app', resizable = true, inject, proxyUrl, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, multiInstance, multiWindow, startToTray, forceInternalNavigation, internalUrlRegex, zoom, minWidth, minHeight, ignoreCertificateErrors, newWindow, camera, microphone, } = options;
-    const { platform } = process;
-    const platformHideOnClose = hideOnClose ?? platform === 'darwin';
-    const tauriConfWindowOptions = {
-        width,
-        height,
-        fullscreen,
-        maximize,
-        resizable,
-        hide_title_bar: hideTitleBar,
-        activation_shortcut: activationShortcut,
-        always_on_top: alwaysOnTop,
-        dark_mode: darkMode,
-        disabled_web_shortcuts: disabledWebShortcuts,
-        hide_on_close: platformHideOnClose,
-        incognito: incognito,
-        title: title,
-        enable_wasm: wasm,
-        enable_drag_drop: enableDragDrop,
-        start_to_tray: startToTray && showSystemTray,
-        force_internal_navigation: forceInternalNavigation,
-        internal_url_regex: internalUrlRegex,
-        zoom,
-        min_width: minWidth,
-        min_height: minHeight,
-        ignore_certificate_errors: ignoreCertificateErrors,
-        new_window: newWindow,
-    };
-    Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
-    tauriConf.productName = name;
-    tauriConf.identifier = identifier;
-    tauriConf.version = appVersion;
-    // Always set mainBinaryName to ensure binary uniqueness
-    const linuxBinaryName = `pake-${generateLinuxPackageName(name)}`;
-    tauriConf.mainBinaryName =
-        platform === 'linux'
-            ? linuxBinaryName
-            : `pake-${generateIdentifierSafeName(name)}`;
-    if (platform === 'win32') {
-        tauriConf.bundle.windows.wix.language[0] = installerLanguage;
-    }
+}
+async function handleLocalFile(url, useLocalFile, tauriConf) {
     const pathExists = await fsExtra.pathExists(url);
     if (pathExists) {
         logger.warn('✼ Your input might be a local file.');
@@ -553,8 +513,6 @@ async function mergeConfig(url, options, tauriConf) {
         else {
             fsExtra.moveSync(distDir, distBakDir, { overwrite: true });
             fsExtra.copySync(dirName, distDir, { overwrite: true });
-            // ignore it, because about_pake.html have be erased.
-            // const filesToCopyBack = ['cli.js', 'about_pake.html'];
             const filesToCopyBack = ['cli.js'];
             await Promise.all(filesToCopyBack.map((file) => fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file))));
         }
@@ -564,28 +522,15 @@ async function mergeConfig(url, options, tauriConf) {
     else {
         tauriConf.pake.windows[0].url_type = 'web';
     }
-    const platformMap = {
-        win32: 'windows',
-        linux: 'linux',
-        darwin: 'macos',
-    };
-    const currentPlatform = platformMap[platform];
-    if (userAgent.length > 0) {
-        tauriConf.pake.user_agent[currentPlatform] = userAgent;
-    }
-    tauriConf.pake.system_tray[currentPlatform] = showSystemTray;
-    // Processing targets are currently only open to Linux.
-    if (platform === 'linux') {
-        // Remove hardcoded desktop files and regenerate with correct app name
-        delete tauriConf.bundle.linux.deb.files;
-        // Generate correct desktop file configuration
-        const linuxName = generateLinuxPackageName(name);
-        const desktopFileName = `com.pake.${linuxName}.desktop`;
-        const iconName = `${linuxName}_512`;
-        // Create desktop file content
-        // Determine if title contains Chinese characters for Name[zh_CN]
-        const chineseName = title && /[\u4e00-\u9fa5]/.test(title) ? title : null;
-        const desktopContent = `[Desktop Entry]
+}
+async function mergeLinuxConfig(options, name, tauriConf, linuxBinaryName) {
+    delete tauriConf.bundle.linux.deb.files;
+    const linuxName = generateLinuxPackageName(name);
+    const desktopFileName = `com.pake.${linuxName}.desktop`;
+    const iconName = `${linuxName}_512`;
+    const { title } = options;
+    const chineseName = title && /[\u4e00-\u9fa5]/.test(title) ? title : null;
+    const desktopContent = `[Desktop Entry]
 Version=1.0
 Type=Application
 Name=${name}
@@ -598,51 +543,39 @@ MimeType=text/html;text/xml;application/xhtml_xml;
 StartupNotify=true
 Terminal=false
 `;
-        // Write desktop file to src-tauri/assets directory where Tauri expects it
-        const srcAssetsDir = path.join(npmDirectory, 'src-tauri/assets');
-        const srcDesktopFilePath = path.join(srcAssetsDir, desktopFileName);
-        await fsExtra.ensureDir(srcAssetsDir);
-        await fsExtra.writeFile(srcDesktopFilePath, desktopContent);
-        // Set up desktop file in bundle configuration
-        // Use absolute path from src-tauri directory to assets
-        const desktopInstallPath = `/usr/share/applications/${desktopFileName}`;
-        tauriConf.bundle.linux.deb.files = {
-            [desktopInstallPath]: `assets/${desktopFileName}`,
-        };
-        // Add desktop file support for RPM
-        if (!tauriConf.bundle.linux.rpm) {
-            tauriConf.bundle.linux.rpm = {};
-        }
-        tauriConf.bundle.linux.rpm.files = {
-            [desktopInstallPath]: `assets/${desktopFileName}`,
-        };
-        const validTargets = [
-            'deb',
-            'appimage',
-            'rpm',
-            'deb-arm64',
-            'appimage-arm64',
-            'rpm-arm64',
-        ];
-        const baseTarget = options.targets.includes('-arm64')
-            ? options.targets.replace('-arm64', '')
-            : options.targets;
-        if (validTargets.includes(options.targets)) {
-            tauriConf.bundle.targets = [baseTarget];
-        }
-        else {
-            logger.warn(`✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`);
-        }
+    const srcAssetsDir = path.join(npmDirectory, 'src-tauri/assets');
+    const srcDesktopFilePath = path.join(srcAssetsDir, desktopFileName);
+    await fsExtra.ensureDir(srcAssetsDir);
+    await fsExtra.writeFile(srcDesktopFilePath, desktopContent);
+    const desktopInstallPath = `/usr/share/applications/${desktopFileName}`;
+    tauriConf.bundle.linux.deb.files = {
+        [desktopInstallPath]: `assets/${desktopFileName}`,
+    };
+    if (!tauriConf.bundle.linux.rpm) {
+        tauriConf.bundle.linux.rpm = {};
     }
-    // Set macOS bundle targets (for app vs dmg)
-    if (platform === 'darwin') {
-        const validMacTargets = ['app', 'dmg'];
-        if (validMacTargets.includes(options.targets)) {
-            tauriConf.bundle.targets = [options.targets];
-        }
+    tauriConf.bundle.linux.rpm.files = {
+        [desktopInstallPath]: `assets/${desktopFileName}`,
+    };
+    const validTargets = [
+        'deb',
+        'appimage',
+        'rpm',
+        'deb-arm64',
+        'appimage-arm64',
+        'rpm-arm64',
+    ];
+    const baseTarget = options.targets.includes('-arm64')
+        ? options.targets.replace('-arm64', '')
+        : options.targets;
+    if (validTargets.includes(options.targets)) {
+        tauriConf.bundle.targets = [baseTarget];
     }
-    // Set icon.
-    const safeAppName = getSafeAppName(name);
+    else {
+        logger.warn(`✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`);
+    }
+}
+async function mergeIcons(options, name, tauriConf, platform, safeAppName) {
     const platformIconMap = {
         win32: {
             fileExt: '.ico',
@@ -668,7 +601,7 @@ Terminal=false
     const exists = resolvedIconPath && (await fsExtra.pathExists(resolvedIconPath));
     if (exists) {
         let updateIconPath = true;
-        let customIconExt = path.extname(resolvedIconPath).toLowerCase();
+        const customIconExt = path.extname(resolvedIconPath).toLowerCase();
         if (customIconExt !== iconInfo.fileExt) {
             updateIconPath = false;
             logger.warn(`✼ ${iconInfo.message}, but you give ${customIconExt}`);
@@ -677,7 +610,6 @@ Terminal=false
         else {
             const iconPath = path.join(npmDirectory, 'src-tauri/', iconInfo.path);
             tauriConf.bundle.resources = [iconInfo.path];
-            // Avoid copying if source and destination are the same
             const absoluteDestPath = path.resolve(iconPath);
             if (resolvedIconPath !== absoluteDestPath) {
                 try {
@@ -704,15 +636,14 @@ Terminal=false
     }
     // Set tray icon path.
     let trayIconPath = platform === 'darwin' ? 'png/icon_512.png' : tauriConf.bundle.icon[0];
-    if (systemTrayIcon.length > 0) {
+    if (options.systemTrayIcon.length > 0) {
         try {
-            await fsExtra.pathExists(systemTrayIcon);
-            // 需要判断图标格式，默认只支持ico和png两种
-            let iconExt = path.extname(systemTrayIcon).toLowerCase();
-            if (iconExt == '.png' || iconExt == '.ico') {
+            await fsExtra.pathExists(options.systemTrayIcon);
+            const iconExt = path.extname(options.systemTrayIcon).toLowerCase();
+            if (iconExt === '.png' || iconExt === '.ico') {
                 const trayIcoPath = path.join(npmDirectory, `src-tauri/png/${safeAppName}${iconExt}`);
                 trayIconPath = `png/${safeAppName}${iconExt}`;
-                await fsExtra.copy(systemTrayIcon, trayIcoPath);
+                await fsExtra.copy(options.systemTrayIcon, trayIcoPath);
             }
             else {
                 logger.warn(`✼ System tray icon must be .ico or .png, but you provided ${iconExt}.`);
@@ -720,16 +651,17 @@ Terminal=false
             }
         }
         catch {
-            logger.warn(`✼ ${systemTrayIcon} not exists!`);
+            logger.warn(`✼ ${options.systemTrayIcon} not exists!`);
             logger.warn(`✼ Default system tray icon will remain unchanged.`);
         }
     }
     tauriConf.pake.system_tray_path = trayIconPath;
     delete tauriConf.app.trayIcon;
-    const injectFilePath = path.join(npmDirectory, `src-tauri/src/inject/custom.js`);
-    // inject js or css files
+}
+async function injectCustomCode(options, tauriConf) {
+    const { inject, proxyUrl, multiInstance, multiWindow, wasm } = options;
+    const injectFilePath = path.join(npmDirectory, 'src-tauri/src/inject/custom.js');
     if (inject?.length > 0) {
-        // Ensure inject is an array before calling .every()
         const injectArray = Array.isArray(inject) ? inject : [inject];
         if (!injectArray.every((item) => item.endsWith('.css') || item.endsWith('.js'))) {
             logger.error('The injected file must be in either CSS or JS format.');
@@ -746,7 +678,6 @@ Terminal=false
     tauriConf.pake.proxy_url = proxyUrl || '';
     tauriConf.pake.multi_instance = multiInstance;
     tauriConf.pake.multi_window = multiWindow;
-    // Configure WASM support with required HTTP headers
     if (wasm) {
         tauriConf.app.security = {
             headers: {
@@ -755,16 +686,16 @@ Terminal=false
             },
         };
     }
-    // Write entitlements dynamically on macOS so camera/microphone are opt-in
-    if (platform === 'darwin') {
-        const entitlementEntries = [];
-        if (camera) {
-            entitlementEntries.push('    <key>com.apple.security.device.camera</key>\n    <true/>');
-        }
-        if (microphone) {
-            entitlementEntries.push('    <key>com.apple.security.device.audio-input</key>\n    <true/>');
-        }
-        const entitlementsContent = `<?xml version="1.0" encoding="UTF-8"?>
+}
+async function generateMacEntitlements(camera, microphone) {
+    const entitlementEntries = [];
+    if (camera) {
+        entitlementEntries.push('    <key>com.apple.security.device.camera</key>\n    <true/>');
+    }
+    if (microphone) {
+        entitlementEntries.push('    <key>com.apple.security.device.audio-input</key>\n    <true/>');
+    }
+    const entitlementsContent = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
   <dict>
@@ -772,10 +703,10 @@ ${entitlementEntries.join('\n')}
   </dict>
 </plist>
 `;
-        const entitlementsPath = path.join(npmDirectory, 'src-tauri', 'entitlements.plist');
-        await fsExtra.writeFile(entitlementsPath, entitlementsContent);
-    }
-    // Save config file.
+    const entitlementsPath = path.join(npmDirectory, 'src-tauri', 'entitlements.plist');
+    await fsExtra.writeFile(entitlementsPath, entitlementsContent);
+}
+async function writeAllConfigs(tauriConf, platform) {
     const platformConfigPaths = {
         win32: 'tauri.windows.conf.json',
         darwin: 'tauri.macos.conf.json',
@@ -786,10 +717,80 @@ ${entitlementEntries.join('\n')}
     await fsExtra.outputJSON(configPath, bundleConf, { spaces: 4 });
     const pakeConfigPath = path.join(tauriConfigDirectory, 'pake.json');
     await fsExtra.outputJSON(pakeConfigPath, tauriConf.pake, { spaces: 4 });
-    let tauriConf2 = JSON.parse(JSON.stringify(tauriConf));
+    const tauriConf2 = JSON.parse(JSON.stringify(tauriConf));
     delete tauriConf2.pake;
     const configJsonPath = path.join(tauriConfigDirectory, 'tauri.conf.json');
     await fsExtra.outputJSON(configJsonPath, tauriConf2, { spaces: 4 });
+}
+async function mergeConfig(url, options, tauriConf) {
+    await copyTemplateConfigs();
+    const { width, height, fullscreen, maximize, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, useLocalFile, identifier, name = 'pake-app', resizable = true, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, startToTray, forceInternalNavigation, internalUrlRegex, zoom, minWidth, minHeight, ignoreCertificateErrors, newWindow, camera, microphone, } = options;
+    const { platform } = process;
+    const platformHideOnClose = hideOnClose ?? platform === 'darwin';
+    const tauriConfWindowOptions = {
+        width,
+        height,
+        fullscreen,
+        maximize,
+        resizable,
+        hide_title_bar: hideTitleBar,
+        activation_shortcut: activationShortcut,
+        always_on_top: alwaysOnTop,
+        dark_mode: darkMode,
+        disabled_web_shortcuts: disabledWebShortcuts,
+        hide_on_close: platformHideOnClose,
+        incognito,
+        title,
+        enable_wasm: wasm,
+        enable_drag_drop: enableDragDrop,
+        start_to_tray: startToTray && showSystemTray,
+        force_internal_navigation: forceInternalNavigation,
+        internal_url_regex: internalUrlRegex,
+        zoom,
+        min_width: minWidth,
+        min_height: minHeight,
+        ignore_certificate_errors: ignoreCertificateErrors,
+        new_window: newWindow,
+    };
+    Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
+    tauriConf.productName = name;
+    tauriConf.identifier = identifier;
+    tauriConf.version = appVersion;
+    const linuxBinaryName = `pake-${generateLinuxPackageName(name)}`;
+    tauriConf.mainBinaryName =
+        platform === 'linux'
+            ? linuxBinaryName
+            : `pake-${generateIdentifierSafeName(name)}`;
+    if (platform === 'win32') {
+        tauriConf.bundle.windows.wix.language[0] = installerLanguage;
+    }
+    await handleLocalFile(url, useLocalFile, tauriConf);
+    const platformMap = {
+        win32: 'windows',
+        linux: 'linux',
+        darwin: 'macos',
+    };
+    const currentPlatform = platformMap[platform];
+    if (userAgent.length > 0) {
+        tauriConf.pake.user_agent[currentPlatform] = userAgent;
+    }
+    tauriConf.pake.system_tray[currentPlatform] = showSystemTray;
+    if (platform === 'linux') {
+        await mergeLinuxConfig(options, name, tauriConf, linuxBinaryName);
+    }
+    if (platform === 'darwin') {
+        const validMacTargets = ['app', 'dmg'];
+        if (validMacTargets.includes(options.targets)) {
+            tauriConf.bundle.targets = [options.targets];
+        }
+    }
+    const safeAppName = getSafeAppName(name);
+    await mergeIcons(options, name, tauriConf, platform, safeAppName);
+    await injectCustomCode(options, tauriConf);
+    if (platform === 'darwin') {
+        await generateMacEntitlements(camera, microphone);
+    }
+    await writeAllConfigs(tauriConf, platform);
 }
 
 class BaseBuilder {
@@ -1086,6 +1087,10 @@ class BaseBuilder {
         if (this.options.debug) {
             fullCommand += ' --verbose';
         }
+        const features = this.getBuildFeatures();
+        if (features.length > 0) {
+            fullCommand += ` --features ${features.join(',')}`;
+        }
         return fullCommand;
     }
     getBuildFeatures() {
@@ -1106,11 +1111,6 @@ class BaseBuilder {
         // For macOS, use app bundles by default unless DMG is explicitly requested
         if (IS_MAC && this.options.targets === 'app') {
             fullCommand += ' --bundles app';
-        }
-        // Add features
-        const features = this.getBuildFeatures();
-        if (features.length > 0) {
-            fullCommand += ` --features ${features.join(',')}`;
         }
         return fullCommand;
     }
@@ -1273,12 +1273,7 @@ class MacBuilder extends BaseBuilder {
         if (!buildTarget) {
             throw new Error(`Unsupported architecture: ${actualArch} for macOS`);
         }
-        let fullCommand = this.buildBaseCommand(packageManager, configPath, buildTarget);
-        const features = this.getBuildFeatures();
-        if (features.length > 0) {
-            fullCommand += ` --features ${features.join(',')}`;
-        }
-        return fullCommand;
+        return this.buildBaseCommand(packageManager, configPath, buildTarget);
     }
     getBasePath() {
         const basePath = this.options.debug ? 'debug' : 'release';
@@ -1318,12 +1313,7 @@ class WinBuilder extends BaseBuilder {
         if (!buildTarget) {
             throw new Error(`Unsupported architecture: ${this.buildArch} for Windows`);
         }
-        let fullCommand = this.buildBaseCommand(packageManager, configPath, buildTarget);
-        const features = this.getBuildFeatures();
-        if (features.length > 0) {
-            fullCommand += ` --features ${features.join(',')}`;
-        }
-        return fullCommand;
+        return this.buildBaseCommand(packageManager, configPath, buildTarget);
     }
     getBasePath() {
         const basePath = this.options.debug ? 'debug' : 'release';
@@ -1403,10 +1393,6 @@ class LinuxBuilder extends BaseBuilder {
             ? (this.getTauriTarget(this.buildArch, 'linux') ?? undefined)
             : undefined;
         let fullCommand = this.buildBaseCommand(packageManager, configPath, buildTarget);
-        const features = this.getBuildFeatures();
-        if (features.length > 0) {
-            fullCommand += ` --features ${features.join(',')}`;
-        }
         if (this.currentBuildType) {
             fullCommand += ` --bundles ${this.currentBuildType}`;
         }
@@ -1717,7 +1703,7 @@ function generateIconPath(appName, isDefault = false) {
 function getIconBaseName(appName) {
     const baseName = IS_LINUX
         ? generateLinuxPackageName(appName)
-        : generateSafeFilename(appName).toLowerCase();
+        : getSafeAppName(appName);
     return baseName || 'pake-app';
 }
 async function copyWindowsIconIfNeeded(convertedPath, appName) {
@@ -2312,7 +2298,7 @@ function validateNumberInput(value) {
     return parsedValue;
 }
 function validateUrlInput(url) {
-    const isFile = fs.existsSync(url);
+    const isFile = fs$1.existsSync(url);
     if (!isFile) {
         try {
             return normalizeUrl(url);
