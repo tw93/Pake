@@ -110,7 +110,8 @@ var devDependencies = {
 };
 var pnpm = {
 	overrides: {
-		sharp: "^0.34.5"
+		sharp: "^0.34.5",
+		"@img/sharp-libvips-darwin-arm64": "1.2.4"
 	},
 	onlyBuiltDependencies: [
 		"esbuild",
@@ -650,8 +651,8 @@ async function mergeIcons(options, name, tauriConf, platform, safeAppName) {
                 logger.warn(`✼ Default system tray icon will be used.`);
             }
         }
-        catch {
-            logger.warn(`✼ ${options.systemTrayIcon} not exists!`);
+        catch (err) {
+            logger.warn(`✼ Failed to apply system tray icon "${options.systemTrayIcon}": ${err instanceof Error ? err.message : String(err)}`);
             logger.warn(`✼ Default system tray icon will remain unchanged.`);
         }
     }
@@ -1810,8 +1811,9 @@ async function convertIconFormat(inputPath, appName) {
         // Generate platform-specific format
         if (IS_WIN) {
             const icoPath = path.join(platformOutputDir, `${iconName}_256${PLATFORM_CONFIG.win.format}`);
+            const sourceBuffer = await fsExtra.readFile(processedInputPath);
             const frames = await Promise.all(PLATFORM_CONFIG.win.sizes.map(async (size) => {
-                const png = await sharp(processedInputPath)
+                const png = await sharp(sourceBuffer)
                     .resize(size, size, {
                     fit: 'contain',
                     background: { r: 0, g: 0, b: 0, alpha: 0 },

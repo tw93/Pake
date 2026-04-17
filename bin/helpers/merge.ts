@@ -236,8 +236,10 @@ async function mergeIcons(
         );
         logger.warn(`✼ Default system tray icon will be used.`);
       }
-    } catch {
-      logger.warn(`✼ ${options.systemTrayIcon} not exists!`);
+    } catch (err) {
+      logger.warn(
+        `✼ Failed to apply system tray icon "${options.systemTrayIcon}": ${err instanceof Error ? err.message : String(err)}`,
+      );
       logger.warn(`✼ Default system tray icon will remain unchanged.`);
     }
   }

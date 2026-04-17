@@ -211,9 +211,10 @@ async function convertIconFormat(
         platformOutputDir,
         `${iconName}_256${PLATFORM_CONFIG.win.format}`,
       );
+      const sourceBuffer = await fsExtra.readFile(processedInputPath);
       const frames = await Promise.all(
         (PLATFORM_CONFIG.win.sizes as number[]).map(async (size) => {
-          const png = await sharp(processedInputPath)
+          const png = await sharp(sourceBuffer)
             .resize(size, size, {
               fit: 'contain',
               background: { r: 0, g: 0, b: 0, alpha: 0 },

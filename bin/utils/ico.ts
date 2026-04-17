@@ -5,7 +5,7 @@ const ICO_HEADER_SIZE = 6;
 const ICO_DIR_ENTRY_SIZE = 16;
 const ICO_TYPE_ICON = 1;
 
-export type IcoEntry = {
+type IcoEntry = {
   index: number;
   width: number;
   height: number;
@@ -46,7 +46,7 @@ function compareByPreferredSize(
   };
 }
 
-export function parseIcoBuffer(buffer: Buffer): IcoEntry[] {
+function parseIcoBuffer(buffer: Buffer): IcoEntry[] {
   if (buffer.length < ICO_HEADER_SIZE) {
     throw new Error('Invalid ICO: header too short.');
   }
@@ -93,7 +93,7 @@ export function parseIcoBuffer(buffer: Buffer): IcoEntry[] {
   return entries;
 }
 
-export function buildReorderedIcoBuffer(
+function buildReorderedIcoBuffer(
   buffer: Buffer,
   preferredSize: number,
 ): Buffer {
