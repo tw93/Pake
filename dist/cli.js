@@ -525,7 +525,8 @@ async function handleLocalFile(url, useLocalFile, tauriConf) {
     }
 }
 async function mergeLinuxConfig(options, name, tauriConf, linuxBinaryName) {
-    delete tauriConf.bundle.linux.deb.files;
+    const linuxBundle = tauriConf.bundle.linux;
+    delete linuxBundle.deb.files;
     const linuxName = generateLinuxPackageName(name);
     const desktopFileName = `com.pake.${linuxName}.desktop`;
     const iconName = `${linuxName}_512`;
@@ -549,13 +550,13 @@ Terminal=false
     await fsExtra.ensureDir(srcAssetsDir);
     await fsExtra.writeFile(srcDesktopFilePath, desktopContent);
     const desktopInstallPath = `/usr/share/applications/${desktopFileName}`;
-    tauriConf.bundle.linux.deb.files = {
+    linuxBundle.deb.files = {
         [desktopInstallPath]: `assets/${desktopFileName}`,
     };
-    if (!tauriConf.bundle.linux.rpm) {
-        tauriConf.bundle.linux.rpm = {};
+    if (!linuxBundle.rpm) {
+        linuxBundle.rpm = {};
     }
-    tauriConf.bundle.linux.rpm.files = {
+    linuxBundle.rpm.files = {
         [desktopInstallPath]: `assets/${desktopFileName}`,
     };
     const validTargets = [

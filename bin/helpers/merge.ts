@@ -9,7 +9,13 @@ import {
   getSafeAppName,
   generateLinuxPackageName,
 } from '@/utils/name';
-import { PakeAppOptions, PlatformMap, WindowConfig } from '@/types';
+import {
+  PakeAppOptions,
+  PakeTauriConfig,
+  PlatformMap,
+  PlatformSpecific,
+  WindowConfig,
+} from '@/types';
 import { tauriConfigDirectory, npmDirectory } from '@/utils/dir';
 
 async function copyTemplateConfigs(): Promise<void> {
@@ -41,7 +47,7 @@ async function copyTemplateConfigs(): Promise<void> {
 async function handleLocalFile(
   url: string,
   useLocalFile: boolean,
-  tauriConf: any,
+  tauriConf: PakeTauriConfig,
 ): Promise<void> {
   const pathExists = await fsExtra.pathExists(url);
   if (pathExists) {
@@ -77,10 +83,11 @@ async function handleLocalFile(
 async function mergeLinuxConfig(
   options: PakeAppOptions,
   name: string,
-  tauriConf: any,
+  tauriConf: PakeTauriConfig,
   linuxBinaryName: string,
 ): Promise<void> {
-  delete tauriConf.bundle.linux.deb.files;
+  const linuxBundle = tauriConf.bundle.linux!;
+  delete linuxBundle.deb.files;
 
   const linuxName = generateLinuxPackageName(name);
   const desktopFileName = `com.pake.${linuxName}.desktop`;
@@ -108,14 +115,14 @@ Terminal=false
   await fsExtra.writeFile(srcDesktopFilePath, desktopContent);
 
   const desktopInstallPath = `/usr/share/applications/${desktopFileName}`;
-  tauriConf.bundle.linux.deb.files = {
+  linuxBundle.deb.files = {
     [desktopInstallPath]: `assets/${desktopFileName}`,
   };
 
-  if (!tauriConf.bundle.linux.rpm) {
-    tauriConf.bundle.linux.rpm = {};
+  if (!linuxBundle.rpm) {
+    linuxBundle.rpm = {};
   }
-  tauriConf.bundle.linux.rpm.files = {
+  linuxBundle.rpm.files = {
     [desktopInstallPath]: `assets/${desktopFileName}`,
   };
 
@@ -143,7 +150,7 @@ Terminal=false
 async function mergeIcons(
   options: PakeAppOptions,
   name: string,
-  tauriConf: any,
+  tauriConf: PakeTauriConfig,
   platform: string,
   safeAppName: string,
 ): Promise<void> {
@@ -218,7 +225,7 @@ async function mergeIcons(
 
   // Set tray icon path.
   let trayIconPath =
-    platform === 'darwin' ? 'png/icon_512.png' : tauriConf.bundle.icon[0];
+    platform === 'darwin' ? 'png/icon_512.png' : tauriConf.bundle.icon![0];
   if (options.systemTrayIcon.length > 0) {
     try {
       await fsExtra.pathExists(options.systemTrayIcon);
@@ -250,7 +257,7 @@ async function mergeIcons(
 
 async function injectCustomCode(
   options: PakeAppOptions,
-  tauriConf: any,
+  tauriConf: PakeTauriConfig,
 ): Promise<void> {
   const { inject, proxyUrl, multiInstance, multiWindow, wasm } = options;
   const injectFilePath = path.join(
@@ -324,7 +331,7 @@ ${entitlementEntries.join('\n')}
 }
 
 async function writeAllConfigs(
-  tauriConf: any,
+  tauriConf: PakeTauriConfig,
   platform: string,
 ): Promise<void> {
   const platformConfigPaths: PlatformMap = {
@@ -355,7 +362,7 @@ async function writeAllConfigs(
 export async function mergeConfig(
   url: string,
   options: PakeAppOptions,
-  tauriConf: any,
+  tauriConf: PakeTauriConfig,
 ) {
   await copyTemplateConfigs();
 
@@ -435,7 +442,7 @@ export async function mergeConfig(
       : `pake-${generateIdentifierSafeName(name)}`;
 
   if (platform === 'win32') {
-    tauriConf.bundle.windows.wix.language[0] = installerLanguage;
+    tauriConf.bundle.windows!.wix.language[0] = installerLanguage;
   }
 
   await handleLocalFile(url, useLocalFile, tauriConf);
@@ -445,7 +452,9 @@ export async function mergeConfig(
     linux: 'linux',
     darwin: 'macos',
   };
-  const currentPlatform = platformMap[platform];
+  const currentPlatform = platformMap[platform] as keyof PlatformSpecific<
+    string | boolean
+  >;
 
   if (userAgent.length > 0) {
     tauriConf.pake.user_agent[currentPlatform] = userAgent;
