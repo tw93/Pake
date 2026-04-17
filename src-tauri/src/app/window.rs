@@ -1,6 +1,10 @@
 use crate::app::config::PakeConfig;
 use crate::util::get_data_dir;
-use std::{path::PathBuf, str::FromStr, sync::Mutex};
+use std::{
+    path::PathBuf,
+    str::FromStr,
+    sync::atomic::{AtomicU32, Ordering},
+};
 use tauri::{
     webview::{NewWindowFeatures, NewWindowResponse},
     AppHandle, Config, Manager, Url, WebviewUrl, WebviewWindow, WebviewWindowBuilder,
@@ -28,7 +32,7 @@ fn build_proxy_browser_arg(url: &Url) -> Option<String> {
 pub struct MultiWindowState {
     pub pake_config: PakeConfig,
     pub tauri_config: Config,
-    next_window_index: Mutex<u32>,
+    next_window_index: AtomicU32,
 }
 
 impl MultiWindowState {
@@ -36,14 +40,13 @@ impl MultiWindowState {
         Self {
             pake_config,
             tauri_config,
-            next_window_index: Mutex::new(0),
+            next_window_index: AtomicU32::new(0),
         }
     }
 
     fn next_window_label(&self) -> String {
-        let mut index = self.next_window_index.lock().unwrap();
-        *index += 1;
-        format!("pake-{}", *index)
+        let index = self.next_window_index.fetch_add(1, Ordering::Relaxed) + 1;
+        format!("pake-{index}")
     }
 }
 
@@ -124,7 +127,18 @@ fn build_window_with_label(
         .first()
         .expect("At least one window configuration is required");
     let url = match window_config.url_type.as_str() {
-        "web" => WebviewUrl::App(window_config.url.parse().unwrap()),
+        "web" => {
+            let parsed = window_config.url.parse().map_err(|err| {
+                tauri::Error::Io(std::io::Error::new(
+                    std::io::ErrorKind::InvalidInput,
+                    format!(
+                        "Invalid 'web' url '{}' in pake.json: {err}",
+                        window_config.url
+                    ),
+                ))
+            })?;
+            WebviewUrl::App(parsed)
+        }
         "local" => WebviewUrl::App(PathBuf::from(&window_config.url)),
         other => {
             return Err(tauri::Error::Io(std::io::Error::new(

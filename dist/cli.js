@@ -480,6 +480,12 @@ function generateIdentifierSafeName(name) {
     return cleaned;
 }
 
+function asSupportedPlatform(platform) {
+    if (platform !== 'win32' && platform !== 'darwin' && platform !== 'linux') {
+        throw new Error(`Pake only supports win32, darwin, and linux; detected '${platform}'.`);
+    }
+    return platform;
+}
 async function copyTemplateConfigs() {
     const srcTauriDir = path.join(npmDirectory, 'src-tauri');
     await fsExtra.ensureDir(tauriConfigDirectory);
@@ -526,6 +532,9 @@ async function handleLocalFile(url, useLocalFile, tauriConf) {
 }
 async function mergeLinuxConfig(options, name, tauriConf, linuxBinaryName) {
     const linuxBundle = tauriConf.bundle.linux;
+    if (!linuxBundle) {
+        throw new Error('Linux bundle configuration is missing from tauri.linux.conf.json; cannot build Linux target.');
+    }
     delete linuxBundle.deb.files;
     const linuxName = generateLinuxPackageName(name);
     const desktopFileName = `com.pake.${linuxName}.desktop`;
@@ -727,7 +736,7 @@ async function writeAllConfigs(tauriConf, platform) {
 async function mergeConfig(url, options, tauriConf) {
     await copyTemplateConfigs();
     const { width, height, fullscreen, maximize, hideTitleBar, alwaysOnTop, appVersion, darkMode, disabledWebShortcuts, activationShortcut, userAgent, showSystemTray, useLocalFile, identifier, name = 'pake-app', resizable = true, installerLanguage, hideOnClose, incognito, title, wasm, enableDragDrop, startToTray, forceInternalNavigation, internalUrlRegex, zoom, minWidth, minHeight, ignoreCertificateErrors, newWindow, camera, microphone, } = options;
-    const { platform } = process;
+    const platform = asSupportedPlatform(process.platform);
     const platformHideOnClose = hideOnClose ?? platform === 'darwin';
     const tauriConfWindowOptions = {
         width,
@@ -764,7 +773,11 @@ async function mergeConfig(url, options, tauriConf) {
             ? linuxBinaryName
             : `pake-${generateIdentifierSafeName(name)}`;
     if (platform === 'win32') {
-        tauriConf.bundle.windows.wix.language[0] = installerLanguage;
+        const windowsBundle = tauriConf.bundle.windows;
+        if (!windowsBundle) {
+            throw new Error('Windows bundle configuration is missing from tauri.windows.conf.json; cannot build Windows target.');
+        }
+        windowsBundle.wix.language[0] = installerLanguage;
     }
     await handleLocalFile(url, useLocalFile, tauriConf);
     const platformMap = {
@@ -2192,11 +2205,9 @@ function resolveLocalAppName(filePath, platform) {
     return normalized || 'pake-app';
 }
 function isValidName(name, platform) {
-    const platformRegexMapping = {
-        linux: /^[a-z0-9\u4e00-\u9fff][a-z0-9\u4e00-\u9fff-]*$/,
-        default: /^[a-zA-Z0-9\u4e00-\u9fff][a-zA-Z0-9\u4e00-\u9fff- ]*$/,
-    };
-    const reg = platformRegexMapping[platform] || platformRegexMapping.default;
+    const reg = platform === 'linux'
+        ? /^[a-z0-9\u4e00-\u9fff][a-z0-9\u4e00-\u9fff-]*$/
+        : /^[a-zA-Z0-9\u4e00-\u9fff][a-zA-Z0-9\u4e00-\u9fff- ]*$/;
     return !!name && reg.test(name);
 }
 async function handleOptions(options, url) {

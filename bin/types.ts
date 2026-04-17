@@ -1,6 +1,5 @@
-export interface PlatformMap {
-  [key: string]: any;
-}
+export type SupportedPlatform = 'win32' | 'darwin' | 'linux';
+export type TauriPlatform = 'windows' | 'macos' | 'linux';
 
 export interface PakeCliOptions {
   // Application name

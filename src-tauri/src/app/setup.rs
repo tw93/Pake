@@ -39,7 +39,7 @@ pub fn set_system_tray(
 
     app.app_handle().remove_tray_by_id("pake-tray");
 
-    let tray = TrayIconBuilder::new()
+    let mut tray_builder = TrayIconBuilder::new()
         .menu(&menu)
         .on_menu_event(move |app, event| match event.id().as_ref() {
             "new_window" => {
@@ -85,20 +85,23 @@ pub fn set_system_tray(
                 }
             }
             _ => {}
-        })
-        .icon(if tray_icon_path.is_empty() {
-            app.default_window_icon()
-                .unwrap_or_else(|| panic!("Failed to get default window icon"))
-                .clone()
-        } else {
-            tauri::image::Image::from_path(tray_icon_path).unwrap_or_else(|_| {
-                // If custom tray icon fails to load, fallback to default
-                app.default_window_icon()
-                    .unwrap_or_else(|| panic!("Failed to get default window icon"))
-                    .clone()
-            })
-        })
-        .build(app)?;
+        });
+
+    let resolved_icon = if tray_icon_path.is_empty() {
+        app.default_window_icon().cloned()
+    } else {
+        tauri::image::Image::from_path(tray_icon_path)
+            .ok()
+            .or_else(|| app.default_window_icon().cloned())
+    };
+
+    if let Some(icon) = resolved_icon {
+        tray_builder = tray_builder.icon(icon);
+    } else {
+        eprintln!("[Pake] No tray icon available; tray will build without an icon.");
+    }
+
+    let tray = tray_builder.build(app)?;
 
     tray.set_icon_as_template(false)?;
     Ok(())

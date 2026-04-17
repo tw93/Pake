@@ -12,11 +12,27 @@ import {
 import {
   PakeAppOptions,
   PakeTauriConfig,
-  PlatformMap,
-  PlatformSpecific,
+  SupportedPlatform,
+  TauriPlatform,
   WindowConfig,
 } from '@/types';
 import { tauriConfigDirectory, npmDirectory } from '@/utils/dir';
+
+type PlatformIconInfo = {
+  fileExt: string;
+  path: string;
+  defaultIcon: string;
+  message: string;
+};
+
+function asSupportedPlatform(platform: NodeJS.Platform): SupportedPlatform {
+  if (platform !== 'win32' && platform !== 'darwin' && platform !== 'linux') {
+    throw new Error(
+      `Pake only supports win32, darwin, and linux; detected '${platform}'.`,
+    );
+  }
+  return platform;
+}
 
 async function copyTemplateConfigs(): Promise<void> {
   const srcTauriDir = path.join(npmDirectory, 'src-tauri');
@@ -86,7 +102,12 @@ async function mergeLinuxConfig(
   tauriConf: PakeTauriConfig,
   linuxBinaryName: string,
 ): Promise<void> {
-  const linuxBundle = tauriConf.bundle.linux!;
+  const linuxBundle = tauriConf.bundle.linux;
+  if (!linuxBundle) {
+    throw new Error(
+      'Linux bundle configuration is missing from tauri.linux.conf.json; cannot build Linux target.',
+    );
+  }
   delete linuxBundle.deb.files;
 
   const linuxName = generateLinuxPackageName(name);
@@ -151,10 +172,10 @@ async function mergeIcons(
   options: PakeAppOptions,
   name: string,
   tauriConf: PakeTauriConfig,
-  platform: string,
+  platform: SupportedPlatform,
   safeAppName: string,
 ): Promise<void> {
-  const platformIconMap: PlatformMap = {
+  const platformIconMap: Record<SupportedPlatform, PlatformIconInfo> = {
     win32: {
       fileExt: '.ico',
       path: `png/${safeAppName}_256.ico`,
@@ -332,9 +353,9 @@ ${entitlementEntries.join('\n')}
 
 async function writeAllConfigs(
   tauriConf: PakeTauriConfig,
-  platform: string,
+  platform: SupportedPlatform,
 ): Promise<void> {
-  const platformConfigPaths: PlatformMap = {
+  const platformConfigPaths: Record<SupportedPlatform, string> = {
     win32: 'tauri.windows.conf.json',
     darwin: 'tauri.macos.conf.json',
     linux: 'tauri.linux.conf.json',
@@ -401,7 +422,7 @@ export async function mergeConfig(
     microphone,
   } = options;
 
-  const { platform } = process;
+  const platform = asSupportedPlatform(process.platform);
   const platformHideOnClose = hideOnClose ?? platform === 'darwin';
 
   const tauriConfWindowOptions: Partial<WindowConfig> = {
@@ -442,19 +463,23 @@ export async function mergeConfig(
       : `pake-${generateIdentifierSafeName(name)}`;
 
   if (platform === 'win32') {
-    tauriConf.bundle.windows!.wix.language[0] = installerLanguage;
+    const windowsBundle = tauriConf.bundle.windows;
+    if (!windowsBundle) {
+      throw new Error(
+        'Windows bundle configuration is missing from tauri.windows.conf.json; cannot build Windows target.',
+      );
+    }
+    windowsBundle.wix.language[0] = installerLanguage;
   }
 
   await handleLocalFile(url, useLocalFile, tauriConf);
 
-  const platformMap: PlatformMap = {
+  const platformMap: Record<SupportedPlatform, TauriPlatform> = {
     win32: 'windows',
     linux: 'linux',
     darwin: 'macos',
   };
-  const currentPlatform = platformMap[platform] as keyof PlatformSpecific<
-    string | boolean
-  >;
+  const currentPlatform = platformMap[platform];
 
   if (userAgent.length > 0) {
     tauriConf.pake.user_agent[currentPlatform] = userAgent;
