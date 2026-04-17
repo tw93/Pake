@@ -126,7 +126,12 @@ fn build_window_with_label(
     let url = match window_config.url_type.as_str() {
         "web" => WebviewUrl::App(window_config.url.parse().unwrap()),
         "local" => WebviewUrl::App(PathBuf::from(&window_config.url)),
-        _ => panic!("url type can only be web or local"),
+        other => {
+            return Err(tauri::Error::Io(std::io::Error::new(
+                std::io::ErrorKind::InvalidInput,
+                format!("url_type must be 'web' or 'local', got '{other}'"),
+            )));
+        }
     };
 
     build_window(
@@ -154,7 +159,10 @@ fn build_window(
         visible,
         new_window_features,
     } = opts;
-    let package_name = tauri_config.clone().product_name.unwrap();
+    let package_name = tauri_config
+        .product_name
+        .clone()
+        .unwrap_or_else(|| "pake".to_string());
     let _data_dir = get_data_dir(app, package_name);
 
     let window_config = config
@@ -166,7 +174,7 @@ fn build_window(
 
     let config_script = format!(
         "window.pakeConfig = {}",
-        serde_json::to_string(&window_config).unwrap()
+        serde_json::to_string(&window_config).unwrap_or_else(|_| "{}".to_string())
     );
 
     // Platform-specific title: macOS prefers empty, others fallback to product name

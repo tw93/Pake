@@ -126,7 +126,9 @@ pub fn set_global_shortcut(
                 .with_handler({
                     let last_triggered = Arc::clone(&last_triggered);
                     move |app, event, _shortcut| {
-                        let mut last_triggered = last_triggered.lock().unwrap();
+                        let Ok(mut last_triggered) = last_triggered.lock() else {
+                            return;
+                        };
                         if Instant::now().duration_since(*last_triggered)
                             < Duration::from_millis(300)
                         {
