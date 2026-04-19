@@ -1,6 +1,6 @@
 use crate::app::config::PakeConfig;
 use std::env;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Config, Manager, WebviewWindow};
 
 pub fn get_pake_config() -> (PakeConfig, Config) {
@@ -107,9 +107,14 @@ pub fn check_file_or_append(file_path: &str) -> String {
     let mut counter = 0;
 
     while new_path.exists() {
-        let file_stem = new_path.file_stem().unwrap().to_string_lossy().to_string();
-        let extension = new_path.extension().unwrap().to_string_lossy().to_string();
-        let parent_dir = new_path.parent().unwrap();
+        let file_stem = new_path
+            .file_stem()
+            .map(|s| s.to_string_lossy().to_string())
+            .unwrap_or_default();
+        let extension = new_path
+            .extension()
+            .map(|e| e.to_string_lossy().to_string());
+        let parent_dir = new_path.parent().unwrap_or(Path::new(""));
 
         let new_file_stem = match file_stem.rfind('-') {
             Some(index) if file_stem[index + 1..].parse::<u32>().is_ok() => {
@@ -123,7 +128,10 @@ pub fn check_file_or_append(file_path: &str) -> String {
             }
         };
 
-        new_path = parent_dir.join(format!("{new_file_stem}.{extension}"));
+        new_path = match &extension {
+            Some(ext) => parent_dir.join(format!("{new_file_stem}.{ext}")),
+            None => parent_dir.join(new_file_stem),
+        };
     }
 
     new_path.to_string_lossy().into_owned()
