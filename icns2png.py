@@ -6,9 +6,11 @@ import os
 
 try:
     from PIL import Image
-except ImportError:
-    os.system("pip install Pillow")
-    from PIL import Image
+except ImportError as exc:
+    raise ImportError(
+        "Pillow is required but not installed. "
+        "Please install it with: pip install Pillow"
+    ) from exc
 
 if __name__ == "__main__":
     now_dir = os.path.dirname(os.path.abspath(__file__))
