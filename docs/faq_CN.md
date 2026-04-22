@@ -385,6 +385,14 @@ Pake 可以自动转换图标，但提供正确的格式更可靠。
 
    某些认证提供方，尤其是 Google，可能会阻止在嵌入式 WebView 中完成登录。由于 Pake 是把网站包装进桌面 WebView，Google 自家站点或依赖 Google OAuth 的网站，即使启用了 `--new-window` 或 `--multi-window`，也仍然可能无法在应用内完成登录。这属于提供方策略限制，不是打包逻辑错误。遇到这种情况时，建议改用普通浏览器、浏览器安装版站点应用，或官方原生桌面客户端。
 
+5. **微信 Web 版登录环境异常**
+
+   微信检测到 WebView 后会写入标记 Cookie，导致后续持续被拦截。打包时加 `--incognito` 可解决，代价是每次启动都需要重新扫码登录：
+
+   ```bash
+   pake https://wx.qq.com --name WeChat --incognito
+   ```
+
 ---
 
 ## 安装问题

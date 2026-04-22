@@ -385,6 +385,14 @@ This is usually due to web compatibility issues. Try:
 
    Some authentication providers, especially Google, may block sign-in inside embedded webviews. Because Pake packages sites into a desktop webview, Google properties or sites that rely on Google OAuth may still fail to sign in even when `--new-window` or `--multi-window` is enabled. This is provider policy, not a packaging bug. In those cases, use the normal browser, a browser-installed app, or a native desktop client.
 
+5. **WeChat Web login environment error**
+
+   WeChat detects the WebView and writes a flag cookie that blocks subsequent logins. Add `--incognito` when packaging to bypass it, at the cost of requiring a QR scan on every launch:
+
+   ```bash
+   pake https://wx.qq.com --name WeChat --incognito
+   ```
+
 ---
 
 ## Installation Issues
