@@ -22,6 +22,7 @@
 *.tmp
 # AI assistant docs (do not commit)
 # AI Assistant files
+.agents/
 # Editor directories and files
 # Logs
 .claude/
