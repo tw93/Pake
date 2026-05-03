@@ -219,13 +219,23 @@ First-time installation on Windows can be slow due to:
 - Windows Defender real-time scanning
 - Network connectivity issues
 
-**Solution 1: Automatic Retry (Built-in)**
+**Solution 1: Enable CN Mirror Explicitly**
 
-Pake CLI now automatically retries with CN mirror if the initial installation times out. Simply wait for the retry to complete.
+Pake CLI uses the official npm and Rust sources by default. If downloads are slow in China, opt in to CN mirrors:
+
+```bash
+# macOS/Linux
+PAKE_USE_CN_MIRROR=1 pake https://github.com --name GitHub
+```
+
+```powershell
+# Windows PowerShell
+$env:PAKE_USE_CN_MIRROR="1"; pake https://github.com --name GitHub
+```
 
 **Solution 2: Manual Installation**
 
-If automatic retry fails, manually install dependencies:
+If dependency installation still fails, manually install dependencies:
 
 ```bash
 # Navigate to pake-cli installation directory

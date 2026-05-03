@@ -219,13 +219,23 @@ Windows 首次安装可能较慢，原因包括：
 - Windows Defender 实时扫描
 - 网络连接问题
 
-**解决方案 1：自动重试（内置）**
+**解决方案 1：显式启用国内镜像**
 
-Pake CLI 现在会在初次安装超时后自动使用国内镜像重试。只需等待重试完成即可。
+Pake CLI 默认使用官方 npm 和 Rust 源。如果在国内下载较慢，可以显式启用国内镜像：
+
+```bash
+# macOS/Linux
+PAKE_USE_CN_MIRROR=1 pake https://github.com --name GitHub
+```
+
+```powershell
+# Windows PowerShell
+$env:PAKE_USE_CN_MIRROR="1"; pake https://github.com --name GitHub
+```
 
 **解决方案 2：手动安装依赖**
 
-如果自动重试失败，可手动安装依赖：
+如果依赖安装仍然失败，可手动安装依赖：
 
 ```bash
 # 进入 pake-cli 安装目录

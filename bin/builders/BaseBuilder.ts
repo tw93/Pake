@@ -14,7 +14,7 @@ import {
 import { npmDirectory } from '@/utils/dir';
 import { getSpinner } from '@/utils/info';
 import { shellExec } from '@/utils/shell';
-import { isChinaDomain } from '@/utils/ip';
+import { CN_MIRROR_ENV, isCnMirrorEnabled } from '@/utils/mirror';
 import { IS_MAC } from '@/utils/platform';
 import logger from '@/options/logger';
 
@@ -102,6 +102,61 @@ export default abstract class BaseBuilder {
     }
   }
 
+  private getInstallCommand(
+    packageManager: string,
+    useCnMirror: boolean,
+  ): string {
+    const registryOption = useCnMirror
+      ? ' --registry=https://registry.npmmirror.com'
+      : '';
+    const peerDepsOption =
+      packageManager === 'npm' ? ' --legacy-peer-deps' : '';
+
+    return `cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`;
+  }
+
+  private isGeneratedCnMirrorConfig(
+    projectConfig: string,
+    cnMirrorConfig: string,
+  ): boolean {
+    return projectConfig.trim() === cnMirrorConfig.trim();
+  }
+
+  private async configureCargoRegistry(
+    tauriSrcPath: string,
+    useCnMirror: boolean,
+  ): Promise<void> {
+    const rustProjectDir = path.join(tauriSrcPath, '.cargo');
+    const projectConf = path.join(rustProjectDir, 'config.toml');
+    const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
+
+    if (useCnMirror) {
+      await fsExtra.ensureDir(rustProjectDir);
+      await this.copyFileWithSamePathGuard(projectCnConf, projectConf);
+      return;
+    }
+
+    if (!(await fsExtra.pathExists(projectConf))) {
+      return;
+    }
+
+    const [projectConfig, cnMirrorConfig] = await Promise.all([
+      fsExtra.readFile(projectConf, 'utf8'),
+      fsExtra.readFile(projectCnConf, 'utf8'),
+    ]);
+
+    if (this.isGeneratedCnMirrorConfig(projectConfig, cnMirrorConfig)) {
+      await fsExtra.remove(projectConf);
+      return;
+    }
+
+    if (projectConfig.includes('rsproxy.cn')) {
+      logger.warn(
+        `✼ ${projectConf} still references rsproxy.cn. Remove it or set ${CN_MIRROR_ENV}=1 if you want to use the CN mirror.`,
+      );
+    }
+  }
+
   async prepare() {
     const tauriSrcPath = path.join(npmDirectory, 'src-tauri');
     const tauriTargetPath = path.join(tauriSrcPath, 'target');
@@ -129,17 +184,12 @@ export default abstract class BaseBuilder {
       }
     }
 
-    const isChina = await isChinaDomain('www.npmjs.com');
     const spinner = getSpinner('Installing package...');
-    const rustProjectDir = path.join(tauriSrcPath, '.cargo');
-    const projectConf = path.join(rustProjectDir, 'config.toml');
-    await fsExtra.ensureDir(rustProjectDir);
+    const useCnMirror = isCnMirrorEnabled();
+    await this.configureCargoRegistry(tauriSrcPath, useCnMirror);
 
     // Detect available package manager
     const packageManager = await this.detectPackageManager();
-    const registryOption = ' --registry=https://registry.npmmirror.com';
-    const peerDepsOption =
-      packageManager === 'npm' ? ' --legacy-peer-deps' : '';
 
     const timeout = this.getInstallTimeout();
     const buildEnv = this.getBuildEnvironment();
@@ -153,64 +203,30 @@ export default abstract class BaseBuilder {
       );
     }
 
-    let usedMirror = isChina;
+    if (useCnMirror) {
+      logger.info(
+        `✺ ${CN_MIRROR_ENV}=1 detected, using ${packageManager}/rsProxy CN mirror.`,
+      );
+    }
 
     try {
-      if (isChina) {
-        logger.info(
-          `✺ Located in China, using ${packageManager}/rsProxy CN mirror.`,
-        );
-        const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
-        await this.copyFileWithSamePathGuard(projectCnConf, projectConf);
-        await shellExec(
-          `cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`,
-          timeout,
-          { ...buildEnv, CI: 'true' },
-        );
-      } else {
-        await shellExec(
-          `cd "${npmDirectory}" && ${packageManager} install${peerDepsOption}`,
-          timeout,
-          { ...buildEnv, CI: 'true' },
-        );
-      }
+      await shellExec(
+        this.getInstallCommand(packageManager, useCnMirror),
+        timeout,
+        {
+          ...buildEnv,
+          CI: 'true',
+        },
+      );
       spinner.succeed(chalk.green('Package installed!'));
-    } catch (error: unknown) {
-      // If installation times out and we haven't tried the mirror yet, retry with mirror
-      if (
-        error instanceof Error &&
-        error.message.includes('timed out') &&
-        !usedMirror
-      ) {
-        spinner.fail(
-          chalk.yellow('Installation timed out, retrying with CN mirror...'),
-        );
+    } catch (error) {
+      spinner.fail(chalk.red('Installation failed'));
+      if (!useCnMirror) {
         logger.info(
-          '✺ Retrying installation with CN mirror for better speed...',
+          `✺ If downloads are slow in China, retry with ${CN_MIRROR_ENV}=1 to use CN mirrors.`,
         );
-
-        const retrySpinner = getSpinner('Retrying installation...');
-        usedMirror = true;
-
-        try {
-          const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
-          await this.copyFileWithSamePathGuard(projectCnConf, projectConf);
-          await shellExec(
-            `cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`,
-            timeout,
-            { ...buildEnv, CI: 'true' },
-          );
-          retrySpinner.succeed(
-            chalk.green('Package installed with CN mirror!'),
-          );
-        } catch (retryError) {
-          retrySpinner.fail(chalk.red('Installation failed'));
-          throw retryError;
-        }
-      } else {
-        spinner.fail(chalk.red('Installation failed'));
-        throw error;
       }
+      throw error;
     }
 
     if (!tauriTargetPathExists) {

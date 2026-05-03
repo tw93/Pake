@@ -10,9 +10,6 @@ import os from 'os';
 import { execa, execaSync } from 'execa';
 import crypto from 'crypto';
 import ora from 'ora';
-import dns from 'dns';
-import http from 'http';
-import { promisify } from 'util';
 import fs from 'fs/promises';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
@@ -23,18 +20,18 @@ import { InvalidArgumentError, program as program$1, Option } from 'commander';
 import fs$1 from 'fs';
 
 var name = "pake-cli";
-var version = "3.11.3";
+var version = "3.11.4";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
 };
 var packageManager = "pnpm@10.26.2";
 var bin = {
-	pake: "./dist/cli.js"
+	pake: "dist/cli.js"
 };
 var repository = {
 	type: "git",
-	url: "https://github.com/tw93/pake.git"
+	url: "git+https://github.com/tw93/pake.git"
 };
 var author = {
 	name: "Tw93",
@@ -220,6 +217,12 @@ function getSpinner(text) {
     }).start();
 }
 
+const TRUE_VALUES = new Set(['1', 'true', 'yes', 'on']);
+const CN_MIRROR_ENV = 'PAKE_USE_CN_MIRROR';
+function isCnMirrorEnabled(value = process.env[CN_MIRROR_ENV]) {
+    return TRUE_VALUES.has((value ?? '').trim().toLowerCase());
+}
+
 const { platform: platform$1 } = process;
 const IS_MAC = platform$1 === 'darwin';
 const IS_WIN = platform$1 === 'win32';
@@ -279,69 +282,6 @@ async function shellExec(command, timeout = 300000, env) {
     }
 }
 
-const logger = {
-    info(...msg) {
-        log.info(...msg.map((m) => chalk.white(m)));
-    },
-    debug(...msg) {
-        log.debug(...msg);
-    },
-    error(...msg) {
-        log.error(...msg.map((m) => chalk.red(m)));
-    },
-    warn(...msg) {
-        log.warn(...msg.map((m) => chalk.yellow(m)));
-    },
-    success(...msg) {
-        log.info(...msg.map((m) => chalk.green(m)));
-    },
-};
-
-const resolve = promisify(dns.resolve);
-const ping = async (host) => {
-    const lookup = promisify(dns.lookup);
-    const ip = await lookup(host);
-    const start = new Date();
-    // Prevent timeouts from affecting user experience.
-    const requestPromise = new Promise((resolve, reject) => {
-        const req = http.get(`http://${ip.address}`, (res) => {
-            const delay = new Date().getTime() - start.getTime();
-            res.resume();
-            resolve(delay);
-        });
-        req.on('error', (err) => {
-            reject(err);
-        });
-    });
-    const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => {
-            reject(new Error('Request timed out after 3 seconds'));
-        }, 1000);
-    });
-    return Promise.race([requestPromise, timeoutPromise]);
-};
-async function isChinaDomain(domain) {
-    try {
-        const [ip] = await resolve(domain);
-        return await isChinaIP(ip, domain);
-    }
-    catch (error) {
-        logger.debug(`${domain} can't be parse!`);
-        return true;
-    }
-}
-async function isChinaIP(ip, domain) {
-    try {
-        const delay = await ping(ip);
-        logger.debug(`${domain} latency is ${delay} ms`);
-        return delay > 1000;
-    }
-    catch (error) {
-        logger.debug(`ping ${domain} failed!`);
-        return true;
-    }
-}
-
 function normalizePathForComparison(targetPath) {
     const normalized = path.normalize(targetPath);
     return IS_WIN ? normalized.toLowerCase() : normalized;
@@ -389,15 +329,13 @@ function ensureRustEnv() {
     ensureCargoBinOnPath();
 }
 async function installRust() {
-    const isActions = process.env.GITHUB_ACTIONS;
-    const isInChina = await isChinaDomain('sh.rustup.rs');
-    const rustInstallScriptForMac = isInChina && !isActions
+    const rustInstallScriptForUnix = isCnMirrorEnabled()
         ? 'export RUSTUP_DIST_SERVER="https://rsproxy.cn" && export RUSTUP_UPDATE_ROOT="https://rsproxy.cn/rustup" && curl --proto "=https" --tlsv1.2 -sSf https://rsproxy.cn/rustup-init.sh | sh'
         : "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y";
     const rustInstallScriptForWindows = 'winget install --id Rustlang.Rustup';
     const spinner = getSpinner('Downloading Rust...');
     try {
-        await shellExec(IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForMac, 300000, undefined);
+        await shellExec(IS_WIN ? rustInstallScriptForWindows : rustInstallScriptForUnix, 300000, undefined);
         spinner.succeed(chalk.green('✔ Rust installed successfully!'));
         ensureRustEnv();
     }
@@ -442,6 +380,24 @@ async function combineFiles(files, output) {
     await fs.writeFile(output, contents.join('\n'));
     return files;
 }
+
+const logger = {
+    info(...msg) {
+        log.info(...msg.map((m) => chalk.white(m)));
+    },
+    debug(...msg) {
+        log.debug(...msg);
+    },
+    error(...msg) {
+        log.error(...msg.map((m) => chalk.red(m)));
+    },
+    warn(...msg) {
+        log.warn(...msg.map((m) => chalk.yellow(m)));
+    },
+    success(...msg) {
+        log.info(...msg.map((m) => chalk.green(m)));
+    },
+};
 
 function generateSafeFilename(name) {
     return name
@@ -873,6 +829,40 @@ class BaseBuilder {
             throw error;
         }
     }
+    getInstallCommand(packageManager, useCnMirror) {
+        const registryOption = useCnMirror
+            ? ' --registry=https://registry.npmmirror.com'
+            : '';
+        const peerDepsOption = packageManager === 'npm' ? ' --legacy-peer-deps' : '';
+        return `cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`;
+    }
+    isGeneratedCnMirrorConfig(projectConfig, cnMirrorConfig) {
+        return projectConfig.trim() === cnMirrorConfig.trim();
+    }
+    async configureCargoRegistry(tauriSrcPath, useCnMirror) {
+        const rustProjectDir = path.join(tauriSrcPath, '.cargo');
+        const projectConf = path.join(rustProjectDir, 'config.toml');
+        const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
+        if (useCnMirror) {
+            await fsExtra.ensureDir(rustProjectDir);
+            await this.copyFileWithSamePathGuard(projectCnConf, projectConf);
+            return;
+        }
+        if (!(await fsExtra.pathExists(projectConf))) {
+            return;
+        }
+        const [projectConfig, cnMirrorConfig] = await Promise.all([
+            fsExtra.readFile(projectConf, 'utf8'),
+            fsExtra.readFile(projectCnConf, 'utf8'),
+        ]);
+        if (this.isGeneratedCnMirrorConfig(projectConfig, cnMirrorConfig)) {
+            await fsExtra.remove(projectConf);
+            return;
+        }
+        if (projectConfig.includes('rsproxy.cn')) {
+            logger.warn(`✼ ${projectConf} still references rsproxy.cn. Remove it or set ${CN_MIRROR_ENV}=1 if you want to use the CN mirror.`);
+        }
+    }
     async prepare() {
         const tauriSrcPath = path.join(npmDirectory, 'src-tauri');
         const tauriTargetPath = path.join(tauriSrcPath, 'target');
@@ -896,15 +886,11 @@ class BaseBuilder {
                 process.exit(1);
             }
         }
-        const isChina = await isChinaDomain('www.npmjs.com');
         const spinner = getSpinner('Installing package...');
-        const rustProjectDir = path.join(tauriSrcPath, '.cargo');
-        const projectConf = path.join(rustProjectDir, 'config.toml');
-        await fsExtra.ensureDir(rustProjectDir);
+        const useCnMirror = isCnMirrorEnabled();
+        await this.configureCargoRegistry(tauriSrcPath, useCnMirror);
         // Detect available package manager
         const packageManager = await this.detectPackageManager();
-        const registryOption = ' --registry=https://registry.npmmirror.com';
-        const peerDepsOption = packageManager === 'npm' ? ' --legacy-peer-deps' : '';
         const timeout = this.getInstallTimeout();
         const buildEnv = this.getBuildEnvironment();
         // Show helpful message for first-time users
@@ -913,43 +899,22 @@ class BaseBuilder {
                 ? '✺ First-time setup may take 10-15 minutes on Windows (compiling dependencies)...'
                 : '✺ First-time setup may take 5-10 minutes (installing dependencies)...');
         }
-        let usedMirror = isChina;
+        if (useCnMirror) {
+            logger.info(`✺ ${CN_MIRROR_ENV}=1 detected, using ${packageManager}/rsProxy CN mirror.`);
+        }
         try {
-            if (isChina) {
-                logger.info(`✺ Located in China, using ${packageManager}/rsProxy CN mirror.`);
-                const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
-                await this.copyFileWithSamePathGuard(projectCnConf, projectConf);
-                await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`, timeout, { ...buildEnv, CI: 'true' });
-            }
-            else {
-                await shellExec(`cd "${npmDirectory}" && ${packageManager} install${peerDepsOption}`, timeout, { ...buildEnv, CI: 'true' });
-            }
+            await shellExec(this.getInstallCommand(packageManager, useCnMirror), timeout, {
+                ...buildEnv,
+                CI: 'true',
+            });
             spinner.succeed(chalk.green('Package installed!'));
         }
         catch (error) {
-            // If installation times out and we haven't tried the mirror yet, retry with mirror
-            if (error instanceof Error &&
-                error.message.includes('timed out') &&
-                !usedMirror) {
-                spinner.fail(chalk.yellow('Installation timed out, retrying with CN mirror...'));
-                logger.info('✺ Retrying installation with CN mirror for better speed...');
-                const retrySpinner = getSpinner('Retrying installation...');
-                usedMirror = true;
-                try {
-                    const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
-                    await this.copyFileWithSamePathGuard(projectCnConf, projectConf);
-                    await shellExec(`cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`, timeout, { ...buildEnv, CI: 'true' });
-                    retrySpinner.succeed(chalk.green('Package installed with CN mirror!'));
-                }
-                catch (retryError) {
-                    retrySpinner.fail(chalk.red('Installation failed'));
-                    throw retryError;
-                }
+            spinner.fail(chalk.red('Installation failed'));
+            if (!useCnMirror) {
+                logger.info(`✺ If downloads are slow in China, retry with ${CN_MIRROR_ENV}=1 to use CN mirrors.`);
             }
-            else {
-                spinner.fail(chalk.red('Installation failed'));
-                throw error;
-            }
+            throw error;
         }
         if (!tauriTargetPathExists) {
             logger.warn('✼ The first packaging may be slow, please be patient and wait, it will be faster afterwards.');
