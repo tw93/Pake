@@ -20,15 +20,14 @@
 *.suo
 *.sw?
 *.tmp
-# AI assistant docs (do not commit)
-# AI Assistant files
-.agents/
+# Local AI assistant docs
+AGENTS.override.md
+CLAUDE.local.md
+.agents/settings.local.json
 # Editor directories and files
 # Logs
-.claude/
+.claude/settings.local.json
 AGENT.md
-AGENTS.md
-CLAUDE.md
 dist
 dist-ssr
 journal/
