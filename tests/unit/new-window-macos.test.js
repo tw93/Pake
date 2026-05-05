@@ -10,7 +10,10 @@ describe("macOS new-window handling", () => {
     );
 
     const blockStart = source.indexOf("if window_config.new_window");
-    const blockEnd = source.indexOf("// Add initialization scripts", blockStart);
+    const blockEnd = source.indexOf(
+      "// Add initialization scripts",
+      blockStart,
+    );
     const newWindowBlock = source.slice(blockStart, blockEnd);
 
     expect(newWindowBlock).toMatch(
