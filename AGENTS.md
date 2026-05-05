@@ -37,19 +37,19 @@ Pake/
 
 ## Development Commands
 
-| Command | Purpose |
-|---------|---------|
-| `pnpm install` | Install dependencies |
-| `pnpm run dev` | Tauri development mode |
-| `pnpm run cli:dev -- <url>` | CLI wrapper + Tauri (recommended) |
-| `pnpm run cli:dev --iterative-build` | Faster dev (skip checks) |
-| `pnpm run cli:build` | Rollup + TypeScript check (catches type errors Prettier misses) |
-| `pnpm run build` | Build for current platform |
-| `pnpm run build:mac` | macOS universal binary |
-| `pnpm run format` | Format code (prettier + cargo fmt) |
-| `npx vitest run` | Unit and integration tests only (sub-second) |
-| `pnpm test -- --no-build` | Full suite minus the multi-arch real build |
-| `pnpm test` | Full suite including release workflow |
+| Command                              | Purpose                                                         |
+| ------------------------------------ | --------------------------------------------------------------- |
+| `pnpm install`                       | Install dependencies                                            |
+| `pnpm run dev`                       | Tauri development mode                                          |
+| `pnpm run cli:dev -- <url>`          | CLI wrapper + Tauri (recommended)                               |
+| `pnpm run cli:dev --iterative-build` | Faster dev (skip checks)                                        |
+| `pnpm run cli:build`                 | Rollup + TypeScript check (catches type errors Prettier misses) |
+| `pnpm run build`                     | Build for current platform                                      |
+| `pnpm run build:mac`                 | macOS universal binary                                          |
+| `pnpm run format`                    | Format code (prettier + cargo fmt)                              |
+| `npx vitest run`                     | Unit and integration tests only (sub-second)                    |
+| `pnpm test -- --no-build`            | Full suite minus the multi-arch real build                      |
+| `pnpm test`                          | Full suite including release workflow                           |
 
 Keep shared project facts in this file so Codex, Claude Code, and other agents use the same public source of truth. Tool-specific local skills or overrides must remain optional and ignored.
 
@@ -104,11 +104,11 @@ Execution rules:
 
 Three files must be updated in sync for every release:
 
-| File | Field |
-|------|-------|
-| `package.json` | `"version"` |
-| `src-tauri/Cargo.toml` | `version` under `[package]` |
-| `src-tauri/tauri.conf.json` | `"version"` |
+| File                        | Field                       |
+| --------------------------- | --------------------------- |
+| `package.json`              | `"version"`                 |
+| `src-tauri/Cargo.toml`      | `version` under `[package]` |
+| `src-tauri/tauri.conf.json` | `"version"`                 |
 
 Tag format: `V0.x.x` (uppercase V). Current version: check `package.json`.
 
