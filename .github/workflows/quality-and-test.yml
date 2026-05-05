@@ -79,18 +79,10 @@ jobs:
 
       - uses: rui314/setup-mold@v1
 
-      - name: Cache cargo-hack
-        uses: actions/cache@v5
-        id: cargo-hack-cache
-        with:
-          path: ~/.cargo/bin/cargo-hack
-          key: ${{ runner.os }}-cargo-hack-${{ hashFiles('~/.cargo/bin/cargo-hack') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-hack-
-
       - name: Install cargo-hack
-        if: steps.cargo-hack-cache.outputs.cache-hit != 'true'
-        run: cargo install cargo-hack --force
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-hack
 
       - name: Check Rust formatting
         run: cargo fmt --all -- --color=always --check
@@ -98,8 +90,11 @@ jobs:
       - name: Run Clippy lints
         run: cargo hack --feature-powerset --exclude-features cli-build --no-dev-deps clippy # cspell:disable-line
 
-  validation:
-    name: CLI & Build Validation (${{ matrix.os }})
+  # Fast lane: runs on every PR and push. Skips the heavy real Tauri build
+  # (kept under tests/index.js) but still covers Vitest + integration suites
+  # so feedback stays under ~5 minutes per OS instead of 20+.
+  validation-fast:
+    name: CLI Fast Validation (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -117,14 +112,15 @@ jobs:
       - name: Build CLI
         run: pnpm run cli:build
 
-      - name: Run CI Test Suite
-        run: pnpm test
-        timeout-minutes: 30
+      - name: Run Fast Test Suite
+        shell: bash
+        run: PAKE_CREATE_APP=1 node tests/index.js --no-build
+        timeout-minutes: 15
         env:
           CI: true
           NODE_ENV: test
 
-      - name: Test CLI Integration
+      - name: Test CLI Integration (smoke)
         shell: bash
         run: |
           echo "Testing CLI integration..."
@@ -134,10 +130,36 @@ jobs:
             timeout 30s PAKE_CREATE_APP=1 node dist/cli.js https://weekly.tw93.fun --name "CITest" --debug --iterative-build || true
           fi
 
+  # Full lane: only runs after merge to main (push event) or manual dispatch.
+  # Keeps the real Tauri build coverage off the PR critical path.
+  validation-full:
+    name: Full Tauri Build (${{ matrix.os }})
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Build Environment
+        uses: ./.github/actions/setup-env
+        with:
+          mode: build
+
+      - name: Run Full Test Suite (with real build)
+        run: pnpm test
+        timeout-minutes: 30
+        env:
+          CI: true
+          NODE_ENV: test
+
   summary:
     name: Quality Summary
     runs-on: ubuntu-latest
-    needs: [auto-format, rust-quality, validation]
+    needs: [auto-format, rust-quality, validation-fast, validation-full]
     if: always()
     steps:
       - name: Generate Summary
@@ -149,5 +171,6 @@ jobs:
             echo "|-------|--------|"
             echo "| Auto Formatting | ${{ needs.auto-format.result == 'success' && 'PASSED' || needs.auto-format.result == 'skipped' && 'SKIPPED' || 'FAILED' }} |"
             echo "| Rust Quality | ${{ needs.rust-quality.result == 'success' && 'PASSED' || 'FAILED' }} |"
-            echo "| CLI & Build Validation | ${{ needs.validation.result == 'success' && 'PASSED' || 'FAILED' }} |"
+            echo "| CLI Fast Validation | ${{ needs.validation-fast.result == 'success' && 'PASSED' || 'FAILED' }} |"
+            echo "| Full Tauri Build | ${{ needs.validation-full.result == 'success' && 'PASSED' || needs.validation-full.result == 'skipped' && 'SKIPPED (PR fast lane)' || 'FAILED' }} |"
           } >> $GITHUB_STEP_SUMMARY

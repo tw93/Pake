@@ -10,6 +10,7 @@ import {
   resolveIdentifier,
 } from '@/utils/info';
 import { generateLinuxPackageName } from '@/utils/name';
+import { PakeError } from '@/utils/error';
 import { PakeAppOptions, PakeCliOptions } from '@/types';
 
 function resolveAppName(name: string, platform: NodeJS.Platform): string {
@@ -68,12 +69,12 @@ export default async function handleOptions(
     const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dashes, and spaces (not leading dashes and spaces). Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read, 123.`;
     const errorMsg =
       platform === 'linux' ? LINUX_NAME_ERROR : DEFAULT_NAME_ERROR;
-    logger.error(errorMsg);
     if (isActions) {
+      logger.error(errorMsg);
       name = resolveAppName(url, platform);
       logger.warn(`✼ Inside github actions, use the default name: ${name}`);
     } else {
-      process.exit(1);
+      throw new PakeError(errorMsg);
     }
   }
 

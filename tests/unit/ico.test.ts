@@ -2,8 +2,14 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { afterEach, describe, expect, it } from 'vitest';
+import sharp from 'sharp';
 
-import { buildIcoFromPngBuffers, writeIcoWithPreferredSize } from '@/utils/ico';
+import {
+  buildIcoFromPngBuffers,
+  ensureMultiResolutionIco,
+  writeIcoWithPreferredSize,
+  WIN_STANDARD_ICO_SIZES,
+} from '@/utils/ico';
 
 const ICO_HEADER_SIZE = 6;
 const ICO_DIR_ENTRY_SIZE = 16;
@@ -162,6 +168,93 @@ describe('writeIcoWithPreferredSize', () => {
       source,
       path.join(dir, 'out.ico'),
       32,
+    );
+    expect(ok).toBe(false);
+  });
+});
+
+describe('ensureMultiResolutionIco', () => {
+  async function realPng(size: number, fillColor = 'red'): Promise<Buffer> {
+    return sharp({
+      create: {
+        width: size,
+        height: size,
+        channels: 4,
+        background: fillColor,
+      },
+    })
+      .png()
+      .toBuffer();
+  }
+
+  it('expands a single-frame 256x256 ICO into every Windows standard size (#1190)', async () => {
+    const dir = makeTempDir();
+    const source = path.join(dir, 'source.ico');
+    const output = path.join(dir, 'multi.ico');
+
+    const big = await realPng(256, 'blue');
+    fs.writeFileSync(source, buildIcoFromPngBuffers([{ size: 256, png: big }]));
+
+    const ok = await ensureMultiResolutionIco(source, output);
+    expect(ok).toBe(true);
+
+    const entries = parseIcoHeader(fs.readFileSync(output));
+    const sizes = entries.map((entry) => Math.max(entry.width, entry.height));
+    for (const expected of WIN_STANDARD_ICO_SIZES) {
+      expect(sizes).toContain(expected);
+    }
+  });
+
+  it('places the preferred size as the first directory entry', async () => {
+    const dir = makeTempDir();
+    const source = path.join(dir, 'source.ico');
+    const output = path.join(dir, 'multi.ico');
+
+    const big = await realPng(256, 'green');
+    fs.writeFileSync(source, buildIcoFromPngBuffers([{ size: 256, png: big }]));
+
+    const ok = await ensureMultiResolutionIco(source, output, 32);
+    expect(ok).toBe(true);
+
+    const entries = parseIcoHeader(fs.readFileSync(output));
+    expect(entries[0].width).toBe(32);
+    expect(entries[0].height).toBe(32);
+  });
+
+  it('preserves any exact-size PNG frame already in the ICO', async () => {
+    const dir = makeTempDir();
+    const source = path.join(dir, 'source.ico');
+    const output = path.join(dir, 'multi.ico');
+
+    const tiny = await realPng(16, 'magenta');
+    const big = await realPng(256, 'cyan');
+    fs.writeFileSync(
+      source,
+      buildIcoFromPngBuffers([
+        { size: 16, png: tiny },
+        { size: 256, png: big },
+      ]),
+    );
+
+    const ok = await ensureMultiResolutionIco(source, output);
+    expect(ok).toBe(true);
+
+    const entries = parseIcoHeader(fs.readFileSync(output));
+    const sixteen = entries.find(
+      (entry) => entry.width === 16 && entry.height === 16,
+    );
+    expect(sixteen).toBeDefined();
+    expect(sixteen!.data.equals(tiny)).toBe(true);
+  });
+
+  it('falls back gracefully when the source ICO is malformed', async () => {
+    const dir = makeTempDir();
+    const source = path.join(dir, 'bad.ico');
+    fs.writeFileSync(source, Buffer.from([0, 0]));
+
+    const ok = await ensureMultiResolutionIco(
+      source,
+      path.join(dir, 'out.ico'),
     );
     expect(ok).toBe(false);
   });

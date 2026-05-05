@@ -1,0 +1,85 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`buildWindowConfigOverrides > matches the default snapshot on Linux 1`] = `
+{
+  "activation_shortcut": "",
+  "always_on_top": false,
+  "dark_mode": false,
+  "disabled_web_shortcuts": false,
+  "enable_drag_drop": false,
+  "enable_wasm": false,
+  "force_internal_navigation": false,
+  "fullscreen": false,
+  "height": 780,
+  "hide_on_close": false,
+  "hide_title_bar": false,
+  "ignore_certificate_errors": false,
+  "incognito": false,
+  "internal_url_regex": "",
+  "maximize": false,
+  "min_height": 0,
+  "min_width": 0,
+  "new_window": false,
+  "resizable": true,
+  "start_to_tray": false,
+  "title": undefined,
+  "width": 1200,
+  "zoom": 100,
+}
+`;
+
+exports[`buildWindowConfigOverrides > matches the default snapshot on Windows 1`] = `
+{
+  "activation_shortcut": "",
+  "always_on_top": false,
+  "dark_mode": false,
+  "disabled_web_shortcuts": false,
+  "enable_drag_drop": false,
+  "enable_wasm": false,
+  "force_internal_navigation": false,
+  "fullscreen": false,
+  "height": 780,
+  "hide_on_close": false,
+  "hide_title_bar": false,
+  "ignore_certificate_errors": false,
+  "incognito": false,
+  "internal_url_regex": "",
+  "maximize": false,
+  "min_height": 0,
+  "min_width": 0,
+  "new_window": false,
+  "resizable": true,
+  "start_to_tray": false,
+  "title": undefined,
+  "width": 1200,
+  "zoom": 100,
+}
+`;
+
+exports[`buildWindowConfigOverrides > matches the default snapshot on macOS 1`] = `
+{
+  "activation_shortcut": "",
+  "always_on_top": false,
+  "dark_mode": false,
+  "disabled_web_shortcuts": false,
+  "enable_drag_drop": false,
+  "enable_wasm": false,
+  "force_internal_navigation": false,
+  "fullscreen": false,
+  "height": 780,
+  "hide_on_close": true,
+  "hide_title_bar": false,
+  "ignore_certificate_errors": false,
+  "incognito": false,
+  "internal_url_regex": "",
+  "maximize": false,
+  "min_height": 0,
+  "min_width": 0,
+  "new_window": false,
+  "resizable": true,
+  "start_to_tray": false,
+  "title": undefined,
+  "width": 1200,
+  "zoom": 100,
+}
+`;

@@ -18,6 +18,45 @@ import {
 } from '@/types';
 import { tauriConfigDirectory, npmDirectory } from '@/utils/dir';
 
+/**
+ * Pure transform from CLI options to the window-config slice that gets
+ * merged into pake.json. Exposed for snapshot testing so option drift
+ * (e.g. a new flag added in cli-program.ts but forgotten here) is caught.
+ *
+ * Keep this function side-effect free.
+ */
+export function buildWindowConfigOverrides(
+  options: PakeAppOptions,
+  platform: SupportedPlatform = asSupportedPlatform(process.platform),
+): Partial<WindowConfig> {
+  const platformHideOnClose = options.hideOnClose ?? platform === 'darwin';
+  return {
+    width: options.width,
+    height: options.height,
+    fullscreen: options.fullscreen,
+    maximize: options.maximize,
+    resizable: options.resizable ?? true,
+    hide_title_bar: options.hideTitleBar,
+    activation_shortcut: options.activationShortcut,
+    always_on_top: options.alwaysOnTop,
+    dark_mode: options.darkMode,
+    disabled_web_shortcuts: options.disabledWebShortcuts,
+    hide_on_close: platformHideOnClose,
+    incognito: options.incognito,
+    title: options.title,
+    enable_wasm: options.wasm,
+    enable_drag_drop: options.enableDragDrop,
+    start_to_tray: options.startToTray && options.showSystemTray,
+    force_internal_navigation: options.forceInternalNavigation,
+    internal_url_regex: options.internalUrlRegex,
+    zoom: options.zoom,
+    min_width: options.minWidth,
+    min_height: options.minHeight,
+    ignore_certificate_errors: options.ignoreCertificateErrors,
+    new_window: options.newWindow,
+  };
+}
+
 type PlatformIconInfo = {
   fileExt: string;
   path: string;
@@ -388,68 +427,20 @@ export async function mergeConfig(
   await copyTemplateConfigs();
 
   const {
-    width,
-    height,
-    fullscreen,
-    maximize,
-    hideTitleBar,
-    alwaysOnTop,
     appVersion,
-    darkMode,
-    disabledWebShortcuts,
-    activationShortcut,
     userAgent,
     showSystemTray,
     useLocalFile,
     identifier,
     name = 'pake-app',
-    resizable = true,
     installerLanguage,
-    hideOnClose,
-    incognito,
-    title,
     wasm,
-    enableDragDrop,
-    startToTray,
-    forceInternalNavigation,
-    internalUrlRegex,
-    zoom,
-    minWidth,
-    minHeight,
-    ignoreCertificateErrors,
-    newWindow,
     camera,
     microphone,
   } = options;
 
   const platform = asSupportedPlatform(process.platform);
-  const platformHideOnClose = hideOnClose ?? platform === 'darwin';
-
-  const tauriConfWindowOptions: Partial<WindowConfig> = {
-    width,
-    height,
-    fullscreen,
-    maximize,
-    resizable,
-    hide_title_bar: hideTitleBar,
-    activation_shortcut: activationShortcut,
-    always_on_top: alwaysOnTop,
-    dark_mode: darkMode,
-    disabled_web_shortcuts: disabledWebShortcuts,
-    hide_on_close: platformHideOnClose,
-    incognito,
-    title,
-    enable_wasm: wasm,
-    enable_drag_drop: enableDragDrop,
-    start_to_tray: startToTray && showSystemTray,
-    force_internal_navigation: forceInternalNavigation,
-    internal_url_regex: internalUrlRegex,
-    zoom,
-    min_width: minWidth,
-    min_height: minHeight,
-    ignore_certificate_errors: ignoreCertificateErrors,
-    new_window: newWindow,
-  };
+  const tauriConfWindowOptions = buildWindowConfigOverrides(options, platform);
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
 
   tauriConf.productName = name;

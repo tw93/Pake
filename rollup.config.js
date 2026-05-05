@@ -49,7 +49,7 @@ export default {
       tsconfig: "./tsconfig.json",
       sourceMap: !isProduction,
       inlineSources: !isProduction,
-      noEmitOnError: false,
+      noEmitOnError: isProduction,
       compilerOptions: {
         target: "es2020",
         module: "esnext",
@@ -77,7 +77,6 @@ function pakeCliDevPlugin() {
 
   let devHasStarted = false;
 
-  // 智能检测包管理器
   const detectPackageManager = () => {
     if (fs.existsSync("pnpm-lock.yaml")) return "pnpm";
     if (fs.existsSync("yarn.lock")) return "yarn";

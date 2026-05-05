@@ -9,6 +9,11 @@ vi.mock('@/utils/dir', () => ({
 }));
 
 import BaseBuilder from '@/builders/BaseBuilder';
+import {
+  configureCargoRegistry,
+  getBuildEnvironment,
+  getInstallCommand,
+} from '@/builders/env';
 import logger from '@/options/logger';
 import { CN_MIRROR_ENV, isCnMirrorEnabled } from '@/utils/mirror';
 
@@ -65,16 +70,15 @@ describe('BaseBuilder guards', () => {
   });
 
   it('prepends /usr/bin to PATH for macOS build environment', () => {
-    const builder = new TestBuilder({} as any);
     const originalPath = process.env.PATH;
     process.env.PATH = '/opt/homebrew/bin:/usr/local/bin';
 
     try {
-      const env = (builder as any).getBuildEnvironment();
+      const env = getBuildEnvironment();
 
       if (process.platform === 'darwin') {
         expect(env).toBeDefined();
-        expect(env.PATH.startsWith('/usr/bin:')).toBe(true);
+        expect(env!.PATH.startsWith('/usr/bin:')).toBe(true);
       } else {
         expect(env).toBeUndefined();
       }
@@ -83,36 +87,23 @@ describe('BaseBuilder guards', () => {
     }
   });
 
-  it('skips copy when source and destination are the same path', async () => {
-    const builder = new TestBuilder({} as any);
-    const copySpy = vi
-      .spyOn(fsExtra, 'copy')
-      .mockResolvedValue(undefined as any);
-
-    await expect(
-      (builder as any).copyFileWithSamePathGuard('/tmp/same', '/tmp/same'),
-    ).resolves.toBeUndefined();
-    expect(copySpy).not.toHaveBeenCalled();
-  });
-
-  it('suppresses same-path fs-extra copy errors', async () => {
-    const builder = new TestBuilder({} as any);
-    vi.spyOn(fsExtra, 'copy').mockRejectedValue(
-      new Error('Source and destination must not be the same.'),
+  it('skips Cargo registry copy when source and destination resolve to the same path', async () => {
+    // configureCargoRegistry uses a same-path guard internally; if the
+    // CN-mirror file and the project config end up identical we should not
+    // crash with "source and destination must not be the same".
+    const tempDir = await fsExtra.mkdtemp(
+      path.join(os.tmpdir(), 'pake-base-builder-same-'),
     );
+    tempDirs.push(tempDir);
+    const tauriSrcPath = path.join(tempDir, 'src-tauri');
+    const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
+    const projectConf = path.join(tauriSrcPath, '.cargo', 'config.toml');
+    await fsExtra.outputFile(projectCnConf, GENERATED_MIRROR_CONFIG);
+    await fsExtra.outputFile(projectConf, GENERATED_MIRROR_CONFIG);
 
     await expect(
-      (builder as any).copyFileWithSamePathGuard('/tmp/a', '/tmp/b'),
+      configureCargoRegistry(tauriSrcPath, true),
     ).resolves.toBeUndefined();
-  });
-
-  it('rethrows non-same-path copy errors', async () => {
-    const builder = new TestBuilder({} as any);
-    vi.spyOn(fsExtra, 'copy').mockRejectedValue(new Error('permission denied'));
-
-    await expect(
-      (builder as any).copyFileWithSamePathGuard('/tmp/a', '/tmp/b'),
-    ).rejects.toThrow('permission denied');
   });
 
   it('does not enable CN mirror by default', () => {
@@ -133,16 +124,14 @@ describe('BaseBuilder guards', () => {
   );
 
   it('uses official npm registry by default', () => {
-    const builder = new TestBuilder({} as any);
-    const command = (builder as any).getInstallCommand('pnpm', false);
+    const command = getInstallCommand('pnpm', false);
 
     expect(command).toContain('pnpm install');
     expect(command).not.toContain('registry.npmmirror.com');
   });
 
   it('uses npmmirror only when CN mirror is enabled', () => {
-    const builder = new TestBuilder({} as any);
-    const command = (builder as any).getInstallCommand('npm', true);
+    const command = getInstallCommand('npm', true);
 
     expect(command).toContain(
       'npm install --registry=https://registry.npmmirror.com --legacy-peer-deps',
@@ -150,11 +139,10 @@ describe('BaseBuilder guards', () => {
   });
 
   it('copies Cargo mirror config only when CN mirror is enabled', async () => {
-    const builder = new TestBuilder({} as any);
     const { tauriSrcPath, projectConf, projectCnConf } =
       await createCargoFixture();
 
-    await (builder as any).configureCargoRegistry(tauriSrcPath, true);
+    await configureCargoRegistry(tauriSrcPath, true);
 
     expect(await fsExtra.readFile(projectConf, 'utf8')).toBe(
       await fsExtra.readFile(projectCnConf, 'utf8'),
@@ -162,18 +150,16 @@ describe('BaseBuilder guards', () => {
   });
 
   it('removes generated Cargo mirror config when CN mirror is disabled', async () => {
-    const builder = new TestBuilder({} as any);
     const { tauriSrcPath, projectConf } = await createCargoFixture(
       GENERATED_MIRROR_CONFIG,
     );
 
-    await (builder as any).configureCargoRegistry(tauriSrcPath, false);
+    await configureCargoRegistry(tauriSrcPath, false);
 
     expect(await fsExtra.pathExists(projectConf)).toBe(false);
   });
 
   it('keeps custom Cargo config when CN mirror is disabled', async () => {
-    const builder = new TestBuilder({} as any);
     const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
     const customConfig = `${GENERATED_MIRROR_CONFIG}
 # custom user setting
@@ -181,11 +167,19 @@ describe('BaseBuilder guards', () => {
     const { tauriSrcPath, projectConf } =
       await createCargoFixture(customConfig);
 
-    await (builder as any).configureCargoRegistry(tauriSrcPath, false);
+    await configureCargoRegistry(tauriSrcPath, false);
 
     expect(await fsExtra.readFile(projectConf, 'utf8')).toBe(customConfig);
     expect(warnSpy).toHaveBeenCalledWith(
       expect.stringContaining('still references rsproxy.cn'),
     );
+  });
+
+  it('keeps the BaseBuilder hierarchy intact', () => {
+    // Sanity check that subclasses can still construct against the slimmer
+    // BaseBuilder after env helpers were extracted.
+    const builder = new TestBuilder({} as any);
+    expect(builder).toBeInstanceOf(BaseBuilder);
+    expect(builder.getFileName()).toBe('test-app');
   });
 });

@@ -17,7 +17,12 @@ import {
 } from '@/utils/icon-source';
 import { generateLinuxPackageName, getSafeAppName } from '@/utils/name';
 import { PakeAppOptions } from '@/types';
-import { writeIcoWithPreferredSize, buildIcoFromPngBuffers } from '@/utils/ico';
+import {
+  ensureMultiResolutionIco,
+  writeIcoWithPreferredSize,
+  buildIcoFromPngBuffers,
+  WIN_STANDARD_ICO_SIZES,
+} from '@/utils/ico';
 
 type PlatformIconConfig = {
   format: string;
@@ -43,7 +48,7 @@ const ICON_CONFIG = {
 } as const;
 
 const PLATFORM_CONFIG: Record<'win' | 'linux' | 'macos', PlatformIconConfig> = {
-  win: { format: '.ico', sizes: [16, 32, 48, 64, 128, 256] },
+  win: { format: '.ico', sizes: [...WIN_STANDARD_ICO_SIZES] },
   linux: { format: '.png', size: 512 },
   macos: { format: '.icns', sizes: [16, 32, 64, 128, 256, 512, 1024] },
 };
@@ -89,14 +94,23 @@ async function copyWindowsIconIfNeeded(
   try {
     const finalIconPath = generateIconPath(appName);
     await fsExtra.ensureDir(path.dirname(finalIconPath));
-    // Reorder ICO to prioritize 256px icons for better Windows display
-    const reordered = await writeIcoWithPreferredSize(
+    // Re-render ICO so every Windows standard size is present and prefer the
+    // 256px frame as the leading entry; falls back to plain reordering if the
+    // ICO is non-decodable, then to a raw copy. (Issue #1190)
+    const upgraded = await ensureMultiResolutionIco(
       convertedPath,
       finalIconPath,
       256,
     );
-    if (!reordered) {
-      await fsExtra.copy(convertedPath, finalIconPath);
+    if (!upgraded) {
+      const reordered = await writeIcoWithPreferredSize(
+        convertedPath,
+        finalIconPath,
+        256,
+      );
+      if (!reordered) {
+        await fsExtra.copy(convertedPath, finalIconPath);
+      }
     }
     return finalIconPath;
   } catch (error) {
