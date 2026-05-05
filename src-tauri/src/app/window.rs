@@ -67,6 +67,7 @@ struct WindowBuildOptions<'a> {
     new_window_features: Option<NewWindowFeatures>,
 }
 
+#[cfg(not(target_os = "macos"))]
 fn open_requested_window(
     app: &AppHandle,
     config: &PakeConfig,
@@ -253,24 +254,34 @@ fn build_window(
     }
 
     if window_config.new_window {
-        let app_handle = app.clone();
-        let popup_config = config.clone();
-        let popup_tauri_config = tauri_config.clone();
-        window_builder = window_builder.on_new_window(move |target_url, features| {
-            match open_requested_window(
-                &app_handle,
-                &popup_config,
-                &popup_tauri_config,
-                target_url,
-                features,
-            ) {
-                Ok(window) => NewWindowResponse::Create { window },
-                Err(error) => {
-                    eprintln!("[Pake] Failed to open requested window: {error}");
-                    NewWindowResponse::Deny
-                }
-            }
-        });
+        #[cfg(target_os = "macos")]
+        {
+            window_builder =
+                window_builder.on_new_window(|_target_url, _features| NewWindowResponse::Allow);
+        }
+
+        #[cfg(not(target_os = "macos"))]
+        {
+            let app_handle = app.clone();
+            let popup_config = config.clone();
+            let popup_tauri_config = tauri_config.clone();
+            window_builder =
+                window_builder.on_new_window(
+                    move |target_url, features| match open_requested_window(
+                        &app_handle,
+                        &popup_config,
+                        &popup_tauri_config,
+                        target_url,
+                        features,
+                    ) {
+                        Ok(window) => NewWindowResponse::Create { window },
+                        Err(error) => {
+                            eprintln!("[Pake] Failed to open requested window: {error}");
+                            NewWindowResponse::Deny
+                        }
+                    },
+                );
+        }
     }
 
     // Add initialization scripts
