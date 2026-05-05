@@ -103,7 +103,7 @@ pub fn run_app() {
             }
             // --- Menu Construction End ---
 
-            let window = set_window(app.app_handle(), &pake_config, &tauri_config);
+            let window = set_window(app.app_handle(), &pake_config, &tauri_config)?;
             set_system_tray(
                 app.app_handle(),
                 show_system_tray,
@@ -174,7 +174,10 @@ pub fn run_app() {
             }
         })
         .build(tauri::generate_context!())
-        .expect("error while building tauri application")
+        .unwrap_or_else(|error| {
+            eprintln!("[Pake] Fatal error while building Tauri application: {error}");
+            std::process::exit(1);
+        })
         .run(|_app, _event| {
             // Handle macOS dock icon click to reopen hidden window
             #[cfg(target_os = "macos")]

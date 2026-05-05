@@ -119,49 +119,54 @@ pub fn set_global_shortcut(
     let app_handle = app.clone();
     let shortcut_hotkey = match Shortcut::from_str(&shortcut) {
         Ok(s) => s,
-        Err(_) => return Ok(()),
+        Err(error) => {
+            eprintln!("[Pake] Invalid activation shortcut '{shortcut}': {error}");
+            return Ok(());
+        }
     };
     let last_triggered = Arc::new(Mutex::new(Instant::now()));
 
-    app_handle
-        .plugin(
-            tauri_plugin_global_shortcut::Builder::new()
-                .with_handler({
-                    let last_triggered = Arc::clone(&last_triggered);
-                    move |app, event, _shortcut| {
-                        let Ok(mut last_triggered) = last_triggered.lock() else {
-                            return;
-                        };
-                        if Instant::now().duration_since(*last_triggered)
-                            < Duration::from_millis(300)
-                        {
-                            return;
-                        }
-                        *last_triggered = Instant::now();
+    if let Err(error) = app_handle.plugin(
+        tauri_plugin_global_shortcut::Builder::new()
+            .with_handler({
+                let last_triggered = Arc::clone(&last_triggered);
+                move |app, event, _shortcut| {
+                    let Ok(mut last_triggered) = last_triggered.lock() else {
+                        return;
+                    };
+                    if Instant::now().duration_since(*last_triggered) < Duration::from_millis(300) {
+                        return;
+                    }
+                    *last_triggered = Instant::now();
 
-                        if shortcut_hotkey.eq(event) {
-                            if let Some(window) = app.get_webview_window("pake") {
-                                let is_visible = window.is_visible().unwrap_or(false);
-                                if is_visible {
-                                    let _ = window.hide();
-                                } else {
-                                    let _ = window.show();
-                                    let _ = window.set_focus();
-                                    #[cfg(target_os = "linux")]
-                                    if _init_fullscreen && !window.is_fullscreen().unwrap_or(false)
-                                    {
-                                        let _ = window.set_fullscreen(true);
-                                    }
+                    if shortcut_hotkey.eq(event) {
+                        if let Some(window) = app.get_webview_window("pake") {
+                            let is_visible = window.is_visible().unwrap_or(false);
+                            if is_visible {
+                                let _ = window.hide();
+                            } else {
+                                let _ = window.show();
+                                let _ = window.set_focus();
+                                #[cfg(target_os = "linux")]
+                                if _init_fullscreen && !window.is_fullscreen().unwrap_or(false) {
+                                    let _ = window.set_fullscreen(true);
                                 }
                             }
                         }
                     }
-                })
-                .build(),
-        )
-        .expect("Failed to set global shortcut");
+                }
+            })
+            .build(),
+    ) {
+        eprintln!(
+            "[Pake] Failed to register global shortcut plugin '{shortcut}': {error}; continuing without it."
+        );
+        return Ok(());
+    }
 
-    let _ = app.global_shortcut().register(shortcut_hotkey);
+    if let Err(error) = app.global_shortcut().register(shortcut_hotkey) {
+        eprintln!("[Pake] Failed to bind global shortcut '{shortcut}': {error}");
+    }
 
     Ok(())
 }
