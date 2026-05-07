@@ -21,12 +21,14 @@
 *.sw?
 *.tmp
 # Local AI assistant docs
-AGENTS.override.md
+CLAUDE.md
 CLAUDE.local.md
+AGENTS.md
+AGENTS.override.md
+.claude/
 .agents/settings.local.json
 # Editor directories and files
 # Logs
-.claude/settings.local.json
 AGENT.md
 dist
 dist-ssr
