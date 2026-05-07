@@ -13,8 +13,8 @@ const WINDOW_SHOW_DELAY: u64 = 50;
 
 use app::{
     invoke::{
-        clear_cache_and_restart, download_file, download_file_by_binary, send_notification,
-        update_theme_mode,
+        clear_cache_and_restart, clear_dock_badge, download_file, download_file_by_binary,
+        send_notification, set_dock_badge, set_dock_badge_label, update_theme_mode,
     },
     setup::{set_global_shortcut, set_system_tray},
     window::{open_additional_window_safe, set_window, MultiWindowState},
@@ -81,6 +81,9 @@ pub fn run_app() {
             download_file,
             download_file_by_binary,
             send_notification,
+            set_dock_badge,
+            set_dock_badge_label,
+            clear_dock_badge,
             update_theme_mode,
             clear_cache_and_restart,
         ])
