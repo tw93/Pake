@@ -6,9 +6,11 @@ use tauri::menu::{AboutMetadata, Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::{AppHandle, Manager, Wry};
 use tauri_plugin_opener::OpenerExt;
 
-pub fn get_menu(app: &AppHandle<Wry>, allow_multi_window: bool) -> tauri::Result<Menu<Wry>> {
+pub fn set_app_menu(app: &AppHandle<Wry>, allow_multi_window: bool) -> tauri::Result<()> {
     let pake_version = env!("CARGO_PKG_VERSION");
     let pake_menu_item_title = format!("Built with Pake V{}", pake_version);
+
+    let window_submenu = window_menu(app)?;
 
     let menu = Menu::with_items(
         app,
@@ -18,12 +20,18 @@ pub fn get_menu(app: &AppHandle<Wry>, allow_multi_window: bool) -> tauri::Result
             &edit_menu(app)?,
             &view_menu(app)?,
             &navigation_menu(app)?,
-            &window_menu(app)?,
+            &window_submenu,
             &help_menu(app, &pake_menu_item_title)?,
         ],
     )?;
 
-    Ok(menu)
+    app.set_menu(menu)?;
+
+    // AppKit injects Move & Resize, Fill, Center, Full Screen Tile, and
+    // window-cycling once the submenu is registered as the windows menu.
+    window_submenu.set_as_windows_menu_for_nsapp()?;
+
+    Ok(())
 }
 
 fn app_menu(app: &AppHandle<Wry>) -> tauri::Result<Submenu<Wry>> {

@@ -93,8 +93,7 @@ pub fn run_app() {
             // --- Menu Construction Start ---
             #[cfg(target_os = "macos")]
             {
-                let menu = app::menu::get_menu(app.app_handle(), multi_window)?;
-                app.set_menu(menu)?;
+                app::menu::set_app_menu(app.app_handle(), multi_window)?;
 
                 // Event Handling for Custom Menu Item
                 app.on_menu_event(move |app_handle, event| {
