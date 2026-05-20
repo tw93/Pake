@@ -6,9 +6,8 @@ import os
 
 try:
     from PIL import Image
-except ImportError:
-    os.system("pip install Pillow")
-    from PIL import Image
+except ImportError as e:
+    raise SystemExit("Pillow is required. Install it with: pip install Pillow") from e
 
 if __name__ == "__main__":
     now_dir = os.path.dirname(os.path.abspath(__file__))
@@ -24,7 +23,7 @@ if __name__ == "__main__":
         image_512 = image.copy().resize((512, 512))
         image_256 = image.copy().resize((256, 256))
         image_32 = image.copy().resize((32, 32))
-        image_name = os.path.splitext(file)[0]
+        image_name = os.path.basename(os.path.splitext(file)[0])
         image_512_path = os.path.join(png_dir, image_name + "_512.png")
         image_256_path = os.path.join(png_dir, image_name + "_256.ico")
         image_32_path = os.path.join(png_dir, image_name + "_32.ico")
