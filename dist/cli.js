@@ -20,7 +20,7 @@ import { InvalidArgumentError, program as program$1, Option } from 'commander';
 import fs$1 from 'fs';
 
 var name = "pake-cli";
-var version = "3.11.6";
+var version = "3.11.7";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -807,6 +807,24 @@ function getBuildTimeout() {
     return 900000;
 }
 let packageManagerCache = null;
+function parseMajorVersion(version) {
+    const match = version.match(/^(\d+)/);
+    return match ? Number(match[1]) : null;
+}
+function getPinnedPnpmMajorVersion() {
+    const packageManager = packageJson.packageManager;
+    const match = packageManager?.match(/^pnpm@(\d+)/);
+    return match ? Number(match[1]) : null;
+}
+async function detectNpm(execa) {
+    try {
+        await execa('npm', ['--version'], { stdio: 'ignore' });
+        return true;
+    }
+    catch {
+        return false;
+    }
+}
 /**
  * Returns 'pnpm' when available, otherwise 'npm'. Throws if neither is found.
  * Cached after the first successful detection so tests can call repeatedly.
@@ -817,21 +835,28 @@ async function detectPackageManager() {
     }
     const { execa } = await import('execa');
     try {
-        await execa('pnpm', ['--version'], { stdio: 'ignore' });
+        const { stdout } = await execa('pnpm', ['--version']);
+        const pnpmMajor = parseMajorVersion(stdout.trim());
+        const pinnedPnpmMajor = getPinnedPnpmMajorVersion();
+        if (pnpmMajor !== null &&
+            pinnedPnpmMajor !== null &&
+            pnpmMajor !== pinnedPnpmMajor &&
+            (await detectNpm(execa))) {
+            logger.warn(`✼ Detected pnpm v${stdout.trim()}, but Pake is pinned to ${packageJson.packageManager}; using npm for package installation instead.`);
+            packageManagerCache = 'npm';
+            return 'npm';
+        }
         logger.info('✺ Using pnpm for package management.');
         packageManagerCache = 'pnpm';
         return 'pnpm';
     }
     catch {
-        try {
-            await execa('npm', ['--version'], { stdio: 'ignore' });
+        if (await detectNpm(execa)) {
             logger.info('✺ pnpm not available, using npm for package management.');
             packageManagerCache = 'npm';
             return 'npm';
         }
-        catch {
-            throw new Error('Neither pnpm nor npm is available. Please install a package manager.');
-        }
+        throw new Error('Neither pnpm nor npm is available. Please install a package manager.');
     }
 }
 function getInstallCommand(packageManager, useCnMirror) {

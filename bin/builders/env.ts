@@ -5,6 +5,7 @@ import { CN_MIRROR_ENV } from '@/utils/mirror';
 import { IS_MAC } from '@/utils/platform';
 import { npmDirectory } from '@/utils/dir';
 import logger from '@/options/logger';
+import packageJson from '../../package.json';
 
 /**
  * Returns build environment variables overrides for macOS, where Rust crates
@@ -43,6 +44,28 @@ export function getBuildTimeout(): number {
 
 let packageManagerCache: 'pnpm' | 'npm' | null = null;
 
+function parseMajorVersion(version: string): number | null {
+  const match = version.match(/^(\d+)/);
+  return match ? Number(match[1]) : null;
+}
+
+function getPinnedPnpmMajorVersion(): number | null {
+  const packageManager = packageJson.packageManager;
+  const match = packageManager?.match(/^pnpm@(\d+)/);
+  return match ? Number(match[1]) : null;
+}
+
+async function detectNpm(
+  execa: typeof import('execa').execa,
+): Promise<boolean> {
+  try {
+    await execa('npm', ['--version'], { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Resets the cached package manager. Exported for tests. */
 export function _resetPackageManagerCache(): void {
   packageManagerCache = null;
@@ -59,21 +82,36 @@ export async function detectPackageManager(): Promise<'pnpm' | 'npm'> {
 
   const { execa } = await import('execa');
   try {
-    await execa('pnpm', ['--version'], { stdio: 'ignore' });
+    const { stdout } = await execa('pnpm', ['--version']);
+    const pnpmMajor = parseMajorVersion(stdout.trim());
+    const pinnedPnpmMajor = getPinnedPnpmMajorVersion();
+
+    if (
+      pnpmMajor !== null &&
+      pinnedPnpmMajor !== null &&
+      pnpmMajor !== pinnedPnpmMajor &&
+      (await detectNpm(execa))
+    ) {
+      logger.warn(
+        `✼ Detected pnpm v${stdout.trim()}, but Pake is pinned to ${packageJson.packageManager}; using npm for package installation instead.`,
+      );
+      packageManagerCache = 'npm';
+      return 'npm';
+    }
+
     logger.info('✺ Using pnpm for package management.');
     packageManagerCache = 'pnpm';
     return 'pnpm';
   } catch {
-    try {
-      await execa('npm', ['--version'], { stdio: 'ignore' });
+    if (await detectNpm(execa)) {
       logger.info('✺ pnpm not available, using npm for package management.');
       packageManagerCache = 'npm';
       return 'npm';
-    } catch {
-      throw new Error(
-        'Neither pnpm nor npm is available. Please install a package manager.',
-      );
     }
+
+    throw new Error(
+      'Neither pnpm nor npm is available. Please install a package manager.',
+    );
   }
 }
 

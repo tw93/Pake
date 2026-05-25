@@ -3,6 +3,12 @@ import path from 'path';
 import fsExtra from 'fs-extra';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+const execaMock = vi.hoisted(() => vi.fn());
+
+vi.mock('execa', () => ({
+  execa: execaMock,
+}));
+
 vi.mock('@/utils/dir', () => ({
   npmDirectory: process.cwd(),
   tauriConfigDirectory: path.join(process.cwd(), 'src-tauri', '.pake'),
@@ -10,7 +16,9 @@ vi.mock('@/utils/dir', () => ({
 
 import BaseBuilder from '@/builders/BaseBuilder';
 import {
+  _resetPackageManagerCache,
   configureCargoRegistry,
+  detectPackageManager,
   getBuildEnvironment,
   getInstallCommand,
 } from '@/builders/env';
@@ -56,9 +64,30 @@ async function createCargoFixture(projectConfig?: string) {
   return { tauriSrcPath, projectConf, projectCnConf };
 }
 
+function mockPackageManagers(options: {
+  pnpm?: string | Error;
+  npm?: string | Error;
+}) {
+  execaMock.mockImplementation(async (command: string) => {
+    const value = options[command as 'pnpm' | 'npm'];
+
+    if (value instanceof Error) {
+      throw value;
+    }
+
+    if (typeof value === 'string') {
+      return { stdout: value };
+    }
+
+    throw new Error(`${command} not found`);
+  });
+}
+
 describe('BaseBuilder guards', () => {
   afterEach(async () => {
     vi.restoreAllMocks();
+    execaMock.mockReset();
+    _resetPackageManagerCache();
 
     if (originalCnMirrorEnv === undefined) {
       delete process.env[CN_MIRROR_ENV];
@@ -136,6 +165,57 @@ describe('BaseBuilder guards', () => {
     expect(command).toContain(
       'npm install --registry=https://registry.npmmirror.com --legacy-peer-deps',
     );
+  });
+
+  it('uses pnpm when the installed major matches the pinned package manager', async () => {
+    mockPackageManagers({ pnpm: '10.26.2', npm: '11.12.1' });
+
+    await expect(detectPackageManager()).resolves.toBe('pnpm');
+    expect(execaMock).toHaveBeenCalledTimes(1);
+    expect(execaMock).toHaveBeenCalledWith('pnpm', ['--version']);
+  });
+
+  it('falls back to npm when the installed pnpm major does not match the pinned major', async () => {
+    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+    mockPackageManagers({ pnpm: '11.2.2', npm: '11.12.1' });
+
+    await expect(detectPackageManager()).resolves.toBe('npm');
+    expect(execaMock).toHaveBeenCalledWith('pnpm', ['--version']);
+    expect(execaMock).toHaveBeenCalledWith('npm', ['--version'], {
+      stdio: 'ignore',
+    });
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('using npm for package installation instead'),
+    );
+  });
+
+  it('falls back to npm when pnpm is unavailable', async () => {
+    mockPackageManagers({ pnpm: new Error('missing pnpm'), npm: '11.12.1' });
+
+    await expect(detectPackageManager()).resolves.toBe('npm');
+  });
+
+  it('throws when neither pnpm nor npm is available', async () => {
+    mockPackageManagers({
+      pnpm: new Error('missing pnpm'),
+      npm: new Error('missing npm'),
+    });
+
+    await expect(detectPackageManager()).rejects.toThrow(
+      'Neither pnpm nor npm is available',
+    );
+  });
+
+  it('caches the detected package manager until reset', async () => {
+    mockPackageManagers({ pnpm: '10.26.2' });
+
+    await expect(detectPackageManager()).resolves.toBe('pnpm');
+    mockPackageManagers({ pnpm: new Error('missing pnpm'), npm: '11.12.1' });
+    await expect(detectPackageManager()).resolves.toBe('pnpm');
+    expect(execaMock).toHaveBeenCalledTimes(1);
+
+    _resetPackageManagerCache();
+    await expect(detectPackageManager()).resolves.toBe('npm');
   });
 
   it('copies Cargo mirror config only when CN mirror is enabled', async () => {
