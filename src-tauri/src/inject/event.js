@@ -423,37 +423,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   }
 
-  // detect blob download by createElement("a")
-  function detectDownloadByCreateAnchor() {
-    const createEle = document.createElement;
-    document.createElement = (el) => {
-      if (el !== "a") return createEle.call(document, el);
-      const anchorEle = createEle.call(document, el);
-
-      // use addEventListener to avoid overriding the original click event.
-      anchorEle.addEventListener(
-        "click",
-        (e) => {
-          const url = anchorEle.href;
-          const filename = anchorEle.download || getFilenameFromUrl(url);
-          if (window.blobToUrlCaches.has(url)) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            downloadFromBlobUrl(url, filename);
-            // case: download from dataURL -> convert dataURL ->
-          } else if (url.startsWith("data:")) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            downloadFromDataUri(url, filename);
-          }
-        },
-        true,
-      );
-
-      return anchorEle;
-    };
-  }
-
   // process special download protocol['data:','blob:']
   const isSpecialDownload = (url) =>
     ["blob", "data"].some((protocol) => url.startsWith(protocol));
@@ -587,11 +556,16 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Process download links for Rust to handle.
-      if (
-        isDownloadRequired(absoluteUrl, anchorElement, e) &&
-        !isSpecialDownload(absoluteUrl)
-      ) {
+      // Process download links.
+      if (isDownloadRequired(absoluteUrl, anchorElement, e)) {
+        // Let the browser download blob:/data: URLs natively; the Rust
+        // on_download handler saves them to the Downloads folder. Routing them
+        // through the IPC fails on strict-CSP sites (e.g. Gemini), whose
+        // connect-src blocks the IPC origin, and on downloads triggered from a
+        // sandboxed iframe where the IPC can't be reached.
+        if (isSpecialDownload(absoluteUrl)) {
+          return;
+        }
         e.preventDefault();
         e.stopImmediatePropagation();
         const userLanguage = getUserLanguage();
@@ -626,7 +600,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("click", detectAnchorElementClick, true);
 
   collectUrlToBlobs();
-  detectDownloadByCreateAnchor();
 
   // Rewrite the window.open function.
   const originalWindowOpen = window.open;
