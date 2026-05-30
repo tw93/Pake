@@ -1,5 +1,5 @@
 use crate::util::{check_file_or_append, get_download_message_with_lang, show_toast, MessageType};
-use std::fs::{self, File};
+use std::fs::File;
 use std::io::Write;
 use std::str::FromStr;
 use std::sync::atomic::{AtomicI64, Ordering};
@@ -74,13 +74,6 @@ pub struct DownloadFileParams {
 }
 
 #[derive(serde::Deserialize)]
-pub struct BinaryDownloadParams {
-    filename: String,
-    binary: Vec<u8>,
-    language: Option<String>,
-}
-
-#[derive(serde::Deserialize)]
 pub struct NotificationParams {
     title: String,
     body: String,
@@ -131,47 +124,6 @@ pub async fn download_file(app: AppHandle, params: DownloadFileParams) -> Result
                     .map_err(|e| format!("Failed to write chunk: {}", e))?;
             }
 
-            show_toast(
-                &window,
-                &get_download_message_with_lang(MessageType::Success, params.language.clone()),
-            );
-            Ok(())
-        }
-        Err(e) => {
-            show_toast(
-                &window,
-                &get_download_message_with_lang(MessageType::Failure, params.language),
-            );
-            Err(e.to_string())
-        }
-    }
-}
-
-#[command]
-pub async fn download_file_by_binary(
-    app: AppHandle,
-    params: BinaryDownloadParams,
-) -> Result<(), String> {
-    let window: WebviewWindow = app.get_webview_window("pake").ok_or("Window not found")?;
-
-    show_toast(
-        &window,
-        &get_download_message_with_lang(MessageType::Start, params.language.clone()),
-    );
-
-    let download_dir = app
-        .path()
-        .download_dir()
-        .map_err(|e| format!("Failed to get download dir: {}", e))?;
-
-    let output_path = download_dir.join(&params.filename);
-
-    let path_str = output_path.to_str().ok_or("Invalid output path")?;
-
-    let file_path = check_file_or_append(path_str);
-
-    match fs::write(file_path, &params.binary) {
-        Ok(_) => {
             show_toast(
                 &window,
                 &get_download_message_with_lang(MessageType::Success, params.language.clone()),
