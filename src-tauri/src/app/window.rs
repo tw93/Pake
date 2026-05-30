@@ -1,12 +1,14 @@
 use crate::app::config::PakeConfig;
-use crate::util::get_data_dir;
+use crate::util::{
+    check_file_or_append, get_data_dir, get_download_message_with_lang, show_toast, MessageType,
+};
 use std::{
     path::PathBuf,
     str::FromStr,
     sync::atomic::{AtomicU32, Ordering},
 };
 use tauri::{
-    webview::{NewWindowFeatures, NewWindowResponse},
+    webview::{DownloadEvent, NewWindowFeatures, NewWindowResponse},
     AppHandle, Config, Manager, Url, WebviewUrl, WebviewWindow, WebviewWindowBuilder,
 };
 
@@ -424,6 +426,61 @@ fn build_window(
         {
             window_builder = window_builder.window_features(features).focused(true);
         }
+    }
+
+    // Capture webview-initiated downloads (blob:, data:, Content-Disposition,
+    // etc.) and write them to the OS Downloads folder. This is essential for
+    // sites with a strict Content-Security-Policy (e.g. Gemini): their
+    // `connect-src` blocks Tauri's IPC origin, so downloads cannot be routed
+    // through the JS bridge, and downloads triggered from a sandboxed iframe
+    // can't reach the IPC either. Letting the browser download natively and
+    // catching it here is independent of the page CSP and the IPC channel.
+    {
+        let download_handle = app.clone();
+        window_builder = window_builder.on_download(move |_webview, event| match event {
+            DownloadEvent::Requested { url, destination } => {
+                match download_handle.path().download_dir() {
+                    Ok(download_dir) => {
+                        let filename = destination
+                            .file_name()
+                            .map(|name| name.to_string_lossy().to_string())
+                            .filter(|name| !name.is_empty())
+                            .or_else(|| {
+                                url.path_segments()
+                                    .and_then(|mut segments| segments.next_back())
+                                    .map(|segment| segment.to_string())
+                                    .filter(|segment| !segment.is_empty())
+                            })
+                            .unwrap_or_else(|| "download".to_string());
+
+                        let target = download_dir.join(filename);
+                        if let Some(path_str) = target.to_str() {
+                            *destination = PathBuf::from(check_file_or_append(path_str));
+                        }
+                    }
+                    Err(error) => {
+                        eprintln!("[Pake] Failed to resolve download dir: {error}");
+                    }
+                }
+                true
+            }
+            DownloadEvent::Finished {
+                url: _,
+                path: _,
+                success,
+            } => {
+                if let Some(window) = download_handle.get_webview_window("pake") {
+                    let message_type = if success {
+                        MessageType::Success
+                    } else {
+                        MessageType::Failure
+                    };
+                    show_toast(&window, &get_download_message_with_lang(message_type, None));
+                }
+                true
+            }
+            _ => true,
+        });
     }
 
     window_builder = window_builder.on_navigation(|_| true);
