@@ -13,11 +13,12 @@ const WINDOW_SHOW_DELAY: u64 = 50;
 
 use app::{
     invoke::{
-        clear_cache_and_restart, clear_dock_badge, download_file, increment_dock_badge,
-        send_notification, set_dock_badge, set_dock_badge_label, update_theme_mode,
+        clear_cache_and_restart, clear_dock_badge, close_splashscreen, download_file,
+        increment_dock_badge, send_notification, set_dock_badge, set_dock_badge_label,
+        update_theme_mode,
     },
     setup::{set_global_shortcut, set_system_tray},
-    window::{open_additional_window_safe, set_window, MultiWindowState},
+    window::{build_splash_window, open_additional_window_safe, set_window, MultiWindowState},
 };
 use util::get_pake_config;
 
@@ -43,6 +44,8 @@ pub fn run_app() {
     let multi_instance = pake_config.multi_instance;
     let multi_window = pake_config.multi_window;
     let _enable_find = pake_config.windows[0].enable_find;
+    let has_splash = !pake_config.windows[0].splash.is_empty();
+    let splash_asset = pake_config.windows[0].splash.clone();
 
     let window_state_plugin = WindowStatePlugin::default()
         .with_state_flags(if init_fullscreen {
@@ -87,6 +90,7 @@ pub fn run_app() {
             clear_dock_badge,
             update_theme_mode,
             clear_cache_and_restart,
+            close_splashscreen,
         ])
         .setup(move |app| {
             app.manage(MultiWindowState::new(
@@ -106,6 +110,25 @@ pub fn run_app() {
             }
             // --- Menu Construction End ---
 
+            // Create splash window if configured
+            if has_splash {
+                let _splash = build_splash_window(app.app_handle(), &splash_asset)?;
+                let _ = _splash.show();
+
+                // 10-second splash timeout: if main window hasn't signaled ready, show it anyway
+                let app_handle = app.app_handle().clone();
+                tauri::async_runtime::spawn(async move {
+                    tokio::time::sleep(tokio::time::Duration::from_millis(10000)).await;
+                    if let Some(splash) = app_handle.get_webview_window("splash") {
+                        let _ = splash.destroy();
+                    }
+                    if let Some(main) = app_handle.get_webview_window("pake") {
+                        let _ = main.show();
+                        let _ = main.set_focus();
+                    }
+                });
+            }
+
             let window = set_window(app.app_handle(), &pake_config, &tauri_config)?;
             set_system_tray(
                 app.app_handle(),
@@ -117,8 +140,8 @@ pub fn run_app() {
             set_global_shortcut(app.app_handle(), activation_shortcut, init_fullscreen)?;
 
             // Show window after state restoration to prevent position flashing
-            // Unless start_to_tray is enabled, then keep it hidden
-            if !start_to_tray {
+            // Unless start_to_tray is enabled or splash is configured (splash handles showing)
+            if !start_to_tray && !has_splash {
                 let window_clone = window.clone();
                 tauri::async_runtime::spawn(async move {
                     tokio::time::sleep(tokio::time::Duration::from_millis(WINDOW_SHOW_DELAY)).await;

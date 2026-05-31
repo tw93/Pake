@@ -137,6 +137,15 @@ export interface PakeCliOptions {
 
   // Request microphone entitlement on macOS, default false
   microphone: boolean;
+
+  // Path or URL to splash screen image
+  splash: string;
+
+  // Auto-fetch og:image from target URL for splash
+  autoSplash: boolean;
+
+  // Enable offline fallback page
+  offline: boolean;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {
@@ -176,6 +185,9 @@ export interface WindowConfig {
   min_height: number;
   ignore_certificate_errors: boolean;
   new_window: boolean;
+  splash: string;
+  auto_splash: boolean;
+  offline: boolean;
 }
 
 export interface PakeConfig {

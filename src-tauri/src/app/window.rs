@@ -60,6 +60,30 @@ pub fn set_window(
     build_window_with_label(app, config, tauri_config, "pake")
 }
 
+pub fn build_splash_window(
+    app: &AppHandle,
+    splash_asset: &str,
+) -> tauri::Result<WebviewWindow> {
+    let url = WebviewUrl::App(PathBuf::from("splash.html"));
+
+    let mut window_builder = WebviewWindowBuilder::new(app, "splash", url)
+        .title("")
+        .visible(false)
+        .inner_size(400.0, 400.0)
+        .resizable(false)
+        .decorations(false)
+        .transparent(true)
+        .skip_taskbar(true);
+
+    #[cfg(target_os = "macos")]
+    {
+        use tauri::TitleBarStyle;
+        window_builder = window_builder.title_bar_style(TitleBarStyle::Overlay);
+    }
+
+    window_builder.build()
+}
+
 pub fn open_additional_window(app: &AppHandle) -> tauri::Result<WebviewWindow> {
     let state = app.state::<MultiWindowState>();
     let label = state.next_window_label();
@@ -297,6 +321,18 @@ fn build_window(
         .initialization_script(include_str!("../inject/theme_refresh.js"))
         .initialization_script(include_str!("../inject/auth.js"))
         .initialization_script(include_str!("../inject/custom.js"));
+
+    // Conditionally inject offline detection script
+    if window_config.offline {
+        window_builder =
+            window_builder.initialization_script(include_str!("../inject/offline.js"));
+    }
+
+    // Inject splash transition script if splash is configured
+    if !window_config.splash.is_empty() {
+        window_builder =
+            window_builder.initialization_script(include_str!("../inject/splash-transition.js"));
+    }
 
     #[cfg(target_os = "windows")]
     let mut windows_browser_args = String::from("--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-blink-features=AutomationControlled");

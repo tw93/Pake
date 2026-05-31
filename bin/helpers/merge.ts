@@ -4,6 +4,11 @@ import fsExtra from 'fs-extra';
 import combineFiles from '@/utils/combine';
 import logger from '@/options/logger';
 import {
+  generateSplashHtml,
+  generateOfflineHtml,
+  processSplashAsset,
+} from '@/utils/splash';
+import {
   generateSafeFilename,
   generateIdentifierSafeName,
   getSafeAppName,
@@ -438,6 +443,9 @@ export async function mergeConfig(
     wasm,
     camera,
     microphone,
+    splash,
+    autoSplash,
+    offline,
   } = options;
 
   const platform = asSupportedPlatform(process.platform);
@@ -493,6 +501,33 @@ export async function mergeConfig(
   await mergeIcons(options, name, tauriConf, platform, safeAppName);
 
   await injectCustomCode(options, tauriConf);
+
+  // Process splash screen
+  if (splash || autoSplash) {
+    const distDir = path.join(npmDirectory, 'dist');
+    await fsExtra.ensureDir(distDir);
+    const resolvedIcon = options.icon ? path.resolve(options.icon) : '';
+    const { assetFilename, assetPath } = await processSplashAsset(
+      splash,
+      autoSplash,
+      url,
+      resolvedIcon,
+    );
+    const splashHtml = generateSplashHtml(assetPath, resolvedIcon);
+    await fsExtra.writeFile(path.join(distDir, 'splash.html'), splashHtml);
+    tauriConf.pake.windows[0].splash = assetFilename;
+    logger.info('✼ Splash screen configured.');
+  }
+
+  // Process offline page
+  if (offline) {
+    const distDir = path.join(npmDirectory, 'dist');
+    await fsExtra.ensureDir(distDir);
+    const offlineHtml = generateOfflineHtml();
+    await fsExtra.writeFile(path.join(distDir, 'offline.html'), offlineHtml);
+    tauriConf.pake.windows[0].offline = true;
+    logger.info('✼ Offline page configured.');
+  }
 
   if (platform === 'darwin') {
     await generateMacEntitlements(camera, microphone);
