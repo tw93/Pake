@@ -220,3 +220,23 @@ pub fn clear_cache_and_restart(app: AppHandle) -> Result<(), String> {
         Err("Main window not found".to_string())
     }
 }
+
+#[command]
+pub async fn close_splashscreen(app: AppHandle) -> Result<(), String> {
+    if let Some(splash) = app.get_webview_window("splash") {
+        let _ = splash.eval("document.body.classList.add('fade-out')");
+        tokio::time::sleep(tokio::time::Duration::from_millis(300)).await;
+        if let Err(e) = splash.destroy() {
+            eprintln!("[Pake] Failed to destroy splash window: {}", e);
+        }
+    }
+    if let Some(main) = app.get_webview_window("pake") {
+        if let Err(e) = main.show() {
+            eprintln!("[Pake] Failed to show main window: {}", e);
+        }
+        if let Err(e) = main.set_focus() {
+            eprintln!("[Pake] Failed to focus main window: {}", e);
+        }
+    }
+    Ok(())
+}

@@ -60,6 +60,47 @@ pub fn set_window(
     build_window_with_label(app, config, tauri_config, "pake")
 }
 
+pub fn build_splash_window(
+    app: &AppHandle,
+    _splash_asset: &str,
+) -> tauri::Result<WebviewWindow> {
+    let url = WebviewUrl::App(PathBuf::from("splash.html"));
+    let splash_width = 800.0;
+    let splash_height = 500.0;
+
+    // Calculate centered position on primary monitor
+    let (pos_x, pos_y) = if let Some(monitor) = app.primary_monitor().ok().flatten() {
+        let monitor_size = monitor.size();
+        let scale = monitor.scale_factor();
+        let mon_w = monitor_size.width as f64 / scale;
+        let mon_h = monitor_size.height as f64 / scale;
+        let monitor_pos = monitor.position();
+        let x = monitor_pos.x as f64 / scale + (mon_w - splash_width) / 2.0;
+        let y = monitor_pos.y as f64 / scale + (mon_h - splash_height) / 2.0;
+        (x, y)
+    } else {
+        // Fallback: rough center assuming 1920x1080
+        ((1920.0 - splash_width) / 2.0, (1080.0 - splash_height) / 2.0)
+    };
+
+    let window_builder = WebviewWindowBuilder::new(app, "splash", url)
+        .title("")
+        .visible(false)
+        .inner_size(splash_width, splash_height)
+        .position(pos_x, pos_y)
+        .resizable(false)
+        .decorations(false)
+        .skip_taskbar(true);
+
+    #[cfg(target_os = "macos")]
+    {
+        use tauri::TitleBarStyle;
+        window_builder = window_builder.title_bar_style(TitleBarStyle::Overlay);
+    }
+
+    window_builder.build()
+}
+
 pub fn open_additional_window(app: &AppHandle) -> tauri::Result<WebviewWindow> {
     let state = app.state::<MultiWindowState>();
     let label = state.next_window_label();
@@ -297,6 +338,18 @@ fn build_window(
         .initialization_script(include_str!("../inject/theme_refresh.js"))
         .initialization_script(include_str!("../inject/auth.js"))
         .initialization_script(include_str!("../inject/custom.js"));
+
+    // Conditionally inject offline detection script
+    if window_config.offline {
+        window_builder =
+            window_builder.initialization_script(include_str!("../inject/offline.js"));
+    }
+
+    // Inject splash transition script if splash is configured
+    if !window_config.splash.is_empty() {
+        window_builder =
+            window_builder.initialization_script(include_str!("../inject/splash-transition.js"));
+    }
 
     #[cfg(target_os = "windows")]
     let mut windows_browser_args = String::from("--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-blink-features=AutomationControlled");
