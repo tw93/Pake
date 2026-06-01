@@ -18,25 +18,37 @@ export function generateSplashHtml(assetPath: string, iconPath: string, isIconFa
       height: 100vh; background: #1a1a1a;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
       animation: fadeIn 0.3s ease-in;
+      overflow: hidden;
     }
     .icon-box {
       display: flex; justify-content: center; align-items: center;
       width: 200px; height: 200px; border-radius: 16px;
       background: #2C2C2E;
       box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      user-select: none; -webkit-user-select: none;
+      -webkit-user-drag: none;
     }
     .icon-box img {
       max-width: 120px; max-height: 120px; object-fit: contain;
       border-radius: 12px;
+      user-select: none; -webkit-user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
+    }
+    .loading-text {
+      position: fixed; bottom: 24px; left: 24px;
+      font-size: 13px; color: #636366; letter-spacing: 0.5px;
     }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+    @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
   </style>
 </head>
-<body>
+<body oncontextmenu="return false">
   <div class="icon-box">
-    <img src="${assetPath}" alt="Loading...">
+    <img src="${assetPath}" alt="" draggable="false">
   </div>
+  <div class="loading-text">Chargement\u2026</div>
 </body>
 </html>`;
   }
@@ -57,13 +69,21 @@ export function generateSplashHtml(assetPath: string, iconPath: string, isIconFa
     img {
       width: 100%; height: 100%; object-fit: cover;
       border-radius: 16px;
+      user-select: none; -webkit-user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
+    }
+    .loading-text {
+      position: fixed; bottom: 24px; left: 24px;
+      font-size: 13px; color: #636366; letter-spacing: 0.5px;
     }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
   </style>
 </head>
-<body>
-  <img src="${assetPath}" alt="Loading..." onerror="this.src='${iconPath}'">
+<body oncontextmenu="return false">
+  <img src="${assetPath}" alt="" draggable="false">
+  <div class="loading-text">Chargement\u2026</div>
 </body>
 </html>`;
 }

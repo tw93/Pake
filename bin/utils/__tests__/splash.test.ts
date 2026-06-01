@@ -13,7 +13,6 @@ describe('generateSplashHtml', () => {
     const html = generateSplashHtml('logo.png', 'icon.png');
     expect(html).toContain('<!DOCTYPE html>');
     expect(html).toContain('logo.png');
-    expect(html).toContain('icon.png');
     expect(html).toContain('display: flex');
     expect(html).toContain('justify-content: center');
   });
