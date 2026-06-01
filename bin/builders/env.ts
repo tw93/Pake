@@ -45,7 +45,7 @@ export function getBuildTimeout(): number {
 let packageManagerCache: 'pnpm' | 'npm' | null = null;
 
 function parseMajorVersion(version: string): number | null {
-  const match = version.match(/^(\d+)/);
+  const match = version.match(/^v?(\d+)/);
   return match ? Number(match[1]) : null;
 }
 
@@ -81,27 +81,11 @@ export async function detectPackageManager(): Promise<'pnpm' | 'npm'> {
   }
 
   const { execa } = await import('execa');
+  let pnpmVersion: string;
+
   try {
     const { stdout } = await execa('pnpm', ['--version']);
-    const pnpmMajor = parseMajorVersion(stdout.trim());
-    const pinnedPnpmMajor = getPinnedPnpmMajorVersion();
-
-    if (
-      pnpmMajor !== null &&
-      pinnedPnpmMajor !== null &&
-      pnpmMajor !== pinnedPnpmMajor &&
-      (await detectNpm(execa))
-    ) {
-      logger.warn(
-        `✼ Detected pnpm v${stdout.trim()}, but Pake is pinned to ${packageJson.packageManager}; using npm for package installation instead.`,
-      );
-      packageManagerCache = 'npm';
-      return 'npm';
-    }
-
-    logger.info('✺ Using pnpm for package management.');
-    packageManagerCache = 'pnpm';
-    return 'pnpm';
+    pnpmVersion = stdout.trim();
   } catch {
     if (await detectNpm(execa)) {
       logger.info('✺ pnpm not available, using npm for package management.');
@@ -113,6 +97,34 @@ export async function detectPackageManager(): Promise<'pnpm' | 'npm'> {
       'Neither pnpm nor npm is available. Please install a package manager.',
     );
   }
+
+  const normalizedPnpmVersion = pnpmVersion.startsWith('v')
+    ? pnpmVersion
+    : `v${pnpmVersion}`;
+  const pnpmMajor = parseMajorVersion(pnpmVersion);
+  const pinnedPnpmMajor = getPinnedPnpmMajorVersion();
+
+  if (
+    pnpmMajor !== null &&
+    pinnedPnpmMajor !== null &&
+    pnpmMajor !== pinnedPnpmMajor
+  ) {
+    if (!(await detectNpm(execa))) {
+      throw new Error(
+        `Detected pnpm ${normalizedPnpmVersion}, but Pake is pinned to ${packageJson.packageManager}. Install npm so Pake can fall back, or use pnpm ${pinnedPnpmMajor}.x to match the project pin.`,
+      );
+    }
+
+    logger.warn(
+      `✼ Detected pnpm ${normalizedPnpmVersion}, but Pake is pinned to ${packageJson.packageManager}; using npm for package management instead.`,
+    );
+    packageManagerCache = 'npm';
+    return 'npm';
+  }
+
+  logger.info('✺ Using pnpm for package management.');
+  packageManagerCache = 'pnpm';
+  return 'pnpm';
 }
 
 export function getInstallCommand(

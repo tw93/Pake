@@ -185,8 +185,32 @@ describe('BaseBuilder guards', () => {
       stdio: 'ignore',
     });
     expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('using npm for package installation instead'),
+      expect.stringContaining('using npm for package management instead'),
     );
+  });
+
+  it('parses v-prefixed pnpm versions before comparing majors', async () => {
+    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+    mockPackageManagers({ pnpm: 'v11.2.2', npm: '11.12.1' });
+
+    await expect(detectPackageManager()).resolves.toBe('npm');
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Detected pnpm v11.2.2'),
+    );
+  });
+
+  it('throws a clear error when pnpm is incompatible and npm is unavailable', async () => {
+    mockPackageManagers({
+      pnpm: '11.2.2',
+      npm: new Error('missing npm'),
+    });
+
+    await expect(detectPackageManager()).rejects.toThrow(
+      'Detected pnpm v11.2.2, but Pake is pinned to pnpm@10.26.2',
+    );
+    expect(execaMock).toHaveBeenCalledWith('npm', ['--version'], {
+      stdio: 'ignore',
+    });
   });
 
   it('falls back to npm when pnpm is unavailable', async () => {
