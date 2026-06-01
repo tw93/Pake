@@ -23,9 +23,10 @@ describe('generateSplashHtml', () => {
     expect(html).toContain('my logo.png');
   });
 
-  it('includes dark mode media query', () => {
+  it('uses dark background for image mode', () => {
     const html = generateSplashHtml('logo.png', 'icon.png');
-    expect(html).toContain('prefers-color-scheme: dark');
+    expect(html).toContain('background: #1a1a1a');
+    expect(html).toContain('object-fit: cover');
   });
 
   it('includes fade-in animation', () => {

@@ -513,7 +513,8 @@ export async function mergeConfig(
       url,
       resolvedIcon,
     );
-    const splashHtml = generateSplashHtml(assetPath, resolvedIcon);
+    const isIconFallback = assetFilename === 'icon.png';
+    const splashHtml = generateSplashHtml(assetPath, resolvedIcon, isIconFallback);
     await fsExtra.writeFile(path.join(distDir, 'splash.html'), splashHtml);
     tauriConf.pake.windows[0].splash = assetFilename;
     logger.info('✼ Splash screen configured.');

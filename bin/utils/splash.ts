@@ -5,7 +5,42 @@ import { npmDirectory } from '@/utils/dir';
 
 const OG_IMAGE_MAX_SIZE = 500 * 1024; // 500KB
 
-export function generateSplashHtml(assetPath: string, iconPath: string): string {
+export function generateSplashHtml(assetPath: string, iconPath: string, isIconFallback: boolean = false): string {
+  if (isIconFallback) {
+    return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      display: flex; justify-content: center; align-items: center;
+      height: 100vh; background: #1a1a1a;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      animation: fadeIn 0.3s ease-in;
+    }
+    .icon-box {
+      display: flex; justify-content: center; align-items: center;
+      width: 200px; height: 200px; border-radius: 16px;
+      background: #2C2C2E;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+    .icon-box img {
+      max-width: 120px; max-height: 120px; object-fit: contain;
+      border-radius: 12px;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+  </style>
+</head>
+<body>
+  <div class="icon-box">
+    <img src="${assetPath}" alt="Loading...">
+  </div>
+</body>
+</html>`;
+  }
+
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -14,15 +49,14 @@ export function generateSplashHtml(assetPath: string, iconPath: string): string 
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       display: flex; justify-content: center; align-items: center;
-      height: 100vh; background: #FFFFFF;
+      height: 100vh; background: #1a1a1a;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
       animation: fadeIn 0.3s ease-in;
-    }
-    @media (prefers-color-scheme: dark) {
-      body { background: #1a1a1a; }
+      overflow: hidden;
     }
     img {
-      max-width: 300px; max-height: 300px; object-fit: contain;
+      width: 100%; height: 100%; object-fit: cover;
+      border-radius: 16px;
     }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
@@ -93,6 +127,12 @@ export function generateOfflineHtml(): string {
   </div>
   <script>
     let cooldown = false;
+    function getLocalUrl(file) {
+      if (window.location.hostname === 'tauri.localhost' || window.location.protocol === 'tauri:') {
+        return file;
+      }
+      return 'https://tauri.localhost/' + file;
+    }
     function retry() {
       if (cooldown) return;
       cooldown = true;
