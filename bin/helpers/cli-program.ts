@@ -274,6 +274,27 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .default(DEFAULT.microphone)
         .hideHelp(),
     )
+    .addOption(
+      new Option(
+        '--splash <path_or_url>',
+        'Splash screen image (local path or URL)',
+      )
+        .default(DEFAULT.splash)
+        .hideHelp(),
+    )
+    .addOption(
+      new Option(
+        '--auto-splash',
+        'Auto-fetch og:image from target URL for splash',
+      )
+        .default(DEFAULT.autoSplash)
+        .hideHelp(),
+    )
+    .addOption(
+      new Option('--offline', 'Enable offline fallback page')
+        .default(DEFAULT.offline)
+        .hideHelp(),
+    )
     .version(packageJson.version, '-v, --version')
     .configureHelp({
       sortSubcommands: true,
