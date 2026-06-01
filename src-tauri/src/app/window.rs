@@ -347,15 +347,12 @@ fn build_window(
     // Platform-specific configuration must be set before proxy on Windows/Linux
     #[cfg(target_os = "macos")]
     {
-        // When both flags are set, use a fully frameless window so the title bar
-        // area is removed entirely (no safe-area inset pushed down by macOS).
-        // When only hide_title_bar is set, use Overlay (transparent title bar with
-        // traffic lights still rendered over the content).
-        if window_config.hide_title_bar && window_config.hide_window_buttons {
-            window_builder = window_builder.decorations(false);
-        } else if window_config.hide_title_bar {
-            window_builder = window_builder.title_bar_style(TitleBarStyle::Overlay);
-        }
+        let title_bar_style = if window_config.hide_title_bar {
+            TitleBarStyle::Overlay
+        } else {
+            TitleBarStyle::Visible
+        };
+        window_builder = window_builder.title_bar_style(title_bar_style);
 
         // Default to following system theme (None), only force dark when explicitly set
         let theme = if window_config.dark_mode {
@@ -492,14 +489,18 @@ fn build_window(
 
     #[cfg(target_os = "macos")]
     if window_config.hide_window_buttons {
-        use objc2_app_kit::{NSWindow, NSWindowButton};
+        use objc2_app_kit::{NSWindow, NSWindowButton, NSWindowStyleMask};
 
         if let Ok(ns_win_ptr) = window.ns_window() {
             let ns_win = unsafe { &*(ns_win_ptr as *const NSWindow) };
             if window_config.hide_title_bar {
-                // decorations(false) already removed the buttons; restore the drop shadow
-                // that borderless windows lose by default.
-                ns_win.setHasShadow(true);
+                // Remove the Titled bit from the style mask. This surgically strips the
+                // title bar area (and its traffic-light buttons) from the window without
+                // going fully borderless, so shadow and resizability are preserved.
+                // It also eliminates the safe-area inset macOS would otherwise inject
+                // into WKWebView when a title bar is present.
+                let mask = ns_win.styleMask();
+                ns_win.setStyleMask(mask & !NSWindowStyleMask::Titled);
             } else {
                 for button_type in [
                     NSWindowButton::CloseButton,
