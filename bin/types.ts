@@ -137,6 +137,9 @@ export interface PakeCliOptions {
 
   // Request microphone entitlement on macOS, default false
   microphone: boolean;
+
+  // For Mac, hide window traffic light buttons (close/minimize/maximize), default false
+  hideWindowButtons: boolean;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {
@@ -176,6 +179,7 @@ export interface WindowConfig {
   min_height: number;
   ignore_certificate_errors: boolean;
   new_window: boolean;
+  hide_window_buttons: boolean;
 }
 
 export interface PakeConfig {

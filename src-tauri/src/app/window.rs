@@ -485,7 +485,27 @@ fn build_window(
 
     window_builder = window_builder.on_navigation(|_| true);
 
-    window_builder.build()
+    let window = window_builder.build()?;
+
+    #[cfg(target_os = "macos")]
+    if window_config.hide_window_buttons {
+        use objc2_app_kit::{NSWindow, NSWindowButton};
+
+        if let Ok(ns_win_ptr) = window.ns_window() {
+            let ns_win = unsafe { &*(ns_win_ptr as *const NSWindow) };
+            for button_type in [
+                NSWindowButton::CloseButton,
+                NSWindowButton::MiniaturizeButton,
+                NSWindowButton::ZoomButton,
+            ] {
+                if let Some(button) = ns_win.standardWindowButton(button_type) {
+                    button.setHidden(true);
+                }
+            }
+        }
+    }
+
+    Ok(window)
 }
 
 #[cfg(all(test, target_os = "windows"))]
