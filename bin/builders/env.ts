@@ -214,6 +214,14 @@ export function isLinuxDeployStripError(error: unknown): boolean {
     return false;
   }
   const message = error.message.toLowerCase();
+  // A gtk-plugin / gdk-pixbuf failure also mentions linuxdeploy but is not a
+  // strip issue, so a NO_STRIP retry won't help. Don't treat it as one.
+  if (
+    message.includes('gdk-pixbuf') ||
+    message.includes('failed to run plugin: gtk')
+  ) {
+    return false;
+  }
   return (
     message.includes('linuxdeploy') ||
     message.includes('failed to run linuxdeploy') ||
