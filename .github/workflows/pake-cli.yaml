@@ -189,12 +189,12 @@ jobs:
           retention-days: 3
           if-no-files-found: ignore
 
-      - name: Upload MSI (Windows)
+      - name: Upload EXE (Windows)
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v6
         with:
           name: ${{ inputs.name }}-Windows
-          path: ${{ inputs.name }}.msi
+          path: ${{ inputs.name }}.exe
           retention-days: 3
 
       - name: Rust cache store
