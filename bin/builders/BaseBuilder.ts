@@ -25,7 +25,29 @@ import {
   getInstallCommand,
   getInstallTimeout,
 } from './env';
-import { appendAppImageGuidance } from '@/utils/linuxBuildError';
+// Appended to the error when a Linux AppImage build fails for good. linuxdeploy's
+// diagnostics stream to the terminal (stdio: 'inherit') and never reach
+// error.message, so we cannot name the exact cause. We only reach here after
+// NO_STRIP=1 has been applied and still failed, so strip is shown as ruled out.
+const APPIMAGE_BAR = '━'.repeat(56);
+const APPIMAGE_FAILURE_GUIDANCE =
+  `\n\n${APPIMAGE_BAR}\n` +
+  'Linux AppImage Build Failed\n' +
+  `${APPIMAGE_BAR}\n\n` +
+  'The AppImage bundler (linuxdeploy) failed. Common causes and fixes:\n\n' +
+  '  • Strip incompatibility (glibc 2.38+): NO_STRIP=1 was already applied and\n' +
+  '    the build still failed, so strip is likely not the cause.\n' +
+  '  • Missing gdk-pixbuf loaders (e.g. "cannot stat\n' +
+  "    '/usr/lib/gdk-pixbuf-2.0/...'\"): install them, then rebuild:\n" +
+  '      Arch:    sudo pacman -S gdk-pixbuf2 librsvg\n' +
+  '      Debian:  sudo apt install librsvg2-common gdk-pixbuf2.0-bin\n' +
+  '      Fedora:  sudo dnf install gdk-pixbuf2-modules librsvg2\n' +
+  '      then:    gdk-pixbuf-query-loaders --update-cache\n' +
+  '  • Running in Docker/container: AppImage needs /dev/fuse:\n' +
+  '      --privileged --device /dev/fuse --security-opt apparmor=unconfined\n\n' +
+  'Still stuck? Build a DEB instead: pake <url> --targets deb\n' +
+  'Detailed guide: https://github.com/tw93/Pake/blob/main/docs/faq.md\n' +
+  APPIMAGE_BAR;
 
 export default abstract class BaseBuilder {
   protected options: PakeAppOptions;
@@ -182,7 +204,8 @@ export default abstract class BaseBuilder {
       // most common AppImage failure, so retry once with NO_STRIP=1; if that
       // (or an already-NO_STRIP run) still fails, surface all known causes.
       if (buildEnv.NO_STRIP) {
-        throw appendAppImageGuidance(error);
+        (error as Error).message += APPIMAGE_FAILURE_GUIDANCE;
+        throw error;
       }
 
       logger.warn(
@@ -192,7 +215,8 @@ export default abstract class BaseBuilder {
       try {
         await shellExec(buildCommand, buildTimeout, resolveExecEnv());
       } catch (retryError) {
-        throw appendAppImageGuidance(retryError);
+        (retryError as Error).message += APPIMAGE_FAILURE_GUIDANCE;
+        throw retryError;
       }
     }
 

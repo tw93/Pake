@@ -893,15 +893,14 @@ async function configureCargoRegistry(tauriSrcPath, useCnMirror) {
     }
 }
 
-const DIVIDER = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
-// Guidance printed after a Linux AppImage build fails for good. We cannot detect
-// the exact cause: linuxdeploy streams its diagnostics to the terminal via
-// `stdio: 'inherit'`, so they never reach `error.message` (which only holds the
-// failed command line). We only reach here after NO_STRIP=1 has already been
-// applied and still failed, so strip is presented as already ruled out.
-const APPIMAGE_FAILURE_GUIDANCE = `\n\n${DIVIDER}\n` +
+// Appended to the error when a Linux AppImage build fails for good. linuxdeploy's
+// diagnostics stream to the terminal (stdio: 'inherit') and never reach
+// error.message, so we cannot name the exact cause. We only reach here after
+// NO_STRIP=1 has been applied and still failed, so strip is shown as ruled out.
+const APPIMAGE_BAR = '━'.repeat(56);
+const APPIMAGE_FAILURE_GUIDANCE = `\n\n${APPIMAGE_BAR}\n` +
     'Linux AppImage Build Failed\n' +
-    `${DIVIDER}\n\n` +
+    `${APPIMAGE_BAR}\n\n` +
     'The AppImage bundler (linuxdeploy) failed. Common causes and fixes:\n\n' +
     '  • Strip incompatibility (glibc 2.38+): NO_STRIP=1 was already applied and\n' +
     '    the build still failed, so strip is likely not the cause.\n' +
@@ -915,17 +914,7 @@ const APPIMAGE_FAILURE_GUIDANCE = `\n\n${DIVIDER}\n` +
     '      --privileged --device /dev/fuse --security-opt apparmor=unconfined\n\n' +
     'Still stuck? Build a DEB instead: pake <url> --targets deb\n' +
     'Detailed guide: https://github.com/tw93/Pake/blob/main/docs/faq.md\n' +
-    DIVIDER;
-/**
- * Returns the original error with AppImage guidance appended to its message,
- * preserving the stack. Used when a Linux AppImage build fails for good.
- */
-function appendAppImageGuidance(error) {
-    const baseError = error instanceof Error ? error : new Error(String(error));
-    baseError.message += APPIMAGE_FAILURE_GUIDANCE;
-    return baseError;
-}
-
+    APPIMAGE_BAR;
 class BaseBuilder {
     constructor(options) {
         this.options = options;
@@ -1037,7 +1026,8 @@ class BaseBuilder {
             // most common AppImage failure, so retry once with NO_STRIP=1; if that
             // (or an already-NO_STRIP run) still fails, surface all known causes.
             if (buildEnv.NO_STRIP) {
-                throw appendAppImageGuidance(error);
+                error.message += APPIMAGE_FAILURE_GUIDANCE;
+                throw error;
             }
             logger.warn('⚠ AppImage build failed, retrying once with NO_STRIP=1 (common glibc 2.38+ strip issue).');
             buildEnv = { ...buildEnv, NO_STRIP: '1' };
@@ -1045,7 +1035,8 @@ class BaseBuilder {
                 await shellExec(buildCommand, buildTimeout, resolveExecEnv());
             }
             catch (retryError) {
-                throw appendAppImageGuidance(retryError);
+                retryError.message += APPIMAGE_FAILURE_GUIDANCE;
+                throw retryError;
             }
         }
         // Copy app
