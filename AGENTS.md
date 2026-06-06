@@ -127,12 +127,12 @@ Execution rules:
 
 Four files must be updated in sync for every release:
 
-| File                        | Field                       |
-| --------------------------- | --------------------------- |
-| `package.json`              | `"version"`                 |
-| `src-tauri/Cargo.toml`      | `version` under `[package]` |
+| File                        | Field                        |
+| --------------------------- | ---------------------------- |
+| `package.json`              | `"version"`                  |
+| `src-tauri/Cargo.toml`      | `version` under `[package]`  |
 | `src-tauri/Cargo.lock`      | `version` for package `pake` |
-| `src-tauri/tauri.conf.json` | `"version"`                 |
+| `src-tauri/tauri.conf.json` | `"version"`                  |
 
 Tag format: `V0.x.x` (uppercase V). Current version: check `package.json`.
 
