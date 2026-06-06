@@ -1,7 +1,3 @@
-
-!dist/.gitkeep
-!dist/about_pake.html
-!dist/cli.js
 .DS_Store
 .idea
 .next
@@ -29,6 +25,9 @@ AGENTS.override.md
 # Logs
 AGENT.md
 dist
+!dist/.gitkeep
+!dist/about_pake.html
+!dist/cli.js
 dist-ssr
 journal/
 lerna-debug.log*
