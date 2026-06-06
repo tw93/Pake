@@ -1,6 +1,6 @@
 # Pake Rust + Tauri Rules
 
-> Shared Rust rules: see global `~/.claude/rules/rust.md` (includes Tauri section).
+> Pake-specific Rust + Tauri rules. Standard Rust hygiene is assumed: `?` over `unwrap()`, `cargo clippy` clean, `cargo fmt` before commit.
 
 ## Pake-Specific
 

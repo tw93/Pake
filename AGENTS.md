@@ -1,6 +1,6 @@
 # AGENTS.md - Pake Project Knowledge Base
 
-> 全局规则在 `~/.claude/CLAUDE.md`，Rust 通用规则在 `~/.claude/rules/rust.md`，项目级 Rust+Tauri 补充在 `.claude/rules/rust.md`。发版细节看 `.claude/skills/release`（`/release`）。
+> Project-specific Rust + Tauri rules: `.claude/rules/rust.md`. Release runbook: `.claude/skills/release/SKILL.md` (run `/release`).
 
 ## Project Identity
 
