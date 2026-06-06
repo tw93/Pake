@@ -20,12 +20,10 @@
 *.suo
 *.sw?
 *.tmp
-# Local AI assistant docs
-CLAUDE.md
+# Local AI assistant overrides (shared docs AGENTS.md / CLAUDE.md / .claude are tracked)
 CLAUDE.local.md
-AGENTS.md
 AGENTS.override.md
-.claude/
+.claude/settings.local.json
 .agents/settings.local.json
 # Editor directories and files
 # Logs
