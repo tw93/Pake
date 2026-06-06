@@ -108,6 +108,22 @@ sudo apt-get install -y libayatana-appindicator3-dev
 ```txt
 Error: failed to run linuxdeploy
 Error: strip: Unable to recognise the format of the input file
+ERROR: Failed to run plugin: gtk
+cp: cannot stat '/usr/lib/gdk-pixbuf-2.0/2.10.0': No such file or directory
+```
+
+**先判断你遇到的是哪一种失败。** 同样是 `failed to run linuxdeploy`，实际有两类不同原因：
+
+- `strip: Unable to recognise the format of the input file`：strip 不兼容，按解决方案 1 处理。
+- `Failed to run plugin: gtk` 且伴随 `cannot stat '/usr/lib/gdk-pixbuf-2.0/...'`：linuxdeploy 的 gtk 插件找不到 gdk-pixbuf loaders，`NO_STRIP` 无效。安装 loaders、刷新缓存后重新构建：
+
+```bash
+# Arch
+sudo pacman -S gdk-pixbuf2 librsvg
+# Debian / Ubuntu
+sudo apt install librsvg2-common gdk-pixbuf2.0-bin
+# 刷新 loader 缓存后重新构建
+gdk-pixbuf-query-loaders --update-cache
 ```
 
 **解决方案 1：自动 NO_STRIP 重试（推荐）**

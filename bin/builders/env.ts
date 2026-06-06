@@ -204,30 +204,3 @@ export async function configureCargoRegistry(
     );
   }
 }
-
-/**
- * Returns true when an error string looks like the well-known Tauri+linuxdeploy
- * strip failure that we automatically retry with NO_STRIP=1.
- */
-export function isLinuxDeployStripError(error: unknown): boolean {
-  if (!(error instanceof Error) || !error.message) {
-    return false;
-  }
-  const message = error.message.toLowerCase();
-  // A gtk-plugin / gdk-pixbuf failure also mentions linuxdeploy but is not a
-  // strip issue, so a NO_STRIP retry won't help. Don't treat it as one.
-  if (
-    message.includes('gdk-pixbuf') ||
-    message.includes('failed to run plugin: gtk')
-  ) {
-    return false;
-  }
-  return (
-    message.includes('linuxdeploy') ||
-    message.includes('failed to run linuxdeploy') ||
-    message.includes('strip:') ||
-    message.includes('unable to recognise the format of the input file') ||
-    message.includes('appimage tool failed') ||
-    message.includes('strip tool')
-  );
-}

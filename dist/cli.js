@@ -248,69 +248,10 @@ async function shellExec(command, timeout = 300000, env) {
         if (error.timedOut) {
             throw new Error(`Command timed out after ${timeout}ms: "${command}". Try increasing timeout or check network connectivity.`);
         }
-        let errorMsg = `Error occurred while executing command "${command}". Exit code: ${exitCode}. Details: ${errorMessage}`;
-        // Provide targeted guidance for common Linux AppImage build failures.
-        // A gtk-plugin / gdk-pixbuf failure also mentions linuxdeploy/appimage but
-        // is unrelated to strip, so it must be matched first and given its own hint.
-        const lowerError = errorMessage.toLowerCase();
-        const divider = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
-        if (process.platform === 'linux') {
-            const isGtkPixbufFailure = lowerError.includes('gdk-pixbuf') ||
-                lowerError.includes('failed to run plugin: gtk');
-            const isAppImageStripFailure = lowerError.includes('linuxdeploy') ||
-                lowerError.includes('appimage') ||
-                lowerError.includes('strip');
-            const noStripActive = !!(env?.NO_STRIP || process.env.NO_STRIP);
-            if (isGtkPixbufFailure) {
-                errorMsg +=
-                    `\n\n${divider}\n` +
-                        'Linux AppImage Build Failed\n' +
-                        `${divider}\n\n` +
-                        "Cause: linuxdeploy's gtk plugin could not find the gdk-pixbuf loaders\n" +
-                        '       (e.g. "cannot stat \'/usr/lib/gdk-pixbuf-2.0/...\'").\n\n' +
-                        'Quick fix:\n' +
-                        '  • Install the gdk-pixbuf loaders for your distro:\n' +
-                        '      Arch:    sudo pacman -S gdk-pixbuf2 librsvg\n' +
-                        '      Debian:  sudo apt install librsvg2-common gdk-pixbuf2.0-bin\n' +
-                        '      Fedora:  sudo dnf install gdk-pixbuf2-modules librsvg2\n' +
-                        '  • Refresh the loader cache, then rebuild:\n' +
-                        '      gdk-pixbuf-query-loaders --update-cache\n\n' +
-                        'Alternative:\n' +
-                        '  • Use DEB format instead: pake <url> --targets deb\n' +
-                        '  • Detailed guide: https://github.com/tw93/Pake/blob/main/docs/faq.md\n' +
-                        divider;
-            }
-            else if (isAppImageStripFailure) {
-                errorMsg +=
-                    `\n\n${divider}\n` +
-                        'Linux AppImage Build Failed\n' +
-                        `${divider}\n\n` +
-                        'Cause: Strip tool incompatibility with glibc 2.38+\n' +
-                        '       (affects Debian Trixie, Arch Linux, and other modern distros)\n\n';
-                errorMsg += noStripActive
-                    ? 'NO_STRIP=1 is already set but the build still failed, so this is\n' +
-                        'likely not a strip issue. Try the alternatives below or rerun with\n' +
-                        '--debug and read the linuxdeploy output above for the real cause.\n\n'
-                    : 'Quick fix:\n' +
-                        '  NO_STRIP=1 pake <url> --targets appimage --debug\n\n';
-                errorMsg +=
-                    'Alternatives:\n' +
-                        '  • Use DEB format: pake <url> --targets deb\n' +
-                        '  • Update binutils: sudo apt install binutils (or pacman -S binutils)\n' +
-                        '  • Detailed guide: https://github.com/tw93/Pake/blob/main/docs/faq.md\n' +
-                        divider;
-                if (lowerError.includes('fuse') ||
-                    lowerError.includes('operation not permitted') ||
-                    lowerError.includes('/dev/fuse')) {
-                    errorMsg +=
-                        '\n\nDocker / Container hint:\n' +
-                            '  AppImage tooling needs access to /dev/fuse. When running inside Docker, add:\n' +
-                            '    --privileged --device /dev/fuse --security-opt apparmor=unconfined\n' +
-                            '  or run on the host directly.';
-                }
-            }
-        }
-        throw new Error(errorMsg);
+        // AppImage/linuxdeploy guidance is added by the caller (BaseBuilder), which
+        // knows the build target. We only have the command line here (the tool's
+        // diagnostics stream to the terminal via stdio:inherit, not into the error).
+        throw new Error(`Error occurred while executing command "${command}". Exit code: ${exitCode}. Details: ${errorMessage}`);
     }
 }
 
@@ -951,27 +892,38 @@ async function configureCargoRegistry(tauriSrcPath, useCnMirror) {
         logger.warn(`✼ ${projectConf} still references rsproxy.cn. Remove it or set ${CN_MIRROR_ENV}=1 if you want to use the CN mirror.`);
     }
 }
+
+const DIVIDER = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
+// Guidance printed after a Linux AppImage build fails for good. We cannot detect
+// the exact cause: linuxdeploy streams its diagnostics to the terminal via
+// `stdio: 'inherit'`, so they never reach `error.message` (which only holds the
+// failed command line). We only reach here after NO_STRIP=1 has already been
+// applied and still failed, so strip is presented as already ruled out.
+const APPIMAGE_FAILURE_GUIDANCE = `\n\n${DIVIDER}\n` +
+    'Linux AppImage Build Failed\n' +
+    `${DIVIDER}\n\n` +
+    'The AppImage bundler (linuxdeploy) failed. Common causes and fixes:\n\n' +
+    '  • Strip incompatibility (glibc 2.38+): NO_STRIP=1 was already applied and\n' +
+    '    the build still failed, so strip is likely not the cause.\n' +
+    '  • Missing gdk-pixbuf loaders (e.g. "cannot stat\n' +
+    "    '/usr/lib/gdk-pixbuf-2.0/...'\"): install them, then rebuild:\n" +
+    '      Arch:    sudo pacman -S gdk-pixbuf2 librsvg\n' +
+    '      Debian:  sudo apt install librsvg2-common gdk-pixbuf2.0-bin\n' +
+    '      Fedora:  sudo dnf install gdk-pixbuf2-modules librsvg2\n' +
+    '      then:    gdk-pixbuf-query-loaders --update-cache\n' +
+    '  • Running in Docker/container: AppImage needs /dev/fuse:\n' +
+    '      --privileged --device /dev/fuse --security-opt apparmor=unconfined\n\n' +
+    'Still stuck? Build a DEB instead: pake <url> --targets deb\n' +
+    'Detailed guide: https://github.com/tw93/Pake/blob/main/docs/faq.md\n' +
+    DIVIDER;
 /**
- * Returns true when an error string looks like the well-known Tauri+linuxdeploy
- * strip failure that we automatically retry with NO_STRIP=1.
+ * Returns the original error with AppImage guidance appended to its message,
+ * preserving the stack. Used when a Linux AppImage build fails for good.
  */
-function isLinuxDeployStripError(error) {
-    if (!(error instanceof Error) || !error.message) {
-        return false;
-    }
-    const message = error.message.toLowerCase();
-    // A gtk-plugin / gdk-pixbuf failure also mentions linuxdeploy but is not a
-    // strip issue, so a NO_STRIP retry won't help. Don't treat it as one.
-    if (message.includes('gdk-pixbuf') ||
-        message.includes('failed to run plugin: gtk')) {
-        return false;
-    }
-    return (message.includes('linuxdeploy') ||
-        message.includes('failed to run linuxdeploy') ||
-        message.includes('strip:') ||
-        message.includes('unable to recognise the format of the input file') ||
-        message.includes('appimage tool failed') ||
-        message.includes('strip tool'));
+function appendAppImageGuidance(error) {
+    const baseError = error instanceof Error ? error : new Error(String(error));
+    baseError.message += APPIMAGE_FAILURE_GUIDANCE;
+    return baseError;
 }
 
 class BaseBuilder {
@@ -1065,14 +1017,11 @@ class BaseBuilder {
             ...(process.env.NO_STRIP ? { NO_STRIP: process.env.NO_STRIP } : {}),
         };
         const resolveExecEnv = () => Object.keys(buildEnv).length > 0 ? buildEnv : undefined;
-        // Warn users about potential AppImage build failures on modern Linux systems.
-        // The linuxdeploy tool bundled in Tauri uses an older strip tool that doesn't
-        // recognize the .relr.dyn section introduced in glibc 2.38+.
-        if (process.platform === 'linux' && target === 'appimage') {
-            if (!buildEnv.NO_STRIP) {
-                logger.warn('⚠ Building AppImage on Linux may fail due to strip incompatibility with glibc 2.38+');
-                logger.warn('⚠ If build fails, retry with: NO_STRIP=1 pake <url> --targets appimage');
-            }
+        const isLinuxAppImage = process.platform === 'linux' && target === 'appimage';
+        // AppImage builds can fail at the linuxdeploy strip step on glibc 2.38+.
+        // A real failure now prints full guidance, so only hint in debug mode.
+        if (isLinuxAppImage && !buildEnv.NO_STRIP && this.options.debug) {
+            logger.warn('⚠ AppImage strip step can fail on glibc 2.38+; Pake will auto-retry with NO_STRIP=1.');
         }
         const buildCommand = `cd "${npmDirectory}" && ${this.getBuildCommand(packageManager)}`;
         const buildTimeout = getBuildTimeout();
@@ -1080,20 +1029,23 @@ class BaseBuilder {
             await shellExec(buildCommand, buildTimeout, resolveExecEnv());
         }
         catch (error) {
-            const shouldRetryWithoutStrip = process.platform === 'linux' &&
-                target === 'appimage' &&
-                !buildEnv.NO_STRIP &&
-                isLinuxDeployStripError(error);
-            if (shouldRetryWithoutStrip) {
-                logger.warn('⚠ AppImage build failed during linuxdeploy strip step, retrying with NO_STRIP=1 automatically.');
-                buildEnv = {
-                    ...buildEnv,
-                    NO_STRIP: '1',
-                };
+            if (!isLinuxAppImage) {
+                throw error;
+            }
+            // linuxdeploy's diagnostics stream to the terminal (stdio: 'inherit') and
+            // never reach error.message, so we cannot classify the cause. strip is the
+            // most common AppImage failure, so retry once with NO_STRIP=1; if that
+            // (or an already-NO_STRIP run) still fails, surface all known causes.
+            if (buildEnv.NO_STRIP) {
+                throw appendAppImageGuidance(error);
+            }
+            logger.warn('⚠ AppImage build failed, retrying once with NO_STRIP=1 (common glibc 2.38+ strip issue).');
+            buildEnv = { ...buildEnv, NO_STRIP: '1' };
+            try {
                 await shellExec(buildCommand, buildTimeout, resolveExecEnv());
             }
-            else {
-                throw error;
+            catch (retryError) {
+                throw appendAppImageGuidance(retryError);
             }
         }
         // Copy app

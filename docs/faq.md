@@ -108,6 +108,22 @@ When building AppImage on Linux (Debian, Ubuntu, Arch, etc.), you may encounter 
 ```txt
 Error: failed to run linuxdeploy
 Error: strip: Unable to recognise the format of the input file
+ERROR: Failed to run plugin: gtk
+cp: cannot stat '/usr/lib/gdk-pixbuf-2.0/2.10.0': No such file or directory
+```
+
+**Identify which failure you have first.** Two distinct problems share the `failed to run linuxdeploy` message:
+
+- `strip: Unable to recognise the format of the input file`: a strip incompatibility. Use Solution 1.
+- `Failed to run plugin: gtk` together with `cannot stat '/usr/lib/gdk-pixbuf-2.0/...'`: linuxdeploy's gtk plugin cannot find the gdk-pixbuf loaders. `NO_STRIP` will not help. Install the loaders, refresh the cache, then rebuild:
+
+```bash
+# Arch
+sudo pacman -S gdk-pixbuf2 librsvg
+# Debian / Ubuntu
+sudo apt install librsvg2-common gdk-pixbuf2.0-bin
+# refresh the loader cache, then rebuild
+gdk-pixbuf-query-loaders --update-cache
 ```
 
 **Solution 1: Automatic NO_STRIP Retry (Recommended)**
