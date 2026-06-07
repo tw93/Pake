@@ -133,7 +133,10 @@ depend = pango
 depend = webkit2gtk-4.1
 `;
       await fsExtra.writeFile(path.join(dataDir, '.PKGINFO'), pkgInfo);
-      await shellExec(`bsdtar --zstd -cf "${packagePath}" -C "${dataDir}" .`);
+      await shellExec(
+        `bsdtar --zstd -cf "${packagePath}" -C "${dataDir}" .PKGINFO usr`,
+      );
+      await fsExtra.remove(debPath);
       logger.success('✔ Build success!');
       logger.success('✔ App installer located in', packagePath);
     } finally {
