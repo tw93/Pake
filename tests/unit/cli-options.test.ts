@@ -46,4 +46,14 @@ describe('CLI options', () => {
     expect(option?.defaultValue).toBe(false);
     expect(option?.hidden).toBe(true);
   });
+
+  it('rejects malformed zoom values instead of truncating them', () => {
+    const option = program.options.find((item) => item.long === '--zoom');
+
+    expect(option).toBeDefined();
+    expect(option?.parseArg?.('80', undefined)).toBe(80);
+    expect(() => option?.parseArg?.('80abc', undefined)).toThrow(
+      '--zoom must be a number between 50 and 200',
+    );
+  });
 });
