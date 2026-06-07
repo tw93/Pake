@@ -707,6 +707,9 @@ async function mergeConfig(url, options, tauriConf) {
     const { appVersion, userAgent, showSystemTray, useLocalFile, identifier, name = 'pake-app', installerLanguage, wasm, camera, microphone, } = options;
     const platform = asSupportedPlatform(process.platform);
     const tauriConfWindowOptions = buildWindowConfigOverrides(options, platform);
+    if (!tauriConfWindowOptions.title && options.displayName) {
+        tauriConfWindowOptions.title = options.displayName;
+    }
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
     tauriConf.productName = name;
     tauriConf.identifier = identifier;
