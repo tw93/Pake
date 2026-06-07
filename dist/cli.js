@@ -1420,9 +1420,8 @@ class LinuxBuilder extends BaseBuilder {
         const { name = 'pake-app' } = this.options;
         const packageName = generateLinuxPackageName(name);
         const version = tauriConfig.version;
-        const debArch = this.buildArch === 'arm64' ? 'arm64' : 'amd64';
         const arch = this.buildArch === 'arm64' ? 'aarch64' : 'x86_64';
-        const debPath = path.resolve(`${name}_${version}_${debArch}.deb`);
+        const debPath = path.resolve(`${name}.deb`);
         const packagePath = path.resolve(`${name}-${version}-1-${arch}.pkg.tar.zst`);
         const workDir = path.resolve('.pake-arch-package');
         const dataDir = path.join(workDir, 'data');
