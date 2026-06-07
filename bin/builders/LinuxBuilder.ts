@@ -5,6 +5,7 @@ import { PakeAppOptions } from '@/types';
 import tauriConfig from '@/helpers/tauriConfig';
 import { shellExec } from '@/utils/shell';
 import { generateLinuxPackageName } from '@/utils/name';
+import logger from '@/options/logger';
 
 export default class LinuxBuilder extends BaseBuilder {
   private buildFormat: string;
@@ -71,7 +72,7 @@ export default class LinuxBuilder extends BaseBuilder {
       if (requestedTargets.includes(target)) {
         this.currentBuildType = target;
         if (target === 'zst') {
-          await this.buildAndCopy(url, 'deb');
+          await this.buildAndCopy(url, 'deb', false);
           await this.createArchPackageFromDeb();
         } else {
           await this.buildAndCopy(url, target);
@@ -133,6 +134,8 @@ depend = webkit2gtk-4.1
 `;
       await fsExtra.writeFile(path.join(dataDir, '.PKGINFO'), pkgInfo);
       await shellExec(`bsdtar --zstd -cf "${packagePath}" -C "${dataDir}" .`);
+      logger.success('✔ Build success!');
+      logger.success('✔ App installer located in', packagePath);
     } finally {
       await fsExtra.remove(workDir);
     }
@@ -154,9 +157,9 @@ depend = webkit2gtk-4.1
   }
 
   // Override buildAndCopy to ensure currentBuildType is synced if called directly, though the loop above handles it most of the time.
-  async buildAndCopy(url: string, target: string) {
+  async buildAndCopy(url: string, target: string, logSuccess = true) {
     this.currentBuildType = target;
-    await super.buildAndCopy(url, target);
+    await super.buildAndCopy(url, target, logSuccess);
   }
 
   protected getBuildCommand(packageManager: string = 'pnpm'): string {
