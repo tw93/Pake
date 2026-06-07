@@ -151,21 +151,23 @@ async function mergeLinuxConfig(
   delete linuxBundle.deb.files;
 
   const linuxName = generateLinuxPackageName(name);
+  const displayName = options.displayName || name;
   const desktopFileName = `com.pake.${linuxName}.desktop`;
-  const iconName = `${linuxName}_512`;
+  const iconName = `pake-${linuxName}`;
   const { title } = options;
 
   const chineseName = title && /[\u4e00-\u9fa5]/.test(title) ? title : null;
   const desktopContent = `[Desktop Entry]
 Version=1.0
 Type=Application
-Name=${name}
+Name=${displayName}
 ${chineseName ? `Name[zh_CN]=${chineseName}` : ''}
-Comment=${name}
+Comment=${displayName} Pake app
 Exec=${linuxBinaryName}
 Icon=${iconName}
 Categories=Network;WebBrowser;Utility;
 MimeType=text/html;text/xml;application/xhtml_xml;
+StartupWMClass=${linuxBinaryName}
 StartupNotify=true
 Terminal=false
 `;

@@ -83,6 +83,7 @@ export default class LinuxBuilder extends BaseBuilder {
 
   private async createArchPackageFromDeb() {
     const { name = 'pake-app' } = this.options;
+    const displayName = this.options.displayName || name;
     const packageName = generateLinuxPackageName(name);
     const version = tauriConfig.version;
     const arch = this.buildArch === 'arm64' ? 'aarch64' : 'x86_64';
@@ -110,12 +111,21 @@ export default class LinuxBuilder extends BaseBuilder {
       await shellExec(
         `tar -xf "${path.join(controlDir, dataArchive)}" -C "${dataDir}"`,
       );
+      await fsExtra.remove(
+        path.join(
+          dataDir,
+          'usr',
+          'share',
+          'applications',
+          `${packageName}.desktop`,
+        ),
+      );
 
       const installedSize = await this.getDirectorySize(dataDir);
       const pkgInfo = `pkgname = ${packageName}
 pkgbase = ${packageName}
 pkgver = ${version}-1
-pkgdesc = ${name}
+pkgdesc = ${displayName} Pake app
 url = https://github.com/tw93/Pake
 builddate = ${Math.floor(Date.now() / 1000)}
 packager = Pake
@@ -133,8 +143,25 @@ depend = pango
 depend = webkit2gtk-4.1
 `;
       await fsExtra.writeFile(path.join(dataDir, '.PKGINFO'), pkgInfo);
+      await fsExtra.writeFile(
+        path.join(dataDir, '.INSTALL'),
+        `post_install() {
+  gtk-update-icon-cache -q -t -f usr/share/icons/hicolor
+  update-desktop-database -q usr/share/applications
+}
+
+post_upgrade() {
+  post_install
+}
+
+post_remove() {
+  gtk-update-icon-cache -q -t -f usr/share/icons/hicolor
+  update-desktop-database -q usr/share/applications
+}
+`,
+      );
       await shellExec(
-        `bsdtar --zstd -cf "${packagePath}" -C "${dataDir}" .PKGINFO usr`,
+        `bsdtar --zstd -cf "${packagePath}" -C "${dataDir}" .PKGINFO .INSTALL usr`,
       );
       await fsExtra.remove(debPath);
       logger.success('✔ Build success!');

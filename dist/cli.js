@@ -502,20 +502,22 @@ async function mergeLinuxConfig(options, name, tauriConf, linuxBinaryName) {
     }
     delete linuxBundle.deb.files;
     const linuxName = generateLinuxPackageName(name);
+    const displayName = options.displayName || name;
     const desktopFileName = `com.pake.${linuxName}.desktop`;
-    const iconName = `${linuxName}_512`;
+    const iconName = `pake-${linuxName}`;
     const { title } = options;
     const chineseName = title && /[\u4e00-\u9fa5]/.test(title) ? title : null;
     const desktopContent = `[Desktop Entry]
 Version=1.0
 Type=Application
-Name=${name}
+Name=${displayName}
 ${chineseName ? `Name[zh_CN]=${chineseName}` : ''}
-Comment=${name}
+Comment=${displayName} Pake app
 Exec=${linuxBinaryName}
 Icon=${iconName}
 Categories=Network;WebBrowser;Utility;
 MimeType=text/html;text/xml;application/xhtml_xml;
+StartupWMClass=${linuxBinaryName}
 StartupNotify=true
 Terminal=false
 `;
@@ -1420,6 +1422,7 @@ class LinuxBuilder extends BaseBuilder {
     }
     async createArchPackageFromDeb() {
         const { name = 'pake-app' } = this.options;
+        const displayName = this.options.displayName || name;
         const packageName = generateLinuxPackageName(name);
         const version = tauriConfig.version;
         const arch = this.buildArch === 'arm64' ? 'aarch64' : 'x86_64';
@@ -1438,11 +1441,12 @@ class LinuxBuilder extends BaseBuilder {
                 throw new Error(`Could not find data.tar payload in ${debPath}`);
             }
             await shellExec(`tar -xf "${path.join(controlDir, dataArchive)}" -C "${dataDir}"`);
+            await fsExtra.remove(path.join(dataDir, 'usr', 'share', 'applications', `${packageName}.desktop`));
             const installedSize = await this.getDirectorySize(dataDir);
             const pkgInfo = `pkgname = ${packageName}
 pkgbase = ${packageName}
 pkgver = ${version}-1
-pkgdesc = ${name}
+pkgdesc = ${displayName} Pake app
 url = https://github.com/tw93/Pake
 builddate = ${Math.floor(Date.now() / 1000)}
 packager = Pake
@@ -1460,7 +1464,21 @@ depend = pango
 depend = webkit2gtk-4.1
 `;
             await fsExtra.writeFile(path.join(dataDir, '.PKGINFO'), pkgInfo);
-            await shellExec(`bsdtar --zstd -cf "${packagePath}" -C "${dataDir}" .PKGINFO usr`);
+            await fsExtra.writeFile(path.join(dataDir, '.INSTALL'), `post_install() {
+  gtk-update-icon-cache -q -t -f usr/share/icons/hicolor
+  update-desktop-database -q usr/share/applications
+}
+
+post_upgrade() {
+  post_install
+}
+
+post_remove() {
+  gtk-update-icon-cache -q -t -f usr/share/icons/hicolor
+  update-desktop-database -q usr/share/applications
+}
+`);
+            await shellExec(`bsdtar --zstd -cf "${packagePath}" -C "${dataDir}" .PKGINFO .INSTALL usr`);
             await fsExtra.remove(debPath);
             logger.success('✔ Build success!');
             logger.success('✔ App installer located in', packagePath);
@@ -2419,6 +2437,7 @@ async function handleOptions(options, url) {
     const { platform } = process;
     const isActions = process.env.GITHUB_ACTIONS;
     let name = options.name;
+    let displayName = options.name;
     const pathExists = await fsExtra.pathExists(url);
     if (!options.name) {
         const defaultName = pathExists
@@ -2427,8 +2446,10 @@ async function handleOptions(options, url) {
         const promptMessage = 'Enter your application name';
         const namePrompt = await promptText(promptMessage, defaultName);
         name = namePrompt?.trim() || defaultName;
+        displayName = name;
     }
     if (name && platform === 'linux') {
+        displayName = displayName || name;
         name = generateLinuxPackageName(name);
     }
     if (name && !isValidName(name, platform)) {
@@ -2448,6 +2469,7 @@ async function handleOptions(options, url) {
     const appOptions = {
         ...options,
         name: resolvedName,
+        displayName: displayName || resolvedName,
         identifier: resolveIdentifier(url, options.name, options.identifier),
     };
     const iconPath = await handleIcon(appOptions, url);
