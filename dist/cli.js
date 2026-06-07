@@ -2321,8 +2321,8 @@ function resolveLocalAppName(filePath, platform) {
         return generateLinuxPackageName(baseName) || 'pake-app';
     }
     const normalized = baseName
-        .replace(/[^a-zA-Z0-9\u4e00-\u9fff -]/g, '')
-        .replace(/^[ -]+/, '')
+        .replace(/[^a-zA-Z0-9\u4e00-\u9fff .-]/g, '')
+        .replace(/^[ .-]+/, '')
         .replace(/\s+/g, ' ')
         .trim();
     return normalized || 'pake-app';
@@ -2330,7 +2330,7 @@ function resolveLocalAppName(filePath, platform) {
 function isValidName(name, platform) {
     const reg = platform === 'linux'
         ? /^[a-z0-9\u4e00-\u9fff][a-z0-9\u4e00-\u9fff-]*$/
-        : /^[a-zA-Z0-9\u4e00-\u9fff][a-zA-Z0-9\u4e00-\u9fff- ]*$/;
+        : /^[a-zA-Z0-9\u4e00-\u9fff][a-zA-Z0-9\u4e00-\u9fff .-]*$/;
     return !!name && reg.test(name);
 }
 async function handleOptions(options, url) {
@@ -2351,7 +2351,7 @@ async function handleOptions(options, url) {
     }
     if (name && !isValidName(name, platform)) {
         const LINUX_NAME_ERROR = `✕ Name should only include lowercase letters, numbers, and dashes (not leading dashes). Examples: com-123-xxx, 123pan, pan123, weread, we-read, 123.`;
-        const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dashes, and spaces (not leading dashes and spaces). Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read, 123.`;
+        const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dots, dashes, and spaces (not leading dots, dashes, and spaces). Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read, Vectorizer.AI, 123.`;
         const errorMsg = platform === 'linux' ? LINUX_NAME_ERROR : DEFAULT_NAME_ERROR;
         if (isActions) {
             logger.error(errorMsg);
