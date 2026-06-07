@@ -537,15 +537,17 @@ Terminal=false
         'deb',
         'appimage',
         'rpm',
+        'zst',
         'deb-arm64',
         'appimage-arm64',
         'rpm-arm64',
+        'zst-arm64',
     ];
     const baseTarget = options.targets.includes('-arm64')
         ? options.targets.replace('-arm64', '')
         : options.targets;
     if (validTargets.includes(options.targets)) {
-        tauriConf.bundle.targets = [baseTarget];
+        tauriConf.bundle.targets = [baseTarget === 'zst' ? 'deb' : baseTarget];
     }
     else {
         logger.warn(`✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`);
@@ -1391,19 +1393,92 @@ class LinuxBuilder extends BaseBuilder {
         if (this.currentBuildType === 'rpm') {
             return `${name}-${version}-1.${arch}`;
         }
+        if (this.currentBuildType === 'zst') {
+            return `${name}-${version}-1-${arch}.pkg.tar`;
+        }
         return `${name}_${version}_${arch}`;
     }
     async build(url) {
-        const targetTypes = ['deb', 'appimage', 'rpm'];
+        const targetTypes = ['deb', 'appimage', 'rpm', 'zst'];
         const requestedTargets = this.options.targets
             .split(',')
             .map((t) => t.trim());
         for (const target of targetTypes) {
             if (requestedTargets.includes(target)) {
                 this.currentBuildType = target;
-                await this.buildAndCopy(url, target);
+                if (target === 'zst') {
+                    await this.buildAndCopy(url, 'deb');
+                    await this.createArchPackageFromDeb();
+                }
+                else {
+                    await this.buildAndCopy(url, target);
+                }
             }
         }
+    }
+    async createArchPackageFromDeb() {
+        const { name = 'pake-app' } = this.options;
+        const packageName = generateLinuxPackageName(name);
+        const version = tauriConfig.version;
+        const debArch = this.buildArch === 'arm64' ? 'arm64' : 'amd64';
+        const arch = this.buildArch === 'arm64' ? 'aarch64' : 'x86_64';
+        const debPath = path.resolve(`${name}_${version}_${debArch}.deb`);
+        const packagePath = path.resolve(`${name}-${version}-1-${arch}.pkg.tar.zst`);
+        const workDir = path.resolve('.pake-arch-package');
+        const dataDir = path.join(workDir, 'data');
+        const controlDir = path.join(workDir, 'control');
+        await fsExtra.remove(workDir);
+        await fsExtra.ensureDir(dataDir);
+        await fsExtra.ensureDir(controlDir);
+        try {
+            await shellExec(`cd "${controlDir}" && ar x "${debPath}"`);
+            const dataArchive = (await fsExtra.readdir(controlDir)).find((file) => file.startsWith('data.tar'));
+            if (!dataArchive) {
+                throw new Error(`Could not find data.tar payload in ${debPath}`);
+            }
+            await shellExec(`tar -xf "${path.join(controlDir, dataArchive)}" -C "${dataDir}"`);
+            const installedSize = await this.getDirectorySize(dataDir);
+            const pkgInfo = `pkgname = ${packageName}
+pkgbase = ${packageName}
+pkgver = ${version}-1
+pkgdesc = ${name}
+url = https://github.com/tw93/Pake
+builddate = ${Math.floor(Date.now() / 1000)}
+packager = Pake
+size = ${installedSize}
+arch = ${arch}
+license = MIT
+depend = cairo
+depend = desktop-file-utils
+depend = gdk-pixbuf2
+depend = glib2
+depend = gtk3
+depend = hicolor-icon-theme
+depend = libsoup
+depend = pango
+depend = webkit2gtk-4.1
+`;
+            await fsExtra.writeFile(path.join(dataDir, '.PKGINFO'), pkgInfo);
+            await shellExec(`bsdtar --zstd -cf "${packagePath}" -C "${dataDir}" .`);
+        }
+        finally {
+            await fsExtra.remove(workDir);
+        }
+    }
+    async getDirectorySize(directory) {
+        let size = 0;
+        for (const entry of await fsExtra.readdir(directory, {
+            withFileTypes: true,
+        })) {
+            const entryPath = path.join(directory, entry.name);
+            if (entry.isDirectory()) {
+                size += await this.getDirectorySize(entryPath);
+            }
+            else if (entry.isFile()) {
+                size += (await fsExtra.stat(entryPath)).size;
+            }
+        }
+        return size;
     }
     // Override buildAndCopy to ensure currentBuildType is synced if called directly, though the loop above handles it most of the time.
     async buildAndCopy(url, target) {
@@ -1441,6 +1516,9 @@ class LinuxBuilder extends BaseBuilder {
     getFileType(target) {
         if (target === 'appimage') {
             return 'AppImage';
+        }
+        if (target === 'zst') {
+            return 'zst';
         }
         return super.getFileType(target);
     }
@@ -2373,6 +2451,15 @@ async function handleOptions(options, url) {
     return appOptions;
 }
 
+function isArchLinuxBased() {
+    try {
+        const osRelease = fs$1.readFileSync('/etc/os-release', 'utf8').toLowerCase();
+        return osRelease.includes('id=arch') || osRelease.includes('id_like=arch');
+    }
+    catch {
+        return false;
+    }
+}
 const DEFAULT_PAKE_OPTIONS = {
     icon: '',
     height: 780,
@@ -2391,7 +2478,7 @@ const DEFAULT_PAKE_OPTIONS = {
     targets: (() => {
         switch (process.platform) {
             case 'linux':
-                return 'deb,appimage';
+                return isArchLinuxBased() ? 'zst' : 'deb,appimage';
             case 'darwin':
                 return 'dmg';
             case 'win32':

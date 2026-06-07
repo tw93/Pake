@@ -1,7 +1,10 @@
 import path from 'path';
+import fsExtra from 'fs-extra';
 import BaseBuilder from './BaseBuilder';
 import { PakeAppOptions } from '@/types';
 import tauriConfig from '@/helpers/tauriConfig';
+import { shellExec } from '@/utils/shell';
+import { generateLinuxPackageName } from '@/utils/name';
 
 export default class LinuxBuilder extends BaseBuilder {
   private buildFormat: string;
@@ -51,11 +54,15 @@ export default class LinuxBuilder extends BaseBuilder {
       return `${name}-${version}-1.${arch}`;
     }
 
+    if (this.currentBuildType === 'zst') {
+      return `${name}-${version}-1-${arch}.pkg.tar`;
+    }
+
     return `${name}_${version}_${arch}`;
   }
 
   async build(url: string) {
-    const targetTypes = ['deb', 'appimage', 'rpm'];
+    const targetTypes = ['deb', 'appimage', 'rpm', 'zst'];
     const requestedTargets = this.options.targets
       .split(',')
       .map((t: string) => t.trim());
@@ -63,9 +70,88 @@ export default class LinuxBuilder extends BaseBuilder {
     for (const target of targetTypes) {
       if (requestedTargets.includes(target)) {
         this.currentBuildType = target;
-        await this.buildAndCopy(url, target);
+        if (target === 'zst') {
+          await this.buildAndCopy(url, 'deb');
+          await this.createArchPackageFromDeb();
+        } else {
+          await this.buildAndCopy(url, target);
+        }
       }
     }
+  }
+
+  private async createArchPackageFromDeb() {
+    const { name = 'pake-app' } = this.options;
+    const packageName = generateLinuxPackageName(name);
+    const version = tauriConfig.version;
+    const debArch = this.buildArch === 'arm64' ? 'arm64' : 'amd64';
+    const arch = this.buildArch === 'arm64' ? 'aarch64' : 'x86_64';
+    const debPath = path.resolve(`${name}_${version}_${debArch}.deb`);
+    const packagePath = path.resolve(
+      `${name}-${version}-1-${arch}.pkg.tar.zst`,
+    );
+    const workDir = path.resolve('.pake-arch-package');
+    const dataDir = path.join(workDir, 'data');
+    const controlDir = path.join(workDir, 'control');
+
+    await fsExtra.remove(workDir);
+    await fsExtra.ensureDir(dataDir);
+    await fsExtra.ensureDir(controlDir);
+
+    try {
+      await shellExec(`cd "${controlDir}" && ar x "${debPath}"`);
+      const dataArchive = (await fsExtra.readdir(controlDir)).find((file) =>
+        file.startsWith('data.tar'),
+      );
+      if (!dataArchive) {
+        throw new Error(`Could not find data.tar payload in ${debPath}`);
+      }
+
+      await shellExec(
+        `tar -xf "${path.join(controlDir, dataArchive)}" -C "${dataDir}"`,
+      );
+
+      const installedSize = await this.getDirectorySize(dataDir);
+      const pkgInfo = `pkgname = ${packageName}
+pkgbase = ${packageName}
+pkgver = ${version}-1
+pkgdesc = ${name}
+url = https://github.com/tw93/Pake
+builddate = ${Math.floor(Date.now() / 1000)}
+packager = Pake
+size = ${installedSize}
+arch = ${arch}
+license = MIT
+depend = cairo
+depend = desktop-file-utils
+depend = gdk-pixbuf2
+depend = glib2
+depend = gtk3
+depend = hicolor-icon-theme
+depend = libsoup
+depend = pango
+depend = webkit2gtk-4.1
+`;
+      await fsExtra.writeFile(path.join(dataDir, '.PKGINFO'), pkgInfo);
+      await shellExec(`bsdtar --zstd -cf "${packagePath}" -C "${dataDir}" .`);
+    } finally {
+      await fsExtra.remove(workDir);
+    }
+  }
+
+  private async getDirectorySize(directory: string): Promise<number> {
+    let size = 0;
+    for (const entry of await fsExtra.readdir(directory, {
+      withFileTypes: true,
+    })) {
+      const entryPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        size += await this.getDirectorySize(entryPath);
+      } else if (entry.isFile()) {
+        size += (await fsExtra.stat(entryPath)).size;
+      }
+    }
+    return size;
   }
 
   // Override buildAndCopy to ensure currentBuildType is synced if called directly, though the loop above handles it most of the time.
@@ -121,6 +207,9 @@ export default class LinuxBuilder extends BaseBuilder {
   protected getFileType(target: string): string {
     if (target === 'appimage') {
       return 'AppImage';
+    }
+    if (target === 'zst') {
+      return 'zst';
     }
     return super.getFileType(target);
   }

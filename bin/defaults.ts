@@ -1,4 +1,14 @@
+import fs from 'fs';
 import { PakeCliOptions } from './types.js';
+
+function isArchLinuxBased(): boolean {
+  try {
+    const osRelease = fs.readFileSync('/etc/os-release', 'utf8').toLowerCase();
+    return osRelease.includes('id=arch') || osRelease.includes('id_like=arch');
+  } catch {
+    return false;
+  }
+}
 
 export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   icon: '',
@@ -19,7 +29,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   targets: (() => {
     switch (process.platform) {
       case 'linux':
-        return 'deb,appimage';
+        return isArchLinuxBased() ? 'zst' : 'deb,appimage';
       case 'darwin':
         return 'dmg';
       case 'win32':
