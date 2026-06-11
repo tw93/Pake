@@ -48,7 +48,7 @@
   },
   "type": "module",
   "exports": "./dist/cli.js",
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "GPL-3.0-or-later",
   "dependencies": {
     "@tauri-apps/api": "~2.10.1",
     "@tauri-apps/cli": "^2.10.0",

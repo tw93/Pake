@@ -1,36 +1,3 @@
-                    Pake License
-
-Pake is free software: you can redistribute it and/or modify it under the
-terms of the GNU General Public License version 3 (GPLv3) as published by
-the Free Software Foundation, together with the additional permission (the
-"Pake Output Exception") stated below.
-
-------------------------------------------------------------------------
-Pake Output Exception
-------------------------------------------------------------------------
-
-As an additional permission under section 7 of the GNU General Public
-License version 3 ("GPLv3"):
-
-When you use Pake, or a build of Pake produced by the standard Pake build
-and packaging process, to generate a target application ("Pake Output"),
-the portions of Pake incorporated into that Pake Output do not by
-themselves cause the Pake Output as a whole to be or become subject to the
-GPLv3. You may distribute such Pake Output under license terms of your own
-choosing, including proprietary terms.
-
-This permission does NOT apply to Pake itself or to any modified version of
-Pake's own source code: anyone who distributes Pake, or a work derived from
-Pake's source code beyond the configuration and packaging performed by the
-standard build process, remains fully bound by the GPLv3.
-
-Copyright (c) 2024 Tw93 and the Pake contributors.
-
-========================================================================
-The full text of the GNU General Public License version 3 follows.
-========================================================================
-
-
                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
