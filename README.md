@@ -207,3 +207,7 @@ Pake's development can not be without these Hackers. They contributed a lot of c
 - I have two cats, TangYuan and Coke. If you think Pake delights your life, you can feed them <a href="https://cats.tw93.fun?name=Pake" target="_blank">canned food 🥩</a>.
 
 <a href="https://cats.tw93.fun?name=Pake"><img src="https://cdn.jsdelivr.net/gh/tw93/sponsors@main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
+
+## License
+
+Pake is open source under GPL-3.0, see [LICENSE](./LICENSE); apps you build with Pake are entirely yours to use and distribute. If you fork Pake into your own product, to avoid confusion please give it a different name and credit Pake as the source.

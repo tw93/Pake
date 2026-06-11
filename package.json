@@ -48,7 +48,7 @@
   },
   "type": "module",
   "exports": "./dist/cli.js",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "@tauri-apps/api": "~2.10.1",
     "@tauri-apps/cli": "^2.10.0",
