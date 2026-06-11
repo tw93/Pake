@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getCliProgram } from '../../bin/helpers/cli-program.js';
+import { validateNumberInput } from '../../bin/utils/validate.js';
 
 describe('CLI options', () => {
   const program = getCliProgram();
@@ -55,5 +56,11 @@ describe('CLI options', () => {
     expect(() => option?.parseArg?.('80abc', undefined)).toThrow(
       '--zoom must be a number between 50 and 200',
     );
+  });
+
+  it('rejects non-finite numeric option values', () => {
+    expect(() => validateNumberInput('Infinity')).toThrow('Not a number.');
+    expect(() => validateNumberInput('-Infinity')).toThrow('Not a number.');
+    expect(validateNumberInput('1200')).toBe(1200);
   });
 });

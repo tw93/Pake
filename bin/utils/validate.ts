@@ -4,7 +4,7 @@ import { normalizeUrl } from './url';
 
 export function validateNumberInput(value: string) {
   const parsedValue = Number(value);
-  if (isNaN(parsedValue)) {
+  if (!Number.isFinite(parsedValue)) {
     throw new InvalidArgumentError('Not a number.');
   }
   return parsedValue;

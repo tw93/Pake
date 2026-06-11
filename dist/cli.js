@@ -20,7 +20,7 @@ import { InvalidArgumentError, program as program$1, Option } from 'commander';
 import fs$1 from 'fs';
 
 var name = "pake-cli";
-var version = "3.11.7";
+var version = "3.11.8";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -68,7 +68,7 @@ var scripts = {
 };
 var type = "module";
 var exports$1 = "./dist/cli.js";
-var license = "MIT";
+var license = "GPL-3.0-or-later";
 var dependencies = {
 	"@tauri-apps/api": "~2.10.1",
 	"@tauri-apps/cli": "^2.10.0",
@@ -2321,8 +2321,8 @@ function resolveLocalAppName(filePath, platform) {
         return generateLinuxPackageName(baseName) || 'pake-app';
     }
     const normalized = baseName
-        .replace(/[^a-zA-Z0-9\u4e00-\u9fff -]/g, '')
-        .replace(/^[ -]+/, '')
+        .replace(/[^a-zA-Z0-9\u4e00-\u9fff .-]/g, '')
+        .replace(/^[ .-]+/, '')
         .replace(/\s+/g, ' ')
         .trim();
     return normalized || 'pake-app';
@@ -2330,7 +2330,7 @@ function resolveLocalAppName(filePath, platform) {
 function isValidName(name, platform) {
     const reg = platform === 'linux'
         ? /^[a-z0-9\u4e00-\u9fff][a-z0-9\u4e00-\u9fff-]*$/
-        : /^[a-zA-Z0-9\u4e00-\u9fff][a-zA-Z0-9\u4e00-\u9fff- ]*$/;
+        : /^[a-zA-Z0-9\u4e00-\u9fff][a-zA-Z0-9\u4e00-\u9fff .-]*$/;
     return !!name && reg.test(name);
 }
 async function handleOptions(options, url) {
@@ -2351,7 +2351,7 @@ async function handleOptions(options, url) {
     }
     if (name && !isValidName(name, platform)) {
         const LINUX_NAME_ERROR = `✕ Name should only include lowercase letters, numbers, and dashes (not leading dashes). Examples: com-123-xxx, 123pan, pan123, weread, we-read, 123.`;
-        const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dashes, and spaces (not leading dashes and spaces). Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read, 123.`;
+        const DEFAULT_NAME_ERROR = `✕ Name should only include letters, numbers, dots, dashes, and spaces (not leading dots, dashes, and spaces). Examples: 123pan, 123Pan, Pan123, weread, WeRead, WERead, we-read, We Read, Vectorizer.AI, 123.`;
         const errorMsg = platform === 'linux' ? LINUX_NAME_ERROR : DEFAULT_NAME_ERROR;
         if (isActions) {
             logger.error(errorMsg);
@@ -2430,7 +2430,7 @@ const DEFAULT_PAKE_OPTIONS = {
 
 function validateNumberInput(value) {
     const parsedValue = Number(value);
-    if (isNaN(parsedValue)) {
+    if (!Number.isFinite(parsedValue)) {
         throw new InvalidArgumentError('Not a number.');
     }
     return parsedValue;
@@ -2565,8 +2565,8 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .addOption(new Option('--zoom <number>', 'Initial page zoom level (50-200)')
         .default(DEFAULT_PAKE_OPTIONS.zoom)
         .argParser((value) => {
-        const zoom = parseInt(value);
-        if (isNaN(zoom) || zoom < 50 || zoom > 200) {
+        const zoom = Number(value);
+        if (!Number.isFinite(zoom) || zoom < 50 || zoom > 200) {
             throw new Error('--zoom must be a number between 50 and 200');
         }
         return zoom;

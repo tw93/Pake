@@ -1,6 +1,6 @@
 {
   "name": "pake-cli",
-  "version": "3.11.7",
+  "version": "3.11.8",
   "description": "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。",
   "engines": {
     "node": ">=18.0.0"
@@ -48,7 +48,7 @@
   },
   "type": "module",
   "exports": "./dist/cli.js",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "dependencies": {
     "@tauri-apps/api": "~2.10.1",
     "@tauri-apps/cli": "^2.10.0",
