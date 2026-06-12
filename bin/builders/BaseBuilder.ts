@@ -155,7 +155,7 @@ export default abstract class BaseBuilder {
     await shellExec(command);
   }
 
-  async buildAndCopy(url: string, target: string) {
+  async buildAndCopy(url: string, target: string, logSuccess = true) {
     const { name = 'pake-app' } = this.options;
     await mergeConfig(url, this.options, tauriConfig);
 
@@ -233,8 +233,10 @@ export default abstract class BaseBuilder {
     }
 
     await fsExtra.remove(appPath);
-    logger.success('✔ Build success!');
-    logger.success('✔ App installer located in', distPath);
+    if (logSuccess) {
+      logger.success('✔ Build success!');
+      logger.success('✔ App installer located in', distPath);
+    }
 
     // Log binary location if preserved
     if (this.options.keepBinary) {

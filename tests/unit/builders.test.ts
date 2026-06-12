@@ -9,7 +9,7 @@ describe('Multi-target build parsing', () => {
    * Simulates the logic from LinuxBuilder.build()
    */
   function parseAndFilterTargets(targetsString: string): string[] {
-    const validTargets = ['deb', 'appimage', 'rpm'];
+    const validTargets = ['deb', 'appimage', 'rpm', 'zst'];
     const requestedTargets = targetsString
       .split(',')
       .map((t: string) => t.trim());
@@ -33,10 +33,10 @@ describe('Multi-target build parsing', () => {
     });
 
     it('should handle targets with spaces', () => {
-      const result = parseAndFilterTargets('deb, appimage, rpm');
+      const result = parseAndFilterTargets('deb, appimage, rpm, zst');
 
-      expect(result).toEqual(['deb', 'appimage', 'rpm']);
-      expect(result).toHaveLength(3);
+      expect(result).toEqual(['deb', 'appimage', 'rpm', 'zst']);
+      expect(result).toHaveLength(4);
     });
 
     it('should filter out invalid targets', () => {
@@ -48,10 +48,10 @@ describe('Multi-target build parsing', () => {
     });
 
     it('should handle all valid targets', () => {
-      const result = parseAndFilterTargets('deb,appimage,rpm');
+      const result = parseAndFilterTargets('deb,appimage,rpm,zst');
 
-      expect(result).toEqual(['deb', 'appimage', 'rpm']);
-      expect(result).toHaveLength(3);
+      expect(result).toEqual(['deb', 'appimage', 'rpm', 'zst']);
+      expect(result).toHaveLength(4);
     });
 
     it('should return empty array for all invalid targets', () => {
@@ -62,10 +62,12 @@ describe('Multi-target build parsing', () => {
     });
 
     it('should handle excessive whitespace', () => {
-      const result = parseAndFilterTargets('  deb  ,  appimage  ,  rpm  ');
+      const result = parseAndFilterTargets(
+        '  deb  ,  appimage  ,  rpm  , zst ',
+      );
 
-      expect(result).toEqual(['deb', 'appimage', 'rpm']);
-      expect(result).toHaveLength(3);
+      expect(result).toEqual(['deb', 'appimage', 'rpm', 'zst']);
+      expect(result).toHaveLength(4);
     });
 
     it('should be case-sensitive', () => {
@@ -85,23 +87,24 @@ describe('Multi-target build parsing', () => {
 
   describe('Target validation', () => {
     it('should validate against Linux target types', () => {
-      const validTargets = ['deb', 'appimage', 'rpm'];
+      const validTargets = ['deb', 'appimage', 'rpm', 'zst'];
 
       expect(validTargets).toContain('deb');
       expect(validTargets).toContain('appimage');
       expect(validTargets).toContain('rpm');
+      expect(validTargets).toContain('zst');
       expect(validTargets).not.toContain('msi');
       expect(validTargets).not.toContain('dmg');
     });
 
     it('should check if target is valid', () => {
-      const validTargets = ['deb', 'appimage', 'rpm'];
-      const testTargets = ['deb', 'invalid', 'appimage', 'msi'];
+      const validTargets = ['deb', 'appimage', 'rpm', 'zst'];
+      const testTargets = ['deb', 'invalid', 'appimage', 'zst', 'msi'];
 
       const valid = testTargets.filter((t) => validTargets.includes(t));
       const invalid = testTargets.filter((t) => !validTargets.includes(t));
 
-      expect(valid).toEqual(['deb', 'appimage']);
+      expect(valid).toEqual(['deb', 'appimage', 'zst']);
       expect(invalid).toEqual(['invalid', 'msi']);
     });
   });
@@ -126,6 +129,13 @@ describe('Multi-target build parsing', () => {
       const format = target.replace('-arm64', '');
 
       expect(format).toBe('appimage');
+    });
+
+    it('should handle zst-arm64', () => {
+      const target = 'zst-arm64';
+      const format = target.replace('-arm64', '');
+
+      expect(format).toBe('zst');
     });
   });
 });

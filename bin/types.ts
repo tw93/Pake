@@ -63,7 +63,7 @@ export interface PakeCliOptions {
   multiArch: boolean;
 
   // Build target architecture/format:
-  // Linux: "deb", "appimage", "deb-arm64", "appimage-arm64"; Windows: "x64", "arm64"; macOS: "intel", "apple", "universal"
+  // Linux: "deb", "appimage", "rpm", "zst" and "*-arm64" variants; Windows: "x64", "arm64"; macOS: "intel", "apple", "universal"
   targets: string;
 
   // Debug mode, outputs more logs

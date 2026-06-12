@@ -537,15 +537,17 @@ Terminal=false
         'deb',
         'appimage',
         'rpm',
+        'zst',
         'deb-arm64',
         'appimage-arm64',
         'rpm-arm64',
+        'zst-arm64',
     ];
     const baseTarget = options.targets.includes('-arm64')
         ? options.targets.replace('-arm64', '')
         : options.targets;
     if (validTargets.includes(options.targets)) {
-        tauriConf.bundle.targets = [baseTarget];
+        tauriConf.bundle.targets = [baseTarget === 'zst' ? 'deb' : baseTarget];
     }
     else {
         logger.warn(`✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`);
@@ -989,7 +991,7 @@ class BaseBuilder {
         const command = `cd "${npmDirectory}" && ${packageManager} run tauri${argSeparator} dev --config "${configPath}" ${featureArgs}`;
         await shellExec(command);
     }
-    async buildAndCopy(url, target) {
+    async buildAndCopy(url, target, logSuccess = true) {
         const { name = 'pake-app' } = this.options;
         await mergeConfig(url, this.options, tauriConfig);
         const packageManager = await detectPackageManager();
@@ -1050,8 +1052,10 @@ class BaseBuilder {
             await this.copyRawBinary(npmDirectory, name);
         }
         await fsExtra.remove(appPath);
-        logger.success('✔ Build success!');
-        logger.success('✔ App installer located in', distPath);
+        if (logSuccess) {
+            logger.success('✔ Build success!');
+            logger.success('✔ App installer located in', distPath);
+        }
         // Log binary location if preserved
         if (this.options.keepBinary) {
             const binaryPath = this.getRawBinaryPath(name);
@@ -1391,24 +1395,129 @@ class LinuxBuilder extends BaseBuilder {
         if (this.currentBuildType === 'rpm') {
             return `${name}-${version}-1.${arch}`;
         }
+        if (this.currentBuildType === 'zst') {
+            return `${name}-${version}-1-${arch}.pkg.tar`;
+        }
         return `${name}_${version}_${arch}`;
     }
     async build(url) {
-        const targetTypes = ['deb', 'appimage', 'rpm'];
+        const targetTypes = ['deb', 'appimage', 'rpm', 'zst'];
         const requestedTargets = this.options.targets
             .split(',')
             .map((t) => t.trim());
         for (const target of targetTypes) {
             if (requestedTargets.includes(target)) {
                 this.currentBuildType = target;
-                await this.buildAndCopy(url, target);
+                if (target === 'zst') {
+                    await this.buildAndCopy(url, 'deb', false);
+                    await this.createArchPackageFromDeb();
+                }
+                else {
+                    await this.buildAndCopy(url, target);
+                }
             }
         }
     }
+    async ensureArchPackagingTools() {
+        const requiredTools = [
+            { tool: 'ar', pacmanPackage: 'binutils' },
+            { tool: 'bsdtar', pacmanPackage: 'libarchive' },
+        ];
+        for (const { tool, pacmanPackage } of requiredTools) {
+            try {
+                await shellExec(`command -v ${tool} >/dev/null 2>&1`);
+            }
+            catch {
+                throw new Error(`Building a zst package requires "${tool}". Install it first, e.g. "sudo pacman -S ${pacmanPackage}".`);
+            }
+        }
+    }
+    async createArchPackageFromDeb() {
+        const { name = 'pake-app' } = this.options;
+        const packageName = generateLinuxPackageName(name);
+        const version = tauriConfig.version;
+        const arch = this.buildArch === 'arm64' ? 'aarch64' : 'x86_64';
+        const debPath = path.resolve(`${name}.deb`);
+        const packagePath = path.resolve(`${name}-${version}-1-${arch}.pkg.tar.zst`);
+        const workDir = path.resolve('.pake-arch-package');
+        const dataDir = path.join(workDir, 'data');
+        const controlDir = path.join(workDir, 'control');
+        await this.ensureArchPackagingTools();
+        await fsExtra.remove(workDir);
+        await fsExtra.ensureDir(dataDir);
+        await fsExtra.ensureDir(controlDir);
+        try {
+            await shellExec(`cd "${controlDir}" && ar x "${debPath}"`);
+            const dataArchive = (await fsExtra.readdir(controlDir)).find((file) => file.startsWith('data.tar'));
+            if (!dataArchive) {
+                throw new Error(`Could not find data.tar payload in ${debPath}`);
+            }
+            await shellExec(`tar -xf "${path.join(controlDir, dataArchive)}" -C "${dataDir}"`);
+            await fsExtra.remove(path.join(dataDir, 'usr', 'share', 'applications', `${packageName}.desktop`));
+            const installedSize = await this.getDirectorySize(dataDir);
+            const pkgInfo = `pkgname = ${packageName}
+pkgbase = ${packageName}
+pkgver = ${version}-1
+pkgdesc = ${name} Pake app
+url = https://github.com/tw93/Pake
+builddate = ${Math.floor(Date.now() / 1000)}
+packager = Pake
+size = ${installedSize}
+arch = ${arch}
+license = custom
+depend = cairo
+depend = desktop-file-utils
+depend = gdk-pixbuf2
+depend = glib2
+depend = gtk3
+depend = hicolor-icon-theme
+depend = libsoup3
+depend = pango
+depend = webkit2gtk-4.1
+`;
+            await fsExtra.writeFile(path.join(dataDir, '.PKGINFO'), pkgInfo);
+            await fsExtra.writeFile(path.join(dataDir, '.INSTALL'), `post_install() {
+  gtk-update-icon-cache -q -t -f usr/share/icons/hicolor
+  update-desktop-database -q usr/share/applications
+}
+
+post_upgrade() {
+  post_install
+}
+
+post_remove() {
+  gtk-update-icon-cache -q -t -f usr/share/icons/hicolor
+  update-desktop-database -q usr/share/applications
+}
+`);
+            await shellExec(`bsdtar --zstd -cf "${packagePath}" -C "${dataDir}" .PKGINFO .INSTALL usr`);
+            await fsExtra.remove(debPath);
+            logger.success('✔ Build success!');
+            logger.success('✔ App installer located in', packagePath);
+        }
+        finally {
+            await fsExtra.remove(workDir);
+        }
+    }
+    async getDirectorySize(directory) {
+        let size = 0;
+        for (const entry of await fsExtra.readdir(directory, {
+            withFileTypes: true,
+        })) {
+            const entryPath = path.join(directory, entry.name);
+            if (entry.isDirectory()) {
+                size += await this.getDirectorySize(entryPath);
+            }
+            else if (entry.isFile()) {
+                size += (await fsExtra.stat(entryPath)).size;
+            }
+        }
+        return size;
+    }
     // Override buildAndCopy to ensure currentBuildType is synced if called directly, though the loop above handles it most of the time.
-    async buildAndCopy(url, target) {
+    async buildAndCopy(url, target, logSuccess = true) {
         this.currentBuildType = target;
-        await super.buildAndCopy(url, target);
+        await super.buildAndCopy(url, target, logSuccess);
     }
     getBuildCommand(packageManager = 'pnpm') {
         const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
@@ -1441,6 +1550,9 @@ class LinuxBuilder extends BaseBuilder {
     getFileType(target) {
         if (target === 'appimage') {
             return 'AppImage';
+        }
+        if (target === 'zst') {
+            return 'zst';
         }
         return super.getFileType(target);
     }
