@@ -502,22 +502,20 @@ async function mergeLinuxConfig(options, name, tauriConf, linuxBinaryName) {
     }
     delete linuxBundle.deb.files;
     const linuxName = generateLinuxPackageName(name);
-    const displayName = options.displayName || name;
     const desktopFileName = `com.pake.${linuxName}.desktop`;
-    const iconName = `pake-${linuxName}`;
+    const iconName = `${linuxName}_512`;
     const { title } = options;
     const chineseName = title && /[\u4e00-\u9fa5]/.test(title) ? title : null;
     const desktopContent = `[Desktop Entry]
 Version=1.0
 Type=Application
-Name=${displayName}
+Name=${name}
 ${chineseName ? `Name[zh_CN]=${chineseName}` : ''}
-Comment=${displayName} Pake app
+Comment=${name}
 Exec=${linuxBinaryName}
 Icon=${iconName}
 Categories=Network;WebBrowser;Utility;
 MimeType=text/html;text/xml;application/xhtml_xml;
-StartupWMClass=${linuxBinaryName}
 StartupNotify=true
 Terminal=false
 `;
@@ -707,9 +705,6 @@ async function mergeConfig(url, options, tauriConf) {
     const { appVersion, userAgent, showSystemTray, useLocalFile, identifier, name = 'pake-app', installerLanguage, wasm, camera, microphone, } = options;
     const platform = asSupportedPlatform(process.platform);
     const tauriConfWindowOptions = buildWindowConfigOverrides(options, platform);
-    if (!tauriConfWindowOptions.title && options.displayName) {
-        tauriConfWindowOptions.title = options.displayName;
-    }
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
     tauriConf.productName = name;
     tauriConf.identifier = identifier;
@@ -1423,9 +1418,22 @@ class LinuxBuilder extends BaseBuilder {
             }
         }
     }
+    async ensureArchPackagingTools() {
+        const requiredTools = [
+            { tool: 'ar', pacmanPackage: 'binutils' },
+            { tool: 'bsdtar', pacmanPackage: 'libarchive' },
+        ];
+        for (const { tool, pacmanPackage } of requiredTools) {
+            try {
+                await shellExec(`command -v ${tool} >/dev/null 2>&1`);
+            }
+            catch {
+                throw new Error(`Building a zst package requires "${tool}". Install it first, e.g. "sudo pacman -S ${pacmanPackage}".`);
+            }
+        }
+    }
     async createArchPackageFromDeb() {
         const { name = 'pake-app' } = this.options;
-        const displayName = this.options.displayName || name;
         const packageName = generateLinuxPackageName(name);
         const version = tauriConfig.version;
         const arch = this.buildArch === 'arm64' ? 'aarch64' : 'x86_64';
@@ -1434,6 +1442,7 @@ class LinuxBuilder extends BaseBuilder {
         const workDir = path.resolve('.pake-arch-package');
         const dataDir = path.join(workDir, 'data');
         const controlDir = path.join(workDir, 'control');
+        await this.ensureArchPackagingTools();
         await fsExtra.remove(workDir);
         await fsExtra.ensureDir(dataDir);
         await fsExtra.ensureDir(controlDir);
@@ -1449,20 +1458,20 @@ class LinuxBuilder extends BaseBuilder {
             const pkgInfo = `pkgname = ${packageName}
 pkgbase = ${packageName}
 pkgver = ${version}-1
-pkgdesc = ${displayName} Pake app
+pkgdesc = ${name} Pake app
 url = https://github.com/tw93/Pake
 builddate = ${Math.floor(Date.now() / 1000)}
 packager = Pake
 size = ${installedSize}
 arch = ${arch}
-license = MIT
+license = custom
 depend = cairo
 depend = desktop-file-utils
 depend = gdk-pixbuf2
 depend = glib2
 depend = gtk3
 depend = hicolor-icon-theme
-depend = libsoup
+depend = libsoup3
 depend = pango
 depend = webkit2gtk-4.1
 `;
@@ -2440,7 +2449,6 @@ async function handleOptions(options, url) {
     const { platform } = process;
     const isActions = process.env.GITHUB_ACTIONS;
     let name = options.name;
-    let displayName = options.name;
     const pathExists = await fsExtra.pathExists(url);
     if (!options.name) {
         const defaultName = pathExists
@@ -2449,10 +2457,8 @@ async function handleOptions(options, url) {
         const promptMessage = 'Enter your application name';
         const namePrompt = await promptText(promptMessage, defaultName);
         name = namePrompt?.trim() || defaultName;
-        displayName = name;
     }
     if (name && platform === 'linux') {
-        displayName = displayName || name;
         name = generateLinuxPackageName(name);
     }
     if (name && !isValidName(name, platform)) {
@@ -2472,7 +2478,6 @@ async function handleOptions(options, url) {
     const appOptions = {
         ...options,
         name: resolvedName,
-        displayName: displayName || resolvedName,
         identifier: resolveIdentifier(url, options.name, options.identifier),
     };
     const iconPath = await handleIcon(appOptions, url);
@@ -2480,15 +2485,6 @@ async function handleOptions(options, url) {
     return appOptions;
 }
 
-function isArchLinuxBased() {
-    try {
-        const osRelease = fs$1.readFileSync('/etc/os-release', 'utf8').toLowerCase();
-        return osRelease.includes('id=arch') || osRelease.includes('id_like=arch');
-    }
-    catch {
-        return false;
-    }
-}
 const DEFAULT_PAKE_OPTIONS = {
     icon: '',
     height: 780,
@@ -2507,7 +2503,7 @@ const DEFAULT_PAKE_OPTIONS = {
     targets: (() => {
         switch (process.platform) {
             case 'linux':
-                return isArchLinuxBased() ? 'zst' : 'deb,appimage';
+                return 'deb,appimage';
             case 'darwin':
                 return 'dmg';
             case 'win32':

@@ -366,10 +366,7 @@ fn build_window(
     // Windows and Linux: set data_directory before proxy_url
     #[cfg(not(target_os = "macos"))]
     {
-        window_builder = window_builder
-            .data_directory(_data_dir)
-            .decorations(!window_config.hide_title_bar)
-            .theme(None);
+        window_builder = window_builder.data_directory(_data_dir).theme(None);
 
         if !config.proxy_url.is_empty() {
             if let Ok(proxy_url) = Url::from_str(&config.proxy_url) {

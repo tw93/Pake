@@ -151,23 +151,21 @@ async function mergeLinuxConfig(
   delete linuxBundle.deb.files;
 
   const linuxName = generateLinuxPackageName(name);
-  const displayName = options.displayName || name;
   const desktopFileName = `com.pake.${linuxName}.desktop`;
-  const iconName = `pake-${linuxName}`;
+  const iconName = `${linuxName}_512`;
   const { title } = options;
 
   const chineseName = title && /[\u4e00-\u9fa5]/.test(title) ? title : null;
   const desktopContent = `[Desktop Entry]
 Version=1.0
 Type=Application
-Name=${displayName}
+Name=${name}
 ${chineseName ? `Name[zh_CN]=${chineseName}` : ''}
-Comment=${displayName} Pake app
+Comment=${name}
 Exec=${linuxBinaryName}
 Icon=${iconName}
 Categories=Network;WebBrowser;Utility;
 MimeType=text/html;text/xml;application/xhtml_xml;
-StartupWMClass=${linuxBinaryName}
 StartupNotify=true
 Terminal=false
 `;
@@ -446,9 +444,6 @@ export async function mergeConfig(
 
   const platform = asSupportedPlatform(process.platform);
   const tauriConfWindowOptions = buildWindowConfigOverrides(options, platform);
-  if (!tauriConfWindowOptions.title && options.displayName) {
-    tauriConfWindowOptions.title = options.displayName;
-  }
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
 
   tauriConf.productName = name;

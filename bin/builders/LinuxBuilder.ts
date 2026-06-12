@@ -81,9 +81,24 @@ export default class LinuxBuilder extends BaseBuilder {
     }
   }
 
+  private async ensureArchPackagingTools() {
+    const requiredTools = [
+      { tool: 'ar', pacmanPackage: 'binutils' },
+      { tool: 'bsdtar', pacmanPackage: 'libarchive' },
+    ];
+    for (const { tool, pacmanPackage } of requiredTools) {
+      try {
+        await shellExec(`command -v ${tool} >/dev/null 2>&1`);
+      } catch {
+        throw new Error(
+          `Building a zst package requires "${tool}". Install it first, e.g. "sudo pacman -S ${pacmanPackage}".`,
+        );
+      }
+    }
+  }
+
   private async createArchPackageFromDeb() {
     const { name = 'pake-app' } = this.options;
-    const displayName = this.options.displayName || name;
     const packageName = generateLinuxPackageName(name);
     const version = tauriConfig.version;
     const arch = this.buildArch === 'arm64' ? 'aarch64' : 'x86_64';
@@ -95,6 +110,7 @@ export default class LinuxBuilder extends BaseBuilder {
     const dataDir = path.join(workDir, 'data');
     const controlDir = path.join(workDir, 'control');
 
+    await this.ensureArchPackagingTools();
     await fsExtra.remove(workDir);
     await fsExtra.ensureDir(dataDir);
     await fsExtra.ensureDir(controlDir);
@@ -125,20 +141,20 @@ export default class LinuxBuilder extends BaseBuilder {
       const pkgInfo = `pkgname = ${packageName}
 pkgbase = ${packageName}
 pkgver = ${version}-1
-pkgdesc = ${displayName} Pake app
+pkgdesc = ${name} Pake app
 url = https://github.com/tw93/Pake
 builddate = ${Math.floor(Date.now() / 1000)}
 packager = Pake
 size = ${installedSize}
 arch = ${arch}
-license = MIT
+license = custom
 depend = cairo
 depend = desktop-file-utils
 depend = gdk-pixbuf2
 depend = glib2
 depend = gtk3
 depend = hicolor-icon-theme
-depend = libsoup
+depend = libsoup3
 depend = pango
 depend = webkit2gtk-4.1
 `;

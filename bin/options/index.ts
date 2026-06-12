@@ -49,7 +49,6 @@ export default async function handleOptions(
   const { platform } = process;
   const isActions = process.env.GITHUB_ACTIONS;
   let name = options.name;
-  let displayName = options.name;
 
   const pathExists = await fsExtra.pathExists(url);
   if (!options.name) {
@@ -59,11 +58,9 @@ export default async function handleOptions(
     const promptMessage = 'Enter your application name';
     const namePrompt = await promptText(promptMessage, defaultName);
     name = namePrompt?.trim() || defaultName;
-    displayName = name;
   }
 
   if (name && platform === 'linux') {
-    displayName = displayName || name;
     name = generateLinuxPackageName(name);
   }
 
@@ -86,7 +83,6 @@ export default async function handleOptions(
   const appOptions: PakeAppOptions = {
     ...options,
     name: resolvedName,
-    displayName: displayName || resolvedName,
     identifier: resolveIdentifier(url, options.name, options.identifier),
   };
 

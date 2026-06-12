@@ -141,7 +141,6 @@ export interface PakeCliOptions {
 
 export interface PakeAppOptions extends PakeCliOptions {
   identifier: string;
-  displayName?: string;
 }
 
 export interface PlatformSpecific<T> {
