@@ -4,6 +4,10 @@ on:
   push:
     tags:
       - "V*"
+  # Manual npm-only publish for CLI hotfixes that do not need the full
+  # V* tag release (popular apps, Docker). Version files must already be
+  # bumped on main; the check step then validates against package.json.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -38,7 +42,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Check release version
-        run: node scripts/check-release-version.mjs "$GITHUB_REF_NAME"
+        run: node scripts/check-release-version.mjs "${{ github.ref_type == 'tag' && github.ref_name || '' }}"
 
       - name: Check formatting
         run: pnpm run format:check
