@@ -915,7 +915,8 @@ const APPIMAGE_FAILURE_GUIDANCE = `\n\n${APPIMAGE_BAR}\n` +
     '      Arch:    sudo pacman -S gdk-pixbuf2 librsvg\n' +
     '      Debian:  sudo apt install librsvg2-common gdk-pixbuf2.0-bin\n' +
     '      Fedora:  sudo dnf install gdk-pixbuf2-modules librsvg2\n' +
-    '      then:    gdk-pixbuf-query-loaders --update-cache\n' +
+    '      then:    sudo gdk-pixbuf-query-loaders --update-cache\n' +
+    '      (Arch refreshes the cache automatically via a pacman hook)\n' +
     '  • Running in Docker/container: AppImage needs /dev/fuse:\n' +
     '      --privileged --device /dev/fuse --security-opt apparmor=unconfined\n\n' +
     'Still stuck? Build a DEB instead: pake <url> --targets deb\n' +
