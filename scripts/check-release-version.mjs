@@ -4,7 +4,11 @@ import fs from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
-const tag = process.argv[2] || process.env.GITHUB_REF_NAME;
+// Only trust GITHUB_REF_NAME when the workflow actually runs on a tag;
+// on workflow_dispatch it holds the branch name, which is not a version.
+const refTag =
+  process.env.GITHUB_REF_TYPE === "tag" ? process.env.GITHUB_REF_NAME : "";
+const tag = process.argv[2] || refTag;
 const errors = [];
 
 function readText(filePath) {
