@@ -203,12 +203,17 @@ Pake 的发展离不开这些优秀的贡献者 ❤️
 
 ## 支持
 
+<details>
+<summary>感谢这些喂过罐头的朋友 🥩</summary>
+<br/>
 <a href="https://cats.tw93.fun?name=Pake"><img src="https://cdn.jsdelivr.net/gh/tw93/sponsors@main/assets/sponsors.svg" width="1000px" /></a>
+</details>
 
 1. 我有两只猫，一只叫汤圆，一只可乐，假如 Pake 让你生活更美好，可以给她们 <a href="https://cats.tw93.fun?name=Pake" target="_blank">喂罐头 🥩</a>。
 2. 如果你喜欢 Pake，可以在 Github Star，更欢迎 [推荐](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20一键打包网页生成轻量桌面应用，比%20Electron%20小%2020%20倍，支持%20macOS%20Windows%20Linux) 给志同道合的朋友使用。
 3. 可以关注我的 [Twitter](https://twitter.com/HiTw93) 获取最新的 Pake 更新消息，也欢迎加入 [Telegram](https://t.me/+GclQS9ZnxyI2ODQ1) 聊天群。
 4. 希望大伙玩的过程中有一种学习新技术的喜悦感，发现适合做成桌面 App 的网页也欢迎告诉我。
+5. 购买我做的 Mac 清理应用 [Mole for Mac](https://mole.fit)，也是对我最直接的支持。
 
 ## 开源协议
 
