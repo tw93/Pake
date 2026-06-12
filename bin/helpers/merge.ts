@@ -17,6 +17,7 @@ import {
   WindowConfig,
 } from '@/types';
 import { tauriConfigDirectory, npmDirectory } from '@/utils/dir';
+import { LINUX_TARGET_TYPES } from '@/utils/targets';
 
 /**
  * Pure transform from CLI options to the window-config slice that gets
@@ -188,20 +189,15 @@ Terminal=false
   };
 
   const validTargets = [
-    'deb',
-    'appimage',
-    'rpm',
-    'zst',
-    'deb-arm64',
-    'appimage-arm64',
-    'rpm-arm64',
-    'zst-arm64',
+    ...LINUX_TARGET_TYPES,
+    ...LINUX_TARGET_TYPES.map((target) => `${target}-arm64`),
   ];
   const baseTarget = options.targets.includes('-arm64')
     ? options.targets.replace('-arm64', '')
     : options.targets;
 
   if (validTargets.includes(options.targets)) {
+    // zst is repacked from the deb payload, so Tauri itself bundles a deb.
     tauriConf.bundle.targets = [baseTarget === 'zst' ? 'deb' : baseTarget];
   } else {
     logger.warn(

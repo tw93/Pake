@@ -7,6 +7,9 @@ export function validateNumberInput(value: string) {
   if (!Number.isFinite(parsedValue)) {
     throw new InvalidArgumentError('Not a number.');
   }
+  if (parsedValue < 0) {
+    throw new InvalidArgumentError('Must not be negative.');
+  }
   return parsedValue;
 }
 

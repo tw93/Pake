@@ -63,4 +63,9 @@ describe('CLI options', () => {
     expect(() => validateNumberInput('-Infinity')).toThrow('Not a number.');
     expect(validateNumberInput('1200')).toBe(1200);
   });
+
+  it('rejects negative numeric option values', () => {
+    expect(() => validateNumberInput('-100')).toThrow('Must not be negative.');
+    expect(validateNumberInput('0')).toBe(0);
+  });
 });
