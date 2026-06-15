@@ -136,11 +136,15 @@ class PakeTestRunner {
     try {
       execSync(`node "${config.CLI_PATH}" --version`, {
         encoding: "utf8",
-        timeout: 3000,
+        timeout: TIMEOUTS.QUICK,
       });
-      console.log("[PASS] CLI is executable");
+      console.log("[PASS] CLI responds");
     } catch (error) {
-      console.log("[FAIL] CLI is not executable");
+      const reason =
+        error.signal === "SIGTERM"
+          ? `timed out after ${TIMEOUTS.QUICK}ms`
+          : error.message;
+      console.log(`[FAIL] CLI did not respond: ${reason}`);
       process.exit(1);
     }
 
