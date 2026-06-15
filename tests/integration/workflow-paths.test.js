@@ -6,6 +6,7 @@
  */
 
 import { describe, it, expect } from "vitest";
+import fs from "fs";
 import path from "path";
 
 describe("Workflow path integration", () => {
@@ -27,6 +28,9 @@ describe("Workflow path integration", () => {
           primary: "appname.rpm",
           fallback: "src-tauri/target/release/bundle/rpm",
         },
+        zst: {
+          primary: "appname-1.0.0-1-x86_64.pkg.tar.zst",
+        },
       };
 
       // Verify paths are defined
@@ -34,6 +38,8 @@ describe("Workflow path integration", () => {
       expect(linuxPaths.deb.fallback).toBeTruthy();
       expect(linuxPaths.appimage.primary).toBeTruthy();
       expect(linuxPaths.appimage.fallback).toBeTruthy();
+      expect(linuxPaths.rpm.primary).toBeTruthy();
+      expect(linuxPaths.zst.primary).toBeTruthy();
     });
 
     it("should match Windows output paths", () => {
@@ -99,11 +105,35 @@ describe("Workflow path integration", () => {
     it("should filter valid targets", () => {
       const targets = "deb,invalid,appimage";
       const parsedTargets = targets.split(",").map((t) => t.trim());
-      const validTargets = ["deb", "appimage", "rpm"];
+      const validTargets = ["deb", "appimage", "rpm", "zst"];
       const filtered = parsedTargets.filter((t) => validTargets.includes(t));
 
       expect(filtered).toEqual(["deb", "appimage"]);
       expect(filtered).not.toContain("invalid");
+    });
+
+    it("should keep zst in valid Linux targets", () => {
+      const targets = "deb,zst";
+      const parsedTargets = targets.split(",").map((t) => t.trim());
+      const validTargets = ["deb", "appimage", "rpm", "zst"];
+      const filtered = parsedTargets.filter((t) => validTargets.includes(t));
+
+      expect(filtered).toEqual(["deb", "zst"]);
+    });
+  });
+
+  describe("Workflow artifact uploads", () => {
+    it("should upload every Linux workflow package format", () => {
+      const workflow = fs.readFileSync(
+        ".github/workflows/pake-cli.yaml",
+        "utf8",
+      );
+
+      expect(workflow).toContain("Upload DEB (Linux)");
+      expect(workflow).toContain("Upload AppImage (Linux)");
+      expect(workflow).toContain("Upload RPM (Linux)");
+      expect(workflow).toContain("Upload ZST (Linux)");
+      expect(workflow).toContain("path: ${{ inputs.name }}-*.pkg.tar.zst");
     });
   });
 

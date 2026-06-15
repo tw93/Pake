@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   LINUX_TARGET_TYPES,
   filterLinuxTargets,
+  needsTemporaryDebForZst,
 } from '../../bin/utils/targets.js';
 
 describe('Linux target filtering', () => {
@@ -56,5 +57,12 @@ describe('Linux target filtering', () => {
 
   it('covers exactly the supported Linux formats', () => {
     expect(LINUX_TARGET_TYPES).toEqual(['deb', 'appimage', 'rpm', 'zst']);
+  });
+
+  it('uses a temporary deb only when zst is requested without deb', () => {
+    expect(needsTemporaryDebForZst(['zst'])).toBe(true);
+    expect(needsTemporaryDebForZst(['appimage', 'zst'])).toBe(true);
+    expect(needsTemporaryDebForZst(['deb', 'zst'])).toBe(false);
+    expect(needsTemporaryDebForZst(['deb', 'appimage'])).toBe(false);
   });
 });

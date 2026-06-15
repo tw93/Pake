@@ -46,6 +46,7 @@ var keywords = [
 	"productivity"
 ];
 var files = [
+	"LICENSE-EXCEPTION",
 	"dist",
 	"src-tauri"
 ];
@@ -416,6 +417,9 @@ const LINUX_TARGET_TYPES = ['deb', 'appimage', 'rpm', 'zst'];
 function filterLinuxTargets(targets) {
     const requested = targets.split(',').map((target) => target.trim());
     return LINUX_TARGET_TYPES.filter((target) => requested.includes(target));
+}
+function needsTemporaryDebForZst(targets) {
+    return targets.includes('zst') && !targets.includes('deb');
 }
 
 /**
@@ -1407,11 +1411,16 @@ class LinuxBuilder extends BaseBuilder {
         if (targets.length === 0) {
             throw new Error(`No valid Linux target in "${this.options.targets}". Valid targets: ${LINUX_TARGET_TYPES.join(', ')}.`);
         }
+        const useTemporaryDebForZst = needsTemporaryDebForZst(targets);
         for (const target of targets) {
             this.currentBuildType = target;
             if (target === 'zst') {
-                await this.buildAndCopy(url, 'deb', false);
-                await this.createArchPackageFromDeb();
+                if (useTemporaryDebForZst) {
+                    await this.buildAndCopy(url, 'deb', false);
+                }
+                await this.createArchPackageFromDeb({
+                    removeSourceDeb: useTemporaryDebForZst,
+                });
             }
             else {
                 await this.buildAndCopy(url, target);
@@ -1432,7 +1441,7 @@ class LinuxBuilder extends BaseBuilder {
             }
         }
     }
-    async createArchPackageFromDeb() {
+    async createArchPackageFromDeb({ removeSourceDeb, }) {
         const { name = 'pake-app' } = this.options;
         const packageName = generateLinuxPackageName(name);
         const version = tauriConfig.version;
@@ -1493,11 +1502,13 @@ post_remove() {
 }
 `);
             await shellExec(`bsdtar --zstd -cf "${packagePath}" -C "${dataDir}" .PKGINFO .INSTALL usr`);
-            await fsExtra.remove(debPath);
             logger.success('✔ Build success!');
             logger.success('✔ App installer located in', packagePath);
         }
         finally {
+            if (removeSourceDeb) {
+                await fsExtra.remove(debPath);
+            }
             await fsExtra.remove(workDir);
         }
     }

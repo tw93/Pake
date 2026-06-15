@@ -85,6 +85,12 @@ expectEqual(
   "git+https://github.com/tw93/Pake.git",
 );
 
+if (!packageJson.files?.includes("LICENSE-EXCEPTION")) {
+  errors.push(
+    "package.json files: LICENSE-EXCEPTION must be included in the npm package",
+  );
+}
+
 if (errors.length > 0) {
   console.error("Release version check failed:");
   for (const error of errors) {

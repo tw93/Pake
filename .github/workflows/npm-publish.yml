@@ -25,6 +25,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Check manual publish branch
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "Manual npm publish must run from main, got ${GITHUB_REF}."
+            exit 1
+          fi
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:

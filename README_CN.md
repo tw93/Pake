@@ -217,4 +217,4 @@ Pake 的发展离不开这些优秀的贡献者 ❤️
 
 ## 开源协议
 
-Pake 使用 GPL-3.0 协议开源，详见 [LICENSE](./LICENSE)，用 Pake 打包生成的应用所有权完全归你，可以自由使用和分发；假如你想基于 fork 重新做一个 Pake 产品，为了避免误解，辛苦换一个名字，并注明来源。
+Pake 使用 GPL-3.0 协议开源，详见 [LICENSE](./LICENSE) 和 [Pake Output Exception](./LICENSE-EXCEPTION)，用 Pake 打包生成的应用所有权完全归你，可以自由使用和分发；假如你想基于 fork 重新做一个 Pake 产品，为了避免误解，辛苦换一个名字，并注明来源。

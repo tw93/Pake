@@ -59,7 +59,7 @@ on:
         type: boolean
         default: false
       targets:
-        description: "Package formats (comma-separated: deb,appimage,rpm)"
+        description: "Package formats (comma-separated: deb,appimage,rpm,zst)"
         required: false
         default: "deb"
 
@@ -220,6 +220,24 @@ jobs:
         with:
           name: ${{ inputs.name }}-Linux-AppImage
           path: ${{ inputs.name }}.AppImage
+          retention-days: 3
+          if-no-files-found: ignore
+
+      - name: Upload RPM (Linux)
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ inputs.name }}-Linux-rpm
+          path: ${{ inputs.name }}.rpm
+          retention-days: 3
+          if-no-files-found: ignore
+
+      - name: Upload ZST (Linux)
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ inputs.name }}-Linux-zst
+          path: ${{ inputs.name }}-*.pkg.tar.zst
           retention-days: 3
           if-no-files-found: ignore
 

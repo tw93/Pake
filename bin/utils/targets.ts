@@ -6,3 +6,7 @@ export function filterLinuxTargets(targets: string): string[] {
   const requested = targets.split(',').map((target) => target.trim());
   return LINUX_TARGET_TYPES.filter((target) => requested.includes(target));
 }
+
+export function needsTemporaryDebForZst(targets: string[]): boolean {
+  return targets.includes('zst') && !targets.includes('deb');
+}
