@@ -272,6 +272,33 @@ function shouldBypassPakeLinkHandling(rawHref) {
   );
 }
 
+function shouldNavigateAuthInCurrentWindow() {
+  return /macintosh|mac os x/i.test(navigator.userAgent);
+}
+
+function canNavigateAuthUrl(url) {
+  const normalizedUrl = normalizeAnchorHref(url).toLowerCase();
+  return normalizedUrl !== "" && normalizedUrl !== "about:blank";
+}
+
+function navigateInCurrentWindow(url) {
+  window.location.href = url;
+  return window;
+}
+
+function openAuthNavigation(originalWindowOpen, url, name, specs) {
+  if (shouldNavigateAuthInCurrentWindow() && canNavigateAuthUrl(url)) {
+    return navigateInCurrentWindow(url);
+  }
+
+  const authWindow = originalWindowOpen.call(window, url, name, specs);
+  if (!authWindow) {
+    return navigateInCurrentWindow(url);
+  }
+
+  return authWindow;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const tauri = window.__TAURI__;
   const appWindow = tauri.window.getCurrentWindow();
@@ -440,16 +467,12 @@ document.addEventListener("DOMContentLoaded", () => {
           e.preventDefault();
           e.stopImmediatePropagation();
 
-          const authWindow = originalWindowOpen.call(
-            window,
+          openAuthNavigation(
+            originalWindowOpen,
             absoluteUrl,
             "_blank",
             "width=1200,height=800,scrollbars=yes,resizable=yes",
           );
-
-          if (!authWindow) {
-            window.location.href = absoluteUrl;
-          }
         }
 
         return;
@@ -544,9 +567,15 @@ document.addEventListener("DOMContentLoaded", () => {
       return originalWindowOpen.call(window, url, name, specs);
     }
 
-    // Allow authentication popups to open normally
+    // Avoid macOS WebKit auth-popup crashes by navigating auth URLs in-place.
     if (window.isAuthPopup(url, name)) {
-      return originalWindowOpen.call(window, url, name, specs);
+      try {
+        const baseUrl = window.location.origin + window.location.pathname;
+        const absoluteUrl = new URL(url, baseUrl).href;
+        return openAuthNavigation(originalWindowOpen, absoluteUrl, name, specs);
+      } catch (error) {
+        return openAuthNavigation(originalWindowOpen, url, name, specs);
+      }
     }
 
     try {

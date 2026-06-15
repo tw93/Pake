@@ -3,7 +3,10 @@ import path from "path";
 import { runInNewContext } from "node:vm";
 import { describe, expect, it } from "vitest";
 
-function loadEventHelpers({ withTauri = false } = {}) {
+function loadEventHelpers({
+  withTauri = false,
+  userAgent = "Mozilla/5.0",
+} = {}) {
   const source = fs.readFileSync(
     path.join(process.cwd(), "src-tauri/src/inject/event.js"),
     "utf-8",
@@ -24,7 +27,7 @@ function loadEventHelpers({ withTauri = false } = {}) {
     clearTimeout,
     scrollTo: () => {},
     navigator: {
-      userAgent: "Mozilla/5.0",
+      userAgent,
       language: "en-US",
     },
     window: {
@@ -35,6 +38,7 @@ function loadEventHelpers({ withTauri = false } = {}) {
       location: {
         href: "https://example.com/app",
         origin: "https://example.com",
+        pathname: "/app",
         reload: () => {},
       },
       localStorage: {
@@ -82,6 +86,57 @@ describe("event link guard", () => {
     expect(shouldBypassPakeLinkHandling("https://example.com/account")).toBe(
       false,
     );
+  });
+
+  it("navigates macOS auth URLs in the current window", () => {
+    const { openAuthNavigation, window } = loadEventHelpers({
+      userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_5)",
+    });
+    const openCalls = [];
+    const originalWindowOpen = (url, name, specs) => {
+      openCalls.push({ url, name, specs });
+      return {};
+    };
+
+    const result = openAuthNavigation(
+      originalWindowOpen,
+      "https://www.linkedin.com/login",
+      "_blank",
+      "width=1200,height=800",
+    );
+
+    expect(openCalls).toEqual([]);
+    expect(window.location.href).toBe("https://www.linkedin.com/login");
+    expect(result).toBe(window);
+  });
+
+  it("keeps blank macOS auth popups on the native popup path", () => {
+    const popup = {};
+    const { openAuthNavigation, window } = loadEventHelpers({
+      userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_5)",
+    });
+    const openCalls = [];
+    const originalWindowOpen = (url, name, specs) => {
+      openCalls.push({ url, name, specs });
+      return popup;
+    };
+
+    const result = openAuthNavigation(
+      originalWindowOpen,
+      "about:blank",
+      "login",
+      "width=1200,height=800",
+    );
+
+    expect(openCalls).toEqual([
+      {
+        url: "about:blank",
+        name: "login",
+        specs: "width=1200,height=800",
+      },
+    ]);
+    expect(window.location.href).toBe("https://example.com/app");
+    expect(result).toBe(popup);
   });
 
   it("bridges Web Badging API calls to explicit badge commands", async () => {
