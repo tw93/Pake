@@ -64,6 +64,11 @@ describe('CLI options', () => {
     expect(validateNumberInput('1200')).toBe(1200);
   });
 
+  it('rejects blank numeric option values', () => {
+    expect(() => validateNumberInput('')).toThrow('Not a number.');
+    expect(() => validateNumberInput('   ')).toThrow('Not a number.');
+  });
+
   it('rejects negative numeric option values', () => {
     expect(() => validateNumberInput('-100')).toThrow('Must not be negative.');
     expect(validateNumberInput('0')).toBe(0);

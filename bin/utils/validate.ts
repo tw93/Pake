@@ -3,6 +3,9 @@ import { InvalidArgumentError } from 'commander';
 import { normalizeUrl } from './url';
 
 export function validateNumberInput(value: string) {
+  if (value.trim() === '') {
+    throw new InvalidArgumentError('Not a number.');
+  }
   const parsedValue = Number(value);
   if (!Number.isFinite(parsedValue)) {
     throw new InvalidArgumentError('Not a number.');
