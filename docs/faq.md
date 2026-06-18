@@ -197,6 +197,29 @@ The `NO_STRIP=1` environment variable is the official workaround recommended by 
 
 ---
 
+### Linux: AppImage Opens but Buttons or Keyboard Do Not Work on Wayland
+
+**Problem:**
+On some pure Wayland compositors, especially niri, the AppImage can open but page buttons cannot be clicked or keyboard input does not reach the webview.
+
+**Solution:**
+Pake automatically avoids the conservative WebKit rendering flags in niri sessions. To force the same native WebKit path manually, launch the app with:
+
+```bash
+PAKE_LINUX_WEBKIT_SAFE_MODE=0 ./MyApp.AppImage
+```
+
+If your system shows a blank window instead, re-enable the conservative WebKit workaround:
+
+```bash
+PAKE_LINUX_WEBKIT_SAFE_MODE=1 ./MyApp.AppImage
+```
+
+**Why This Happens:**
+Pake normally enables WebKitGTK workarounds that help blank-window cases on Linux, but those same flags can make input and window controls unreliable on some Wayland compositors. The `PAKE_LINUX_WEBKIT_SAFE_MODE` variable lets you choose the safer rendering mode for your compositor.
+
+---
+
 ### Linux: "cargo: command not found" After Installing Rust
 
 **Problem:**

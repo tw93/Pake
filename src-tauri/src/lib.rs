@@ -10,6 +10,12 @@ use tauri_plugin_window_state::StateFlags;
 use std::time::Duration;
 
 const WINDOW_SHOW_DELAY: u64 = 50;
+#[cfg(target_os = "linux")]
+const PAKE_LINUX_WEBKIT_SAFE_MODE: &str = "PAKE_LINUX_WEBKIT_SAFE_MODE";
+#[cfg(target_os = "linux")]
+const WEBKIT_DISABLE_DMABUF_RENDERER: &str = "WEBKIT_DISABLE_DMABUF_RENDERER";
+#[cfg(target_os = "linux")]
+const WEBKIT_DISABLE_COMPOSITING_MODE: &str = "WEBKIT_DISABLE_COMPOSITING_MODE";
 
 use app::{
     invoke::{
@@ -21,16 +27,83 @@ use app::{
 };
 use util::get_pake_config;
 
+#[cfg(any(target_os = "linux", test))]
+fn is_disabled_env_value(value: &str) -> bool {
+    matches!(
+        value.trim().to_ascii_lowercase().as_str(),
+        "0" | "false" | "off" | "no" | "native" | "disabled"
+    )
+}
+
+#[cfg(any(target_os = "linux", test))]
+fn is_non_empty_env_value(value: Option<&str>) -> bool {
+    value.map(|value| !value.trim().is_empty()).unwrap_or(false)
+}
+
+#[cfg(any(target_os = "linux", test))]
+fn contains_niri(value: &str) -> bool {
+    value
+        .split([':', ';', ',', ' '])
+        .any(|part| part.eq_ignore_ascii_case("niri"))
+}
+
+#[cfg(any(target_os = "linux", test))]
+fn should_enable_linux_webkit_safe_mode_from_values(
+    safe_mode: Option<&str>,
+    niri_socket: Option<&str>,
+    desktop_values: &[Option<&str>],
+) -> bool {
+    if let Some(value) = safe_mode.filter(|value| !value.trim().is_empty()) {
+        return !is_disabled_env_value(value);
+    }
+
+    let is_niri_session = is_non_empty_env_value(niri_socket)
+        || desktop_values
+            .iter()
+            .flatten()
+            .any(|value| contains_niri(value));
+
+    !is_niri_session
+}
+
+#[cfg(target_os = "linux")]
+fn apply_linux_webkit_runtime_flags() {
+    let safe_mode = std::env::var(PAKE_LINUX_WEBKIT_SAFE_MODE).ok();
+    if safe_mode.as_deref().is_some_and(is_disabled_env_value) {
+        std::env::remove_var(WEBKIT_DISABLE_DMABUF_RENDERER);
+        std::env::remove_var(WEBKIT_DISABLE_COMPOSITING_MODE);
+        return;
+    }
+
+    let desktop_values = [
+        std::env::var("XDG_CURRENT_DESKTOP").ok(),
+        std::env::var("XDG_SESSION_DESKTOP").ok(),
+        std::env::var("DESKTOP_SESSION").ok(),
+    ];
+    let desktop_refs = desktop_values
+        .iter()
+        .map(|value| value.as_deref())
+        .collect::<Vec<_>>();
+
+    if !should_enable_linux_webkit_safe_mode_from_values(
+        safe_mode.as_deref(),
+        std::env::var("NIRI_SOCKET").ok().as_deref(),
+        &desktop_refs,
+    ) {
+        return;
+    }
+
+    if std::env::var(WEBKIT_DISABLE_DMABUF_RENDERER).is_err() {
+        std::env::set_var(WEBKIT_DISABLE_DMABUF_RENDERER, "1");
+    }
+    if std::env::var(WEBKIT_DISABLE_COMPOSITING_MODE).is_err() {
+        std::env::set_var(WEBKIT_DISABLE_COMPOSITING_MODE, "1");
+    }
+}
+
 pub fn run_app() {
     #[cfg(target_os = "linux")]
-    {
-        if std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").is_err() {
-            std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
-        }
-        if std::env::var("WEBKIT_DISABLE_COMPOSITING_MODE").is_err() {
-            std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
-        }
-    }
+    apply_linux_webkit_runtime_flags();
 
     let (pake_config, tauri_config) = get_pake_config();
     let tauri_app = tauri::Builder::default();
@@ -201,4 +274,59 @@ pub fn run_app() {
 
 pub fn run() {
     run_app()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn linux_webkit_safe_mode_stays_on_by_default() {
+        assert!(should_enable_linux_webkit_safe_mode_from_values(
+            None,
+            None,
+            &[None, None, None]
+        ));
+    }
+
+    #[test]
+    fn linux_webkit_safe_mode_is_disabled_for_niri_socket() {
+        assert!(!should_enable_linux_webkit_safe_mode_from_values(
+            None,
+            Some("/run/user/501/niri.sock"),
+            &[None, None, None]
+        ));
+    }
+
+    #[test]
+    fn linux_webkit_safe_mode_is_disabled_for_niri_desktop() {
+        assert!(!should_enable_linux_webkit_safe_mode_from_values(
+            None,
+            None,
+            &[Some("niri"), None, None]
+        ));
+    }
+
+    #[test]
+    fn linux_webkit_safe_mode_can_be_forced_on_for_niri() {
+        assert!(should_enable_linux_webkit_safe_mode_from_values(
+            Some("1"),
+            Some("/run/user/501/niri.sock"),
+            &[Some("niri"), None, None]
+        ));
+    }
+
+    #[test]
+    fn linux_webkit_safe_mode_can_be_disabled_explicitly() {
+        for value in ["0", "false", "off", "no", "native", "disabled"] {
+            assert!(
+                !should_enable_linux_webkit_safe_mode_from_values(
+                    Some(value),
+                    None,
+                    &[None, None, None]
+                ),
+                "expected {value} to disable safe mode"
+            );
+        }
+    }
 }

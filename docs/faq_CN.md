@@ -197,6 +197,29 @@ docker run --rm --privileged \
 
 ---
 
+### Linux：AppImage 打开后按钮或键盘在 Wayland 下不可用
+
+**问题描述：**
+在某些纯 Wayland 合成器上，尤其是 niri，AppImage 可以打开，但页面按钮无法点击，键盘输入也无法进入 webview。
+
+**解决方案：**
+Pake 会在 niri 会话中自动避开保守的 WebKit 渲染参数。也可以手动强制使用原生 WebKit 渲染路径：
+
+```bash
+PAKE_LINUX_WEBKIT_SAFE_MODE=0 ./MyApp.AppImage
+```
+
+如果你的系统反而出现白屏，可以重新启用保守 WebKit workaround：
+
+```bash
+PAKE_LINUX_WEBKIT_SAFE_MODE=1 ./MyApp.AppImage
+```
+
+**原因：**
+Pake 默认启用的 WebKitGTK workaround 可以缓解 Linux 白屏，但在部分 Wayland 合成器上，这些参数可能导致输入和窗口控件不可用。`PAKE_LINUX_WEBKIT_SAFE_MODE` 可以按当前合成器选择更合适的渲染模式。
+
+---
+
 ### Linux:"cargo: command not found" 即使已安装 Rust
 
 **问题描述：**
