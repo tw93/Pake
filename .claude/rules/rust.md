@@ -34,5 +34,7 @@
 ### Platform sensitivity
 
 - WebKit compositing on Linux/Wayland is platform-sensitive. Don't change defaults without testing on the affected platform or documenting the risk.
+- Linux WebKit runtime flags live in `src-tauri/src/lib.rs`. Keep the default conservative; compositor-specific exceptions need unit tests for the decision function and FAQ guidance for users.
+- AppImage logs often contain optional GTK, appindicator, or GStreamer warnings. Do not treat those warnings as the root cause unless the user-visible symptom and target path confirm it.
 - `--incognito` trades persistence for clean private sessions; be deliberate around login / cookies / local storage / embedded-WebView detection.
 - Google OAuth and other embedded-WebView restrictions may still apply even with `--new-window` / `--multi-window`.

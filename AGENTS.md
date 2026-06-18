@@ -85,6 +85,7 @@ Execution rules:
 - Start with the smallest plausible file set
 - Prefer targeted search (`rg <symbol|string> <paths>`) over repository-wide scans
 - Ignore generated or output-heavy areas unless the task directly targets them, especially `dist/`, `node_modules/`, `src-tauri/target/`, `.app/`, `src-tauri/icons/`, and `src-tauri/png/`. Exception: `dist/cli.js` is the shipped CLI build artifact (see `package.json` `files`); when you change anything under `bin/`, rebuild it via `pnpm run cli:build` and commit the regenerated `dist/cli.js` alongside the source change
+- If a task touches release status, issue closeout, npm delivery, or GitHub assets, verify live surfaces separately: source commit/tag, workflow run, npm registry, GitHub Release/assets, and issue state. Do not let one passing surface imply another
 - Keep changes local to one subsystem when possible
 - Run the narrowest relevant verification first, expand only if needed
 - If key context is missing, make one reasonable assumption and proceed
@@ -95,8 +96,11 @@ Execution rules:
 - Recent window/runtime options include `--incognito`, `--new-window`, `--min-width`, `--min-height`, `--maximize`, multi-window behavior, notification click handling, and Linux/Wayland WebKit compositing defaults.
 - `--incognito` intentionally trades persistence for clean private sessions; be careful around login, cookies, local storage, and WeChat-style WebView detection.
 - `--new-window` and `--multi-window` do not bypass every provider policy. Google OAuth and similar embedded-WebView restrictions may still require a normal browser or native client.
+- macOS auth-popup behavior is fragile. Auth/sign-in URLs that trigger WebKit `SOAuthorization` popup creation should stay in the current window when that path can abort the app; changes in `src-tauri/src/inject/event.js` need targeted tests.
 - Notification flows cross injected JS, Tauri invokes, capabilities, and native notification plugins. Verify the Rust capability and JS caller together.
-- WebKit compositing behavior is platform-sensitive on Linux/Wayland. Do not change defaults without testing the affected platform path or documenting the risk.
+- WebKit compositing behavior is platform-sensitive on Linux/Wayland. Runtime flag decisions live in `src-tauri/src/lib.rs`; keep the default conservative, cover compositor exceptions with unit tests, and document user-facing fallbacks in `docs/faq*.md`.
+- Linux AppImage reports often include harmless GTK, appindicator, or GStreamer warnings. Separate optional runtime warnings from the actual symptom before changing code; input/click failures on pure Wayland compositors are not the same class as blank-window failures.
+- Release state can be split. npm Trusted Publishing can succeed before the popular-app release workflow finishes, and GitHub Release assets can exist while a workflow run still shows queued or in progress. Report each surface explicitly.
 
 ## Platform-Specific Development
 
@@ -150,7 +154,14 @@ The workflow can also be triggered manually via `workflow_dispatch` with options
 
 Pushing the same `V*` tag also triggers `.github/workflows/npm-publish.yml`, which publishes `pake-cli` to npm through Trusted Publishing. Configure the npm package's Trusted Publisher as GitHub Actions, `tw93/Pake`, workflow file `npm-publish.yml`, with no environment. Local `npm publish` is only a fallback when CI or npm registry state blocks the trusted path.
 
-Before treating an npm release as shipped, verify both `gh workflow list --all | grep "Publish npm Package"` and `npm view pake-cli@X.Y.Z version`. Do not reply to or close GitHub issues as released until the public registry returns the expected version.
+Before treating an npm release as shipped, verify both `gh workflow list --all | grep "Publish npm Package"` and `npm view pake-cli@X.Y.Z version`. Prefer `npm view pake-cli@X.Y.Z version gitHead dist.tarball --json` so the published package can be tied back to the intended commit. Do not reply to or close GitHub issues as released until the public registry returns the expected version.
+
+For release follow-through, keep these boundaries explicit:
+
+- `workflow_dispatch` runs on a branch unless a tag ref or input is supplied. Do not infer a release tag from the branch name, run title, or compare UI.
+- For CLI/npm issue closeout, the npm registry is the decisive public surface. GitHub app release assets and quality workflows should still be reported, but they are separate surfaces.
+- For app-release claims, inspect the GitHub Release directly with `gh release view <tag> --json assets` and check asset count/state instead of trusting source state or workflow names alone.
+- If CI pushes an automatic `chore: update contributors [skip ci]` commit after release, fast-forward local `main`; do not move an already pushed release tag to include it.
 
 `.github/workflows/quality-and-test.yml` runs auto-format on push, Rust quality checks, and CLI/build validation across Linux, Windows, and macOS.
 
