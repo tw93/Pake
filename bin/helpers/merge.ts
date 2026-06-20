@@ -10,6 +10,8 @@ import {
   generateLinuxPackageName,
 } from '@/utils/name';
 import {
+  AdblockConfig,
+  AdblockProfile,
   PakeAppOptions,
   PakeTauriConfig,
   SupportedPlatform,
@@ -18,6 +20,13 @@ import {
 } from '@/types';
 import { tauriConfigDirectory, npmDirectory } from '@/utils/dir';
 import { LINUX_TARGET_TYPES } from '@/utils/targets';
+
+export function buildAdblockConfig(profile: AdblockProfile): AdblockConfig {
+  return {
+    enabled: profile !== 'none',
+    profile,
+  };
+}
 
 /**
  * Pure transform from CLI options to the window-config slice that gets
@@ -347,6 +356,7 @@ async function injectCustomCode(
   tauriConf.pake.proxy_url = proxyUrl || '';
   tauriConf.pake.multi_instance = multiInstance;
   tauriConf.pake.multi_window = multiWindow;
+  tauriConf.pake.adblock = buildAdblockConfig(options.adblockProfile);
 
   if (wasm) {
     tauriConf.app.security = {

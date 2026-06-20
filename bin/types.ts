@@ -1,5 +1,11 @@
 export type SupportedPlatform = 'win32' | 'darwin' | 'linux';
 export type TauriPlatform = 'windows' | 'macos' | 'linux';
+export type AdblockProfile = 'none' | 'youtube';
+
+export interface AdblockConfig {
+  enabled: boolean;
+  profile: AdblockProfile;
+}
 
 export interface PakeCliOptions {
   // Application name
@@ -83,6 +89,9 @@ export interface PakeCliOptions {
 
   // Launch app in incognito/private mode, default false
   incognito: boolean;
+
+  // Built-in ad-block profile, default none
+  adblockProfile: AdblockProfile;
 
   // Enable WebAssembly support (Flutter Web, etc.), default false
   wasm: boolean;
@@ -186,6 +195,7 @@ export interface PakeConfig {
   proxy_url: string;
   multi_instance: boolean;
   multi_window: boolean;
+  adblock: AdblockConfig;
   inject?: string[];
 }
 

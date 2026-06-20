@@ -36,6 +36,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   installerLanguage: 'en-US',
   hideOnClose: undefined, // Platform-specific: true for macOS, false for others
   incognito: false,
+  adblockProfile: 'none',
   wasm: false,
   enableDragDrop: false,
   keepBinary: false,

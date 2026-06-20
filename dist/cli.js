@@ -422,6 +422,12 @@ function needsTemporaryDebForZst(targets) {
     return targets.includes('zst') && !targets.includes('deb');
 }
 
+function buildAdblockConfig(profile) {
+    return {
+        enabled: profile !== 'none',
+        profile,
+    };
+}
 /**
  * Pure transform from CLI options to the window-config slice that gets
  * merged into pake.json. Exposed for snapshot testing so option drift
@@ -664,6 +670,7 @@ async function injectCustomCode(options, tauriConf) {
     tauriConf.pake.proxy_url = proxyUrl || '';
     tauriConf.pake.multi_instance = multiInstance;
     tauriConf.pake.multi_window = multiWindow;
+    tauriConf.pake.adblock = buildAdblockConfig(options.adblockProfile);
     if (wasm) {
         tauriConf.app.security = {
             headers: {
@@ -2530,6 +2537,7 @@ const DEFAULT_PAKE_OPTIONS = {
     installerLanguage: 'en-US',
     hideOnClose: undefined, // Platform-specific: true for macOS, false for others
     incognito: false,
+    adblockProfile: 'none',
     wasm: false,
     enableDragDrop: false,
     keepBinary: false,
@@ -2659,6 +2667,10 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .addOption(new Option('--title <string>', 'Window title').hideHelp())
         .addOption(new Option('--incognito', 'Launch app in incognito/private mode')
         .default(DEFAULT_PAKE_OPTIONS.incognito)
+        .hideHelp())
+        .addOption(new Option('--adblock <profile>', 'Enable a built-in ad-block profile')
+        .choices(['none', 'youtube'])
+        .default(DEFAULT_PAKE_OPTIONS.adblockProfile)
         .hideHelp())
         .addOption(new Option('--wasm', 'Enable WebAssembly support (Flutter Web, etc.)')
         .default(DEFAULT_PAKE_OPTIONS.wasm)

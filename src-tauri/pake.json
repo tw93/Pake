@@ -36,6 +36,10 @@
   },
   "system_tray_path": "icons/icon.png",
   "inject": [],
+  "adblock": {
+    "enabled": false,
+    "profile": "none"
+  },
   "proxy_url": "",
   "multi_instance": false,
   "multi_window": false

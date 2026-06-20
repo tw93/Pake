@@ -147,6 +147,12 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .hideHelp(),
     )
     .addOption(
+      new Option('--adblock <profile>', 'Enable a built-in ad-block profile')
+        .choices(['none', 'youtube'])
+        .default(DEFAULT.adblockProfile)
+        .hideHelp(),
+    )
+    .addOption(
       new Option('--wasm', 'Enable WebAssembly support (Flutter Web, etc.)')
         .default(DEFAULT.wasm)
         .hideHelp(),
