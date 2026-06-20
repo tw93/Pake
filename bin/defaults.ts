@@ -14,6 +14,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   disabledWebShortcuts: false,
   activationShortcut: '',
   userAgent: '',
+  lang: '',
   showSystemTray: false,
   multiArch: false,
   targets: (() => {

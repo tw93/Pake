@@ -50,6 +50,9 @@ export interface PakeCliOptions {
   // Custom User-Agent, default off
   userAgent: string;
 
+  // Preferred language / locale, e.g. en-US, zh-CN
+  lang: string;
+
   // Enable system tray, default off for macOS, on for Windows and Linux
   showSystemTray: boolean;
 
@@ -176,6 +179,7 @@ export interface WindowConfig {
   min_height: number;
   ignore_certificate_errors: boolean;
   new_window: boolean;
+  lang: string;
 }
 
 export interface PakeConfig {

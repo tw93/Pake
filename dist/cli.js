@@ -456,6 +456,7 @@ function buildWindowConfigOverrides(options, platform = asSupportedPlatform(proc
         min_height: options.minHeight,
         ignore_certificate_errors: options.ignoreCertificateErrors,
         new_window: options.newWindow,
+        lang: options.lang,
     };
 }
 function asSupportedPlatform(platform) {
@@ -2508,6 +2509,7 @@ const DEFAULT_PAKE_OPTIONS = {
     disabledWebShortcuts: false,
     activationShortcut: '',
     userAgent: '',
+    lang: '',
     showSystemTray: false,
     multiArch: false,
     targets: (() => {
@@ -2618,6 +2620,9 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .hideHelp())
         .addOption(new Option('--user-agent <string>', 'Custom user agent')
         .default(DEFAULT_PAKE_OPTIONS.userAgent)
+        .hideHelp())
+        .addOption(new Option('--lang <locale>', 'Preferred app language / locale, e.g. en-US, zh-CN')
+        .default(DEFAULT_PAKE_OPTIONS.lang)
         .hideHelp())
         .addOption(new Option('--targets <string>', 'Build target format for your system').default(DEFAULT_PAKE_OPTIONS.targets))
         .addOption(new Option('--app-version <string>', 'App version, the same as package.json version')

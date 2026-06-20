@@ -78,6 +78,11 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .hideHelp(),
     )
     .addOption(
+      new Option('--lang <locale>', 'Preferred app language / locale, e.g. en-US, zh-CN')
+        .default(DEFAULT.lang)
+        .hideHelp(),
+    )
+    .addOption(
       new Option(
         '--targets <string>',
         'Build target format for your system',

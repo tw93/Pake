@@ -36,6 +36,8 @@ pub struct WindowConfig {
     pub min_height: f64,
     #[serde(default)]
     pub ignore_certificate_errors: bool,
+    #[serde(default)]
+    pub lang: String,
 }
 
 fn default_zoom() -> u32 {

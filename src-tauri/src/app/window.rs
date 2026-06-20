@@ -475,7 +475,17 @@ fn build_window(
                     } else {
                         MessageType::Failure
                     };
-                    show_toast(&window, &get_download_message_with_lang(message_type, None));
+                    let lang = config
+                        .windows
+                        .first()
+                        .and_then(|window| {
+                            if window.lang.trim().is_empty() {
+                                None
+                            } else {
+                                Some(window.lang.clone())
+                            }
+                        });
+                    show_toast(&window, &get_download_message_with_lang(message_type, lang));
                 }
                 true
             }
