@@ -39,7 +39,12 @@ export default class WinBuilder extends BaseBuilder {
   protected getBasePath(): string {
     const basePath = this.options.debug ? 'debug' : 'release';
     const target = this.getTauriTarget(this.buildArch, 'win32');
-    return `src-tauri/target/${target}/${basePath}/bundle/`;
+    if (!target) {
+      throw new Error(
+        `Unsupported architecture: ${this.buildArch} for Windows`,
+      );
+    }
+    return path.join(this.getCargoTargetDir(), target, basePath, 'bundle');
   }
 
   protected hasArchSpecificTarget(): boolean {
@@ -48,6 +53,11 @@ export default class WinBuilder extends BaseBuilder {
 
   protected getArchSpecificPath(): string {
     const target = this.getTauriTarget(this.buildArch, 'win32');
-    return `src-tauri/target/${target}`;
+    if (!target) {
+      throw new Error(
+        `Unsupported architecture: ${this.buildArch} for Windows`,
+      );
+    }
+    return path.join(this.getCargoTargetDir(), target);
   }
 }
