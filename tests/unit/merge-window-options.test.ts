@@ -58,6 +58,27 @@ describe('buildWindowConfigOverrides', () => {
     ).toBe(false);
   });
 
+  it('only forwards hideTitleBar on macOS', () => {
+    expect(
+      buildWindowConfigOverrides(
+        { ...makeOptions(), hideTitleBar: true },
+        'darwin',
+      ).hide_title_bar,
+    ).toBe(true);
+    expect(
+      buildWindowConfigOverrides(
+        { ...makeOptions(), hideTitleBar: true },
+        'linux',
+      ).hide_title_bar,
+    ).toBe(false);
+    expect(
+      buildWindowConfigOverrides(
+        { ...makeOptions(), hideTitleBar: true },
+        'win32',
+      ).hide_title_bar,
+    ).toBe(false);
+  });
+
   it('only enables start_to_tray when both flag and tray are on', () => {
     expect(
       buildWindowConfigOverrides(

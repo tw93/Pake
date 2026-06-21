@@ -404,9 +404,19 @@ export default abstract class BaseBuilder {
     }
   }
 
+  protected getCargoTargetDir(): string {
+    return process.env.CARGO_TARGET_DIR || path.join('src-tauri', 'target');
+  }
+
+  protected resolveBuildPath(npmDirectory: string, buildPath: string): string {
+    return path.isAbsolute(buildPath)
+      ? buildPath
+      : path.join(npmDirectory, buildPath);
+  }
+
   protected getBasePath(): string {
     const basePath = this.options.debug ? 'debug' : 'release';
-    return `src-tauri/target/${basePath}/bundle/`;
+    return path.join(this.getCargoTargetDir(), basePath, 'bundle');
   }
 
   protected getBuildAppPath(
@@ -418,8 +428,7 @@ export default abstract class BaseBuilder {
     const bundleDir =
       fileType.toLowerCase() === 'app' ? 'macos' : fileType.toLowerCase();
     return path.join(
-      npmDirectory,
-      this.getBasePath(),
+      this.resolveBuildPath(npmDirectory, this.getBasePath()),
       bundleDir,
       `${fileName}.${fileType}`,
     );
@@ -459,14 +468,17 @@ export default abstract class BaseBuilder {
     // Handle cross-platform builds
     if (this.options.multiArch || this.hasArchSpecificTarget()) {
       return path.join(
-        npmDirectory,
-        this.getArchSpecificPath(),
+        this.resolveBuildPath(npmDirectory, this.getArchSpecificPath()),
         basePath,
         binaryName,
       );
     }
 
-    return path.join(npmDirectory, 'src-tauri/target', basePath, binaryName);
+    return path.join(
+      this.resolveBuildPath(npmDirectory, this.getCargoTargetDir()),
+      basePath,
+      binaryName,
+    );
   }
 
   /**
@@ -503,6 +515,6 @@ export default abstract class BaseBuilder {
    * Get architecture-specific path for binary
    */
   protected getArchSpecificPath(): string {
-    return 'src-tauri/target'; // Override in subclasses if needed
+    return this.getCargoTargetDir(); // Override in subclasses if needed
   }
 }

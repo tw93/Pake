@@ -260,7 +260,12 @@ post_remove() {
 
     if (this.buildArch === 'arm64') {
       const target = this.getTauriTarget(this.buildArch, 'linux');
-      return `src-tauri/target/${target}/${basePath}/bundle/`;
+      if (!target) {
+        throw new Error(
+          `Unsupported architecture: ${this.buildArch} for Linux`,
+        );
+      }
+      return path.join(this.getCargoTargetDir(), target, basePath, 'bundle');
     }
 
     return super.getBasePath();
@@ -280,7 +285,12 @@ post_remove() {
   protected getArchSpecificPath(): string {
     if (this.buildArch === 'arm64') {
       const target = this.getTauriTarget(this.buildArch, 'linux');
-      return `src-tauri/target/${target}`;
+      if (!target) {
+        throw new Error(
+          `Unsupported architecture: ${this.buildArch} for Linux`,
+        );
+      }
+      return path.join(this.getCargoTargetDir(), target);
     }
     return super.getArchSpecificPath();
   }

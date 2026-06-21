@@ -431,13 +431,14 @@ function needsTemporaryDebForZst(targets) {
  */
 function buildWindowConfigOverrides(options, platform = asSupportedPlatform(process.platform)) {
     const platformHideOnClose = options.hideOnClose ?? platform === 'darwin';
+    const platformHideTitleBar = platform === 'darwin' ? options.hideTitleBar : false;
     return {
         width: options.width,
         height: options.height,
         fullscreen: options.fullscreen,
         maximize: options.maximize,
         resizable: options.resizable ?? true,
-        hide_title_bar: options.hideTitleBar,
+        hide_title_bar: platformHideTitleBar,
         activation_shortcut: options.activationShortcut,
         always_on_top: options.alwaysOnTop,
         dark_mode: options.darkMode,
@@ -712,6 +713,9 @@ async function mergeConfig(url, options, tauriConf) {
     await copyTemplateConfigs();
     const { appVersion, userAgent, showSystemTray, useLocalFile, identifier, name = 'pake-app', installerLanguage, wasm, camera, microphone, } = options;
     const platform = asSupportedPlatform(process.platform);
+    if (options.hideTitleBar && platform !== 'darwin') {
+        logger.warn('✼ --hide-title-bar is only supported on macOS and will be ignored on this platform.');
+    }
     const tauriConfWindowOptions = buildWindowConfigOverrides(options, platform);
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
     tauriConf.productName = name;
@@ -1162,14 +1166,22 @@ class BaseBuilder {
             return 0; // Disable proxy feature if version detection fails
         }
     }
+    getCargoTargetDir() {
+        return process.env.CARGO_TARGET_DIR || path.join('src-tauri', 'target');
+    }
+    resolveBuildPath(npmDirectory, buildPath) {
+        return path.isAbsolute(buildPath)
+            ? buildPath
+            : path.join(npmDirectory, buildPath);
+    }
     getBasePath() {
         const basePath = this.options.debug ? 'debug' : 'release';
-        return `src-tauri/target/${basePath}/bundle/`;
+        return path.join(this.getCargoTargetDir(), basePath, 'bundle');
     }
     getBuildAppPath(npmDirectory, fileName, fileType) {
         // For app bundles on macOS, the directory is 'macos', not 'app'
         const bundleDir = fileType.toLowerCase() === 'app' ? 'macos' : fileType.toLowerCase();
-        return path.join(npmDirectory, this.getBasePath(), bundleDir, `${fileName}.${fileType}`);
+        return path.join(this.resolveBuildPath(npmDirectory, this.getBasePath()), bundleDir, `${fileName}.${fileType}`);
     }
     /**
      * Copy raw binary file to output directory
@@ -1196,9 +1208,9 @@ class BaseBuilder {
         const binaryName = this.getBinaryName(appName);
         // Handle cross-platform builds
         if (this.options.multiArch || this.hasArchSpecificTarget()) {
-            return path.join(npmDirectory, this.getArchSpecificPath(), basePath, binaryName);
+            return path.join(this.resolveBuildPath(npmDirectory, this.getArchSpecificPath()), basePath, binaryName);
         }
-        return path.join(npmDirectory, 'src-tauri/target', basePath, binaryName);
+        return path.join(this.resolveBuildPath(npmDirectory, this.getCargoTargetDir()), basePath, binaryName);
     }
     /**
      * Get the output path for the raw binary file
@@ -1229,7 +1241,7 @@ class BaseBuilder {
      * Get architecture-specific path for binary
      */
     getArchSpecificPath() {
-        return 'src-tauri/target'; // Override in subclasses if needed
+        return this.getCargoTargetDir(); // Override in subclasses if needed
     }
 }
 BaseBuilder.ARCH_MAPPINGS = {
@@ -1315,7 +1327,10 @@ class MacBuilder extends BaseBuilder {
         const basePath = this.options.debug ? 'debug' : 'release';
         const actualArch = this.getActualArch();
         const target = this.getTauriTarget(actualArch, 'darwin');
-        return `src-tauri/target/${target}/${basePath}/bundle`;
+        if (!target) {
+            throw new Error(`Unsupported architecture: ${actualArch} for macOS`);
+        }
+        return path.join(this.getCargoTargetDir(), target, basePath, 'bundle');
     }
     hasArchSpecificTarget() {
         return true;
@@ -1323,7 +1338,10 @@ class MacBuilder extends BaseBuilder {
     getArchSpecificPath() {
         const actualArch = this.getActualArch();
         const target = this.getTauriTarget(actualArch, 'darwin');
-        return `src-tauri/target/${target}`;
+        if (!target) {
+            throw new Error(`Unsupported architecture: ${actualArch} for macOS`);
+        }
+        return path.join(this.getCargoTargetDir(), target);
     }
 }
 
@@ -1354,14 +1372,26 @@ class WinBuilder extends BaseBuilder {
     getBasePath() {
         const basePath = this.options.debug ? 'debug' : 'release';
         const target = this.getTauriTarget(this.buildArch, 'win32');
-        return `src-tauri/target/${target}/${basePath}/bundle/`;
+        if (!target) {
+            throw new Error(`Unsupported architecture: ${this.buildArch} for Windows`);
+        }
+        return path.join(this.getCargoTargetDir(), target, basePath, 'bundle');
     }
     hasArchSpecificTarget() {
         return true;
     }
     getArchSpecificPath() {
         const target = this.getTauriTarget(this.buildArch, 'win32');
-        return `src-tauri/target/${target}`;
+        if (!target) {
+            throw new Error(`Unsupported architecture: ${this.buildArch} for Windows`);
+        }
+        return path.join(this.getCargoTargetDir(), target);
+    }
+    getRawBinaryPath(appName) {
+        return `${appName}.exe`;
+    }
+    getBinaryName(appName) {
+        return `pake-${generateIdentifierSafeName(appName)}.exe`;
     }
 }
 
@@ -1556,7 +1586,10 @@ post_remove() {
         const basePath = this.options.debug ? 'debug' : 'release';
         if (this.buildArch === 'arm64') {
             const target = this.getTauriTarget(this.buildArch, 'linux');
-            return `src-tauri/target/${target}/${basePath}/bundle/`;
+            if (!target) {
+                throw new Error(`Unsupported architecture: ${this.buildArch} for Linux`);
+            }
+            return path.join(this.getCargoTargetDir(), target, basePath, 'bundle');
         }
         return super.getBasePath();
     }
@@ -1572,7 +1605,10 @@ post_remove() {
     getArchSpecificPath() {
         if (this.buildArch === 'arm64') {
             const target = this.getTauriTarget(this.buildArch, 'linux');
-            return `src-tauri/target/${target}`;
+            if (!target) {
+                throw new Error(`Unsupported architecture: ${this.buildArch} for Linux`);
+            }
+            return path.join(this.getCargoTargetDir(), target);
         }
         return super.getArchSpecificPath();
     }
@@ -2608,6 +2644,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     return program$1
         .addHelpText('beforeAll', logo)
         .usage(`[url] [options]`)
+        .helpOption('-h, --help', 'Show all CLI options')
         .showHelpAfterError()
         .argument('[url]', 'The web URL you want to package', validateUrlInput)
         .option('--name <string>', 'Application name')
@@ -2742,14 +2779,19 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .version(packageJson.version, '-v, --version')
         .configureHelp({
         sortSubcommands: true,
+        visibleOptions: (command) => {
+            const options = [...command.options];
+            const helpOption = command
+                ._helpOption;
+            if (helpOption) {
+                options.push(helpOption);
+            }
+            return options;
+        },
         optionTerm: (option) => {
-            if (option.flags === '-v, --version' || option.flags === '-h, --help')
-                return '';
             return option.flags;
         },
         optionDescription: (option) => {
-            if (option.flags === '-v, --version' || option.flags === '-h, --help')
-                return '';
             return option.description;
         },
     });

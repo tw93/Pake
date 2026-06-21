@@ -5,6 +5,21 @@ import { validateNumberInput } from '../../bin/utils/validate.js';
 describe('CLI options', () => {
   const program = getCliProgram();
 
+  it('shows meta options in help', () => {
+    const help = program.helpInformation();
+
+    expect(help).toContain('-h, --help');
+    expect(help).toContain('-v, --version');
+  });
+
+  it('shows advanced options in help', () => {
+    const help = program.helpInformation();
+
+    expect(help).toContain('--enable-find');
+    expect(help).toContain('--internal-url-regex');
+    expect(help).toContain('--hide-on-close');
+  });
+
   it('registers hidden --multi-window option', () => {
     const option = program.options.find(
       (item) => item.long === '--multi-window',

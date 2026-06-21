@@ -2,6 +2,7 @@ import path from 'path';
 import BaseBuilder from './BaseBuilder';
 import { PakeAppOptions } from '@/types';
 import tauriConfig from '@/helpers/tauriConfig';
+import { generateIdentifierSafeName } from '@/utils/name';
 
 export default class WinBuilder extends BaseBuilder {
   private buildFormat: string = 'msi';
@@ -39,7 +40,12 @@ export default class WinBuilder extends BaseBuilder {
   protected getBasePath(): string {
     const basePath = this.options.debug ? 'debug' : 'release';
     const target = this.getTauriTarget(this.buildArch, 'win32');
-    return `src-tauri/target/${target}/${basePath}/bundle/`;
+    if (!target) {
+      throw new Error(
+        `Unsupported architecture: ${this.buildArch} for Windows`,
+      );
+    }
+    return path.join(this.getCargoTargetDir(), target, basePath, 'bundle');
   }
 
   protected hasArchSpecificTarget(): boolean {
@@ -48,6 +54,19 @@ export default class WinBuilder extends BaseBuilder {
 
   protected getArchSpecificPath(): string {
     const target = this.getTauriTarget(this.buildArch, 'win32');
-    return `src-tauri/target/${target}`;
+    if (!target) {
+      throw new Error(
+        `Unsupported architecture: ${this.buildArch} for Windows`,
+      );
+    }
+    return path.join(this.getCargoTargetDir(), target);
+  }
+
+  protected getRawBinaryPath(appName: string): string {
+    return `${appName}.exe`;
+  }
+
+  protected getBinaryName(appName: string): string {
+    return `pake-${generateIdentifierSafeName(appName)}.exe`;
   }
 }
