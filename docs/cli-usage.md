@@ -262,6 +262,19 @@ Set a regex pattern to determine which URLs should be considered internal (opene
 --internal-url-regex "^https://(app|api)\\.example\\.com"
 ```
 
+#### [safe-domain]
+
+A simpler way to keep trusted domains and their subdomains inside the app. This is useful for workspace callbacks and enterprise SSO flows, for example Slack plus Okta. Pake compiles this list into `internal_url_regex`; if `--internal-url-regex` is also set, the explicit regex wins.
+
+`--safe-domain` matches URL hosts only, not arbitrary path or query text.
+
+```shell
+--safe-domain <domains>
+
+# Keep Slack and Okta auth redirects inside the app
+--safe-domain slack.com,okta.com
+```
+
 #### [multi-arch]
 
 Package the application to support both Intel and M1 chips, exclusively for macOS. Default is `false`.

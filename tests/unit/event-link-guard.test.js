@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { runInNewContext } from "node:vm";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 function loadEventHelpers({
   withTauri = false,
@@ -17,6 +17,36 @@ function loadEventHelpers({
     invokeCalls.push([command, payload]);
     return Promise.resolve();
   };
+  const eventListeners = {};
+  const elementsById = new Map();
+  const registerListener = (type, handler, options) => {
+    eventListeners[type] = eventListeners[type] || [];
+    eventListeners[type].push({ handler, options });
+  };
+  const createElement = (tagName = "div") => ({
+    tagName: tagName.toUpperCase(),
+    style: {},
+    children: [],
+    addEventListener: () => {},
+    appendChild(child) {
+      this.children.push(child);
+      if (child.id) elementsById.set(child.id, child);
+    },
+    removeChild(child) {
+      this.children = this.children.filter((item) => item !== child);
+      if (child.id) elementsById.delete(child.id);
+    },
+    click: () => {},
+    set id(value) {
+      this._id = value;
+      elementsById.set(value, this);
+    },
+    get id() {
+      return this._id;
+    },
+  });
+  const body = createElement("body");
+  body.scrollHeight = 0;
 
   const context = {
     console,
@@ -45,26 +75,67 @@ function loadEventHelpers({
         getItem: () => null,
         setItem: () => {},
       },
-      addEventListener: () => {},
+      addEventListener: registerListener,
       dispatchEvent: () => {},
+      open: () => ({}),
+      isAuthLink: () => false,
+      isAuthPopup: () => false,
+      pakeConfig: {},
     },
     document: {
-      addEventListener: () => {},
+      addEventListener: registerListener,
+      createElement,
+      getElementById: (id) => elementsById.get(id) || null,
       getElementsByTagName: () => [{ style: {} }],
-      body: {
-        style: {},
-        scrollHeight: 0,
-      },
+      body,
       execCommand: () => {},
     },
   };
   context.window.navigator = context.navigator;
   if (withTauri) {
-    context.window.__TAURI__ = { core: { invoke } };
+    context.window.__TAURI__ = {
+      core: { invoke },
+      window: {
+        getCurrentWindow: () => ({
+          startDragging: () => {},
+          isFullscreen: () => Promise.resolve(false),
+          setFullscreen: () => {},
+        }),
+      },
+    };
   }
 
   runInNewContext(source, context);
-  return { ...context, invokeCalls };
+  return { ...context, eventListeners, invokeCalls };
+}
+
+function runDomReady(context) {
+  context.eventListeners.DOMContentLoaded[0].handler();
+}
+
+function getClickGuard(context) {
+  return context.eventListeners.click.find(
+    ({ handler }) => handler.name === "detectAnchorElementClick",
+  ).handler;
+}
+
+function makeAnchor(href, target = "_blank") {
+  return {
+    href,
+    target,
+    download: "",
+    getAttribute: (name) => (name === "href" ? href : ""),
+  };
+}
+
+function makeClickEvent(anchor) {
+  return {
+    target: {
+      closest: () => anchor,
+    },
+    preventDefault: vi.fn(),
+    stopImmediatePropagation: vi.fn(),
+  };
 }
 
 describe("event link guard", () => {
@@ -137,6 +208,42 @@ describe("event link guard", () => {
     ]);
     expect(window.location.href).toBe("https://example.com/app");
     expect(result).toBe(popup);
+  });
+
+  it("navigates target blank auth links in-place when new-window is disabled", () => {
+    const context = loadEventHelpers({ withTauri: true });
+    context.window.pakeConfig = { new_window: false };
+    context.window.isAuthLink = (url) => url.includes("okta.com");
+    runDomReady(context);
+
+    const event = makeClickEvent(
+      makeAnchor("https://mycompany.okta.com/sso", "_blank"),
+    );
+    getClickGuard(context)(event);
+
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(event.stopImmediatePropagation).toHaveBeenCalled();
+    expect(context.window.location.href).toBe("https://mycompany.okta.com/sso");
+  });
+
+  it("navigates target blank internal links in-place when new-window is disabled", () => {
+    const context = loadEventHelpers({ withTauri: true });
+    context.window.pakeConfig = {
+      new_window: false,
+      internal_url_regex: "^https://app\\.example\\.com",
+    };
+    runDomReady(context);
+
+    const event = makeClickEvent(
+      makeAnchor("https://app.example.com/callback", "_blank"),
+    );
+    getClickGuard(context)(event);
+
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(event.stopImmediatePropagation).toHaveBeenCalled();
+    expect(context.window.location.href).toBe(
+      "https://app.example.com/callback",
+    );
   });
 
   it("bridges Web Badging API calls to explicit badge commands", async () => {
