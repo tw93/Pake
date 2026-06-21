@@ -264,12 +264,14 @@ Set a regex pattern to determine which URLs should be considered internal (opene
 
 #### [safe-domain]
 
-Comma-separated list of domains to keep inside the app — convenience sugar over `--internal-url-regex`. Each domain (and its subdomains) is matched only in the URL's host position, so SSO and workspace callbacks stay in the app instead of opening in the system browser, while look-alike URLs such as `https://slack.com.evil.test` are not treated as internal. When `--internal-url-regex` is also set, the explicit regex takes precedence.
+A simpler way to keep trusted domains and their subdomains inside the app. This is useful for workspace callbacks and enterprise SSO flows, for example Slack plus Okta. Pake compiles this list into `internal_url_regex`; if `--internal-url-regex` is also set, the explicit regex wins.
+
+`--safe-domain` matches URL hosts only, not arbitrary path or query text.
 
 ```shell
 --safe-domain <domains>
 
-# Example: keep Slack and its SSO provider inside the app
+# Keep Slack and Okta auth redirects inside the app
 --safe-domain slack.com,okta.com
 ```
 

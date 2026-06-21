@@ -262,12 +262,14 @@ pake https://github.com --name GitHub
 
 #### [safe-domain]
 
-以逗号分隔的域名列表，用于让这些域名始终在应用内打开——它是 `--internal-url-regex` 的便捷写法。每个域名（及其子域名）只在 URL 的主机位置匹配，因此 SSO 和工作区回调会留在应用内，而不会切换到系统浏览器；同时像 `https://slack.com.evil.test` 这类仿冒地址不会被视为内部链接。若同时设置了 `--internal-url-regex`，则以显式正则为准。
+更简单地把可信域名及其子域名保留在应用内打开。适合工作区回调和企业 SSO 登录流程，例如 Slack 加 Okta。Pake 会把这个列表编译成 `internal_url_regex`；如果同时设置了 `--internal-url-regex`，则以显式正则为准。
+
+`--safe-domain` 只匹配 URL 的 host，不会因为路径或查询参数里出现域名就误判为内部链接。
 
 ```shell
 --safe-domain <domains>
 
-# 示例：让 Slack 及其 SSO 提供商在应用内打开
+# 将 Slack 和 Okta 的认证跳转保留在应用内
 --safe-domain slack.com,okta.com
 ```
 
