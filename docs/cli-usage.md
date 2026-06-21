@@ -308,7 +308,7 @@ Specify the build target architecture or format:
 
 - **Linux**: `deb`, `appimage`, `rpm`, `zst`, `deb-arm64`, `appimage-arm64`, `rpm-arm64`, `zst-arm64` (default: `deb`, `appimage`)
 - **Windows**: `x64`, `arm64` (auto-detects if not specified)
-- **macOS**: `intel`, `apple`, `universal` (auto-detects if not specified)
+- **macOS**: `intel`, `apple`, `universal` (architecture, auto-detects if not specified); `app`, `dmg` (output format, default: `dmg`)
 
 ```shell
 --targets <target>
@@ -319,6 +319,8 @@ Specify the build target architecture or format:
 --targets universal      # macOS Universal (Intel + Apple Silicon)
 --targets apple          # macOS Apple Silicon only
 --targets intel          # macOS Intel only
+--targets app            # macOS app bundle only (.app, skips the DMG step)
+--targets dmg            # macOS DMG installer (default)
 --targets deb            # Linux DEB package (x64)
 --targets rpm            # Linux RPM package (x64)
 --targets appimage       # Linux AppImage (x64)

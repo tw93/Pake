@@ -306,7 +306,7 @@ pake https://github.com --name GitHub
 
 - **Linux**: `deb`, `appimage`, `rpm`, `zst`, `deb-arm64`, `appimage-arm64`, `rpm-arm64`, `zst-arm64`（默认：`deb`, `appimage`）
 - **Windows**: `x64`, `arm64`（未指定时自动检测）
-- **macOS**: `intel`, `apple`, `universal`（未指定时自动检测）
+- **macOS**: `intel`, `apple`, `universal`（架构，未指定时自动检测）；`app`, `dmg`（输出格式，默认：`dmg`）
 
 ```shell
 --targets <target>
@@ -317,6 +317,8 @@ pake https://github.com --name GitHub
 --targets universal      # macOS 通用版本（Intel + Apple Silicon）
 --targets apple          # 仅 macOS Apple Silicon
 --targets intel          # 仅 macOS Intel
+--targets app            # 仅 macOS 应用包（.app，跳过 DMG 步骤）
+--targets dmg            # macOS DMG 安装包（默认）
 --targets deb            # Linux DEB 包（x64）
 --targets rpm            # Linux RPM 包（x64）
 --targets appimage       # Linux AppImage（x64）

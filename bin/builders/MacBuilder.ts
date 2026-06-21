@@ -15,7 +15,9 @@ export default class MacBuilder extends BaseBuilder {
       ? options.targets
       : 'auto';
 
+    // `app` is a valid macOS bundle target (see merge.ts); honour it explicitly.
     if (
+      options.targets === 'app' ||
       options.iterativeBuild ||
       options.install ||
       process.env.PAKE_CREATE_APP === '1'
