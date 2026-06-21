@@ -260,6 +260,17 @@ pake https://github.com --name GitHub
 --internal-url-regex "^https://(app|api)\\.example\\.com"
 ```
 
+#### [safe-domain]
+
+以逗号分隔的域名列表，用于让这些域名始终在应用内打开——它是 `--internal-url-regex` 的便捷写法。每个域名（及其子域名）只在 URL 的主机位置匹配，因此 SSO 和工作区回调会留在应用内，而不会切换到系统浏览器；同时像 `https://slack.com.evil.test` 这类仿冒地址不会被视为内部链接。若同时设置了 `--internal-url-regex`，则以显式正则为准。
+
+```shell
+--safe-domain <domains>
+
+# 示例：让 Slack 及其 SSO 提供商在应用内打开
+--safe-domain slack.com,okta.com
+```
+
 #### [multi-arch]
 
 设置打包结果同时支持 Intel 和 M1 芯片，仅适用于 macOS，默认为 `false`。

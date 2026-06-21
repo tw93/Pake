@@ -44,6 +44,27 @@ describe("auth SSO patterns", () => {
     expect(isAuthLink("https://example.com/reports/q3")).toBe(false);
   });
 
+  it("does not flag ordinary pages that merely contain sso or saml in the path", () => {
+    expect(isAuthLink("https://app.example.com/settings/sso/providers")).toBe(
+      false,
+    );
+    expect(isAuthLink("https://app.example.com/docs/saml/overview")).toBe(
+      false,
+    );
+  });
+
+  it("does not flag a query string that carries an SSO URL", () => {
+    expect(
+      isAuthLink(
+        "https://app.example.com/?next=https://idp.example.com/sso/saml",
+      ),
+    ).toBe(false);
+  });
+
+  it("does not flag look-alike provider suffix hosts", () => {
+    expect(isAuthLink("https://okta.com.evil.test/app")).toBe(false);
+  });
+
   it("treats known auth window names as popups", () => {
     expect(isAuthPopup("https://example.com/dashboard", "oauth2")).toBe(true);
   });

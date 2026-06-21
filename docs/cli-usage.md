@@ -262,6 +262,17 @@ Set a regex pattern to determine which URLs should be considered internal (opene
 --internal-url-regex "^https://(app|api)\\.example\\.com"
 ```
 
+#### [safe-domain]
+
+Comma-separated list of domains to keep inside the app — convenience sugar over `--internal-url-regex`. Each domain (and its subdomains) is matched only in the URL's host position, so SSO and workspace callbacks stay in the app instead of opening in the system browser, while look-alike URLs such as `https://slack.com.evil.test` are not treated as internal. When `--internal-url-regex` is also set, the explicit regex takes precedence.
+
+```shell
+--safe-domain <domains>
+
+# Example: keep Slack and its SSO provider inside the app
+--safe-domain slack.com,okta.com
+```
+
 #### [multi-arch]
 
 Package the application to support both Intel and M1 chips, exclusively for macOS. Default is `false`.
