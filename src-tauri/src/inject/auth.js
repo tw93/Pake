@@ -17,6 +17,12 @@ function matchesAuthUrl(url, baseUrl = window.location.href) {
       /facebook\.com\/.*\/dialog/,
       /twitter\.com\/oauth/,
       /appleid\.apple\.com/,
+      // Enterprise SSO providers and SAML/ADFS endpoints
+      /\.okta\.com/,
+      /\.onelogin\.com/,
+      /\/saml\//,
+      /\/sso\//,
+      /adfs\/ls/,
       /\/oauth\//,
       /\/auth\//,
       /\/authorize/,

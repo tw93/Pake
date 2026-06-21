@@ -44,6 +44,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   startToTray: false,
   forceInternalNavigation: false,
   internalUrlRegex: '',
+  safeDomain: '',
   enableFind: false,
   iterativeBuild: false,
   zoom: 100,

@@ -29,13 +29,42 @@ describe('CLI options', () => {
     expect(option?.defaultValue).toBe(false);
   });
 
-  it('registers hidden --internal-url-regex option', () => {
+  it('exposes --internal-url-regex option', () => {
     const option = program.options.find(
       (item) => item.long === '--internal-url-regex',
     );
 
     expect(option).toBeDefined();
     expect(option?.defaultValue).toBe('');
+    expect(option?.hidden).toBeFalsy();
+  });
+
+  it('exposes --safe-domain option', () => {
+    const option = program.options.find(
+      (item) => item.long === '--safe-domain',
+    );
+
+    expect(option).toBeDefined();
+    expect(option?.defaultValue).toBe('');
+    expect(option?.hidden).toBeFalsy();
+  });
+
+  it('exposes --force-internal-navigation option', () => {
+    const option = program.options.find(
+      (item) => item.long === '--force-internal-navigation',
+    );
+
+    expect(option).toBeDefined();
+    expect(option?.defaultValue).toBe(false);
+    expect(option?.hidden).toBeFalsy();
+  });
+
+  it('exposes --new-window option', () => {
+    const option = program.options.find((item) => item.long === '--new-window');
+
+    expect(option).toBeDefined();
+    expect(option?.defaultValue).toBe(false);
+    expect(option?.hidden).toBeFalsy();
   });
 
   it('registers hidden --identifier option', () => {

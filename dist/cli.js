@@ -2446,6 +2446,20 @@ function normalizeUrl(urlToNormalize) {
         throw new Error(`Your url "${urlWithProtocol}" is invalid: ${err.message}`);
     }
 }
+// Compiles a comma-separated domain list into a regex source for
+// internal_url_regex. Each domain is escaped and matched against the URL host
+// and its subdomains so path or query text cannot accidentally opt a link in.
+// Returns '' for empty input.
+function safeDomainsToRegex(domains) {
+    const escaped = domains
+        .split(',')
+        .map((domain) => domain.trim().toLowerCase())
+        .filter(Boolean)
+        .map((domain) => domain.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    return escaped.length
+        ? `^https?:\\/\\/(?:[^/?#@]+\\.)*(?:${escaped.join('|')})(?::\\d+)?(?:[/?#]|$)`
+        : '';
+}
 
 /**
  * Error class used for user-facing CLI errors.
@@ -2526,6 +2540,10 @@ async function handleOptions(options, url) {
         name: resolvedName,
         identifier: resolveIdentifier(url, options.name, options.identifier),
     };
+    // --safe-domain is sugar over --internal-url-regex; an explicit regex wins.
+    if (!options.internalUrlRegex && options.safeDomain) {
+        appOptions.internalUrlRegex = safeDomainsToRegex(options.safeDomain);
+    }
     const iconPath = await handleIcon(appOptions, url);
     appOptions.icon = iconPath || '';
     return appOptions;
@@ -2574,6 +2592,7 @@ const DEFAULT_PAKE_OPTIONS = {
     startToTray: false,
     forceInternalNavigation: false,
     internalUrlRegex: '',
+    safeDomain: '',
     enableFind: false,
     iterativeBuild: false,
     zoom: 100,
@@ -2715,12 +2734,9 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .addOption(new Option('--start-to-tray', 'Start app minimized to tray')
         .default(DEFAULT_PAKE_OPTIONS.startToTray)
         .hideHelp())
-        .addOption(new Option('--force-internal-navigation', 'Keep every link inside the Pake window instead of opening external handlers')
-        .default(DEFAULT_PAKE_OPTIONS.forceInternalNavigation)
-        .hideHelp())
-        .addOption(new Option('--internal-url-regex <string>', 'Regex pattern to match URLs that should be considered internal')
-        .default(DEFAULT_PAKE_OPTIONS.internalUrlRegex)
-        .hideHelp())
+        .addOption(new Option('--force-internal-navigation', 'Keep every link inside the Pake window instead of opening external handlers').default(DEFAULT_PAKE_OPTIONS.forceInternalNavigation))
+        .addOption(new Option('--internal-url-regex <string>', 'Regex pattern to match URLs that should be considered internal').default(DEFAULT_PAKE_OPTIONS.internalUrlRegex))
+        .addOption(new Option('--safe-domain <domains>', 'Comma-separated domains kept inside the app (e.g. SSO/workspace callbacks)').default(DEFAULT_PAKE_OPTIONS.safeDomain))
         .addOption(new Option('--enable-find', 'Enable in-page Find UI with Cmd/Ctrl+F/G shortcuts')
         .default(DEFAULT_PAKE_OPTIONS.enableFind)
         .hideHelp())
@@ -2751,9 +2767,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .addOption(new Option('--iterative-build', 'Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging')
         .default(DEFAULT_PAKE_OPTIONS.iterativeBuild)
         .hideHelp())
-        .addOption(new Option('--new-window', 'Allow sites to open new windows (for auth flows, tabs, branches)')
-        .default(DEFAULT_PAKE_OPTIONS.newWindow)
-        .hideHelp())
+        .addOption(new Option('--new-window', 'Allow sites to open new windows (for auth flows, tabs, branches)').default(DEFAULT_PAKE_OPTIONS.newWindow))
         .addOption(new Option('--install', 'Auto-install app to /Applications (macOS) after build and remove local bundle')
         .default(DEFAULT_PAKE_OPTIONS.install)
         .hideHelp())

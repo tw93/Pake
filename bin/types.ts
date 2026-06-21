@@ -108,6 +108,9 @@ export interface PakeCliOptions {
   // Regex pattern to match URLs that should be considered internal
   internalUrlRegex: string;
 
+  // Comma-separated domains kept inside the app, compiled into internalUrlRegex, default empty
+  safeDomain: string;
+
   // Enable in-page Find UI and Cmd/Ctrl+F/G shortcuts, default false
   enableFind: boolean;
 
