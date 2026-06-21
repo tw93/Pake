@@ -222,6 +222,8 @@ pake https://github.com --name GitHub
 --dark-mode
 ```
 
+在 Linux 上黑暗模式经由 WebKitGTK 实现，页面是否真正渲染为暗色还取决于 WebKitGTK 是否尊重窗口主题以及站点是否实现了 `prefers-color-scheme: dark`。
+
 #### [disabled-web-shortcuts]
 
 设置是否禁用原有 Pake 容器里面的网页操作快捷键，默认为 `false`。

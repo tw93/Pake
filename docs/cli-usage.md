@@ -224,6 +224,8 @@ Force packaging applications using dark mode (supports macOS, Windows, and Linux
 --dark-mode
 ```
 
+On Linux this goes through WebKitGTK, so whether a page renders dark also depends on the WebKitGTK build honoring the window theme and the site implementing `prefers-color-scheme: dark`.
+
 #### [disabled-web-shortcuts]
 
 Sets whether to disable web shortcuts in the original Pake container, defaults to `false`.
