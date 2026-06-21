@@ -19,8 +19,8 @@ const WEBKIT_DISABLE_COMPOSITING_MODE: &str = "WEBKIT_DISABLE_COMPOSITING_MODE";
 
 use app::{
     invoke::{
-        clear_cache_and_restart, clear_dock_badge, download_file, increment_dock_badge,
-        send_notification, set_dock_badge, set_dock_badge_label, update_theme_mode,
+        clear_dock_badge, download_file, increment_dock_badge, send_notification,
+        set_dock_badge, set_dock_badge_label, update_theme_mode,
     },
     setup::{set_global_shortcut, set_system_tray},
     window::{open_additional_window_safe, set_window, MultiWindowState},
@@ -159,7 +159,6 @@ pub fn run_app() {
             set_dock_badge_label,
             clear_dock_badge,
             update_theme_mode,
-            clear_cache_and_restart,
         ])
         .setup(move |app| {
             app.manage(MultiWindowState::new(

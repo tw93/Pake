@@ -56,11 +56,3 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   camera: false,
   microphone: false,
 };
-
-// Just for cli development
-export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
-  ...DEFAULT_PAKE_OPTIONS,
-  url: 'https://weekly.tw93.fun/en',
-  name: 'Weekly',
-  hideTitleBar: true,
-};

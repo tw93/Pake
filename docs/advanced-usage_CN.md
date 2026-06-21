@@ -267,17 +267,7 @@ pnpm run dev
 
 #### CLI 开发调试
 
-对于需要热重载的 CLI 开发，可修改 `bin/defaults.ts` 中的 `DEFAULT_DEV_PAKE_OPTIONS` 配置：
-
-```typescript
-export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
-  ...DEFAULT_PAKE_OPTIONS,
-  url: "https://weekly.tw93.fun/en",
-  name: "Weekly",
-};
-```
-
-然后运行：
+对于需要热重载的 CLI 开发，运行：
 
 ```bash
 pnpm run cli:dev
