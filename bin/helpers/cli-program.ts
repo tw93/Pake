@@ -137,8 +137,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
           if (value === 'true') return true;
           if (value === 'false') return false;
           throw new Error('--hide-on-close must be true or false');
-        })
-        .hideHelp(),
+        }),
     )
     .addOption(new Option('--title <string>', 'Window title').hideHelp())
     .addOption(
@@ -153,8 +152,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     )
     .addOption(
       new Option('--enable-drag-drop', 'Enable drag and drop functionality')
-        .default(DEFAULT.enableDragDrop)
-        .hideHelp(),
+        .default(DEFAULT.enableDragDrop),
     )
     .addOption(
       new Option('--keep-binary', 'Keep raw binary file alongside installer')
@@ -200,8 +198,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         '--enable-find',
         'Enable in-page Find UI with Cmd/Ctrl+F/G shortcuts',
       )
-        .default(DEFAULT.enableFind)
-        .hideHelp(),
+        .default(DEFAULT.enableFind),
     )
     .addOption(
       new Option('--installer-language <string>', 'Installer language')
@@ -223,14 +220,12 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     .addOption(
       new Option('--min-width <number>', 'Minimum window width')
         .default(DEFAULT.minWidth)
-        .argParser(validateNumberInput)
-        .hideHelp(),
+        .argParser(validateNumberInput),
     )
     .addOption(
       new Option('--min-height <number>', 'Minimum window height')
         .default(DEFAULT.minHeight)
-        .argParser(validateNumberInput)
-        .hideHelp(),
+        .argParser(validateNumberInput),
     )
     .addOption(
       new Option(
@@ -253,8 +248,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         '--new-window',
         'Allow sites to open new windows (for auth flows, tabs, branches)',
       )
-        .default(DEFAULT.newWindow)
-        .hideHelp(),
+        .default(DEFAULT.newWindow),
     )
     .addOption(
       new Option(
@@ -278,13 +272,9 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     .configureHelp({
       sortSubcommands: true,
       optionTerm: (option) => {
-        if (option.flags === '-v, --version' || option.flags === '-h, --help')
-          return '';
         return option.flags;
       },
       optionDescription: (option) => {
-        if (option.flags === '-v, --version' || option.flags === '-h, --help')
-          return '';
         return option.description;
       },
     });

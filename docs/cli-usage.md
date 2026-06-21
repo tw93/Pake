@@ -74,6 +74,8 @@ Various options are available for customization. Here are the most commonly used
 
 | Option             | Description                                     | Example                                        |
 | ------------------ | ----------------------------------------------- | ---------------------------------------------- |
+| `--help`           | Show help output with all options               | `--help`                                       |
+| `--version`        | Show CLI version                                | `--version`                                    |
 | `--name`           | Application name                                | `--name "Weekly"`                              |
 | `--icon`           | Custom icon (optional, auto-fetch website icon) | `--icon https://cdn.tw93.fun/pake/weekly.icns` |
 | `--width`          | Window width (default: 1200px)                  | `--width 1400`                                 |
