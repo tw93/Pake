@@ -459,19 +459,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const absoluteUrl = hrefUrl.href;
       let filename = anchorElement.download || getFilenameFromUrl(absoluteUrl);
 
-      // Keep OAuth/authentication flows inside the app. A new window is only
-      // used when the link or config asks for one; otherwise navigate in place
-      // so the SSO redirect chain (and its callback) stays in the webview.
+      // Keep OAuth/authentication flows inside the app. Without --new-window,
+      // navigate in place so the SSO redirect chain and callback stay in the
+      // webview instead of falling through to the system browser.
       if (window.isAuthLink(absoluteUrl)) {
         console.log("[Pake] Handling OAuth navigation in-app:", absoluteUrl);
         e.preventDefault();
         e.stopImmediatePropagation();
 
-        const wantsNewWindow =
-          target === "_blank" ||
-          target === "_new" ||
-          window.pakeConfig?.new_window;
-        if (wantsNewWindow) {
+        if (window.pakeConfig?.new_window) {
           openAuthNavigation(
             originalWindowOpen,
             absoluteUrl,

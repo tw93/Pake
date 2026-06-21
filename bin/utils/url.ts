@@ -42,15 +42,16 @@ export function normalizeUrl(urlToNormalize: string): string {
 }
 
 // Compiles a comma-separated domain list into a regex source for
-// internal_url_regex. Each domain is escaped and matched anywhere in the URL so
-// SSO and workspace callbacks stay inside the app instead of opening in the
-// system browser. Intentionally permissive: a broad match avoids false
-// negatives that would break an auth redirect. Returns '' for empty input.
+// internal_url_regex. Each domain is escaped and matched against the URL host
+// and its subdomains so path or query text cannot accidentally opt a link in.
+// Returns '' for empty input.
 export function safeDomainsToRegex(domains: string): string {
   const escaped = domains
     .split(',')
-    .map((domain) => domain.trim())
+    .map((domain) => domain.trim().toLowerCase())
     .filter(Boolean)
     .map((domain) => domain.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-  return escaped.length ? `(${escaped.join('|')})` : '';
+  return escaped.length
+    ? `^https?:\\/\\/(?:[^/?#@]+\\.)*(?:${escaped.join('|')})(?::\\d+)?(?:[/?#]|$)`
+    : '';
 }
