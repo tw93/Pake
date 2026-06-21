@@ -38,7 +38,7 @@ export interface PakeCliOptions {
   // App version, the same as package.json version, default 1.0.0
   appVersion: string;
 
-  // Force Mac to use dark mode, default false
+  // Force app to use dark mode (supports macOS, Windows, and Linux), default false
   darkMode: boolean;
 
   // Disable web shortcuts, default false

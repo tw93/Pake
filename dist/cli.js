@@ -2685,7 +2685,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .addOption(new Option('--maximize', 'Start window maximized')
         .default(DEFAULT_PAKE_OPTIONS.maximize)
         .hideHelp())
-        .addOption(new Option('--dark-mode', 'Force Mac app to use dark mode')
+        .addOption(new Option('--dark-mode', 'Force app to use dark mode (supports macOS, Windows, and Linux)')
         .default(DEFAULT_PAKE_OPTIONS.darkMode)
         .hideHelp())
         .addOption(new Option('--disabled-web-shortcuts', 'Disabled webPage shortcuts')
