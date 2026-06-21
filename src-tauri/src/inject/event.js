@@ -459,20 +459,27 @@ document.addEventListener("DOMContentLoaded", () => {
       const absoluteUrl = hrefUrl.href;
       let filename = anchorElement.download || getFilenameFromUrl(absoluteUrl);
 
-      // Keep OAuth/authentication flows inside the app when popup support is enabled.
+      // Keep OAuth/authentication flows inside the app. A new window is only
+      // used when the link or config asks for one; otherwise navigate in place
+      // so the SSO redirect chain (and its callback) stays in the webview.
       if (window.isAuthLink(absoluteUrl)) {
         console.log("[Pake] Handling OAuth navigation in-app:", absoluteUrl);
+        e.preventDefault();
+        e.stopImmediatePropagation();
 
-        if (window.pakeConfig?.new_window) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-
+        const wantsNewWindow =
+          target === "_blank" ||
+          target === "_new" ||
+          window.pakeConfig?.new_window;
+        if (wantsNewWindow) {
           openAuthNavigation(
             originalWindowOpen,
             absoluteUrl,
             "_blank",
             "width=1200,height=800,scrollbars=yes,resizable=yes",
           );
+        } else {
+          window.location.href = absoluteUrl;
         }
 
         return;
@@ -488,7 +495,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (isInternalUrl(absoluteUrl)) {
-          // For internal links (based on regex or domain), let the browser handle it naturally
+          // With --new-window the Rust on_new_window handler opens an in-app
+          // window; without it, deferring to the native handler sends the
+          // _blank target to the system browser and strands SSO callbacks.
+          // Navigate in place so internal links stay inside the webview.
+          if (!window.pakeConfig?.new_window) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            window.location.href = absoluteUrl;
+          }
           return;
         }
 
@@ -590,6 +605,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         handleExternalLink(absoluteUrl);
         return null;
+      }
+
+      // With --new-window the native handler opens an in-app window; without it,
+      // originalWindowOpen would route the internal target to the system browser
+      // and strand SSO callbacks, so navigate in place instead.
+      if (!window.pakeConfig?.new_window) {
+        window.location.href = absoluteUrl;
+        return window;
       }
 
       return originalWindowOpen.call(window, absoluteUrl, name, specs);
