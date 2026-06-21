@@ -111,6 +111,7 @@ After build, confirm:
 | `--multi-instance`            | false   | Allow multiple app instances                 |
 | `--multi-window`              | false   | Multiple windows in one instance             |
 | `--new-window`                | false   | Allow popup windows (needed for OAuth flows) |
+| `--safe-domain <domains>`     | none    | Keep trusted SSO/workspace domains in-app    |
 | `--incognito`                 | false   | Private browsing mode                        |
 | `--dark-mode`                 | false   | Force macOS dark mode                        |
 | `--zoom <number>`             | 100     | Initial zoom level (50-200)                  |

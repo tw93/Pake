@@ -114,6 +114,8 @@ Configure window properties in `pake.json`:
 }
 ```
 
+`hideTitleBar` is only supported on macOS. It is ignored on Windows and Linux.
+
 ## Static File Packaging
 
 Package local HTML/CSS/JS files:

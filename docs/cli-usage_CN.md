@@ -260,6 +260,19 @@ pake https://github.com --name GitHub
 --internal-url-regex "^https://(app|api)\\.example\\.com"
 ```
 
+#### [safe-domain]
+
+更简单地把可信域名及其子域名保留在应用内打开。适合工作区回调和企业 SSO 登录流程，例如 Slack 加 Okta。Pake 会把这个列表编译成 `internal_url_regex`；如果同时设置了 `--internal-url-regex`，则以显式正则为准。
+
+`--safe-domain` 只匹配 URL 的 host，不会因为路径或查询参数里出现域名就误判为内部链接。
+
+```shell
+--safe-domain <domains>
+
+# 将 Slack 和 Okta 的认证跳转保留在应用内
+--safe-domain slack.com,okta.com
+```
+
 #### [multi-arch]
 
 设置打包结果同时支持 Intel 和 M1 芯片，仅适用于 macOS，默认为 `false`。

@@ -431,13 +431,14 @@ function needsTemporaryDebForZst(targets) {
  */
 function buildWindowConfigOverrides(options, platform = asSupportedPlatform(process.platform)) {
     const platformHideOnClose = options.hideOnClose ?? platform === 'darwin';
+    const platformHideTitleBar = platform === 'darwin' ? options.hideTitleBar : false;
     return {
         width: options.width,
         height: options.height,
         fullscreen: options.fullscreen,
         maximize: options.maximize,
         resizable: options.resizable ?? true,
-        hide_title_bar: options.hideTitleBar,
+        hide_title_bar: platformHideTitleBar,
         activation_shortcut: options.activationShortcut,
         always_on_top: options.alwaysOnTop,
         dark_mode: options.darkMode,
@@ -712,6 +713,9 @@ async function mergeConfig(url, options, tauriConf) {
     await copyTemplateConfigs();
     const { appVersion, userAgent, showSystemTray, useLocalFile, identifier, name = 'pake-app', installerLanguage, wasm, camera, microphone, } = options;
     const platform = asSupportedPlatform(process.platform);
+    if (options.hideTitleBar && platform !== 'darwin') {
+        logger.warn('✼ --hide-title-bar is only supported on macOS and will be ignored on this platform.');
+    }
     const tauriConfWindowOptions = buildWindowConfigOverrides(options, platform);
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
     tauriConf.productName = name;
@@ -1162,14 +1166,22 @@ class BaseBuilder {
             return 0; // Disable proxy feature if version detection fails
         }
     }
+    getCargoTargetDir() {
+        return process.env.CARGO_TARGET_DIR || path.join('src-tauri', 'target');
+    }
+    resolveBuildPath(npmDirectory, buildPath) {
+        return path.isAbsolute(buildPath)
+            ? buildPath
+            : path.join(npmDirectory, buildPath);
+    }
     getBasePath() {
         const basePath = this.options.debug ? 'debug' : 'release';
-        return `src-tauri/target/${basePath}/bundle/`;
+        return path.join(this.getCargoTargetDir(), basePath, 'bundle');
     }
     getBuildAppPath(npmDirectory, fileName, fileType) {
         // For app bundles on macOS, the directory is 'macos', not 'app'
         const bundleDir = fileType.toLowerCase() === 'app' ? 'macos' : fileType.toLowerCase();
-        return path.join(npmDirectory, this.getBasePath(), bundleDir, `${fileName}.${fileType}`);
+        return path.join(this.resolveBuildPath(npmDirectory, this.getBasePath()), bundleDir, `${fileName}.${fileType}`);
     }
     /**
      * Copy raw binary file to output directory
@@ -1196,9 +1208,9 @@ class BaseBuilder {
         const binaryName = this.getBinaryName(appName);
         // Handle cross-platform builds
         if (this.options.multiArch || this.hasArchSpecificTarget()) {
-            return path.join(npmDirectory, this.getArchSpecificPath(), basePath, binaryName);
+            return path.join(this.resolveBuildPath(npmDirectory, this.getArchSpecificPath()), basePath, binaryName);
         }
-        return path.join(npmDirectory, 'src-tauri/target', basePath, binaryName);
+        return path.join(this.resolveBuildPath(npmDirectory, this.getCargoTargetDir()), basePath, binaryName);
     }
     /**
      * Get the output path for the raw binary file
@@ -1229,7 +1241,7 @@ class BaseBuilder {
      * Get architecture-specific path for binary
      */
     getArchSpecificPath() {
-        return 'src-tauri/target'; // Override in subclasses if needed
+        return this.getCargoTargetDir(); // Override in subclasses if needed
     }
 }
 BaseBuilder.ARCH_MAPPINGS = {
@@ -1315,7 +1327,10 @@ class MacBuilder extends BaseBuilder {
         const basePath = this.options.debug ? 'debug' : 'release';
         const actualArch = this.getActualArch();
         const target = this.getTauriTarget(actualArch, 'darwin');
-        return `src-tauri/target/${target}/${basePath}/bundle`;
+        if (!target) {
+            throw new Error(`Unsupported architecture: ${actualArch} for macOS`);
+        }
+        return path.join(this.getCargoTargetDir(), target, basePath, 'bundle');
     }
     hasArchSpecificTarget() {
         return true;
@@ -1323,7 +1338,10 @@ class MacBuilder extends BaseBuilder {
     getArchSpecificPath() {
         const actualArch = this.getActualArch();
         const target = this.getTauriTarget(actualArch, 'darwin');
-        return `src-tauri/target/${target}`;
+        if (!target) {
+            throw new Error(`Unsupported architecture: ${actualArch} for macOS`);
+        }
+        return path.join(this.getCargoTargetDir(), target);
     }
 }
 
@@ -1354,14 +1372,26 @@ class WinBuilder extends BaseBuilder {
     getBasePath() {
         const basePath = this.options.debug ? 'debug' : 'release';
         const target = this.getTauriTarget(this.buildArch, 'win32');
-        return `src-tauri/target/${target}/${basePath}/bundle/`;
+        if (!target) {
+            throw new Error(`Unsupported architecture: ${this.buildArch} for Windows`);
+        }
+        return path.join(this.getCargoTargetDir(), target, basePath, 'bundle');
     }
     hasArchSpecificTarget() {
         return true;
     }
     getArchSpecificPath() {
         const target = this.getTauriTarget(this.buildArch, 'win32');
-        return `src-tauri/target/${target}`;
+        if (!target) {
+            throw new Error(`Unsupported architecture: ${this.buildArch} for Windows`);
+        }
+        return path.join(this.getCargoTargetDir(), target);
+    }
+    getRawBinaryPath(appName) {
+        return `${appName}.exe`;
+    }
+    getBinaryName(appName) {
+        return `pake-${generateIdentifierSafeName(appName)}.exe`;
     }
 }
 
@@ -1556,7 +1586,10 @@ post_remove() {
         const basePath = this.options.debug ? 'debug' : 'release';
         if (this.buildArch === 'arm64') {
             const target = this.getTauriTarget(this.buildArch, 'linux');
-            return `src-tauri/target/${target}/${basePath}/bundle/`;
+            if (!target) {
+                throw new Error(`Unsupported architecture: ${this.buildArch} for Linux`);
+            }
+            return path.join(this.getCargoTargetDir(), target, basePath, 'bundle');
         }
         return super.getBasePath();
     }
@@ -1572,7 +1605,10 @@ post_remove() {
     getArchSpecificPath() {
         if (this.buildArch === 'arm64') {
             const target = this.getTauriTarget(this.buildArch, 'linux');
-            return `src-tauri/target/${target}`;
+            if (!target) {
+                throw new Error(`Unsupported architecture: ${this.buildArch} for Linux`);
+            }
+            return path.join(this.getCargoTargetDir(), target);
         }
         return super.getArchSpecificPath();
     }
@@ -2410,6 +2446,20 @@ function normalizeUrl(urlToNormalize) {
         throw new Error(`Your url "${urlWithProtocol}" is invalid: ${err.message}`);
     }
 }
+// Compiles a comma-separated domain list into a regex source for
+// internal_url_regex. Each domain is escaped and matched against the URL host
+// and its subdomains so path or query text cannot accidentally opt a link in.
+// Returns '' for empty input.
+function safeDomainsToRegex(domains) {
+    const escaped = domains
+        .split(',')
+        .map((domain) => domain.trim().toLowerCase())
+        .filter(Boolean)
+        .map((domain) => domain.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    return escaped.length
+        ? `^https?:\\/\\/(?:[^/?#@]+\\.)*(?:${escaped.join('|')})(?::\\d+)?(?:[/?#]|$)`
+        : '';
+}
 
 /**
  * Error class used for user-facing CLI errors.
@@ -2490,6 +2540,10 @@ async function handleOptions(options, url) {
         name: resolvedName,
         identifier: resolveIdentifier(url, options.name, options.identifier),
     };
+    // --safe-domain is sugar over --internal-url-regex; an explicit regex wins.
+    if (!options.internalUrlRegex && options.safeDomain) {
+        appOptions.internalUrlRegex = safeDomainsToRegex(options.safeDomain);
+    }
     const iconPath = await handleIcon(appOptions, url);
     appOptions.icon = iconPath || '';
     return appOptions;
@@ -2538,6 +2592,7 @@ const DEFAULT_PAKE_OPTIONS = {
     startToTray: false,
     forceInternalNavigation: false,
     internalUrlRegex: '',
+    safeDomain: '',
     enableFind: false,
     iterativeBuild: false,
     zoom: 100,
@@ -2679,12 +2734,9 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .addOption(new Option('--start-to-tray', 'Start app minimized to tray')
         .default(DEFAULT_PAKE_OPTIONS.startToTray)
         .hideHelp())
-        .addOption(new Option('--force-internal-navigation', 'Keep every link inside the Pake window instead of opening external handlers')
-        .default(DEFAULT_PAKE_OPTIONS.forceInternalNavigation)
-        .hideHelp())
-        .addOption(new Option('--internal-url-regex <string>', 'Regex pattern to match URLs that should be considered internal')
-        .default(DEFAULT_PAKE_OPTIONS.internalUrlRegex)
-        .hideHelp())
+        .addOption(new Option('--force-internal-navigation', 'Keep every link inside the Pake window instead of opening external handlers').default(DEFAULT_PAKE_OPTIONS.forceInternalNavigation))
+        .addOption(new Option('--internal-url-regex <string>', 'Regex pattern to match URLs that should be considered internal').default(DEFAULT_PAKE_OPTIONS.internalUrlRegex))
+        .addOption(new Option('--safe-domain <domains>', 'Comma-separated domains kept inside the app (e.g. SSO/workspace callbacks)').default(DEFAULT_PAKE_OPTIONS.safeDomain))
         .addOption(new Option('--enable-find', 'Enable in-page Find UI with Cmd/Ctrl+F/G shortcuts')
         .default(DEFAULT_PAKE_OPTIONS.enableFind)
         .hideHelp())
@@ -2715,9 +2767,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .addOption(new Option('--iterative-build', 'Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging')
         .default(DEFAULT_PAKE_OPTIONS.iterativeBuild)
         .hideHelp())
-        .addOption(new Option('--new-window', 'Allow sites to open new windows (for auth flows, tabs, branches)')
-        .default(DEFAULT_PAKE_OPTIONS.newWindow)
-        .hideHelp())
+        .addOption(new Option('--new-window', 'Allow sites to open new windows (for auth flows, tabs, branches)').default(DEFAULT_PAKE_OPTIONS.newWindow))
         .addOption(new Option('--install', 'Auto-install app to /Applications (macOS) after build and remove local bundle')
         .default(DEFAULT_PAKE_OPTIONS.install)
         .hideHelp())

@@ -76,7 +76,11 @@ export default class MacBuilder extends BaseBuilder {
     const actualArch = this.getActualArch();
     const target = this.getTauriTarget(actualArch, 'darwin');
 
-    return `src-tauri/target/${target}/${basePath}/bundle`;
+    if (!target) {
+      throw new Error(`Unsupported architecture: ${actualArch} for macOS`);
+    }
+
+    return path.join(this.getCargoTargetDir(), target, basePath, 'bundle');
   }
 
   protected hasArchSpecificTarget(): boolean {
@@ -86,6 +90,9 @@ export default class MacBuilder extends BaseBuilder {
   protected getArchSpecificPath(): string {
     const actualArch = this.getActualArch();
     const target = this.getTauriTarget(actualArch, 'darwin');
-    return `src-tauri/target/${target}`;
+    if (!target) {
+      throw new Error(`Unsupported architecture: ${actualArch} for macOS`);
+    }
+    return path.join(this.getCargoTargetDir(), target);
   }
 }

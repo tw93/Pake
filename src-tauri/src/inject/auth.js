@@ -27,12 +27,26 @@ function matchesAuthUrl(url, baseUrl = window.location.href) {
       /\/o\/oauth2/,
     ];
 
-    const isMatch = oauthPatterns.some(
-      (pattern) =>
-        pattern.test(hostname) ||
-        pattern.test(pathname) ||
-        pattern.test(fullUrl),
-    );
+    // Enterprise SSO. Match identity providers on the host, and SAML/SSO/ADFS on
+    // the pathname with endpoint-shaped patterns only, so ordinary pages such as
+    // /settings/sso/providers (or a query string carrying an SSO URL) are not
+    // misread as authentication.
+    const enterpriseHostPatterns = [/(^|\.)okta\.com$/, /(^|\.)onelogin\.com$/];
+    const enterprisePathPatterns = [
+      /\/saml2?\/(sso|acs|login|metadata|consume|redirect|callback|continue)/,
+      /\/sso\/(saml|oidc|oauth|login|authorize|redirect|callback|acs|start|continue|metadata)/,
+      /\/adfs\/ls\b/,
+    ];
+
+    const isMatch =
+      oauthPatterns.some(
+        (pattern) =>
+          pattern.test(hostname) ||
+          pattern.test(pathname) ||
+          pattern.test(fullUrl),
+      ) ||
+      enterpriseHostPatterns.some((pattern) => pattern.test(hostname)) ||
+      enterprisePathPatterns.some((pattern) => pattern.test(pathname));
 
     if (isMatch) {
       console.log("[Pake] OAuth URL detected:", url);
