@@ -216,7 +216,7 @@ pake https://github.com --name GitHub
 
 #### [dark-mode]
 
-强制 Mac 打包应用使用黑暗模式，默认为 `false`。
+强制打包应用使用黑暗模式（支持 macOS、Windows 和 Linux），默认为 `false`。
 
 ```shell
 --dark-mode

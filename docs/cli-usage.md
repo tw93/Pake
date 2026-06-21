@@ -218,7 +218,7 @@ Set the version number of the packaged application to be consistent with the nam
 
 #### [dark-mode]
 
-Force Mac to package applications using dark mode, default is `false`.
+Force packaging applications using dark mode (supports macOS, Windows, and Linux), default is `false`.
 
 ```shell
 --dark-mode
