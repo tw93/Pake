@@ -114,6 +114,8 @@ fn handle_scroll(scroll_y: f64, scroll_x: f64) {
 }
 ```
 
+`hideTitleBar` 仅支持 macOS，在 Windows 和 Linux 上会被忽略。
+
 ## 静态文件打包
 
 打包本地 HTML/CSS/JS 文件：

@@ -31,13 +31,15 @@ export function buildWindowConfigOverrides(
   platform: SupportedPlatform = asSupportedPlatform(process.platform),
 ): Partial<WindowConfig> {
   const platformHideOnClose = options.hideOnClose ?? platform === 'darwin';
+  const platformHideTitleBar =
+    platform === 'darwin' ? options.hideTitleBar : false;
   return {
     width: options.width,
     height: options.height,
     fullscreen: options.fullscreen,
     maximize: options.maximize,
     resizable: options.resizable ?? true,
-    hide_title_bar: options.hideTitleBar,
+    hide_title_bar: platformHideTitleBar,
     activation_shortcut: options.activationShortcut,
     always_on_top: options.alwaysOnTop,
     dark_mode: options.darkMode,
@@ -439,6 +441,11 @@ export async function mergeConfig(
   } = options;
 
   const platform = asSupportedPlatform(process.platform);
+  if (options.hideTitleBar && platform !== 'darwin') {
+    logger.warn(
+      '✼ --hide-title-bar is only supported on macOS and will be ignored on this platform.',
+    );
+  }
   const tauriConfWindowOptions = buildWindowConfigOverrides(options, platform);
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
 
