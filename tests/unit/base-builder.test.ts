@@ -15,6 +15,7 @@ vi.mock('@/utils/dir', () => ({
 }));
 
 import BaseBuilder from '@/builders/BaseBuilder';
+import WinBuilder from '@/builders/WinBuilder';
 import {
   _resetPackageManagerCache,
   configureCargoRegistry,
@@ -32,6 +33,7 @@ class TestBuilder extends BaseBuilder {
 }
 
 const originalCnMirrorEnv = process.env[CN_MIRROR_ENV];
+const originalCargoTargetDir = process.env.CARGO_TARGET_DIR;
 const tempDirs: string[] = [];
 
 const GENERATED_MIRROR_CONFIG = `[source.crates-io]
@@ -93,6 +95,12 @@ describe('BaseBuilder guards', () => {
       delete process.env[CN_MIRROR_ENV];
     } else {
       process.env[CN_MIRROR_ENV] = originalCnMirrorEnv;
+    }
+
+    if (originalCargoTargetDir === undefined) {
+      delete process.env.CARGO_TARGET_DIR;
+    } else {
+      process.env.CARGO_TARGET_DIR = originalCargoTargetDir;
     }
 
     await Promise.all(tempDirs.splice(0).map((dir) => fsExtra.remove(dir)));
@@ -298,6 +306,46 @@ describe('BaseBuilder guards', () => {
 
     expect(normalizedCommand).toContain('src-tauri/.pake/tauri.conf.json');
     expect(command).toContain('--features cli-build');
+  });
+
+  it('copies Windows build artifacts from CARGO_TARGET_DIR when it is set', () => {
+    const cargoTargetDir = path.join(process.cwd(), '.short-cargo-target');
+    process.env.CARGO_TARGET_DIR = cargoTargetDir;
+
+    const builder = new WinBuilder({
+      debug: false,
+      name: 'ChatGPT',
+      targets: 'x64',
+    } as any);
+
+    const appPath = (builder as any).getBuildAppPath(
+      process.cwd(),
+      'ChatGPT_1.0.0_x64_en-US',
+      'msi',
+    );
+    const binaryPath = (builder as any).getRawBinarySourcePath(
+      process.cwd(),
+      'ChatGPT',
+    );
+
+    expect(appPath).toBe(
+      path.join(
+        cargoTargetDir,
+        'x86_64-pc-windows-msvc',
+        'release',
+        'bundle',
+        'msi',
+        'ChatGPT_1.0.0_x64_en-US.msi',
+      ),
+    );
+    expect(binaryPath).toBe(
+      path.join(
+        cargoTargetDir,
+        'x86_64-pc-windows-msvc',
+        'release',
+        'pake-chatgpt.exe',
+      ),
+    );
   });
 
   it('tracks generated Pake config files in the Cargo build script', async () => {

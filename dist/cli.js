@@ -1162,14 +1162,22 @@ class BaseBuilder {
             return 0; // Disable proxy feature if version detection fails
         }
     }
+    getCargoTargetDir() {
+        return process.env.CARGO_TARGET_DIR || path.join('src-tauri', 'target');
+    }
+    resolveBuildPath(npmDirectory, buildPath) {
+        return path.isAbsolute(buildPath)
+            ? buildPath
+            : path.join(npmDirectory, buildPath);
+    }
     getBasePath() {
         const basePath = this.options.debug ? 'debug' : 'release';
-        return `src-tauri/target/${basePath}/bundle/`;
+        return path.join(this.getCargoTargetDir(), basePath, 'bundle');
     }
     getBuildAppPath(npmDirectory, fileName, fileType) {
         // For app bundles on macOS, the directory is 'macos', not 'app'
         const bundleDir = fileType.toLowerCase() === 'app' ? 'macos' : fileType.toLowerCase();
-        return path.join(npmDirectory, this.getBasePath(), bundleDir, `${fileName}.${fileType}`);
+        return path.join(this.resolveBuildPath(npmDirectory, this.getBasePath()), bundleDir, `${fileName}.${fileType}`);
     }
     /**
      * Copy raw binary file to output directory
@@ -1196,9 +1204,9 @@ class BaseBuilder {
         const binaryName = this.getBinaryName(appName);
         // Handle cross-platform builds
         if (this.options.multiArch || this.hasArchSpecificTarget()) {
-            return path.join(npmDirectory, this.getArchSpecificPath(), basePath, binaryName);
+            return path.join(this.resolveBuildPath(npmDirectory, this.getArchSpecificPath()), basePath, binaryName);
         }
-        return path.join(npmDirectory, 'src-tauri/target', basePath, binaryName);
+        return path.join(this.resolveBuildPath(npmDirectory, this.getCargoTargetDir()), basePath, binaryName);
     }
     /**
      * Get the output path for the raw binary file
@@ -1229,7 +1237,7 @@ class BaseBuilder {
      * Get architecture-specific path for binary
      */
     getArchSpecificPath() {
-        return 'src-tauri/target'; // Override in subclasses if needed
+        return this.getCargoTargetDir(); // Override in subclasses if needed
     }
 }
 BaseBuilder.ARCH_MAPPINGS = {
@@ -1315,7 +1323,10 @@ class MacBuilder extends BaseBuilder {
         const basePath = this.options.debug ? 'debug' : 'release';
         const actualArch = this.getActualArch();
         const target = this.getTauriTarget(actualArch, 'darwin');
-        return `src-tauri/target/${target}/${basePath}/bundle`;
+        if (!target) {
+            throw new Error(`Unsupported architecture: ${actualArch} for macOS`);
+        }
+        return path.join(this.getCargoTargetDir(), target, basePath, 'bundle');
     }
     hasArchSpecificTarget() {
         return true;
@@ -1323,7 +1334,10 @@ class MacBuilder extends BaseBuilder {
     getArchSpecificPath() {
         const actualArch = this.getActualArch();
         const target = this.getTauriTarget(actualArch, 'darwin');
-        return `src-tauri/target/${target}`;
+        if (!target) {
+            throw new Error(`Unsupported architecture: ${actualArch} for macOS`);
+        }
+        return path.join(this.getCargoTargetDir(), target);
     }
 }
 
@@ -1354,14 +1368,26 @@ class WinBuilder extends BaseBuilder {
     getBasePath() {
         const basePath = this.options.debug ? 'debug' : 'release';
         const target = this.getTauriTarget(this.buildArch, 'win32');
-        return `src-tauri/target/${target}/${basePath}/bundle/`;
+        if (!target) {
+            throw new Error(`Unsupported architecture: ${this.buildArch} for Windows`);
+        }
+        return path.join(this.getCargoTargetDir(), target, basePath, 'bundle');
     }
     hasArchSpecificTarget() {
         return true;
     }
     getArchSpecificPath() {
         const target = this.getTauriTarget(this.buildArch, 'win32');
-        return `src-tauri/target/${target}`;
+        if (!target) {
+            throw new Error(`Unsupported architecture: ${this.buildArch} for Windows`);
+        }
+        return path.join(this.getCargoTargetDir(), target);
+    }
+    getRawBinaryPath(appName) {
+        return `${appName}.exe`;
+    }
+    getBinaryName(appName) {
+        return `pake-${generateIdentifierSafeName(appName)}.exe`;
     }
 }
 
@@ -1556,7 +1582,10 @@ post_remove() {
         const basePath = this.options.debug ? 'debug' : 'release';
         if (this.buildArch === 'arm64') {
             const target = this.getTauriTarget(this.buildArch, 'linux');
-            return `src-tauri/target/${target}/${basePath}/bundle/`;
+            if (!target) {
+                throw new Error(`Unsupported architecture: ${this.buildArch} for Linux`);
+            }
+            return path.join(this.getCargoTargetDir(), target, basePath, 'bundle');
         }
         return super.getBasePath();
     }
@@ -1572,7 +1601,10 @@ post_remove() {
     getArchSpecificPath() {
         if (this.buildArch === 'arm64') {
             const target = this.getTauriTarget(this.buildArch, 'linux');
-            return `src-tauri/target/${target}`;
+            if (!target) {
+                throw new Error(`Unsupported architecture: ${this.buildArch} for Linux`);
+            }
+            return path.join(this.getCargoTargetDir(), target);
         }
         return super.getArchSpecificPath();
     }
