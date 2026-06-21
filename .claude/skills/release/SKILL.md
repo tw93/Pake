@@ -51,11 +51,12 @@ Tag format: uppercase `V` prefix (e.g. `V3.11.0`), not `v3.11.0`.
 1. [ ] Confirm CI triggered: `gh run list --workflow=release.yml`
 2. [ ] Watch CI status: `gh run watch`
 3. [ ] Verify GitHub Release was created: `gh release view VX.X.X --json tagName,url,assets`
-4. [ ] Confirm npm workflow exists and is active: `gh workflow list --all | grep "Publish npm Package"`
-5. [ ] Confirm npm Trusted Publishing triggered: `gh run list --workflow=npm-publish.yml`
-6. [ ] Verify npm published the exact package: `npm view pake-cli@X.Y.Z version gitHead dist.tarball --json`
-7. [ ] Verify latest now resolves to the release: `npm view pake-cli version`
-8. [ ] Record Quality & Testing status separately: `gh run list --workflow=quality-and-test.yml --limit 3`
+4. [ ] Fill the GitHub Release title and body from the template in **GitHub Release Notes** below. CI's `create-release` step only makes a bare placeholder (title = `VX.X.X`, empty body); do not leave it bare.
+5. [ ] Confirm npm workflow exists and is active: `gh workflow list --all | grep "Publish npm Package"`
+6. [ ] Confirm npm Trusted Publishing triggered: `gh run list --workflow=npm-publish.yml`
+7. [ ] Verify npm published the exact package: `npm view pake-cli@X.Y.Z version gitHead dist.tarball --json`
+8. [ ] Verify latest now resolves to the release: `npm view pake-cli version`
+9. [ ] Record Quality & Testing status separately: `gh run list --workflow=quality-and-test.yml --limit 3`
 
 npm publishes through Trusted Publishing from `.github/workflows/npm-publish.yml`. Configure npm package settings with GitHub Actions, `tw93/Pake`, workflow file `npm-publish.yml`, and no environment. Local `npm publish` is only a fallback if CI or registry state blocks the trusted path.
 
@@ -67,6 +68,40 @@ Keep release surfaces separate in the final status:
 - Source/tag: the authority for what code was intended to ship.
 
 Do not collapse these into "released" without naming which surface was verified. If GitHub Release assets are visible while `gh run list` still reports the release workflow as queued or in progress, trust `gh release view` for asset state and report the workflow state separately.
+
+## GitHub Release Notes
+
+CI only creates a bare placeholder release. Every published release must be edited to match the house format, or it looks broken next to the others. Two failure modes to avoid: a bare version title with no codename, and a body missing the logo header / star line / repo footer (see `V3.11.10` and `V3.12.0`, both fixed after the fact).
+
+### Title format
+
+`V<X.Y.Z> <Codename>` — version, then a single English codename word, optionally with one emoji. Examples: `V3.11.8 Polish`, `V3.11.10 Bedrock`, `V3.12.0 Gateway`, `V3.11.0 Evolve 👻`. The codename is the maintainer's call; pick one that fits the release theme. Even patch releases get a codename.
+
+### Body template
+
+Fill in the version, the two changelog lists (English + 中文, same items in the same order, numbered), the thanks line (credit the reporters/PR authors behind the release), and keep the logo header and repo footer verbatim:
+
+```markdown
+<div align="center">
+<img src="https://gw.alipayobjects.com/zos/k/fa/logo-modified.png" alt="Pake Logo" width="120" height="120" style="border-radius:50%" />
+<h1 style="margin: 12px 0 6px;">Pake VX.Y.Z</h1>
+<p><em>Turn any webpage into a desktop app with one command.</em></p>
+</div>
+
+### Changelog
+
+1. ...
+
+### 更新日志
+
+1. ...
+
+Special thanks to @user for the reports and PRs behind this release. If Pake helps you, please consider giving it a star and recommending it to your friends.
+
+> https://github.com/tw93/Pake
+```
+
+Apply with a notes file to avoid shell escaping: `gh release edit VX.Y.Z --title "VX.Y.Z Codename" --notes-file notes.md`. Source changelog items from the real commit range (`git log VPREV..VX.Y.Z`), keep them user-facing, and drop pure CI/refactor/docs noise.
 
 ## Trusted Publishing Notes
 
