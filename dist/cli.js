@@ -1383,6 +1383,12 @@ class WinBuilder extends BaseBuilder {
         }
         return path.join(this.getCargoTargetDir(), target);
     }
+    getRawBinaryPath(appName) {
+        return `${appName}.exe`;
+    }
+    getBinaryName(appName) {
+        return `pake-${generateIdentifierSafeName(appName)}.exe`;
+    }
 }
 
 class LinuxBuilder extends BaseBuilder {
