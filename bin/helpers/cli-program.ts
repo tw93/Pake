@@ -103,7 +103,10 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .hideHelp(),
     )
     .addOption(
-      new Option('--dark-mode', 'Force app to use dark mode (supports macOS, Windows, and Linux)')
+      new Option(
+        '--dark-mode',
+        'Force app to use dark mode (supports macOS, Windows, and Linux)',
+      )
         .default(DEFAULT.darkMode)
         .hideHelp(),
     )
