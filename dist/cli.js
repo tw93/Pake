@@ -2590,6 +2590,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     return program$1
         .addHelpText('beforeAll', logo)
         .usage(`[url] [options]`)
+        .helpOption('-h, --help', 'Show all CLI options')
         .showHelpAfterError()
         .argument('[url]', 'The web URL you want to package', validateUrlInput)
         .option('--name <string>', 'Application name')
@@ -2729,14 +2730,19 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .version(packageJson.version, '-v, --version')
         .configureHelp({
         sortSubcommands: true,
+        visibleOptions: (command) => {
+            const options = [...command.options];
+            const helpOption = command
+                ._helpOption;
+            if (helpOption) {
+                options.push(helpOption);
+            }
+            return options;
+        },
         optionTerm: (option) => {
-            if (option.flags === '-v, --version' || option.flags === '-h, --help')
-                return '';
             return option.flags;
         },
         optionDescription: (option) => {
-            if (option.flags === '-v, --version' || option.flags === '-h, --help')
-                return '';
             return option.description;
         },
     });

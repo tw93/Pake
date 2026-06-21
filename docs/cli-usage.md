@@ -70,7 +70,7 @@ The URL is the link to the web page you want to package or the path to a local H
 
 ### [options]
 
-Various options are available for customization. Here are the most commonly used ones:
+Various options are available for customization. `pake --help` shows every supported CLI option. This page is the complete reference.
 
 | Option             | Description                                     | Example                                        |
 | ------------------ | ----------------------------------------------- | ---------------------------------------------- |
@@ -80,6 +80,8 @@ Various options are available for customization. Here are the most commonly used
 | `--height`         | Window height (default: 780px)                  | `--height 900`                                 |
 | `--hide-title-bar` | Immersive header (macOS only)                   | `--hide-title-bar`                             |
 | `--debug`          | Enable development tools                        | `--debug`                                      |
+| `--help`           | Show all CLI options                            | `--help`                                       |
+| `--version`        | Show CLI version                                | `--version`                                    |
 
 For complete options, see detailed sections below.
 
