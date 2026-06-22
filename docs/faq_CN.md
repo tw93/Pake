@@ -10,6 +10,7 @@
   - [Rust 版本错误:"feature 'edition2024' is required"](#rust-版本错误feature-edition2024-is-required)
   - [Linux：Ubuntu 24.04 构建报错 "Can't detect any appindicator library"](#linuxubuntu-2404-构建报错-cant-detect-any-appindicator-library)
   - [Linux：AppImage 构建失败，提示 "failed to run linuxdeploy"](#linuxappimage-构建失败提示-failed-to-run-linuxdeploy)
+  - [Linux：AppImage 启动即崩溃，提示找不到 WebKitNetworkProcess](#linuxappimage-启动即崩溃提示找不到-webkitnetworkprocess)
   - [Linux:"cargo: command not found" 即使已安装 Rust](#linuxcargo-command-not-found-即使已安装-rust)
   - [Windows：首次构建时安装超时](#windows首次构建时安装超时)
   - [Windows：缺少 Visual Studio 构建工具](#windows缺少-visual-studio-构建工具)
@@ -194,6 +195,54 @@ docker run --rm --privileged \
 - 缺少 WebKit2GTK 或 GTK 开发库
 
 `NO_STRIP=1` 环境变量是 Tauri 社区推荐的官方解决方法。
+
+---
+
+### Linux：AppImage 启动即崩溃，提示找不到 WebKitNetworkProcess
+
+**问题描述：**
+AppImage 构建成功，但启动时立即崩溃：
+
+```txt
+** ERROR **: Unable to spawn a new child process: Failed to spawn child process
+"././/lib/webkit2gtk-4.1/WebKitNetworkProcess" (No such file or directory)
+```
+
+这只影响在非 Debian 发行版（Arch、Fedora 等）本地构建出来的 AppImage。Pake 官方发布的 AppImage 在基于 Debian 的环境中构建，不受影响。
+
+**原因：**
+这是 Tauri 打包器的上游限制（[tauri-apps/tauri#5292](https://github.com/tauri-apps/tauri/issues/5292)）。打包时 Tauri 会把编译进 `libwebkit2gtk*.so` 的 WebKit 辅助进程绝对路径改写成相对的 `././...` 形式，并按 Debian 的库布局（`/usr/lib/<架构三元组>/webkit2gtk-4.1`）复制这些辅助二进制。Arch 上 WebKit 位于 `/usr/lib/webkit2gtk-4.1`，没有架构三元组，于是改写后的相对路径指向了 bundle 内并不存在的 `lib/webkit2gtk-4.1` 目录，`WebKitNetworkProcess` 永远找不到。Pake 不参与这一步：AppDir 布局和路径改写完全由 `tauri build` 生成。
+
+**解决方案 1：使用 Arch 原生包（Arch 上推荐）**
+
+```bash
+pake https://example.com --name MyApp --targets zst
+```
+
+这会生成 pacman 包（`*.pkg.tar.zst`），安装到系统路径，WebKit 按系统原生路径解析辅助进程，不存在重定位问题。用 `sudo pacman -U MyApp-*.pkg.tar.zst` 安装。
+
+**解决方案 2：在 Docker（基于 Debian）中构建 AppImage**
+
+在 Pake 的 Docker 镜像中构建，库布局正好符合 AppImage 打包器的预期：
+
+```bash
+docker run --rm --privileged \
+  --device /dev/fuse \
+  --security-opt apparmor=unconfined \
+  -v $(pwd)/output:/output \
+  ghcr.io/tw93/pake:latest \
+  https://example.com --name MyApp --targets appimage
+```
+
+**已构建 AppImage 的临时绕过方法：**
+解压后补上缺失的软链接，再运行内部的 `AppRun`：
+
+```bash
+./MyApp.AppImage --appimage-extract
+cd squashfs-root
+mkdir -p lib && ln -s ../usr/lib/webkit2gtk-4.1 lib/webkit2gtk-4.1
+./AppRun
+```
 
 ---
 

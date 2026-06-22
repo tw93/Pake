@@ -10,6 +10,7 @@ Common issues and solutions when using Pake.
   - [Rust Version Error: "feature 'edition2024' is required"](#rust-version-error-feature-edition2024-is-required)
   - [Linux: Build Error "Can't detect any appindicator library" on Ubuntu 24.04](#linux-build-error-cant-detect-any-appindicator-library-on-ubuntu-2404)
   - [Linux: AppImage Build Fails with "failed to run linuxdeploy"](#linux-appimage-build-fails-with-failed-to-run-linuxdeploy)
+  - [Linux: AppImage Crashes at Launch with WebKitNetworkProcess Not Found](#linux-appimage-crashes-at-launch-with-webkitnetworkprocess-not-found)
   - [Linux: "cargo: command not found" After Installing Rust](#linux-cargo-command-not-found-after-installing-rust)
   - [Windows: Installation Timeout During First Build](#windows-installation-timeout-during-first-build)
   - [Windows: Missing Visual Studio Build Tools](#windows-missing-visual-studio-build-tools)
@@ -194,6 +195,54 @@ This is a known issue with Tauri's linuxdeploy tool, which can fail when:
 - Missing WebKit2GTK or GTK development libraries
 
 The `NO_STRIP=1` environment variable is the official workaround recommended by the Tauri community.
+
+---
+
+### Linux: AppImage Crashes at Launch with WebKitNetworkProcess Not Found
+
+**Problem:**
+The AppImage builds successfully but crashes immediately at launch:
+
+```txt
+** ERROR **: Unable to spawn a new child process: Failed to spawn child process
+"././/lib/webkit2gtk-4.1/WebKitNetworkProcess" (No such file or directory)
+```
+
+This only affects AppImages built locally on a non-Debian distribution (Arch, Fedora, etc.). Pake's official AppImage releases are built in a Debian-based environment and are not affected.
+
+**Why This Happens:**
+This is an upstream Tauri bundler limitation ([tauri-apps/tauri#5292](https://github.com/tauri-apps/tauri/issues/5292)). When bundling, Tauri rewrites the absolute WebKit helper path baked into `libwebkit2gtk*.so` to a relative `././...` form, and copies the helper binaries based on the Debian library layout (`/usr/lib/<arch-triple>/webkit2gtk-4.1`). On Arch the helpers live in `/usr/lib/webkit2gtk-4.1` with no architecture triple, so the patched relative path points at a `lib/webkit2gtk-4.1` directory that does not exist inside the bundle, and `WebKitNetworkProcess` can never be found. Pake does not control this step: the AppDir layout and path patching are produced entirely by `tauri build`.
+
+**Solution 1: Use the Arch native package (recommended on Arch)**
+
+```bash
+pake https://example.com --name MyApp --targets zst
+```
+
+This produces a pacman package (`*.pkg.tar.zst`) that installs to system paths, so WebKit resolves its helper processes natively and there is no relocation problem. Install it with `sudo pacman -U MyApp-*.pkg.tar.zst`.
+
+**Solution 2: Build the AppImage in Docker (Debian-based)**
+
+Building inside Pake's Docker image matches the library layout the AppImage bundler expects:
+
+```bash
+docker run --rm --privileged \
+  --device /dev/fuse \
+  --security-opt apparmor=unconfined \
+  -v $(pwd)/output:/output \
+  ghcr.io/tw93/pake:latest \
+  https://example.com --name MyApp --targets appimage
+```
+
+**Workaround for an already-built AppImage:**
+Extract it, add the missing symlink, then launch the inner `AppRun`:
+
+```bash
+./MyApp.AppImage --appimage-extract
+cd squashfs-root
+mkdir -p lib && ln -s ../usr/lib/webkit2gtk-4.1 lib/webkit2gtk-4.1
+./AppRun
+```
 
 ---
 
