@@ -1272,7 +1272,9 @@ class MacBuilder extends BaseBuilder {
         this.buildArch = validArchs.includes(options.targets || '')
             ? options.targets
             : 'auto';
-        if (options.iterativeBuild ||
+        // `app` is a valid macOS bundle target (see merge.ts); honour it explicitly.
+        if (options.targets === 'app' ||
+            options.iterativeBuild ||
             options.install ||
             process.env.PAKE_CREATE_APP === '1') {
             this.buildFormat = 'app';
