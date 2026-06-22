@@ -19,7 +19,7 @@
 
 ## Features
 
-- 🎐 **Lightweight**: Installer is nearly 20 times smaller than Electron packages, typically around 5M on disk
+- 🎐 **Lightweight**: Installer is nearly 20 times smaller than Electron packages, typically under 10M on disk
 - 🚀 **Fast**: Built with Rust Tauri, much faster than traditional JS frameworks with lower memory usage
 - ⚡ **Easy to use**: One-command packaging via CLI or online building, no complex configuration needed
 - 📦 **Feature-rich**: Supports shortcuts, immersive windows, drag & drop, style customization, ad removal
