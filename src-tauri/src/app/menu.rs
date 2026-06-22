@@ -1,6 +1,4 @@
-// Menu functionality is only used on macOS
-#![cfg(target_os = "macos")]
-
+// Menu functionality is only used on macOS; the module is gated in app/mod.rs.
 use crate::app::window::open_additional_window_safe;
 use tauri::menu::{AboutMetadata, Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::{AppHandle, Manager, Wry};
@@ -308,7 +306,7 @@ pub fn handle_menu_click(app_handle: &AppHandle, id: &str) {
         }
         "clear_cache_restart" => {
             if let Some(window) = app_handle.get_webview_window("pake") {
-                if let Ok(_) = window.clear_all_browsing_data() {
+                if window.clear_all_browsing_data().is_ok() {
                     app_handle.restart();
                 }
             }
