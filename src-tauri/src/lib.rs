@@ -16,6 +16,8 @@ const PAKE_LINUX_WEBKIT_SAFE_MODE: &str = "PAKE_LINUX_WEBKIT_SAFE_MODE";
 const WEBKIT_DISABLE_DMABUF_RENDERER: &str = "WEBKIT_DISABLE_DMABUF_RENDERER";
 #[cfg(target_os = "linux")]
 const WEBKIT_DISABLE_COMPOSITING_MODE: &str = "WEBKIT_DISABLE_COMPOSITING_MODE";
+#[cfg(target_os = "linux")]
+const GDK_BACKEND: &str = "GDK_BACKEND";
 
 use app::{
     invoke::{
@@ -66,6 +68,34 @@ fn should_enable_linux_webkit_safe_mode_from_values(
     !is_niri_session
 }
 
+#[cfg(any(target_os = "linux", test))]
+fn should_force_wayland_gdk_backend(
+    gdk_backend: Option<&str>,
+    wayland_display: Option<&str>,
+    display: Option<&str>,
+) -> bool {
+    // Respect an explicit user choice.
+    if is_non_empty_env_value(gdk_backend) {
+        return false;
+    }
+
+    // On pure Wayland compositors without XWayland (e.g. Niri), $DISPLAY is unset
+    // and GTK defaults to the X11 backend, which aborts with "Failed to initialize
+    // GTK". Wayland is then the only viable backend, so forcing it is safe.
+    is_non_empty_env_value(wayland_display) && !is_non_empty_env_value(display)
+}
+
+#[cfg(target_os = "linux")]
+fn apply_linux_gdk_backend() {
+    if should_force_wayland_gdk_backend(
+        std::env::var(GDK_BACKEND).ok().as_deref(),
+        std::env::var("WAYLAND_DISPLAY").ok().as_deref(),
+        std::env::var("DISPLAY").ok().as_deref(),
+    ) {
+        std::env::set_var(GDK_BACKEND, "wayland");
+    }
+}
+
 #[cfg(target_os = "linux")]
 fn apply_linux_webkit_runtime_flags() {
     let safe_mode = std::env::var(PAKE_LINUX_WEBKIT_SAFE_MODE).ok();
@@ -103,7 +133,10 @@ fn apply_linux_webkit_runtime_flags() {
 
 pub fn run_app() {
     #[cfg(target_os = "linux")]
-    apply_linux_webkit_runtime_flags();
+    {
+        apply_linux_gdk_backend();
+        apply_linux_webkit_runtime_flags();
+    }
 
     let (pake_config, tauri_config) = get_pake_config();
     let tauri_app = tauri::Builder::default();
@@ -327,5 +360,46 @@ mod tests {
                 "expected {value} to disable safe mode"
             );
         }
+    }
+
+    #[test]
+    fn forces_wayland_backend_on_pure_wayland() {
+        assert!(should_force_wayland_gdk_backend(
+            None,
+            Some("wayland-0"),
+            None
+        ));
+    }
+
+    #[test]
+    fn forces_wayland_backend_when_display_is_blank() {
+        assert!(should_force_wayland_gdk_backend(
+            None,
+            Some("wayland-0"),
+            Some("   ")
+        ));
+    }
+
+    #[test]
+    fn keeps_default_backend_when_x11_display_present() {
+        assert!(!should_force_wayland_gdk_backend(
+            None,
+            Some("wayland-0"),
+            Some(":0")
+        ));
+    }
+
+    #[test]
+    fn keeps_default_backend_without_wayland_display() {
+        assert!(!should_force_wayland_gdk_backend(None, None, None));
+    }
+
+    #[test]
+    fn respects_explicit_gdk_backend_override() {
+        assert!(!should_force_wayland_gdk_backend(
+            Some("x11"),
+            Some("wayland-0"),
+            None
+        ));
     }
 }
