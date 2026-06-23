@@ -345,6 +345,61 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Keyboard shortcut bridge for clipboard operations (Windows and Linux only)
+  if (/windows|linux/i.test(navigator.userAgent)) {
+    document.addEventListener("keydown", (e) => {
+      const isCtrl = e.ctrlKey || e.metaKey;
+      if (!isCtrl) return;
+
+      const activeEl = document.activeElement;
+      if (!activeEl) return;
+
+      const isInput = activeEl.tagName === "INPUT" ||
+                      activeEl.tagName === "TEXTAREA" ||
+                      activeEl.isContentEditable;
+
+      const key = e.key.toLowerCase();
+
+      if (key === "c") {
+        if (isInput || window.getSelection().toString()) {
+          document.execCommand("copy");
+          e.preventDefault();
+        }
+      } else if (key === "x") {
+        if (isInput) {
+          document.execCommand("cut");
+          e.preventDefault();
+        }
+      } else if (key === "v") {
+        if (isInput) {
+          e.preventDefault();
+          window.__TAURI__?.core?.invoke("plugin:clipboard-manager|read_text")
+            .then((text) => {
+              if (text) {
+                document.execCommand("insertText", false, text);
+              }
+            })
+            .catch((err) => {
+              console.error("Failed to paste from clipboard:", err);
+            });
+        }
+      } else if (key === "a") {
+        if (isInput) {
+          if (typeof activeEl.select === "function") {
+            activeEl.select();
+          } else {
+            const range = document.createRange();
+            range.selectNodeContents(activeEl);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+          }
+          e.preventDefault();
+        }
+      }
+    });
+  }
+
   document.addEventListener(
     "paste",
     (event) => {
