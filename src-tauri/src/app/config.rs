@@ -75,12 +75,64 @@ pub type UserAgent = PlatformSpecific<String>;
 pub type FunctionON = PlatformSpecific<bool>;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct OneVpnHost {
+    pub hostname: String,
+    pub port: u16,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct OneVpnConfig {
+    #[serde(default)]
+    pub enabled: bool,
+    #[serde(default = "default_onevpn_location")]
+    pub location: String,
+    #[serde(default = "default_onevpn_local_bind")]
+    pub local_bind: String,
+    #[serde(default = "default_onevpn_upstream_tls")]
+    pub upstream_tls: bool,
+    #[serde(default)]
+    pub username: String,
+    #[serde(default)]
+    pub password: String,
+    #[serde(default)]
+    pub custom_hosts: Vec<OneVpnHost>,
+}
+
+impl Default for OneVpnConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            location: default_onevpn_location(),
+            local_bind: default_onevpn_local_bind(),
+            upstream_tls: default_onevpn_upstream_tls(),
+            username: String::new(),
+            password: String::new(),
+            custom_hosts: Vec::new(),
+        }
+    }
+}
+
+fn default_onevpn_location() -> String {
+    "ams".to_string()
+}
+
+fn default_onevpn_local_bind() -> String {
+    "127.0.0.1:0".to_string()
+}
+
+fn default_onevpn_upstream_tls() -> bool {
+    true
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PakeConfig {
     pub windows: Vec<WindowConfig>,
     pub user_agent: UserAgent,
     pub system_tray: FunctionON,
     pub system_tray_path: String,
     pub proxy_url: String,
+    #[serde(default)]
+    pub onevpn: OneVpnConfig,
     #[serde(default)]
     pub multi_instance: bool,
     #[serde(default)]
