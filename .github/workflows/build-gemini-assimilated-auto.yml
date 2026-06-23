@@ -1,0 +1,55 @@
+name: Build Gemini Assimilated Auto
+
+on:
+  push:
+    branches:
+      - extra-mod
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "10.26.2"
+
+jobs:
+  build:
+    name: macos-latest
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Setup Node.js Environment
+        uses: ./.github/actions/setup-env
+        with:
+          mode: build
+
+      - name: Build CLI
+        run: pnpm run cli:build
+
+      - name: Build Gemini Assimilated
+        shell: bash
+        run: |
+          node dist/cli.js "https://www.google.com/ai" \
+            --name "Gemini Search Assimilated" \
+            --icon "https://raw.githubusercontent.com/SupaSuper/icons/main/gemini-assimilated.png" \
+            --width "1200" \
+            --height "780" \
+            --min-width "900" \
+            --min-height "620" \
+            --app-version "1.0.0" \
+            --hide-title-bar
+
+      - name: Upload DMG
+        uses: actions/upload-artifact@v6
+        with:
+          name: Gemini Search Assimilated-macOS
+          path: Gemini Search Assimilated.dmg
+          retention-days: 3
