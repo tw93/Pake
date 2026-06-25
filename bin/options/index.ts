@@ -11,7 +11,20 @@ import {
 } from '@/utils/info';
 import { generateLinuxPackageName } from '@/utils/name';
 import { PakeError } from '@/utils/error';
-import { PakeAppOptions, PakeCliOptions } from '@/types';
+import { AdblockProfile, PakeAppOptions, PakeCliOptions } from '@/types';
+
+type RawPakeCliOptions = PakeCliOptions & {
+  adblock?: AdblockProfile;
+};
+
+export function normalizeCliOptions(options: RawPakeCliOptions): PakeCliOptions {
+  const { adblock, ...normalizedOptions } = options;
+
+  return {
+    ...normalizedOptions,
+    adblockProfile: adblock ?? normalizedOptions.adblockProfile,
+  };
+}
 
 function resolveAppName(name: string, platform: NodeJS.Platform): string {
   const domain = getDomain(name) || 'pake';
@@ -43,9 +56,10 @@ export function isValidName(name: string, platform: NodeJS.Platform): boolean {
 }
 
 export default async function handleOptions(
-  options: PakeCliOptions,
+  rawOptions: RawPakeCliOptions,
   url: string,
 ): Promise<PakeAppOptions> {
+  const options = normalizeCliOptions(rawOptions);
   const { platform } = process;
   const isActions = process.env.GITHUB_ACTIONS;
   let name = options.name;

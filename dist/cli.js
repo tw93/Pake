@@ -2440,6 +2440,13 @@ function isPakeError(error) {
             error.isUserError === true));
 }
 
+function normalizeCliOptions(options) {
+    const { adblock, ...normalizedOptions } = options;
+    return {
+        ...normalizedOptions,
+        adblockProfile: adblock ?? normalizedOptions.adblockProfile,
+    };
+}
 function resolveAppName(name, platform) {
     const domain = getDomain(name) || 'pake';
     return platform !== 'linux' ? capitalizeFirstLetter(domain) : domain;
@@ -2462,7 +2469,8 @@ function isValidName(name, platform) {
         : /^[a-zA-Z0-9\u4e00-\u9fff][a-zA-Z0-9\u4e00-\u9fff .-]*$/;
     return !!name && reg.test(name);
 }
-async function handleOptions(options, url) {
+async function handleOptions(rawOptions, url) {
+    const options = normalizeCliOptions(rawOptions);
     const { platform } = process;
     const isActions = process.env.GITHUB_ACTIONS;
     let name = options.name;
