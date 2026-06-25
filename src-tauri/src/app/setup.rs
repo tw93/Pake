@@ -61,7 +61,12 @@ pub fn set_system_tray(
                 }
             }
             "quit" => {
-                let _ = app.save_window_state(StateFlags::all());
+                let flags = if _init_fullscreen {
+                    StateFlags::all()
+                } else {
+                    StateFlags::all() & !StateFlags::FULLSCREEN
+                };
+                let _ = app.save_window_state(flags);
                 app.exit(0);
             }
             _ => (),

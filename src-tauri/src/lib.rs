@@ -155,7 +155,9 @@ pub fn run_app() {
             StateFlags::FULLSCREEN
         } else {
             // Prevent flickering on the first open.
-            StateFlags::all() & !StateFlags::VISIBLE
+            // Exclude FULLSCREEN so a prior --fullscreen build's persisted state
+            // doesn't force fullscreen on a rebuild without --fullscreen.
+            StateFlags::all() & !StateFlags::VISIBLE & !StateFlags::FULLSCREEN
         })
         .build();
 
