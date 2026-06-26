@@ -485,7 +485,18 @@ fn build_window(
 
     window_builder = window_builder.on_navigation(|_| true);
 
-    window_builder.build()
+    let window = window_builder.build()?;
+
+    #[cfg(target_os = "windows")]
+    if config.adblock.is_enabled_for("youtube") {
+        let session = app
+            .state::<crate::adblock::state::AdblockSession>()
+            .inner()
+            .clone();
+        crate::adblock::windows::attach(&window, session)?;
+    }
+
+    Ok(window)
 }
 
 #[cfg(all(test, target_os = "windows"))]
