@@ -42,6 +42,10 @@ on:
         description: "Window height"
         required: false
         default: 780
+      adblock:
+        description: "Built-in ad-block profile"
+        required: false
+        default: ""
   workflow_call:
     inputs:
       name:
@@ -88,6 +92,11 @@ on:
         type: number
         required: false
         default: 780
+      adblock:
+        description: "Built-in ad-block profile"
+        type: string
+        required: false
+        default: ""
     secrets:
       PAKE_SIGNING_IDENTITY:
         required: false
@@ -346,6 +355,11 @@ jobs:
 
           if ("${{ inputs.incognito }}" -eq "true") {
             $args += "--incognito"
+          }
+
+          if ("${{ inputs.adblock }}" -ne "") {
+            $args += "--adblock", "${{ inputs.adblock }}"
+            $args += "--show-system-tray"
           }
 
           $args += "--width", "${{ inputs.width }}"

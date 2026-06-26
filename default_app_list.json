@@ -48,7 +48,8 @@
     "name": "youtube",
     "title": "YouTube",
     "name_zh": "YouTube",
-    "url": "https://www.youtube.com"
+    "url": "https://www.youtube.com",
+    "adblock": "youtube"
   },
   {
     "name": "chatgpt",
