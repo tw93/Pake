@@ -514,6 +514,16 @@ Supports both comma-separated and multiple option formats:
 --inject ./tools/style.css
 ```
 
+#### [adblock]
+
+Enable a built-in ad-block profile. The initial `youtube` profile combines conservative request filtering with page cleanup on Windows WebView2 builds.
+
+```shell
+pake https://www.youtube.com --name YouTube --show-system-tray --adblock youtube
+```
+
+The blocker may stop working when YouTube changes and may conflict with YouTube's terms or enforcement. Use the tray item **Block YouTube ads** to disable it for the current session if playback fails. SponsorBlock and embedded sponsorship skipping are not included.
+
 #### [proxy-url]
 
 Set proxy server for all network requests. Supports HTTP, HTTPS, and SOCKS5. Available on Windows and Linux. On macOS, requires macOS 14+.

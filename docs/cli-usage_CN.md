@@ -512,6 +512,16 @@ pake ./my-app/index.html --name "my-app" --use-local-file
 --inject ./tools/style.css
 ```
 
+#### [adblock]
+
+启用内置广告拦截配置。初始的 `youtube` 配置会在 Windows WebView2 构建中结合保守的请求过滤和页面清理。
+
+```shell
+pake https://www.youtube.com --name YouTube --show-system-tray --adblock youtube
+```
+
+当 YouTube 调整页面或策略时，该拦截器可能会失效，也可能与 YouTube 的条款或检测机制冲突。如果播放异常，可以通过托盘菜单 **Block YouTube ads** 在当前会话中关闭。该功能不包含 SponsorBlock，也不会跳过视频内置赞助内容。
+
 #### [proxy-url]
 
 为所有网络请求设置代理服务器。支持 HTTP、HTTPS 和 SOCKS5。在 Windows 和 Linux 上可用。在 macOS 上需要 macOS 14+。
