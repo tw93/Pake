@@ -26,6 +26,15 @@
     "ytd-enforcement-message-view-model",
     "tp-yt-paper-dialog ytd-enforcement-message-view-model",
   ];
+  const playerAdMarkers = [
+    ".html5-video-player.ad-showing",
+    ".video-ads .ytp-ad-module",
+    ".ytp-ad-player-overlay",
+    ".ytp-ad-text",
+    ".ytp-ad-preview-container",
+    ".ytp-ad-skip-button-container",
+    ".ytp-ad-simple-ad-badge",
+  ];
 
   const recover = (reason) => {
     if (recoveryRequested) return;
@@ -57,7 +66,12 @@
     }
 
     const player = document.querySelector(".html5-video-player.ad-showing");
-    const video = player?.querySelector("video");
+    const hasPlayerAd = playerAdMarkers.some((selector) =>
+      document.querySelector(selector),
+    );
+    const video =
+      player?.querySelector("video") ||
+      (hasPlayerAd ? document.querySelector("video") : null);
     if (video && Number.isFinite(video.duration) && video.duration > 0) {
       video.muted = true;
       video.currentTime = video.duration;

@@ -117,4 +117,25 @@ describe("YouTube ad-block injection", () => {
     expect(video.muted).toBe(true);
     expect(video.currentTime).toBe(30);
   });
+
+  it("skips player ads when only ad overlay markers are present", () => {
+    const video = { currentTime: 2, duration: 20, muted: false, paused: false };
+    let overlayVisible = false;
+    const { context } = run({
+      querySelector: (selector) => {
+        if (selector === "video") return video;
+        if (selector === ".html5-video-player.ad-showing") return null;
+        if (selector === ".video-ads .ytp-ad-module" && overlayVisible) {
+          return { nodeType: 1 };
+        }
+        return null;
+      },
+    });
+
+    overlayVisible = true;
+    context.intervals.forEach((callback) => callback());
+
+    expect(video.muted).toBe(true);
+    expect(video.currentTime).toBe(20);
+  });
 });
