@@ -17,7 +17,7 @@ function run({
   const context = {
     window: {
       pakeConfig: { adblock: { enabled, profile: "youtube" } },
-      location: { hostname: host },
+      location: { hostname: host, reload: vi.fn() },
       __TAURI__: { core: { invoke: vi.fn(() => Promise.resolve(true)) } },
     },
     document: {
@@ -34,7 +34,11 @@ function run({
     setInterval: vi.fn(),
     setTimeout: vi.fn((callback) => callback()),
     clearTimeout: vi.fn(),
-    sessionStorage: { getItem: () => null, setItem: vi.fn() },
+    sessionStorage: {
+      getItem: () => null,
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+    },
     console,
   };
   context.window.window = context.window;
@@ -58,5 +62,36 @@ describe("YouTube ad-block injection", () => {
     expect(context.window.pakeAdblock.isEnabled()).toBe(true);
     expect(removed).toContain("ytd-display-ad-renderer");
     expect(removed).not.toContain("ytd-video-renderer");
+  });
+
+  it("requests native recovery once for a known anti-block state", async () => {
+    const { context } = run();
+    context.window.pakeAdblock.recover("anti-adblock");
+    context.window.pakeAdblock.recover("anti-adblock");
+    await Promise.resolve();
+    expect(context.window.__TAURI__.core.invoke).toHaveBeenCalledTimes(1);
+    expect(context.window.__TAURI__.core.invoke).toHaveBeenCalledWith(
+      "disable_adblock_for_session",
+      { reason: "anti-adblock" },
+    );
+  });
+
+  it("recovers only after 15 seconds without ad playback progress", () => {
+    const video = { currentTime: 3, duration: 30, muted: false, paused: false };
+    const player = { querySelector: () => video };
+    const { context } = run({
+      querySelector: (selector) =>
+        selector === ".html5-video-player.ad-showing" ? player : null,
+    });
+
+    context.window.pakeAdblock.checkPlaybackStall(1_000);
+    context.window.pakeAdblock.checkPlaybackStall(15_999);
+    expect(context.window.__TAURI__.core.invoke).not.toHaveBeenCalled();
+
+    context.window.pakeAdblock.checkPlaybackStall(16_000);
+    expect(context.window.__TAURI__.core.invoke).toHaveBeenCalledWith(
+      "disable_adblock_for_session",
+      { reason: "ad-playback-stall" },
+    );
   });
 });

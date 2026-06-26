@@ -1,10 +1,11 @@
+use crate::adblock::state::AdblockSession;
 use crate::util::{check_file_or_append, get_download_message_with_lang, show_toast, MessageType};
 use std::fs::File;
 use std::io::Write;
 use std::str::FromStr;
 use std::sync::atomic::{AtomicI64, Ordering};
 use tauri::http::Method;
-use tauri::{command, AppHandle, Manager, Url, WebviewWindow};
+use tauri::{command, AppHandle, Manager, State, Url, WebviewWindow};
 use tauri_plugin_http::reqwest::{ClientBuilder, Request};
 
 #[cfg(target_os = "macos")]
@@ -151,6 +152,16 @@ pub fn send_notification(app: AppHandle, params: NotificationParams) -> Result<(
         .show()
         .map_err(|e| format!("Failed to show notification: {}", e))?;
     Ok(())
+}
+
+#[command]
+pub fn disable_adblock_for_session(state: State<'_, AdblockSession>, reason: String) -> bool {
+    #[cfg(debug_assertions)]
+    eprintln!("[Pake] Disabling adblock for session: {reason}");
+    #[cfg(not(debug_assertions))]
+    let _ = reason;
+
+    state.disable_for_recovery()
 }
 
 #[command]

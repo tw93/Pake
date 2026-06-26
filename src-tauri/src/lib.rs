@@ -20,8 +20,9 @@ const WEBKIT_DISABLE_COMPOSITING_MODE: &str = "WEBKIT_DISABLE_COMPOSITING_MODE";
 
 use app::{
     invoke::{
-        clear_cache_and_restart, clear_dock_badge, download_file, increment_dock_badge,
-        send_notification, set_dock_badge, set_dock_badge_label, update_theme_mode,
+        clear_cache_and_restart, clear_dock_badge, disable_adblock_for_session, download_file,
+        increment_dock_badge, send_notification, set_dock_badge, set_dock_badge_label,
+        update_theme_mode,
     },
     setup::{set_global_shortcut, set_system_tray},
     window::{open_additional_window_safe, set_window, MultiWindowState},
@@ -163,6 +164,7 @@ pub fn run_app() {
             clear_dock_badge,
             update_theme_mode,
             clear_cache_and_restart,
+            disable_adblock_for_session,
         ])
         .setup(move |app| {
             app.manage(adblock_session.clone());
@@ -190,6 +192,8 @@ pub fn run_app() {
                 &pake_config.system_tray_path,
                 init_fullscreen,
                 multi_window,
+                adblock_session.clone(),
+                pake_config.adblock.is_enabled_for("youtube"),
             )?;
             set_global_shortcut(app.app_handle(), activation_shortcut, init_fullscreen)?;
 

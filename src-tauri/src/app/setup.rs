@@ -1,9 +1,10 @@
+use crate::adblock::state::AdblockSession;
 use crate::app::window::open_additional_window_safe;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use tauri::{
-    menu::{MenuBuilder, MenuItemBuilder},
+    menu::{CheckMenuItemBuilder, MenuBuilder, MenuItemBuilder},
     tray::{TrayIconBuilder, TrayIconEvent},
     AppHandle, Manager,
 };
@@ -16,6 +17,8 @@ pub fn set_system_tray(
     tray_icon_path: &str,
     _init_fullscreen: bool,
     allow_multi_window: bool,
+    adblock_session: AdblockSession,
+    show_adblock_toggle: bool,
 ) -> tauri::Result<()> {
     if !show_system_tray {
         app.remove_tray_by_id("pake-tray");
@@ -26,18 +29,31 @@ pub fn set_system_tray(
     let hide_app = MenuItemBuilder::with_id("hide_app", "Hide").build(app)?;
     let show_app = MenuItemBuilder::with_id("show_app", "Show").build(app)?;
     let quit = MenuItemBuilder::with_id("quit", "Quit").build(app)?;
+    let adblock_toggle = show_adblock_toggle
+        .then(|| {
+            CheckMenuItemBuilder::with_id("toggle_youtube_adblock", "Block YouTube ads")
+                .checked(adblock_session.is_enabled())
+                .build(app)
+        })
+        .transpose()?;
 
-    let menu = if allow_multi_window {
-        MenuBuilder::new(app)
+    let menu = match (allow_multi_window, adblock_toggle.as_ref()) {
+        (true, Some(toggle)) => MenuBuilder::new(app)
+            .items(&[&new_window, &hide_app, &show_app, toggle, &quit])
+            .build()?,
+        (false, Some(toggle)) => MenuBuilder::new(app)
+            .items(&[&hide_app, &show_app, toggle, &quit])
+            .build()?,
+        (true, None) => MenuBuilder::new(app)
             .items(&[&new_window, &hide_app, &show_app, &quit])
-            .build()?
-    } else {
-        MenuBuilder::new(app)
+            .build()?,
+        (false, None) => MenuBuilder::new(app)
             .items(&[&hide_app, &show_app, &quit])
-            .build()?
+            .build()?,
     };
 
     app.app_handle().remove_tray_by_id("pake-tray");
+    let menu_adblock_session = adblock_session.clone();
 
     let mut tray_builder = TrayIconBuilder::new()
         .menu(&menu)
@@ -58,6 +74,16 @@ pub fn set_system_tray(
                         let _ = window.set_fullscreen(true);
                         let _ = window.set_focus();
                     }
+                }
+            }
+            "toggle_youtube_adblock" => {
+                let enabled = !menu_adblock_session.is_enabled();
+                menu_adblock_session.set_enabled(enabled);
+                if let Some(window) = app.get_webview_window("pake") {
+                    let script = format!(
+                        "window.pakeAdblock?.setEnabled({enabled}); window.location.reload();"
+                    );
+                    let _ = window.eval(&script);
                 }
             }
             "quit" => {
