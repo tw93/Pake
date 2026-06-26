@@ -74,6 +74,20 @@ where
 pub type UserAgent = PlatformSpecific<String>;
 pub type FunctionON = PlatformSpecific<bool>;
 
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct AdblockConfig {
+    #[serde(default)]
+    pub enabled: bool,
+    #[serde(default)]
+    pub profile: String,
+}
+
+impl AdblockConfig {
+    pub fn is_enabled_for(&self, profile: &str) -> bool {
+        self.enabled && self.profile == profile
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PakeConfig {
     pub windows: Vec<WindowConfig>,
@@ -85,10 +99,31 @@ pub struct PakeConfig {
     pub multi_instance: bool,
     #[serde(default)]
     pub multi_window: bool,
+    #[serde(default)]
+    pub adblock: AdblockConfig,
 }
 
 impl PakeConfig {
     pub fn show_system_tray(&self) -> bool {
         self.system_tray.copied()
+    }
+}
+
+#[cfg(test)]
+mod adblock_config_tests {
+    use super::*;
+
+    #[test]
+    fn missing_adblock_config_is_disabled() {
+        let config: AdblockConfig = serde_json::from_str("{}").unwrap();
+        assert!(!config.is_enabled_for("youtube"));
+    }
+
+    #[test]
+    fn youtube_profile_requires_enabled_flag() {
+        let config: AdblockConfig =
+            serde_json::from_str(r#"{"enabled":true,"profile":"youtube"}"#).unwrap();
+        assert!(config.is_enabled_for("youtube"));
+        assert!(!config.is_enabled_for("other"));
     }
 }

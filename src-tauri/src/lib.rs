@@ -1,3 +1,4 @@
+pub mod adblock;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 mod app;
 mod util;
@@ -107,6 +108,8 @@ pub fn run_app() {
 
     let (pake_config, tauri_config) = get_pake_config();
     let tauri_app = tauri::Builder::default();
+    let adblock_session =
+        adblock::state::AdblockSession::new(pake_config.adblock.is_enabled_for("youtube"));
 
     let show_system_tray = pake_config.show_system_tray();
     let hide_on_close = pake_config.windows[0].hide_on_close;
@@ -162,6 +165,7 @@ pub fn run_app() {
             clear_cache_and_restart,
         ])
         .setup(move |app| {
+            app.manage(adblock_session.clone());
             app.manage(MultiWindowState::new(
                 pake_config.clone(),
                 tauri_config.clone(),
