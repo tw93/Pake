@@ -11,19 +11,13 @@ const shortcuts = {
 };
 
 function setZoom(zoom) {
-  const html = document.getElementsByTagName("html")[0];
-  const body = document.body;
-  const zoomValue = parseFloat(zoom) / 100;
-  const isWindows = /windows/i.test(navigator.userAgent);
-
-  if (isWindows) {
-    body.style.transform = `scale(${zoomValue})`;
-    body.style.transformOrigin = "top left";
-    body.style.width = `${100 / zoomValue}%`;
-    body.style.height = `${100 / zoomValue}%`;
-  } else {
-    html.style.zoom = zoom;
-    window.dispatchEvent(new Event("resize"));
+  // Use native WebView zoom (WKWebView pageZoom / WebView2 ZoomFactor) instead of
+  // CSS hacks. `transform: scale` and `html.style.zoom` break complex SPAs like
+  // ChatGPT: the page shifts right on Windows and parts of the UI stop repainting
+  // on macOS. Native zoom recalculates layout exactly like a browser does.
+  const invoke = window.__TAURI__?.core?.invoke;
+  if (invoke) {
+    invoke("set_zoom", { percent: parseFloat(zoom) }).catch(() => {});
   }
 
   window.localStorage.setItem("htmlZoom", zoom);
