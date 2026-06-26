@@ -196,9 +196,16 @@ fn build_window(
 
     let user_agent = config.user_agent.get();
 
+    let mut page_config =
+        serde_json::to_value(window_config).unwrap_or_else(|_| serde_json::json!({}));
+    if let serde_json::Value::Object(config_map) = &mut page_config {
+        let adblock = serde_json::to_value(&config.adblock)
+            .unwrap_or_else(|_| serde_json::json!({"enabled": false, "profile": "none"}));
+        config_map.insert("adblock".to_string(), adblock);
+    }
     let config_script = format!(
         "window.pakeConfig = {}",
-        serde_json::to_string(&window_config).unwrap_or_else(|_| "{}".to_string())
+        serde_json::to_string(&page_config).unwrap_or_else(|_| "{}".to_string())
     );
 
     // Platform-specific title: macOS prefers empty, others fallback to product name
@@ -289,6 +296,7 @@ fn build_window(
     // calls show_toast().
     window_builder = window_builder
         .initialization_script(&config_script)
+        .initialization_script(include_str!("../inject/youtube_adblock.js"))
         .initialization_script(include_str!("../inject/find.js"))
         .initialization_script(include_str!("../inject/toast.js"))
         .initialization_script(include_str!("../inject/fullscreen.js"))
