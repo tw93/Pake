@@ -68,6 +68,12 @@
   let lastAdTime = null;
 
   const checkPlaybackStall = (now = Date.now()) => {
+    if (!enabled) {
+      stalledSince = null;
+      lastAdTime = null;
+      return;
+    }
+
     const player = document.querySelector(".html5-video-player.ad-showing");
     const video = player?.querySelector("video");
     if (!video || video.paused) {
@@ -85,6 +91,11 @@
     if (stalledSince !== null && now - stalledSince >= 15_000) {
       recover("ad-playback-stall");
     }
+  };
+
+  const runMaintenance = () => {
+    clean();
+    checkPlaybackStall();
   };
 
   const style = document.createElement("style");
@@ -122,5 +133,5 @@
     checkPlaybackStall,
   };
   clean();
-  setInterval(checkPlaybackStall, 1_000);
+  setInterval(runMaintenance, 1_000);
 })();

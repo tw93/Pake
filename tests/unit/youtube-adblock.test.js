@@ -14,6 +14,7 @@ function run({
   querySelector = () => null,
 } = {}) {
   const removed = [];
+  const intervals = [];
   const context = {
     window: {
       pakeConfig: { adblock: { enabled, profile: "youtube" } },
@@ -31,7 +32,10 @@ function run({
     MutationObserver: class {
       observe() {}
     },
-    setInterval: vi.fn(),
+    setInterval: vi.fn((callback) => {
+      intervals.push(callback);
+      return intervals.length;
+    }),
     setTimeout: vi.fn((callback) => callback()),
     clearTimeout: vi.fn(),
     sessionStorage: {
@@ -42,6 +46,7 @@ function run({
     console,
   };
   context.window.window = context.window;
+  context.intervals = intervals;
   vm.runInNewContext(source, context);
   return { context, removed };
 }
@@ -93,5 +98,23 @@ describe("YouTube ad-block injection", () => {
       "disable_adblock_for_session",
       { reason: "ad-playback-stall" },
     );
+  });
+
+  it("periodically skips player ads that appear after startup", () => {
+    const video = { currentTime: 3, duration: 30, muted: false, paused: false };
+    const player = { querySelector: () => video };
+    let adPlayer = null;
+    const { context } = run({
+      querySelector: (selector) =>
+        selector === ".html5-video-player.ad-showing" ? adPlayer : null,
+    });
+
+    expect(video.currentTime).toBe(3);
+
+    adPlayer = player;
+    context.intervals.forEach((callback) => callback());
+
+    expect(video.muted).toBe(true);
+    expect(video.currentTime).toBe(30);
   });
 });
