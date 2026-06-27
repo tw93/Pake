@@ -1,5 +1,5 @@
 import path from 'path';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // tauriConfig.ts reads pake.json at module load, keyed off npmDirectory.
 // Point it at the repo root so the import chain resolves under vitest.
@@ -15,6 +15,17 @@ const makeBuilder = (targets?: string) =>
   new MacBuilder({ name: 'Demo', targets } as PakeAppOptions);
 
 describe('MacBuilder target selection', () => {
+  // The CI fast-test step runs with PAKE_CREATE_APP=1, which forces the macOS
+  // build format to `app` and strips the DMG name suffix. Clear it so these
+  // DMG-naming assertions stay deterministic regardless of the ambient env.
+  beforeEach(() => {
+    vi.stubEnv('PAKE_CREATE_APP', '');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it('builds an app bundle when --targets app is requested', () => {
     // The app format ships a bare `.app`, so the file name carries no
     // version/arch suffix. This proves `--targets app` is honoured rather
