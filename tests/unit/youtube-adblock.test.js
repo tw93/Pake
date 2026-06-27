@@ -239,7 +239,7 @@ describe("YouTube ad-block injection", () => {
     expect(video.currentTime).toBe(20);
   });
 
-  it("accelerates player ads when YouTube reports an unknown ad duration", () => {
+  it("accelerates unknown-duration player ads without seeking the video", () => {
     const video = {
       currentTime: 0,
       duration: Number.NaN,
@@ -257,10 +257,10 @@ describe("YouTube ad-block injection", () => {
 
     expect(video.muted).toBe(true);
     expect(video.playbackRate).toBe(16);
-    expect(video.currentTime).toBeGreaterThanOrEqual(600);
+    expect(video.currentTime).toBe(0);
   });
 
-  it("resumes paused player ads before accelerating unknown-duration ads", () => {
+  it("resumes paused unknown-duration ads without seeking the video", () => {
     const video = {
       currentTime: 0,
       duration: Number.NaN,
@@ -280,10 +280,10 @@ describe("YouTube ad-block injection", () => {
     expect(video.play).toHaveBeenCalled();
     expect(video.muted).toBe(true);
     expect(video.playbackRate).toBe(16);
-    expect(video.currentTime).toBeGreaterThanOrEqual(600);
+    expect(video.currentTime).toBe(0);
   });
 
-  it("does not keep stacking jumps for unknown-duration player ads", () => {
+  it("does not seek unknown-duration player ads on repeated maintenance", () => {
     const video = {
       currentTime: 0,
       duration: Number.NaN,
@@ -300,7 +300,7 @@ describe("YouTube ad-block injection", () => {
     context.intervals.forEach((callback) => callback());
     context.intervals.forEach((callback) => callback());
 
-    expect(video.currentTime).toBe(600);
+    expect(video.currentTime).toBe(0);
   });
 
   it("hides every visible ad surface while a player pre-roll is active", () => {

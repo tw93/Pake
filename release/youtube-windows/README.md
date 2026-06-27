@@ -6,10 +6,10 @@ This build includes an integrated YouTube ad-blocking layer focused on removing 
 
 ## Downloads
 
-| File | Purpose | Size |
-| --- | --- | ---: |
+| File          | Purpose                                               |   Size |
+| ------------- | ----------------------------------------------------- | -----: |
 | `YouTube.exe` | Portable app. Run it directly, no installer required. | 8.6 MB |
-| `YouTube.msi` | Windows x64 installer. | 3.3 MB |
+| `YouTube.msi` | Windows x64 installer.                                | 3.3 MB |
 
 ## Features
 
@@ -40,8 +40,8 @@ Installer option:
 Use SHA256 to verify that the downloaded files match this build.
 
 ```text
-YouTube.exe  218757CD5A6A7B4B95ED6B17C7EF841F840CDD19AECE81B4050D5C8625EEE69A
-YouTube.msi  17AA3CA59EBD8560EB8A8AEBDCFC8664013BE7AAA79DAC4A8B93D1F46C5299CE
+YouTube.exe  54FF24ADBD2B65D21508724EC45D22A199ED4C70086EFB85E9951D94D1F736F3
+YouTube.msi  002DBC959C904D5846605C7A1E993DCD3BCD6B9615ADA04FCA34357E5E0E95C4
 ```
 
 PowerShell example:
@@ -81,10 +81,10 @@ Esta build incluye una capa integrada de bloqueo de anuncios de YouTube centrada
 
 ## Descargas
 
-| Archivo | Uso | Tamano |
-| --- | --- | ---: |
+| Archivo       | Uso                                                   | Tamano |
+| ------------- | ----------------------------------------------------- | -----: |
 | `YouTube.exe` | App portable. Ejecutala directamente, sin instalador. | 8.6 MB |
-| `YouTube.msi` | Instalador para Windows x64. | 3.3 MB |
+| `YouTube.msi` | Instalador para Windows x64.                          | 3.3 MB |
 
 ## Caracteristicas
 
@@ -115,8 +115,8 @@ Opcion instalador:
 Puedes usar SHA256 para comprobar que los archivos descargados coinciden con esta build.
 
 ```text
-YouTube.exe  218757CD5A6A7B4B95ED6B17C7EF841F840CDD19AECE81B4050D5C8625EEE69A
-YouTube.msi  17AA3CA59EBD8560EB8A8AEBDCFC8664013BE7AAA79DAC4A8B93D1F46C5299CE
+YouTube.exe  54FF24ADBD2B65D21508724EC45D22A199ED4C70086EFB85E9951D94D1F736F3
+YouTube.msi  002DBC959C904D5846605C7A1E993DCD3BCD6B9615ADA04FCA34357E5E0E95C4
 ```
 
 Ejemplo en PowerShell:

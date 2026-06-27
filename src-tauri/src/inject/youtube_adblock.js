@@ -86,8 +86,6 @@
       "companionAd",
       "instreamAdPlayerOverlayRenderer",
     ]);
-    const unknownDurationAdJumpSeconds = 600;
-
     const getRequestUrl = (input) => {
       if (typeof input === "string") return input;
       if (input instanceof URL) return input.href;
@@ -341,12 +339,6 @@
           video.currentTime = video.duration;
         } else {
           video.playbackRate = 16;
-          const currentTime = Number.isFinite(video.currentTime)
-            ? video.currentTime
-            : 0;
-          if (currentTime < unknownDurationAdJumpSeconds) {
-            video.currentTime = unknownDurationAdJumpSeconds;
-          }
         }
       }
     };
