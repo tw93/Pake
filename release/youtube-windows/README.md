@@ -1,56 +1,147 @@
-# YouTube para Windows - Pake
+# YouTube for Windows - Pake
 
-Aplicacion ligera de YouTube para Windows, empaquetada con Pake/Tauri y WebView2.
+Lightweight YouTube desktop app for Windows, built with Pake/Tauri and Microsoft WebView2.
 
-## Descarga
+This build includes an integrated YouTube ad-blocking layer focused on removing visible ad surfaces and reducing hidden pre-roll waiting time.
 
-- `YouTube.exe`: ejecutable portable.
-- `YouTube.msi`: instalador MSI para Windows x64.
+## Downloads
 
-## Caracteristicas
+| File | Purpose | Size |
+| --- | --- | ---: |
+| `YouTube.exe` | Portable app. Run it directly, no installer required. | 8.6 MB |
+| `YouTube.msi` | Windows x64 installer. | 3.3 MB |
 
-- App nativa ligera basada en WebView2.
-- Bloqueo de anuncios de YouTube integrado.
-- Oculta superficies visibles de anuncios.
-- Acelera el salto de pre-rolls ocultos para evitar esperas largas en pantalla negra.
-- Icono personalizado de YouTube.
-- Solo Windows x64.
+## Features
 
-## Uso
+- Native Windows desktop app based on WebView2.
+- Lightweight Pake/Tauri packaging.
+- Integrated YouTube ad-block profile.
+- Removes common YouTube ad containers and companion ad surfaces.
+- Speeds up hidden pre-roll skips to avoid long black-screen waits.
+- Custom YouTube-style icon.
+- Windows x64 only.
 
-Opcion recomendada:
+## How to use
 
-1. Descarga `YouTube.exe`.
-2. Ejecutalo directamente.
+Recommended portable option:
 
-Opcion instalador:
+1. Download `YouTube.exe`.
+2. Run it directly.
+3. If Windows SmartScreen appears, choose the option to run it only if you trust this build.
 
-1. Descarga `YouTube.msi`.
-2. Ejecuta el instalador.
-3. Abre la app desde Windows.
+Installer option:
 
-## Verificacion SHA256
+1. Download `YouTube.msi`.
+2. Run the installer.
+3. Open `YouTube` from Windows.
+
+## Verify downloads
+
+Use SHA256 to verify that the downloaded files match this build.
 
 ```text
 YouTube.exe  218757CD5A6A7B4B95ED6B17C7EF841F840CDD19AECE81B4050D5C8625EEE69A
 YouTube.msi  17AA3CA59EBD8560EB8A8AEBDCFC8664013BE7AAA79DAC4A8B93D1F46C5299CE
 ```
 
-## Build
+PowerShell example:
 
-Generado desde el fork:
+```powershell
+Get-FileHash -Algorithm SHA256 .\YouTube.exe
+Get-FileHash -Algorithm SHA256 .\YouTube.msi
+```
 
-- Repositorio: `davidValades/Pake`
-- Rama: `codex/youtube-adblock`
-- Base: Pake + Tauri v2
-- Plataforma: Windows x64
+## Build information
 
-Comando de build usado:
+- Repository: `davidValades/Pake`
+- Branch: `codex/youtube-adblock`
+- Base project: Pake + Tauri v2
+- WebView runtime: Microsoft WebView2
+- Target platform: Windows x64
+
+Build command:
 
 ```powershell
 node dist/cli.js "https://www.youtube.com/" --name YouTube --icon src-tauri/png/youtube_256.ico --show-system-tray --adblock youtube --targets x64 --keep-binary
 ```
 
-## Nota
+## Notes
 
-YouTube cambia con frecuencia su frontend y sus mecanismos de anuncios. Si vuelve a aparecer pantalla negra prolongada o anuncios visibles, habra que actualizar la inyeccion del bloqueador.
+YouTube changes its frontend and ad delivery behavior frequently. If ads become visible again, or if a video gets stuck on a black screen before playback, the injected ad-blocking logic may need to be updated.
+
+This is an unofficial wrapper. It is not affiliated with YouTube, Google, Pake, Tauri, or Microsoft.
+
+---
+
+# YouTube para Windows - Pake
+
+Aplicacion ligera de escritorio para YouTube en Windows, creada con Pake/Tauri y Microsoft WebView2.
+
+Esta build incluye una capa integrada de bloqueo de anuncios de YouTube centrada en eliminar superficies visibles de anuncios y reducir la espera de los pre-rolls ocultos.
+
+## Descargas
+
+| Archivo | Uso | Tamano |
+| --- | --- | ---: |
+| `YouTube.exe` | App portable. Ejecutala directamente, sin instalador. | 8.6 MB |
+| `YouTube.msi` | Instalador para Windows x64. | 3.3 MB |
+
+## Caracteristicas
+
+- App nativa para Windows basada en WebView2.
+- Empaquetado ligero con Pake/Tauri.
+- Perfil de bloqueo de anuncios de YouTube integrado.
+- Elimina contenedores habituales de anuncios y anuncios laterales/companion.
+- Acelera el salto de pre-rolls ocultos para evitar esperas largas en pantalla negra.
+- Icono personalizado estilo YouTube.
+- Solo Windows x64.
+
+## Como usarla
+
+Opcion portable recomendada:
+
+1. Descarga `YouTube.exe`.
+2. Ejecutalo directamente.
+3. Si aparece Windows SmartScreen, ejecutalo solo si confias en esta build.
+
+Opcion instalador:
+
+1. Descarga `YouTube.msi`.
+2. Ejecuta el instalador.
+3. Abre `YouTube` desde Windows.
+
+## Verificar descargas
+
+Puedes usar SHA256 para comprobar que los archivos descargados coinciden con esta build.
+
+```text
+YouTube.exe  218757CD5A6A7B4B95ED6B17C7EF841F840CDD19AECE81B4050D5C8625EEE69A
+YouTube.msi  17AA3CA59EBD8560EB8A8AEBDCFC8664013BE7AAA79DAC4A8B93D1F46C5299CE
+```
+
+Ejemplo en PowerShell:
+
+```powershell
+Get-FileHash -Algorithm SHA256 .\YouTube.exe
+Get-FileHash -Algorithm SHA256 .\YouTube.msi
+```
+
+## Informacion de build
+
+- Repositorio: `davidValades/Pake`
+- Rama: `codex/youtube-adblock`
+- Proyecto base: Pake + Tauri v2
+- Runtime web: Microsoft WebView2
+- Plataforma objetivo: Windows x64
+
+Comando de build:
+
+```powershell
+node dist/cli.js "https://www.youtube.com/" --name YouTube --icon src-tauri/png/youtube_256.ico --show-system-tray --adblock youtube --targets x64 --keep-binary
+```
+
+## Notas
+
+YouTube cambia con frecuencia su frontend y su forma de servir anuncios. Si vuelven a verse anuncios, o si un video se queda bloqueado en pantalla negra antes de reproducirse, habra que actualizar la logica inyectada del bloqueador.
+
+Este es un wrapper no oficial. No esta afiliado con YouTube, Google, Pake, Tauri ni Microsoft.
