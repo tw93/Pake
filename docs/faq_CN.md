@@ -20,6 +20,7 @@
   - [应用窗口太小/太大](#应用窗口太小太大)
   - [应用图标显示不正确](#应用图标显示不正确)
   - [网站功能不工作（登录、上传等）](#网站功能不工作登录上传等)
+  - [应用占用内存比预期高](#应用占用内存比预期高)
 - [安装问题](#安装问题)
   - [全局安装时权限被拒绝](#全局安装时权限被拒绝)
 - [获取帮助](#获取帮助)
@@ -528,6 +529,21 @@ Pake 可以自动转换图标，但提供正确的格式更可靠。
    ```bash
    pake https://wx.qq.com --name WeChat --incognito
    ```
+
+6. **Cloudflare 或人机验证一直循环**
+
+   某些站点（例如 ChatGPT）会在页面前加一层 Cloudflare 验证。系统 WebView，尤其是 Linux 上的 WebKitGTK，经常被这类验证判定为非标准浏览器而一直循环、无法通过，即使加了自定义 `--user-agent` 也无效。这是验证服务在识别浏览器引擎，不是 Pake 的 bug，Pake 侧没有可靠的绕过手段。遇到强制此类验证的站点，建议改用普通浏览器或官方原生客户端。
+
+---
+
+### 应用占用内存比预期高
+
+**问题：**
+应用会启动一个 WebKitWebProcess（Linux）或 WebContent 进程（macOS），占用几百 MB 内存，看起来和"约 5MB"的说法矛盾。
+
+**说明：**
+
+"约 5MB"指的是安装包/应用在磁盘上的体积，不是运行时内存。运行时 Pake 通过系统 WebView 渲染（Linux 上是 WebKitWebProcess，macOS 上是 WKWebView），这个进程的内存由引擎和你加载的页面决定，不由 Pake 控制。像 Gemini、Slack、ChatGPT 这类重型 SPA，用 GNOME Web 等任意 WebKitGTK 浏览器打开也会占用差不多的内存。Pake 在 WebView 之上几乎不增加额外开销，所以没有能显著降低它的 Pake 侧设置。这是使用系统 WebView 的固有代价，也是换取极小安装体积的取舍。
 
 ---
 

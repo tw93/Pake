@@ -20,6 +20,7 @@ Common issues and solutions when using Pake.
   - [App Window is Too Small/Large](#app-window-is-too-smalllarge)
   - [App Icon Not Showing Correctly](#app-icon-not-showing-correctly)
   - [Website Features Not Working (Login, Upload, etc.)](#website-features-not-working-login-upload-etc)
+  - [App Uses More Memory Than Expected](#app-uses-more-memory-than-expected)
 - [Installation Issues](#installation-issues)
   - [Permission Denied When Installing Globally](#permission-denied-when-installing-globally)
 - [Getting Help](#getting-help)
@@ -531,6 +532,21 @@ This is usually due to web compatibility issues. Try:
    ```bash
    pake https://wx.qq.com --name WeChat --incognito
    ```
+
+6. **Cloudflare or bot-verification loops forever**
+
+   Some sites (e.g. ChatGPT) put a Cloudflare challenge in front of the page. The system WebView, especially WebKitGTK on Linux, is often flagged by these challenges and loops without passing, even with a custom `--user-agent`. This is the challenge provider detecting a non-standard browser engine, not a Pake bug, and there is no reliable Pake-side workaround. Use the site in a regular browser or a native client when it gates behind such a check.
+
+---
+
+### App Uses More Memory Than Expected
+
+**Problem:**
+The app spawns a WebKitWebProcess (Linux) or WebContent process (macOS) that uses several hundred MB of RAM, which seems to contradict the "~5MB" figure.
+
+**Explanation:**
+
+The ~5MB number is the installer/app size on disk, not runtime memory. At runtime Pake renders through your system WebView (WebKitWebProcess on Linux, WKWebView on macOS), and that process's memory is governed by the engine and the page you load, not by Pake. A heavy SPA like Gemini, Slack, or ChatGPT uses a comparable amount opening in any WebKitGTK browser such as GNOME Web. Pake adds very little on top of the WebView, so there is no Pake-side setting that meaningfully lowers it. This is inherent to using the system WebView and is the trade-off for the small binary size.
 
 ---
 
