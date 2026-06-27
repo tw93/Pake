@@ -43,8 +43,11 @@
       "ytd-in-feed-ad-layout-renderer",
       "ytd-companion-slot-renderer",
       "ytd-action-companion-ad-renderer",
+      "ytd-companion-ad-renderer",
       "ytd-instream-companion-renderer",
       "ytd-player-legacy-desktop-watch-ads-renderer",
+      'ytd-engagement-panel-section-list-renderer[target-id*="ads"]',
+      "#panels [target-id*='ads']",
       "ytd-rich-item-renderer:has(ytd-ad-slot-renderer)",
       "ytd-rich-section-renderer:has(ytd-ad-slot-renderer)",
       "#player-ads",
@@ -330,6 +333,9 @@
         (hasPlayerAd ? document.querySelector("video") : null);
       if (video) {
         video.muted = true;
+        if (video.paused) {
+          video.play?.().catch?.(() => {});
+        }
         if (Number.isFinite(video.duration) && video.duration > 0) {
           video.currentTime = video.duration;
         } else {

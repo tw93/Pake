@@ -125,6 +125,11 @@ describe("YouTube ad-block injection", () => {
     );
     expect(removed).toContain("ytd-companion-slot-renderer");
     expect(removed).toContain("ytd-action-companion-ad-renderer");
+    expect(removed).toContain("ytd-companion-ad-renderer");
+    expect(removed).toContain(
+      'ytd-engagement-panel-section-list-renderer[target-id*="ads"]',
+    );
+    expect(removed).toContain("#panels [target-id*='ads']");
     expect(removed).not.toContain("ytd-video-renderer");
   });
 
@@ -239,6 +244,29 @@ describe("YouTube ad-block injection", () => {
 
     context.intervals.forEach((callback) => callback());
 
+    expect(video.muted).toBe(true);
+    expect(video.playbackRate).toBe(16);
+    expect(video.currentTime).toBeGreaterThanOrEqual(10);
+  });
+
+  it("resumes paused player ads before accelerating unknown-duration ads", () => {
+    const video = {
+      currentTime: 0,
+      duration: Number.NaN,
+      muted: false,
+      paused: true,
+      playbackRate: 1,
+      play: vi.fn(() => Promise.resolve()),
+    };
+    const player = { querySelector: () => video };
+    const { context } = run({
+      querySelector: (selector) =>
+        selector === ".html5-video-player.ad-showing" ? player : null,
+    });
+
+    context.intervals.forEach((callback) => callback());
+
+    expect(video.play).toHaveBeenCalled();
     expect(video.muted).toBe(true);
     expect(video.playbackRate).toBe(16);
     expect(video.currentTime).toBeGreaterThanOrEqual(10);
