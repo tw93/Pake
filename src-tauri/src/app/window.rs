@@ -8,7 +8,7 @@ use std::{
     sync::atomic::{AtomicU32, Ordering},
 };
 use tauri::{
-    webview::{DownloadEvent, NewWindowFeatures, NewWindowResponse},
+    webview::{DownloadEvent, NewWindowFeatures, NewWindowResponse, PageLoadEvent},
     AppHandle, Config, Manager, Url, WebviewUrl, WebviewWindow, WebviewWindowBuilder,
 };
 
@@ -305,6 +305,25 @@ fn build_window(
         .initialization_script(include_str!("../inject/theme_refresh.js"))
         .initialization_script(include_str!("../inject/auth.js"))
         .initialization_script(include_str!("../inject/custom.js"));
+
+    if config.adblock.is_enabled_for("youtube") {
+        let page_load_config_script = config_script.clone();
+        window_builder = window_builder.on_page_load(move |window, payload| {
+            if !matches!(payload.event(), PageLoadEvent::Finished) {
+                return;
+            }
+
+            let script = format!(
+                "{};\n{}",
+                page_load_config_script,
+                include_str!("../inject/youtube_adblock.js")
+            );
+            if let Err(error) = window.eval(&script) {
+                #[cfg(debug_assertions)]
+                eprintln!("[Pake] Failed to inject YouTube adblock after page load: {error}");
+            }
+        });
+    }
 
     #[cfg(target_os = "windows")]
     let mut windows_browser_args = String::from("--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-blink-features=AutomationControlled");
