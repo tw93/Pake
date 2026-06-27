@@ -35,6 +35,7 @@ tauri-plugin-shell = { version = "2.3.5" }
 tauri-plugin-opener = { version = "2.5.3" }
 tauri-plugin-single-instance = "2.4.0"
 tauri-plugin-notification = "2.3.3"
+tauri-plugin-clipboard-manager = "2.2.0"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.6"
