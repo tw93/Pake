@@ -296,8 +296,7 @@ fn build_window(
     // find UI on every page load in the common (find-off) case. Matches the
     // enable_find gating already applied to the Find menu item.
     if window_config.enable_find {
-        window_builder =
-            window_builder.initialization_script(include_str!("../inject/find.js"));
+        window_builder = window_builder.initialization_script(include_str!("../inject/find.js"));
     }
 
     window_builder = window_builder
