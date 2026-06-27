@@ -200,7 +200,18 @@
         ...selectors.map(
           (selector) => `${selector} { display: none !important; }`,
         ),
-        ".html5-video-player.ad-showing video { visibility: hidden !important; }",
+        ".html5-video-player.ad-showing { background: #000 !important; }",
+        [
+          ".html5-video-player.ad-showing .html5-main-video",
+          ".html5-video-player.ad-showing .ytp-ad-player-overlay",
+          ".html5-video-player.ad-showing .ytp-ad-image-overlay",
+          ".html5-video-player.ad-showing .ytp-ad-overlay-container",
+          ".html5-video-player.ad-showing .ytp-ad-module",
+          ".html5-video-player.ad-showing .video-ads",
+          ".html5-video-player.ad-showing video",
+        ].join(",") +
+          " { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }",
+        ".html5-video-player.ad-showing::after { content: ''; position: absolute; inset: 0; z-index: 2147483646; background: #000; pointer-events: none; }",
       ].join("\n");
 
     const getMatches = (selectorList) =>

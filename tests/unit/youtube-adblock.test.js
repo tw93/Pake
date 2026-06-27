@@ -20,6 +20,7 @@ function run({
 } = {}) {
   const removed = [];
   const intervals = [];
+  const createdElements = [];
   const context = {
     window: {
       location: { hostname: host, search, reload: vi.fn() },
@@ -28,7 +29,11 @@ function run({
     document: {
       title: "YouTube",
       documentElement: { appendChild: vi.fn() },
-      createElement: () => ({ id: "", textContent: "", remove: vi.fn() }),
+      createElement: () => {
+        const element = { id: "", textContent: "", remove: vi.fn() };
+        createdElements.push(element);
+        return element;
+      },
       querySelectorAll:
         querySelectorAll ??
         ((selector) => [{ remove: () => removed.push(selector) }]),
@@ -67,6 +72,7 @@ function run({
   }
   context.window.window = context.window;
   context.intervals = intervals;
+  context.createdElements = createdElements;
   vm.runInNewContext(source, context);
   return { context, removed };
 }
@@ -236,6 +242,26 @@ describe("YouTube ad-block injection", () => {
     expect(video.muted).toBe(true);
     expect(video.playbackRate).toBe(16);
     expect(video.currentTime).toBeGreaterThanOrEqual(10);
+  });
+
+  it("hides every visible ad surface while a player pre-roll is active", () => {
+    const { context } = run();
+    const style = context.createdElements.find(
+      (element) => element.id === "pake-youtube-adblock-style",
+    );
+
+    expect(style.textContent).toContain(
+      ".html5-video-player.ad-showing .html5-main-video",
+    );
+    expect(style.textContent).toContain(
+      ".html5-video-player.ad-showing .ytp-ad-player-overlay",
+    );
+    expect(style.textContent).toContain(
+      ".html5-video-player.ad-showing .video-ads",
+    );
+    expect(style.textContent).toContain(
+      ".html5-video-player.ad-showing::after",
+    );
   });
 
   it("exposes debug state when diagnostics are enabled", () => {
