@@ -86,6 +86,13 @@
       "companionAd",
       "instreamAdPlayerOverlayRenderer",
     ]);
+    const sponsoredTextPattern = /\b(Sponsored|Patrocinado|Anuncio)\b/i;
+    const sponsoredTextContainers = [
+      "ytd-rich-item-renderer",
+      "ytd-video-renderer",
+      "ytd-compact-video-renderer",
+      "ytd-rich-section-renderer",
+    ];
     const getRequestUrl = (input) => {
       if (typeof input === "string") return input;
       if (input instanceof URL) return input.href;
@@ -162,6 +169,38 @@
       });
     };
 
+    const sanitizeXhrResponse = (xhr) => {
+      if (!enabled || !isYouTubePlayerPayloadUrl(xhr.__pakeAdblockUrl)) return;
+      if (xhr.readyState !== 4) return;
+
+      const text =
+        typeof xhr.responseText === "string"
+          ? xhr.responseText
+          : typeof xhr.response === "string"
+            ? xhr.response
+            : "";
+      if (!text) return;
+
+      const sanitizedText = sanitizePlayerText(text);
+      if (sanitizedText === text) return;
+
+      sanitizedPlayerResponses += 1;
+      try {
+        Object.defineProperty(xhr, "responseText", {
+          configurable: true,
+          value: sanitizedText,
+        });
+      } catch {}
+      try {
+        if (!xhr.responseType || xhr.responseType === "text") {
+          Object.defineProperty(xhr, "response", {
+            configurable: true,
+            value: sanitizedText,
+          });
+        }
+      } catch {}
+    };
+
     const patchFetch = () => {
       const root = typeof globalThis === "undefined" ? window : globalThis;
       const nativeFetch = window.fetch || root.fetch;
@@ -174,6 +213,69 @@
       };
       window.fetch = patchedFetch;
       root.fetch = patchedFetch;
+    };
+
+    const patchXmlHttpRequest = () => {
+      const XMLHttpRequestConstructor = window.XMLHttpRequest;
+      const prototype = XMLHttpRequestConstructor?.prototype;
+      if (window.__pakeYoutubeAdblockXhrPatched || !prototype) return;
+      window.__pakeYoutubeAdblockXhrPatched = true;
+
+      const nativeOpen = prototype.open;
+      const nativeSend = prototype.send;
+      const nativeAddEventListener = prototype.addEventListener;
+      if (!nativeOpen || !nativeSend) return;
+
+      prototype.open = function (method, url, ...rest) {
+        this.__pakeAdblockUrl = getRequestUrl(url);
+        return nativeOpen.call(this, method, url, ...rest);
+      };
+
+      if (nativeAddEventListener) {
+        prototype.addEventListener = function (type, listener, ...rest) {
+          if (
+            (type === "readystatechange" ||
+              type === "load" ||
+              type === "loadend") &&
+            typeof listener === "function" &&
+            !listener.__pakeAdblockWrapped
+          ) {
+            const xhr = this;
+            const wrappedListener = function (...eventArgs) {
+              sanitizeXhrResponse(xhr);
+              return listener.apply(this, eventArgs);
+            };
+            wrappedListener.__pakeAdblockWrapped = true;
+            return nativeAddEventListener.call(
+              this,
+              type,
+              wrappedListener,
+              ...rest,
+            );
+          }
+          return nativeAddEventListener.call(this, type, listener, ...rest);
+        };
+      }
+
+      prototype.send = function (...args) {
+        const originalReadyStateChange = this.onreadystatechange;
+        if (
+          typeof originalReadyStateChange === "function" &&
+          !originalReadyStateChange.__pakeAdblockWrapped
+        ) {
+          const xhr = this;
+          const wrappedReadyStateChange = function (...eventArgs) {
+            sanitizeXhrResponse(xhr);
+            return originalReadyStateChange.apply(this, eventArgs);
+          };
+          wrappedReadyStateChange.__pakeAdblockWrapped = true;
+          this.onreadystatechange = wrappedReadyStateChange;
+        }
+
+        const result = nativeSend.apply(this, args);
+        sanitizeXhrResponse(this);
+        return result;
+      };
     };
 
     const recover = (reason) => {
@@ -194,6 +296,15 @@
         return document.querySelectorAll(selector);
       } catch {
         return [];
+      }
+    };
+
+    const removeSponsoredTextAds = () => {
+      for (const selector of sponsoredTextContainers) {
+        querySelectorAllSafe(selector).forEach((node) => {
+          const text = node.innerText || node.textContent || "";
+          if (sponsoredTextPattern.test(text)) node.remove();
+        });
       }
     };
 
@@ -308,6 +419,7 @@
       for (const selector of selectors) {
         querySelectorAllSafe(selector).forEach((node) => node.remove());
       }
+      removeSponsoredTextAds();
       for (const selector of skipSelectors) {
         querySelectorAllSafe(selector).forEach((button) => {
           button.click?.();
@@ -412,6 +524,7 @@
       getDebugState: updateDebugState,
     };
     patchFetch();
+    patchXmlHttpRequest();
     clean();
     renderDebugPanel();
     setInterval(runMaintenance, 250);

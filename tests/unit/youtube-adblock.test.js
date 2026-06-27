@@ -15,6 +15,7 @@ function run({
   withConfig = true,
   fetchImpl,
   responseClass,
+  xmlHttpRequestClass,
   querySelector = () => null,
   querySelectorAll,
 } = {}) {
@@ -66,6 +67,9 @@ function run({
   };
   if (fetchImpl) context.window.fetch = fetchImpl;
   if (responseClass) context.window.Response = responseClass;
+  if (xmlHttpRequestClass) {
+    context.window.XMLHttpRequest = xmlHttpRequestClass;
+  }
   if (withConfig) {
     context.window.pakeConfig = {
       adblock: { enabled, profile: "youtube" },
@@ -134,6 +138,29 @@ describe("YouTube ad-block injection", () => {
     );
     expect(removed).toContain("#panels [target-id*='ads']");
     expect(removed).not.toContain("ytd-video-renderer");
+  });
+
+  it("removes sponsored feed cards that do not expose a stable ad element", () => {
+    const sponsoredCard = {
+      textContent: "Protegete del phishing Patrocinado Google Chrome",
+      remove: vi.fn(),
+    };
+    const normalCard = {
+      textContent: "Video normal sin publicidad",
+      remove: vi.fn(),
+    };
+
+    run({
+      querySelectorAll: (selector) => {
+        if (selector === "ytd-rich-item-renderer") {
+          return [sponsoredCard, normalCard];
+        }
+        return [];
+      },
+    });
+
+    expect(sponsoredCard.remove).toHaveBeenCalled();
+    expect(normalCard.remove).not.toHaveBeenCalled();
   });
 
   it("does not install duplicate maintenance timers when injected twice", () => {
@@ -420,5 +447,118 @@ describe("YouTube ad-block injection", () => {
     expect(payload.adPlacements).toBeUndefined();
     expect(payload.playerAds).toBeUndefined();
     expect(payload.responseContext.adSlots).toBeUndefined();
+  });
+
+  it("sanitizes YouTube player JSON ad payloads returned through XMLHttpRequest", () => {
+    const originalPayload = {
+      videoDetails: { videoId: "abc123", title: "Normal video" },
+      streamingData: { formats: [{ itag: 18 }] },
+      adPlacements: [{ ad: "pre-roll" }],
+      playerAds: [{ ad: "mid-roll" }],
+      responseContext: {
+        serviceTrackingParams: [],
+        adSlots: [{ slot: "player" }],
+      },
+    };
+
+    class FakeXMLHttpRequest {
+      constructor() {
+        this.readyState = 0;
+        this.responseType = "";
+        this.responseText = "";
+        this.response = "";
+      }
+
+      open(method, url) {
+        this.method = method;
+        this.url = url;
+      }
+
+      send() {
+        this.readyState = 4;
+        this.responseText = JSON.stringify(originalPayload);
+        this.response = this.responseText;
+        this.onreadystatechange?.();
+      }
+    }
+
+    const { context } = run({
+      xmlHttpRequestClass: FakeXMLHttpRequest,
+    });
+
+    const xhr = new context.window.XMLHttpRequest();
+    let payload;
+    xhr.open(
+      "POST",
+      "https://www.youtube.com/youtubei/v1/player?prettyPrint=false",
+    );
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === 4) payload = JSON.parse(xhr.responseText);
+    };
+    xhr.send();
+
+    expect(payload.videoDetails).toEqual(originalPayload.videoDetails);
+    expect(payload.streamingData).toEqual(originalPayload.streamingData);
+    expect(payload.adPlacements).toBeUndefined();
+    expect(payload.playerAds).toBeUndefined();
+    expect(payload.responseContext.adSlots).toBeUndefined();
+  });
+
+  it("sanitizes XMLHttpRequest player payloads before readystatechange listeners read them", () => {
+    const originalPayload = {
+      videoDetails: { videoId: "abc123", title: "Normal video" },
+      streamingData: { formats: [{ itag: 18 }] },
+      adPlacements: [{ ad: "pre-roll" }],
+      playerAds: [{ ad: "mid-roll" }],
+    };
+
+    class FakeXMLHttpRequest {
+      constructor() {
+        this.readyState = 0;
+        this.responseType = "";
+        this.responseText = "";
+        this.response = "";
+        this.listeners = {};
+      }
+
+      open(method, url) {
+        this.method = method;
+        this.url = url;
+      }
+
+      addEventListener(type, listener) {
+        this.listeners[type] ??= [];
+        this.listeners[type].push(listener);
+      }
+
+      send() {
+        this.readyState = 4;
+        this.responseText = JSON.stringify(originalPayload);
+        this.response = this.responseText;
+        for (const listener of this.listeners.readystatechange ?? []) {
+          listener.call(this);
+        }
+      }
+    }
+
+    const { context } = run({
+      xmlHttpRequestClass: FakeXMLHttpRequest,
+    });
+
+    const xhr = new context.window.XMLHttpRequest();
+    let payload;
+    xhr.open(
+      "POST",
+      "https://www.youtube.com/youtubei/v1/player?prettyPrint=false",
+    );
+    xhr.addEventListener("readystatechange", () => {
+      if (xhr.readyState === 4) payload = JSON.parse(xhr.responseText);
+    });
+    xhr.send();
+
+    expect(payload.videoDetails).toEqual(originalPayload.videoDetails);
+    expect(payload.streamingData).toEqual(originalPayload.streamingData);
+    expect(payload.adPlacements).toBeUndefined();
+    expect(payload.playerAds).toBeUndefined();
   });
 });
