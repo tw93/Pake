@@ -9,6 +9,7 @@ Common issues and solutions when using Pake.
 - [Build Issues](#build-issues)
   - [Rust Version Error: "feature 'edition2024' is required"](#rust-version-error-feature-edition2024-is-required)
   - [Linux: Build Error "Can't detect any appindicator library" on Ubuntu 24.04](#linux-build-error-cant-detect-any-appindicator-library-on-ubuntu-2404)
+  - [Linux: Installing on Fedora / RHEL / Oracle Linux (RPM-based distros)](#linux-installing-on-fedora--rhel--oracle-linux-rpm-based-distros)
   - [Linux: AppImage Build Fails with "failed to run linuxdeploy"](#linux-appimage-build-fails-with-failed-to-run-linuxdeploy)
   - [Linux: AppImage Crashes at Launch with WebKitNetworkProcess Not Found](#linux-appimage-crashes-at-launch-with-webkitnetworkprocess-not-found)
   - [Linux: "cargo: command not found" After Installing Rust](#linux-cargo-command-not-found-after-installing-rust)
@@ -98,6 +99,46 @@ Install the correct dependency:
 sudo apt-get update
 sudo apt-get install -y libayatana-appindicator3-dev
 ```
+
+---
+
+### Linux: Installing on Fedora / RHEL / Oracle Linux (RPM-based distros)
+
+**Problem:**
+On RPM-based distros (Fedora, RHEL, Oracle Linux, Rocky, AlmaLinux, openSUSE) a
+`.deb` package cannot be installed by the system package manager, and older Pake
+versions always built a `.deb` first.
+
+**Solution:**
+
+Pake now picks the default bundle target from `/etc/os-release`: RPM-based
+distros default to `rpm, appimage`, while Debian/Ubuntu keep `deb, appimage`. So
+the basic command already produces an installable package:
+
+```bash
+pake https://github.com --name GitHub
+sudo dnf install ./GitHub.rpm   # or: sudo rpm -i ./GitHub.rpm
+```
+
+You can also choose the format explicitly at any time:
+
+```bash
+pake https://github.com --name GitHub --targets rpm        # RPM package
+pake https://github.com --name GitHub --targets appimage   # portable AppImage
+```
+
+When several targets build (the default), one format failing no longer aborts
+the others: if the `.rpm`/`.deb` bundler fails, the AppImage is still produced as
+a portable fallback. AppImage runs without installation:
+
+```bash
+chmod +x ./GitHub.AppImage
+./GitHub.AppImage
+```
+
+> Building an `.rpm` requires `rpm-build` (`sudo dnf install rpm-build`). If you
+> only need a runnable app without packaging, add `--keep-binary` to also copy
+> the raw executable next to the installer.
 
 ---
 

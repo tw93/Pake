@@ -72,18 +72,51 @@ export default class LinuxBuilder extends BaseBuilder {
     }
     const useTemporaryDebForZst = needsTemporaryDebForZst(targets);
 
+    // With a single explicit target, fail fast. With multiple targets (the
+    // distro-aware default, or an explicit comma list) keep building the rest
+    // when one fails, so a usable installer is still produced, e.g. AppImage
+    // survives a .deb bundler abort on RPM-based distros.
+    const isolateFailures = targets.length > 1;
+    const failed: string[] = [];
+    let firstError: Error | null = null;
+
     for (const target of targets) {
       this.currentBuildType = target;
-      if (target === 'zst') {
-        if (useTemporaryDebForZst) {
-          await this.buildAndCopy(url, 'deb', false);
+      try {
+        if (target === 'zst') {
+          if (useTemporaryDebForZst) {
+            await this.buildAndCopy(url, 'deb', false);
+          }
+          await this.createArchPackageFromDeb({
+            removeSourceDeb: useTemporaryDebForZst,
+          });
+        } else {
+          await this.buildAndCopy(url, target);
         }
-        await this.createArchPackageFromDeb({
-          removeSourceDeb: useTemporaryDebForZst,
-        });
-      } else {
-        await this.buildAndCopy(url, target);
+      } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        if (!isolateFailures) {
+          throw err;
+        }
+        if (!firstError) {
+          firstError = err;
+        }
+        failed.push(target);
+        logger.warn(
+          `✼ Failed to build "${target}" target: ${err.message.split('\n')[0]}`,
+        );
       }
+    }
+
+    // Every requested target failed: surface the first real error.
+    if (firstError && failed.length === targets.length) {
+      throw firstError;
+    }
+
+    if (failed.length > 0) {
+      logger.warn(
+        `✼ Skipped failed Linux targets: ${failed.join(', ')}. Other formats built successfully.`,
+      );
     }
   }
 

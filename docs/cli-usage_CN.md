@@ -304,7 +304,7 @@ pake https://github.com --name GitHub
 
 指定构建目标架构或格式：
 
-- **Linux**: `deb`, `appimage`, `rpm`, `zst`, `deb-arm64`, `appimage-arm64`, `rpm-arm64`, `zst-arm64`（默认：`deb`, `appimage`）
+- **Linux**: `deb`, `appimage`, `rpm`, `zst`, `deb-arm64`, `appimage-arm64`, `rpm-arm64`, `zst-arm64`（默认：按发行版自适应，Debian/Ubuntu 为 `deb, appimage`，Fedora/RHEL/Oracle/Rocky/Alma/openSUSE 为 `rpm, appimage`）
 - **Windows**: `x64`, `arm64`（未指定时自动检测）
 - **macOS**: `intel`, `apple`, `universal`（架构，未指定时自动检测）；`app`, `dmg`（输出格式，默认：`dmg`）
 

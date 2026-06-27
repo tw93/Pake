@@ -9,6 +9,7 @@
 - [构建问题](#构建问题)
   - [Rust 版本错误:"feature 'edition2024' is required"](#rust-版本错误feature-edition2024-is-required)
   - [Linux：Ubuntu 24.04 构建报错 "Can't detect any appindicator library"](#linuxubuntu-2404-构建报错-cant-detect-any-appindicator-library)
+  - [Linux：在 Fedora / RHEL / Oracle Linux 等 RPM 系发行版上安装](#linux在-fedora--rhel--oracle-linux-等-rpm-系发行版上安装)
   - [Linux：AppImage 构建失败，提示 "failed to run linuxdeploy"](#linuxappimage-构建失败提示-failed-to-run-linuxdeploy)
   - [Linux：AppImage 启动即崩溃，提示找不到 WebKitNetworkProcess](#linuxappimage-启动即崩溃提示找不到-webkitnetworkprocess)
   - [Linux:"cargo: command not found" 即使已安装 Rust](#linuxcargo-command-not-found-即使已安装-rust)
@@ -98,6 +99,43 @@ Can't detect any appindicator library
 sudo apt-get update
 sudo apt-get install -y libayatana-appindicator3-dev
 ```
+
+---
+
+### Linux：在 Fedora / RHEL / Oracle Linux 等 RPM 系发行版上安装
+
+**问题：**
+在 RPM 系发行版（Fedora、RHEL、Oracle Linux、Rocky、AlmaLinux、openSUSE）上，
+`.deb` 包无法被系统包管理器安装，而旧版本 Pake 总是先构建 `.deb`。
+
+**解决方法：**
+
+Pake 现在会读取 `/etc/os-release` 来决定默认打包目标：RPM 系发行版默认使用
+`rpm, appimage`，Debian/Ubuntu 仍然是 `deb, appimage`。所以基础命令就能直接产出
+可安装的包：
+
+```bash
+pake https://github.com --name GitHub
+sudo dnf install ./GitHub.rpm   # 或：sudo rpm -i ./GitHub.rpm
+```
+
+你也可以随时显式指定格式：
+
+```bash
+pake https://github.com --name GitHub --targets rpm        # RPM 包
+pake https://github.com --name GitHub --targets appimage   # 便携 AppImage
+```
+
+默认会构建多个目标，此时单个格式失败不再中断其余格式：如果 `.rpm`/`.deb` 打包失败，
+仍会产出 AppImage 作为便携回退方案。AppImage 无需安装即可运行：
+
+```bash
+chmod +x ./GitHub.AppImage
+./GitHub.AppImage
+```
+
+> 构建 `.rpm` 需要 `rpm-build`（`sudo dnf install rpm-build`）。如果你只想要一个可运行
+> 的程序而不需要打包，可加上 `--keep-binary`，它会把原始可执行文件复制到安装包旁边。
 
 ---
 
