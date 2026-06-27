@@ -2564,7 +2564,7 @@ dependencies = [
 
 [[package]]
 name = "pake"
-version = "3.12.1"
+version = "3.13.0"
 dependencies = [
  "objc2",
  "objc2-app-kit",
