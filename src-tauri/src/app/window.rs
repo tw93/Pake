@@ -289,9 +289,18 @@ fn build_window(
     // any script that reads it (e.g. fullscreen polyfill checks for an opt-out
     // flag), and toast must register `window.pakeToast` before Rust code
     // calls show_toast().
+    window_builder = window_builder.initialization_script(&config_script);
+
+    // find.js is opt-in via --enable-find and no-ops at runtime when disabled,
+    // so only inject its ~700 lines when the feature is on. Avoids parsing the
+    // find UI on every page load in the common (find-off) case. Matches the
+    // enable_find gating already applied to the Find menu item.
+    if window_config.enable_find {
+        window_builder =
+            window_builder.initialization_script(include_str!("../inject/find.js"));
+    }
+
     window_builder = window_builder
-        .initialization_script(&config_script)
-        .initialization_script(include_str!("../inject/find.js"))
         .initialization_script(include_str!("../inject/toast.js"))
         .initialization_script(include_str!("../inject/fullscreen.js"))
         .initialization_script(include_str!("../inject/event.js"))
