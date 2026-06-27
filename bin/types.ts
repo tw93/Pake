@@ -90,6 +90,10 @@ export interface PakeCliOptions {
   // Enable drag and drop functionality, default false
   enableDragDrop: boolean;
 
+  // Build the executable without packaging it into an installer (Linux only),
+  // default true. Set false via --no-bundle for RPM distros where the bundler aborts.
+  bundle: boolean;
+
   // Keep raw binary file alongside installer, default false
   keepBinary: boolean;
 

@@ -1141,6 +1141,16 @@ class BaseBuilder {
                 throw retryError;
             }
         }
+        // With --no-bundle there is no installer to copy; surface the raw
+        // executable the build produced instead.
+        if (this.options.bundle === false) {
+            await this.copyRawBinary(npmDirectory, name);
+            if (logSuccess) {
+                logger.success('✔ Build success!');
+                logger.success('✔ Raw binary located in', path.resolve(this.getRawBinaryPath(name)));
+            }
+            return;
+        }
         // Copy app
         const fileName = this.getFileName();
         const fileType = this.getFileType(target);
@@ -1526,6 +1536,11 @@ class LinuxBuilder extends BaseBuilder {
         return `${name}_${version}_${arch}`;
     }
     async build(url) {
+        // --no-bundle: build the executable once with no per-format packaging loop.
+        if (this.options.bundle === false) {
+            await this.buildAndCopy(url, 'deb');
+            return;
+        }
         const targets = filterLinuxTargets(this.options.targets);
         if (targets.length === 0) {
             throw new Error(`No valid Linux target in "${this.options.targets}". Valid targets: ${LINUX_TARGET_TYPES.join(', ')}.`);
@@ -1684,6 +1699,11 @@ post_remove() {
             ? (this.getTauriTarget(this.buildArch, 'linux') ?? undefined)
             : undefined;
         let fullCommand = this.buildBaseCommand(packageManager, configPath, buildTarget);
+        // --no-bundle: build the executable only, skipping .deb/.rpm/.appimage
+        // packaging entirely (e.g. RPM-based distros where the bundler aborts).
+        if (this.options.bundle === false) {
+            return `${fullCommand} --no-bundle`;
+        }
         if (this.currentBuildType) {
             fullCommand += ` --bundles ${this.currentBuildType}`;
         }
@@ -2660,6 +2680,11 @@ async function handleOptions(options, url) {
     if (!options.internalUrlRegex && options.safeDomain) {
         appOptions.internalUrlRegex = safeDomainsToRegex(options.safeDomain);
     }
+    // --no-bundle is Linux-only; keep normal packaging on other platforms.
+    if (appOptions.bundle === false && platform !== 'linux') {
+        logger.warn('✼ --no-bundle is only supported on Linux; ignoring it.');
+        appOptions.bundle = true;
+    }
     const iconPath = await handleIcon(appOptions, url);
     appOptions.icon = iconPath || '';
     return appOptions;
@@ -2702,6 +2727,7 @@ const DEFAULT_PAKE_OPTIONS = {
     incognito: false,
     wasm: false,
     enableDragDrop: false,
+    bundle: true,
     keepBinary: false,
     multiInstance: false,
     multiWindow: false,
@@ -2840,6 +2866,9 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .hideHelp())
         .addOption(new Option('--keep-binary', 'Keep raw binary file alongside installer')
         .default(DEFAULT_PAKE_OPTIONS.keepBinary)
+        .hideHelp())
+        .addOption(new Option('--no-bundle', 'Skip packaging, output only the raw executable (Linux; for RPM distros where the bundler aborts)')
+        .default(DEFAULT_PAKE_OPTIONS.bundle)
         .hideHelp())
         .addOption(new Option('--multi-instance', 'Allow multiple app instances')
         .default(DEFAULT_PAKE_OPTIONS.multiInstance)

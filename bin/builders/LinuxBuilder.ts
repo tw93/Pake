@@ -64,6 +64,12 @@ export default class LinuxBuilder extends BaseBuilder {
   }
 
   async build(url: string) {
+    // --no-bundle: build the executable once with no per-format packaging loop.
+    if (this.options.bundle === false) {
+      await this.buildAndCopy(url, 'deb');
+      return;
+    }
+
     const targets = filterLinuxTargets(this.options.targets);
     if (targets.length === 0) {
       throw new Error(
@@ -268,6 +274,12 @@ post_remove() {
       configPath,
       buildTarget,
     );
+
+    // --no-bundle: build the executable only, skipping .deb/.rpm/.appimage
+    // packaging entirely (e.g. RPM-based distros where the bundler aborts).
+    if (this.options.bundle === false) {
+      return `${fullCommand} --no-bundle`;
+    }
 
     if (this.currentBuildType) {
       fullCommand += ` --bundles ${this.currentBuildType}`;

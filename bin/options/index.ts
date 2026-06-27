@@ -91,6 +91,12 @@ export default async function handleOptions(
     appOptions.internalUrlRegex = safeDomainsToRegex(options.safeDomain);
   }
 
+  // --no-bundle is Linux-only; keep normal packaging on other platforms.
+  if (appOptions.bundle === false && platform !== 'linux') {
+    logger.warn('✼ --no-bundle is only supported on Linux; ignoring it.');
+    appOptions.bundle = true;
+  }
+
   const iconPath = await handleIcon(appOptions, url);
   appOptions.icon = iconPath || '';
 

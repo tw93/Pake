@@ -221,6 +221,20 @@ export default abstract class BaseBuilder {
       }
     }
 
+    // With --no-bundle there is no installer to copy; surface the raw
+    // executable the build produced instead.
+    if (this.options.bundle === false) {
+      await this.copyRawBinary(npmDirectory, name);
+      if (logSuccess) {
+        logger.success('✔ Build success!');
+        logger.success(
+          '✔ Raw binary located in',
+          path.resolve(this.getRawBinaryPath(name)),
+        );
+      }
+      return;
+    }
+
     // Copy app
     const fileName = this.getFileName();
     const fileType = this.getFileType(target);

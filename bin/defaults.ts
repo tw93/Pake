@@ -39,6 +39,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   incognito: false,
   wasm: false,
   enableDragDrop: false,
+  bundle: true,
   keepBinary: false,
   multiInstance: false,
   multiWindow: false,

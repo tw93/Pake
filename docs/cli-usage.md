@@ -338,6 +338,16 @@ Specify the build target architecture or format:
 - Use `--target appimage-arm64` for portable ARM64 applications that work across different ARM64 Linux distributions.
 - Use `--targets zst` on Arch Linux based distributions to produce a `.pkg.tar.zst` package directly. Pake follows Tauri's AUR packaging guidance by building the Linux package payload first, then emitting Arch package metadata and zstd-compressed output. Requires `binutils` (for `ar`) and `libarchive` (for `bsdtar`).
 
+#### [no-bundle]
+
+Skip packaging and output only the compiled executable. Linux only. Useful on RPM-based distros (Fedora, RHEL, Oracle Linux, etc.) where the native bundler can abort during the packaging stage, so you still get a runnable binary.
+
+```shell
+pake https://github.com --name GitHub --no-bundle
+```
+
+The raw executable is copied to the current directory as `<name>-binary`. On platforms other than Linux this flag is ignored.
+
 #### [user-agent]
 
 Customize the browser user agent. Default is empty.

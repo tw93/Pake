@@ -166,6 +166,14 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .hideHelp(),
     )
     .addOption(
+      new Option(
+        '--no-bundle',
+        'Skip packaging, output only the raw executable (Linux; for RPM distros where the bundler aborts)',
+      )
+        .default(DEFAULT.bundle)
+        .hideHelp(),
+    )
+    .addOption(
       new Option('--multi-instance', 'Allow multiple app instances')
         .default(DEFAULT.multiInstance)
         .hideHelp(),
