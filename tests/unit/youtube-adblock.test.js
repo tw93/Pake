@@ -20,6 +20,7 @@ function run({
 } = {}) {
   const removed = [];
   const intervals = [];
+  const intervalCalls = [];
   const createdElements = [];
   const context = {
     window: {
@@ -42,7 +43,8 @@ function run({
     MutationObserver: class {
       observe() {}
     },
-    setInterval: vi.fn((callback) => {
+    setInterval: vi.fn((callback, delay) => {
+      intervalCalls.push({ callback, delay });
       intervals.push(callback);
       return intervals.length;
     }),
@@ -72,6 +74,7 @@ function run({
   }
   context.window.window = context.window;
   context.intervals = intervals;
+  context.intervalCalls = intervalCalls;
   context.createdElements = createdElements;
   vm.runInNewContext(source, context);
   return { context, removed };
@@ -140,6 +143,14 @@ describe("YouTube ad-block injection", () => {
     vm.runInNewContext(source, context);
 
     expect(context.intervals).toHaveLength(intervalCount);
+  });
+
+  it("runs player ad maintenance several times per second", () => {
+    const { context } = run();
+
+    expect(context.intervalCalls).toContainEqual(
+      expect.objectContaining({ delay: 250 }),
+    );
   });
 
   it("continues cleaning and rendering diagnostics when one selector is unsupported", () => {
@@ -246,7 +257,7 @@ describe("YouTube ad-block injection", () => {
 
     expect(video.muted).toBe(true);
     expect(video.playbackRate).toBe(16);
-    expect(video.currentTime).toBeGreaterThanOrEqual(10);
+    expect(video.currentTime).toBeGreaterThanOrEqual(600);
   });
 
   it("resumes paused player ads before accelerating unknown-duration ads", () => {
@@ -269,7 +280,27 @@ describe("YouTube ad-block injection", () => {
     expect(video.play).toHaveBeenCalled();
     expect(video.muted).toBe(true);
     expect(video.playbackRate).toBe(16);
-    expect(video.currentTime).toBeGreaterThanOrEqual(10);
+    expect(video.currentTime).toBeGreaterThanOrEqual(600);
+  });
+
+  it("does not keep stacking jumps for unknown-duration player ads", () => {
+    const video = {
+      currentTime: 0,
+      duration: Number.NaN,
+      muted: false,
+      paused: false,
+      playbackRate: 1,
+    };
+    const player = { querySelector: () => video };
+    const { context } = run({
+      querySelector: (selector) =>
+        selector === ".html5-video-player.ad-showing" ? player : null,
+    });
+
+    context.intervals.forEach((callback) => callback());
+    context.intervals.forEach((callback) => callback());
+
+    expect(video.currentTime).toBe(600);
   });
 
   it("hides every visible ad surface while a player pre-roll is active", () => {

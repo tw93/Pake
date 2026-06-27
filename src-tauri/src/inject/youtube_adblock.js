@@ -86,6 +86,7 @@
       "companionAd",
       "instreamAdPlayerOverlayRenderer",
     ]);
+    const unknownDurationAdJumpSeconds = 600;
 
     const getRequestUrl = (input) => {
       if (typeof input === "string") return input;
@@ -340,8 +341,12 @@
           video.currentTime = video.duration;
         } else {
           video.playbackRate = 16;
-          video.currentTime =
-            (Number.isFinite(video.currentTime) ? video.currentTime : 0) + 10;
+          const currentTime = Number.isFinite(video.currentTime)
+            ? video.currentTime
+            : 0;
+          if (currentTime < unknownDurationAdJumpSeconds) {
+            video.currentTime = unknownDurationAdJumpSeconds;
+          }
         }
       }
     };
@@ -417,7 +422,7 @@
     patchFetch();
     clean();
     renderDebugPanel();
-    setInterval(runMaintenance, 1_000);
+    setInterval(runMaintenance, 250);
     window[loadedKey] = true;
 
     return true;
