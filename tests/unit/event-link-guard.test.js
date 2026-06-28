@@ -226,7 +226,7 @@ describe("event link guard", () => {
     expect(context.window.location.href).toBe("https://mycompany.okta.com/sso");
   });
 
-  it("navigates target blank internal links in-place when new-window is disabled", () => {
+  it("retargets internal target=_blank links to _self instead of forcing a reload", () => {
     const context = loadEventHelpers({ withTauri: true });
     context.window.pakeConfig = {
       new_window: false,
@@ -234,16 +234,34 @@ describe("event link guard", () => {
     };
     runDomReady(context);
 
-    const event = makeClickEvent(
-      makeAnchor("https://app.example.com/callback", "_blank"),
-    );
+    const anchor = makeAnchor("https://app.example.com/callback", "_blank");
+    const event = makeClickEvent(anchor);
+    getClickGuard(context)(event);
+
+    // The link must be neutralized so the native webview never opens a system
+    // browser window, but the page's own click handler (and a normal in-app
+    // navigation) should still run -- so we do NOT preventDefault / reload.
+    expect(anchor.target).toBe("_self");
+    expect(event.preventDefault).not.toHaveBeenCalled();
+    expect(event.stopImmediatePropagation).not.toHaveBeenCalled();
+    expect(context.window.location.href).toBe("https://example.com/app");
+  });
+
+  it("still opens external target=_blank links in the system browser", () => {
+    const context = loadEventHelpers({ withTauri: true });
+    context.window.pakeConfig = { new_window: false };
+    runDomReady(context);
+
+    const anchor = makeAnchor("https://other.example.org/page", "_blank");
+    const event = makeClickEvent(anchor);
     getClickGuard(context)(event);
 
     expect(event.preventDefault).toHaveBeenCalled();
     expect(event.stopImmediatePropagation).toHaveBeenCalled();
-    expect(context.window.location.href).toBe(
-      "https://app.example.com/callback",
-    );
+    expect(context.invokeCalls).toContainEqual([
+      "plugin:shell|open",
+      { path: "https://other.example.org/page" },
+    ]);
   });
 
   it("bridges Web Badging API calls to explicit badge commands", async () => {
