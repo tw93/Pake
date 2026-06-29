@@ -508,6 +508,18 @@ function filterLinuxTargets(targets) {
 function needsTemporaryDebForZst(targets) {
     return targets.includes('zst') && !targets.includes('deb');
 }
+// Resolves the Tauri `bundle.targets` list for a Linux build from a
+// comma-separated --targets string (e.g. the distro-aware default
+// "deb,appimage"). zst is repacked from the deb payload, so it maps to a deb
+// bundle. hasValidTarget is false only when no known target is present, which
+// is the single case that should warn and fall back to the default.
+function resolveLinuxBundleTargets(targets) {
+    const requested = filterLinuxTargets(targets);
+    const bundleTargets = [
+        ...new Set(requested.map((target) => (target === 'zst' ? 'deb' : target))),
+    ];
+    return { bundleTargets, hasValidTarget: requested.length > 0 };
+}
 
 /**
  * Pure transform from CLI options to the window-config slice that gets
@@ -634,19 +646,17 @@ Terminal=false
     linuxBundle.rpm.files = {
         [desktopInstallPath]: `assets/${desktopFileName}`,
     };
-    const validTargets = [
-        ...LINUX_TARGET_TYPES,
-        ...LINUX_TARGET_TYPES.map((target) => `${target}-arm64`),
-    ];
-    const baseTarget = options.targets.includes('-arm64')
-        ? options.targets.replace('-arm64', '')
-        : options.targets;
-    if (validTargets.includes(options.targets)) {
-        // zst is repacked from the deb payload, so Tauri itself bundles a deb.
-        tauriConf.bundle.targets = [baseTarget === 'zst' ? 'deb' : baseTarget];
+    // options.targets reaches here already stripped of any -arm64 suffix by the
+    // LinuxBuilder constructor, and may carry several comma-separated formats
+    // (e.g. the distro-aware default "deb,appimage"). Validate the parsed list
+    // rather than string-matching the whole value, so a valid multi-target
+    // default no longer trips the "must be one of ..." warning on every build.
+    const { bundleTargets, hasValidTarget } = resolveLinuxBundleTargets(options.targets);
+    if (hasValidTarget) {
+        tauriConf.bundle.targets = bundleTargets;
     }
     else {
-        logger.warn(`✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`);
+        logger.warn(`✼ The target must be one of ${LINUX_TARGET_TYPES.join(', ')}, the default 'deb' will be used.`);
     }
 }
 async function mergeIcons(options, name, tauriConf, platform, safeAppName) {

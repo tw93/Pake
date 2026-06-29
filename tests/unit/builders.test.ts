@@ -3,6 +3,7 @@ import {
   LINUX_TARGET_TYPES,
   filterLinuxTargets,
   needsTemporaryDebForZst,
+  resolveLinuxBundleTargets,
 } from '../../bin/utils/targets.js';
 
 describe('Linux target filtering', () => {
@@ -64,5 +65,42 @@ describe('Linux target filtering', () => {
     expect(needsTemporaryDebForZst(['appimage', 'zst'])).toBe(true);
     expect(needsTemporaryDebForZst(['deb', 'zst'])).toBe(false);
     expect(needsTemporaryDebForZst(['deb', 'appimage'])).toBe(false);
+  });
+});
+
+describe('resolveLinuxBundleTargets', () => {
+  it('treats the default multi-target value as valid (no fallback warning)', () => {
+    expect(resolveLinuxBundleTargets('deb,appimage')).toEqual({
+      bundleTargets: ['deb', 'appimage'],
+      hasValidTarget: true,
+    });
+  });
+
+  it('treats the RPM-distro default as valid (canonical target order)', () => {
+    expect(resolveLinuxBundleTargets('rpm,appimage')).toEqual({
+      bundleTargets: ['appimage', 'rpm'],
+      hasValidTarget: true,
+    });
+  });
+
+  it('maps zst to a deb bundle (zst is repacked from the deb payload)', () => {
+    expect(resolveLinuxBundleTargets('zst')).toEqual({
+      bundleTargets: ['deb'],
+      hasValidTarget: true,
+    });
+  });
+
+  it('deduplicates when zst and deb are both requested', () => {
+    expect(resolveLinuxBundleTargets('deb,zst')).toEqual({
+      bundleTargets: ['deb'],
+      hasValidTarget: true,
+    });
+  });
+
+  it('reports no valid target when nothing matches', () => {
+    expect(resolveLinuxBundleTargets('invalid')).toEqual({
+      bundleTargets: [],
+      hasValidTarget: false,
+    });
   });
 });
