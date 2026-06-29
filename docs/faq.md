@@ -12,6 +12,7 @@ Common issues and solutions when using Pake.
   - [Linux: Installing on Fedora / RHEL / Oracle Linux (RPM-based distros)](#linux-installing-on-fedora--rhel--oracle-linux-rpm-based-distros)
   - [Linux: AppImage Build Fails with "failed to run linuxdeploy"](#linux-appimage-build-fails-with-failed-to-run-linuxdeploy)
   - [Linux: AppImage Crashes at Launch with WebKitNetworkProcess Not Found](#linux-appimage-crashes-at-launch-with-webkitnetworkprocess-not-found)
+  - [Linux: AppImage Opens but Buttons or Keyboard Do Not Work on Wayland](#linux-appimage-opens-but-buttons-or-keyboard-do-not-work-on-wayland)
   - [Linux: "cargo: command not found" After Installing Rust](#linux-cargo-command-not-found-after-installing-rust)
   - [Windows: Installation Timeout During First Build](#windows-installation-timeout-during-first-build)
   - [Windows: Missing Visual Studio Build Tools](#windows-missing-visual-studio-build-tools)
