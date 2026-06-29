@@ -42,18 +42,10 @@ export default class LinuxBuilder extends BaseBuilder {
     if (this.buildArch === 'arm64') {
       arch =
         buildType === 'rpm' || buildType === 'appimage' ? 'aarch64' : 'arm64';
+    } else if (this.buildArch === 'x64') {
+      arch = buildType === 'rpm' ? 'x86_64' : 'amd64';
     } else {
-      if (this.buildArch === 'x64') {
-        arch = buildType === 'rpm' ? 'x86_64' : 'amd64';
-      } else {
-        arch = this.buildArch;
-        if (
-          this.buildArch === 'arm64' &&
-          (buildType === 'rpm' || buildType === 'appimage')
-        ) {
-          arch = 'aarch64';
-        }
-      }
+      arch = this.buildArch;
     }
 
     if (this.currentBuildType === 'rpm') {
