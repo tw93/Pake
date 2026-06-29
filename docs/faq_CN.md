@@ -436,7 +436,7 @@ EOF
 pake https://example.com --width 1200 --height 800
 ```
 
-查看 [CLI 使用指南](cli-usage_CN.md#窗口选项) 了解所有窗口选项。
+查看 [CLI 使用指南](cli-usage_CN.md#width) 了解所有窗口选项。
 
 ---
 
