@@ -227,8 +227,8 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .default(DEFAULT.zoom)
         .argParser((value) => {
           const zoom = Number(value);
-          if (!Number.isFinite(zoom) || zoom < 50 || zoom > 200) {
-            throw new Error('--zoom must be a number between 50 and 200');
+          if (!Number.isInteger(zoom) || zoom < 50 || zoom > 200) {
+            throw new Error('--zoom must be an integer between 50 and 200');
           }
           return zoom;
         })

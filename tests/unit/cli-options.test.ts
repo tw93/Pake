@@ -98,7 +98,12 @@ describe('CLI options', () => {
     expect(option).toBeDefined();
     expect(option?.parseArg?.('80', undefined)).toBe(80);
     expect(() => option?.parseArg?.('80abc', undefined)).toThrow(
-      '--zoom must be a number between 50 and 200',
+      '--zoom must be an integer between 50 and 200',
+    );
+    // Fractional in-range values cannot deserialize into the Rust u32 zoom
+    // field, so they must be rejected rather than forwarded to pake.json.
+    expect(() => option?.parseArg?.('99.5', undefined)).toThrow(
+      '--zoom must be an integer between 50 and 200',
     );
   });
 
