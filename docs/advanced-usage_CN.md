@@ -83,7 +83,7 @@ if (window.Notification && Notification.permission === "default") {
 **网页端（JavaScript）：**
 
 ```javascript
-window.__TAURI__.invoke("handle_scroll", {
+window.__TAURI__.core.invoke("handle_scroll", {
   scrollY: window.scrollY,
   scrollX: window.scrollX,
 });
@@ -104,17 +104,19 @@ fn handle_scroll(scroll_y: f64, scroll_x: f64) {
 
 ```json
 {
-  "windows": {
-    "width": 1200,
-    "height": 780,
-    "fullscreen": false,
-    "resizable": true
-  },
-  "hideTitleBar": true
+  "windows": [
+    {
+      "width": 1200,
+      "height": 780,
+      "fullscreen": false,
+      "resizable": true,
+      "hide_title_bar": true
+    }
+  ]
 }
 ```
 
-`hideTitleBar` 仅支持 macOS，在 Windows 和 Linux 上会被忽略。
+`hide_title_bar` 是 `pake.json` 中的字段名（CLI 对应参数为 `--hide-title-bar`）。仅支持 macOS，在 Windows 和 Linux 上会被忽略。
 
 ## 静态文件打包
 
