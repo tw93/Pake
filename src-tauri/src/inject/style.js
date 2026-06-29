@@ -10,7 +10,7 @@ window.addEventListener("DOMContentLoaded", (_event) => {
     #Bottom > div.content > div.inner,
     #Rightbar .sep20:nth-of-type(5),
     #Rightbar > div.box:nth-child(4),
-    #Main > div.box:nth-child(8) > div
+    #Main > div.box:nth-child(8) > div,
     #Wrapper > div.sep20,
     #Main > div.box:nth-child(8),
     #masthead-ad,
