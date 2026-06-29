@@ -474,6 +474,28 @@ pake https://github.com --name GitHub --keep-binary
 pake https://github.com --name GitHub --install
 ```
 
+#### [camera]
+
+在 macOS 上为打包应用请求摄像头权限，会添加 `com.apple.security.device.camera` entitlement。默认为 `false`。仅适用于 macOS，在 Windows 和 Linux 上会被忽略。适用于需要访问摄像头的网页应用，例如视频通话或扫码。
+
+```shell
+--camera
+
+# 示例：为视频通话站点打包并开启摄像头权限
+pake https://meet.google.com --name Meet --camera
+```
+
+#### [microphone]
+
+在 macOS 上为打包应用请求麦克风权限，会添加 `com.apple.security.device.audio-input` entitlement。默认为 `false`。仅适用于 macOS，在 Windows 和 Linux 上会被忽略。
+
+```shell
+--microphone
+
+# 示例：为会议类应用同时开启摄像头和麦克风权限
+pake https://meet.google.com --name Meet --camera --microphone
+```
+
 #### [multi-instance]
 
 允许打包后的应用同时运行多个实例。默认为 `false`，此时再次启动只会聚焦已有窗口。启用该选项后，可以同时打开同一个应用的多个窗口。
