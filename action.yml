@@ -56,9 +56,6 @@ runs:
           npm run cli:build
         fi
 
-        # Ensure node is accessible in subsequent steps
-        echo "$(npm bin)" >> $GITHUB_PATH
-
         # Install Rust/Cargo if needed
         if ! command -v cargo &> /dev/null; then
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
