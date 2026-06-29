@@ -712,16 +712,22 @@ async function mergeIcons(options, name, tauriConf, platform, safeAppName) {
     let trayIconPath = platform === 'darwin' ? 'png/icon_512.png' : tauriConf.bundle.icon[0];
     if (options.systemTrayIcon.length > 0) {
         try {
-            await fsExtra.pathExists(options.systemTrayIcon);
             const iconExt = path.extname(options.systemTrayIcon).toLowerCase();
-            if (iconExt === '.png' || iconExt === '.ico') {
-                const trayIcoPath = path.join(npmDirectory, `src-tauri/png/${safeAppName}${iconExt}`);
-                trayIconPath = `png/${safeAppName}${iconExt}`;
-                await fsExtra.copy(options.systemTrayIcon, trayIcoPath);
-            }
-            else {
+            if (iconExt !== '.png' && iconExt !== '.ico') {
                 logger.warn(`✼ System tray icon must be .ico or .png, but you provided ${iconExt}.`);
                 logger.warn(`✼ Default system tray icon will be used.`);
+            }
+            else if (!(await fsExtra.pathExists(options.systemTrayIcon))) {
+                logger.warn(`✼ System tray icon "${options.systemTrayIcon}" was not found.`);
+                logger.warn(`✼ Default system tray icon will be used.`);
+            }
+            else {
+                const trayIcoPath = path.join(npmDirectory, `src-tauri/png/${safeAppName}${iconExt}`);
+                await fsExtra.copy(options.systemTrayIcon, trayIcoPath);
+                // Only point the config at the custom icon after the copy succeeds, so
+                // a failed copy truly keeps the default instead of referencing a file
+                // that was never written.
+                trayIconPath = `png/${safeAppName}${iconExt}`;
             }
         }
         catch (err) {
