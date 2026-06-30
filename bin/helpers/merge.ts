@@ -155,7 +155,8 @@ async function mergeLinuxConfig(
 
   const linuxName = generateLinuxPackageName(name);
   const desktopFileName = `com.pake.${linuxName}.desktop`;
-  const iconName = `${linuxName}_512`;
+  // Tauri installs hicolor icons using mainBinaryName, not the png filename.
+  const iconName = linuxBinaryName;
   const { title } = options;
 
   const chineseName = title && /[\u4e00-\u9fa5]/.test(title) ? title : null;
