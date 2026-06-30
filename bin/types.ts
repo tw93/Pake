@@ -225,3 +225,39 @@ export interface PakeTauriConfig {
   build?: unknown;
   [key: string]: unknown;
 }
+
+export type PakeHistoryTargetPlatform = 'darwin' | 'windows' | 'linux';
+
+export type PakeHistoryTargetFormat =
+  | 'dmg'
+  | 'app'
+  | 'msi'
+  | 'deb'
+  | 'rpm'
+  | 'appimage'
+  | 'zst'
+  | 'raw';
+
+export interface PakeHistoryTarget {
+  platform: PakeHistoryTargetPlatform;
+  target: PakeHistoryTargetFormat;
+  install_path?: string;
+  output_path: string;
+  built_at: string;
+}
+
+export interface PakeHistoryEntry {
+  id: string;
+  name: string;
+  url: string;
+  identifier: string;
+  created_at: string;
+  last_build_at: string;
+  pake_version: string;
+  app_version: string;
+  targets: PakeHistoryTarget[];
+}
+
+export interface PakeRegistry {
+  entries: PakeHistoryEntry[];
+}
