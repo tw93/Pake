@@ -223,13 +223,20 @@ describe('registry', () => {
     expect(/^[0-9a-f]{12}$/.test(id1)).toBe(true);
   });
 
-  it('generates ids matching sha256(url + name) sliced to 12 hex chars', () => {
+  it('generates ids matching sha256(url::name) sliced to 12 hex chars', () => {
     const expected = crypto
       .createHash('sha256')
-      .update('https://github.comGitHub')
+      .update('https://github.com::GitHub')
       .digest('hex')
       .slice(0, 12);
 
     expect(generateEntryId('https://github.com', 'GitHub')).toBe(expected);
+  });
+
+  it('avoids collisions between different url/name pairs', () => {
+    const id1 = generateEntryId('https://a.com', 'bc');
+    const id2 = generateEntryId('https://a.comb', 'c');
+
+    expect(id1).not.toBe(id2);
   });
 });
