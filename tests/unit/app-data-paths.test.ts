@@ -1,7 +1,7 @@
 import os from 'os';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { getAppDataPaths } from '@/utils/app-data-paths';
+import { getAppDataPaths, validateProductName } from '@/utils/app-data-paths';
 
 describe('app-data-paths', () => {
   const originalPlatform = process.platform;
@@ -51,5 +51,41 @@ describe('app-data-paths', () => {
     vi.spyOn(os, 'homedir').mockReturnValue('/home/alice');
 
     expect(() => getAppDataPaths('GitHub')).toThrow('Unsupported platform');
+  });
+});
+
+describe('validateProductName', () => {
+  it('accepts valid product names', () => {
+    expect(validateProductName('GitHub')).toBe('GitHub');
+    expect(validateProductName('my-app')).toBe('my-app');
+    expect(validateProductName('My App 2')).toBe('My App 2');
+  });
+
+  it('rejects empty strings', () => {
+    expect(() => validateProductName('')).toThrow('Invalid product name ""');
+  });
+
+  it('rejects whitespace-only strings', () => {
+    expect(() => validateProductName('   ')).toThrow('Invalid product name "   "');
+  });
+
+  it('rejects path separators', () => {
+    expect(() => validateProductName('foo/bar')).toThrow('path separators');
+    expect(() => validateProductName('foo\\bar')).toThrow('path separators');
+  });
+
+  it('rejects parent directory references', () => {
+    expect(() => validateProductName('..')).toThrow('cannot contain ".." segments');
+    expect(() => validateProductName('foo..bar')).toThrow('cannot contain ".." segments');
+  });
+
+  it('rejects null bytes', () => {
+    expect(() => validateProductName('foo\0bar')).toThrow('NUL bytes');
+  });
+
+  it('rejects names longer than 200 characters', () => {
+    expect(() => validateProductName('a'.repeat(201))).toThrow(
+      'exceeds 200 characters',
+    );
   });
 });
