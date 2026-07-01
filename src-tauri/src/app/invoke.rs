@@ -44,7 +44,12 @@ pub async fn download_file(app: AppHandle, params: DownloadFileParams) -> Result
         .download_dir()
         .map_err(|e| format!("Failed to get download dir: {}", e))?;
 
-    let output_path = download_dir.join(&params.filename);
+    let safe_name = std::path::Path::new(&params.filename)
+        .file_name()
+        .map(|n| n.to_string_lossy().to_string())
+        .unwrap_or_else(|| "download".to_string());
+
+    let output_path = download_dir.join(&safe_name);
 
     let path_str = output_path.to_str().ok_or("Invalid output path")?;
 
@@ -107,7 +112,12 @@ pub async fn download_file_by_binary(
         .download_dir()
         .map_err(|e| format!("Failed to get download dir: {}", e))?;
 
-    let output_path = download_dir.join(&params.filename);
+    let safe_name = std::path::Path::new(&params.filename)
+        .file_name()
+        .map(|n| n.to_string_lossy().to_string())
+        .unwrap_or_else(|| "download".to_string());
+
+    let output_path = download_dir.join(&safe_name);
 
     let path_str = output_path.to_str().ok_or("Invalid output path")?;
 
