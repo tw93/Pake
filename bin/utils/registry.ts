@@ -106,9 +106,11 @@ export function removeEntry(registry: PakeRegistry, id: string): void {
 }
 
 export function generateEntryId(url: string, name: string): string {
+  // Use "::" as a delimiter to prevent collisions such as
+  // ("https://a.com", "bc") and ("https://a.comb", "c").
   return crypto
     .createHash('sha256')
-    .update(`${url}${name}`)
+    .update(`${url}::${name}`)
     .digest('hex')
     .slice(0, 12);
 }
