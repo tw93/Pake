@@ -10,7 +10,9 @@ const REGISTRY_ROOTS = [
   'HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall',
 ];
 
-export function lookupWindowsProductCode(productName: string): string | undefined {
+export function lookupWindowsProductCode(
+  productName: string,
+): string | undefined {
   for (const root of REGISTRY_ROOTS) {
     try {
       const output = execSync(`reg query "${root}" /s /v DisplayName`, {
@@ -62,7 +64,9 @@ export async function removeWindowsBinary(
   if (await fsExtra.pathExists(target.output_path)) {
     await fsExtra.remove(target.output_path);
   } else {
-    console.warn(chalk.yellow(`Path ${target.output_path} does not exist, skipping...`));
+    console.warn(
+      chalk.yellow(`Path ${target.output_path} does not exist, skipping...`),
+    );
   }
 }
 

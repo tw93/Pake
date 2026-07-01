@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import fsExtra from 'fs-extra';
 import { getAppDataPaths } from '@/utils/app-data-paths';
-import { removeDarwinBinary, removeDarwinData } from '@/commands/uninstall/remover-darwin';
+import {
+  removeDarwinBinary,
+  removeDarwinData,
+} from '@/commands/uninstall/remover-darwin';
 
 vi.mock('@/utils/app-data-paths', () => ({
   getAppDataPaths: vi.fn(),
@@ -19,7 +22,9 @@ const mockedFsExtra = fsExtra as unknown as {
   remove: ReturnType<typeof vi.fn>;
 };
 
-const mockedGetAppDataPaths = getAppDataPaths as unknown as ReturnType<typeof vi.fn>;
+const mockedGetAppDataPaths = getAppDataPaths as unknown as ReturnType<
+  typeof vi.fn
+>;
 
 describe('removeDarwinBinary', () => {
   beforeEach(() => {
@@ -44,7 +49,9 @@ describe('removeDarwinBinary', () => {
 
     await removeDarwinBinary(target);
 
-    expect(mockedFsExtra.remove).toHaveBeenCalledWith('/Applications/GitHub.app');
+    expect(mockedFsExtra.remove).toHaveBeenCalledWith(
+      '/Applications/GitHub.app',
+    );
     expect(mockedFsExtra.remove).toHaveBeenCalledWith('/Users/you/GitHub.dmg');
   });
 
@@ -66,7 +73,9 @@ describe('removeDarwinBinary', () => {
       expect.stringContaining('/Applications/GitHub.app'),
     );
     expect(mockedFsExtra.remove).toHaveBeenCalledWith('/Users/you/GitHub.dmg');
-    expect(mockedFsExtra.remove).not.toHaveBeenCalledWith('/Applications/GitHub.app');
+    expect(mockedFsExtra.remove).not.toHaveBeenCalledWith(
+      '/Applications/GitHub.app',
+    );
   });
 
   it('warns and continues when output_path is missing', async () => {
@@ -83,9 +92,15 @@ describe('removeDarwinBinary', () => {
 
     await removeDarwinBinary(target);
 
-    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('/Users/you/GitHub.dmg'));
-    expect(mockedFsExtra.remove).toHaveBeenCalledWith('/Applications/GitHub.app');
-    expect(mockedFsExtra.remove).not.toHaveBeenCalledWith('/Users/you/GitHub.dmg');
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.stringContaining('/Users/you/GitHub.dmg'),
+    );
+    expect(mockedFsExtra.remove).toHaveBeenCalledWith(
+      '/Applications/GitHub.app',
+    );
+    expect(mockedFsExtra.remove).not.toHaveBeenCalledWith(
+      '/Users/you/GitHub.dmg',
+    );
   });
 });
 
@@ -108,8 +123,12 @@ describe('removeDarwinData', () => {
     await removeDarwinData('GitHub', { config: true, cache: true });
 
     expect(mockedGetAppDataPaths).toHaveBeenCalledWith('GitHub');
-    expect(mockedFsExtra.remove).toHaveBeenCalledWith('/Users/you/Library/Application Support/GitHub');
-    expect(mockedFsExtra.remove).toHaveBeenCalledWith('/Users/you/Library/Caches/GitHub');
+    expect(mockedFsExtra.remove).toHaveBeenCalledWith(
+      '/Users/you/Library/Application Support/GitHub',
+    );
+    expect(mockedFsExtra.remove).toHaveBeenCalledWith(
+      '/Users/you/Library/Caches/GitHub',
+    );
   });
 
   it('removes only cache when config is not selected', async () => {
@@ -118,6 +137,8 @@ describe('removeDarwinData', () => {
     expect(mockedFsExtra.remove).not.toHaveBeenCalledWith(
       '/Users/you/Library/Application Support/GitHub',
     );
-    expect(mockedFsExtra.remove).toHaveBeenCalledWith('/Users/you/Library/Caches/GitHub');
+    expect(mockedFsExtra.remove).toHaveBeenCalledWith(
+      '/Users/you/Library/Caches/GitHub',
+    );
   });
 });

@@ -3,7 +3,9 @@ import chalk from 'chalk';
 import { PakeHistoryTarget } from '@/types';
 import { getAppDataPaths } from '@/utils/app-data-paths';
 
-export async function removeDarwinBinary(target: PakeHistoryTarget): Promise<void> {
+export async function removeDarwinBinary(
+  target: PakeHistoryTarget,
+): Promise<void> {
   const paths: string[] = [];
   if (target.install_path) {
     paths.push(target.install_path);
@@ -14,7 +16,9 @@ export async function removeDarwinBinary(target: PakeHistoryTarget): Promise<voi
     if (await fsExtra.pathExists(filePath)) {
       await fsExtra.remove(filePath);
     } else {
-      console.warn(chalk.yellow(`Path ${filePath} does not exist, skipping...`));
+      console.warn(
+        chalk.yellow(`Path ${filePath} does not exist, skipping...`),
+      );
     }
   }
 }

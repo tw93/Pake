@@ -52,7 +52,9 @@ export async function removeLinuxBinary(
           await fsExtra.remove(target.output_path);
         } else {
           console.warn(
-            chalk.yellow(`Path ${target.output_path} does not exist, skipping...`),
+            chalk.yellow(
+              `Path ${target.output_path} does not exist, skipping...`,
+            ),
           );
         }
       } catch (error) {
@@ -68,7 +70,9 @@ export async function removeLinuxBinary(
   }
 
   if (errors.length > 0) {
-    throw new Error(`Failed to remove ${errors.length} path(s): ${errors.join('; ')}`);
+    throw new Error(
+      `Failed to remove ${errors.length} path(s): ${errors.join('; ')}`,
+    );
   }
 }
 

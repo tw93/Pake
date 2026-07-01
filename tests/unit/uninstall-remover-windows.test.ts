@@ -35,7 +35,9 @@ const mockedFsExtra = fsExtra as unknown as {
 
 const mockedExecSync = execSync as unknown as ReturnType<typeof vi.fn>;
 const mockedShellExec = shellExec as unknown as ReturnType<typeof vi.fn>;
-const mockedGetAppDataPaths = getAppDataPaths as unknown as ReturnType<typeof vi.fn>;
+const mockedGetAppDataPaths = getAppDataPaths as unknown as ReturnType<
+  typeof vi.fn
+>;
 
 describe('lookupWindowsProductCode', () => {
   beforeEach(() => {
@@ -106,7 +108,9 @@ describe('removeWindowsBinary', () => {
 
     await removeWindowsBinary('GitHub', target);
 
-    expect(mockedFsExtra.remove).toHaveBeenCalledWith('C:\\Users\\you\\GitHub.msi');
+    expect(mockedFsExtra.remove).toHaveBeenCalledWith(
+      'C:\\Users\\you\\GitHub.msi',
+    );
     expect(mockedShellExec).not.toHaveBeenCalled();
   });
 
@@ -122,7 +126,9 @@ describe('removeWindowsBinary', () => {
 
     await removeWindowsBinary('GitHub', target);
 
-    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('C:\\Users\\you\\GitHub.msi'));
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.stringContaining('C:\\Users\\you\\GitHub.msi'),
+    );
     expect(mockedShellExec).not.toHaveBeenCalled();
     expect(mockedFsExtra.remove).not.toHaveBeenCalled();
   });
@@ -146,7 +152,11 @@ describe('removeWindowsData', () => {
   it('removes config and cache when both categories are selected', async () => {
     await removeWindowsData('GitHub', { config: true, cache: true });
 
-    expect(mockedFsExtra.remove).toHaveBeenCalledWith('C:\\Users\\you\\AppData\\Roaming\\GitHub');
-    expect(mockedFsExtra.remove).toHaveBeenCalledWith('C:\\Users\\you\\AppData\\Local\\GitHub');
+    expect(mockedFsExtra.remove).toHaveBeenCalledWith(
+      'C:\\Users\\you\\AppData\\Roaming\\GitHub',
+    );
+    expect(mockedFsExtra.remove).toHaveBeenCalledWith(
+      'C:\\Users\\you\\AppData\\Local\\GitHub',
+    );
   });
 });

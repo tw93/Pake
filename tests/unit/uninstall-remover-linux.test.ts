@@ -35,7 +35,9 @@ const mockedFsExtra = fsExtra as unknown as {
 
 const mockedExecSync = execSync as unknown as ReturnType<typeof vi.fn>;
 const mockedShellExec = shellExec as unknown as ReturnType<typeof vi.fn>;
-const mockedGetAppDataPaths = getAppDataPaths as unknown as ReturnType<typeof vi.fn>;
+const mockedGetAppDataPaths = getAppDataPaths as unknown as ReturnType<
+  typeof vi.fn
+>;
 
 describe('normalizedPackageName', () => {
   it('lowercases and prefixes with pake-', () => {
@@ -73,7 +75,9 @@ describe('removeLinuxBinary', () => {
 
     await removeLinuxBinary('GitHub', target);
 
-    expect(mockedShellExec).toHaveBeenCalledWith('sudo dpkg --remove pake-github');
+    expect(mockedShellExec).toHaveBeenCalledWith(
+      'sudo dpkg --remove pake-github',
+    );
   });
 
   it('invokes rpm for rpm format', async () => {
@@ -86,7 +90,9 @@ describe('removeLinuxBinary', () => {
 
     await removeLinuxBinary('GitHub', target);
 
-    expect(mockedShellExec).toHaveBeenCalledWith('sudo rpm --erase pake-github');
+    expect(mockedShellExec).toHaveBeenCalledWith(
+      'sudo rpm --erase pake-github',
+    );
   });
 
   it('invokes pacman for zst format when pacman exists', async () => {
@@ -133,7 +139,9 @@ describe('removeLinuxBinary', () => {
 
     await removeLinuxBinary('GitHub', target);
 
-    expect(mockedFsExtra.remove).toHaveBeenCalledWith('/home/you/GitHub.AppImage');
+    expect(mockedFsExtra.remove).toHaveBeenCalledWith(
+      '/home/you/GitHub.AppImage',
+    );
   });
 
   it('warns and continues when appimage output_path is missing', async () => {
@@ -162,7 +170,9 @@ describe('removeLinuxBinary', () => {
       built_at: '2024-01-01T00:00:00Z',
     };
 
-    await expect(removeLinuxBinary('GitHub', target)).rejects.toThrow('permission denied');
+    await expect(removeLinuxBinary('GitHub', target)).rejects.toThrow(
+      'permission denied',
+    );
     expect(console.warn).toHaveBeenCalled();
   });
 });
@@ -185,14 +195,22 @@ describe('removeLinuxData', () => {
   it('removes config and cache when both selected', async () => {
     await removeLinuxData('GitHub', { config: true, cache: true });
 
-    expect(mockedFsExtra.remove).toHaveBeenCalledWith('/home/you/.config/GitHub');
-    expect(mockedFsExtra.remove).toHaveBeenCalledWith('/home/you/.cache/GitHub');
+    expect(mockedFsExtra.remove).toHaveBeenCalledWith(
+      '/home/you/.config/GitHub',
+    );
+    expect(mockedFsExtra.remove).toHaveBeenCalledWith(
+      '/home/you/.cache/GitHub',
+    );
   });
 
   it('removes only cache when config is not selected', async () => {
     await removeLinuxData('GitHub', { config: false, cache: true });
 
-    expect(mockedFsExtra.remove).not.toHaveBeenCalledWith('/home/you/.config/GitHub');
-    expect(mockedFsExtra.remove).toHaveBeenCalledWith('/home/you/.cache/GitHub');
+    expect(mockedFsExtra.remove).not.toHaveBeenCalledWith(
+      '/home/you/.config/GitHub',
+    );
+    expect(mockedFsExtra.remove).toHaveBeenCalledWith(
+      '/home/you/.cache/GitHub',
+    );
   });
 });
