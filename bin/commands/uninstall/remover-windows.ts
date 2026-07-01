@@ -10,6 +10,24 @@ const REGISTRY_ROOTS = [
   'HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall',
 ];
 
+/**
+ * Windows-specific uninstall helpers.
+ *
+ * Windows MSI targets are uninstalled through `msiexec /x` using the
+ * ProductCode stored in the registry. Non-MSI artifacts are removed as files.
+ * The registry is only read, never modified, and lookup failures fall back to
+ * direct file removal so that already-uninstalled apps do not block the flow.
+ */
+
+/**
+ * Look up the MSI ProductCode for an installed app by its DisplayName.
+ *
+ * Searches both the native and WOW6432Node uninstall registry hives so that
+ * 32-bit installers are found on 64-bit Windows.
+ *
+ * @param productName - The display name of the app to look up.
+ * @returns The ProductCode GUID if found, otherwise `undefined`.
+ */
 export function lookupWindowsProductCode(
   productName: string,
 ): string | undefined {
@@ -50,6 +68,14 @@ export function lookupWindowsProductCode(
   return undefined;
 }
 
+/**
+ * Remove the Windows binary or MSI installation for a single build target.
+ *
+ * @param productName - The app name as recorded in the registry.
+ * @param target - The build target describing what was built and where.
+ * @returns A promise that resolves when removal succeeds.
+ * @throws When `msiexec` fails or file removal fails.
+ */
 export async function removeWindowsBinary(
   productName: string,
   target: PakeHistoryTarget,
@@ -81,6 +107,12 @@ export async function removeWindowsBinary(
   }
 }
 
+/**
+ * Remove the Windows config and/or cache directories for an app.
+ *
+ * @param productName - The app name as recorded in the registry.
+ * @param categories - Flags selecting which data directories to remove.
+ */
 export async function removeWindowsData(
   productName: string,
   categories: { config: boolean; cache: boolean },

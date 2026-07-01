@@ -6,6 +6,24 @@ import { getAppDataPaths } from '@/utils/app-data-paths';
 import { shellExec } from '@/utils/shell';
 import { generateLinuxPackageName } from '@/utils/name';
 
+/**
+ * Linux-specific uninstall helpers.
+ *
+ * Package-managed targets (deb, rpm, zst) are removed through the native package
+ * manager so that desktop entries, icons, and dependencies are cleaned up
+ * properly. File-based targets (AppImage, raw binary) are removed directly.
+ *
+ * Package-manager failures are allowed to propagate and abort the uninstall
+ * flow, which prevents config/cache directories from being deleted while a
+ * package-managed binary may still be registered with the system.
+ */
+
+/**
+ * Build the Linux package name used at build time.
+ *
+ * Reuses {@link generateLinuxPackageName} so that the uninstall command targets
+ * the exact package that `LinuxBuilder` / `BaseBuilder` created.
+ */
 function linuxPackageName(productName: string): string {
   const base = generateLinuxPackageName(productName);
   if (base.startsWith('pake-')) {
@@ -14,6 +32,12 @@ function linuxPackageName(productName: string): string {
   return `pake-${base}`;
 }
 
+/**
+ * Check whether a command is available in the current shell.
+ *
+ * Uses `command -v` instead of `which` because `which` is not guaranteed to be
+ * installed on minimal Linux distributions.
+ */
 function commandExists(command: string): boolean {
   try {
     execSync(`command -v ${command} >/dev/null 2>&1`, { stdio: 'ignore' });
@@ -23,6 +47,14 @@ function commandExists(command: string): boolean {
   }
 }
 
+/**
+ * Remove the Linux binary or package for a single build target.
+ *
+ * @param productName - The app name as recorded in the registry.
+ * @param target - The build target describing what was built and where.
+ * @returns A promise that resolves when removal succeeds.
+ * @throws When a package-manager command fails or a file removal fails.
+ */
 export async function removeLinuxBinary(
   productName: string,
   target: PakeHistoryTarget,
@@ -77,6 +109,12 @@ export async function removeLinuxBinary(
   }
 }
 
+/**
+ * Remove the Linux config and/or cache directories for an app.
+ *
+ * @param productName - The app name as recorded in the registry.
+ * @param categories - Flags selecting which data directories to remove.
+ */
 export async function removeLinuxData(
   productName: string,
   categories: { config: boolean; cache: boolean },

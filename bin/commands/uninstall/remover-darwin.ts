@@ -3,6 +3,20 @@ import chalk from 'chalk';
 import { PakeHistoryTarget } from '@/types';
 import { getAppDataPaths } from '@/utils/app-data-paths';
 
+/**
+ * macOS-specific uninstall helpers.
+ *
+ * macOS artifacts are file-based (`.app` bundles and `.dmg` installers), so
+ * removal is a direct filesystem operation. Missing paths are treated as
+ * already-removed and only produce a warning so the uninstall can continue.
+ */
+
+/**
+ * Remove the macOS app bundle and/or build artifact for a single target.
+ *
+ * @param target - The build target describing install_path and output_path.
+ * @returns A promise that resolves when removal succeeds or paths are missing.
+ */
 export async function removeDarwinBinary(
   target: PakeHistoryTarget,
 ): Promise<void> {
@@ -23,6 +37,12 @@ export async function removeDarwinBinary(
   }
 }
 
+/**
+ * Remove the macOS config and/or cache directories for an app.
+ *
+ * @param productName - The app name as recorded in the registry.
+ * @param categories - Flags selecting which data directories to remove.
+ */
 export async function removeDarwinData(
   productName: string,
   categories: { config: boolean; cache: boolean },
