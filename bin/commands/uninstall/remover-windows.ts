@@ -54,6 +54,17 @@ export async function removeWindowsBinary(
   productName: string,
   target: PakeHistoryTarget,
 ): Promise<void> {
+  if (target.format !== 'msi') {
+    if (await fsExtra.pathExists(target.output_path)) {
+      await fsExtra.remove(target.output_path);
+    } else {
+      console.warn(
+        chalk.yellow(`Path ${target.output_path} does not exist, skipping...`),
+      );
+    }
+    return;
+  }
+
   const productCode = lookupWindowsProductCode(productName);
 
   if (productCode) {
