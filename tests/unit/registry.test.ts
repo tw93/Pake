@@ -19,6 +19,7 @@ describe('registry', () => {
   const tempFiles: string[] = [];
 
   afterEach(async () => {
+    vi.restoreAllMocks();
     await Promise.all(tempFiles.splice(0).map((file) => fsExtra.remove(file)));
   });
 
@@ -90,7 +91,6 @@ describe('registry', () => {
   it('writes registry atomically via temp file and rename', async () => {
     const registryPath = await tempRegistryPath();
     const registryDir = path.dirname(registryPath);
-    const tmpPath = path.join(registryDir, 'history.json.tmp');
     const registry: PakeRegistry = { entries: [createEntry()] };
 
     const ensureDirSpy = vi.spyOn(fsExtra, 'ensureDir').mockResolvedValue(undefined);
@@ -99,7 +99,11 @@ describe('registry', () => {
 
     await writeRegistry(registryPath, registry);
 
+    const tmpPath = writeFileSpy.mock.calls[0][0] as string;
+
     expect(ensureDirSpy).toHaveBeenCalledWith(registryDir);
+    expect(tmpPath).toMatch(/history\.json\.tmp-/);
+    expect(tmpPath.startsWith(registryDir)).toBe(true);
     expect(writeFileSpy).toHaveBeenCalledWith(
       tmpPath,
       `${JSON.stringify(registry, null, 2)}\n`,
@@ -109,17 +113,59 @@ describe('registry', () => {
 
   it('removes temp file when atomic rename fails', async () => {
     const registryPath = await tempRegistryPath();
-    const registryDir = path.dirname(registryPath);
-    const tmpPath = path.join(registryDir, 'history.json.tmp');
     const registry: PakeRegistry = { entries: [createEntry()] };
 
     vi.spyOn(fsExtra, 'ensureDir').mockResolvedValue(undefined);
-    vi.spyOn(fsExtra, 'writeFile').mockResolvedValue(undefined);
+    const writeFileSpy = vi.spyOn(fsExtra, 'writeFile').mockResolvedValue(undefined);
     vi.spyOn(fsExtra, 'rename').mockRejectedValue(new Error('rename failed'));
     const removeSpy = vi.spyOn(fsExtra, 'remove').mockResolvedValue(undefined);
 
     await expect(writeRegistry(registryPath, registry)).rejects.toThrow('rename failed');
+
+    const tmpPath = writeFileSpy.mock.calls[0][0] as string;
     expect(removeSpy).toHaveBeenCalledWith(tmpPath);
+  });
+
+  it('uses a unique temp file name for each writeRegistry call', async () => {
+    const registryPath = await tempRegistryPath();
+    const registry: PakeRegistry = { entries: [createEntry()] };
+
+    vi.spyOn(fsExtra, 'ensureDir').mockResolvedValue(undefined);
+    vi.spyOn(fsExtra, 'rename').mockResolvedValue(undefined);
+    const writeFileSpy = vi.spyOn(fsExtra, 'writeFile').mockResolvedValue(undefined);
+
+    await writeRegistry(registryPath, registry);
+    await writeRegistry(registryPath, registry);
+
+    expect(writeFileSpy).toHaveBeenCalledTimes(2);
+    const firstTmpPath = writeFileSpy.mock.calls[0][0] as string;
+    const secondTmpPath = writeFileSpy.mock.calls[1][0] as string;
+
+    expect(firstTmpPath).not.toBe(secondTmpPath);
+    expect(firstTmpPath).toMatch(/history\.json\.tmp-/);
+    expect(secondTmpPath).toMatch(/history\.json\.tmp-/);
+  });
+
+  it('includes the process pid in the temp file name', async () => {
+    const originalPid = process.pid;
+    const testPid = 12345;
+    Object.defineProperty(process, 'pid', { value: testPid });
+
+    try {
+      const registryPath = await tempRegistryPath();
+      const registry: PakeRegistry = { entries: [createEntry()] };
+
+      vi.spyOn(fsExtra, 'ensureDir').mockResolvedValue(undefined);
+      vi.spyOn(fsExtra, 'rename').mockResolvedValue(undefined);
+      const writeFileSpy = vi.spyOn(fsExtra, 'writeFile').mockResolvedValue(undefined);
+
+      await writeRegistry(registryPath, registry);
+
+      const tmpPath = writeFileSpy.mock.calls[0][0] as string;
+      expect(tmpPath).toContain(`history.json.tmp-${testPid}-`);
+    } finally {
+      Object.defineProperty(process, 'pid', { value: originalPid });
+    }
   });
 
   it('finds an entry by exact name', () => {
