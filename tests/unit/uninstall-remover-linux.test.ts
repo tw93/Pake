@@ -3,8 +3,8 @@ import fsExtra from 'fs-extra';
 import { execSync } from 'child_process';
 import { getAppDataPaths } from '@/utils/app-data-paths';
 import { shellExec } from '@/utils/shell';
+import { generateLinuxPackageName } from '@/utils/name';
 import {
-  normalizedPackageName,
   removeLinuxBinary,
   removeLinuxData,
 } from '@/commands/uninstall/remover-linux';
@@ -39,16 +39,6 @@ const mockedGetAppDataPaths = getAppDataPaths as unknown as ReturnType<
   typeof vi.fn
 >;
 
-describe('normalizedPackageName', () => {
-  it('lowercases and prefixes with pake-', () => {
-    expect(normalizedPackageName('GitHub')).toBe('pake-github');
-  });
-
-  it('replaces spaces and special chars with hyphens', () => {
-    expect(normalizedPackageName('My App!')).toBe('pake-my-app');
-  });
-});
-
 describe('removeLinuxBinary', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -77,6 +67,36 @@ describe('removeLinuxBinary', () => {
 
     expect(mockedShellExec).toHaveBeenCalledWith(
       'sudo dpkg --remove pake-github',
+    );
+  });
+
+  it('matches builder package name for names with dots', async () => {
+    const target = {
+      platform: 'linux' as const,
+      format: 'deb' as const,
+      output_path: '/home/you/pake-my-app.deb',
+      built_at: '2024-01-01T00:00:00Z',
+    };
+
+    await removeLinuxBinary('My.App', target);
+
+    expect(mockedShellExec).toHaveBeenCalledWith(
+      `sudo dpkg --remove pake-${generateLinuxPackageName('My.App')}`,
+    );
+  });
+
+  it('preserves CJK characters in package name to match builder output', async () => {
+    const target = {
+      platform: 'linux' as const,
+      format: 'deb' as const,
+      output_path: '/home/you/pake-我的应用.deb',
+      built_at: '2024-01-01T00:00:00Z',
+    };
+
+    await removeLinuxBinary('我的应用', target);
+
+    expect(mockedShellExec).toHaveBeenCalledWith(
+      `sudo dpkg --remove pake-${generateLinuxPackageName('我的应用')}`,
     );
   });
 
