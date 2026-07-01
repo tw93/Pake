@@ -9,7 +9,7 @@ export interface AppDataPaths {
 const MAX_PRODUCT_NAME_LENGTH = 200;
 
 function getPlatformPath() {
-  return process.platform === 'win32' ? path.win32 : path;
+  return process.platform === 'win32' ? path.win32 : path.posix;
 }
 
 export function validateProductName(name: string): string {
