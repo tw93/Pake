@@ -34,11 +34,23 @@ export async function writeRegistry(
   registryPath: string,
   registry: PakeRegistry,
 ): Promise<void> {
-  await fsExtra.ensureDir(path.dirname(registryPath));
+  const registryDir = path.dirname(registryPath);
+  const tmpPath = path.join(registryDir, 'history.json.tmp');
+
+  await fsExtra.ensureDir(registryDir);
   await fsExtra.writeFile(
-    registryPath,
+    tmpPath,
     `${JSON.stringify(registry, null, 2)}\n`,
   );
+
+  try {
+    await fsExtra.rename(tmpPath, registryPath);
+  } catch (error) {
+    await fsExtra.remove(tmpPath).catch(() => {
+      // Ignore cleanup errors so the original rename error is preserved.
+    });
+    throw error;
+  }
 }
 
 export function findEntryByName(
