@@ -21,14 +21,14 @@ describe('registry types', () => {
   it('can build a target object', () => {
     const target: PakeHistoryTarget = {
       platform: 'linux',
-      target: 'deb',
+      format: 'deb',
       install_path: undefined,
       output_path: '/home/you/GitHub.deb',
       built_at: '2026-06-30T12:00:00Z',
     };
 
     expect(target.platform).toBe('linux');
-    expect(target.target).toBe('deb');
+    expect(target.format).toBe('deb');
   });
 
   it('can build an entry object', () => {
@@ -44,7 +44,7 @@ describe('registry types', () => {
       targets: [
         {
           platform: 'darwin',
-          target: 'dmg',
+          format: 'dmg',
           install_path: '/Applications/GitHub.app',
           output_path: '/Users/you/GitHub.dmg',
           built_at: '2026-06-30T12:00:00Z',

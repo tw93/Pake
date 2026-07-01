@@ -41,7 +41,7 @@ describe('registry', () => {
       targets: partial?.targets ?? [
         {
           platform: 'linux',
-          target: 'deb',
+          format: 'deb',
           output_path: '/home/you/GitHub.deb',
           built_at: '2026-06-30T12:00:00Z',
         },
@@ -159,7 +159,7 @@ describe('registry', () => {
       targets: [
         {
           platform: 'darwin',
-          target: 'dmg',
+          format: 'dmg',
           install_path: '/Applications/GitHub.app',
           output_path: '/Users/you/GitHub.dmg',
           built_at: '2026-06-30T13:00:00Z',
@@ -171,6 +171,40 @@ describe('registry', () => {
 
     expect(registry.entries[0].targets).toHaveLength(2);
     expect(registry.entries[0].targets[1].platform).toBe('darwin');
+    expect(registry.entries[0].targets[1].format).toBe('dmg');
+  });
+
+  it('distinguishes targets by format when upserting', () => {
+    const registry: PakeRegistry = {
+      entries: [
+        createEntry({
+          targets: [
+            {
+              platform: 'linux',
+              format: 'deb',
+              output_path: '/home/you/GitHub.deb',
+              built_at: '2026-06-30T12:00:00Z',
+            },
+          ],
+        }),
+      ],
+    };
+    const updated = createEntry({
+      targets: [
+        {
+          platform: 'linux',
+          format: 'rpm',
+          output_path: '/home/you/GitHub.rpm',
+          built_at: '2026-06-30T13:00:00Z',
+        },
+      ],
+    });
+
+    addOrUpdateEntry(registry, updated);
+
+    expect(registry.entries[0].targets).toHaveLength(2);
+    expect(registry.entries[0].targets[0].format).toBe('deb');
+    expect(registry.entries[0].targets[1].format).toBe('rpm');
   });
 
   it('updates an existing target instead of duplicating it', () => {
@@ -179,7 +213,7 @@ describe('registry', () => {
       targets: [
         {
           platform: 'linux',
-          target: 'deb',
+          format: 'deb',
           output_path: '/home/you/GitHub-v2.deb',
           built_at: '2026-06-30T13:00:00Z',
         },
