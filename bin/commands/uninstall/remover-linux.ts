@@ -21,15 +21,14 @@ import { generateLinuxPackageName } from '@/utils/name';
 /**
  * Build the Linux package name used at build time.
  *
- * Reuses {@link generateLinuxPackageName} so that the uninstall command targets
- * the exact package that `LinuxBuilder` / `BaseBuilder` created.
+ * Tauri v2 derives the package name for `.deb`/`.rpm` from `productName` via
+ * `heck::AsKebabCase` and the Arch `.pkg.tar.zst` `pkgname` is
+ * `generateLinuxPackageName(name)`. Pake's `merge.ts` only adds the `pake-`
+ * prefix to the **binary filename** (`mainBinaryName`), not to the package
+ * name. So the uninstaller must target the unprefixed name.
  */
 function linuxPackageName(productName: string): string {
-  const base = generateLinuxPackageName(productName);
-  if (base.startsWith('pake-')) {
-    return base;
-  }
-  return `pake-${base}`;
+  return generateLinuxPackageName(productName);
 }
 
 /**

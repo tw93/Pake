@@ -65,9 +65,7 @@ describe('removeLinuxBinary', () => {
 
     await removeLinuxBinary('GitHub', target);
 
-    expect(mockedShellExec).toHaveBeenCalledWith(
-      'sudo dpkg --remove pake-github',
-    );
+    expect(mockedShellExec).toHaveBeenCalledWith('sudo dpkg --remove github');
   });
 
   it('matches builder package name for names with dots', async () => {
@@ -81,7 +79,7 @@ describe('removeLinuxBinary', () => {
     await removeLinuxBinary('My.App', target);
 
     expect(mockedShellExec).toHaveBeenCalledWith(
-      `sudo dpkg --remove pake-${generateLinuxPackageName('My.App')}`,
+      `sudo dpkg --remove ${generateLinuxPackageName('My.App')}`,
     );
   });
 
@@ -96,7 +94,7 @@ describe('removeLinuxBinary', () => {
     await removeLinuxBinary('我的应用', target);
 
     expect(mockedShellExec).toHaveBeenCalledWith(
-      `sudo dpkg --remove pake-${generateLinuxPackageName('我的应用')}`,
+      `sudo dpkg --remove ${generateLinuxPackageName('我的应用')}`,
     );
   });
 
@@ -110,9 +108,7 @@ describe('removeLinuxBinary', () => {
 
     await removeLinuxBinary('GitHub', target);
 
-    expect(mockedShellExec).toHaveBeenCalledWith(
-      'sudo rpm --erase pake-github',
-    );
+    expect(mockedShellExec).toHaveBeenCalledWith('sudo rpm --erase github');
   });
 
   it('aborts when dpkg removal fails', async () => {
@@ -155,7 +151,7 @@ describe('removeLinuxBinary', () => {
 
     await removeLinuxBinary('GitHub', target);
 
-    expect(mockedShellExec).toHaveBeenCalledWith('sudo pacman -R pake-github');
+    expect(mockedShellExec).toHaveBeenCalledWith('sudo pacman -R github');
   });
 
   it('warns and skips for zst format when pacman is missing', async () => {
