@@ -31,7 +31,9 @@ describe('registry-paths', () => {
     mockPlatform('darwin');
     mockHome('/Users/alice');
 
-    expect(getRegistryDir()).toBe('/Users/alice/Library/Application Support/pake');
+    expect(getRegistryDir()).toBe(
+      '/Users/alice/Library/Application Support/pake',
+    );
   });
 
   it('resolves Windows registry directory to %APPDATA%/pake', () => {
@@ -45,7 +47,9 @@ describe('registry-paths', () => {
     mockPlatform('linux');
     mockHome('/home/alice');
 
-    expect(getRegistryPath()).toBe(path.join('/home/alice/.config/pake', 'history.json'));
+    expect(getRegistryPath()).toBe(
+      path.join('/home/alice/.config/pake', 'history.json'),
+    );
   });
 
   it('throws on unsupported platforms', () => {

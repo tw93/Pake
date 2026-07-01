@@ -15,7 +15,16 @@ describe('registry types', () => {
 
   it('exports format union', () => {
     const format: PakeHistoryTargetFormat = 'deb';
-    expect(['dmg', 'app', 'msi', 'deb', 'rpm', 'appimage', 'zst', 'raw']).toContain(format);
+    expect([
+      'dmg',
+      'app',
+      'msi',
+      'deb',
+      'rpm',
+      'appimage',
+      'zst',
+      'raw',
+    ]).toContain(format);
   });
 
   it('can build a target object', () => {

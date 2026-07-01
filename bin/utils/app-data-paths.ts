@@ -26,9 +26,7 @@ export function validateProductName(name: string): string {
   }
 
   if (name.includes('\0')) {
-    throw new Error(
-      `Invalid product name "${name}": cannot contain NUL bytes`,
-    );
+    throw new Error(`Invalid product name "${name}": cannot contain NUL bytes`);
   }
 
   if (name.includes('/') || name.includes('\\')) {
@@ -38,9 +36,7 @@ export function validateProductName(name: string): string {
   }
 
   if (name.includes('..')) {
-    throw new Error(
-      `Invalid product name "${name}": cannot contain ".."`,
-    );
+    throw new Error(`Invalid product name "${name}": cannot contain ".."`);
   }
 
   return name;
@@ -66,7 +62,12 @@ export function getAppDataPaths(productName: string): AppDataPaths {
         'Application Support',
         validatedName,
       ),
-      cache: platformPath.join(os.homedir(), 'Library', 'Caches', validatedName),
+      cache: platformPath.join(
+        os.homedir(),
+        'Library',
+        'Caches',
+        validatedName,
+      ),
     };
   }
 

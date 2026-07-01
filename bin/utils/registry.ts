@@ -4,7 +4,9 @@ import fsExtra from 'fs-extra';
 
 import type { PakeHistoryEntry, PakeRegistry } from '@/types';
 
-export async function readRegistry(registryPath: string): Promise<PakeRegistry> {
+export async function readRegistry(
+  registryPath: string,
+): Promise<PakeRegistry> {
   try {
     const content = await fsExtra.readFile(registryPath, 'utf8');
     const parsed = JSON.parse(content) as unknown;
@@ -24,8 +26,7 @@ export async function readRegistry(registryPath: string): Promise<PakeRegistry> 
       return { entries: [] };
     }
 
-    const message =
-      error instanceof Error ? error.message : String(error);
+    const message = error instanceof Error ? error.message : String(error);
     throw new Error(`Failed to read Pake registry: ${message}`);
   }
 }
@@ -45,10 +46,7 @@ export async function writeRegistry(
   const tmpPath = getRegistryTempPath(registryDir);
 
   await fsExtra.ensureDir(registryDir);
-  await fsExtra.writeFile(
-    tmpPath,
-    `${JSON.stringify(registry, null, 2)}\n`,
-  );
+  await fsExtra.writeFile(tmpPath, `${JSON.stringify(registry, null, 2)}\n`);
 
   try {
     await fsExtra.rename(tmpPath, registryPath);
@@ -65,7 +63,9 @@ export function findEntryByName(
   name: string,
 ): PakeHistoryEntry | undefined {
   const lowerName = name.toLowerCase();
-  return registry.entries.find((entry) => entry.name.toLowerCase() === lowerName);
+  return registry.entries.find(
+    (entry) => entry.name.toLowerCase() === lowerName,
+  );
 }
 
 export function findEntryById(

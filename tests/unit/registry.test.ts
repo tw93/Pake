@@ -24,14 +24,21 @@ describe('registry', () => {
   });
 
   async function tempRegistryPath(): Promise<string> {
-    const tempDir = await fsExtra.mkdtemp(path.join(os.tmpdir(), 'pake-registry-'));
+    const tempDir = await fsExtra.mkdtemp(
+      path.join(os.tmpdir(), 'pake-registry-'),
+    );
     tempFiles.push(tempDir);
     return path.join(tempDir, 'history.json');
   }
 
   function createEntry(partial?: Partial<PakeHistoryEntry>): PakeHistoryEntry {
     return {
-      id: partial?.id ?? generateEntryId(partial?.url ?? 'https://github.com', partial?.name ?? 'GitHub'),
+      id:
+        partial?.id ??
+        generateEntryId(
+          partial?.url ?? 'https://github.com',
+          partial?.name ?? 'GitHub',
+        ),
       name: partial?.name ?? 'GitHub',
       url: partial?.url ?? 'https://github.com',
       identifier: partial?.identifier ?? 'com.pake.github',
@@ -93,8 +100,12 @@ describe('registry', () => {
     const registryDir = path.dirname(registryPath);
     const registry: PakeRegistry = { entries: [createEntry()] };
 
-    const ensureDirSpy = vi.spyOn(fsExtra, 'ensureDir').mockResolvedValue(undefined);
-    const writeFileSpy = vi.spyOn(fsExtra, 'writeFile').mockResolvedValue(undefined);
+    const ensureDirSpy = vi
+      .spyOn(fsExtra, 'ensureDir')
+      .mockResolvedValue(undefined);
+    const writeFileSpy = vi
+      .spyOn(fsExtra, 'writeFile')
+      .mockResolvedValue(undefined);
     const renameSpy = vi.spyOn(fsExtra, 'rename').mockResolvedValue(undefined);
 
     await writeRegistry(registryPath, registry);
@@ -116,11 +127,15 @@ describe('registry', () => {
     const registry: PakeRegistry = { entries: [createEntry()] };
 
     vi.spyOn(fsExtra, 'ensureDir').mockResolvedValue(undefined);
-    const writeFileSpy = vi.spyOn(fsExtra, 'writeFile').mockResolvedValue(undefined);
+    const writeFileSpy = vi
+      .spyOn(fsExtra, 'writeFile')
+      .mockResolvedValue(undefined);
     vi.spyOn(fsExtra, 'rename').mockRejectedValue(new Error('rename failed'));
     const removeSpy = vi.spyOn(fsExtra, 'remove').mockResolvedValue(undefined);
 
-    await expect(writeRegistry(registryPath, registry)).rejects.toThrow('rename failed');
+    await expect(writeRegistry(registryPath, registry)).rejects.toThrow(
+      'rename failed',
+    );
 
     const tmpPath = writeFileSpy.mock.calls[0][0] as string;
     expect(removeSpy).toHaveBeenCalledWith(tmpPath);
@@ -132,7 +147,9 @@ describe('registry', () => {
 
     vi.spyOn(fsExtra, 'ensureDir').mockResolvedValue(undefined);
     vi.spyOn(fsExtra, 'rename').mockResolvedValue(undefined);
-    const writeFileSpy = vi.spyOn(fsExtra, 'writeFile').mockResolvedValue(undefined);
+    const writeFileSpy = vi
+      .spyOn(fsExtra, 'writeFile')
+      .mockResolvedValue(undefined);
 
     await writeRegistry(registryPath, registry);
     await writeRegistry(registryPath, registry);
@@ -157,7 +174,9 @@ describe('registry', () => {
 
       vi.spyOn(fsExtra, 'ensureDir').mockResolvedValue(undefined);
       vi.spyOn(fsExtra, 'rename').mockResolvedValue(undefined);
-      const writeFileSpy = vi.spyOn(fsExtra, 'writeFile').mockResolvedValue(undefined);
+      const writeFileSpy = vi
+        .spyOn(fsExtra, 'writeFile')
+        .mockResolvedValue(undefined);
 
       await writeRegistry(registryPath, registry);
 
@@ -269,8 +288,12 @@ describe('registry', () => {
     addOrUpdateEntry(registry, updated);
 
     expect(registry.entries[0].targets).toHaveLength(1);
-    expect(registry.entries[0].targets[0].output_path).toBe('/home/you/GitHub-v2.deb');
-    expect(registry.entries[0].targets[0].built_at).toBe('2026-06-30T13:00:00Z');
+    expect(registry.entries[0].targets[0].output_path).toBe(
+      '/home/you/GitHub-v2.deb',
+    );
+    expect(registry.entries[0].targets[0].built_at).toBe(
+      '2026-06-30T13:00:00Z',
+    );
   });
 
   it('updates last_build_at while preserving created_at on upsert', () => {

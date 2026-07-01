@@ -66,7 +66,9 @@ describe('validateProductName', () => {
   });
 
   it('rejects whitespace-only strings', () => {
-    expect(() => validateProductName('   ')).toThrow('Invalid product name "   "');
+    expect(() => validateProductName('   ')).toThrow(
+      'Invalid product name "   "',
+    );
   });
 
   it('rejects path separators', () => {
@@ -76,7 +78,9 @@ describe('validateProductName', () => {
 
   it('rejects parent directory references', () => {
     expect(() => validateProductName('..')).toThrow('cannot contain ".."');
-    expect(() => validateProductName('foo..bar')).toThrow('cannot contain ".."');
+    expect(() => validateProductName('foo..bar')).toThrow(
+      'cannot contain ".."',
+    );
   });
 
   it('rejects null bytes', () => {
