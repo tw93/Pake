@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import path from 'path';
 import fsExtra from 'fs-extra';
 
@@ -30,12 +30,19 @@ export async function readRegistry(registryPath: string): Promise<PakeRegistry> 
   }
 }
 
+function getRegistryTempPath(registryDir: string): string {
+  return path.join(
+    registryDir,
+    `history.json.tmp-${process.pid}-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
+  );
+}
+
 export async function writeRegistry(
   registryPath: string,
   registry: PakeRegistry,
 ): Promise<void> {
   const registryDir = path.dirname(registryPath);
-  const tmpPath = path.join(registryDir, 'history.json.tmp');
+  const tmpPath = getRegistryTempPath(registryDir);
 
   await fsExtra.ensureDir(registryDir);
   await fsExtra.writeFile(
