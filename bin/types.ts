@@ -240,7 +240,7 @@ export type PakeHistoryTargetFormat =
 
 export interface PakeHistoryTarget {
   platform: PakeHistoryTargetPlatform;
-  target: PakeHistoryTargetFormat;
+  format: PakeHistoryTargetFormat;
   install_path?: string;
   output_path: string;
   built_at: string;

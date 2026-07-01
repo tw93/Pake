@@ -90,7 +90,7 @@ export function addOrUpdateEntry(
     const targetIndex = existing.targets.findIndex(
       (target) =>
         target.platform === newTarget.platform &&
-        target.target === newTarget.target,
+        target.format === newTarget.format,
     );
 
     if (targetIndex === -1) {
