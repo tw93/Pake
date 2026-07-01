@@ -8,6 +8,7 @@ import {
   removeWindowsBinary,
   removeWindowsData,
 } from '@/commands/uninstall/remover-windows';
+import * as removerWindows from '@/commands/uninstall/remover-windows';
 
 vi.mock('@/utils/app-data-paths', () => ({
   getAppDataPaths: vi.fn(),
@@ -131,6 +132,28 @@ describe('removeWindowsBinary', () => {
     );
     expect(mockedShellExec).not.toHaveBeenCalled();
     expect(mockedFsExtra.remove).not.toHaveBeenCalled();
+  });
+
+  it('skips registry lookup for non-MSI formats and removes the file directly', async () => {
+    mockedExecSync.mockReturnValue(
+      'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{12345678-1234-1234-1234-123456789012}\n    DisplayName    REG_SZ    GitHub\n',
+    );
+    const lookupSpy = vi.spyOn(removerWindows, 'lookupWindowsProductCode');
+    const target = {
+      platform: 'windows' as const,
+      format: 'app' as const,
+      output_path: 'C:\\Users\\you\\GitHub.app',
+      built_at: '2024-01-01T00:00:00Z',
+    };
+
+    await removeWindowsBinary('GitHub', target);
+
+    expect(lookupSpy).not.toHaveBeenCalled();
+    expect(mockedFsExtra.remove).toHaveBeenCalledWith(
+      'C:\\Users\\you\\GitHub.app',
+    );
+    expect(mockedShellExec).not.toHaveBeenCalled();
+    lookupSpy.mockRestore();
   });
 });
 
