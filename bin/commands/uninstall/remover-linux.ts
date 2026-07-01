@@ -4,13 +4,14 @@ import { execSync } from 'child_process';
 import { PakeHistoryTarget } from '@/types';
 import { getAppDataPaths } from '@/utils/app-data-paths';
 import { shellExec } from '@/utils/shell';
+import { generateLinuxPackageName } from '@/utils/name';
 
-export function normalizedPackageName(productName: string): string {
-  const normalized = productName
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-  return `pake-${normalized}`;
+function linuxPackageName(productName: string): string {
+  const base = generateLinuxPackageName(productName);
+  if (base.startsWith('pake-')) {
+    return base;
+  }
+  return `pake-${base}`;
 }
 
 function commandExists(command: string): boolean {
@@ -26,7 +27,7 @@ export async function removeLinuxBinary(
   productName: string,
   target: PakeHistoryTarget,
 ): Promise<void> {
-  const packageName = normalizedPackageName(productName);
+  const packageName = linuxPackageName(productName);
   const errors: string[] = [];
 
   switch (target.format) {
