@@ -39,7 +39,7 @@ export function validateProductName(name: string): string {
 
   if (name.includes('..')) {
     throw new Error(
-      `Invalid product name "${name}": cannot contain ".." segments`,
+      `Invalid product name "${name}": cannot contain ".."`,
     );
   }
 
