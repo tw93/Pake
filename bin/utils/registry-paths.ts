@@ -2,7 +2,7 @@ import os from 'os';
 import path from 'path';
 
 function getPlatformPath() {
-  return process.platform === 'win32' ? path.win32 : path;
+  return process.platform === 'win32' ? path.win32 : path.posix;
 }
 
 export function getRegistryDir(): string {
