@@ -102,6 +102,27 @@ describe('removeDarwinBinary', () => {
       '/Users/you/GitHub.dmg',
     );
   });
+
+  it('warns for both paths when install_path and output_path are missing', async () => {
+    mockedFsExtra.pathExists.mockResolvedValue(false);
+    const target = {
+      platform: 'darwin' as const,
+      format: 'dmg' as const,
+      install_path: '/Applications/GitHub.app',
+      output_path: '/Users/you/GitHub.dmg',
+      built_at: '2024-01-01T00:00:00Z',
+    };
+
+    await expect(removeDarwinBinary(target)).resolves.toBeUndefined();
+
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.stringContaining('/Applications/GitHub.app'),
+    );
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.stringContaining('/Users/you/GitHub.dmg'),
+    );
+    expect(mockedFsExtra.remove).not.toHaveBeenCalled();
+  });
 });
 
 describe('removeDarwinData', () => {

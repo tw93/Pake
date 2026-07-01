@@ -155,6 +155,64 @@ describe('removeWindowsBinary', () => {
     expect(mockedShellExec).not.toHaveBeenCalled();
     lookupSpy.mockRestore();
   });
+
+  it('falls back to file removal when registry query throws', async () => {
+    mockedExecSync.mockImplementation(() => {
+      throw new Error('permission denied');
+    });
+    const target = {
+      platform: 'windows' as const,
+      format: 'msi' as const,
+      output_path: 'C:\\Users\\you\\GitHub.msi',
+      built_at: '2024-01-01T00:00:00Z',
+    };
+
+    await removeWindowsBinary('GitHub', target);
+
+    expect(mockedFsExtra.remove).toHaveBeenCalledWith(
+      'C:\\Users\\you\\GitHub.msi',
+    );
+    expect(mockedShellExec).not.toHaveBeenCalled();
+  });
+
+  it('finds ProductCode in WOW6432Node when not in native hive', async () => {
+    mockedExecSync.mockImplementation((cmd: string) => {
+      if (!cmd.includes('WOW6432Node')) {
+        return 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{00000000-0000-0000-0000-000000000000}\n    DisplayName    REG_SZ    OtherApp\n';
+      }
+      return 'HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{12345678-1234-1234-1234-123456789012}\n    DisplayName    REG_SZ    GitHub\n';
+    });
+    const target = {
+      platform: 'windows' as const,
+      format: 'msi' as const,
+      output_path: 'C:\\Users\\you\\GitHub.msi',
+      built_at: '2024-01-01T00:00:00Z',
+    };
+
+    await removeWindowsBinary('GitHub', target);
+
+    expect(mockedShellExec).toHaveBeenCalledWith(
+      'msiexec /x {12345678-1234-1234-1234-123456789012} /qn /norestart',
+    );
+  });
+
+  it('picks the first matching DisplayName deterministically', async () => {
+    mockedExecSync.mockReturnValue(
+      'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{11111111-1111-1111-1111-111111111111}\n    DisplayName    REG_SZ    GitHub\nHKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{22222222-2222-2222-2222-222222222222}\n    DisplayName    REG_SZ    GitHub\n',
+    );
+    const target = {
+      platform: 'windows' as const,
+      format: 'msi' as const,
+      output_path: 'C:\\Users\\you\\GitHub.msi',
+      built_at: '2024-01-01T00:00:00Z',
+    };
+
+    await removeWindowsBinary('GitHub', target);
+
+    expect(mockedShellExec).toHaveBeenCalledWith(
+      'msiexec /x {11111111-1111-1111-1111-111111111111} /qn /norestart',
+    );
+  });
 });
 
 describe('removeWindowsData', () => {
