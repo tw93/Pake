@@ -1,5 +1,4 @@
 import os from 'os';
-import path from 'path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { getRegistryDir, getRegistryPath } from '@/utils/registry-paths';
@@ -47,9 +46,7 @@ describe('registry-paths', () => {
     mockPlatform('linux');
     mockHome('/home/alice');
 
-    expect(getRegistryPath()).toBe(
-      path.join('/home/alice/.config/pake', 'history.json'),
-    );
+    expect(getRegistryPath()).toBe('/home/alice/.config/pake/history.json');
   });
 
   it('throws on unsupported platforms', () => {
