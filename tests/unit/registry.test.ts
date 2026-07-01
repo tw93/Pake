@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import os from 'os';
 import path from 'path';
 import fsExtra from 'fs-extra';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { PakeHistoryEntry, PakeRegistry } from '@/types';
 import {
@@ -85,6 +85,41 @@ describe('registry', () => {
 
     const content = await fsExtra.readFile(registryPath, 'utf8');
     expect(JSON.parse(content)).toEqual(registry);
+  });
+
+  it('writes registry atomically via temp file and rename', async () => {
+    const registryPath = await tempRegistryPath();
+    const registryDir = path.dirname(registryPath);
+    const tmpPath = path.join(registryDir, 'history.json.tmp');
+    const registry: PakeRegistry = { entries: [createEntry()] };
+
+    const ensureDirSpy = vi.spyOn(fsExtra, 'ensureDir').mockResolvedValue(undefined);
+    const writeFileSpy = vi.spyOn(fsExtra, 'writeFile').mockResolvedValue(undefined);
+    const renameSpy = vi.spyOn(fsExtra, 'rename').mockResolvedValue(undefined);
+
+    await writeRegistry(registryPath, registry);
+
+    expect(ensureDirSpy).toHaveBeenCalledWith(registryDir);
+    expect(writeFileSpy).toHaveBeenCalledWith(
+      tmpPath,
+      `${JSON.stringify(registry, null, 2)}\n`,
+    );
+    expect(renameSpy).toHaveBeenCalledWith(tmpPath, registryPath);
+  });
+
+  it('removes temp file when atomic rename fails', async () => {
+    const registryPath = await tempRegistryPath();
+    const registryDir = path.dirname(registryPath);
+    const tmpPath = path.join(registryDir, 'history.json.tmp');
+    const registry: PakeRegistry = { entries: [createEntry()] };
+
+    vi.spyOn(fsExtra, 'ensureDir').mockResolvedValue(undefined);
+    vi.spyOn(fsExtra, 'writeFile').mockResolvedValue(undefined);
+    vi.spyOn(fsExtra, 'rename').mockRejectedValue(new Error('rename failed'));
+    const removeSpy = vi.spyOn(fsExtra, 'remove').mockResolvedValue(undefined);
+
+    await expect(writeRegistry(registryPath, registry)).rejects.toThrow('rename failed');
+    expect(removeSpy).toHaveBeenCalledWith(tmpPath);
   });
 
   it('finds an entry by exact name', () => {
