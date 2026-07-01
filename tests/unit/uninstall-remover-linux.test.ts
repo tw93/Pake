@@ -115,6 +115,32 @@ describe('removeLinuxBinary', () => {
     );
   });
 
+  it('aborts when dpkg removal fails', async () => {
+    const error = new Error('dpkg failed');
+    mockedShellExec.mockRejectedValue(error);
+    const target = {
+      platform: 'linux' as const,
+      format: 'deb' as const,
+      output_path: '/home/you/pake-github.deb',
+      built_at: '2024-01-01T00:00:00Z',
+    };
+
+    await expect(removeLinuxBinary('GitHub', target)).rejects.toBe(error);
+  });
+
+  it('aborts when rpm removal fails', async () => {
+    const error = new Error('rpm failed');
+    mockedShellExec.mockRejectedValue(error);
+    const target = {
+      platform: 'linux' as const,
+      format: 'rpm' as const,
+      output_path: '/home/you/pake-github.rpm',
+      built_at: '2024-01-01T00:00:00Z',
+    };
+
+    await expect(removeLinuxBinary('GitHub', target)).rejects.toBe(error);
+  });
+
   it('invokes pacman for zst format when pacman exists', async () => {
     mockedExecSync.mockImplementation((cmd: string) => {
       if (cmd === 'command -v pacman >/dev/null 2>&1') return '';
@@ -147,6 +173,23 @@ describe('removeLinuxBinary', () => {
 
     expect(console.warn).toHaveBeenCalled();
     expect(mockedShellExec).not.toHaveBeenCalled();
+  });
+
+  it('aborts when pacman removal fails for zst format', async () => {
+    const error = new Error('pacman failed');
+    mockedShellExec.mockRejectedValue(error);
+    mockedExecSync.mockImplementation((cmd: string) => {
+      if (cmd === 'command -v pacman >/dev/null 2>&1') return '';
+      throw new Error('command not found');
+    });
+    const target = {
+      platform: 'linux' as const,
+      format: 'zst' as const,
+      output_path: '/home/you/pake-github.zst',
+      built_at: '2024-01-01T00:00:00Z',
+    };
+
+    await expect(removeLinuxBinary('GitHub', target)).rejects.toBe(error);
   });
 
   it('removes output_path for appimage format', async () => {
