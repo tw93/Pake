@@ -117,7 +117,7 @@ describe('removeLinuxBinary', () => {
 
   it('invokes pacman for zst format when pacman exists', async () => {
     mockedExecSync.mockImplementation((cmd: string) => {
-      if (cmd === 'which pacman') return '/usr/bin/pacman';
+      if (cmd === 'command -v pacman >/dev/null 2>&1') return '';
       throw new Error('command not found');
     });
     const target = {

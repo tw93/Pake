@@ -16,7 +16,7 @@ function linuxPackageName(productName: string): string {
 
 function commandExists(command: string): boolean {
   try {
-    execSync(`which ${command}`, { stdio: 'ignore' });
+    execSync(`command -v ${command} >/dev/null 2>&1`, { stdio: 'ignore' });
     return true;
   } catch {
     return false;
