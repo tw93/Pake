@@ -6,18 +6,55 @@ export interface AppDataPaths {
   cache: string;
 }
 
+const MAX_PRODUCT_NAME_LENGTH = 200;
+
 function getPlatformPath() {
   return process.platform === 'win32' ? path.win32 : path;
 }
 
+export function validateProductName(name: string): string {
+  if (name === '' || name.trim() === '') {
+    throw new Error(
+      `Invalid product name "${name}": cannot be empty or whitespace-only`,
+    );
+  }
+
+  if (name.length > MAX_PRODUCT_NAME_LENGTH) {
+    throw new Error(
+      `Invalid product name "${name}": exceeds ${MAX_PRODUCT_NAME_LENGTH} characters`,
+    );
+  }
+
+  if (name.includes('\0')) {
+    throw new Error(
+      `Invalid product name "${name}": cannot contain NUL bytes`,
+    );
+  }
+
+  if (name.includes('/') || name.includes('\\')) {
+    throw new Error(
+      `Invalid product name "${name}": cannot contain path separators`,
+    );
+  }
+
+  if (name.includes('..')) {
+    throw new Error(
+      `Invalid product name "${name}": cannot contain ".." segments`,
+    );
+  }
+
+  return name;
+}
+
 export function getAppDataPaths(productName: string): AppDataPaths {
+  const validatedName = validateProductName(productName);
   const platform = process.platform;
   const platformPath = getPlatformPath();
 
   if (platform === 'linux') {
     return {
-      config: platformPath.join(os.homedir(), '.config', productName),
-      cache: platformPath.join(os.homedir(), '.cache', productName),
+      config: platformPath.join(os.homedir(), '.config', validatedName),
+      cache: platformPath.join(os.homedir(), '.cache', validatedName),
     };
   }
 
@@ -27,9 +64,9 @@ export function getAppDataPaths(productName: string): AppDataPaths {
         os.homedir(),
         'Library',
         'Application Support',
-        productName,
+        validatedName,
       ),
-      cache: platformPath.join(os.homedir(), 'Library', 'Caches', productName),
+      cache: platformPath.join(os.homedir(), 'Library', 'Caches', validatedName),
     };
   }
 
@@ -45,8 +82,8 @@ export function getAppDataPaths(productName: string): AppDataPaths {
     }
 
     return {
-      config: platformPath.join(appData, productName),
-      cache: platformPath.join(localAppData, productName),
+      config: platformPath.join(appData, validatedName),
+      cache: platformPath.join(localAppData, validatedName),
     };
   }
 
