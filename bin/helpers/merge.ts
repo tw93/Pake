@@ -139,6 +139,28 @@ async function handleLocalFile(
   }
 }
 
+export function buildLinuxDesktopContent(
+  name: string,
+  title: string | undefined,
+  linuxBinaryName: string,
+): string {
+  const chineseName = title && /[\u4e00-\u9fa5]/.test(title) ? title : null;
+
+  return `[Desktop Entry]
+Version=1.0
+Type=Application
+Name=${name}
+${chineseName ? `Name[zh_CN]=${chineseName}` : ''}
+Comment=${name}
+Exec=${linuxBinaryName}
+Icon=${linuxBinaryName}
+Categories=Network;WebBrowser;Utility;
+MimeType=text/html;text/xml;application/xhtml_xml;
+StartupNotify=true
+Terminal=false
+`;
+}
+
 async function mergeLinuxConfig(
   options: PakeAppOptions,
   name: string,
@@ -155,24 +177,11 @@ async function mergeLinuxConfig(
 
   const linuxName = generateLinuxPackageName(name);
   const desktopFileName = `com.pake.${linuxName}.desktop`;
-  // Tauri installs hicolor icons using mainBinaryName, not the png filename.
-  const iconName = linuxBinaryName;
-  const { title } = options;
-
-  const chineseName = title && /[\u4e00-\u9fa5]/.test(title) ? title : null;
-  const desktopContent = `[Desktop Entry]
-Version=1.0
-Type=Application
-Name=${name}
-${chineseName ? `Name[zh_CN]=${chineseName}` : ''}
-Comment=${name}
-Exec=${linuxBinaryName}
-Icon=${iconName}
-Categories=Network;WebBrowser;Utility;
-MimeType=text/html;text/xml;application/xhtml_xml;
-StartupNotify=true
-Terminal=false
-`;
+  const desktopContent = buildLinuxDesktopContent(
+    name,
+    options.title,
+    linuxBinaryName,
+  );
 
   const srcAssetsDir = path.join(npmDirectory, 'src-tauri/assets');
   const srcDesktopFilePath = path.join(srcAssetsDir, desktopFileName);
