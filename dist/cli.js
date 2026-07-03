@@ -649,6 +649,33 @@ Terminal=false
         logger.warn(`✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`);
     }
 }
+async function resolveSystemTrayIconPath(systemTrayIcon, defaultTrayIconPath, safeAppName, iconOutputDir = path.join(npmDirectory, 'src-tauri/png')) {
+    if (systemTrayIcon.length === 0) {
+        return defaultTrayIconPath;
+    }
+    try {
+        const iconExt = path.extname(systemTrayIcon).toLowerCase();
+        if (iconExt !== '.png' && iconExt !== '.ico') {
+            logger.warn(`✼ System tray icon must be .ico or .png, but you provided ${iconExt}.`);
+            logger.warn(`✼ Default system tray icon will be used.`);
+            return defaultTrayIconPath;
+        }
+        if (!(await fsExtra.pathExists(systemTrayIcon))) {
+            logger.warn(`✼ System tray icon "${systemTrayIcon}" was not found.`);
+            logger.warn(`✼ Default system tray icon will be used.`);
+            return defaultTrayIconPath;
+        }
+        const trayIconPath = `png/${safeAppName}${iconExt}`;
+        const trayIcoPath = path.join(iconOutputDir, `${safeAppName}${iconExt}`);
+        await fsExtra.copy(systemTrayIcon, trayIcoPath);
+        return trayIconPath;
+    }
+    catch (err) {
+        logger.warn(`✼ Failed to apply system tray icon "${systemTrayIcon}": ${err instanceof Error ? err.message : String(err)}`);
+        logger.warn(`✼ Default system tray icon will remain unchanged.`);
+        return defaultTrayIconPath;
+    }
+}
 async function mergeIcons(options, name, tauriConf, platform, safeAppName) {
     const platformIconMap = {
         win32: {
@@ -709,26 +736,8 @@ async function mergeIcons(options, name, tauriConf, platform, safeAppName) {
         tauriConf.bundle.icon = [iconInfo.defaultIcon];
     }
     // Set tray icon path.
-    let trayIconPath = platform === 'darwin' ? 'png/icon_512.png' : tauriConf.bundle.icon[0];
-    if (options.systemTrayIcon.length > 0) {
-        try {
-            await fsExtra.pathExists(options.systemTrayIcon);
-            const iconExt = path.extname(options.systemTrayIcon).toLowerCase();
-            if (iconExt === '.png' || iconExt === '.ico') {
-                const trayIcoPath = path.join(npmDirectory, `src-tauri/png/${safeAppName}${iconExt}`);
-                trayIconPath = `png/${safeAppName}${iconExt}`;
-                await fsExtra.copy(options.systemTrayIcon, trayIcoPath);
-            }
-            else {
-                logger.warn(`✼ System tray icon must be .ico or .png, but you provided ${iconExt}.`);
-                logger.warn(`✼ Default system tray icon will be used.`);
-            }
-        }
-        catch (err) {
-            logger.warn(`✼ Failed to apply system tray icon "${options.systemTrayIcon}": ${err instanceof Error ? err.message : String(err)}`);
-            logger.warn(`✼ Default system tray icon will remain unchanged.`);
-        }
-    }
+    const defaultTrayIconPath = platform === 'darwin' ? 'png/icon_512.png' : tauriConf.bundle.icon[0];
+    const trayIconPath = await resolveSystemTrayIconPath(options.systemTrayIcon, defaultTrayIconPath, safeAppName);
     tauriConf.pake.system_tray_path = trayIconPath;
     delete tauriConf.app.trayIcon;
 }
