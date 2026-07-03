@@ -282,3 +282,28 @@ describe("event link guard", () => {
     ]);
   });
 });
+
+describe("getFilenameFromUrl data URI extension", () => {
+  it("maps a structured image subtype to a real extension (svg+xml -> svg)", () => {
+    const context = loadEventHelpers();
+    const filename = context.getFilenameFromUrl(
+      "data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=",
+    );
+    expect(filename).toMatch(/^image-.*\.svg$/);
+    expect(filename).not.toContain("+");
+  });
+
+  it("normalizes jpeg to jpg", () => {
+    const context = loadEventHelpers();
+    expect(context.getFilenameFromUrl("data:image/jpeg;base64,AAAA")).toMatch(
+      /^image-.*\.jpg$/,
+    );
+  });
+
+  it("does not fold the data payload into the extension when ';' is absent", () => {
+    const context = loadEventHelpers();
+    const filename = context.getFilenameFromUrl("data:image/png,rawdata");
+    expect(filename).toMatch(/^image-.*\.png$/);
+    expect(filename).not.toContain("data:image/");
+  });
+});

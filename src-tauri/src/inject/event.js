@@ -1124,8 +1124,17 @@ function getFilenameFromUrl(url) {
 
       // Detect image type from URL or data URI
       if (url.startsWith("data:image/")) {
-        const mimeType = url.substring(11, url.indexOf(";"));
-        filename = `image-${timestamp}.${mimeType}`;
+        // Read only the MIME subtype: stop at ';' (params) or ',' (data),
+        // whichever comes first, so we never fold the encoding/payload into
+        // the extension. Map structured suffixes (svg+xml -> svg) and jpeg.
+        const semicolon = url.indexOf(";");
+        const comma = url.indexOf(",");
+        let end = url.length;
+        if (semicolon !== -1) end = Math.min(end, semicolon);
+        if (comma !== -1) end = Math.min(end, comma);
+        let ext = url.substring(11, end).split("+")[0];
+        if (ext === "jpeg") ext = "jpg";
+        filename = `image-${timestamp}.${ext}`;
       } else {
         // Default to common image extensions based on common patterns
         if (url.includes("jpg") || url.includes("jpeg")) {
