@@ -111,6 +111,22 @@ pub fn get_download_message_with_lang(
     .to_string()
 }
 
+pub fn sanitize_download_filename(filename: &str) -> String {
+    let Some(candidate) = filename
+        .rsplit(['/', '\\'])
+        .find(|part| !part.trim().is_empty())
+        .map(str::trim)
+    else {
+        return "download".to_string();
+    };
+
+    if candidate == "." || candidate == ".." {
+        "download".to_string()
+    } else {
+        candidate.to_string()
+    }
+}
+
 /// Check if the file exists. If it does, append `-N` to the stem until a free
 /// path is found.
 ///
@@ -216,6 +232,39 @@ mod tests {
         let resolved = check_file_or_append(path.to_str().unwrap());
         assert!(resolved.contains("huge-"));
         let _ = fs::remove_dir_all(path.parent().unwrap());
+    }
+
+    #[test]
+    fn sanitize_download_filename_keeps_plain_names() {
+        assert_eq!(sanitize_download_filename("report.pdf"), "report.pdf");
+        assert_eq!(sanitize_download_filename(" report.pdf "), "report.pdf");
+    }
+
+    #[test]
+    fn sanitize_download_filename_takes_the_final_path_segment() {
+        assert_eq!(
+            sanitize_download_filename("../../private/report.pdf"),
+            "report.pdf"
+        );
+        assert_eq!(
+            sanitize_download_filename("..\\private\\report.pdf"),
+            "report.pdf"
+        );
+        assert_eq!(
+            sanitize_download_filename("nested/path/archive.tar.gz"),
+            "archive.tar.gz"
+        );
+    }
+
+    #[test]
+    fn sanitize_download_filename_falls_back_for_empty_or_parent_segments() {
+        for filename in ["", "   ", "/", "\\", ".", "..", "../..", "..\\.."] {
+            assert_eq!(
+                sanitize_download_filename(filename),
+                "download",
+                "{filename}"
+            );
+        }
     }
 
     #[test]

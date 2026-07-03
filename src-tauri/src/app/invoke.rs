@@ -1,4 +1,7 @@
-use crate::util::{check_file_or_append, get_download_message_with_lang, show_toast, MessageType};
+use crate::util::{
+    check_file_or_append, get_download_message_with_lang, sanitize_download_filename, show_toast,
+    MessageType,
+};
 use std::fs::File;
 use std::io::Write;
 use std::str::FromStr;
@@ -93,7 +96,7 @@ pub async fn download_file(app: AppHandle, params: DownloadFileParams) -> Result
         .download_dir()
         .map_err(|e| format!("Failed to get download dir: {}", e))?;
 
-    let output_path = download_dir.join(&params.filename);
+    let output_path = download_dir.join(sanitize_download_filename(&params.filename));
 
     let path_str = output_path.to_str().ok_or("Invalid output path")?;
 

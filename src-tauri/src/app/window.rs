@@ -1,6 +1,7 @@
 use crate::app::config::PakeConfig;
 use crate::util::{
-    check_file_or_append, get_data_dir, get_download_message_with_lang, show_toast, MessageType,
+    check_file_or_append, get_data_dir, get_download_message_with_lang, sanitize_download_filename,
+    show_toast, MessageType,
 };
 use std::{
     path::PathBuf,
@@ -464,7 +465,7 @@ fn build_window(
                             })
                             .unwrap_or_else(|| "download".to_string());
 
-                        let target = download_dir.join(filename);
+                        let target = download_dir.join(sanitize_download_filename(&filename));
                         if let Some(path_str) = target.to_str() {
                             *destination = PathBuf::from(check_file_or_append(path_str));
                         }
