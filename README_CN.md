@@ -7,7 +7,7 @@
 <div align="center">
     <a href="https://twitter.com/HiTw93" target="_blank">
     <img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
-    <a href="https://t.me/+GclQS9ZnxyI2ODQ1" target="_blank">
+    <a href="https://t.me/+9f9gf4ZrFSQ2OWVl" target="_blank">
     <img alt="telegram" src="https://img.shields.io/badge/chat-telegram-blueviolet?style=flat-square&logo=Telegram"></a>
     <a href="https://github.com/tw93/Pake/releases" target="_blank">
     <img alt="GitHub downloads" src="https://img.shields.io/github/downloads/tw93/Pake/total.svg?style=flat-square"></a>
@@ -19,7 +19,7 @@
 
 ## 特征
 
-- 🎐 **体积小巧**：相比 Electron 应用小近 20 倍，通常只有 5M 左右
+- 🎐 **体积小巧**：安装包相比 Electron 应用小近 20 倍，通常小于 10M
 - 🚀 **性能优异**：基于 Rust Tauri，比传统 JS 框架更快，内存占用更少
 - ⚡ **使用简单**：命令行一键打包，或在线构建，无需复杂配置
 - 📦 **功能丰富**：支持快捷键透传、沉浸式窗口、拖拽、样式定制、去广告
@@ -178,7 +178,7 @@ pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/week
 
 ## 定制开发
 
-需要 Rust `>=1.85` 和 Node `>=22`，详细安装指南参考 [Tauri 文档](https://tauri.app/start/prerequisites/)。不熟悉开发环境建议直接使用命令行工具。
+需要 Rust `>=1.85` 和 Node `>=22`（推荐 LTS，较旧的 `>=18` 也可使用），详细安装指南参考 [Tauri 文档](https://tauri.app/start/prerequisites/)。不熟悉开发环境建议直接使用命令行工具。
 
 ```bash
 # 安装依赖
@@ -203,9 +203,18 @@ Pake 的发展离不开这些优秀的贡献者 ❤️
 
 ## 支持
 
-<a href="https://miaoyan.app/cats.html?name=Pake"><img src="https://miaoyan.app/assets/sponsors.svg" width="1000px" /></a>
-
-1. 我有两只猫，一只叫汤圆，一只可乐，假如 Pake 让你生活更美好，可以给她们 <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">喂罐头 🥩</a>。
+1. 购买我做的 Mac 清理应用 [Mole for Mac](https://mole.fit)，是对我最直接的支持。
 2. 如果你喜欢 Pake，可以在 Github Star，更欢迎 [推荐](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20一键打包网页生成轻量桌面应用，比%20Electron%20小%2020%20倍，支持%20macOS%20Windows%20Linux) 给志同道合的朋友使用。
-3. 可以关注我的 [Twitter](https://twitter.com/HiTw93) 获取最新的 Pake 更新消息，也欢迎加入 [Telegram](https://t.me/+GclQS9ZnxyI2ODQ1) 聊天群。
+3. 可以关注我的 [Twitter](https://twitter.com/HiTw93) 获取最新的 Pake 更新消息，也欢迎加入 [Telegram](https://t.me/+9f9gf4ZrFSQ2OWVl) 聊天群。
 4. 希望大伙玩的过程中有一种学习新技术的喜悦感，发现适合做成桌面 App 的网页也欢迎告诉我。
+5. 我有两只猫，一只叫汤圆，一只可乐，假如 Pake 让你生活更美好，可以给她们 <a href="https://cats.tw93.fun?name=Pake" target="_blank">喂罐头 🥩</a>。
+
+<details>
+<summary>这些可爱的朋友已经喂过了 🐱</summary>
+<br/>
+<a href="https://cats.tw93.fun?name=Pake"><img src="https://cdn.jsdelivr.net/gh/tw93/sponsors@main/assets/sponsors.svg" width="1000px" /></a>
+</details>
+
+## 开源协议
+
+Pake 使用 GPL-3.0 协议开源，详见 [LICENSE](./LICENSE) 和 [Pake Output Exception](./LICENSE-EXCEPTION)，用 Pake 打包生成的应用所有权完全归你，可以自由使用和分发；假如你想基于 fork 重新做一个 Pake 产品，为了避免误解，辛苦换一个名字，并注明来源。

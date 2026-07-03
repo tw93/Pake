@@ -12,7 +12,7 @@ const logger = {
     log.error(...msg.map((m) => chalk.red(m)));
   },
   warn(...msg: any[]) {
-    log.info(...msg.map((m) => chalk.yellow(m)));
+    log.warn(...msg.map((m) => chalk.yellow(m)));
   },
   success(...msg: any[]) {
     log.info(...msg.map((m) => chalk.green(m)));

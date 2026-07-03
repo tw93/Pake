@@ -1,4 +1,5 @@
 import { PakeCliOptions } from './types.js';
+import { getDefaultLinuxTargets } from './utils/platform.js';
 
 export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   icon: '',
@@ -19,7 +20,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   targets: (() => {
     switch (process.platform) {
       case 'linux':
-        return 'deb,appimage';
+        return getDefaultLinuxTargets();
       case 'darwin':
         return 'dmg';
       case 'win32':
@@ -38,12 +39,15 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   incognito: false,
   wasm: false,
   enableDragDrop: false,
+  bundle: true,
   keepBinary: false,
   multiInstance: false,
   multiWindow: false,
   startToTray: false,
   forceInternalNavigation: false,
   internalUrlRegex: '',
+  safeDomain: '',
+  enableFind: false,
   iterativeBuild: false,
   zoom: 100,
   minWidth: 0,
@@ -53,12 +57,4 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   install: false,
   camera: false,
   microphone: false,
-};
-
-// Just for cli development
-export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
-  ...DEFAULT_PAKE_OPTIONS,
-  url: 'https://weekly.tw93.fun/en',
-  name: 'Weekly',
-  hideTitleBar: true,
 };

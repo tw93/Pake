@@ -70,7 +70,7 @@ pake [url] [options]
 
 ### [options]
 
-您可以通过传递以下选项来定制打包过程。以下是最常用的选项：
+您可以通过传递以下选项来定制打包过程。`pake --help` 展示全部支持的 CLI 选项。本文档是完整参考。
 
 | 选项               | 描述                                 | 示例                                           |
 | ------------------ | ------------------------------------ | ---------------------------------------------- |
@@ -80,6 +80,8 @@ pake [url] [options]
 | `--height`         | 窗口高度（默认：780px）              | `--height 900`                                 |
 | `--hide-title-bar` | 沉浸式标题栏（仅macOS）              | `--hide-title-bar`                             |
 | `--debug`          | 启用开发者工具                       | `--debug`                                      |
+| `--help`           | 显示全部 CLI 选项                    | `--help`                                       |
+| `--version`        | 显示 CLI 版本                        | `--version`                                    |
 
 完整选项请参见下面的详细说明：
 
@@ -214,11 +216,13 @@ pake https://github.com --name GitHub
 
 #### [dark-mode]
 
-强制 Mac 打包应用使用黑暗模式，默认为 `false`。
+强制打包应用使用黑暗模式（支持 macOS、Windows 和 Linux），默认为 `false`。
 
 ```shell
 --dark-mode
 ```
+
+在 Linux 上黑暗模式经由 WebKitGTK 实现，页面是否真正渲染为暗色还取决于 WebKitGTK 是否尊重窗口主题以及站点是否实现了 `prefers-color-scheme: dark`。
 
 #### [disabled-web-shortcuts]
 
@@ -226,6 +230,14 @@ pake https://github.com --name GitHub
 
 ```shell
 --disabled-web-shortcuts
+```
+
+#### [enable-find]
+
+启用 Pake 内置的页面查找浮层，默认 `false`。开启后用户可以使用 `Cmd/Ctrl+F` 打开查找，`Cmd/Ctrl+G` 跳到下一个匹配项，`Cmd/Ctrl+Shift+G` 跳到上一个匹配项。
+
+```shell
+--enable-find
 ```
 
 #### [force-internal-navigation]
@@ -248,6 +260,19 @@ pake https://github.com --name GitHub
 
 # 示例：只把特定子域名视为内部链接
 --internal-url-regex "^https://(app|api)\\.example\\.com"
+```
+
+#### [safe-domain]
+
+更简单地把可信域名及其子域名保留在应用内打开。适合工作区回调和企业 SSO 登录流程，例如 Slack 加 Okta。Pake 会把这个列表编译成 `internal_url_regex`；如果同时设置了 `--internal-url-regex`，则以显式正则为准。
+
+`--safe-domain` 只匹配 URL 的 host，不会因为路径或查询参数里出现域名就误判为内部链接。
+
+```shell
+--safe-domain <domains>
+
+# 将 Slack 和 Okta 的认证跳转保留在应用内
+--safe-domain slack.com,okta.com
 ```
 
 #### [multi-arch]
@@ -279,9 +304,9 @@ pake https://github.com --name GitHub
 
 指定构建目标架构或格式：
 
-- **Linux**: `deb`, `appimage`, `rpm`, `deb-arm64`, `appimage-arm64`, `rpm-arm64`（默认：`deb`, `appimage`）
+- **Linux**: `deb`, `appimage`, `rpm`, `zst`, `deb-arm64`, `appimage-arm64`, `rpm-arm64`, `zst-arm64`（默认：按发行版自适应，Debian/Ubuntu 为 `deb, appimage`，Fedora/RHEL/Oracle/Rocky/Alma/openSUSE 为 `rpm, appimage`）
 - **Windows**: `x64`, `arm64`（未指定时自动检测）
-- **macOS**: `intel`, `apple`, `universal`（未指定时自动检测）
+- **macOS**: `intel`, `apple`, `universal`（架构，未指定时自动检测）；`app`, `dmg`（输出格式，默认：`dmg`）
 
 ```shell
 --targets <target>
@@ -292,12 +317,16 @@ pake https://github.com --name GitHub
 --targets universal      # macOS 通用版本（Intel + Apple Silicon）
 --targets apple          # 仅 macOS Apple Silicon
 --targets intel          # 仅 macOS Intel
+--targets app            # 仅 macOS 应用包（.app，跳过 DMG 步骤）
+--targets dmg            # macOS DMG 安装包（默认）
 --targets deb            # Linux DEB 包（x64）
 --targets rpm            # Linux RPM 包（x64）
 --targets appimage       # Linux AppImage（x64）
+--targets zst            # Linux Arch 包（x64 .pkg.tar.zst）
 --targets deb-arm64      # Linux DEB 包（ARM64）
 --targets rpm-arm64      # Linux RPM 包（ARM64）
 --targets appimage-arm64 # Linux AppImage（ARM64）
+--targets zst-arm64      # Linux Arch 包（ARM64 .pkg.tar.zst）
 ```
 
 **Linux ARM64 注意事项**：
@@ -305,6 +334,17 @@ pake https://github.com --name GitHub
 - 交叉编译需要额外设置。需要安装 `gcc-aarch64-linux-gnu` 并配置交叉编译环境变量。
 - ARM64 支持让 Pake 应用可以在基于 ARM 的 Linux 设备上运行，包括 Linux 手机（postmarketOS、Ubuntu Touch）、树莓派和其他 ARM64 Linux 系统。
 - 使用 `--target appimage-arm64` 可以创建便携式 ARM64 应用，在不同的 ARM64 Linux 发行版上运行。
+- 在基于 Arch Linux 的发行版上使用 `--targets zst` 可直接生成 `.pkg.tar.zst` 包。Pake 会按 Tauri 的 AUR 打包说明先生成 Linux 包内容，再写入 Arch 包元数据并输出 zstd 压缩包。需要预先安装 `binutils`（提供 `ar`）和 `libarchive`（提供 `bsdtar`）。
+
+#### [no-bundle]
+
+跳过打包，只输出编译好的可执行文件。仅 Linux 可用。适用于 Fedora、RHEL、Oracle Linux 等 RPM 系发行版，这些系统上原生打包器可能在打包阶段中止，用此选项仍能拿到可运行的二进制。
+
+```shell
+pake https://github.com --name GitHub --no-bundle
+```
+
+裸可执行文件会复制到当前目录，命名为 `<name>-binary`。在非 Linux 平台此选项会被忽略。
 
 #### [user-agent]
 

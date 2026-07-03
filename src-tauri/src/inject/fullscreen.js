@@ -1,28 +1,10 @@
-document.addEventListener("DOMContentLoaded", () => {
-  // Toast
-  function pakeToast(msg) {
-    const m = document.createElement("div");
-    m.innerHTML = msg;
-    m.style.cssText =
-      "max-width:60%;min-width: 80px;padding:0 12px;height: 32px;color: rgb(255, 255, 255);line-height: 32px;text-align: center;border-radius: 8px;position: fixed; bottom:24px;right: 28px;z-index: 999999;background: rgba(0, 0, 0,.8);font-size: 13px;";
-    document.body.appendChild(m);
-    setTimeout(function () {
-      const d = 0.5;
-      m.style.transition =
-        "transform " + d + "s ease-in, opacity " + d + "s ease-in";
-      m.style.opacity = "0";
-      setTimeout(function () {
-        document.body.removeChild(m);
-      }, d * 1000);
-    }, 3000);
-  }
-
-  window.pakeToast = pakeToast;
-});
-
-// Polyfill for HTML5 Fullscreen API in Tauri webview
-// This bridges the HTML5 Fullscreen API to Tauri's native window fullscreen
-// Works for all video sites (YouTube, Vimeo, Bilibili, etc.)
+// Polyfill for HTML5 Fullscreen API in Tauri webview.
+// Bridges the standard requestFullscreen / exitFullscreen DOM API to Tauri's
+// native window fullscreen so video sites (YouTube, Vimeo, Bilibili, etc.) can
+// go true fullscreen on their player buttons.
+//
+// Split out from component.js so a future CLI flag (or custom.js override)
+// can short-circuit the polyfill for apps that don't need video fullscreen.
 (function () {
   if (window.__PAKE_FULLSCREEN_POLYFILL__) return;
   window.__PAKE_FULLSCREEN_POLYFILL__ = true;
@@ -42,7 +24,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let wasInBody = false;
     let monitorId = null;
 
-    // Inject fullscreen styles
     if (!document.getElementById("pake-fullscreen-style")) {
       const styleEl = document.createElement("style");
       styleEl.id = "pake-fullscreen-style";
@@ -93,7 +74,6 @@ document.addEventListener("DOMContentLoaded", () => {
       monitorId = null;
     }
 
-    // Find the actual video element
     function findMediaElement() {
       const videos = document.querySelectorAll("video");
       if (videos.length > 0) {
@@ -112,11 +92,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return null;
     }
 
-    // Enter fullscreen
     function enterFullscreen(element) {
       fullscreenElement = element;
 
-      // If html/body element, find the video instead
       let targetElement = element;
       if (element === document.documentElement || element === document.body) {
         const mediaElement = findMediaElement();
@@ -130,7 +108,6 @@ document.addEventListener("DOMContentLoaded", () => {
         actualFullscreenElement = element;
       }
 
-      // Save original state
       originalStyles = {
         position: targetElement.style.position,
         top: targetElement.style.top,
@@ -152,7 +129,6 @@ document.addEventListener("DOMContentLoaded", () => {
         originalNextSibling = targetElement.nextSibling;
       }
 
-      // Apply fullscreen
       targetElement.classList.add("pake-fullscreen-element");
       document.body.classList.add("pake-fullscreen-active");
 
@@ -160,7 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.appendChild(targetElement);
       }
 
-      // Fullscreen window
       appWindow.setFullscreen(true).then(() => {
         startFullscreenMonitor();
         const event = new Event("fullscreenchange", { bubbles: true });
@@ -177,7 +152,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return Promise.resolve();
     }
 
-    // Exit fullscreen
     function exitFullscreen() {
       if (!fullscreenElement) {
         return Promise.resolve();
@@ -188,7 +162,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const exitingElement = fullscreenElement;
       const targetElement = actualFullscreenElement;
 
-      // Restore styles and position
       targetElement.classList.remove("pake-fullscreen-element");
       document.body.classList.remove("pake-fullscreen-active");
 
@@ -209,7 +182,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      // Reset state
       fullscreenElement = null;
       actualFullscreenElement = null;
       originalStyles = null;
@@ -217,7 +189,6 @@ document.addEventListener("DOMContentLoaded", () => {
       originalNextSibling = null;
       wasInBody = false;
 
-      // Exit window fullscreen
       return appWindow.setFullscreen(false).then(() => {
         const event = new Event("fullscreenchange", { bubbles: true });
         document.dispatchEvent(event);
@@ -231,7 +202,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Override fullscreenEnabled
     Object.defineProperty(document, "fullscreenEnabled", {
       get: () => true,
       configurable: true,
@@ -241,7 +211,6 @@ document.addEventListener("DOMContentLoaded", () => {
       configurable: true,
     });
 
-    // Override fullscreenElement
     Object.defineProperty(document, "fullscreenElement", {
       get: () => fullscreenElement,
       configurable: true,
@@ -255,7 +224,6 @@ document.addEventListener("DOMContentLoaded", () => {
       configurable: true,
     });
 
-    // Override requestFullscreen
     Element.prototype.requestFullscreen = function () {
       return enterFullscreen(this);
     };
@@ -266,12 +234,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return enterFullscreen(this);
     };
 
-    // Override exitFullscreen
     document.exitFullscreen = exitFullscreen;
     document.webkitExitFullscreen = exitFullscreen;
     document.webkitCancelFullScreen = exitFullscreen;
 
-    // Handle Escape key
     document.addEventListener(
       "keydown",
       (e) => {

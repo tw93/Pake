@@ -11,18 +11,13 @@ const shortcuts = {
 };
 
 function setZoom(zoom) {
-  const html = document.getElementsByTagName("html")[0];
-  const body = document.body;
-  const zoomValue = parseFloat(zoom) / 100;
-  const isWindows = /windows/i.test(navigator.userAgent);
-
-  if (isWindows) {
-    body.style.transform = `scale(${zoomValue})`;
-    body.style.transformOrigin = "top left";
-    body.style.width = `${100 / zoomValue}%`;
-    body.style.height = `${100 / zoomValue}%`;
-  } else {
-    html.style.zoom = zoom;
+  // Use native WebView zoom (WKWebView pageZoom / WebView2 ZoomFactor) instead of
+  // CSS hacks. `transform: scale` and `html.style.zoom` break complex SPAs like
+  // ChatGPT: the page shifts right on Windows and parts of the UI stop repainting
+  // on macOS. Native zoom recalculates layout exactly like a browser does.
+  const invoke = window.__TAURI__?.core?.invoke;
+  if (invoke) {
+    invoke("set_zoom", { percent: parseFloat(zoom) }).catch(() => {});
   }
 
   window.localStorage.setItem("htmlZoom", zoom);
@@ -256,6 +251,48 @@ function isDownloadableFile(url) {
   }
 }
 
+function normalizeAnchorHref(rawHref) {
+  return typeof rawHref === "string" ? rawHref.trim() : "";
+}
+
+function shouldBypassPakeLinkHandling(rawHref) {
+  const normalizedHref = normalizeAnchorHref(rawHref).toLowerCase();
+  if (!normalizedHref) {
+    return false;
+  }
+
+  return (
+    normalizedHref.startsWith("javascript:") || normalizedHref.startsWith("#")
+  );
+}
+
+function shouldNavigateAuthInCurrentWindow() {
+  return /macintosh|mac os x/i.test(navigator.userAgent);
+}
+
+function canNavigateAuthUrl(url) {
+  const normalizedUrl = normalizeAnchorHref(url).toLowerCase();
+  return normalizedUrl !== "" && normalizedUrl !== "about:blank";
+}
+
+function navigateInCurrentWindow(url) {
+  window.location.href = url;
+  return window;
+}
+
+function openAuthNavigation(originalWindowOpen, url, name, specs) {
+  if (shouldNavigateAuthInCurrentWindow() && canNavigateAuthUrl(url)) {
+    return navigateInCurrentWindow(url);
+  }
+
+  const authWindow = originalWindowOpen.call(window, url, name, specs);
+  if (!authWindow) {
+    return navigateInCurrentWindow(url);
+  }
+
+  return authWindow;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const tauri = window.__TAURI__;
   const appWindow = tauri.window.getCurrentWindow();
@@ -324,111 +361,19 @@ document.addEventListener("DOMContentLoaded", () => {
     true,
   );
 
-  // Collect blob urls to blob by overriding window.URL.createObjectURL
-  function collectUrlToBlobs() {
-    const backupCreateObjectURL = window.URL.createObjectURL;
-    window.blobToUrlCaches = new Map();
-    window.URL.createObjectURL = (blob) => {
-      const url = backupCreateObjectURL.call(window.URL, blob);
-      window.blobToUrlCaches.set(url, blob);
-      return url;
-    };
-  }
-
-  function convertBlobUrlToBinary(blobUrl) {
-    return new Promise((resolve) => {
-      const blob = window.blobToUrlCaches.get(blobUrl);
-      const reader = new FileReader();
-
-      reader.readAsArrayBuffer(blob);
-      reader.onload = () => {
-        resolve(Array.from(new Uint8Array(reader.result)));
-      };
-    });
-  }
-
-  function downloadFromDataUri(dataURI, filename) {
-    try {
-      const byteString = atob(dataURI.split(",")[1]);
-      // write the bytes of the string to an ArrayBuffer
-      const bufferArray = new ArrayBuffer(byteString.length);
-
-      // create a view into the buffer
-      const binary = new Uint8Array(bufferArray);
-
-      // set the bytes of the buffer to the correct values
-      for (let i = 0; i < byteString.length; i++) {
-        binary[i] = byteString.charCodeAt(i);
-      }
-
-      // write the ArrayBuffer to a binary, and you're done
-      const userLanguage = getUserLanguage();
-      invoke("download_file_by_binary", {
-        params: {
-          filename,
-          binary: Array.from(binary),
-          language: userLanguage,
-        },
-      }).catch((error) => {
-        console.error("Failed to download data URI file:", filename, error);
-        showDownloadError(filename);
-      });
-    } catch (error) {
-      console.error("Failed to process data URI:", dataURI, error);
-      showDownloadError(filename || "file");
-    }
-  }
-
-  function downloadFromBlobUrl(blobUrl, filename) {
-    convertBlobUrlToBinary(blobUrl)
-      .then((binary) => {
-        const userLanguage = getUserLanguage();
-        invoke("download_file_by_binary", {
-          params: {
-            filename,
-            binary,
-            language: userLanguage,
-          },
-        }).catch((error) => {
-          console.error("Failed to download blob file:", filename, error);
-          showDownloadError(filename);
-        });
-      })
-      .catch((error) => {
-        console.error("Failed to convert blob to binary:", blobUrl, error);
-        showDownloadError(filename);
-      });
-  }
-
-  // detect blob download by createElement("a")
-  function detectDownloadByCreateAnchor() {
-    const createEle = document.createElement;
-    document.createElement = (el) => {
-      if (el !== "a") return createEle.call(document, el);
-      const anchorEle = createEle.call(document, el);
-
-      // use addEventListener to avoid overriding the original click event.
-      anchorEle.addEventListener(
-        "click",
-        (e) => {
-          const url = anchorEle.href;
-          const filename = anchorEle.download || getFilenameFromUrl(url);
-          if (window.blobToUrlCaches.has(url)) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            downloadFromBlobUrl(url, filename);
-            // case: download from dataURL -> convert dataURL ->
-          } else if (url.startsWith("data:")) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            downloadFromDataUri(url, filename);
-          }
-        },
-        true,
-      );
-
-      return anchorEle;
-    };
+  // Trigger a native browser download via a transient anchor click. The Rust
+  // on_download handler then writes the file to the Downloads folder. This is
+  // used for blob:/data: URLs because routing their bytes through the Tauri
+  // IPC fails on strict-CSP sites (e.g. Gemini), whose connect-src blocks the
+  // IPC origin. The native download path is independent of the page CSP.
+  function triggerNativeDownload(url, filename) {
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filename || "";
+    anchor.style.display = "none";
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
   }
 
   // process special download protocol['data:','blob:']
@@ -498,35 +443,39 @@ document.addEventListener("DOMContentLoaded", () => {
     const anchorElement = e.target.closest("a");
 
     if (anchorElement && anchorElement.href) {
+      const rawHref = anchorElement.getAttribute("href") || "";
+      if (shouldBypassPakeLinkHandling(rawHref)) {
+        return;
+      }
+
       const target = anchorElement.target;
       const hrefUrl = new URL(anchorElement.href);
       const absoluteUrl = hrefUrl.href;
       let filename = anchorElement.download || getFilenameFromUrl(absoluteUrl);
 
-      // Keep OAuth/authentication flows inside the app when popup support is enabled.
+      // Keep OAuth/authentication flows inside the app. Without --new-window,
+      // navigate in place so the SSO redirect chain and callback stay in the
+      // webview instead of falling through to the system browser.
       if (window.isAuthLink(absoluteUrl)) {
         console.log("[Pake] Handling OAuth navigation in-app:", absoluteUrl);
+        e.preventDefault();
+        e.stopImmediatePropagation();
 
         if (window.pakeConfig?.new_window) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-
-          const authWindow = originalWindowOpen.call(
-            window,
+          openAuthNavigation(
+            originalWindowOpen,
             absoluteUrl,
             "_blank",
             "width=1200,height=800,scrollbars=yes,resizable=yes",
           );
-
-          if (!authWindow) {
-            window.location.href = absoluteUrl;
-          }
+        } else {
+          window.location.href = absoluteUrl;
         }
 
         return;
       }
 
-      // Handle _blank links: same domain navigates in-app, cross-domain opens new window
+      // Handle _blank links: internal links stay in-app, external links open in the system browser
       if (target === "_blank") {
         if (forceInternalNavigation) {
           e.preventDefault();
@@ -536,19 +485,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (isInternalUrl(absoluteUrl)) {
-          // For internal links (based on regex or domain), let the browser handle it naturally
+          // With --new-window the Rust on_new_window handler opens an in-app
+          // window; without it, deferring to the native handler sends the
+          // _blank target to the system browser and strands SSO callbacks.
+          // Navigate in place so internal links stay inside the webview.
+          if (!window.pakeConfig?.new_window) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            window.location.href = absoluteUrl;
+          }
           return;
         }
 
         e.preventDefault();
         e.stopImmediatePropagation();
-        const newWindow = originalWindowOpen.call(
-          window,
-          absoluteUrl,
-          "_blank",
-          "width=1200,height=800,scrollbars=yes,resizable=yes",
-        );
-        if (!newWindow) handleExternalLink(absoluteUrl);
+        handleExternalLink(absoluteUrl);
         return;
       }
 
@@ -565,11 +516,16 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Process download links for Rust to handle.
-      if (
-        isDownloadRequired(absoluteUrl, anchorElement, e) &&
-        !isSpecialDownload(absoluteUrl)
-      ) {
+      // Process download links.
+      if (isDownloadRequired(absoluteUrl, anchorElement, e)) {
+        // Let the browser download blob:/data: URLs natively; the Rust
+        // on_download handler saves them to the Downloads folder. Routing them
+        // through the IPC fails on strict-CSP sites (e.g. Gemini), whose
+        // connect-src blocks the IPC origin, and on downloads triggered from a
+        // sandboxed iframe where the IPC can't be reached.
+        if (isSpecialDownload(absoluteUrl)) {
+          return;
+        }
         e.preventDefault();
         e.stopImmediatePropagation();
         const userLanguage = getUserLanguage();
@@ -579,7 +535,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Handle regular links: internal URLs allow normal navigation, external opens new window
+      // Handle regular links: internal URLs allow normal navigation, external links open in the system browser
       if (!target || target === "_self") {
         // Optimization: Allow previewable media to be handled by the app/browser directly
         // This fixes issues where CDN links are treated as external
@@ -594,13 +550,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           e.preventDefault();
           e.stopImmediatePropagation();
-          const newWindow = originalWindowOpen.call(
-            window,
-            absoluteUrl,
-            "_blank",
-            "width=1200,height=800,scrollbars=yes,resizable=yes",
-          );
-          if (!newWindow) handleExternalLink(absoluteUrl);
+          handleExternalLink(absoluteUrl);
         }
       }
     }
@@ -609,15 +559,28 @@ document.addEventListener("DOMContentLoaded", () => {
   // Prevent some special websites from executing in advance, before the click event is triggered.
   document.addEventListener("click", detectAnchorElementClick, true);
 
-  collectUrlToBlobs();
-  detectDownloadByCreateAnchor();
-
   // Rewrite the window.open function.
   const originalWindowOpen = window.open;
   window.open = function (url, name, specs) {
-    // Allow authentication popups to open normally
-    if (window.isAuthPopup(url, name)) {
+    const normalizedUrl = normalizeAnchorHref(url);
+    if (normalizedUrl.startsWith("#")) {
+      window.location.href = new URL(normalizedUrl, window.location.href).href;
+      return window;
+    }
+
+    if (shouldBypassPakeLinkHandling(url)) {
       return originalWindowOpen.call(window, url, name, specs);
+    }
+
+    // Avoid macOS WebKit auth-popup crashes by navigating auth URLs in-place.
+    if (window.isAuthPopup(url, name)) {
+      try {
+        const baseUrl = window.location.origin + window.location.pathname;
+        const absoluteUrl = new URL(url, baseUrl).href;
+        return openAuthNavigation(originalWindowOpen, absoluteUrl, name, specs);
+      } catch (error) {
+        return openAuthNavigation(originalWindowOpen, url, name, specs);
+      }
     }
 
     try {
@@ -632,6 +595,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         handleExternalLink(absoluteUrl);
         return null;
+      }
+
+      // With --new-window the native handler opens an in-app window; without it,
+      // originalWindowOpen would route the internal target to the system browser
+      // and strand SSO callbacks, so navigate in place instead.
+      if (!window.pakeConfig?.new_window) {
+        window.location.href = absoluteUrl;
+        return window;
       }
 
       return originalWindowOpen.call(window, absoluteUrl, name, specs);
@@ -837,12 +808,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const filename = getFilenameFromUrl(imageUrl) || "image";
 
     // Handle different URL types
-    if (imageUrl.startsWith("data:")) {
-      downloadFromDataUri(imageUrl, filename);
-    } else if (imageUrl.startsWith("blob:")) {
-      if (window.blobToUrlCaches && window.blobToUrlCaches.has(imageUrl)) {
-        downloadFromBlobUrl(imageUrl, filename);
-      }
+    if (isSpecialDownload(imageUrl)) {
+      // Download blob:/data: natively so it works under strict CSP; the Rust
+      // on_download handler saves it to the Downloads folder.
+      triggerNativeDownload(imageUrl, filename);
     } else {
       // Regular HTTP(S) image
       const userLanguage = getUserLanguage();
@@ -999,37 +968,141 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-document.addEventListener("DOMContentLoaded", function () {
+// Bridge the Web Notification + Web Badging APIs to Pake's Rust commands so
+// pages running inside the webview can drive the macOS dock badge (and
+// taskbar badge on Linux/Windows). Installs synchronously instead of waiting
+// for DOMContentLoaded so feature-detection on Notification/setAppBadge
+// returns the polyfill before site scripts run.
+(function () {
+  const invoke = window.__TAURI__?.core?.invoke;
+  if (!invoke) return;
+
   let permVal = "granted";
-  window.Notification = function (title, options) {
-    const { invoke } = window.__TAURI__.core;
+  let lastNotifTime = 0;
+  let lastNotif = null;
+  // Pages that drive the badge directly via setAppBadge own its lifecycle;
+  // notifications-driven counts auto-clear on the next user interaction.
+  let pageManagedBadge = false;
+  let autoBadgeActive = false;
+
+  const normalizeBadgeCount = (count) => {
+    if (typeof count !== "number" || !Number.isFinite(count)) {
+      throw new TypeError("Badge count must be a finite number.");
+    }
+    const normalized = Math.floor(count);
+    return normalized > 0 ? Math.min(normalized, 99999) : null;
+  };
+  const setBadge = (count) => {
+    pageManagedBadge = true;
+    autoBadgeActive = false;
+    return invoke("set_dock_badge", { count }).catch(() => {});
+  };
+  const clearBadge = () => invoke("clear_dock_badge").catch(() => {});
+  const setLabel = (label) => {
+    pageManagedBadge = true;
+    autoBadgeActive = false;
+    return invoke("set_dock_badge_label", { label }).catch(() => {});
+  };
+  const incrementAutoBadge = () => {
+    if (pageManagedBadge) return Promise.resolve();
+    autoBadgeActive = true;
+    return invoke("increment_dock_badge").catch(() => {});
+  };
+
+  window.addEventListener("focus", () => {
+    if (lastNotif?.onclick && Date.now() - lastNotifTime < 5000) {
+      lastNotif.onclick(new Event("click"));
+      lastNotif = null;
+    }
+  });
+
+  const clearAutoBadge = () => {
+    if (pageManagedBadge || !autoBadgeActive) return;
+    autoBadgeActive = false;
+    clearBadge();
+  };
+  document.addEventListener("click", clearAutoBadge, true);
+  document.addEventListener("keydown", clearAutoBadge, true);
+
+  const wrappedNotification = function (title, options) {
     const body = options?.body || "";
     let icon = options?.icon || "";
-
-    // If the icon is a relative path, convert to full path using URI
     if (icon.startsWith("/")) {
       icon = window.location.origin + icon;
     }
 
-    invoke("send_notification", {
-      params: {
-        title,
-        body,
-        icon,
-      },
-    });
+    const notif = {
+      onclick: null,
+      onclose: null,
+      onshow: null,
+      onerror: null,
+      close: () => {},
+    };
+
+    lastNotifTime = Date.now();
+    lastNotif = notif;
+    invoke("send_notification", { params: { title, body, icon } })
+      .then(() => incrementAutoBadge())
+      .then(() => {
+        if (notif.onshow) notif.onshow(new Event("show"));
+      });
+
+    return notif;
   };
 
-  window.Notification.requestPermission = async () => "granted";
-
-  Object.defineProperty(window.Notification, "permission", {
+  wrappedNotification.requestPermission = async () => "granted";
+  Object.defineProperty(wrappedNotification, "permission", {
     enumerable: true,
     get: () => permVal,
     set: (v) => {
       permVal = v;
     },
   });
-});
+
+  try {
+    Object.defineProperty(window, "Notification", {
+      configurable: true,
+      writable: true,
+      value: wrappedNotification,
+    });
+  } catch (_) {}
+
+  // Web Badging API: https://wicg.github.io/badging/
+  // setAppBadge() with no argument shows an indicator dot; with a number,
+  // shows the count (0 clears). clearAppBadge() removes the badge entirely.
+  const setAppBadge = (count) => {
+    if (count === undefined) return setLabel("•");
+    let normalized;
+    try {
+      normalized = normalizeBadgeCount(count);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+    if (normalized === null) {
+      pageManagedBadge = false;
+      autoBadgeActive = false;
+      return clearBadge();
+    }
+    return setBadge(normalized);
+  };
+  const clearAppBadge = () => {
+    pageManagedBadge = false;
+    autoBadgeActive = false;
+    return clearBadge();
+  };
+  try {
+    Object.defineProperty(navigator, "setAppBadge", {
+      configurable: true,
+      writable: true,
+      value: setAppBadge,
+    });
+    Object.defineProperty(navigator, "clearAppBadge", {
+      configurable: true,
+      writable: true,
+      value: clearAppBadge,
+    });
+  } catch (_) {}
+})();
 
 function setDefaultZoom() {
   const htmlZoom = window.localStorage.getItem("htmlZoom");

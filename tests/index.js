@@ -136,11 +136,15 @@ class PakeTestRunner {
     try {
       execSync(`node "${config.CLI_PATH}" --version`, {
         encoding: "utf8",
-        timeout: 3000,
+        timeout: TIMEOUTS.QUICK,
       });
-      console.log("[PASS] CLI is executable");
+      console.log("[PASS] CLI responds");
     } catch (error) {
-      console.log("[FAIL] CLI is not executable");
+      const reason =
+        error.signal === "SIGTERM"
+          ? `timed out after ${TIMEOUTS.QUICK}ms`
+          : error.message;
+      console.log(`[FAIL] CLI did not respond: ${reason}`);
       process.exit(1);
     }
 
@@ -1381,6 +1385,7 @@ class PakeTestRunner {
     const iconsDir = path.join(config.PROJECT_ROOT, "src-tauri/icons");
     const testNames = [
       "urltest",
+      "testapp",
       "githubapp",
       "githubmultiarch",
       "githubconfigtest",
@@ -1468,6 +1473,11 @@ class PakeTestRunner {
       const pakeDir = path.join(config.PROJECT_ROOT, "src-tauri", ".pake");
       if (fs.existsSync(pakeDir)) {
         fs.rmSync(pakeDir, { recursive: true, force: true });
+      }
+
+      const localTestFile = path.join(config.PROJECT_ROOT, "test-local.html");
+      if (fs.existsSync(localTestFile)) {
+        fs.rmSync(localTestFile, { force: true });
       }
     } catch (e) {
       console.warn("   [Warn]  Cleanup warning:", e.message);

@@ -7,6 +7,13 @@ import { getCliProgram } from './helpers/cli-program';
 const program = getCliProgram();
 
 program.action(async (url: string, options: PakeCliOptions) => {
+  if (!url) {
+    program.help({
+      error: false,
+    });
+    return;
+  }
+
   log.setDefaultLevel('debug');
 
   const appOptions = await handleInputOptions(options, url);

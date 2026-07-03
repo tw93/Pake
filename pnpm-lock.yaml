@@ -6,6 +6,7 @@ settings:
 
 overrides:
   sharp: ^0.34.5
+  '@img/sharp-libvips-darwin-arm64': 1.2.4
 
 importers:
 
@@ -78,9 +79,6 @@ importers:
       '@types/node':
         specifier: ^25.3.2
         version: 25.3.2
-      '@types/page-icon':
-        specifier: ^0.3.6
-        version: 0.3.6
       '@types/prompts':
         specifier: ^2.4.9
         version: 2.4.9
@@ -741,9 +739,6 @@ packages:
 
   '@types/node@25.3.2':
     resolution: {integrity: sha512-RpV6r/ij22zRRdyBPcxDeKAzH43phWVKEjL2iksqo1Vz3CuBUrgmPpPhALKiRfU7OMCmeeO9vECBMsV0hMTG8Q==}
-
-  '@types/page-icon@0.3.6':
-    resolution: {integrity: sha512-Swrkvosqbgt8+v/FIaoPt7QSojoLu1lNxbW0Kt1jSBzF/+V5FAy9vSRPzPFOsUKG/O1YEO5QSTcH8VBGQLfC8A==}
 
   '@types/prompts@2.4.9':
     resolution: {integrity: sha512-qTxFi6Buiu8+50/+3DGIWLHM6QuWsEKugJnnP6iv2Mc4ncxE4A/OJkjuVOA+5X0X1S/nq5VJRa8Lu+nwcvbrKA==}
@@ -1948,10 +1943,6 @@ snapshots:
   '@types/node@25.3.2':
     dependencies:
       undici-types: 7.18.2
-
-  '@types/page-icon@0.3.6':
-    dependencies:
-      '@types/node': 25.3.2
 
   '@types/prompts@2.4.9':
     dependencies:

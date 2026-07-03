@@ -1,0 +1,83 @@
+name: Publish npm Package
+
+on:
+  push:
+    tags:
+      - "V*"
+  # Manual npm-only publish for CLI hotfixes that do not need the full
+  # V* tag release (popular apps, Docker). Version files must already be
+  # bumped on main; the check step then validates against package.json.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish pake-cli
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Check manual publish branch
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "Manual npm publish must run from main, got ${GITHUB_REF}."
+            exit 1
+          fi
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: "10.26.2"
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check release version
+        run: node scripts/check-release-version.mjs "${{ github.ref_type == 'tag' && github.ref_name || '' }}"
+
+      - name: Check formatting
+        run: pnpm run format:check
+
+      - name: Run unit tests
+        run: npx vitest run
+
+      - name: Build CLI
+        run: pnpm run cli:build
+
+      - name: Check package contents
+        run: npm pack --dry-run --ignore-scripts
+
+      - name: Publish to npm
+        run: npm publish
+
+      - name: Verify published version
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          for attempt in {1..12}; do
+            PUBLISHED="$(npm view "pake-cli@${VERSION}" version --registry=https://registry.npmjs.org 2>/dev/null || true)"
+            if [ "$PUBLISHED" = "$VERSION" ]; then
+              echo "Published pake-cli@${VERSION}"
+              exit 0
+            fi
+            echo "Waiting for npm registry to expose pake-cli@${VERSION} (attempt ${attempt}/12)"
+            sleep 10
+          done
+          echo "pake-cli@${VERSION} was not visible in npm registry after publish"
+          exit 1

@@ -97,6 +97,9 @@ jobs:
       url: ${{ matrix.config.url }}
       icon: ${{ matrix.config.icon }}
       new_window: ${{ matrix.config.new_window || false }}
+      incognito: ${{ matrix.config.incognito || false }}
+      width: ${{ matrix.config.width || 1200 }}
+      height: ${{ matrix.config.height || 780 }}
 
   # Publish Docker image (runs in parallel with app builds)
   publish-docker:

@@ -9,9 +9,20 @@ import sharp from 'sharp';
 import logger from './logger';
 import { getSpinner } from '@/utils/info';
 import { npmDirectory } from '@/utils/dir';
-import { IS_LINUX, IS_WIN, IS_MAC } from '@/utils/platform';
+import { IS_LINUX, IS_WIN } from '@/utils/platform';
+import {
+  generateDashboardIconSlugs,
+  getIconSourcePriority,
+  type IconSource,
+} from '@/utils/icon-source';
+import { generateLinuxPackageName, getSafeAppName } from '@/utils/name';
 import { PakeAppOptions } from '@/types';
-import { writeIcoWithPreferredSize } from '@/utils/ico';
+import {
+  ensureMultiResolutionIco,
+  writeIcoWithPreferredSize,
+  buildIcoFromPngBuffers,
+  WIN_STANDARD_ICO_SIZES,
+} from '@/utils/ico';
 
 type PlatformIconConfig = {
   format: string;
@@ -20,8 +31,15 @@ type PlatformIconConfig = {
 };
 const ICON_CONFIG = {
   minFileSize: 100,
-  supportedFormats: ['png', 'ico', 'jpeg', 'jpg', 'webp', 'icns'] as const,
-  whiteBackground: { r: 255, g: 255, b: 255 },
+  supportedFormats: [
+    'png',
+    'ico',
+    'jpeg',
+    'jpg',
+    'webp',
+    'icns',
+    'svg',
+  ] as const,
   transparentBackground: { r: 255, g: 255, b: 255, alpha: 0 },
   downloadTimeout: {
     ci: 5000,
@@ -30,7 +48,7 @@ const ICON_CONFIG = {
 } as const;
 
 const PLATFORM_CONFIG: Record<'win' | 'linux' | 'macos', PlatformIconConfig> = {
-  win: { format: '.ico', sizes: [16, 32, 48, 64, 128, 256] },
+  win: { format: '.ico', sizes: [...WIN_STANDARD_ICO_SIZES] },
   linux: { format: '.png', size: 512 },
   macos: { format: '.icns', sizes: [16, 32, 64, 128, 256, 512, 1024] },
 };
@@ -40,11 +58,11 @@ const API_KEYS = {
   brandfetch: ['1idqvJC0CeFSeyp3Yf7', '1idej-yhU_ThggIHFyG'],
 };
 
+type SupportedIconFormat = (typeof ICON_CONFIG.supportedFormats)[number];
+
 /**
  * Generates platform-specific icon paths and handles copying for Windows
  */
-import { generateLinuxPackageName, generateSafeFilename } from '@/utils/name';
-
 function generateIconPath(appName: string, isDefault = false): string {
   const safeName = isDefault ? 'icon' : getIconBaseName(appName);
   const baseName = safeName;
@@ -61,7 +79,7 @@ function generateIconPath(appName: string, isDefault = false): string {
 function getIconBaseName(appName: string): string {
   const baseName = IS_LINUX
     ? generateLinuxPackageName(appName)
-    : generateSafeFilename(appName).toLowerCase();
+    : getSafeAppName(appName);
   return baseName || 'pake-app';
 }
 
@@ -76,14 +94,23 @@ async function copyWindowsIconIfNeeded(
   try {
     const finalIconPath = generateIconPath(appName);
     await fsExtra.ensureDir(path.dirname(finalIconPath));
-    // Reorder ICO to prioritize 256px icons for better Windows display
-    const reordered = await writeIcoWithPreferredSize(
+    // Re-render ICO so every Windows standard size is present and prefer the
+    // 256px frame as the leading entry; falls back to plain reordering if the
+    // ICO is non-decodable, then to a raw copy. (Issue #1190)
+    const upgraded = await ensureMultiResolutionIco(
       convertedPath,
       finalIconPath,
       256,
     );
-    if (!reordered) {
-      await fsExtra.copy(convertedPath, finalIconPath);
+    if (!upgraded) {
+      const reordered = await writeIcoWithPreferredSize(
+        convertedPath,
+        finalIconPath,
+        256,
+      );
+      if (!reordered) {
+        await fsExtra.copy(convertedPath, finalIconPath);
+      }
     }
     return finalIconPath;
   } catch (error) {
@@ -95,32 +122,27 @@ async function copyWindowsIconIfNeeded(
 }
 
 /**
- * Adds white background to transparent icons only
+ * Normalizes icon inputs to PNG while preserving alpha.
  */
 async function preprocessIcon(inputPath: string): Promise<string> {
   try {
-    const metadata = await sharp(inputPath).metadata();
-    if (metadata.channels !== 4) return inputPath; // No transparency
+    const extension = path.extname(inputPath).toLowerCase();
+    const shouldNormalize = ['.png', '.jpeg', '.jpg', '.webp', '.svg'].includes(
+      extension,
+    );
+    if (!shouldNormalize) {
+      return inputPath;
+    }
 
     const { path: tempDir } = await dir();
-    const outputPath = path.join(tempDir, 'icon-with-background.png');
+    const outputPath = path.join(tempDir, 'icon-normalized.png');
 
-    await sharp({
-      create: {
-        width: metadata.width || 512,
-        height: metadata.height || 512,
-        channels: 4,
-        background: { ...ICON_CONFIG.whiteBackground, alpha: 1 },
-      },
-    })
-      .composite([{ input: inputPath }])
-      .png()
-      .toFile(outputPath);
+    await sharp(inputPath).ensureAlpha().png().toFile(outputPath);
 
     return outputPath;
   } catch (error) {
     if (error instanceof Error) {
-      logger.warn(`Failed to add background to icon: ${error.message}`);
+      logger.warn(`Failed to normalize icon: ${error.message}`);
     }
     return inputPath;
   }
@@ -199,18 +221,27 @@ async function convertIconFormat(
 
     // Generate platform-specific format
     if (IS_WIN) {
-      // Support multiple sizes for better Windows compatibility
-      await icongen(processedInputPath, platformOutputDir, {
-        report: false,
-        ico: {
-          name: `${iconName}_256`,
-          sizes: PLATFORM_CONFIG.win.sizes,
-        },
-      });
-      return path.join(
+      const icoPath = path.join(
         platformOutputDir,
         `${iconName}_256${PLATFORM_CONFIG.win.format}`,
       );
+      const sourceBuffer = await fsExtra.readFile(processedInputPath);
+      const frames = await Promise.all(
+        (PLATFORM_CONFIG.win.sizes as number[]).map(async (size) => {
+          const png = await sharp(sourceBuffer)
+            .resize(size, size, {
+              fit: 'contain',
+              background: { r: 0, g: 0, b: 0, alpha: 0 },
+            })
+            .ensureAlpha()
+            .png()
+            .toBuffer();
+          return { size, png };
+        }),
+      );
+      const icoBuffer = buildIcoFromPngBuffers(frames);
+      await fsExtra.outputFile(icoPath, icoBuffer);
+      return icoPath;
     }
 
     if (IS_LINUX) {
@@ -251,6 +282,22 @@ async function convertIconFormat(
   }
 }
 
+async function isLinuxBundleIconReady(iconPath: string): Promise<boolean> {
+  if (!IS_LINUX || path.extname(iconPath).toLowerCase() !== '.png') {
+    return false;
+  }
+
+  try {
+    const { width, height } = await sharp(iconPath).metadata();
+    return (
+      width === PLATFORM_CONFIG.linux.size &&
+      height === PLATFORM_CONFIG.linux.size
+    );
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Processes downloaded or local icon for platform-specific format
  */
@@ -264,7 +311,7 @@ async function processIcon(
   const ext = path.extname(iconPath).toLowerCase();
   const isCorrectFormat =
     (IS_WIN && ext === '.ico') ||
-    (IS_LINUX && ext === '.png') ||
+    (IS_LINUX && (await isLinuxBundleIconReady(iconPath))) ||
     (!IS_WIN && !IS_LINUX && ext === '.icns');
 
   if (isCorrectFormat) {
@@ -405,17 +452,113 @@ function generateIconServiceUrls(domain: string): string[] {
  */
 function generateDashboardIconUrls(appName: string): string[] {
   const baseUrl = 'https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png';
-  const name = appName.toLowerCase().trim();
-  const slugs = new Set<string>();
+  return generateDashboardIconSlugs(appName).map(
+    (slug) => `${baseUrl}/${slug}.png`,
+  );
+}
 
-  // Exact name
-  slugs.add(name);
-  // Replace spaces with hyphens
-  slugs.add(name.replace(/\s+/g, '-'));
+function isSupportedIconFormat(
+  extension: string,
+): extension is SupportedIconFormat {
+  return ICON_CONFIG.supportedFormats.includes(
+    extension as SupportedIconFormat,
+  );
+}
 
-  return [...slugs]
-    .filter((s) => s.length > 0)
-    .map((slug) => `${baseUrl}/${slug}.png`);
+function looksLikeSvg(arrayBuffer: ArrayBuffer): boolean {
+  const sample = Buffer.from(arrayBuffer)
+    .toString('utf-8', 0, Math.min(arrayBuffer.byteLength, 512))
+    .trimStart()
+    .toLowerCase();
+
+  return (
+    sample.startsWith('<svg') ||
+    (sample.startsWith('<?xml') && sample.includes('<svg'))
+  );
+}
+
+function getUrlExtension(iconUrl: string): string {
+  try {
+    return path.extname(new URL(iconUrl).pathname).slice(1).toLowerCase();
+  } catch {
+    return path.extname(iconUrl).slice(1).toLowerCase();
+  }
+}
+
+async function detectDownloadedIconExtension(
+  response: Response,
+  arrayBuffer: ArrayBuffer,
+  iconUrl: string,
+): Promise<SupportedIconFormat | null> {
+  const fileDetails = await fileTypeFromBuffer(arrayBuffer);
+  if (fileDetails && isSupportedIconFormat(fileDetails.ext)) {
+    return fileDetails.ext;
+  }
+
+  const contentType = response.headers
+    .get('content-type')
+    ?.split(';')[0]
+    .trim();
+  if (contentType === 'image/svg+xml' && looksLikeSvg(arrayBuffer)) {
+    return 'svg';
+  }
+
+  if (getUrlExtension(iconUrl) === 'svg' && looksLikeSvg(arrayBuffer)) {
+    return 'svg';
+  }
+
+  return null;
+}
+
+async function resolveIconFromUrl(
+  iconUrl: string,
+  appName: string,
+  downloadTimeout: number,
+): Promise<string | null> {
+  const iconPath = await downloadIcon(iconUrl, false, downloadTimeout);
+  if (!iconPath) {
+    return null;
+  }
+
+  const convertedPath = await convertIconFormat(iconPath, appName);
+  if (!convertedPath) {
+    return null;
+  }
+
+  return await copyWindowsIconIfNeeded(convertedPath, appName);
+}
+
+async function tryResolveIconSource(
+  source: IconSource,
+  domain: string,
+  appName: string,
+  downloadTimeout: number,
+): Promise<string | null> {
+  const iconUrls =
+    source === 'dashboard'
+      ? generateDashboardIconUrls(appName)
+      : generateIconServiceUrls(domain);
+
+  for (const iconUrl of iconUrls) {
+    try {
+      const resolvedPath = await resolveIconFromUrl(
+        iconUrl,
+        appName,
+        downloadTimeout,
+      );
+      if (resolvedPath) {
+        return resolvedPath;
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        const label =
+          source === 'dashboard' ? 'Dashboard icon' : 'Icon service';
+        logger.debug(`${label} ${iconUrl} failed: ${error.message}`);
+      }
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -435,65 +578,26 @@ async function tryGetFavicon(
       ? ICON_CONFIG.downloadTimeout.ci
       : ICON_CONFIG.downloadTimeout.default;
 
-    const serviceUrls = generateIconServiceUrls(domain);
-
-    for (const serviceUrl of serviceUrls) {
-      try {
-        const faviconPath = await downloadIcon(
-          serviceUrl,
-          false,
-          downloadTimeout,
-        );
-        if (!faviconPath) continue;
-
-        const convertedPath = await convertIconFormat(faviconPath, appName);
-        if (convertedPath) {
-          const finalPath = await copyWindowsIconIfNeeded(
-            convertedPath,
-            appName,
-          );
-          spinner.succeed(
-            chalk.green('Icon fetched and converted successfully!'),
-          );
-          return finalPath;
-        }
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          logger.debug(`Icon service ${serviceUrl} failed: ${error.message}`);
-        }
+    const sourcePriority = getIconSourcePriority(url, appName);
+    for (const source of sourcePriority) {
+      const resolvedIconPath = await tryResolveIconSource(
+        source,
+        domain,
+        appName,
+        downloadTimeout,
+      );
+      if (!resolvedIconPath) {
         continue;
       }
-    }
 
-    // Final fallback for selfhosted apps behind auth where domain-based
-    // services cannot access the site favicon.
-    if (appName) {
-      const dashboardIconUrls = generateDashboardIconUrls(appName);
-      for (const iconUrl of dashboardIconUrls) {
-        try {
-          const iconPath = await downloadIcon(iconUrl, false, downloadTimeout);
-          if (!iconPath) continue;
-
-          const convertedPath = await convertIconFormat(iconPath, appName);
-          if (convertedPath) {
-            const finalPath = await copyWindowsIconIfNeeded(
-              convertedPath,
-              appName,
-            );
-            spinner.succeed(
-              chalk.green(
-                `Icon found via dashboard-icons fallback for "${appName}"!`,
-              ),
-            );
-            return finalPath;
-          }
-        } catch (error: unknown) {
-          if (error instanceof Error) {
-            logger.debug(`Dashboard icon ${iconUrl} failed: ${error.message}`);
-          }
-          continue;
-        }
-      }
+      spinner.succeed(
+        chalk.green(
+          source === 'dashboard'
+            ? `Icon found via dashboard-icons for "${appName}"!`
+            : 'Icon fetched and converted successfully!',
+        ),
+      );
+      return resolvedIconPath;
     }
 
     spinner.warn(`No favicon found for ${domain}. Using default.`);
@@ -538,15 +642,16 @@ export async function downloadIcon(
     if (!arrayBuffer || arrayBuffer.byteLength < ICON_CONFIG.minFileSize)
       return null;
 
-    const fileDetails = await fileTypeFromBuffer(arrayBuffer);
-    if (
-      !fileDetails ||
-      !ICON_CONFIG.supportedFormats.includes(fileDetails.ext as any)
-    ) {
+    const extension = await detectDownloadedIconExtension(
+      response,
+      arrayBuffer,
+      iconUrl,
+    );
+    if (!extension) {
       return null;
     }
 
-    return await saveIconFile(arrayBuffer, fileDetails.ext);
+    return await saveIconFile(arrayBuffer, extension);
   } catch (error: unknown) {
     clearTimeout(timeoutId);
     if (showSpinner) {

@@ -33,6 +33,16 @@ on:
         description: "Window height (px)"
         required: false
         default: "780"
+      min_width:
+        description: "Minimum window width (px)"
+        required: false
+      min_height:
+        description: "Minimum window height (px)"
+        required: false
+      app_version:
+        description: "App version"
+        required: false
+        default: "1.0.0"
       fullscreen:
         description: "Start in fullscreen mode"
         required: false
@@ -49,7 +59,7 @@ on:
         type: boolean
         default: false
       targets:
-        description: "Package formats (comma-separated: deb,appimage,rpm)"
+        description: "Package formats (comma-separated: deb,appimage,rpm,zst)"
         required: false
         default: "deb"
 
@@ -112,6 +122,18 @@ jobs:
             ARGS+=("--height" "${{ inputs.height }}")
           fi
 
+          if [ -n "${{ inputs.min_width }}" ]; then
+            ARGS+=("--min-width" "${{ inputs.min_width }}")
+          fi
+
+          if [ -n "${{ inputs.min_height }}" ]; then
+            ARGS+=("--min-height" "${{ inputs.min_height }}")
+          fi
+
+          if [ -n "${{ inputs.app_version }}" ]; then
+            ARGS+=("--app-version" "${{ inputs.app_version }}")
+          fi
+
           if [ "${{ inputs.fullscreen }}" == "true" ]; then
             ARGS+=("--fullscreen")
           fi
@@ -150,6 +172,18 @@ jobs:
             $args += "--height", "${{ inputs.height }}"
           }
 
+          if ("${{ inputs.min_width }}" -ne "") {
+            $args += "--min-width", "${{ inputs.min_width }}"
+          }
+
+          if ("${{ inputs.min_height }}" -ne "") {
+            $args += "--min-height", "${{ inputs.min_height }}"
+          }
+
+          if ("${{ inputs.app_version }}" -ne "") {
+            $args += "--app-version", "${{ inputs.app_version }}"
+          }
+
           if ("${{ inputs.fullscreen }}" -eq "true") {
             $args += "--fullscreen"
           }
@@ -186,6 +220,24 @@ jobs:
         with:
           name: ${{ inputs.name }}-Linux-AppImage
           path: ${{ inputs.name }}.AppImage
+          retention-days: 3
+          if-no-files-found: ignore
+
+      - name: Upload RPM (Linux)
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ inputs.name }}-Linux-rpm
+          path: ${{ inputs.name }}.rpm
+          retention-days: 3
+          if-no-files-found: ignore
+
+      - name: Upload ZST (Linux)
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ inputs.name }}-Linux-zst
+          path: ${{ inputs.name }}-*.pkg.tar.zst
           retention-days: 3
           if-no-files-found: ignore
 

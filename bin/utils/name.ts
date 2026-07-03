@@ -42,14 +42,3 @@ export function generateIdentifierSafeName(name: string): string {
 
   return cleaned;
 }
-
-export function generateWindowsFilename(name: string): string {
-  return name
-    .replace(/[<>:"/\\|?*]/g, '_')
-    .replace(/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i, '$&_')
-    .slice(0, 255);
-}
-
-export function generateMacOSFilename(name: string): string {
-  return name.replace(/[:]/g, '_').slice(0, 255);
-}

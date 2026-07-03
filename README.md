@@ -7,7 +7,7 @@
 <div align="center">
     <a href="https://twitter.com/HiTw93" target="_blank">
     <img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
-    <a href="https://t.me/+GclQS9ZnxyI2ODQ1" target="_blank">
+    <a href="https://t.me/+9f9gf4ZrFSQ2OWVl" target="_blank">
     <img alt="telegram" src="https://img.shields.io/badge/chat-telegram-blueviolet?style=flat-square&logo=Telegram"></a>
     <a href="https://github.com/tw93/Pake/releases" target="_blank">
     <img alt="GitHub downloads" src="https://img.shields.io/github/downloads/tw93/Pake/total.svg?style=flat-square"></a>
@@ -19,7 +19,7 @@
 
 ## Features
 
-- 🎐 **Lightweight**: Nearly 20 times smaller than Electron packages, typically around 5M
+- 🎐 **Lightweight**: Installer is nearly 20 times smaller than Electron packages, typically under 10M on disk
 - 🚀 **Fast**: Built with Rust Tauri, much faster than traditional JS frameworks with lower memory usage
 - ⚡ **Easy to use**: One-command packaging via CLI or online building, no complex configuration needed
 - 📦 **Feature-rich**: Supports shortcuts, immersive windows, drag & drop, style customization, ad removal
@@ -177,7 +177,7 @@ First-time packaging requires environment setup and may be slower, subsequent bu
 
 ## Development
 
-Requires Rust `>=1.85` and Node `>=22`. For detailed installation guide, see [Tauri documentation](https://v2.tauri.app/start/prerequisites/). If unfamiliar with development environment, use the CLI tool instead.
+Requires Rust `>=1.85` and Node `>=22` (recommended LTS; `>=18` also works). For detailed installation guide, see [Tauri documentation](https://v2.tauri.app/start/prerequisites/). If unfamiliar with development environment, use the CLI tool instead.
 
 ```bash
 # Install dependencies
@@ -202,9 +202,16 @@ Pake's development can not be without these Hackers. They contributed a lot of c
 
 ## Support
 
-<a href="https://miaoyan.app/cats.html?name=Pake"><img src="https://miaoyan.app/assets/sponsors.svg" width="1000px" /></a>
+- The most direct way to support me is getting [Mole for Mac](https://mole.fit), my paid Mac cleanup app.
+- If Pake helped you, give it a star, [share it](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20Turn%20any%20webpage%20into%20a%20desktop%20app%20with%20one%20command.%20Nearly%2020x%20smaller%20than%20Electron%20packages,%20supports%20macOS%20Windows%20Linux), or open an issue or PR.
+- I have two cats, TangYuan and Coke. If you think Pake delights your life, you can feed them <a href="https://cats.tw93.fun?name=Pake" target="_blank">canned food 🥩</a>.
 
-1. I have two cats, TangYuan and Coke. If you think Pake delights your life, you can feed them <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">food 🥩</a>.
-2. If you like Pake, you can star it on GitHub. Also, welcome to [recommend Pake](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20Turn%20any%20webpage%20into%20a%20desktop%20app%20with%20one%20command.%20Nearly%2020x%20smaller%20than%20Electron%20packages,%20supports%20macOS%20Windows%20Linux) to your friends.
-3. You can follow my [Twitter](https://twitter.com/HiTw93) to get the latest news of Pake or join our [Telegram](https://t.me/+GclQS9ZnxyI2ODQ1) chat group.
-4. I hope that you enjoy playing with it. Let us know if you find a website that would be great for a Mac App!
+<details>
+<summary>These lovely people already did 🐱</summary>
+<br/>
+<a href="https://cats.tw93.fun?name=Pake"><img src="https://cdn.jsdelivr.net/gh/tw93/sponsors@main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
+</details>
+
+## License
+
+Pake is open source under GPL-3.0, see [LICENSE](./LICENSE) and [Pake Output Exception](./LICENSE-EXCEPTION); apps you build with Pake are entirely yours to use and distribute. If you fork Pake into your own product, to avoid confusion please give it a different name and credit Pake as the source.

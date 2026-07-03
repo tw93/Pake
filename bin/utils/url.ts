@@ -40,3 +40,18 @@ export function normalizeUrl(urlToNormalize: string): string {
     );
   }
 }
+
+// Compiles a comma-separated domain list into a regex source for
+// internal_url_regex. Each domain is escaped and matched against the URL host
+// and its subdomains so path or query text cannot accidentally opt a link in.
+// Returns '' for empty input.
+export function safeDomainsToRegex(domains: string): string {
+  const escaped = domains
+    .split(',')
+    .map((domain) => domain.trim().toLowerCase())
+    .filter(Boolean)
+    .map((domain) => domain.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  return escaped.length
+    ? `^https?:\\/\\/(?:[^/?#@]+\\.)*(?:${escaped.join('|')})(?::\\d+)?(?:[/?#]|$)`
+    : '';
+}

@@ -1,17 +1,17 @@
 {
   "name": "pake-cli",
-  "version": "3.10.1",
+  "version": "3.13.0",
   "description": "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。",
   "engines": {
     "node": ">=18.0.0"
   },
   "packageManager": "pnpm@10.26.2",
   "bin": {
-    "pake": "./dist/cli.js"
+    "pake": "dist/cli.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/tw93/pake.git"
+    "url": "git+https://github.com/tw93/Pake.git"
   },
   "author": {
     "name": "Tw93",
@@ -26,6 +26,7 @@
     "productivity"
   ],
   "files": [
+    "LICENSE-EXCEPTION",
     "dist",
     "src-tauri"
   ],
@@ -38,16 +39,18 @@
     "analyze": "cd src-tauri && cargo bloat --release --crates",
     "tauri": "tauri",
     "cli": "cross-env NODE_ENV=development rollup -c -w",
+    "cli:dev": "cross-env NODE_ENV=development rollup -c -w",
     "cli:build": "cross-env NODE_ENV=production rollup -c",
     "test": "pnpm run cli:build && cross-env PAKE_CREATE_APP=1 node tests/index.js",
     "format": "prettier --write . --ignore-unknown && find tests -name '*.js' -exec sed -i '' 's/[[:space:]]*$//' {} \\; && cd src-tauri && cargo fmt --verbose",
     "format:check": "prettier --check . --ignore-unknown",
+    "release:check": "node scripts/check-release-version.mjs && pnpm run format:check && npx vitest run && pnpm run cli:build && npm pack --dry-run --ignore-scripts",
     "update": "pnpm update --verbose && cd src-tauri && cargo update",
     "prepublishOnly": "pnpm run cli:build"
   },
   "type": "module",
   "exports": "./dist/cli.js",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "dependencies": {
     "@tauri-apps/api": "~2.10.1",
     "@tauri-apps/cli": "^2.10.0",
@@ -73,7 +76,6 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^25.3.2",
-    "@types/page-icon": "^0.3.6",
     "@types/prompts": "^2.4.9",
     "@types/tmp": "^0.2.6",
     "@types/update-notifier": "^6.0.8",
@@ -88,7 +90,8 @@
   },
   "pnpm": {
     "overrides": {
-      "sharp": "^0.34.5"
+      "sharp": "^0.34.5",
+      "@img/sharp-libvips-darwin-arm64": "1.2.4"
     },
     "onlyBuiltDependencies": [
       "esbuild",

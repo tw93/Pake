@@ -14,61 +14,47 @@ import {
 import { npmDirectory } from '@/utils/dir';
 import { getSpinner } from '@/utils/info';
 import { shellExec } from '@/utils/shell';
-import { isChinaDomain } from '@/utils/ip';
+import { CN_MIRROR_ENV, isCnMirrorEnabled } from '@/utils/mirror';
 import { IS_MAC } from '@/utils/platform';
 import logger from '@/options/logger';
+import {
+  configureCargoRegistry,
+  detectPackageManager,
+  getBuildEnvironment,
+  getBuildTimeout,
+  getInstallCommand,
+  getInstallTimeout,
+} from './env';
+// Appended to the error when a Linux AppImage build fails for good. linuxdeploy's
+// diagnostics stream to the terminal (stdio: 'inherit') and never reach
+// error.message, so we cannot name the exact cause. We only reach here after
+// NO_STRIP=1 has been applied and still failed, so strip is shown as ruled out.
+const APPIMAGE_BAR = '━'.repeat(56);
+const APPIMAGE_FAILURE_GUIDANCE =
+  `\n\n${APPIMAGE_BAR}\n` +
+  'Linux AppImage Build Failed\n' +
+  `${APPIMAGE_BAR}\n\n` +
+  'The AppImage bundler (linuxdeploy) failed. Common causes and fixes:\n\n' +
+  '  • Strip incompatibility (glibc 2.38+): NO_STRIP=1 was already applied and\n' +
+  '    the build still failed, so strip is likely not the cause.\n' +
+  '  • Missing gdk-pixbuf loaders (e.g. "cannot stat\n' +
+  "    '/usr/lib/gdk-pixbuf-2.0/...'\"): install them, then rebuild:\n" +
+  '      Arch:    sudo pacman -S gdk-pixbuf2 librsvg\n' +
+  '      Debian:  sudo apt install librsvg2-common gdk-pixbuf2.0-bin\n' +
+  '      Fedora:  sudo dnf install gdk-pixbuf2-modules librsvg2\n' +
+  '      then:    sudo gdk-pixbuf-query-loaders --update-cache\n' +
+  '      (Arch refreshes the cache automatically via a pacman hook)\n' +
+  '  • Running in Docker/container: AppImage needs /dev/fuse:\n' +
+  '      --privileged --device /dev/fuse --security-opt apparmor=unconfined\n\n' +
+  'Still stuck? Build a DEB instead: pake <url> --targets deb\n' +
+  'Detailed guide: https://github.com/tw93/Pake/blob/main/docs/faq.md\n' +
+  APPIMAGE_BAR;
 
 export default abstract class BaseBuilder {
   protected options: PakeAppOptions;
-  private static packageManagerCache: string | null = null;
 
   protected constructor(options: PakeAppOptions) {
     this.options = options;
-  }
-
-  private getBuildEnvironment() {
-    return IS_MAC
-      ? {
-          CFLAGS: '-fno-modules',
-          CXXFLAGS: '-fno-modules',
-          MACOSX_DEPLOYMENT_TARGET: '14.0',
-        }
-      : undefined;
-  }
-
-  private getInstallTimeout(): number {
-    // Windows needs more time due to native compilation and antivirus scanning
-    return process.platform === 'win32' ? 900000 : 600000;
-  }
-
-  private getBuildTimeout(): number {
-    return 900000;
-  }
-
-  private async detectPackageManager(): Promise<string> {
-    if (BaseBuilder.packageManagerCache) {
-      return BaseBuilder.packageManagerCache;
-    }
-
-    const { execa } = await import('execa');
-
-    try {
-      await execa('pnpm', ['--version'], { stdio: 'ignore' });
-      logger.info('✺ Using pnpm for package management.');
-      BaseBuilder.packageManagerCache = 'pnpm';
-      return 'pnpm';
-    } catch {
-      try {
-        await execa('npm', ['--version'], { stdio: 'ignore' });
-        logger.info('✺ pnpm not available, using npm for package management.');
-        BaseBuilder.packageManagerCache = 'npm';
-        return 'npm';
-      } catch {
-        throw new Error(
-          'Neither pnpm nor npm is available. Please install a package manager.',
-        );
-      }
-    }
   }
 
   async prepare() {
@@ -94,24 +80,17 @@ export default abstract class BaseBuilder {
         await installRust();
       } else {
         logger.error('✕ Rust required to package your webapp.');
-        process.exit(0);
+        process.exit(1);
       }
     }
 
-    const isChina = await isChinaDomain('www.npmjs.com');
     const spinner = getSpinner('Installing package...');
-    const rustProjectDir = path.join(tauriSrcPath, '.cargo');
-    const projectConf = path.join(rustProjectDir, 'config.toml');
-    await fsExtra.ensureDir(rustProjectDir);
+    const useCnMirror = isCnMirrorEnabled();
+    await configureCargoRegistry(tauriSrcPath, useCnMirror);
 
-    // Detect available package manager
-    const packageManager = await this.detectPackageManager();
-    const registryOption = ' --registry=https://registry.npmmirror.com';
-    const peerDepsOption =
-      packageManager === 'npm' ? ' --legacy-peer-deps' : '';
-
-    const timeout = this.getInstallTimeout();
-    const buildEnv = this.getBuildEnvironment();
+    const packageManager = await detectPackageManager();
+    const timeout = getInstallTimeout();
+    const buildEnv = getBuildEnvironment();
 
     // Show helpful message for first-time users
     if (!tauriTargetPathExists) {
@@ -122,64 +101,26 @@ export default abstract class BaseBuilder {
       );
     }
 
-    let usedMirror = isChina;
+    if (useCnMirror) {
+      logger.info(
+        `✺ ${CN_MIRROR_ENV}=1 detected, using ${packageManager}/rsProxy CN mirror.`,
+      );
+    }
 
     try {
-      if (isChina) {
-        logger.info(
-          `✺ Located in China, using ${packageManager}/rsProxy CN mirror.`,
-        );
-        const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
-        await fsExtra.copy(projectCnConf, projectConf);
-        await shellExec(
-          `cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`,
-          timeout,
-          { ...buildEnv, CI: 'true' },
-        );
-      } else {
-        await shellExec(
-          `cd "${npmDirectory}" && ${packageManager} install${peerDepsOption}`,
-          timeout,
-          { ...buildEnv, CI: 'true' },
-        );
-      }
+      await shellExec(getInstallCommand(packageManager, useCnMirror), timeout, {
+        ...buildEnv,
+        CI: 'true',
+      });
       spinner.succeed(chalk.green('Package installed!'));
-    } catch (error: unknown) {
-      // If installation times out and we haven't tried the mirror yet, retry with mirror
-      if (
-        error instanceof Error &&
-        error.message.includes('timed out') &&
-        !usedMirror
-      ) {
-        spinner.fail(
-          chalk.yellow('Installation timed out, retrying with CN mirror...'),
-        );
+    } catch (error) {
+      spinner.fail(chalk.red('Installation failed'));
+      if (!useCnMirror) {
         logger.info(
-          '✺ Retrying installation with CN mirror for better speed...',
+          `✺ If downloads are slow in China, retry with ${CN_MIRROR_ENV}=1 to use CN mirrors.`,
         );
-
-        const retrySpinner = getSpinner('Retrying installation...');
-        usedMirror = true;
-
-        try {
-          const projectCnConf = path.join(tauriSrcPath, 'rust_proxy.toml');
-          await fsExtra.copy(projectCnConf, projectConf);
-          await shellExec(
-            `cd "${npmDirectory}" && ${packageManager} install${registryOption}${peerDepsOption}`,
-            timeout,
-            { ...buildEnv, CI: 'true' },
-          );
-          retrySpinner.succeed(
-            chalk.green('Package installed with CN mirror!'),
-          );
-        } catch (retryError) {
-          retrySpinner.fail(chalk.red('Installation failed'));
-          throw retryError;
-        }
-      } else {
-        spinner.fail(chalk.red('Installation failed'));
-        throw error;
       }
+      throw error;
     }
 
     if (!tauriTargetPathExists) {
@@ -197,7 +138,7 @@ export default abstract class BaseBuilder {
     logger.info('Pake dev server starting...');
     await mergeConfig(url, this.options, tauriConfig);
 
-    const packageManager = await this.detectPackageManager();
+    const packageManager = await detectPackageManager();
     const configPath = path.join(
       npmDirectory,
       'src-tauri',
@@ -215,12 +156,11 @@ export default abstract class BaseBuilder {
     await shellExec(command);
   }
 
-  async buildAndCopy(url: string, target: string) {
+  async buildAndCopy(url: string, target: string, logSuccess = true) {
     const { name = 'pake-app' } = this.options;
     await mergeConfig(url, this.options, tauriConfig);
 
-    // Detect available package manager
-    const packageManager = await this.detectPackageManager();
+    const packageManager = await detectPackageManager();
 
     // Build app
     const buildSpinner = getSpinner('Building app...');
@@ -230,7 +170,7 @@ export default abstract class BaseBuilder {
     // Show static message to keep the status visible
     logger.warn('✸ Building app...');
 
-    const baseEnv = this.getBuildEnvironment();
+    const baseEnv = getBuildEnvironment();
     let buildEnv: Record<string, string> = {
       ...(baseEnv ?? {}),
       ...(process.env.NO_STRIP ? { NO_STRIP: process.env.NO_STRIP } : {}),
@@ -239,44 +179,60 @@ export default abstract class BaseBuilder {
     const resolveExecEnv = () =>
       Object.keys(buildEnv).length > 0 ? buildEnv : undefined;
 
-    // Warn users about potential AppImage build failures on modern Linux systems.
-    // The linuxdeploy tool bundled in Tauri uses an older strip tool that doesn't
-    // recognize the .relr.dyn section introduced in glibc 2.38+.
-    if (process.platform === 'linux' && target === 'appimage') {
-      if (!buildEnv.NO_STRIP) {
-        logger.warn(
-          '⚠ Building AppImage on Linux may fail due to strip incompatibility with glibc 2.38+',
-        );
-        logger.warn(
-          '⚠ If build fails, retry with: NO_STRIP=1 pake <url> --targets appimage',
-        );
-      }
+    const isLinuxAppImage =
+      process.platform === 'linux' && target === 'appimage';
+
+    // AppImage builds can fail at the linuxdeploy strip step on glibc 2.38+.
+    // A real failure now prints full guidance, so only hint in debug mode.
+    if (isLinuxAppImage && !buildEnv.NO_STRIP && this.options.debug) {
+      logger.warn(
+        '⚠ AppImage strip step can fail on glibc 2.38+; Pake will auto-retry with NO_STRIP=1.',
+      );
     }
 
     const buildCommand = `cd "${npmDirectory}" && ${this.getBuildCommand(packageManager)}`;
-    const buildTimeout = this.getBuildTimeout();
+    const buildTimeout = getBuildTimeout();
 
     try {
       await shellExec(buildCommand, buildTimeout, resolveExecEnv());
     } catch (error) {
-      const shouldRetryWithoutStrip =
-        process.platform === 'linux' &&
-        target === 'appimage' &&
-        !buildEnv.NO_STRIP &&
-        this.isLinuxDeployStripError(error);
-
-      if (shouldRetryWithoutStrip) {
-        logger.warn(
-          '⚠ AppImage build failed during linuxdeploy strip step, retrying with NO_STRIP=1 automatically.',
-        );
-        buildEnv = {
-          ...buildEnv,
-          NO_STRIP: '1',
-        };
-        await shellExec(buildCommand, buildTimeout, resolveExecEnv());
-      } else {
+      if (!isLinuxAppImage) {
         throw error;
       }
+
+      // linuxdeploy's diagnostics stream to the terminal (stdio: 'inherit') and
+      // never reach error.message, so we cannot classify the cause. strip is the
+      // most common AppImage failure, so retry once with NO_STRIP=1; if that
+      // (or an already-NO_STRIP run) still fails, surface all known causes.
+      if (buildEnv.NO_STRIP) {
+        (error as Error).message += APPIMAGE_FAILURE_GUIDANCE;
+        throw error;
+      }
+
+      logger.warn(
+        '⚠ AppImage build failed, retrying once with NO_STRIP=1 (common glibc 2.38+ strip issue).',
+      );
+      buildEnv = { ...buildEnv, NO_STRIP: '1' };
+      try {
+        await shellExec(buildCommand, buildTimeout, resolveExecEnv());
+      } catch (retryError) {
+        (retryError as Error).message += APPIMAGE_FAILURE_GUIDANCE;
+        throw retryError;
+      }
+    }
+
+    // With --no-bundle there is no installer to copy; surface the raw
+    // executable the build produced instead.
+    if (this.options.bundle === false) {
+      await this.copyRawBinary(npmDirectory, name);
+      if (logSuccess) {
+        logger.success('✔ Build success!');
+        logger.success(
+          '✔ Raw binary located in',
+          path.resolve(this.getRawBinaryPath(name)),
+        );
+      }
+      return;
     }
 
     // Copy app
@@ -292,8 +248,10 @@ export default abstract class BaseBuilder {
     }
 
     await fsExtra.remove(appPath);
-    logger.success('✔ Build success!');
-    logger.success('✔ App installer located in', distPath);
+    if (logSuccess) {
+      logger.success('✔ Build success!');
+      logger.success('✔ App installer located in', distPath);
+    }
 
     // Log binary location if preserved
     if (this.options.keepBinary) {
@@ -316,6 +274,12 @@ export default abstract class BaseBuilder {
       const appBundleName = path.basename(appBundlePath);
       const appDest = path.join('/Applications', appBundleName);
 
+      if (await fsExtra.pathExists(appDest)) {
+        logger.warn(
+          `  Existing ${appBundleName} in /Applications will be replaced.`,
+        );
+      }
+
       // fsExtra.move uses fs.rename (atomic on same filesystem) and falls back
       // to copy+remove only when moving across volumes.
       await fsExtra.move(appBundlePath, appDest, { overwrite: true });
@@ -335,22 +299,6 @@ export default abstract class BaseBuilder {
 
   abstract getFileName(): string;
 
-  private isLinuxDeployStripError(error: unknown): boolean {
-    if (!(error instanceof Error) || !error.message) {
-      return false;
-    }
-    const message = error.message.toLowerCase();
-    return (
-      message.includes('linuxdeploy') ||
-      message.includes('failed to run linuxdeploy') ||
-      message.includes('strip:') ||
-      message.includes('unable to recognise the format of the input file') ||
-      message.includes('appimage tool failed') ||
-      message.includes('strip tool')
-    );
-  }
-
-  // 架构映射配置
   protected static readonly ARCH_MAPPINGS: Record<
     string,
     Record<string, string>
@@ -370,16 +318,12 @@ export default abstract class BaseBuilder {
     },
   };
 
-  // 架构名称映射（用于文件名生成）
   protected static readonly ARCH_DISPLAY_NAMES: Record<string, string> = {
     arm64: 'aarch64',
     x64: 'x64',
     universal: 'universal',
   };
 
-  /**
-   * 解析目标架构
-   */
   protected resolveTargetArch(requestedArch?: string): string {
     if (requestedArch === 'auto' || !requestedArch) {
       return process.arch;
@@ -387,9 +331,6 @@ export default abstract class BaseBuilder {
     return requestedArch;
   }
 
-  /**
-   * 获取Tauri构建目标
-   */
   protected getTauriTarget(
     arch: string,
     platform: NodeJS.Platform = process.platform,
@@ -399,16 +340,10 @@ export default abstract class BaseBuilder {
     return platformMappings[arch] || null;
   }
 
-  /**
-   * 获取架构显示名称（用于文件名）
-   */
   protected getArchDisplayName(arch: string): string {
     return BaseBuilder.ARCH_DISPLAY_NAMES[arch] || arch;
   }
 
-  /**
-   * 构建基础构建命令
-   */
   protected buildBaseCommand(
     packageManager: string,
     configPath: string,
@@ -431,12 +366,14 @@ export default abstract class BaseBuilder {
       fullCommand += ' --verbose';
     }
 
+    const features = this.getBuildFeatures();
+    if (features.length > 0) {
+      fullCommand += ` --features ${features.join(',')}`;
+    }
+
     return fullCommand;
   }
 
-  /**
-   * 获取构建特性列表
-   */
   protected getBuildFeatures(): string[] {
     const features = ['cli-build'];
 
@@ -467,12 +404,6 @@ export default abstract class BaseBuilder {
       fullCommand += ' --bundles app';
     }
 
-    // Add features
-    const features = this.getBuildFeatures();
-    if (features.length > 0) {
-      fullCommand += ` --features ${features.join(',')}`;
-    }
-
     return fullCommand;
   }
 
@@ -487,9 +418,19 @@ export default abstract class BaseBuilder {
     }
   }
 
+  protected getCargoTargetDir(): string {
+    return process.env.CARGO_TARGET_DIR || path.join('src-tauri', 'target');
+  }
+
+  protected resolveBuildPath(npmDirectory: string, buildPath: string): string {
+    return path.isAbsolute(buildPath)
+      ? buildPath
+      : path.join(npmDirectory, buildPath);
+  }
+
   protected getBasePath(): string {
     const basePath = this.options.debug ? 'debug' : 'release';
-    return `src-tauri/target/${basePath}/bundle/`;
+    return path.join(this.getCargoTargetDir(), basePath, 'bundle');
   }
 
   protected getBuildAppPath(
@@ -501,8 +442,7 @@ export default abstract class BaseBuilder {
     const bundleDir =
       fileType.toLowerCase() === 'app' ? 'macos' : fileType.toLowerCase();
     return path.join(
-      npmDirectory,
-      this.getBasePath(),
+      this.resolveBuildPath(npmDirectory, this.getBasePath()),
       bundleDir,
       `${fileName}.${fileType}`,
     );
@@ -542,14 +482,17 @@ export default abstract class BaseBuilder {
     // Handle cross-platform builds
     if (this.options.multiArch || this.hasArchSpecificTarget()) {
       return path.join(
-        npmDirectory,
-        this.getArchSpecificPath(),
+        this.resolveBuildPath(npmDirectory, this.getArchSpecificPath()),
         basePath,
         binaryName,
       );
     }
 
-    return path.join(npmDirectory, 'src-tauri/target', basePath, binaryName);
+    return path.join(
+      this.resolveBuildPath(npmDirectory, this.getCargoTargetDir()),
+      basePath,
+      binaryName,
+    );
   }
 
   /**
@@ -586,6 +529,6 @@ export default abstract class BaseBuilder {
    * Get architecture-specific path for binary
    */
   protected getArchSpecificPath(): string {
-    return 'src-tauri/target'; // Override in subclasses if needed
+    return this.getCargoTargetDir(); // Override in subclasses if needed
   }
 }

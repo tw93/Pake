@@ -14,7 +14,7 @@ export function getIdentifier(url: string, name?: string) {
     .update(hashInput)
     .digest('hex')
     .substring(0, 6);
-  return `com.pake.${postFixHash}`;
+  return `com.pake.a${postFixHash}`;
 }
 
 export function resolveIdentifier(
@@ -24,6 +24,12 @@ export function resolveIdentifier(
 ) {
   const trimmedIdentifier = customIdentifier?.trim();
   if (trimmedIdentifier) {
+    if (!/^[a-zA-Z][a-zA-Z0-9.-]*[a-zA-Z0-9]$/.test(trimmedIdentifier)) {
+      throw new Error(
+        `Invalid identifier "${trimmedIdentifier}". Must start with a letter, ` +
+          `contain only letters, digits, hyphens, and dots, and end with a letter or digit.`,
+      );
+    }
     return trimmedIdentifier;
   }
 

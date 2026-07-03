@@ -26,6 +26,8 @@ pub struct WindowConfig {
     pub force_internal_navigation: bool,
     #[serde(default)]
     pub internal_url_regex: String,
+    #[serde(default)]
+    pub enable_find: bool,
     #[serde(default = "default_zoom")]
     pub zoom: u32,
     #[serde(default)]

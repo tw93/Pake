@@ -114,6 +114,8 @@ fn handle_scroll(scroll_y: f64, scroll_x: f64) {
 }
 ```
 
+`hideTitleBar` 仅支持 macOS，在 Windows 和 Linux 上会被忽略。
+
 ## 静态文件打包
 
 打包本地 HTML/CSS/JS 文件：
@@ -265,17 +267,7 @@ pnpm run dev
 
 #### CLI 开发调试
 
-对于需要热重载的 CLI 开发，可修改 `bin/defaults.ts` 中的 `DEFAULT_DEV_PAKE_OPTIONS` 配置：
-
-```typescript
-export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
-  ...DEFAULT_PAKE_OPTIONS,
-  url: "https://weekly.tw93.fun/en",
-  name: "Weekly",
-};
-```
-
-然后运行：
+对于需要热重载的 CLI 开发，运行：
 
 ```bash
 pnpm run cli:dev

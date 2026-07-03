@@ -114,6 +114,8 @@ Configure window properties in `pake.json`:
 }
 ```
 
+`hideTitleBar` is only supported on macOS. It is ignored on Windows and Linux.
+
 ## Static File Packaging
 
 Package local HTML/CSS/JS files:
@@ -265,17 +267,7 @@ pnpm run dev
 
 #### CLI Development
 
-For CLI development with hot reloading, modify the `DEFAULT_DEV_PAKE_OPTIONS` configuration in `bin/defaults.ts`:
-
-```typescript
-export const DEFAULT_DEV_PAKE_OPTIONS: PakeCliOptions & { url: string } = {
-  ...DEFAULT_PAKE_OPTIONS,
-  url: "https://weekly.tw93.fun/en",
-  name: "Weekly",
-};
-```
-
-Then run:
+For CLI development with hot reloading, run:
 
 ```bash
 pnpm run cli:dev

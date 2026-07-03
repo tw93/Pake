@@ -1,29 +1,39 @@
-// Menu functionality is only used on macOS
-#![cfg(target_os = "macos")]
-
+// Menu functionality is only used on macOS; the module is gated in app/mod.rs.
 use crate::app::window::open_additional_window_safe;
 use tauri::menu::{AboutMetadata, Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::{AppHandle, Manager, Wry};
 use tauri_plugin_opener::OpenerExt;
 
-pub fn get_menu(app: &AppHandle<Wry>, allow_multi_window: bool) -> tauri::Result<Menu<Wry>> {
+pub fn set_app_menu(
+    app: &AppHandle<Wry>,
+    allow_multi_window: bool,
+    enable_find: bool,
+) -> tauri::Result<()> {
     let pake_version = env!("CARGO_PKG_VERSION");
     let pake_menu_item_title = format!("Built with Pake V{}", pake_version);
+
+    let window_submenu = window_menu(app)?;
 
     let menu = Menu::with_items(
         app,
         &[
             &app_menu(app)?,
             &file_menu(app, allow_multi_window)?,
-            &edit_menu(app)?,
+            &edit_menu(app, enable_find)?,
             &view_menu(app)?,
             &navigation_menu(app)?,
-            &window_menu(app)?,
+            &window_submenu,
             &help_menu(app, &pake_menu_item_title)?,
         ],
     )?;
 
-    Ok(menu)
+    app.set_menu(menu)?;
+
+    // AppKit injects Move & Resize, Fill, Center, Full Screen Tile, and
+    // window-cycling once the submenu is registered as the windows menu.
+    window_submenu.set_as_windows_menu_for_nsapp()?;
+
+    Ok(())
 }
 
 fn app_menu(app: &AppHandle<Wry>) -> tauri::Result<Submenu<Wry>> {
@@ -69,7 +79,7 @@ fn file_menu(app: &AppHandle<Wry>, allow_multi_window: bool) -> tauri::Result<Su
     Ok(file_menu)
 }
 
-fn edit_menu(app: &AppHandle<Wry>) -> tauri::Result<Submenu<Wry>> {
+fn edit_menu(app: &AppHandle<Wry>, enable_find: bool) -> tauri::Result<Submenu<Wry>> {
     let edit_menu = Submenu::new(app, "Edit", true)?;
     edit_menu.append(&PredefinedMenuItem::undo(app, None)?)?;
     edit_menu.append(&PredefinedMenuItem::redo(app, None)?)?;
@@ -86,6 +96,30 @@ fn edit_menu(app: &AppHandle<Wry>) -> tauri::Result<Submenu<Wry>> {
     )?)?;
     edit_menu.append(&PredefinedMenuItem::select_all(app, None)?)?;
     edit_menu.append(&PredefinedMenuItem::separator(app)?)?;
+    if enable_find {
+        edit_menu.append(&MenuItem::with_id(
+            app,
+            "find",
+            "Find",
+            true,
+            Some("CmdOrCtrl+F"),
+        )?)?;
+        edit_menu.append(&MenuItem::with_id(
+            app,
+            "find_next",
+            "Find Next",
+            true,
+            Some("CmdOrCtrl+G"),
+        )?)?;
+        edit_menu.append(&MenuItem::with_id(
+            app,
+            "find_previous",
+            "Find Previous",
+            true,
+            Some("CmdOrCtrl+Shift+G"),
+        )?)?;
+        edit_menu.append(&PredefinedMenuItem::separator(app)?)?;
+    }
     edit_menu.append(&MenuItem::with_id(
         app,
         "copy_url",
@@ -255,9 +289,24 @@ pub fn handle_menu_click(app_handle: &AppHandle, id: &str) {
                 let _ = window.eval("triggerPasteAsPlainText()");
             }
         }
+        "find" => {
+            if let Some(window) = app_handle.get_webview_window("pake") {
+                let _ = window.eval("window.pakeFind?.open()");
+            }
+        }
+        "find_next" => {
+            if let Some(window) = app_handle.get_webview_window("pake") {
+                let _ = window.eval("window.pakeFind?.next()");
+            }
+        }
+        "find_previous" => {
+            if let Some(window) = app_handle.get_webview_window("pake") {
+                let _ = window.eval("window.pakeFind?.previous()");
+            }
+        }
         "clear_cache_restart" => {
             if let Some(window) = app_handle.get_webview_window("pake") {
-                if let Ok(_) = window.clear_all_browsing_data() {
+                if window.clear_all_browsing_data().is_ok() {
                     app_handle.restart();
                 }
             }
