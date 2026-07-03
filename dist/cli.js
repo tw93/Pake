@@ -596,6 +596,22 @@ async function handleLocalFile(url, useLocalFile, tauriConf) {
         tauriConf.pake.windows[0].url_type = 'web';
     }
 }
+function buildLinuxDesktopContent(name, title, linuxBinaryName) {
+    const chineseName = title && /[\u4e00-\u9fa5]/.test(title) ? title : null;
+    return `[Desktop Entry]
+Version=1.0
+Type=Application
+Name=${name}
+${chineseName ? `Name[zh_CN]=${chineseName}` : ''}
+Comment=${name}
+Exec=${linuxBinaryName}
+Icon=${linuxBinaryName}
+Categories=Network;WebBrowser;Utility;
+MimeType=text/html;text/xml;application/xhtml_xml;
+StartupNotify=true
+Terminal=false
+`;
+}
 async function mergeLinuxConfig(options, name, tauriConf, linuxBinaryName) {
     const linuxBundle = tauriConf.bundle.linux;
     if (!linuxBundle) {
@@ -604,22 +620,7 @@ async function mergeLinuxConfig(options, name, tauriConf, linuxBinaryName) {
     delete linuxBundle.deb.files;
     const linuxName = generateLinuxPackageName(name);
     const desktopFileName = `com.pake.${linuxName}.desktop`;
-    const iconName = `${linuxName}_512`;
-    const { title } = options;
-    const chineseName = title && /[\u4e00-\u9fa5]/.test(title) ? title : null;
-    const desktopContent = `[Desktop Entry]
-Version=1.0
-Type=Application
-Name=${name}
-${chineseName ? `Name[zh_CN]=${chineseName}` : ''}
-Comment=${name}
-Exec=${linuxBinaryName}
-Icon=${iconName}
-Categories=Network;WebBrowser;Utility;
-MimeType=text/html;text/xml;application/xhtml_xml;
-StartupNotify=true
-Terminal=false
-`;
+    const desktopContent = buildLinuxDesktopContent(name, options.title, linuxBinaryName);
     const srcAssetsDir = path.join(npmDirectory, 'src-tauri/assets');
     const srcDesktopFilePath = path.join(srcAssetsDir, desktopFileName);
     await fsExtra.ensureDir(srcAssetsDir);
@@ -2274,6 +2275,19 @@ async function convertIconFormat(inputPath, appName) {
         return null;
     }
 }
+async function isLinuxBundleIconReady(iconPath) {
+    if (!IS_LINUX || path.extname(iconPath).toLowerCase() !== '.png') {
+        return false;
+    }
+    try {
+        const { width, height } = await sharp(iconPath).metadata();
+        return (width === PLATFORM_CONFIG.linux.size &&
+            height === PLATFORM_CONFIG.linux.size);
+    }
+    catch {
+        return false;
+    }
+}
 /**
  * Processes downloaded or local icon for platform-specific format
  */
@@ -2283,7 +2297,7 @@ async function processIcon(iconPath, appName) {
     // Check if already in correct platform format
     const ext = path.extname(iconPath).toLowerCase();
     const isCorrectFormat = (IS_WIN && ext === '.ico') ||
-        (IS_LINUX && ext === '.png') ||
+        (IS_LINUX && (await isLinuxBundleIconReady(iconPath))) ||
         (!IS_WIN && !IS_LINUX && ext === '.icns');
     if (isCorrectFormat) {
         return await copyWindowsIconIfNeeded(iconPath, appName);

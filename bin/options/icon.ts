@@ -282,6 +282,22 @@ async function convertIconFormat(
   }
 }
 
+async function isLinuxBundleIconReady(iconPath: string): Promise<boolean> {
+  if (!IS_LINUX || path.extname(iconPath).toLowerCase() !== '.png') {
+    return false;
+  }
+
+  try {
+    const { width, height } = await sharp(iconPath).metadata();
+    return (
+      width === PLATFORM_CONFIG.linux.size &&
+      height === PLATFORM_CONFIG.linux.size
+    );
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Processes downloaded or local icon for platform-specific format
  */
@@ -295,7 +311,7 @@ async function processIcon(
   const ext = path.extname(iconPath).toLowerCase();
   const isCorrectFormat =
     (IS_WIN && ext === '.ico') ||
-    (IS_LINUX && ext === '.png') ||
+    (IS_LINUX && (await isLinuxBundleIconReady(iconPath))) ||
     (!IS_WIN && !IS_LINUX && ext === '.icns');
 
   if (isCorrectFormat) {
