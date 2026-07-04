@@ -486,13 +486,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (isInternalUrl(absoluteUrl)) {
           // With --new-window the Rust on_new_window handler opens an in-app
-          // window; without it, deferring to the native handler sends the
-          // _blank target to the system browser and strands SSO callbacks.
-          // Navigate in place so internal links stay inside the webview.
+          // window. Without it, leaving target="_blank" untouched lets the
+          // native webview escalate the click to a system-browser "new window".
+          //
+          // Many SPAs (e.g. Plane) tag in-app links with target="_blank" but
+          // route the click themselves via a React onClick that calls
+          // preventDefault + client-side navigation. Forcing a full
+          // window.location reload here (and stopping propagation) would defeat
+          // that handler and reload the whole app on every click. Instead,
+          // retarget the link to "_self" so the webview never opens a browser
+          // window, then let the page's own handler run. If nothing intercepts
+          // the click, the default _self navigation keeps it inside the app.
           if (!window.pakeConfig?.new_window) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-            window.location.href = absoluteUrl;
+            anchorElement.target = "_self";
           }
           return;
         }
