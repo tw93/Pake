@@ -17,7 +17,7 @@ import {
   WindowConfig,
 } from '@/types';
 import { tauriConfigDirectory, npmDirectory } from '@/utils/dir';
-import { LINUX_TARGET_TYPES } from '@/utils/targets';
+import { LINUX_TARGET_TYPES, resolveLinuxBundleTargets } from '@/utils/targets';
 
 /**
  * Pure transform from CLI options to the window-config slice that gets
@@ -200,20 +200,20 @@ async function mergeLinuxConfig(
     [desktopInstallPath]: `assets/${desktopFileName}`,
   };
 
-  const validTargets = [
-    ...LINUX_TARGET_TYPES,
-    ...LINUX_TARGET_TYPES.map((target) => `${target}-arm64`),
-  ];
-  const baseTarget = options.targets.includes('-arm64')
-    ? options.targets.replace('-arm64', '')
-    : options.targets;
+  // options.targets reaches here already stripped of any -arm64 suffix by the
+  // LinuxBuilder constructor, and may carry several comma-separated formats
+  // (e.g. the distro-aware default "deb,appimage"). Validate the parsed list
+  // rather than string-matching the whole value, so a valid multi-target
+  // default no longer trips the "must be one of ..." warning on every build.
+  const { bundleTargets, hasValidTarget } = resolveLinuxBundleTargets(
+    options.targets,
+  );
 
-  if (validTargets.includes(options.targets)) {
-    // zst is repacked from the deb payload, so Tauri itself bundles a deb.
-    tauriConf.bundle.targets = [baseTarget === 'zst' ? 'deb' : baseTarget];
+  if (hasValidTarget) {
+    tauriConf.bundle.targets = bundleTargets;
   } else {
     logger.warn(
-      `✼ The target must be one of ${validTargets.join(', ')}, the default 'deb' will be used.`,
+      `✼ The target must be one of ${LINUX_TARGET_TYPES.join(', ')}, the default 'deb' will be used.`,
     );
   }
 }
