@@ -53,6 +53,78 @@ function handleShortcut(event) {
   }
 }
 
+function isNonMacDesktop() {
+  return /windows|linux/i.test(navigator.userAgent);
+}
+
+function isEditableElement(element) {
+  if (!element) return false;
+
+  const tagName = element.tagName;
+  return (
+    tagName === "INPUT" || tagName === "TEXTAREA" || element.isContentEditable
+  );
+}
+
+function hasSelectedText() {
+  return Boolean(window.getSelection?.()?.toString());
+}
+
+function selectEditableElement(element) {
+  if (typeof element.select === "function") {
+    element.select();
+    return true;
+  }
+
+  if (element.isContentEditable) {
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    const selection = window.getSelection?.();
+    if (!selection) return false;
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+    return true;
+  }
+
+  return false;
+}
+
+function handleClipboardShortcut(event) {
+  if (
+    !isNonMacDesktop() ||
+    !event.ctrlKey ||
+    event.metaKey ||
+    event.altKey ||
+    event.shiftKey
+  ) {
+    return false;
+  }
+
+  const key = event.key?.toLowerCase();
+  const activeElement = document.activeElement;
+  const isEditable = isEditableElement(activeElement);
+
+  if (key === "c" && (isEditable || hasSelectedText())) {
+    document.execCommand("copy");
+    event.preventDefault();
+    return true;
+  }
+
+  if (key === "x" && isEditable) {
+    document.execCommand("cut");
+    event.preventDefault();
+    return true;
+  }
+
+  if (key === "a" && isEditable && selectEditableElement(activeElement)) {
+    event.preventDefault();
+    return true;
+  }
+
+  return false;
+}
+
 const DOWNLOADABLE_FILE_EXTENSIONS = {
   documents: [
     "pdf",
@@ -344,6 +416,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  document.addEventListener("keydown", handleClipboardShortcut, true);
 
   document.addEventListener(
     "paste",
