@@ -435,9 +435,13 @@ async function combineFiles(files, output) {
       });`;
         }
         const fileContent = await fs$1.readFile(file);
-        return ("window.addEventListener('DOMContentLoaded', (_event) => { " +
+        // Keep the closing `});` on its own line. If the injected file ends in a
+        // line comment without a trailing newline, appending ` });` on the same
+        // line would comment it out and break the wrapper (mirrors the .css
+        // branch above, which already closes on a separate line).
+        return ("window.addEventListener('DOMContentLoaded', (_event) => {\n" +
             fileContent +
-            ' });');
+            '\n});');
     }));
     await fs$1.writeFile(output, contents.join('\n'));
     return files;

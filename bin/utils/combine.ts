@@ -14,10 +14,14 @@ export default async function combineFiles(files: string[], output: string) {
       }
 
       const fileContent = await fs.readFile(file);
+      // Keep the closing `});` on its own line. If the injected file ends in a
+      // line comment without a trailing newline, appending ` });` on the same
+      // line would comment it out and break the wrapper (mirrors the .css
+      // branch above, which already closes on a separate line).
       return (
-        "window.addEventListener('DOMContentLoaded', (_event) => { " +
+        "window.addEventListener('DOMContentLoaded', (_event) => {\n" +
         fileContent +
-        ' });'
+        '\n});'
       );
     }),
   );
