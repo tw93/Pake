@@ -158,7 +158,7 @@ Set the minimum height that the window can be resized to. Prevents UI breakage c
 
 #### [zoom]
 
-Set initial page zoom level (50-200). Default is `100`. Users can still adjust with `Cmd/Ctrl +/-/0` shortcuts.
+Set initial page zoom level as an integer between 50 and 200. Default is `100`. Users can still adjust with `Cmd/Ctrl +/-/0` shortcuts.
 
 ```shell
 --zoom <number>
