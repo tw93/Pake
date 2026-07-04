@@ -70,6 +70,26 @@ function hasSelectedText() {
   return Boolean(window.getSelection?.()?.toString());
 }
 
+const NON_TEXT_INPUT_TYPES = new Set([
+  "button",
+  "checkbox",
+  "color",
+  "file",
+  "hidden",
+  "image",
+  "radio",
+  "range",
+  "reset",
+  "submit",
+]);
+
+function isTextInputElement(element) {
+  return (
+    element?.tagName === "INPUT" &&
+    !NON_TEXT_INPUT_TYPES.has((element.type || "text").toLowerCase())
+  );
+}
+
 function selectEditableElement(element) {
   if (typeof element.select === "function") {
     element.select();
@@ -90,8 +110,81 @@ function selectEditableElement(element) {
   return false;
 }
 
+function canPasteIntoEditableElement(element) {
+  if (!isEditableElement(element)) return false;
+
+  if (element.tagName === "INPUT") {
+    return (
+      isTextInputElement(element) &&
+      element.disabled !== true &&
+      element.readOnly !== true
+    );
+  }
+
+  if (element.tagName === "TEXTAREA") {
+    return element.disabled !== true && element.readOnly !== true;
+  }
+
+  return true;
+}
+
+function insertTextIntoEditableElement(element, text) {
+  if (!text) return false;
+
+  if (document.execCommand("insertText", false, text)) {
+    return true;
+  }
+
+  if (
+    element &&
+    (isTextInputElement(element) || element.tagName === "TEXTAREA") &&
+    typeof element.setRangeText === "function"
+  ) {
+    const valueLength =
+      typeof element.value === "string" ? element.value.length : 0;
+    const start =
+      typeof element.selectionStart === "number"
+        ? element.selectionStart
+        : valueLength;
+    const end =
+      typeof element.selectionEnd === "number" ? element.selectionEnd : start;
+    element.setRangeText(text, start, end, "end");
+    element.dispatchEvent?.(new Event("input", { bubbles: true }));
+    return true;
+  }
+
+  return false;
+}
+
+function runBrowserPasteCommand() {
+  try {
+    return document.execCommand("paste") === true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function pasteClipboardText(activeElement) {
+  if (runBrowserPasteCommand()) {
+    return;
+  }
+
+  const readText = navigator.clipboard?.readText;
+  if (typeof readText !== "function") {
+    return;
+  }
+
+  readText
+    .call(navigator.clipboard)
+    .then((text) => {
+      insertTextIntoEditableElement(activeElement, text);
+    })
+    .catch(() => {});
+}
+
 function handleClipboardShortcut(event) {
   if (
+    event.isTrusted !== true ||
     !isNonMacDesktop() ||
     !event.ctrlKey ||
     event.metaKey ||
@@ -114,6 +207,12 @@ function handleClipboardShortcut(event) {
   if (key === "x" && isEditable) {
     document.execCommand("cut");
     event.preventDefault();
+    return true;
+  }
+
+  if (key === "v" && canPasteIntoEditableElement(activeElement)) {
+    event.preventDefault();
+    pasteClipboardText(activeElement);
     return true;
   }
 

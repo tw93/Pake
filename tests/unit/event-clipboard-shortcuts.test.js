@@ -29,6 +29,9 @@ function createElement(tagName = "div") {
 function loadEventHelpers({
   activeElement = createElement("body"),
   selectionText = "",
+  clipboardText = "clipboard text",
+  clipboardReadRejects = false,
+  pasteCommandSucceeds = false,
   userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
 } = {}) {
   const source = fs.readFileSync(
@@ -40,6 +43,7 @@ function loadEventHelpers({
   const elementsById = new Map();
   const execCommandCalls = [];
   const invokeCalls = [];
+  const clipboardReadCalls = [];
   const body = createElement("body");
   body.scrollHeight = 0;
   body.appendChild = (child) => {
@@ -68,6 +72,15 @@ function loadEventHelpers({
     navigator: {
       userAgent,
       language: "en-US",
+      clipboard: {
+        readText: () => {
+          clipboardReadCalls.push([]);
+          if (clipboardReadRejects) {
+            return Promise.reject(new Error("clipboard denied"));
+          }
+          return Promise.resolve(clipboardText);
+        },
+      },
     },
     window: {
       history: {
@@ -127,6 +140,9 @@ function loadEventHelpers({
       activeElement,
       execCommand: (command, showUI, value) => {
         execCommandCalls.push([command, showUI, value]);
+        if (command === "paste") {
+          return pasteCommandSucceeds;
+        }
         return true;
       },
     },
@@ -136,7 +152,13 @@ function loadEventHelpers({
   runInNewContext(source, context);
   eventListeners.DOMContentLoaded[0].handler();
 
-  return { ...context, eventListeners, execCommandCalls, invokeCalls };
+  return {
+    ...context,
+    eventListeners,
+    execCommandCalls,
+    invokeCalls,
+    clipboardReadCalls,
+  };
 }
 
 function getClipboardShortcutHandler(context) {
@@ -152,6 +174,7 @@ function createKeyEvent(key, overrides = {}) {
     metaKey: false,
     altKey: false,
     shiftKey: false,
+    isTrusted: true,
     preventDefault: vi.fn(),
     ...overrides,
   };
@@ -187,7 +210,92 @@ describe("event clipboard shortcuts", () => {
     expect(selectAllEvent.preventDefault).toHaveBeenCalled();
   });
 
-  it("leaves paste and macOS shortcuts untouched", () => {
+  it("pastes clipboard text into editable elements without Tauri clipboard IPC", async () => {
+    const input = createElement("input");
+    const context = loadEventHelpers({
+      activeElement: input,
+      clipboardText: "pasted text",
+    });
+    const handler = getClipboardShortcutHandler(context);
+    const pasteEvent = createKeyEvent("v");
+
+    handler(pasteEvent);
+    await Promise.resolve();
+
+    expect(context.clipboardReadCalls).toEqual([[]]);
+    expect(context.execCommandCalls).toEqual([
+      ["paste", undefined, undefined],
+      ["insertText", false, "pasted text"],
+    ]);
+    expect(pasteEvent.preventDefault).toHaveBeenCalled();
+    expect(context.invokeCalls).toEqual([]);
+  });
+
+  it("uses the browser paste command first when available", async () => {
+    const input = createElement("input");
+    const context = loadEventHelpers({
+      activeElement: input,
+      pasteCommandSucceeds: true,
+    });
+    const handler = getClipboardShortcutHandler(context);
+    const pasteEvent = createKeyEvent("v");
+
+    handler(pasteEvent);
+    await Promise.resolve();
+
+    expect(context.clipboardReadCalls).toEqual([]);
+    expect(context.execCommandCalls).toEqual([["paste", undefined, undefined]]);
+    expect(pasteEvent.preventDefault).toHaveBeenCalled();
+  });
+
+  it("does not read clipboard for synthetic paste shortcuts", async () => {
+    const input = createElement("input");
+    const context = loadEventHelpers({ activeElement: input });
+    const handler = getClipboardShortcutHandler(context);
+    const pasteEvent = createKeyEvent("v", { isTrusted: false });
+
+    handler(pasteEvent);
+    await Promise.resolve();
+
+    expect(context.clipboardReadCalls).toEqual([]);
+    expect(context.execCommandCalls).toEqual([]);
+    expect(pasteEvent.preventDefault).not.toHaveBeenCalled();
+  });
+
+  it("does not read clipboard for non-text input elements", async () => {
+    const checkbox = createElement("input");
+    checkbox.type = "checkbox";
+    const context = loadEventHelpers({ activeElement: checkbox });
+    const handler = getClipboardShortcutHandler(context);
+    const pasteEvent = createKeyEvent("v");
+
+    handler(pasteEvent);
+    await Promise.resolve();
+
+    expect(context.clipboardReadCalls).toEqual([]);
+    expect(context.execCommandCalls).toEqual([]);
+    expect(pasteEvent.preventDefault).not.toHaveBeenCalled();
+  });
+
+  it("does not add Tauri fallback when async clipboard read is denied", async () => {
+    const input = createElement("input");
+    const context = loadEventHelpers({
+      activeElement: input,
+      clipboardReadRejects: true,
+    });
+    const handler = getClipboardShortcutHandler(context);
+    const pasteEvent = createKeyEvent("v");
+
+    handler(pasteEvent);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(context.clipboardReadCalls).toEqual([[]]);
+    expect(context.execCommandCalls).toEqual([["paste", undefined, undefined]]);
+    expect(pasteEvent.preventDefault).toHaveBeenCalled();
+  });
+
+  it("leaves non-editable paste and macOS shortcuts untouched", () => {
     const windowsContext = loadEventHelpers();
     const windowsHandler = getClipboardShortcutHandler(windowsContext);
     const pasteEvent = createKeyEvent("v");
@@ -205,6 +313,7 @@ describe("event clipboard shortcuts", () => {
 
     expect(pasteEvent.preventDefault).not.toHaveBeenCalled();
     expect(copyEvent.preventDefault).not.toHaveBeenCalled();
+    expect(windowsContext.clipboardReadCalls).toEqual([]);
     expect(windowsContext.execCommandCalls).toEqual([]);
     expect(macContext.execCommandCalls).toEqual([]);
   });
