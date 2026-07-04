@@ -54,8 +54,8 @@ const PLATFORM_CONFIG: Record<'win' | 'linux' | 'macos', PlatformIconConfig> = {
 };
 
 const API_KEYS = {
-  logoDev: ['pk_JLLMUKGZRpaG5YclhXaTkg', 'pk_Ph745P8mQSeYFfW2Wk039A'],
-  brandfetch: ['1idqvJC0CeFSeyp3Yf7', '1idej-yhU_ThggIHFyG'],
+  logoDev: (process.env.LOGO_DEV_API_KEYS ?? '').split(',').filter(Boolean),
+  brandfetch: (process.env.BRANDFETCH_API_KEYS ?? '').split(',').filter(Boolean),
 };
 
 type SupportedIconFormat = (typeof ICON_CONFIG.supportedFormats)[number];
@@ -65,7 +65,7 @@ type SupportedIconFormat = (typeof ICON_CONFIG.supportedFormats)[number];
  */
 function generateIconPath(appName: string, isDefault = false): string {
   const safeName = isDefault ? 'icon' : getIconBaseName(appName);
-  const baseName = safeName;
+  const baseName = safeName.replace(/[/\\]/g, '');
 
   if (IS_WIN) {
     return path.join(npmDirectory, 'src-tauri', 'png', `${baseName}_256.ico`);
@@ -217,7 +217,7 @@ async function convertIconFormat(
     await fsExtra.ensureDir(platformOutputDir);
 
     const processedInputPath = await preprocessIcon(inputPath);
-    const iconName = getIconBaseName(appName);
+    const iconName = getIconBaseName(appName).replace(/[/\\]/g, '');
 
     // Generate platform-specific format
     if (IS_WIN) {
@@ -395,7 +395,8 @@ export async function handleIcon(
       return '';
     }
     // Local file path
-    const resolvedPath = path.resolve(options.icon);
+    const sanitizedIcon = options.icon.replace(/\.\.[/\\]/g, '');
+    const resolvedPath = path.resolve(sanitizedIcon);
     const result = await processIcon(resolvedPath, options.name || '');
     return result || resolvedPath;
   }
@@ -679,7 +680,8 @@ async function saveIconFile(
   const { path: tempPath } = await dir();
 
   // Always save with the original extension first
-  const originalIconPath = path.join(tempPath, `icon.${extension}`);
+  const safeExt = extension.replace(/[^a-zA-Z0-9]/g, '');
+  const originalIconPath = path.join(tempPath, `icon.${safeExt}`);
   await fsExtra.outputFile(originalIconPath, buffer);
 
   return originalIconPath;
