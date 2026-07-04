@@ -439,7 +439,7 @@ Specify custom dimensions when building:
 pake https://example.com --width 1200 --height 800
 ```
 
-See [CLI Usage Guide](cli-usage.md#window-options) for all window options.
+See [CLI Usage Guide](cli-usage.md#width) for all window options.
 
 ---
 
