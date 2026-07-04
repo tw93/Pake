@@ -526,7 +526,7 @@ This is usually due to web compatibility issues. Try:
 
    Some authentication providers, especially Google, may block sign-in inside embedded webviews. Because Pake packages sites into a desktop webview, Google properties or sites that rely on Google OAuth may still fail to sign in even when `--new-window` or `--multi-window` is enabled. This is provider policy, not a packaging bug. In those cases, use the normal browser, a browser-installed app, or a native desktop client.
 
-   On macOS specifically, sites that use **Sign in with Apple** in popup mode (e.g. Yelp, Upwork) may end on a blank window after you authenticate. To avoid a WebKit crash, Pake navigates auth URLs in the current window on macOS, which breaks the popup's callback to the original page. Sign in to those sites with a normal browser or a native app.
+   On macOS, Pake keeps **Sign in with Apple** popup flows (e.g. Yelp, Upwork) on the native popup path so Apple's callback can return to the opener page. Other auth popups may still be navigated in the current window to avoid WebKit crashes. If a provider blocks embedded webviews or the login still fails, use the normal browser, a browser-installed app, or a native desktop client.
 
 5. **WeChat Web login environment error**
 
