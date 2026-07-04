@@ -476,6 +476,28 @@ This option is macOS-only and is intended for local development or quick testing
 pake https://github.com --name GitHub --install
 ```
 
+#### [camera]
+
+Request camera access on macOS by adding the `com.apple.security.device.camera` entitlement to the packaged app. Default is `false`. macOS only; ignored on Windows and Linux. Useful for web apps that need webcam access, such as video calls or QR scanning.
+
+```shell
+--camera
+
+# Example: Package a video-call site with camera access
+pake https://meet.google.com --name Meet --camera
+```
+
+#### [microphone]
+
+Request microphone access on macOS by adding the `com.apple.security.device.audio-input` entitlement to the packaged app. Default is `false`. macOS only; ignored on Windows and Linux.
+
+```shell
+--microphone
+
+# Example: Combine camera and microphone for a conferencing app
+pake https://meet.google.com --name Meet --camera --microphone
+```
+
 #### [multi-instance]
 
 Allow the packaged app to run more than one instance at the same time. Default is `false`, which means launching a second instance simply focuses the existing window. Enable this when you need to open several windows of the same app simultaneously.
