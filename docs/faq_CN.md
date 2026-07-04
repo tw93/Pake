@@ -12,6 +12,7 @@
   - [Linux：在 Fedora / RHEL / Oracle Linux 等 RPM 系发行版上安装](#linux在-fedora--rhel--oracle-linux-等-rpm-系发行版上安装)
   - [Linux：AppImage 构建失败，提示 "failed to run linuxdeploy"](#linuxappimage-构建失败提示-failed-to-run-linuxdeploy)
   - [Linux：AppImage 启动即崩溃，提示找不到 WebKitNetworkProcess](#linuxappimage-启动即崩溃提示找不到-webkitnetworkprocess)
+  - [Linux：AppImage 打开后按钮或键盘在 Wayland 下不可用](#linuxappimage-打开后按钮或键盘在-wayland-下不可用)
   - [Linux:"cargo: command not found" 即使已安装 Rust](#linuxcargo-command-not-found-即使已安装-rust)
   - [Windows：首次构建时安装超时](#windows首次构建时安装超时)
   - [Windows：缺少 Visual Studio 构建工具](#windows缺少-visual-studio-构建工具)
