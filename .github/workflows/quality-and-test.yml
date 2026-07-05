@@ -112,6 +112,18 @@ jobs:
       - name: Build CLI
         run: pnpm run cli:build
 
+      # dist/cli.js is a tracked build artifact; a bin/ change without the
+      # regenerated dist/cli.js ships stale CLI behavior. Linux only to avoid
+      # cross-OS line-ending noise.
+      - name: Verify committed dist/cli.js matches bin/ sources
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          if ! git diff --exit-code -- dist/; then
+            echo "::error::dist/cli.js is out of sync with bin/. Run 'pnpm run cli:build' and commit the regenerated dist/cli.js."
+            exit 1
+          fi
+
       - name: Run Fast Test Suite
         shell: bash
         run: PAKE_CREATE_APP=1 node tests/index.js --no-build

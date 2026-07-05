@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r \".tool_input.file_path // empty\" 2>/dev/null || true); case \"$f\" in \"${CLAUDE_PROJECT_DIR:-$PWD}/bin/\"*) printf \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"PostToolUse\\\",\\\"additionalContext\\\":\\\"bin/ changed: dist/cli.js is a tracked build artifact. Run pnpm run cli:build and commit the regenerated dist/cli.js together with this change.\\\"}}\" ;; esac",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
