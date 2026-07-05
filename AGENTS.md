@@ -1,6 +1,6 @@
 # AGENTS.md - Pake Project Knowledge Base
 
-> Project-specific Rust + Tauri rules: `.claude/rules/rust.md`. Release runbook: `.claude/skills/release/SKILL.md` (run `/release`).
+> Project-specific Rust + Tauri rules: `.claude/rules/rust.md`. Release runbook: `.agents/skills/release/SKILL.md` (run `/release`; `.claude/skills/*` are symlinks into `.agents/skills/`, edit the `.agents` copy only).
 
 ## Project Identity
 
@@ -96,7 +96,8 @@ Execution rules:
 - Recent window/runtime options include `--incognito`, `--new-window`, `--min-width`, `--min-height`, `--maximize`, multi-window behavior, notification click handling, and Linux/Wayland WebKit compositing defaults.
 - `--incognito` intentionally trades persistence for clean private sessions; be careful around login, cookies, local storage, and WeChat-style WebView detection.
 - `--new-window` and `--multi-window` do not bypass every provider policy. Google OAuth and similar embedded-WebView restrictions may still require a normal browser or native client.
-- macOS auth-popup behavior is fragile. Auth/sign-in URLs that trigger WebKit `SOAuthorization` popup creation should stay in the current window when that path can abort the app; changes in `src-tauri/src/inject/event.js` need targeted tests.
+- macOS auth-popup behavior is fragile. Auth/sign-in URLs that trigger WebKit `SOAuthorization` popup creation should stay in the current window when that path can abort the app; changes in `src-tauri/src/inject/event.js` need targeted tests. Apple Sign-In (`appleid.apple.com` / `AppleAuthentication` named windows) is the exception and must keep the native `window.open` popup.
+- Safe clipboard shortcuts (Ctrl+C/X/V/A) on Linux/Windows are bridged by an injected `keydown` handler in `src-tauri/src/inject/event.js` (`handleClipboardShortcut`). It is gated on `isNonMacDesktop()` and `event.isTrusted`, only acts on editable/selected targets, and must never fire on macOS (native shortcuts already work). Changes here need the `tests/unit/event-clipboard-shortcuts.test.js` coverage.
 - Notification flows cross injected JS, Tauri invokes, capabilities, and native notification plugins. Verify the Rust capability and JS caller together.
 - WebKit compositing behavior is platform-sensitive on Linux/Wayland. Runtime flag decisions live in `src-tauri/src/lib.rs`; keep the default conservative, cover compositor exceptions with unit tests, and document user-facing fallbacks in `docs/faq*.md`.
 - Linux AppImage reports often include harmless GTK, appindicator, or GStreamer warnings. Separate optional runtime warnings from the actual symptom before changing code; input/click failures on pure Wayland compositors are not the same class as blank-window failures.
