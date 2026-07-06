@@ -4,6 +4,7 @@
       "url": "https://weekly.tw93.fun/en",
       "url_type": "web",
       "hide_title_bar": true,
+      "hide_window_decorations": false,
       "fullscreen": false,
       "width": 1200,
       "height": 780,

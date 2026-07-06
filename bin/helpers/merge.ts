@@ -33,6 +33,8 @@ export function buildWindowConfigOverrides(
   const platformHideOnClose = options.hideOnClose ?? platform === 'darwin';
   const platformHideTitleBar =
     platform === 'darwin' ? options.hideTitleBar : false;
+  const platformHideWindowDecorations =
+    platform !== 'darwin' ? options.hideWindowDecorations : false;
   return {
     width: options.width,
     height: options.height,
@@ -40,6 +42,7 @@ export function buildWindowConfigOverrides(
     maximize: options.maximize,
     resizable: options.resizable ?? true,
     hide_title_bar: platformHideTitleBar,
+    hide_window_decorations: platformHideWindowDecorations,
     activation_shortcut: options.activationShortcut,
     always_on_top: options.alwaysOnTop,
     dark_mode: options.darkMode,
@@ -474,6 +477,11 @@ export async function mergeConfig(
   if (options.hideTitleBar && platform !== 'darwin') {
     logger.warn(
       '✼ --hide-title-bar is only supported on macOS and will be ignored on this platform.',
+    );
+  }
+  if (options.hideWindowDecorations && platform === 'darwin') {
+    logger.warn(
+      '✼ --hide-window-decorations is only supported on Windows and Linux and will be ignored on this platform.',
     );
   }
   const tauriConfWindowOptions = buildWindowConfigOverrides(options, platform);

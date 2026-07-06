@@ -79,6 +79,7 @@ Various options are available for customization. `pake --help` shows every suppo
 | `--width`          | Window width (default: 1200px)                  | `--width 1400`                                 |
 | `--height`         | Window height (default: 780px)                  | `--height 900`                                 |
 | `--hide-title-bar` | Immersive header (macOS only)                   | `--hide-title-bar`                             |
+| `--hide-window-decorations` | Hide native title bar (Windows/Linux only) | `--hide-window-decorations`                    |
 | `--debug`          | Enable development tools                        | `--debug`                                      |
 | `--help`           | Show all CLI options                            | `--help`                                       |
 | `--version`        | Show CLI version                                | `--version`                                    |
@@ -172,6 +173,14 @@ Enable or disable immersive header. Default is `false`. Use the following comman
 
 ```shell
 --hide-title-bar
+```
+
+#### [hide-window-decorations]
+
+Hide the native window title bar on Windows and Linux. Default is `false`. Removes window decorations and adds a top drag region for moving the window. Ignored on macOS.
+
+```shell
+--hide-window-decorations
 ```
 
 #### [fullscreen]

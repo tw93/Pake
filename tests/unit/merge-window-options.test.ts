@@ -79,6 +79,27 @@ describe('buildWindowConfigOverrides', () => {
     ).toBe(false);
   });
 
+  it('only forwards hideWindowDecorations on Windows and Linux', () => {
+    expect(
+      buildWindowConfigOverrides(
+        { ...makeOptions(), hideWindowDecorations: true },
+        'darwin',
+      ).hide_window_decorations,
+    ).toBe(false);
+    expect(
+      buildWindowConfigOverrides(
+        { ...makeOptions(), hideWindowDecorations: true },
+        'linux',
+      ).hide_window_decorations,
+    ).toBe(true);
+    expect(
+      buildWindowConfigOverrides(
+        { ...makeOptions(), hideWindowDecorations: true },
+        'win32',
+      ).hide_window_decorations,
+    ).toBe(true);
+  });
+
   it('only enables start_to_tray when both flag and tray are on', () => {
     expect(
       buildWindowConfigOverrides(

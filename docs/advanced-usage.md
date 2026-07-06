@@ -116,7 +116,7 @@ Configure window properties in `pake.json`:
 }
 ```
 
-`hide_title_bar` is the `pake.json` key (the CLI exposes it as `--hide-title-bar`). It is only supported on macOS and is ignored on Windows and Linux.
+`hide_title_bar` is the `pake.json` key (the CLI exposes it as `--hide-title-bar`). It is only supported on macOS and is ignored on Windows and Linux. Use `hide_window_decorations` (`--hide-window-decorations`) for frameless windows on Windows and Linux.
 
 ## Static File Packaging
 

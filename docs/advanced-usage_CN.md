@@ -116,7 +116,7 @@ fn handle_scroll(scroll_y: f64, scroll_x: f64) {
 }
 ```
 
-`hide_title_bar` 是 `pake.json` 中的字段名（CLI 对应参数为 `--hide-title-bar`）。仅支持 macOS，在 Windows 和 Linux 上会被忽略。
+`hide_title_bar` 是 `pake.json` 中的字段名（CLI 对应参数为 `--hide-title-bar`）。仅支持 macOS，在 Windows 和 Linux 上会被忽略。Windows 和 Linux 请使用 `hide_window_decorations`（`--hide-window-decorations`）。
 
 ## 静态文件打包
 

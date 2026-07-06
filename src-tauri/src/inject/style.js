@@ -497,9 +497,29 @@ window.addEventListener("DOMContentLoaded", (_event) => {
     }
   `;
   const isMac = /Mac/i.test(navigator.userAgent);
-  if (window["pakeConfig"]?.hide_title_bar && isMac) {
+  if (hasImmersiveHeader(window["pakeConfig"])) {
     const topPaddingStyleElement = document.createElement("style");
-    topPaddingStyleElement.textContent = topPaddingCSS;
+    topPaddingStyleElement.textContent = isMac
+      ? topPaddingCSS
+      : `
+    #pake-top-dom:active {
+      cursor: grabbing;
+      cursor: -webkit-grabbing;
+    }
+
+    #pake-top-dom {
+      position: fixed;
+      background: transparent;
+      top: 0;
+      width: 100%;
+      height: 20px;
+      cursor: grab;
+      -webkit-app-region: drag;
+      user-select: none;
+      -webkit-user-select: none;
+      z-index: 99999;
+    }
+    `;
     document.head.appendChild(topPaddingStyleElement);
   }
 });
