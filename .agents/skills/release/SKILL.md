@@ -1,7 +1,7 @@
 ---
 name: release
 description: Prepare, validate, and publish a Pake release. Not for version bumps without release intent.
-version: 1.2.0
+version: 1.3.0
 allowed-tools:
   - Bash
   - Read
@@ -57,6 +57,7 @@ Tag format: uppercase `V` prefix (e.g. `V3.11.0`), not `v3.11.0`.
 7. [ ] Verify npm published the exact package: `npm view pake-cli@X.Y.Z version gitHead dist.tarball --json`
 8. [ ] Verify latest now resolves to the release: `npm view pake-cli version`
 9. [ ] Record Quality & Testing status separately: `gh run list --workflow=quality-and-test.yml --limit 3`
+10. [ ] After the notes are published, add all six positive reactions to the release: resolve the release id from the tag, POST `+1`, `laugh`, `heart`, `hooray`, `rocket`, and `eyes` each to `repos/tw93/Pake/releases/<id>/reactions` via `gh api`, then re-read the reactions to confirm. Never add `-1` or `confused`.
 
 npm publishes through Trusted Publishing from `.github/workflows/npm-publish.yml`. Configure npm package settings with GitHub Actions, `tw93/Pake`, workflow file `npm-publish.yml`, and no environment. Local `npm publish` is only a fallback if CI or registry state blocks the trusted path.
 
@@ -71,7 +72,7 @@ Do not collapse these into "released" without naming which surface was verified.
 
 ## GitHub Release Notes
 
-CI only creates a bare placeholder release. Every published release must be edited to match the house format, or it looks broken next to the others. Two failure modes to avoid: a bare version title with no codename, and a body missing the logo header / star line / repo footer (see `V3.11.10` and `V3.12.0`, both fixed after the fact).
+CI only creates a bare placeholder release. Every published release must be edited to match the house format, or it looks broken next to the others. Before writing notes, run `gh release view <previous release>` and treat its structure as the hard template, title codename included. Two failure modes to avoid: a bare version title with no codename, and a body missing the logo header / star line / repo footer (see `V3.11.10` and `V3.12.0`, both fixed after the fact).
 
 ### Title format
 
