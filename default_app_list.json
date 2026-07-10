@@ -33,6 +33,12 @@
     "url": "https://excalidraw.com/"
   },
   {
+    "name": "notion",
+    "title": "Notion",
+    "name_zh": "Notion",
+    "url": "https://app.notion.com"
+  },
+  {
     "name": "programmusic",
     "title": "ProgramMusic",
     "name_zh": "ProgramMusic",
