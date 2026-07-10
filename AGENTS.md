@@ -93,6 +93,7 @@ Execution rules:
 ## Current Risk Areas
 
 - CLI options are user-facing and must stay synchronized across `bin/helpers/cli-program.ts`, `bin/types.ts`, `bin/defaults.ts`, `bin/helpers/merge.ts`, generated `dist/cli.js`, and `docs/cli-usage*.md`.
+- New user-visible CLI surface (a new flag, alias, subcommand, or extra help variant) needs a stated justification before implementation: name the user problem and why an existing flag, config key, or default cannot cover it, then get maintainer sign-off. Prefer quieter defaults over new options; never split help output into parallel variants.
 - Recent window/runtime options include `--incognito`, `--new-window`, `--min-width`, `--min-height`, `--maximize`, multi-window behavior, notification click handling, and Linux/Wayland WebKit compositing defaults.
 - `--incognito` intentionally trades persistence for clean private sessions; be careful around login, cookies, local storage, and WeChat-style WebView detection.
 - `--new-window` and `--multi-window` do not bypass every provider policy. Google OAuth and similar embedded-WebView restrictions may still require a normal browser or native client.
@@ -139,7 +140,7 @@ Four files must be updated in sync for every release:
 | `src-tauri/Cargo.lock`      | `version` for package `pake` |
 | `src-tauri/tauri.conf.json` | `"version"`                  |
 
-Tag format: `V0.x.x` (uppercase V). Current version: check `package.json`.
+Tag format: `V<major.minor.patch>` with uppercase `V` (e.g. `V3.13.1`). Current version: check `package.json`.
 
 ## Release Workflow (CI)
 
@@ -232,6 +233,6 @@ The first `cargo build` on a fresh clone takes 10+ minutes as Cargo compiles eve
 - **CLI Documentation** (`docs/cli-usage.md` and locale variants): include **all** CLI parameters with detailed usage examples.
 - **Rare or advanced parameters**: should have full documentation in `docs/cli-usage*.md` but minimal or no mention in the main README. Examples: `--title`, `--incognito`, `--system-tray-icon`, `--multi-window`, `--min-width`, `--min-height`.
 - **Key configuration files**:
-  - `pake.json` - default app configuration.
+  - `src-tauri/pake.json` - default app configuration (CLI options are merged into it at build time).
   - `src-tauri/tauri.conf.json` - shared Tauri settings.
   - `src-tauri/tauri.{macos,windows,linux}.conf.json` - per-platform overrides.

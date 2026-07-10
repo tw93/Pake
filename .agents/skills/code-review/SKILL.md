@@ -22,6 +22,7 @@ Use Waza `/check` for the generic review method. This adapter adds Pake-specific
 - [ ] npm release workflow changes preserve Trusted Publishing: `.github/workflows/npm-publish.yml`, `id-token: write`, canonical `git+https://github.com/tw93/Pake.git`, and `scripts/check-release-version.mjs`.
 - [ ] Release/status changes keep npm registry, GitHub Release/assets, workflow run state, and issue closeout as separate truth surfaces.
 - [ ] `workflow_dispatch` release logic does not infer the release tag from `headBranch`, run title, or compare UI; use an explicit tag/ref and verify the package `gitHead`.
+- [ ] Any new user-visible CLI flag, alias, or help variant carries an explicit justification for why existing options or defaults cannot cover it (maintainer sign-off, not inferred).
 - [ ] No new `tauriConf: any` or other untyped config objects; use `PakeTauriConfig`.
 - [ ] No user-reachable `panic!` or `.unwrap()` on config, CLI, or event paths.
 - [ ] Silent `catch {}` blocks surface the real error through `logger.warn`.
