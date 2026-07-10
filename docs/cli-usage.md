@@ -72,16 +72,17 @@ The URL is the link to the web page you want to package or the path to a local H
 
 Various options are available for customization. `pake --help` shows every supported CLI option. This page is the complete reference.
 
-| Option             | Description                                     | Example                                        |
-| ------------------ | ----------------------------------------------- | ---------------------------------------------- |
-| `--name`           | Application name                                | `--name "Weekly"`                              |
-| `--icon`           | Custom icon (optional, auto-fetch website icon) | `--icon https://cdn.tw93.fun/pake/weekly.icns` |
-| `--width`          | Window width (default: 1200px)                  | `--width 1400`                                 |
-| `--height`         | Window height (default: 780px)                  | `--height 900`                                 |
-| `--hide-title-bar` | Immersive header (macOS only)                   | `--hide-title-bar`                             |
-| `--debug`          | Enable development tools                        | `--debug`                                      |
-| `--help`           | Show all CLI options                            | `--help`                                       |
-| `--version`        | Show CLI version                                | `--version`                                    |
+| Option                      | Description                                         | Example                                        |
+| --------------------------- | --------------------------------------------------- | ---------------------------------------------- |
+| `--name`                    | Application name                                    | `--name "Weekly"`                              |
+| `--icon`                    | Custom icon (optional, auto-fetch website icon)     | `--icon https://cdn.tw93.fun/pake/weekly.icns` |
+| `--width`                   | Window width (default: 1200px)                      | `--width 1400`                                 |
+| `--height`                  | Window height (default: 780px)                      | `--height 900`                                 |
+| `--hide-title-bar`          | Immersive header (macOS only)                       | `--hide-title-bar`                             |
+| `--hide-window-decorations` | Hide native window decorations (Windows/Linux only) | `--hide-window-decorations`                    |
+| `--debug`                   | Enable development tools                            | `--debug`                                      |
+| `--help`                    | Show all CLI options                                | `--help`                                       |
+| `--version`                 | Show CLI version                                    | `--version`                                    |
 
 For complete options, see detailed sections below.
 
@@ -172,6 +173,14 @@ Enable or disable immersive header. Default is `false`. Use the following comman
 
 ```shell
 --hide-title-bar
+```
+
+#### [hide-window-decorations]
+
+Hide the native window decorations on Windows and Linux. Default is `false`. This removes the title bar and window controls, then adds a top drag region for moving the window. Use `F11` to toggle native fullscreen. Ignored on macOS.
+
+```shell
+--hide-window-decorations
 ```
 
 #### [fullscreen]

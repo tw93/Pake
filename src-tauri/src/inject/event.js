@@ -60,8 +60,51 @@ function handleShortcut(event) {
   }
 }
 
+function toggleNativeFullscreen(appWindow) {
+  appWindow
+    .isFullscreen()
+    .then((fullscreen) => appWindow.setFullscreen(!fullscreen))
+    .catch((error) => {
+      console.warn("[Pake] Failed to toggle native fullscreen:", error);
+    });
+}
+
+function handleWindowFullscreenShortcut(event) {
+  if (
+    !event.isTrusted ||
+    event.repeat ||
+    event.key !== "F11" ||
+    !isNonMacDesktop()
+  ) {
+    return;
+  }
+
+  const appWindow = window.__TAURI__?.window?.getCurrentWindow?.();
+  if (!appWindow) {
+    return;
+  }
+
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  toggleNativeFullscreen(appWindow);
+}
+
+function getDesktopPlatform() {
+  return (
+    navigator.userAgentData?.platform ||
+    navigator.platform ||
+    navigator.userAgent
+  );
+}
+
 function isNonMacDesktop() {
-  return /windows|linux/i.test(navigator.userAgent);
+  return /win|linux/i.test(getDesktopPlatform());
+}
+
+function hasImmersiveHeader(config = window["pakeConfig"] || {}) {
+  return /mac/i.test(getDesktopPlatform())
+    ? config.hide_title_bar === true
+    : config.hide_window_decorations === true;
 }
 
 function isEditableElement(element) {
@@ -509,7 +552,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  if (!document.getElementById("pake-top-dom")) {
+  if (!document.getElementById("pake-top-dom") && hasImmersiveHeader()) {
     const topDom = document.createElement("div");
     topDom.id = "pake-top-dom";
     document.body.appendChild(topDom);
@@ -517,24 +560,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const domEl = document.getElementById("pake-top-dom");
 
-  domEl.addEventListener("touchstart", () => {
-    appWindow.startDragging();
-  });
-
-  domEl.addEventListener("mousedown", (e) => {
-    e.preventDefault();
-    if (e.buttons === 1 && e.detail !== 2) {
+  if (domEl) {
+    domEl.addEventListener("touchstart", () => {
       appWindow.startDragging();
-    }
-  });
-
-  domEl.addEventListener("dblclick", () => {
-    appWindow.isFullscreen().then((fullscreen) => {
-      appWindow.setFullscreen(!fullscreen);
     });
-  });
+
+    domEl.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      if (e.buttons === 1 && e.detail !== 2) {
+        appWindow.startDragging();
+      }
+    });
+
+    domEl.addEventListener("dblclick", () => {
+      toggleNativeFullscreen(appWindow);
+    });
+  }
 
   if (window["pakeConfig"]?.disabled_web_shortcuts !== true) {
+    document.addEventListener("keydown", handleWindowFullscreenShortcut, true);
     document.addEventListener("keyup", (event) => {
       if (/windows|linux/i.test(navigator.userAgent) && event.ctrlKey) {
         handleShortcut(event);

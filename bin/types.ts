@@ -29,8 +29,11 @@ export interface PakeCliOptions {
   // Start window maximized, default false
   maximize: boolean;
 
-  // Enable immersive header, default false.
+  // Enable immersive header, default false. macOS only.
   hideTitleBar: boolean;
+
+  // Hide native window decorations, default false. Windows and Linux only.
+  hideWindowDecorations: boolean;
 
   // Enable windows always on top, default false
   alwaysOnTop: boolean;
@@ -159,6 +162,7 @@ export interface PlatformSpecific<T> {
 export interface WindowConfig {
   url: string;
   hide_title_bar: boolean;
+  hide_window_decorations: boolean;
   fullscreen: boolean;
   maximize: boolean;
   width: number;

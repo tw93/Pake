@@ -535,6 +535,7 @@ function resolveLinuxBundleTargets(targets) {
 function buildWindowConfigOverrides(options, platform = asSupportedPlatform(process.platform)) {
     const platformHideOnClose = options.hideOnClose ?? platform === 'darwin';
     const platformHideTitleBar = platform === 'darwin' ? options.hideTitleBar : false;
+    const platformHideWindowDecorations = platform !== 'darwin' ? options.hideWindowDecorations : false;
     return {
         width: options.width,
         height: options.height,
@@ -542,6 +543,7 @@ function buildWindowConfigOverrides(options, platform = asSupportedPlatform(proc
         maximize: options.maximize,
         resizable: options.resizable ?? true,
         hide_title_bar: platformHideTitleBar,
+        hide_window_decorations: platformHideWindowDecorations,
         activation_shortcut: options.activationShortcut,
         always_on_top: options.alwaysOnTop,
         dark_mode: options.darkMode,
@@ -826,6 +828,9 @@ async function mergeConfig(url, options, tauriConf) {
     const platform = asSupportedPlatform(process.platform);
     if (options.hideTitleBar && platform !== 'darwin') {
         logger.warn('✼ --hide-title-bar is only supported on macOS and will be ignored on this platform.');
+    }
+    if (options.hideWindowDecorations && platform === 'darwin') {
+        logger.warn('✼ --hide-window-decorations is only supported on Windows and Linux and will be ignored on this platform.');
     }
     const tauriConfWindowOptions = buildWindowConfigOverrides(options, platform);
     Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
@@ -2728,6 +2733,7 @@ const DEFAULT_PAKE_OPTIONS = {
     fullscreen: false,
     maximize: false,
     hideTitleBar: false,
+    hideWindowDecorations: false,
     alwaysOnTop: false,
     appVersion: '1.0.0',
     darkMode: false,
@@ -2829,6 +2835,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .option('--use-local-file', 'Use local file packaging', DEFAULT_PAKE_OPTIONS.useLocalFile)
         .option('--fullscreen', 'Start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
         .option('--hide-title-bar', 'For Mac, hide title bar', DEFAULT_PAKE_OPTIONS.hideTitleBar)
+        .option('--hide-window-decorations', 'Hide native window decorations on Windows and Linux', DEFAULT_PAKE_OPTIONS.hideWindowDecorations)
         .option('--multi-arch', 'For Mac, both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
         .option('--inject <files>', 'Inject local CSS/JS files into the page', (val, previous) => {
         if (!val)

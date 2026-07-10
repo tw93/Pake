@@ -9,6 +9,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   maximize: false,
   resizable: true,
   hideTitleBar: false,
+  hideWindowDecorations: false,
   alwaysOnTop: false,
   appVersion: '1.0.0',
   darkMode: false,

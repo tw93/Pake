@@ -93,12 +93,13 @@ After build, confirm:
 
 ### Window Behavior
 
-| Option             | Default | Description          |
-| ------------------ | ------- | -------------------- |
-| `--fullscreen`     | false   | Start fullscreen     |
-| `--maximize`       | false   | Start maximized      |
-| `--always-on-top`  | false   | Pin window on top    |
-| `--hide-title-bar` | false   | Hide macOS title bar |
+| Option                      | Default | Description                                     |
+| --------------------------- | ------- | ----------------------------------------------- |
+| `--fullscreen`              | false   | Start fullscreen                                |
+| `--maximize`                | false   | Start maximized                                 |
+| `--always-on-top`           | false   | Pin window on top                               |
+| `--hide-title-bar`          | false   | Hide macOS title bar                            |
+| `--hide-window-decorations` | false   | Hide native window decorations on Windows/Linux |
 
 ### Advanced
 

@@ -72,16 +72,17 @@ pake [url] [options]
 
 您可以通过传递以下选项来定制打包过程。`pake --help` 展示全部支持的 CLI 选项。本文档是完整参考。
 
-| 选项               | 描述                                 | 示例                                           |
-| ------------------ | ------------------------------------ | ---------------------------------------------- |
-| `--name`           | 应用程序名称                         | `--name "Weekly"`                              |
-| `--icon`           | 自定义图标（可选，自动获取网站图标） | `--icon https://cdn.tw93.fun/pake/weekly.icns` |
-| `--width`          | 窗口宽度（默认：1200px）             | `--width 1400`                                 |
-| `--height`         | 窗口高度（默认：780px）              | `--height 900`                                 |
-| `--hide-title-bar` | 沉浸式标题栏（仅macOS）              | `--hide-title-bar`                             |
-| `--debug`          | 启用开发者工具                       | `--debug`                                      |
-| `--help`           | 显示全部 CLI 选项                    | `--help`                                       |
-| `--version`        | 显示 CLI 版本                        | `--version`                                    |
+| 选项                        | 描述                                 | 示例                                           |
+| --------------------------- | ------------------------------------ | ---------------------------------------------- |
+| `--name`                    | 应用程序名称                         | `--name "Weekly"`                              |
+| `--icon`                    | 自定义图标（可选，自动获取网站图标） | `--icon https://cdn.tw93.fun/pake/weekly.icns` |
+| `--width`                   | 窗口宽度（默认：1200px）             | `--width 1400`                                 |
+| `--height`                  | 窗口高度（默认：780px）              | `--height 900`                                 |
+| `--hide-title-bar`          | 沉浸式标题栏（仅 macOS）             | `--hide-title-bar`                             |
+| `--hide-window-decorations` | 隐藏原生窗口装饰（仅 Windows/Linux） | `--hide-window-decorations`                    |
+| `--debug`                   | 启用开发者工具                       | `--debug`                                      |
+| `--help`                    | 显示全部 CLI 选项                    | `--help`                                       |
+| `--version`                 | 显示 CLI 版本                        | `--version`                                    |
 
 完整选项请参见下面的详细说明：
 
@@ -172,6 +173,14 @@ pake https://github.com --name GitHub
 
 ```shell
 --hide-title-bar
+```
+
+#### [hide-window-decorations]
+
+在 Windows 和 Linux 上隐藏原生窗口装饰，默认为 `false`。该选项会移除标题栏和窗口控制按钮，并在顶部提供拖拽区域以移动窗口。可使用 `F11` 切换原生全屏。在 macOS 上会被忽略。
+
+```shell
+--hide-window-decorations
 ```
 
 #### [fullscreen]
