@@ -53,35 +53,22 @@ function handleShortcut(event) {
   }
 }
 
-function syncNativeFullscreenClass(appWindow) {
-  appWindow.isFullscreen().then((fullscreen) => {
-    document.documentElement.classList.toggle(
-      "pake-native-fullscreen",
-      fullscreen,
-    );
-  });
-}
-
 function toggleNativeFullscreen(appWindow) {
-  appWindow.isFullscreen().then((fullscreen) => {
-    const next = !fullscreen;
-    Promise.resolve(appWindow.setFullscreen(next)).then(() => {
-      document.documentElement.classList.toggle(
-        "pake-native-fullscreen",
-        next,
-      );
+  appWindow
+    .isFullscreen()
+    .then((fullscreen) => appWindow.setFullscreen(!fullscreen))
+    .catch((error) => {
+      console.warn("[Pake] Failed to toggle native fullscreen:", error);
     });
-  });
 }
-
-window.pakeSyncNativeFullscreen = syncNativeFullscreenClass;
 
 function handleWindowFullscreenShortcut(event) {
-  const isF11 = event.key === "F11";
-  const isAltEnter =
-    event.key === "Enter" && event.altKey && isNonMacDesktop();
-
-  if (!isF11 && !isAltEnter) {
+  if (
+    !event.isTrusted ||
+    event.repeat ||
+    event.key !== "F11" ||
+    !isNonMacDesktop()
+  ) {
     return;
   }
 
@@ -91,17 +78,26 @@ function handleWindowFullscreenShortcut(event) {
   }
 
   event.preventDefault();
+  event.stopImmediatePropagation();
   toggleNativeFullscreen(appWindow);
 }
 
+function getDesktopPlatform() {
+  return (
+    navigator.userAgentData?.platform ||
+    navigator.platform ||
+    navigator.userAgent
+  );
+}
+
 function isNonMacDesktop() {
-  return /windows|linux/i.test(navigator.userAgent);
+  return /win|linux/i.test(getDesktopPlatform());
 }
 
 function hasImmersiveHeader(config = window["pakeConfig"] || {}) {
-  return (
-    config.hide_title_bar === true || config.hide_window_decorations === true
-  );
+  return /mac/i.test(getDesktopPlatform())
+    ? config.hide_title_bar === true
+    : config.hide_window_decorations === true;
 }
 
 function isEditableElement(element) {
@@ -573,9 +569,6 @@ document.addEventListener("DOMContentLoaded", () => {
       toggleNativeFullscreen(appWindow);
     });
   }
-
-  syncNativeFullscreenClass(appWindow);
-  window.addEventListener("resize", () => syncNativeFullscreenClass(appWindow));
 
   if (window["pakeConfig"]?.disabled_web_shortcuts !== true) {
     document.addEventListener("keydown", handleWindowFullscreenShortcut, true);

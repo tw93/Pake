@@ -154,8 +154,9 @@
 | <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>H</kbd>                | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>H</kbd>   | 回到首页            |
 | <kbd>⌘</kbd> + <kbd>⌥</kbd> + <kbd>I</kbd>                | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd>   | 开启调试 (仅开发版) |
 | <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>⌫</kbd>                | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Del</kbd> | 清除缓存并重启      |
+| <kbd>⌃</kbd> + <kbd>⌘</kbd> + <kbd>F</kbd>                | <kbd>F11</kbd>                                      | 切换原生全屏        |
 
-此外还支持双击头部全屏切换，拖拽头部移动窗口，Mac 用户支持手势返回和前进，新菜单也提供了导航、缩放和窗口控制等选项。
+此外还支持双击头部全屏切换。Windows 和 Linux 可使用 `--hide-window-decorations` 创建带顶部拖拽区域的无边框窗口。Mac 用户支持手势返回和前进，新菜单也提供了导航、缩放和窗口控制等选项。
 
 </details>
 

@@ -153,8 +153,7 @@
 | <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>H</kbd>                | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>H</kbd>   | Go to Home Page                     |
 | <kbd>⌘</kbd> + <kbd>⌥</kbd> + <kbd>I</kbd>                | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd>   | Toggle Developer Tools (Debug Only) |
 | <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>⌫</kbd>                | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Del</kbd> | Clear Cache & Restart               |
-| <kbd>F11</kbd>                                            | <kbd>F11</kbd>                                      | Toggle native window fullscreen     |
-| <kbd>⌥</kbd> + <kbd>Enter</kbd>                           | <kbd>Alt</kbd> + <kbd>Enter</kbd>                   | Toggle native window fullscreen     |
+| <kbd>⌃</kbd> + <kbd>⌘</kbd> + <kbd>F</kbd>                | <kbd>F11</kbd>                                      | Toggle native window fullscreen     |
 
 In addition, double-click the title bar to switch to full-screen mode. On Windows and Linux, use `--hide-window-decorations` for a frameless window with a top drag region. For Mac users, you can also use the gesture to go to the previous or next page and drag the title bar to move the window. The new menu also offers options for navigation, zoom, and window controls.
 

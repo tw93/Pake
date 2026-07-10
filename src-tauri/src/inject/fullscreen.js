@@ -137,7 +137,6 @@
       }
 
       appWindow.setFullscreen(true).then(() => {
-        window.pakeSyncNativeFullscreen?.(appWindow);
         startFullscreenMonitor();
         const event = new Event("fullscreenchange", { bubbles: true });
         document.dispatchEvent(event);
@@ -191,7 +190,6 @@
       wasInBody = false;
 
       return appWindow.setFullscreen(false).then(() => {
-        window.pakeSyncNativeFullscreen?.(appWindow);
         const event = new Event("fullscreenchange", { bubbles: true });
         document.dispatchEvent(event);
         exitingElement.dispatchEvent(event);

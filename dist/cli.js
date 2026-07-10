@@ -2835,7 +2835,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .option('--use-local-file', 'Use local file packaging', DEFAULT_PAKE_OPTIONS.useLocalFile)
         .option('--fullscreen', 'Start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
         .option('--hide-title-bar', 'For Mac, hide title bar', DEFAULT_PAKE_OPTIONS.hideTitleBar)
-        .option('--hide-window-decorations', 'For Windows and Linux, hide the native title bar', DEFAULT_PAKE_OPTIONS.hideWindowDecorations)
+        .option('--hide-window-decorations', 'Hide native window decorations on Windows and Linux', DEFAULT_PAKE_OPTIONS.hideWindowDecorations)
         .option('--multi-arch', 'For Mac, both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
         .option('--inject <files>', 'Inject local CSS/JS files into the page', (val, previous) => {
         if (!val)

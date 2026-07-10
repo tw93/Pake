@@ -28,8 +28,11 @@ function createElement(tagName = "div") {
 
 function loadEventHelpers({
   userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+  platform = "Win32",
   disabledWebShortcuts = false,
   initialFullscreen = false,
+  hideTitleBar = false,
+  hideWindowDecorations = false,
 } = {}) {
   const source = fs.readFileSync(
     path.join(process.cwd(), "src-tauri/src/inject/event.js"),
@@ -40,21 +43,6 @@ function loadEventHelpers({
   const elementsById = new Map();
   const fullscreenCalls = [];
   const body = createElement("body");
-  const documentElement = {
-    classList: {
-      _classes: new Set(),
-      toggle(className, force) {
-        if (force) {
-          this._classes.add(className);
-        } else {
-          this._classes.delete(className);
-        }
-      },
-      contains(className) {
-        return this._classes.has(className);
-      },
-    },
-  };
   body.appendChild = (child) => {
     body.children.push(child);
     if (child.id) elementsById.set(child.id, child);
@@ -78,6 +66,7 @@ function loadEventHelpers({
     scrollTo: () => {},
     navigator: {
       userAgent,
+      platform,
       language: "en-US",
       clipboard: {
         readText: () => Promise.resolve(""),
@@ -110,6 +99,8 @@ function loadEventHelpers({
       isAuthPopup: () => false,
       pakeConfig: {
         disabled_web_shortcuts: disabledWebShortcuts,
+        hide_title_bar: hideTitleBar,
+        hide_window_decorations: hideWindowDecorations,
       },
       __TAURI__: {
         core: {
@@ -130,7 +121,6 @@ function loadEventHelpers({
     },
     document: {
       addEventListener: registerListener,
-      documentElement,
       createElement: (tagName) => {
         const element = createElement(tagName);
         if (element.id) elementsById.set(element.id, element);
@@ -175,7 +165,9 @@ function createKeyEvent(key, overrides = {}) {
     altKey: false,
     shiftKey: false,
     isTrusted: true,
+    repeat: false,
     preventDefault: vi.fn(),
+    stopImmediatePropagation: vi.fn(),
     ...overrides,
   };
 }
@@ -189,6 +181,7 @@ describe("event fullscreen shortcuts", () => {
     handler(event);
 
     expect(event.preventDefault).toHaveBeenCalled();
+    expect(event.stopImmediatePropagation).toHaveBeenCalled();
     await Promise.resolve();
     await Promise.resolve();
     expect(context.fullscreenCalls).toEqual([true]);
@@ -205,10 +198,13 @@ describe("event fullscreen shortcuts", () => {
     expect(context.fullscreenCalls).toEqual([false]);
   });
 
-  it("toggles native fullscreen on Alt+Enter for Windows", async () => {
-    const context = loadEventHelpers();
+  it("toggles native fullscreen on F11 for Linux", async () => {
+    const context = loadEventHelpers({
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+      platform: "Linux x86_64",
+    });
     const handler = getFullscreenShortcutHandler(context);
-    const event = createKeyEvent("Enter", { altKey: true });
+    const event = createKeyEvent("F11");
 
     handler(event);
 
@@ -228,11 +224,24 @@ describe("event fullscreen shortcuts", () => {
     ).toBeUndefined();
   });
 
-  it("does not handle Alt+Enter on macOS", async () => {
+  it("does not handle F11 on macOS", async () => {
     const context = loadEventHelpers({
       userAgent:
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15",
+      platform: "MacIntel",
     });
+    const handler = getFullscreenShortcutHandler(context);
+    const event = createKeyEvent("F11");
+
+    handler(event);
+
+    expect(event.preventDefault).not.toHaveBeenCalled();
+    await Promise.resolve();
+    expect(context.fullscreenCalls).toEqual([]);
+  });
+
+  it("does not claim Alt+Enter from hosted web apps", async () => {
+    const context = loadEventHelpers();
     const handler = getFullscreenShortcutHandler(context);
     const event = createKeyEvent("Enter", { altKey: true });
 
@@ -241,5 +250,50 @@ describe("event fullscreen shortcuts", () => {
     expect(event.preventDefault).not.toHaveBeenCalled();
     await Promise.resolve();
     expect(context.fullscreenCalls).toEqual([]);
+  });
+
+  it("ignores synthetic and repeated F11 events", async () => {
+    const context = loadEventHelpers();
+    const handler = getFullscreenShortcutHandler(context);
+
+    handler(createKeyEvent("F11", { isTrusted: false }));
+    handler(createKeyEvent("F11", { repeat: true }));
+
+    await Promise.resolve();
+    expect(context.fullscreenCalls).toEqual([]);
+  });
+
+  it("creates the drag region only for the active platform flag", () => {
+    const windowsWithMacFlag = loadEventHelpers({ hideTitleBar: true });
+    const windowsWithDecorationsFlag = loadEventHelpers({
+      userAgent: "CustomBrowser/1.0",
+      platform: "Win32",
+      hideWindowDecorations: true,
+    });
+    const macUserAgent =
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15";
+    const macWithDecorationsFlag = loadEventHelpers({
+      userAgent: macUserAgent,
+      platform: "MacIntel",
+      hideWindowDecorations: true,
+    });
+    const macWithTitleBarFlag = loadEventHelpers({
+      userAgent: macUserAgent,
+      platform: "MacIntel",
+      hideTitleBar: true,
+    });
+
+    expect(
+      windowsWithMacFlag.document.getElementById("pake-top-dom"),
+    ).toBeNull();
+    expect(
+      windowsWithDecorationsFlag.document.getElementById("pake-top-dom"),
+    ).not.toBeNull();
+    expect(
+      macWithDecorationsFlag.document.getElementById("pake-top-dom"),
+    ).toBeNull();
+    expect(
+      macWithTitleBarFlag.document.getElementById("pake-top-dom"),
+    ).not.toBeNull();
   });
 });
