@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 function loadEventHelpers({
   withTauri = false,
   userAgent = "Mozilla/5.0",
+  initialZoom = null,
 } = {}) {
   const source = fs.readFileSync(
     path.join(process.cwd(), "src-tauri/src/inject/event.js"),
@@ -19,6 +20,10 @@ function loadEventHelpers({
   };
   const eventListeners = {};
   const elementsById = new Map();
+  const localStorageValues = new Map();
+  if (initialZoom !== null) {
+    localStorageValues.set("htmlZoom", initialZoom);
+  }
   const registerListener = (type, handler, options) => {
     eventListeners[type] = eventListeners[type] || [];
     eventListeners[type].push({ handler, options });
@@ -72,8 +77,10 @@ function loadEventHelpers({
         reload: () => {},
       },
       localStorage: {
-        getItem: () => null,
-        setItem: () => {},
+        getItem: (key) => localStorageValues.get(key) ?? null,
+        setItem: (key, value) => {
+          localStorageValues.set(key, value);
+        },
       },
       addEventListener: registerListener,
       dispatchEvent: () => {},
@@ -106,7 +113,7 @@ function loadEventHelpers({
   }
 
   runInNewContext(source, context);
-  return { ...context, eventListeners, invokeCalls };
+  return { ...context, eventListeners, invokeCalls, localStorageValues };
 }
 
 function runDomReady(context) {
@@ -139,6 +146,22 @@ function makeClickEvent(anchor) {
 }
 
 describe("event link guard", () => {
+  it("falls back from malformed saved zoom values", () => {
+    const context = loadEventHelpers({
+      withTauri: true,
+      initialZoom: "not-a-zoom",
+    });
+
+    context.zoomIn();
+    context.zoomOut();
+
+    expect(context.invokeCalls).toEqual([
+      ["set_zoom", { percent: 110 }],
+      ["set_zoom", { percent: 100 }],
+    ]);
+    expect(context.localStorageValues.get("htmlZoom")).toBe("100%");
+  });
+
   it("bypasses javascript pseudo-links", () => {
     const { shouldBypassPakeLinkHandling } = loadEventHelpers();
 
