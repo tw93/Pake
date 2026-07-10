@@ -15,25 +15,32 @@ function setZoom(zoom) {
   // CSS hacks. `transform: scale` and `html.style.zoom` break complex SPAs like
   // ChatGPT: the page shifts right on Windows and parts of the UI stop repainting
   // on macOS. Native zoom recalculates layout exactly like a browser does.
+  const zoomPercent = normalizeZoomPercent(zoom);
+  const normalizedZoom = `${zoomPercent}%`;
   const invoke = window.__TAURI__?.core?.invoke;
   if (invoke) {
-    invoke("set_zoom", { percent: parseFloat(zoom) }).catch(() => {});
+    invoke("set_zoom", { percent: zoomPercent }).catch(() => {});
   }
 
-  window.localStorage.setItem("htmlZoom", zoom);
+  window.localStorage.setItem("htmlZoom", normalizedZoom);
 }
 
 function zoomCommon(zoomChange) {
   const currentZoom = window.localStorage.getItem("htmlZoom") || "100%";
-  setZoom(zoomChange(currentZoom));
+  setZoom(zoomChange(normalizeZoomPercent(currentZoom)));
 }
 
 function zoomIn() {
-  zoomCommon((currentZoom) => `${Math.min(parseInt(currentZoom) + 10, 200)}%`);
+  zoomCommon((currentZoom) => `${Math.min(currentZoom + 10, 200)}%`);
 }
 
 function zoomOut() {
-  zoomCommon((currentZoom) => `${Math.max(parseInt(currentZoom) - 10, 30)}%`);
+  zoomCommon((currentZoom) => `${Math.max(currentZoom - 10, 30)}%`);
+}
+
+function normalizeZoomPercent(zoom) {
+  const parsed = parseFloat(zoom);
+  return Number.isFinite(parsed) ? parsed : 100;
 }
 
 let pasteAsPlainTextPending = false;
