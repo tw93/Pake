@@ -130,6 +130,22 @@
         <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/Excalidraw.png width=600/></td>
         <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/XiaoHongShu.png width=600/></td>
     </tr>
+    <tr>
+        <td>Notion
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Notion.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Notion_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Notion_x86_64.deb">Linux</a>
+        </td>
+        <td>Flomo
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo.dmg">Mac</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x64.msi">Windows</a>
+            <a href="https://github.com/tw93/Pake/releases/latest/download/Flomo_x86_64.deb">Linux</a>
+        </td>
+    </tr>
+    <tr>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/Notion.png width=600/></td>
+        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/Flomo.png width=600/></td>
+    </tr>
 </table>
 
 <details>
