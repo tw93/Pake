@@ -403,6 +403,11 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       padding-top: 0px;
     }
 
+    #notion-app .notion-sidebar,#notion-app .notion-topbar{
+      padding-top: 20px;
+      box-sizing: content-box;
+    }
+
     #header-area > div > .css-gtiexd > div:nth-child(1) > div, #header-area .logoIcon .user-info{
       padding-top: 20px;
     }
