@@ -1,7 +1,7 @@
 ---
 name: release
 description: Prepare, validate, and publish a Pake release. Not for version bumps without release intent.
-version: 1.3.0
+version: 1.4.0
 allowed-tools:
   - Bash
   - Read
@@ -27,15 +27,15 @@ Four files must be updated in sync — never update one without the others:
 
 ### Pre-Release
 
-1. [ ] Confirm the new version number (check current: `cat package.json | jq .version`)
+1. [ ] Confirm the new version number (check current: `cat package.json | jq .version`; previous tag: `git tag --list 'V*' --sort=-version:refname | head -1` — a bare `git tag --sort` picks up stray non-version tags like `list` and `continuous`)
 2. [ ] Confirm the version is not already on npm: `npm view pake-cli@X.Y.Z version` should return 404 before publishing
 3. [ ] Update all four version files above
 4. [ ] Run `pnpm run format` — must pass cleanly
 5. [ ] Run `pnpm test` — must pass cleanly. If the release workflow step fails with `pnpm install ... exit code 1` against the CN mirror, re-run once; a single transient flake is acceptable, two consecutive failures is not.
 6. [ ] Run `pnpm run cli:build` — Rollup + TS must pass (catches type errors that `format` misses).
 7. [ ] Run `pnpm run release:check` — verifies version sync, package contents, and npm dry-run
-8. [ ] No uncommitted changes: `git status`
-9. [ ] Commit version bump with message: `chore: bump version to VX.X.X`
+8. [ ] No uncommitted changes: `git status`. Local tests and builds leave tracked churn (`src-tauri/pake.json`, `tauri.conf.json`, `tauri.macos.conf.json`, regenerated icons); `git restore` it instead of committing it.
+9. [ ] Commit version bump with message: `chore: bump version to VX.X.X`. Include the rebuilt `dist/cli.js` (it embeds the version); stage it with `git add -f dist/cli.js` since `dist/` is gitignored.
 
 ### Tagging (triggers CI)
 
@@ -45,6 +45,8 @@ git push origin VX.X.X
 ```
 
 Tag format: uppercase `V` prefix (e.g. `V3.11.0`), not `v3.11.0`.
+
+If the bump push is rejected, the contributors bot pushed `chore: update contributors [skip ci]` in between: `git pull --rebase` onto it and push again, then tag. Do not force-push and do not tag the pre-rebase commit.
 
 ### Post-Tag Verification
 
