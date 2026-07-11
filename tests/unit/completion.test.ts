@@ -3,13 +3,19 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-const originalConfigHome = process.env.XDG_CONFIG_HOME;
+const originalEnvironment = {
+  HOME: process.env.HOME,
+  LOCALAPPDATA: process.env.LOCALAPPDATA,
+  XDG_CONFIG_HOME: process.env.XDG_CONFIG_HOME,
+};
 
 afterEach(() => {
-  if (originalConfigHome === undefined) {
-    delete process.env.XDG_CONFIG_HOME;
-  } else {
-    process.env.XDG_CONFIG_HOME = originalConfigHome;
+  for (const [name, value] of Object.entries(originalEnvironment)) {
+    if (value === undefined) {
+      delete process.env[name];
+    } else {
+      process.env[name] = value;
+    }
   }
   vi.resetModules();
 });
@@ -17,6 +23,8 @@ afterEach(() => {
 describe('shell completion', () => {
   it('generates standalone integrations and a Carapace spec', async () => {
     const configHome = await mkdtemp(join(tmpdir(), 'pake-completion-'));
+    process.env.HOME = configHome;
+    process.env.LOCALAPPDATA = configHome;
     process.env.XDG_CONFIG_HOME = configHome;
     vi.resetModules();
 
@@ -80,10 +88,18 @@ describe('shell completion', () => {
 
       await program.installCompletion();
 
-      const spec = await readFile(
-        join(configHome, 'carapace', 'specs', 'pake.yaml'),
-        'utf8',
-      );
+      const specPath =
+        process.platform === 'darwin'
+          ? join(
+              configHome,
+              'Library',
+              'Application Support',
+              'carapace',
+              'specs',
+              'pake.yaml',
+            )
+          : join(configHome, 'carapace', 'specs', 'pake.yaml');
+      const spec = await readFile(specPath, 'utf8');
       expect(spec).toContain('name: pake');
       expect(spec).toContain('commands:');
       expect(spec).toContain('$files');
