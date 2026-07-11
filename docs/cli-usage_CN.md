@@ -607,6 +607,26 @@ pake ./my-app/index.html --name "my-app" --use-local-file
 --new-window
 ```
 
+### Shell 补全
+
+Pake 首次运行时会根据现有 CLI 选项自动生成 [Carapace](https://carapace-sh.github.io/carapace-bin/) 补全规范。安装 Carapace 后，请为当前 Shell 完成初始化：
+
+```shell
+# Bash
+source <(carapace _carapace bash)
+
+# Zsh
+source <(carapace _carapace zsh)
+
+# Fish
+carapace _carapace fish | source
+
+# Nushell：生成一次集成脚本，然后在 config.nu 中加载
+carapace _carapace nushell | save --force $"($nu.cache-dir)/carapace.nu"
+```
+
+使用 Nushell 时，还需要在 `config.nu` 中添加 `source ($nu.cache-dir)/carapace.nu`。生成的 `pake` 规范也可直接供 Carapace 使用，并会自动与全部 CLI 选项保持同步，无需单独维护补全文件。
+
 ### 打包完成
 
 完成上述步骤后，您的应用程序应该已经成功打包。请注意，根据您的系统配置和网络状况，打包过程可能需要一些时间。请耐心等待，一旦打包完成，您就可以在指定的目录中找到应用程序安装包。

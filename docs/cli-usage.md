@@ -609,6 +609,26 @@ This can help sites that rely on popup auth windows, but it does not guarantee i
 --new-window
 ```
 
+### Shell Completion
+
+Pake automatically generates a [Carapace](https://carapace-sh.github.io/carapace-bin/) completion spec from its CLI options the first time it runs. Install Carapace, then initialize it for your shell:
+
+```shell
+# Bash
+source <(carapace _carapace bash)
+
+# Zsh
+source <(carapace _carapace zsh)
+
+# Fish
+carapace _carapace fish | source
+
+# Nushell: generate the integration once, then source it from config.nu
+carapace _carapace nushell | save --force $"($nu.cache-dir)/carapace.nu"
+```
+
+For Nushell, add `source ($nu.cache-dir)/carapace.nu` to `config.nu`. The generated `pake` spec is also available directly to Carapace and stays synchronized with every CLI option without a separately maintained completion file.
+
 ### Packaging Complete
 
 After completing the above steps, your application should be successfully packaged. Please note that the packaging process may take some time depending on your system configuration and network conditions. Be patient, and once the packaging is complete, you can find the application installer in the specified directory.
