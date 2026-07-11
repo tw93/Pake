@@ -18,6 +18,9 @@ import icongen from 'icon-gen';
 import sharp from 'sharp';
 import * as psl from 'psl';
 import { InvalidArgumentError, Option } from 'commander';
+import { mkdir, writeFile, readFile, appendFile } from 'node:fs/promises';
+import os$1 from 'node:os';
+import path$1 from 'node:path';
 import { NewCommand } from '@gutenye/commander-completion-carapace';
 
 var name = "pake-cli";
@@ -2803,7 +2806,7 @@ function bashCompletion(program) {
     return `# bash completion for pake
 _pake_completion() {
   local current="\${COMP_WORDS[COMP_CWORD]}"
-  if [[ "\${COMP_WORDS[1]}" == "completion" ]]; then
+  if [[ "\${COMP_WORDS[1]}" == "completion" || "\${COMP_WORDS[1]}" == "install-completion" ]]; then
     COMPREPLY=( $(compgen -W ${shellQuote(shells)} -- "$current") )
   elif [[ "$current" == -* ]]; then
     COMPREPLY=( $(compgen -W ${shellQuote(flags)} -- "$current") )
@@ -2817,7 +2820,7 @@ function zshCompletion(program) {
     const shells = COMPLETION_SHELLS.map(shellQuote).join(' ');
     return `#compdef pake
 _pake() {
-  if [[ "\${words[2]}" == "completion" ]]; then
+  if [[ "\${words[2]}" == "completion" || "\${words[2]}" == "install-completion" ]]; then
     compadd -- ${shells}
   elif [[ "\${words[CURRENT]}" == -* ]]; then
     compadd -- ${flags}
@@ -2839,7 +2842,9 @@ function fishCompletion(program) {
     const options = program.options.map(fishOption).join('\n');
     return `# fish completion for pake
 complete -c pake -f -a completion -d 'Generate standalone shell completion'
+complete -c pake -f -a install-completion -d 'Install standalone shell completion'
 complete -c pake -f -n '__fish_seen_subcommand_from completion' -a '${COMPLETION_SHELLS.join(' ')}'
+complete -c pake -f -n '__fish_seen_subcommand_from install-completion' -a '${COMPLETION_SHELLS.join(' ')}'
 ${options}
 `;
 }
@@ -2872,6 +2877,10 @@ def "nu-complete pake shells" [] {
 export extern "pake completion" [
   shell: string@"nu-complete pake shells"
 ]
+
+export extern "pake install-completion" [
+  shell: string@"nu-complete pake shells"
+]
 `;
 }
 function generateShellCompletion(program, shell) {
@@ -2885,6 +2894,58 @@ function generateShellCompletion(program, shell) {
         case 'nushell':
             return nushellCompletion(program);
     }
+}
+async function appendLoader(configPath, loader) {
+    let current = '';
+    try {
+        current = await readFile(configPath, 'utf8');
+    }
+    catch (error) {
+        if (!(error instanceof Error && 'code' in error && error.code === 'ENOENT')) {
+            throw error;
+        }
+    }
+    if (current.includes(loader))
+        return;
+    await mkdir(path$1.dirname(configPath), { recursive: true });
+    const prefix = current.length > 0 && !current.endsWith('\n') ? '\n' : '';
+    await appendFile(configPath, `${prefix}${loader}\n`);
+}
+async function installShellCompletion(program, shell, options = {}) {
+    const homeDir = options.homeDir ?? os$1.homedir();
+    const env = options.env ?? process.env;
+    const configHome = env.XDG_CONFIG_HOME ?? path$1.join(homeDir, '.config');
+    const dataHome = env.XDG_DATA_HOME ?? path$1.join(homeDir, '.local', 'share');
+    const completion = generateShellCompletion(program, shell);
+    let completionPath;
+    let configPath;
+    let loader;
+    switch (shell) {
+        case 'bash':
+            completionPath = path$1.join(dataHome, 'pake', 'completions', 'pake.bash');
+            configPath = path$1.join(homeDir, '.bashrc');
+            loader = `. ${shellQuote(completionPath)}`;
+            break;
+        case 'zsh': {
+            completionPath = path$1.join(dataHome, 'pake', 'completions', '_pake');
+            configPath = path$1.join(env.ZDOTDIR ?? homeDir, '.zshrc');
+            loader = `. ${shellQuote(completionPath)}`;
+            break;
+        }
+        case 'fish':
+            completionPath = path$1.join(configHome, 'fish', 'completions', 'pake.fish');
+            break;
+        case 'nushell':
+            completionPath = path$1.join(configHome, 'nushell', 'pake-completion.nu');
+            configPath = path$1.join(configHome, 'nushell', 'config.nu');
+            loader = `source "${completionPath.replace(/(["\\])/g, '\\$1')}"`;
+            break;
+    }
+    await mkdir(path$1.dirname(completionPath), { recursive: true });
+    await writeFile(completionPath, completion);
+    if (configPath && loader)
+        await appendLoader(configPath, loader);
+    return completionPath;
 }
 
 function validateNumberInput(value) {
@@ -3096,6 +3157,17 @@ program
         throw new Error(`Unsupported shell '${shell}'. Expected one of: ${COMPLETION_SHELLS.join(', ')}`);
     }
     process.stdout.write(generateShellCompletion(program, shell));
+});
+program
+    .command('install-completion')
+    .description('Install standalone shell completion for the current user')
+    .argument('<shell>', `Shell: ${COMPLETION_SHELLS.join(', ')}`)
+    .action(async (shell) => {
+    if (!COMPLETION_SHELLS.includes(shell)) {
+        throw new Error(`Unsupported shell '${shell}'. Expected one of: ${COMPLETION_SHELLS.join(', ')}`);
+    }
+    const installedPath = await installShellCompletion(program, shell);
+    process.stdout.write(`Installed completion to ${installedPath}\n`);
 });
 async function checkUpdateTips() {
     updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify({

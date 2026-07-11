@@ -615,23 +615,25 @@ Pake offers standalone shell completion and optional Carapace integration. Both 
 
 #### Standalone completion
 
-This method does not require Carapace:
+This method does not require Carapace. Install completion for the current user with:
 
 ```shell
-# Bash
-source <(pake completion bash)
-
-# Zsh
-source <(pake completion zsh)
-
-# Fish
-pake completion fish | source
-
-# Nushell: generate once, then source the file from config.nu
-pake completion nushell | save --force $"($nu.default-config-dir)/pake-completion.nu"
+pake install-completion bash
+pake install-completion zsh
+pake install-completion fish
+pake install-completion nushell
 ```
 
-For Nushell, add `source ($nu.default-config-dir)/pake-completion.nu` to `config.nu`. Add the equivalent command to your shell startup file to enable completion in every new session.
+Restart the shell after installation. The command writes only to user-owned configuration paths and can be run again safely to refresh completions after an upgrade.
+
+To inspect or manage the generated script yourself, use `pake completion`:
+
+```shell
+pake completion bash
+pake completion zsh
+pake completion fish
+pake completion nushell
+```
 
 #### Carapace integration
 

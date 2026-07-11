@@ -11,6 +11,7 @@ import {
   COMPLETION_SHELLS,
   CompletionShell,
   generateShellCompletion,
+  installShellCompletion,
 } from './utils/completion';
 
 const program = getCliProgram();
@@ -28,6 +29,23 @@ program
     process.stdout.write(
       generateShellCompletion(program, shell as CompletionShell),
     );
+  });
+
+program
+  .command('install-completion')
+  .description('Install standalone shell completion for the current user')
+  .argument('<shell>', `Shell: ${COMPLETION_SHELLS.join(', ')}`)
+  .action(async (shell: string) => {
+    if (!COMPLETION_SHELLS.includes(shell as CompletionShell)) {
+      throw new Error(
+        `Unsupported shell '${shell}'. Expected one of: ${COMPLETION_SHELLS.join(', ')}`,
+      );
+    }
+    const installedPath = await installShellCompletion(
+      program,
+      shell as CompletionShell,
+    );
+    process.stdout.write(`Installed completion to ${installedPath}\n`);
   });
 
 async function checkUpdateTips() {

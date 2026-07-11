@@ -23,8 +23,11 @@ describe('shell completion', () => {
     try {
       const { getCliProgram } =
         await import('../../bin/helpers/cli-program.js');
-      const { COMPLETION_SHELLS, generateShellCompletion } =
-        await import('../../bin/utils/completion.js');
+      const {
+        COMPLETION_SHELLS,
+        generateShellCompletion,
+        installShellCompletion,
+      } = await import('../../bin/utils/completion.js');
       const program = getCliProgram();
 
       for (const shell of COMPLETION_SHELLS) {
@@ -36,7 +39,32 @@ describe('shell completion', () => {
             shell === 'fish' ? `-l ${option.long.slice(2)}` : option.long;
           expect(completion).toContain(flag);
         }
+
+        const installOptions = {
+          homeDir: configHome,
+          env: {
+            XDG_CONFIG_HOME: join(configHome, 'config'),
+            XDG_DATA_HOME: join(configHome, 'data'),
+          },
+        };
+        const installedPath = await installShellCompletion(
+          program,
+          shell,
+          installOptions,
+        );
+        await installShellCompletion(program, shell, installOptions);
+        expect(await readFile(installedPath, 'utf8')).toBe(completion);
       }
+
+      const bashrc = await readFile(join(configHome, '.bashrc'), 'utf8');
+      expect(bashrc.match(/pake\.bash/g)).toHaveLength(1);
+      const zshrc = await readFile(join(configHome, '.zshrc'), 'utf8');
+      expect(zshrc.match(/_pake/g)).toHaveLength(1);
+      const nuConfig = await readFile(
+        join(configHome, 'config', 'nushell', 'config.nu'),
+        'utf8',
+      );
+      expect(nuConfig.match(/pake-completion\.nu/g)).toHaveLength(1);
 
       await program.installCompletion();
 
