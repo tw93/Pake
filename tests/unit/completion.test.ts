@@ -15,7 +15,7 @@ afterEach(() => {
 });
 
 describe('shell completion', () => {
-  it('generates a Carapace spec from every Commander option', async () => {
+  it('generates standalone integrations and a Carapace spec', async () => {
     const configHome = await mkdtemp(join(tmpdir(), 'pake-completion-'));
     process.env.XDG_CONFIG_HOME = configHome;
     vi.resetModules();
@@ -23,7 +23,20 @@ describe('shell completion', () => {
     try {
       const { getCliProgram } =
         await import('../../bin/helpers/cli-program.js');
+      const { COMPLETION_SHELLS, generateShellCompletion } =
+        await import('../../bin/utils/completion.js');
       const program = getCliProgram();
+
+      for (const shell of COMPLETION_SHELLS) {
+        const completion = generateShellCompletion(program, shell);
+        expect(completion).not.toContain('carapace');
+        for (const option of program.options) {
+          if (!option.long) continue;
+          const flag =
+            shell === 'fish' ? `-l ${option.long.slice(2)}` : option.long;
+          expect(completion).toContain(flag);
+        }
+      }
 
       await program.installCompletion();
 

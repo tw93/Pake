@@ -49,3 +49,19 @@ index b952137f2321c761a590a818a64829750818a887..a88e263451c8a3fb3aaf960caf5143e4
    },
    "devDependencies": {
      "@biomejs/biome": "^1.9.4",
+diff --git a/build/installCompletion.js b/build/installCompletion.js
+--- a/build/installCompletion.js
++++ b/build/installCompletion.js
+@@ -3,4 +3,4 @@ import invariant from 'tiny-invariant';
+ import * as yaml from 'yaml';
+ import { CARAPACE_SPECS_DIR } from './constants.js';
+-import { fs, logger, mergeWithoutNull, question } from './utils/index.js';
++import { fs, mergeWithoutNull, question } from './utils/index.js';
+ export async function installCompletion(program) {
+@@ -28,6 +28,5 @@ export async function installCompletion(program) {
+         }
+     }
+     await fs.outputFile(path, text);
+-    logger.log(`\nCompletion file is installed to '${path}'\n`);
+ }
+ function buildRootSpec(rootCommand) {

@@ -2789,7 +2789,103 @@ const DEFAULT_PAKE_OPTIONS = {
     microphone: false,
 };
 
+const COMPLETION_SHELLS = ['bash', 'zsh', 'fish', 'nushell'];
 const completionProgram = new NewCommand();
+function shellQuote(value) {
+    return `'${value.replace(/'/g, "'\\''")}'`;
+}
+function visibleFlags(program) {
+    return program.options.flatMap((option) => [option.short, option.long].filter((flag) => Boolean(flag)));
+}
+function bashCompletion(program) {
+    const flags = visibleFlags(program).join(' ');
+    const shells = COMPLETION_SHELLS.join(' ');
+    return `# bash completion for pake
+_pake_completion() {
+  local current="\${COMP_WORDS[COMP_CWORD]}"
+  if [[ "\${COMP_WORDS[1]}" == "completion" ]]; then
+    COMPREPLY=( $(compgen -W ${shellQuote(shells)} -- "$current") )
+  elif [[ "$current" == -* ]]; then
+    COMPREPLY=( $(compgen -W ${shellQuote(flags)} -- "$current") )
+  fi
+}
+complete -F _pake_completion pake
+`;
+}
+function zshCompletion(program) {
+    const flags = visibleFlags(program).map(shellQuote).join(' ');
+    const shells = COMPLETION_SHELLS.map(shellQuote).join(' ');
+    return `#compdef pake
+_pake() {
+  if [[ "\${words[2]}" == "completion" ]]; then
+    compadd -- ${shells}
+  elif [[ "\${words[CURRENT]}" == -* ]]; then
+    compadd -- ${flags}
+  fi
+}
+compdef _pake pake
+`;
+}
+function fishOption(option) {
+    const flags = [
+        option.short ? `-s ${option.short.slice(1)}` : '',
+        option.long ? `-l ${option.long.slice(2)}` : '',
+        option.isBoolean() ? '' : '-r',
+        option.description ? `-d ${shellQuote(option.description)}` : '',
+    ].filter(Boolean);
+    return `complete -c pake ${flags.join(' ')}`;
+}
+function fishCompletion(program) {
+    const options = program.options.map(fishOption).join('\n');
+    return `# fish completion for pake
+complete -c pake -f -a completion -d 'Generate standalone shell completion'
+complete -c pake -f -n '__fish_seen_subcommand_from completion' -a '${COMPLETION_SHELLS.join(' ')}'
+${options}
+`;
+}
+function nushellFlag(option) {
+    const long = option.long?.slice(2);
+    if (!long)
+        return undefined;
+    const short = option.short ? `(-${option.short.slice(1)})` : '';
+    const value = option.isBoolean() ? '' : ': string';
+    const description = option.description
+        ? ` # ${option.description.replace(/\n/g, ' ')}`
+        : '';
+    return `  --${long}${short}${value}${description}`;
+}
+function nushellCompletion(program) {
+    const flags = program.options
+        .map(nushellFlag)
+        .filter((flag) => Boolean(flag))
+        .join('\n');
+    return `# Nushell completion for pake
+export extern pake [
+  url?: string
+${flags}
+]
+
+def "nu-complete pake shells" [] {
+  [${COMPLETION_SHELLS.map(shellQuote).join(' ')}]
+}
+
+export extern "pake completion" [
+  shell: string@"nu-complete pake shells"
+]
+`;
+}
+function generateShellCompletion(program, shell) {
+    switch (shell) {
+        case 'bash':
+            return bashCompletion(program);
+        case 'zsh':
+            return zshCompletion(program);
+        case 'fish':
+            return fishCompletion(program);
+        case 'nushell':
+            return nushellCompletion(program);
+    }
+}
 
 function validateNumberInput(value) {
     if (value.trim() === '') {
@@ -2991,6 +3087,16 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
 }
 
 const program = getCliProgram();
+program
+    .command('completion')
+    .description('Generate standalone shell completion')
+    .argument('<shell>', `Shell: ${COMPLETION_SHELLS.join(', ')}`)
+    .action((shell) => {
+    if (!COMPLETION_SHELLS.includes(shell)) {
+        throw new Error(`Unsupported shell '${shell}'. Expected one of: ${COMPLETION_SHELLS.join(', ')}`);
+    }
+    process.stdout.write(generateShellCompletion(program, shell));
+});
 async function checkUpdateTips() {
     updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify({
         isGlobal: true,

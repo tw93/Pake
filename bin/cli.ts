@@ -7,8 +7,28 @@ import handleInputOptions from './options/index';
 import { getCliProgram } from './helpers/cli-program';
 import { isPakeError } from './utils/error';
 import { PakeCliOptions } from './types';
+import {
+  COMPLETION_SHELLS,
+  CompletionShell,
+  generateShellCompletion,
+} from './utils/completion';
 
 const program = getCliProgram();
+
+program
+  .command('completion')
+  .description('Generate standalone shell completion')
+  .argument('<shell>', `Shell: ${COMPLETION_SHELLS.join(', ')}`)
+  .action((shell: string) => {
+    if (!COMPLETION_SHELLS.includes(shell as CompletionShell)) {
+      throw new Error(
+        `Unsupported shell '${shell}'. Expected one of: ${COMPLETION_SHELLS.join(', ')}`,
+      );
+    }
+    process.stdout.write(
+      generateShellCompletion(program, shell as CompletionShell),
+    );
+  });
 
 async function checkUpdateTips() {
   updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify({
