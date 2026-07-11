@@ -17,7 +17,7 @@ import { fileTypeFromBuffer } from 'file-type';
 import icongen from 'icon-gen';
 import sharp from 'sharp';
 import * as psl from 'psl';
-import { InvalidArgumentError, Option } from 'commander';
+import { Argument, InvalidArgumentError, Option } from 'commander';
 import { mkdir, writeFile, readFile, appendFile } from 'node:fs/promises';
 import os$1 from 'node:os';
 import path$1 from 'node:path';
@@ -2797,8 +2797,11 @@ const completionProgram = new NewCommand();
 function shellQuote(value) {
     return `'${value.replace(/'/g, "'\\''")}'`;
 }
+function completionOptions(program) {
+    return program.createHelp().visibleOptions(program);
+}
 function visibleFlags(program) {
-    return program.options.flatMap((option) => [option.short, option.long].filter((flag) => Boolean(flag)));
+    return completionOptions(program).flatMap((option) => [option.short, option.long].filter((flag) => Boolean(flag)));
 }
 function bashCompletion(program) {
     const flags = visibleFlags(program).join(' ');
@@ -2806,7 +2809,9 @@ function bashCompletion(program) {
     return `# bash completion for pake
 _pake_completion() {
   local current="\${COMP_WORDS[COMP_CWORD]}"
-  if [[ "\${COMP_WORDS[1]}" == "completion" || "\${COMP_WORDS[1]}" == "install-completion" ]]; then
+  if (( COMP_CWORD == 1 )) && [[ "$current" != -* ]]; then
+    COMPREPLY=( $(compgen -W 'completion install-completion' -- "$current") )
+  elif [[ "\${COMP_WORDS[1]}" == "completion" || "\${COMP_WORDS[1]}" == "install-completion" ]]; then
     COMPREPLY=( $(compgen -W ${shellQuote(shells)} -- "$current") )
   elif [[ "$current" == -* ]]; then
     COMPREPLY=( $(compgen -W ${shellQuote(flags)} -- "$current") )
@@ -2820,7 +2825,9 @@ function zshCompletion(program) {
     const shells = COMPLETION_SHELLS.map(shellQuote).join(' ');
     return `#compdef pake
 _pake() {
-  if [[ "\${words[2]}" == "completion" || "\${words[2]}" == "install-completion" ]]; then
+  if (( CURRENT == 2 )) && [[ "\${words[CURRENT]}" != -* ]]; then
+    compadd -- 'completion' 'install-completion'
+  elif [[ "\${words[2]}" == "completion" || "\${words[2]}" == "install-completion" ]]; then
     compadd -- ${shells}
   elif [[ "\${words[CURRENT]}" == -* ]]; then
     compadd -- ${flags}
@@ -2833,13 +2840,13 @@ function fishOption(option) {
     const flags = [
         option.short ? `-s ${option.short.slice(1)}` : '',
         option.long ? `-l ${option.long.slice(2)}` : '',
-        option.isBoolean() ? '' : '-r',
+        option.isBoolean() || option.optional ? '' : '-r',
         option.description ? `-d ${shellQuote(option.description)}` : '',
     ].filter(Boolean);
     return `complete -c pake ${flags.join(' ')}`;
 }
 function fishCompletion(program) {
-    const options = program.options.map(fishOption).join('\n');
+    const options = completionOptions(program).map(fishOption).join('\n');
     return `# fish completion for pake
 complete -c pake -f -a completion -d 'Generate standalone shell completion'
 complete -c pake -f -a install-completion -d 'Install standalone shell completion'
@@ -2853,14 +2860,14 @@ function nushellFlag(option) {
     if (!long)
         return undefined;
     const short = option.short ? `(-${option.short.slice(1)})` : '';
-    const value = option.isBoolean() ? '' : ': string';
+    const value = option.isBoolean() || option.optional ? '' : ': string';
     const description = option.description
         ? ` # ${option.description.replace(/\n/g, ' ')}`
         : '';
     return `  --${long}${short}${value}${description}`;
 }
 function nushellCompletion(program) {
-    const flags = program.options
+    const flags = completionOptions(program)
         .map(nushellFlag)
         .filter((flag) => Boolean(flag))
         .join('\n');
@@ -2894,6 +2901,23 @@ function generateShellCompletion(program, shell) {
         case 'nushell':
             return nushellCompletion(program);
     }
+}
+function addCompletionCommands(program) {
+    program
+        .command('completion')
+        .description('Generate standalone shell completion')
+        .addArgument(new Argument('<shell>', 'Shell').choices([...COMPLETION_SHELLS]))
+        .action((shell) => {
+        process.stdout.write(generateShellCompletion(program, shell));
+    });
+    program
+        .command('install-completion')
+        .description('Install standalone shell completion for the current user')
+        .addArgument(new Argument('<shell>', 'Shell').choices([...COMPLETION_SHELLS]))
+        .action(async (shell) => {
+        const installedPath = await installShellCompletion(program, shell);
+        process.stdout.write(`Installed completion to ${installedPath}\n`);
+    });
 }
 async function appendLoader(configPath, loader) {
     let current = '';
@@ -3148,27 +3172,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
 }
 
 const program = getCliProgram();
-program
-    .command('completion')
-    .description('Generate standalone shell completion')
-    .argument('<shell>', `Shell: ${COMPLETION_SHELLS.join(', ')}`)
-    .action((shell) => {
-    if (!COMPLETION_SHELLS.includes(shell)) {
-        throw new Error(`Unsupported shell '${shell}'. Expected one of: ${COMPLETION_SHELLS.join(', ')}`);
-    }
-    process.stdout.write(generateShellCompletion(program, shell));
-});
-program
-    .command('install-completion')
-    .description('Install standalone shell completion for the current user')
-    .argument('<shell>', `Shell: ${COMPLETION_SHELLS.join(', ')}`)
-    .action(async (shell) => {
-    if (!COMPLETION_SHELLS.includes(shell)) {
-        throw new Error(`Unsupported shell '${shell}'. Expected one of: ${COMPLETION_SHELLS.join(', ')}`);
-    }
-    const installedPath = await installShellCompletion(program, shell);
-    process.stdout.write(`Installed completion to ${installedPath}\n`);
-});
+addCompletionCommands(program);
 async function checkUpdateTips() {
     updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify({
         isGlobal: true,

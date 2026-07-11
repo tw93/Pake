@@ -10,7 +10,7 @@ overrides:
 
 patchedDependencies:
   '@gutenye/commander-completion-carapace@1.0.9':
-    hash: c7d7519c867a521ff7d2cdc8ad6645cd0184d3005861882a0a943127ff8a1c98
+    hash: cb6132f1475f7d7d87fd834cdc1fb64750caeb12730cc2950cae7ad80cd775c6
     path: patches/@gutenye__commander-completion-carapace@1.0.9.patch
 
 importers:
@@ -19,7 +19,7 @@ importers:
     dependencies:
       '@gutenye/commander-completion-carapace':
         specifier: 1.0.9
-        version: 1.0.9(patch_hash=c7d7519c867a521ff7d2cdc8ad6645cd0184d3005861882a0a943127ff8a1c98)(commander@14.0.3)
+        version: 1.0.9(patch_hash=cb6132f1475f7d7d87fd834cdc1fb64750caeb12730cc2950cae7ad80cd775c6)(commander@14.0.3)
       '@tauri-apps/api':
         specifier: ~2.10.1
         version: 2.10.1
@@ -1628,7 +1628,7 @@ snapshots:
   '@esbuild/win32-x64@0.27.3':
     optional: true
 
-  '@gutenye/commander-completion-carapace@1.0.9(patch_hash=c7d7519c867a521ff7d2cdc8ad6645cd0184d3005861882a0a943127ff8a1c98)(commander@14.0.3)':
+  '@gutenye/commander-completion-carapace@1.0.9(patch_hash=cb6132f1475f7d7d87fd834cdc1fb64750caeb12730cc2950cae7ad80cd775c6)(commander@14.0.3)':
     dependencies:
       commander: 14.0.3
       lodash-es: 4.18.1

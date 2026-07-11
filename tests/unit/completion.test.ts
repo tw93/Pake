@@ -25,15 +25,20 @@ describe('shell completion', () => {
         await import('../../bin/helpers/cli-program.js');
       const {
         COMPLETION_SHELLS,
+        addCompletionCommands,
         generateShellCompletion,
         installShellCompletion,
       } = await import('../../bin/utils/completion.js');
       const program = getCliProgram();
+      addCompletionCommands(program);
+      const options = program.createHelp().visibleOptions(program);
 
       for (const shell of COMPLETION_SHELLS) {
         const completion = generateShellCompletion(program, shell);
         expect(completion).not.toContain('carapace');
-        for (const option of program.options) {
+        expect(completion).toContain('completion');
+        expect(completion).toContain('install-completion');
+        for (const option of options) {
           if (!option.long) continue;
           const flag =
             shell === 'fish' ? `-l ${option.long.slice(2)}` : option.long;
@@ -73,9 +78,13 @@ describe('shell completion', () => {
         'utf8',
       );
       expect(spec).toContain('name: pake');
+      expect(spec).toContain('commands:');
 
-      for (const option of program.options) {
+      for (const option of options) {
         expect(spec).toContain(option.long ?? option.short);
+      }
+      for (const shell of COMPLETION_SHELLS) {
+        expect(spec).toContain(`- ${shell}`);
       }
     } finally {
       await rm(configHome, { recursive: true, force: true });

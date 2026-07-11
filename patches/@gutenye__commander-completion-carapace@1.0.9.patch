@@ -65,3 +65,11 @@ diff --git a/build/installCompletion.js b/build/installCompletion.js
 -    logger.log(`\nCompletion file is installed to '${path}'\n`);
  }
  function buildRootSpec(rootCommand) {
+@@ -66,6 +65,6 @@ function buildSpec(command, { force } = {}) {
+     if (positional.some((v) => v.length > 0)) {
+         completion.positional = positional;
+     }
+-    for (const option of command.options) {
++    for (const option of command.createHelp().visibleOptions(command)) {
+         spec.flags = spec.flags || {};
+         let flag = [option.short, option.long].filter(Boolean).join(', ');
