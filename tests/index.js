@@ -208,7 +208,7 @@ class PakeTestRunner {
           encoding: "utf8",
           timeout: TIMEOUTS.QUICK,
         });
-        return output.includes("Usage: cli [url] [options]");
+        return output.includes("Usage: pake [url] [options]");
       },
       TIMEOUTS.QUICK,
     );
