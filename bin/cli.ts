@@ -53,11 +53,14 @@ program.action(async (url: string, options: PakeCliOptions) => {
   }
 });
 
-program.parseAsync().catch((error: unknown) => {
-  if (error instanceof Error) {
-    console.error(chalk.red(`✕ ${error.message}`));
-  } else {
-    console.error(chalk.red(`✕ Unexpected error: ${String(error)}`));
-  }
-  process.exit(1);
-});
+program
+  .installCompletion()
+  .then(() => program.parseAsync())
+  .catch((error: unknown) => {
+    if (error instanceof Error) {
+      console.error(chalk.red(`✕ ${error.message}`));
+    } else {
+      console.error(chalk.red(`✕ Unexpected error: ${String(error)}`));
+    }
+    process.exit(1);
+  });

@@ -17,7 +17,8 @@ import { fileTypeFromBuffer } from 'file-type';
 import icongen from 'icon-gen';
 import sharp from 'sharp';
 import * as psl from 'psl';
-import { InvalidArgumentError, program as program$1, Option } from 'commander';
+import { InvalidArgumentError, Option } from 'commander';
+import { NewCommand } from '@gutenye/commander-completion-carapace';
 
 var name = "pake-cli";
 var version = "3.14.0";
@@ -72,6 +73,7 @@ var type = "module";
 var exports$1 = "./dist/cli.js";
 var license = "GPL-3.0-or-later";
 var dependencies = {
+	"@gutenye/commander-completion-carapace": "1.0.9",
 	"@tauri-apps/api": "~2.10.1",
 	"@tauri-apps/cli": "^2.10.0",
 	chalk: "^5.6.2",
@@ -116,7 +118,10 @@ var pnpm = {
 	onlyBuiltDependencies: [
 		"esbuild",
 		"sharp"
-	]
+	],
+	patchedDependencies: {
+		"@gutenye/commander-completion-carapace@1.0.9": "patches/@gutenye__commander-completion-carapace@1.0.9.patch"
+	}
 };
 var packageJson = {
 	name: name,
@@ -2784,6 +2789,8 @@ const DEFAULT_PAKE_OPTIONS = {
     microphone: false,
 };
 
+const completionProgram = new NewCommand();
+
 function validateNumberInput(value) {
     if (value.trim() === '') {
         throw new InvalidArgumentError('Not a number.');
@@ -2821,7 +2828,9 @@ ${green('| |_) / _` | |/ / _ \\')}
 ${green('|  __/ (_| |   <  __/')}  ${yellow('https://github.com/tw93/pake')}
 ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with Rust.')}
 `;
-    return program$1
+    return completionProgram
+        .name('pake')
+        .enableCompletion()
         .addHelpText('beforeAll', logo)
         .usage(`[url] [options]`)
         .helpOption('-h, --help', 'Show all CLI options')
@@ -3022,7 +3031,10 @@ program.action(async (url, options) => {
         process.exit(1);
     }
 });
-program.parseAsync().catch((error) => {
+program
+    .installCompletion()
+    .then(() => program.parseAsync())
+    .catch((error) => {
     if (error instanceof Error) {
         console.error(chalk.red(`✕ ${error.message}`));
     }
