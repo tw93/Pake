@@ -2810,7 +2810,8 @@ function bashCompletion(program) {
 _pake_completion() {
   local current="\${COMP_WORDS[COMP_CWORD]}"
   if (( COMP_CWORD == 1 )) && [[ "$current" != -* ]]; then
-    COMPREPLY=( $(compgen -W 'completion install-completion' -- "$current") )
+    COMPREPLY=( $(compgen -W 'completion install-completion' -- "$current") $(compgen -f -- "$current") )
+    compopt -o filenames
   elif [[ "\${COMP_WORDS[1]}" == "completion" || "\${COMP_WORDS[1]}" == "install-completion" ]]; then
     COMPREPLY=( $(compgen -W ${shellQuote(shells)} -- "$current") )
   elif [[ "$current" == -* ]]; then
@@ -2826,7 +2827,9 @@ function zshCompletion(program) {
     return `#compdef pake
 _pake() {
   if (( CURRENT == 2 )) && [[ "\${words[CURRENT]}" != -* ]]; then
-    compadd -- 'completion' 'install-completion'
+    _alternative \
+      'commands:command:(completion install-completion)' \
+      'local-files:URL or local file:_files'
   elif [[ "\${words[2]}" == "completion" || "\${words[2]}" == "install-completion" ]]; then
     compadd -- ${shells}
   elif [[ "\${words[CURRENT]}" == -* ]]; then
@@ -2852,6 +2855,7 @@ complete -c pake -f -a completion -d 'Generate standalone shell completion'
 complete -c pake -f -a install-completion -d 'Install standalone shell completion'
 complete -c pake -f -n '__fish_seen_subcommand_from completion' -a '${COMPLETION_SHELLS.join(' ')}'
 complete -c pake -f -n '__fish_seen_subcommand_from install-completion' -a '${COMPLETION_SHELLS.join(' ')}'
+complete -c pake -F -n 'not __fish_seen_subcommand_from completion install-completion' -d 'URL or local file'
 ${options}
 `;
 }
@@ -2873,7 +2877,7 @@ function nushellCompletion(program) {
         .join('\n');
     return `# Nushell completion for pake
 export extern pake [
-  url?: string
+  url?: path # URL or local file
 ${flags}
 ]
 
@@ -3017,6 +3021,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .helpOption('-h, --help', 'Show all CLI options')
         .showHelpAfterError()
         .argument('[url]', 'The web URL you want to package', validateUrlInput)
+        .completion({ positional: [['$files']] })
         .option('--name <string>', 'Application name')
         .addOption(new Option('--identifier <string>', 'Application identifier / bundle ID').hideHelp())
         .option('--icon <string>', 'Application icon', DEFAULT_PAKE_OPTIONS.icon)

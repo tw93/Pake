@@ -22,6 +22,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     .helpOption('-h, --help', 'Show all CLI options')
     .showHelpAfterError()
     .argument('[url]', 'The web URL you want to package', validateUrlInput)
+    .completion({ positional: [['$files']] })
     .option('--name <string>', 'Application name')
     .addOption(
       new Option(

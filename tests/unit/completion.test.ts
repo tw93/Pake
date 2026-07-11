@@ -44,6 +44,13 @@ describe('shell completion', () => {
             shell === 'fish' ? `-l ${option.long.slice(2)}` : option.long;
           expect(completion).toContain(flag);
         }
+        const positionalMarker = {
+          bash: 'compgen -f',
+          zsh: 'URL or local file:_files',
+          fish: "-d 'URL or local file'",
+          nushell: 'url?: path # URL or local file',
+        }[shell];
+        expect(completion).toContain(positionalMarker);
 
         const installOptions = {
           homeDir: configHome,
@@ -79,6 +86,7 @@ describe('shell completion', () => {
       );
       expect(spec).toContain('name: pake');
       expect(spec).toContain('commands:');
+      expect(spec).toContain('$files');
 
       for (const option of options) {
         expect(spec).toContain(option.long ?? option.short);

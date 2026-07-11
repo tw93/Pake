@@ -635,6 +635,8 @@ pake completion fish
 pake completion nushell
 ```
 
+The generated integration completes local files and directories for the `[url]` position. Web URLs remain free-form and can be typed or pasted normally.
+
 #### Carapace integration
 
 Pake also generates a [Carapace](https://carapace-sh.github.io/carapace-bin/) spec automatically the first time it runs. Carapace users can initialize Carapace themselves for their preferred shell:

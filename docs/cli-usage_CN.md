@@ -633,6 +633,8 @@ pake completion fish
 pake completion nushell
 ```
 
+生成的集成会在 `[url]` 位置补全本地文件和目录。网页 URL 仍为自由输入，可正常键入或粘贴。
+
 #### Carapace 集成
 
 Pake 首次运行时还会自动生成 [Carapace](https://carapace-sh.github.io/carapace-bin/) 补全规范。Carapace 用户可以自行完成当前 Shell 的 Carapace 初始化：
