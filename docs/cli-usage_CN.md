@@ -609,7 +609,31 @@ pake ./my-app/index.html --name "my-app" --use-local-file
 
 ### Shell 补全
 
-Pake 首次运行时会根据现有 CLI 选项自动生成 [Carapace](https://carapace-sh.github.io/carapace-bin/) 补全规范。安装 Carapace 后，请为当前 Shell 完成初始化：
+Pake 同时提供独立 Shell 补全和可选的 Carapace 集成。两种方式都根据相同的 CLI 选项定义生成，并会自动保持同步。
+
+#### 独立补全
+
+此方式不需要安装 Carapace：
+
+```shell
+# Bash
+source <(pake completion bash)
+
+# Zsh
+source <(pake completion zsh)
+
+# Fish
+pake completion fish | source
+
+# Nushell：生成一次脚本，然后在 config.nu 中加载
+pake completion nushell | save --force $"($nu.default-config-dir)/pake-completion.nu"
+```
+
+使用 Nushell 时，请在 `config.nu` 中添加 `source ($nu.default-config-dir)/pake-completion.nu`。其他 Shell 可将对应命令加入启动配置，从而在每个新会话中启用补全。
+
+#### Carapace 集成
+
+Pake 首次运行时还会自动生成 [Carapace](https://carapace-sh.github.io/carapace-bin/) 补全规范。Carapace 用户可以自行完成当前 Shell 的 Carapace 初始化：
 
 ```shell
 # Bash
@@ -625,7 +649,7 @@ carapace _carapace fish | source
 carapace _carapace nushell | save --force $"($nu.cache-dir)/carapace.nu"
 ```
 
-使用 Nushell 时，还需要在 `config.nu` 中添加 `source ($nu.cache-dir)/carapace.nu`。生成的 `pake` 规范也可直接供 Carapace 使用，并会自动与全部 CLI 选项保持同步，无需单独维护补全文件。
+使用 Nushell 时，还需要在 `config.nu` 中添加 `source ($nu.cache-dir)/carapace.nu`。Carapace 会自动发现生成的 `pake` 规范。
 
 ### 打包完成
 

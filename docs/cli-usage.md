@@ -611,7 +611,31 @@ This can help sites that rely on popup auth windows, but it does not guarantee i
 
 ### Shell Completion
 
-Pake automatically generates a [Carapace](https://carapace-sh.github.io/carapace-bin/) completion spec from its CLI options the first time it runs. Install Carapace, then initialize it for your shell:
+Pake offers standalone shell completion and optional Carapace integration. Both are generated from the same CLI option definitions and stay synchronized automatically.
+
+#### Standalone completion
+
+This method does not require Carapace:
+
+```shell
+# Bash
+source <(pake completion bash)
+
+# Zsh
+source <(pake completion zsh)
+
+# Fish
+pake completion fish | source
+
+# Nushell: generate once, then source the file from config.nu
+pake completion nushell | save --force $"($nu.default-config-dir)/pake-completion.nu"
+```
+
+For Nushell, add `source ($nu.default-config-dir)/pake-completion.nu` to `config.nu`. Add the equivalent command to your shell startup file to enable completion in every new session.
+
+#### Carapace integration
+
+Pake also generates a [Carapace](https://carapace-sh.github.io/carapace-bin/) spec automatically the first time it runs. Carapace users can initialize Carapace themselves for their preferred shell:
 
 ```shell
 # Bash
@@ -627,7 +651,7 @@ carapace _carapace fish | source
 carapace _carapace nushell | save --force $"($nu.cache-dir)/carapace.nu"
 ```
 
-For Nushell, add `source ($nu.cache-dir)/carapace.nu` to `config.nu`. The generated `pake` spec is also available directly to Carapace and stays synchronized with every CLI option without a separately maintained completion file.
+For Nushell, add `source ($nu.cache-dir)/carapace.nu` to `config.nu`. Carapace discovers the generated `pake` spec automatically.
 
 ### Packaging Complete
 
