@@ -31,7 +31,6 @@ function loadEventHelpers({
   selectionText = "",
   clipboardText = "clipboard text",
   clipboardReadRejects = false,
-  pasteCommandSucceeds = false,
   userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
 } = {}) {
   const source = fs.readFileSync(
@@ -140,9 +139,6 @@ function loadEventHelpers({
       activeElement,
       execCommand: (command, showUI, value) => {
         execCommandCalls.push([command, showUI, value]);
-        if (command === "paste") {
-          return pasteCommandSucceeds;
-        }
         return true;
       },
     },
@@ -164,6 +160,18 @@ function loadEventHelpers({
 function getClipboardShortcutHandler(context) {
   return context.eventListeners.keydown.find(
     ({ handler }) => handler.name === "handleClipboardShortcut",
+  ).handler;
+}
+
+function getClipboardPasteFallbackHandler(context) {
+  return context.eventListeners.keyup.find(
+    ({ handler }) => handler.name === "handleClipboardPasteFallback",
+  ).handler;
+}
+
+function getPasteHandler(context) {
+  return context.eventListeners.paste.find(
+    ({ handler }) => handler.name === "handlePaste",
   ).handler;
 }
 
@@ -210,42 +218,77 @@ describe("event clipboard shortcuts", () => {
     expect(selectAllEvent.preventDefault).toHaveBeenCalled();
   });
 
-  it("pastes clipboard text into editable elements without Tauri clipboard IPC", async () => {
+  it("lets native paste preserve non-text clipboard data", async () => {
+    const editor = createElement("div");
+    editor.isContentEditable = true;
+    const context = loadEventHelpers({ activeElement: editor });
+    const shortcutHandler = getClipboardShortcutHandler(context);
+    const fallbackHandler = getClipboardPasteFallbackHandler(context);
+    const pasteHandler = getPasteHandler(context);
+    const keydownEvent = createKeyEvent("v");
+    const nativePasteEvent = {
+      clipboardData: {
+        types: ["Files", "image/png"],
+        getData: () => "",
+      },
+      preventDefault: vi.fn(),
+      stopImmediatePropagation: vi.fn(),
+    };
+
+    shortcutHandler(keydownEvent);
+    pasteHandler(nativePasteEvent);
+    fallbackHandler(createKeyEvent("v"));
+    await Promise.resolve();
+
+    expect(keydownEvent.preventDefault).not.toHaveBeenCalled();
+    expect(nativePasteEvent.preventDefault).not.toHaveBeenCalled();
+    expect(context.clipboardReadCalls).toEqual([]);
+    expect(context.execCommandCalls).toEqual([]);
+  });
+
+  it("keeps paste and match style text-only behavior", () => {
+    const input = createElement("input");
+    const context = loadEventHelpers({ activeElement: input });
+    const pasteHandler = getPasteHandler(context);
+    const pasteEvent = {
+      clipboardData: { getData: () => "plain text" },
+      preventDefault: vi.fn(),
+      stopImmediatePropagation: vi.fn(),
+    };
+
+    context.triggerPasteAsPlainText();
+    pasteHandler(pasteEvent);
+
+    expect(pasteEvent.preventDefault).toHaveBeenCalled();
+    expect(pasteEvent.stopImmediatePropagation).toHaveBeenCalled();
+    expect(context.execCommandCalls).toEqual([
+      ["paste", undefined, undefined],
+      ["insertText", false, "plain text"],
+    ]);
+  });
+
+  it("falls back to clipboard text only when native paste does not fire", async () => {
     const input = createElement("input");
     const context = loadEventHelpers({
       activeElement: input,
       clipboardText: "pasted text",
     });
-    const handler = getClipboardShortcutHandler(context);
-    const pasteEvent = createKeyEvent("v");
+    const shortcutHandler = getClipboardShortcutHandler(context);
+    const fallbackHandler = getClipboardPasteFallbackHandler(context);
+    const keydownEvent = createKeyEvent("v");
 
-    handler(pasteEvent);
+    shortcutHandler(keydownEvent);
+    expect(keydownEvent.preventDefault).not.toHaveBeenCalled();
+    expect(context.clipboardReadCalls).toEqual([]);
+
+    fallbackHandler(createKeyEvent("v"));
     await Promise.resolve();
 
     expect(context.clipboardReadCalls).toEqual([[]]);
     expect(context.execCommandCalls).toEqual([
-      ["paste", undefined, undefined],
       ["insertText", false, "pasted text"],
     ]);
-    expect(pasteEvent.preventDefault).toHaveBeenCalled();
     expect(context.invokeCalls).toEqual([]);
-  });
-
-  it("uses the browser paste command first when available", async () => {
-    const input = createElement("input");
-    const context = loadEventHelpers({
-      activeElement: input,
-      pasteCommandSucceeds: true,
-    });
-    const handler = getClipboardShortcutHandler(context);
-    const pasteEvent = createKeyEvent("v");
-
-    handler(pasteEvent);
-    await Promise.resolve();
-
-    expect(context.clipboardReadCalls).toEqual([]);
-    expect(context.execCommandCalls).toEqual([["paste", undefined, undefined]]);
-    expect(pasteEvent.preventDefault).toHaveBeenCalled();
   });
 
   it("does not read clipboard for synthetic paste shortcuts", async () => {
@@ -260,6 +303,20 @@ describe("event clipboard shortcuts", () => {
     expect(context.clipboardReadCalls).toEqual([]);
     expect(context.execCommandCalls).toEqual([]);
     expect(pasteEvent.preventDefault).not.toHaveBeenCalled();
+  });
+
+  it("does not run a pending paste fallback from a synthetic keyup", async () => {
+    const input = createElement("input");
+    const context = loadEventHelpers({ activeElement: input });
+    const shortcutHandler = getClipboardShortcutHandler(context);
+    const fallbackHandler = getClipboardPasteFallbackHandler(context);
+
+    shortcutHandler(createKeyEvent("v"));
+    fallbackHandler(createKeyEvent("v", { isTrusted: false }));
+    await Promise.resolve();
+
+    expect(context.clipboardReadCalls).toEqual([]);
+    expect(context.execCommandCalls).toEqual([]);
   });
 
   it("does not read clipboard for non-text input elements", async () => {
@@ -283,16 +340,18 @@ describe("event clipboard shortcuts", () => {
       activeElement: input,
       clipboardReadRejects: true,
     });
-    const handler = getClipboardShortcutHandler(context);
-    const pasteEvent = createKeyEvent("v");
+    const shortcutHandler = getClipboardShortcutHandler(context);
+    const fallbackHandler = getClipboardPasteFallbackHandler(context);
+    const keydownEvent = createKeyEvent("v");
 
-    handler(pasteEvent);
+    shortcutHandler(keydownEvent);
+    fallbackHandler(createKeyEvent("v"));
     await Promise.resolve();
     await Promise.resolve();
 
     expect(context.clipboardReadCalls).toEqual([[]]);
-    expect(context.execCommandCalls).toEqual([["paste", undefined, undefined]]);
-    expect(pasteEvent.preventDefault).toHaveBeenCalled();
+    expect(context.execCommandCalls).toEqual([]);
+    expect(keydownEvent.preventDefault).not.toHaveBeenCalled();
   });
 
   it("leaves non-editable paste and macOS shortcuts untouched", () => {

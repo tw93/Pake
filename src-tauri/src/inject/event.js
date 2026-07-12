@@ -206,19 +206,9 @@ function insertTextIntoEditableElement(element, text) {
   return false;
 }
 
-function runBrowserPasteCommand() {
-  try {
-    return document.execCommand("paste") === true;
-  } catch (error) {
-    return false;
-  }
-}
+let clipboardPasteFallbackTarget;
 
 function pasteClipboardText(activeElement) {
-  if (runBrowserPasteCommand()) {
-    return;
-  }
-
   const readText = navigator.clipboard?.readText;
   if (typeof readText !== "function") {
     return;
@@ -261,9 +251,11 @@ function handleClipboardShortcut(event) {
   }
 
   if (key === "v" && canPasteIntoEditableElement(activeElement)) {
-    event.preventDefault();
-    pasteClipboardText(activeElement);
-    return true;
+    // Let the native WebView paste event run first so images, files, and rich
+    // clipboard formats remain intact. If the platform does not emit paste,
+    // keyup applies the existing text-only fallback.
+    clipboardPasteFallbackTarget = activeElement;
+    return false;
   }
 
   if (key === "a" && isEditable && selectEditableElement(activeElement)) {
@@ -272,6 +264,42 @@ function handleClipboardShortcut(event) {
   }
 
   return false;
+}
+
+function handleClipboardPasteFallback(event) {
+  if (
+    event.isTrusted !== true ||
+    !isNonMacDesktop() ||
+    event.key?.toLowerCase() !== "v"
+  ) {
+    return false;
+  }
+
+  const activeElement = clipboardPasteFallbackTarget;
+  clipboardPasteFallbackTarget = undefined;
+  if (
+    !activeElement ||
+    document.activeElement !== activeElement ||
+    !canPasteIntoEditableElement(activeElement)
+  ) {
+    return false;
+  }
+
+  pasteClipboardText(activeElement);
+  return true;
+}
+
+function handlePaste(event) {
+  clipboardPasteFallbackTarget = undefined;
+  if (!pasteAsPlainTextPending) return;
+
+  event.preventDefault();
+  event.stopImmediatePropagation();
+
+  const text = event.clipboardData?.getData("text/plain") || "";
+  if (text) {
+    document.execCommand("insertText", false, text);
+  }
 }
 
 const DOWNLOADABLE_FILE_EXTENSIONS = {
@@ -590,22 +618,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   document.addEventListener("keydown", handleClipboardShortcut, true);
-
-  document.addEventListener(
-    "paste",
-    (event) => {
-      if (pasteAsPlainTextPending) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-
-        const text = event.clipboardData?.getData("text/plain") || "";
-        if (text) {
-          document.execCommand("insertText", false, text);
-        }
-      }
-    },
-    true,
-  );
+  document.addEventListener("keyup", handleClipboardPasteFallback, true);
+  document.addEventListener("paste", handlePaste, true);
 
   // Trigger a native browser download via a transient anchor click. The Rust
   // on_download handler then writes the file to the Downloads folder. This is
