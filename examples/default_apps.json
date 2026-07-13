@@ -1,0 +1,23 @@
+[
+  {
+    "name": "GitHub",
+    "url": "https://github.com",
+    "width": 1200,
+    "height": 800
+  },
+  {
+    "name": "ChatGPT",
+    "url": "https://chat.openai.com",
+    "width": 1200,
+    "height": 800,
+    "hideTitleBar": true
+  },
+  {
+    "name": "YouTube",
+    "url": "https://www.youtube.com",
+    "width": 1280,
+    "height": 800,
+    "blockAds": true,
+    "inject": { "blockAds": true }
+  }
+]

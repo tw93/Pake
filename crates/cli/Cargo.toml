@@ -1,0 +1,22 @@
+[package]
+name = "webpake-cli"
+description = "WebPake CLI - turn any webpage into a desktop app with one command"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "webpake"
+path = "src/main.rs"
+
+[dependencies]
+webpake-core = { workspace = true }
+webpake-packager = { workspace = true }
+clap = { workspace = true }
+anyhow = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }

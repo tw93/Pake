@@ -1,0 +1,36 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/core",
+    "crates/packager",
+    "crates/cli",
+    "crates/runtime",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["WebPake Contributors"]
+repository = "https://github.com/qiuxh016/Pake"
+rust-version = "1.85"
+
+[workspace.dependencies]
+webpake-core = { path = "crates/core" }
+webpake-packager = { path = "crates/packager" }
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+anyhow = "1"
+clap = { version = "4", features = ["derive", "env"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
+image = { version = "0.25", default-features = false, features = ["png", "ico"] }
+url = "2"
+dirs = "6"
+tempfile = "3"
+ico = "0.5"
+icns = "0.3"

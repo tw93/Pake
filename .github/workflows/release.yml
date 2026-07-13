@@ -1,146 +1,83 @@
-name: Release & Publish
+name: Release
 
 on:
   push:
     tags:
-      - "V*"
+      - "v*"
   workflow_dispatch:
-    inputs:
-      release_apps:
-        description: "Build popular apps"
-        type: boolean
-        default: false
-      publish_docker:
-        description: "Publish Docker image"
-        type: boolean
-        default: false
 
 env:
-  NODE_VERSION: "22"
-  PNPM_VERSION: "10.26.2"
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  CARGO_TERM_COLOR: always
 
 jobs:
-  # Build and release popular apps
-  release-apps:
-    if: |
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) ||
-      (github.event_name == 'workflow_dispatch' && inputs.release_apps)
-    runs-on: ubuntu-latest
-    outputs:
-      apps_name: ${{ steps.read-apps-config.outputs.apps_name }}
-      apps_config: ${{ steps.read-apps-config.outputs.apps_config }}
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
-      - name: Get Apps Config
-        id: read-apps-config
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --version "^2.0" --locked
+
+      - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          echo "apps_name=$(jq -c '[.[] | .name]' default_app_list.json)" >> $GITHUB_OUTPUT
-          echo "apps_config=$(jq -c '.' default_app_list.json)" >> $GITHUB_OUTPUT
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
-  create-release:
+      - name: Generate icons
+        run: cargo run -p webpake-packager --example generate_icons
+
+      - name: Package Example app (config + build)
+        run: cargo run -p webpake-cli -- https://github.com --name GitHub --config-only
+
+      - name: Build Tauri app
+        run: cargo tauri build
+        working-directory: crates/runtime
+
+      - name: Upload artifacts (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-bundle
+          path: crates/runtime/target/release/bundle/**
+
+      - name: Upload artifacts (macOS)
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-bundle
+          path: crates/runtime/target/release/bundle/**
+
+      - name: Upload artifacts (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-bundle
+          path: crates/runtime/target/release/bundle/**
+
+  release:
     name: Create GitHub Release
+    needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
     permissions:
       contents: write
     steps:
-      - name: Create release placeholder
-        uses: ncipollo/release-action@v1
+      - uses: actions/download-artifact@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          skipIfReleaseExists: true
+          path: artifacts
+          merge-multiple: true
 
-  build-cli:
-    name: Build CLI
-    needs: release-apps
-    if: needs.release-apps.result == 'success'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Setup Node.js Environment
-        uses: ./.github/actions/setup-env
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
-          mode: 'node'
-
-      - name: Build CLI
-        run: pnpm run cli:build
-
-      - name: Upload CLI Artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: pake-cli-dist
-          path: dist/
-          retention-days: 1
-
-  build-popular-apps:
-    name: ${{ matrix.config.title }}
-    needs: [release-apps, build-cli, create-release]
-    if: |
-      needs.release-apps.result == 'success' &&
-      needs.build-cli.result == 'success' &&
-      (needs.create-release.result == 'success' || needs.create-release.result == 'skipped')
-    strategy:
-      matrix:
-        config: ${{ fromJSON(needs.release-apps.outputs.apps_config) }}
-    uses: ./.github/workflows/single-app.yaml
-    secrets: inherit
-    with:
-      name: ${{ matrix.config.name }}
-      title: ${{ matrix.config.title }}
-      name_zh: ${{ matrix.config.name_zh }}
-      url: ${{ matrix.config.url }}
-      icon: ${{ matrix.config.icon }}
-      new_window: ${{ matrix.config.new_window || false }}
-      incognito: ${{ matrix.config.incognito || false }}
-      width: ${{ matrix.config.width || 1200 }}
-      height: ${{ matrix.config.height || 780 }}
-
-  # Publish Docker image (runs in parallel with app builds)
-  publish-docker:
-    if: |
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) ||
-      (github.event_name == 'workflow_dispatch' && inputs.publish_docker)
-    runs-on: ubuntu-22.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Container registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=ref,event=tag
-            type=sha
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          files: artifacts/**
+          generate_release_notes: true

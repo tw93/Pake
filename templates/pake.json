@@ -1,0 +1,23 @@
+{
+  "name": "WebPake",
+  "url": "https://example.com",
+  "width": 1200,
+  "height": 800,
+  "hideTitleBar": false,
+  "maximize": false,
+  "incognito": false,
+  "multiWindow": false,
+  "openExternalLinksInBrowser": true,
+  "inject": {
+    "blockAds": false,
+    "clipboardBridge": true,
+    "inlineAuthPopups": true
+  },
+  "shortcuts": {
+    "navigation": true,
+    "zoom": true,
+    "refresh": true,
+    "copyUrl": true,
+    "devtools": true
+  }
+}

@@ -1,92 +1,66 @@
-## How to contribute to Pake
+# Contributing to WebPake
 
-**Welcome to create [pull requests](https://github.com/tw93/Pake/compare/) for bugfix, new component, doc, example, suggestion and anything.**
+> Full team division (Chinese): [docs/team-division.md](docs/team-division.md)
 
-## Branch Management
+## Team Roles
 
-All development happens directly on `main`. Submit pull requests to `main`.
+### Member A — Runtime Engine ✅ Done
 
-## Development Setup
+**Owns:** `crates/runtime/src/app/`, `crates/runtime/src/commands.rs`, `crates/runtime/src/state.rs`
 
-### Prerequisites
+Tasks:
+- [x] Window lifecycle (create, resize, maximize, fullscreen)
+- [x] Native menu and keyboard shortcuts
+- [x] Tauri invoke commands (copy URL, navigate, cache clear)
+- [x] Multi-window and incognito mode
+- [x] System tray integration
 
-- Node.js ≥22.0.0 (recommended LTS, older versions ≥18.0.0 may work)
-- Rust ≥1.85.0 (required for edition2024 support in dependencies)
-- Platform-specific build tools:
-  - **macOS**: Xcode Command Line Tools (`xcode-select --install`)
-  - **Windows**: Visual Studio Build Tools with MSVC
-  - **Linux**: `build-essential`, `libwebkit2gtk`, system dependencies
+See [member-a-runtime.md](.github/ISSUE_TEMPLATE/member-a-runtime.md) for the Invoke API reference.
 
-### Installation
+### Member B — CLI & Packaging 🔲 In Progress
 
-```bash
-# Clone the repository
-git clone https://github.com/tw93/Pake.git
-cd Pake
+**Owns:** `crates/cli/`, `crates/packager/`
 
-# Install dependencies
-pnpm install
+Tasks:
+- [ ] End-to-end packaging: `webpake url --name X` produces installable `.msi` on Windows
+- [x] Build progress messages and friendly error output
+- [x] CLI flags synced to `docs/cli-usage.md`
+- [x] Proper macOS `.icns` generation
+- [x] Config file merge via `--config-file`
+- [x] Platform config generation (windows/macos/linux)
+- [ ] Build cache optimization for repeat builds
 
-# Start development (Tauri only)
-pnpm run dev
+### Member C — Platform & Inject & DevOps 🔲 In Progress
 
-# Start development (CLI Wrapper + Tauri) - Recommended for CLI changes
-pnpm run cli:dev -- https://web.telegram.org/k/
-```
+**Owns:** `crates/runtime/inject/`, `.github/`, `docs/`, platform tauri configs
 
-### Testing
+Tasks:
+- [x] JS inject: clipboard bridge, OAuth popup handling, ad blocking, external links
+- [x] Platform-specific tauri configs (macOS/Windows/Linux)
+- [x] GitHub Actions release workflow (tag → three-platform artifacts)
+- [x] FAQ documentation updated
+- [ ] CI verified green on three OS
+- [ ] Linux Wayland/WebKit workarounds tested on real hardware
 
-```bash
-# Run all tests (unit + integration + builder)
-pnpm test
+## Milestones
 
-# Build CLI for testing
-pnpm run cli:build
-```
+| Phase | Goal | Owner | Status |
+|-------|------|-------|--------|
+| M0 (Week 1) | Workspace compiles, AppConfig frozen | All | ✅ Done |
+| M1 (Week 2-4) | MVP: CLI packages one URL into runnable app | B leads | 🔲 In progress |
+| M2 (Week 5-7) | Shortcuts, menu, icon pipeline, inject basics | A + C | A ✅, C ✅ |
+| M3 (Week 8-10) | Three-platform installable packages | C leads | 🔲 Pending |
+| M4 (Week 11-12) | v0.1.0 release with docs | All | 🔲 Pending |
 
-### Tips
+## Contract Rules
 
-- Use `--iterative-build` flag during development to skip some hefty checks and use app bundle format for faster debugging:
+1. **`AppConfig` changes** require all three members to review (in `crates/core`)
+2. **New Tauri commands** must be documented in `docs/team-division.md` before C's inject layer uses them
+3. **New CLI flags** must update `docs/cli-usage.md` in the same PR
+4. No Chinese comments in source code (English only)
 
-  ```bash
-  pnpm run cli:dev --iterative-build
-  ```
+## Git Workflow
 
-## Continuous Integration
-
-The project uses streamlined GitHub Actions workflows:
-
-- **Quality & Testing**: Automatic code quality checks and comprehensive testing on all platforms
-- **Claude AI Integration**: Automated code review and interactive assistance
-- **Release Management**: Coordinated releases with app building and Docker publishing
-
-## Troubleshooting
-
-### macOS 26 Beta Compilation Issues
-
-If you're running macOS 26 Beta and encounter compilation errors related to `mac-notification-sys` or system frameworks (errors about `CoreFoundation`, `_Builtin_float` modules), create a `src-tauri/.cargo/config.toml` file with:
-
-```toml
-[env]
-# Fix for macOS 26 Beta compatibility issues
-# Forces use of compatible SDK when building on macOS 26 Beta
-MACOSX_DEPLOYMENT_TARGET = "15.0"
-SDKROOT = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
-```
-
-This file is already in `.gitignore` and should not be committed to the repository.
-
-**Root Cause**: macOS 26 Beta uses newer system frameworks that aren't yet fully compatible with Tauri's dependencies. This configuration uses the universal SDK symlink which automatically points to your system's available SDK version.
-
-### Common Build Issues
-
-- **Rust compilation errors**: Run `cargo clean` in `src-tauri/` directory
-- **`cargo` command not found after installation**: Pake CLI now reloads the Rust environment automatically, but if the issue persists reopen your terminal or run `source ~/.cargo/env` (macOS/Linux) / `call %USERPROFILE%\.cargo\env` (Windows) before retrying
-- **Node dependency issues**: Delete `node_modules` and run `pnpm install`
-- **Permission errors on macOS**: Run `sudo xcode-select --reset`
-
-See the [Advanced Usage Guide](docs/advanced-usage.md) for project structure and customization techniques.
-
-## More
-
-It is a good habit to create a feature request issue to discuss whether the feature is necessary before you implement it. However, it's unnecessary to create an issue to claim that you found a typo or improved the readability of documentation, just create a pull request.
+- `main` branch only
+- Feature branches: `feat/a-*`, `feat/b-*`, `feat/c-*`
+- PR requires `cargo check --workspace` and `cargo test --workspace` passing
