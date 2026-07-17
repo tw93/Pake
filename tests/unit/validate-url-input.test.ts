@@ -24,4 +24,22 @@ describe('validateUrlInput', () => {
     // '' is not a file, normalizeUrl('') -> 'https://' -> new URL() throws.
     expect(() => validateUrlInput('')).toThrow(InvalidArgumentError);
   });
+
+  it('rejects path-shaped input that does not exist instead of URL-ifying it', () => {
+    // Regression guard: './typo' must never become https://./typo and build
+    // a silently broken app. Covers ./, ../, /, ~/ and Windows drive paths.
+    for (const missing of [
+      './does-not-exist-dir',
+      '../does-not-exist-dir',
+      '/does/not/exist/anywhere-pake',
+      '~/does-not-exist-pake',
+      'C:\\does-not-exist-pake',
+    ]) {
+      expect(() => validateUrlInput(missing)).toThrow(/does not exist/);
+    }
+  });
+
+  it('still treats bare domains without scheme as web urls', () => {
+    expect(validateUrlInput('example.com')).toBe('https://example.com');
+  });
 });

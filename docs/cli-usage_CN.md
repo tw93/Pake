@@ -66,7 +66,15 @@ pake [url] [options]
 
 ### [url]
 
-`url` 是您需要打包的网页链接 🔗 或本地 HTML 文件的路径，此参数为必填。
+`url` 是您需要打包的网页链接 🔗、本地 HTML 文件的路径，或包含根级 `index.html` 的静态文件目录（例如构建产物 `dist/`）。除非通过 `--config` 文件提供 `url`，此参数为必填。
+
+```shell
+pake https://example.com --name Example
+pake ./page.html --name MyPage
+pake ./dist --name MyTool
+```
+
+本地打包开箱支持 hash 路由；history 模式的 SPA 路由暂不支持。
 
 ### [options]
 
@@ -81,6 +89,8 @@ pake [url] [options]
 | `--hide-title-bar`          | 沉浸式标题栏（仅 macOS）             | `--hide-title-bar`                             |
 | `--hide-window-decorations` | 隐藏原生窗口装饰（仅 Windows/Linux） | `--hide-window-decorations`                    |
 | `--debug`                   | 启用开发者工具                       | `--debug`                                      |
+| `--config`                  | 从 JSON 配置文件读取选项             | `--config app.json`                            |
+| `--json`                    | stdout 输出机器可读结果（自动化用）  | `--json`                                       |
 | `--help`                    | 显示全部 CLI 选项                    | `--help`                                       |
 | `--version`                 | 显示 CLI 版本                        | `--version`                                    |
 
@@ -548,6 +558,8 @@ pake https://chat.example.com --name ChatApp --multi-window
 
 当 `url` 为本地文件路径时，如果启用此选项，则会递归地将 `url` 路径文件所在的文件夹及其所有子文件复制到 Pake 的静态文件夹。默认不启用。
 
+目录输入（`pake ./dist`）始终打包整个目录树，此选项只影响单个 HTML 文件输入。
+
 ```shell
 --use-local-file
 
@@ -588,6 +600,44 @@ pake ./my-app/index.html --name "my-app" --use-local-file
 ```shell
 --debug
 ```
+
+#### [config]
+
+用声明式 JSON 配置文件代替拼接命令行参数。字段名是 camelCase 的 CLI 选项名，外加 `url`；schema 见 [schema/pake.schema.json](../schema/pake.schema.json)。显式 CLI 参数始终优先于配置文件字段。未知字段与类型错误会立即报错。调用参数（`--json`、`--config`、`--version`）不允许写进配置文件。
+
+```shell
+--config <path>
+
+# app.json
+# {
+#   "$schema": "https://raw.githubusercontent.com/tw93/Pake/main/schema/pake.schema.json",
+#   "url": "https://example.com",
+#   "name": "MyApp",
+#   "width": 1280,
+#   "hideTitleBar": true
+# }
+pake --config app.json
+```
+
+#### [json]
+
+面向脚本与 AI agent 的机器可读模式。所有日志改走 stderr，stdout 只输出一个 JSON 结果对象；交互式提示全部禁用（stdin 非 TTY 时同样禁用）。
+
+```shell
+--json
+
+# 成功（stdout）：
+# {"ok":true,"name":"MyApp","platform":"darwin","arch":"arm64",
+#  "outputs":[{"path":"/abs/MyApp.dmg","sizeBytes":5242880,"format":"dmg"}],
+#  "warnings":[],"error":null}
+#
+# 失败（stdout）：
+# {"ok":false, ..., "error":{"code":"ENV_MISSING","message":"...","hint":"..."}}
+```
+
+退出码：`0` 成功、`2` 输入非法、`3` 构建失败、`4` 环境缺失或依赖安装失败（如未安装 Rust、依赖安装出错）、`1` 未预期错误。错误码：`INVALID_INPUT`、`ENV_MISSING`、`BUILD_FAILED`、`NETWORK`、`UNEXPECTED`。
+
+Linux 多 target 构建（如 `--targets deb,appimage`）时，`ok` 为 true 不代表全部格式成功：单个 target 失败而其余成功会记入 `warnings`。请用 `outputs[].format` 核对拿到的格式是否齐全。
 
 #### [ignore-certificate-errors]
 

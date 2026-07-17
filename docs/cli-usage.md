@@ -66,7 +66,15 @@ The packaged application will be located in the current working directory by def
 
 ### [url]
 
-The URL is the link to the web page you want to package or the path to a local HTML file. This is mandatory.
+The URL is the link to the web page you want to package, the path to a local HTML file, or the path to a directory of static web files containing an `index.html` at its root (e.g. a `dist/` build output). Mandatory unless a `--config` file provides `url`.
+
+```shell
+pake https://example.com --name Example
+pake ./page.html --name MyPage
+pake ./dist --name MyTool
+```
+
+For local packaging, hash-based routing works out of the box; history-mode SPA routing is not yet supported.
 
 ### [options]
 
@@ -81,6 +89,8 @@ Various options are available for customization. `pake --help` shows every suppo
 | `--hide-title-bar`          | Immersive header (macOS only)                       | `--hide-title-bar`                             |
 | `--hide-window-decorations` | Hide native window decorations (Windows/Linux only) | `--hide-window-decorations`                    |
 | `--debug`                   | Enable development tools                            | `--debug`                                      |
+| `--config`                  | Load options from a JSON config file                | `--config app.json`                            |
+| `--json`                    | Machine-readable result on stdout (for automation)  | `--json`                                       |
 | `--help`                    | Show all CLI options                                | `--help`                                       |
 | `--version`                 | Show CLI version                                    | `--version`                                    |
 
@@ -550,6 +560,8 @@ Set the Windows Installer language. Options include `zh-CN`, `ja-JP`, More at [T
 
 Enable recursive copying. When the URL is a local file path, enabling this option will copy the folder containing the file specified in the URL, as well as all sub-files, to the Pake static folder. This is disabled by default.
 
+Directory inputs (`pake ./dist`) always package the full tree; this flag only affects single-HTML-file inputs.
+
 ```shell
 --use-local-file
 
@@ -590,6 +602,44 @@ Enable developer tools and detailed logging for debugging.
 ```shell
 --debug
 ```
+
+#### [config]
+
+Load options from a declarative JSON config file instead of assembling flags. Fields are the camelCase CLI option names plus `url`; the published schema is [schema/pake.schema.json](../schema/pake.schema.json). An explicit CLI flag always wins over a config field. Unknown fields and wrong types fail fast. Invocation flags (`--json`, `--config`, `--version`) are CLI-only and rejected inside the file.
+
+```shell
+--config <path>
+
+# app.json
+# {
+#   "$schema": "https://raw.githubusercontent.com/tw93/Pake/main/schema/pake.schema.json",
+#   "url": "https://example.com",
+#   "name": "MyApp",
+#   "width": 1280,
+#   "hideTitleBar": true
+# }
+pake --config app.json
+```
+
+#### [json]
+
+Machine-readable mode for scripts and AI agents. All logs move to stderr and stdout carries exactly one JSON result object; interactive prompts are disabled (they are also disabled whenever stdin is not a TTY).
+
+```shell
+--json
+
+# Success (stdout):
+# {"ok":true,"name":"MyApp","platform":"darwin","arch":"arm64",
+#  "outputs":[{"path":"/abs/MyApp.dmg","sizeBytes":5242880,"format":"dmg"}],
+#  "warnings":[],"error":null}
+#
+# Failure (stdout):
+# {"ok":false, ..., "error":{"code":"ENV_MISSING","message":"...","hint":"..."}}
+```
+
+Exit codes: `0` success, `2` invalid input, `3` build failure, `4` missing environment or dependency setup failure (e.g. Rust not installed, package install failed), `1` unexpected error. Error codes: `INVALID_INPUT`, `ENV_MISSING`, `BUILD_FAILED`, `NETWORK`, `UNEXPECTED`.
+
+On Linux multi-target builds (e.g. `--targets deb,appimage`), `ok` can be true with fewer `outputs` than requested: a target that fails while others succeed is reported in `warnings`, not as a failure. Check `outputs[].format` against the formats you asked for.
 
 #### [ignore-certificate-errors]
 

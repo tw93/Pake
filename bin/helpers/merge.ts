@@ -17,6 +17,7 @@ import {
   WindowConfig,
 } from '@/types';
 import { tauriConfigDirectory, npmDirectory } from '@/utils/dir';
+import { PakeError } from '@/utils/error';
 import { LINUX_TARGET_TYPES, resolveLinuxBundleTargets } from '@/utils/targets';
 
 /**
@@ -106,40 +107,78 @@ async function copyTemplateConfigs(): Promise<void> {
   );
 }
 
-async function handleLocalFile(
+// Replace the CLI's own dist/ with the user's static files while keeping the
+// build artifacts (cli.js) the packaged app does not need but the CLI does.
+// dist_bak always holds the ORIGINAL package dist: once it exists, later
+// stagings must not overwrite it with a previous user tree, or the original
+// files would be unrecoverable across repeated local builds.
+async function stageLocalTree(sourceDir: string): Promise<void> {
+  const distDir = path.join(npmDirectory, 'dist');
+  const distBakDir = path.join(npmDirectory, 'dist_bak');
+
+  if (await fsExtra.pathExists(distBakDir)) {
+    fsExtra.removeSync(distDir);
+  } else {
+    fsExtra.moveSync(distDir, distBakDir);
+  }
+  fsExtra.copySync(sourceDir, distDir, { overwrite: true });
+
+  const filesToCopyBack = ['cli.js'];
+  await Promise.all(
+    filesToCopyBack.map((file) =>
+      fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file)),
+    ),
+  );
+}
+
+// Exported for unit tests (web fallback and directory entry guard).
+export async function handleLocalFile(
   url: string,
   useLocalFile: boolean,
   tauriConf: PakeTauriConfig,
 ): Promise<void> {
   const pathExists = await fsExtra.pathExists(url);
-  if (pathExists) {
-    logger.warn('✼ Your input might be a local file.');
+  if (!pathExists) {
+    tauriConf.pake.windows[0].url_type = 'web';
+    return;
+  }
 
-    const fileName = path.basename(url);
-    const dirName = path.dirname(url);
-    const distDir = path.join(npmDirectory, 'dist');
-    const distBakDir = path.join(npmDirectory, 'dist_bak');
+  const stat = await fsExtra.stat(url);
 
-    if (!useLocalFile) {
-      const urlPath = path.join(distDir, fileName);
-      await fsExtra.copy(url, urlPath);
-    } else {
-      fsExtra.moveSync(distDir, distBakDir, { overwrite: true });
-      fsExtra.copySync(dirName, distDir, { overwrite: true });
-
-      const filesToCopyBack = ['cli.js'];
-      await Promise.all(
-        filesToCopyBack.map((file) =>
-          fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file)),
-        ),
+  if (stat.isDirectory()) {
+    // A directory of static web assets (e.g. a generated dist/): the whole
+    // tree is packaged and the app entry is its root index.html.
+    const entryFile = 'index.html';
+    if (!(await fsExtra.pathExists(path.join(url, entryFile)))) {
+      throw new PakeError(
+        `Local directory "${url}" has no ${entryFile} at its root.`,
+        {
+          code: 'INVALID_INPUT',
+          hint: 'Point Pake at the built output directory that contains index.html.',
+        },
       );
     }
-
-    tauriConf.pake.windows[0].url = fileName;
+    logger.info(`✺ Packaging local directory: ${url}`);
+    await stageLocalTree(url);
+    tauriConf.pake.windows[0].url = entryFile;
     tauriConf.pake.windows[0].url_type = 'local';
-  } else {
-    tauriConf.pake.windows[0].url_type = 'web';
+    return;
   }
+
+  logger.info(`✺ Packaging local file: ${url}`);
+
+  const fileName = path.basename(url);
+  const distDir = path.join(npmDirectory, 'dist');
+
+  if (!useLocalFile) {
+    const urlPath = path.join(distDir, fileName);
+    await fsExtra.copy(url, urlPath);
+  } else {
+    await stageLocalTree(path.dirname(url));
+  }
+
+  tauriConf.pake.windows[0].url = fileName;
+  tauriConf.pake.windows[0].url_type = 'local';
 }
 
 export function buildLinuxDesktopContent(

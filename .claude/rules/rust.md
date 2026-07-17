@@ -7,7 +7,9 @@
 ### Error handling
 
 - No `panic!` / `.unwrap()` / `.expect()` on user-reachable paths: CLI options, config loading, event handlers, IPC commands. Use `?` and surface clear messages.
-- Silent `catch {}` in TS or `let _ = ...` in Rust must surface the real error through `logger.warn` at minimum.
+- Silent `catch {}` in TS or `let _ = ...` in Rust must surface the real error through `logger.warn` at minimum. Note `logger.warn` also feeds the `--json` warnings array; status lines belong in `logger.info`.
+- Predictable CLI failures throw `PakeError` with `{code, hint}` (`bin/utils/error.ts`); the code maps to a stable exit code and the `--json` error object. Plain `Error` gets classified by build phase in `bin/cli.ts`.
+- In machine mode (`--json`) stdout is reserved for the single JSON result. Never `console.log` / `process.stdout.write` in `bin/`; subprocess stdout is rerouted to stderr by `shellExec`.
 - `shellExec` runs subprocesses with `stdio: 'inherit'`, so their output (linuxdeploy, cargo, npm) never reaches `error.message`; only the failed command line does. Do NOT classify a build failure by grepping `error.message`; you would be matching the command, not the diagnostics. Drive failure guidance off a structured fact the caller holds (e.g. `target === 'appimage'`). Owners: `bin/utils/shell.ts` + `bin/builders/BaseBuilder.ts`.
 
 ### IPC
@@ -19,7 +21,7 @@
 ### Config types
 
 - No `tauriConf: any` or other untyped config bags. Use `PakeTauriConfig`.
-- Window options live in `bin/helpers/cli-program.ts`, `bin/types.ts`, `bin/defaults.ts`, `bin/helpers/merge.ts`. Adding an option means touching all four plus `docs/cli-usage*.md`. Forgetting any is a regression.
+- Window options live in `bin/helpers/cli-program.ts`, `bin/types.ts`, `bin/defaults.ts`, `bin/helpers/merge.ts`. Adding an option means touching all four plus `schema/pake.schema.json` and `docs/cli-usage*.md`. Forgetting any is a regression; the schema half is caught by `tests/unit/config-file.test.ts`.
 
 ### Network mirrors
 

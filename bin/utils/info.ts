@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import prompts from 'prompts';
 import ora from 'ora';
 import chalk from 'chalk';
+import { isMachineMode } from './output';
 
 // Generates a stable identifier based on the app URL (and optionally name).
 // When name is provided it is included in the hash so two apps wrapping
@@ -62,5 +63,7 @@ export function getSpinner(text: string) {
     text: `${chalk.cyan(text)}\n`,
     spinner: loadingType,
     color: 'cyan',
+    // In machine mode stdout must stay parseable and stderr low-noise.
+    isSilent: isMachineMode(),
   }).start();
 }

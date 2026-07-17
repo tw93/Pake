@@ -11,6 +11,7 @@ import {
 } from '@/utils/info';
 import { generateLinuxPackageName } from '@/utils/name';
 import { PakeError } from '@/utils/error';
+import { isInteractive } from '@/utils/output';
 import { PakeAppOptions, PakeCliOptions } from '@/types';
 
 function resolveAppName(name: string, platform: NodeJS.Platform): string {
@@ -55,9 +56,13 @@ export default async function handleOptions(
     const defaultName = pathExists
       ? resolveLocalAppName(url, platform)
       : resolveAppName(url, platform);
-    const promptMessage = 'Enter your application name';
-    const namePrompt = await promptText(promptMessage, defaultName);
-    name = namePrompt?.trim() || defaultName;
+    if (isInteractive()) {
+      const promptMessage = 'Enter your application name';
+      const namePrompt = await promptText(promptMessage, defaultName);
+      name = namePrompt?.trim() || defaultName;
+    } else {
+      name = defaultName;
+    }
   }
 
   if (name && platform === 'linux') {

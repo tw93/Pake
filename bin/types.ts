@@ -72,6 +72,12 @@ export interface PakeCliOptions {
   // Debug mode, outputs more logs
   debug: boolean;
 
+  // Machine-readable mode: logs go to stderr, stdout carries one JSON result, default false
+  json: boolean;
+
+  // Path to a JSON config file whose fields mirror CLI options plus url
+  config?: string;
+
   /** External scripts that need to be injected into the page. */
   inject: string[];
 

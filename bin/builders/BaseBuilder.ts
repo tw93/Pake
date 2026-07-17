@@ -12,7 +12,9 @@ import {
   generateLinuxPackageName,
 } from '@/utils/name';
 import { npmDirectory } from '@/utils/dir';
+import { PakeError } from '@/utils/error';
 import { getSpinner } from '@/utils/info';
+import { BuildArtifact, isInteractive } from '@/utils/output';
 import { shellExec } from '@/utils/shell';
 import { CN_MIRROR_ENV, isCnMirrorEnabled } from '@/utils/mirror';
 import { IS_MAC } from '@/utils/platform';
@@ -52,9 +54,70 @@ const APPIMAGE_FAILURE_GUIDANCE =
 
 export default abstract class BaseBuilder {
   protected options: PakeAppOptions;
+  private artifacts: BuildArtifact[] = [];
 
   protected constructor(options: PakeAppOptions) {
     this.options = options;
+  }
+
+  /** Final artifacts produced by this build, for the `--json` result. */
+  getArtifacts(): BuildArtifact[] {
+    return [...this.artifacts];
+  }
+
+  /** Architecture reported in the `--json` result. */
+  getReportArch(): string {
+    return this.options.multiArch ? 'universal' : process.arch;
+  }
+
+  // Drop a recorded artifact whose file was later removed (e.g. the
+  // temporary .deb consumed by zst repacking), so --json never lists a
+  // path that no longer exists.
+  protected removeArtifact(artifactPath: string): void {
+    const resolved = path.resolve(artifactPath);
+    this.artifacts = this.artifacts.filter(
+      (artifact) => artifact.path !== resolved,
+    );
+  }
+
+  protected async recordArtifact(
+    artifactPath: string,
+    format: string,
+  ): Promise<void> {
+    try {
+      const stat = await fsExtra.stat(artifactPath);
+      let sizeBytes = stat.size;
+      if (stat.isDirectory()) {
+        sizeBytes = await BaseBuilder.getPathSize(artifactPath);
+      }
+      this.artifacts.push({
+        path: path.resolve(artifactPath),
+        sizeBytes,
+        format,
+      });
+    } catch {
+      // Never fail a finished build over size bookkeeping.
+      this.artifacts.push({
+        path: path.resolve(artifactPath),
+        sizeBytes: 0,
+        format,
+      });
+    }
+  }
+
+  private static async getPathSize(directory: string): Promise<number> {
+    let size = 0;
+    for (const entry of await fsExtra.readdir(directory, {
+      withFileTypes: true,
+    })) {
+      const entryPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        size += await BaseBuilder.getPathSize(entryPath);
+      } else if (entry.isFile()) {
+        size += (await fsExtra.stat(entryPath)).size;
+      }
+    }
+    return size;
   }
 
   async prepare() {
@@ -70,6 +133,13 @@ export default abstract class BaseBuilder {
     ensureRustEnv();
 
     if (!checkRustInstalled()) {
+      if (!isInteractive()) {
+        throw new PakeError('Rust required to package your webapp.', {
+          code: 'ENV_MISSING',
+          hint: 'Install Rust via https://rustup.rs, then rerun the same command.',
+        });
+      }
+
       const res = await prompts({
         type: 'confirm',
         message: 'Rust not detected. Install now?',
@@ -79,8 +149,10 @@ export default abstract class BaseBuilder {
       if (res.value) {
         await installRust();
       } else {
-        logger.error('✕ Rust required to package your webapp.');
-        process.exit(1);
+        throw new PakeError('Rust required to package your webapp.', {
+          code: 'ENV_MISSING',
+          hint: 'Install Rust via https://rustup.rs, then rerun the same command.',
+        });
       }
     }
 
@@ -167,8 +239,9 @@ export default abstract class BaseBuilder {
     // Let spinner run for a moment so user can see it, then stop before package manager command
     await new Promise((resolve) => setTimeout(resolve, 500));
     buildSpinner.stop();
-    // Show static message to keep the status visible
-    logger.warn('✸ Building app...');
+    // Show static message to keep the status visible. Info, not warn: warn
+    // entries feed the --json warnings array and this is a status line.
+    logger.info('✸ Building app...');
 
     const baseEnv = getBuildEnvironment();
     let buildEnv: Record<string, string> = {
@@ -225,6 +298,7 @@ export default abstract class BaseBuilder {
     // executable the build produced instead.
     if (this.options.bundle === false) {
       await this.copyRawBinary(npmDirectory, name);
+      await this.recordArtifact(this.getRawBinaryPath(name), 'binary');
       if (logSuccess) {
         logger.success('✔ Build success!');
         logger.success(
@@ -241,10 +315,12 @@ export default abstract class BaseBuilder {
     const appPath = this.getBuildAppPath(npmDirectory, fileName, fileType);
     const distPath = path.resolve(`${name}.${fileType}`);
     await fsExtra.copy(appPath, distPath);
+    await this.recordArtifact(distPath, fileType);
 
     // Copy raw binary if requested
     if (this.options.keepBinary) {
       await this.copyRawBinary(npmDirectory, name);
+      await this.recordArtifact(this.getRawBinaryPath(name), 'binary');
     }
 
     await fsExtra.remove(appPath);
@@ -283,6 +359,14 @@ export default abstract class BaseBuilder {
       // fsExtra.move uses fs.rename (atomic on same filesystem) and falls back
       // to copy+remove only when moving across volumes.
       await fsExtra.move(appBundlePath, appDest, { overwrite: true });
+
+      // Keep the JSON result pointing at where the artifact actually lives.
+      const movedFrom = path.resolve(appBundlePath);
+      for (const artifact of this.artifacts) {
+        if (artifact.path === movedFrom) {
+          artifact.path = appDest;
+        }
+      }
 
       logger.success(
         `✔ ${appBundleName.replace(/\.app$/, '')} installed to /Applications`,

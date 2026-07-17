@@ -409,8 +409,8 @@ export async function handleIcon(
     }
   }
 
-  // Try favicon from website
-  if (url && options.name) {
+  // Try favicon from website; local file/directory input has no favicon.
+  if (url && options.name && /^https?:\/\//i.test(url)) {
     const faviconPath = await tryGetFavicon(url, options.name);
     if (faviconPath) return faviconPath;
   }

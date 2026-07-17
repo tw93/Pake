@@ -32,6 +32,10 @@ export default class LinuxBuilder extends BaseBuilder {
     this.options.targets = this.buildFormat;
   }
 
+  getReportArch(): string {
+    return this.buildArch;
+  }
+
   getFileName() {
     const { name = 'pake-app', targets } = this.options;
     const version = tauriConfig.version;
@@ -222,11 +226,13 @@ post_remove() {
       await shellExec(
         `bsdtar --zstd -cf "${packagePath}" -C "${dataDir}" .PKGINFO .INSTALL usr`,
       );
+      await this.recordArtifact(packagePath, 'zst');
       logger.success('✔ Build success!');
       logger.success('✔ App installer located in', packagePath);
     } finally {
       if (removeSourceDeb) {
         await fsExtra.remove(debPath);
+        this.removeArtifact(debPath);
       }
       await fsExtra.remove(workDir);
     }

@@ -50,6 +50,10 @@ export default class MacBuilder extends BaseBuilder {
     return `${name}_${tauriConfig.version}_${arch}`;
   }
 
+  getReportArch(): string {
+    return this.getActualArch();
+  }
+
   private getActualArch(): string {
     if (this.buildArch === 'universal' || this.options.multiArch) {
       return 'universal';

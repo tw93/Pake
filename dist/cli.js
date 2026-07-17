@@ -172,6 +172,58 @@ let tauriConfig = {
     pake: pakeConf,
 };
 
+// Stable exit-code contract: 0 success, 2 invalid input, 3 build/network
+// failure, 4 missing environment, 1 unexpected. Documented in cli-usage docs.
+const ERROR_EXIT_CODES = {
+    INVALID_INPUT: 2,
+    BUILD_FAILED: 3,
+    NETWORK: 3,
+    ENV_MISSING: 4,
+    UNEXPECTED: 1,
+};
+let machineMode = false;
+const capturedWarnings = [];
+/**
+ * Route all loglevel output to stderr, capture warnings for the final JSON
+ * result, and strip ANSI colors. Must be called before any logging happens.
+ */
+function enableMachineMode() {
+    if (machineMode)
+        return;
+    machineMode = true;
+    chalk.level = 0;
+    log.methodFactory = (methodName) => {
+        return (...args) => {
+            if (methodName === 'warn') {
+                capturedWarnings.push(args.map(String).join(' '));
+            }
+            console.error(...args);
+        };
+    };
+    // Rebuild logging methods with the new factory.
+    log.setLevel(log.getLevel());
+}
+function isMachineMode() {
+    return machineMode;
+}
+function getCapturedWarnings() {
+    return [...capturedWarnings];
+}
+/**
+ * Whether Pake may prompt the user. False in machine mode, without a TTY,
+ * or inside CI, where prompts would hang or produce garbage.
+ */
+function isInteractive() {
+    return (!machineMode &&
+        Boolean(process.stdin.isTTY) &&
+        Boolean(process.stdout.isTTY) &&
+        !process.env.CI &&
+        !process.env.GITHUB_ACTIONS);
+}
+function printJsonResult(result) {
+    process.stdout.write(`${JSON.stringify(result)}\n`);
+}
+
 // Generates a stable identifier based on the app URL (and optionally name).
 // When name is provided it is included in the hash so two apps wrapping
 // the same URL can coexist. Omitting name preserves backward compatibility
@@ -217,6 +269,8 @@ function getSpinner(text) {
         text: `${chalk.cyan(text)}\n`,
         spinner: loadingType,
         color: 'cyan',
+        // In machine mode stdout must stay parseable and stderr low-noise.
+        isSilent: isMachineMode(),
     }).start();
 }
 
@@ -324,7 +378,11 @@ async function shellExec(command, timeout = 300000, env) {
             cwd: npmDirectory,
             // Use 'inherit' to show all output directly to user in real-time.
             // This ensures linuxdeploy and other tool outputs are visible during builds.
-            stdio: 'inherit',
+            // In machine mode (--json) stdout is reserved for the final JSON result,
+            // so subprocess stdout is rerouted to stderr instead.
+            stdin: 'inherit',
+            stdout: isMachineMode() ? process.stderr : 'inherit',
+            stderr: 'inherit',
             shell: true,
             timeout,
             env: env ? { ...process.env, ...env } : process.env,
@@ -502,6 +560,31 @@ function generateIdentifierSafeName(name) {
     return cleaned;
 }
 
+/**
+ * Error class used for user-facing CLI errors.
+ *
+ * The top-level catch in `bin/cli.ts` prints `message` directly without a
+ * stack trace and exits with the code mapped from `code` (see
+ * ERROR_EXIT_CODES in utils/output.ts). Use this for predictable failures
+ * (invalid names, missing files, etc.) so users see a clean message instead
+ * of a Node.js stack dump. `code` and `hint` also feed the `--json` result.
+ */
+class PakeError extends Error {
+    constructor(message, options) {
+        super(message);
+        this.isUserError = true;
+        this.name = 'PakeError';
+        this.code = options?.code;
+        this.hint = options?.hint;
+    }
+}
+function isPakeError(error) {
+    return (error instanceof PakeError ||
+        (typeof error === 'object' &&
+            error !== null &&
+            error.isUserError === true));
+}
+
 const LINUX_TARGET_TYPES = ['deb', 'appimage', 'rpm', 'zst'];
 // Returns the valid Linux build targets from a comma-separated targets
 // string, preserving LINUX_TARGET_TYPES order. Unknown entries are dropped.
@@ -589,30 +672,60 @@ async function copyTemplateConfigs() {
         }
     }));
 }
-async function handleLocalFile(url, useLocalFile, tauriConf) {
-    const pathExists = await fsExtra.pathExists(url);
-    if (pathExists) {
-        logger.warn('✼ Your input might be a local file.');
-        const fileName = path.basename(url);
-        const dirName = path.dirname(url);
-        const distDir = path.join(npmDirectory, 'dist');
-        const distBakDir = path.join(npmDirectory, 'dist_bak');
-        if (!useLocalFile) {
-            const urlPath = path.join(distDir, fileName);
-            await fsExtra.copy(url, urlPath);
-        }
-        else {
-            fsExtra.moveSync(distDir, distBakDir, { overwrite: true });
-            fsExtra.copySync(dirName, distDir, { overwrite: true });
-            const filesToCopyBack = ['cli.js'];
-            await Promise.all(filesToCopyBack.map((file) => fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file))));
-        }
-        tauriConf.pake.windows[0].url = fileName;
-        tauriConf.pake.windows[0].url_type = 'local';
+// Replace the CLI's own dist/ with the user's static files while keeping the
+// build artifacts (cli.js) the packaged app does not need but the CLI does.
+// dist_bak always holds the ORIGINAL package dist: once it exists, later
+// stagings must not overwrite it with a previous user tree, or the original
+// files would be unrecoverable across repeated local builds.
+async function stageLocalTree(sourceDir) {
+    const distDir = path.join(npmDirectory, 'dist');
+    const distBakDir = path.join(npmDirectory, 'dist_bak');
+    if (await fsExtra.pathExists(distBakDir)) {
+        fsExtra.removeSync(distDir);
     }
     else {
-        tauriConf.pake.windows[0].url_type = 'web';
+        fsExtra.moveSync(distDir, distBakDir);
     }
+    fsExtra.copySync(sourceDir, distDir, { overwrite: true });
+    const filesToCopyBack = ['cli.js'];
+    await Promise.all(filesToCopyBack.map((file) => fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file))));
+}
+// Exported for unit tests (web fallback and directory entry guard).
+async function handleLocalFile(url, useLocalFile, tauriConf) {
+    const pathExists = await fsExtra.pathExists(url);
+    if (!pathExists) {
+        tauriConf.pake.windows[0].url_type = 'web';
+        return;
+    }
+    const stat = await fsExtra.stat(url);
+    if (stat.isDirectory()) {
+        // A directory of static web assets (e.g. a generated dist/): the whole
+        // tree is packaged and the app entry is its root index.html.
+        const entryFile = 'index.html';
+        if (!(await fsExtra.pathExists(path.join(url, entryFile)))) {
+            throw new PakeError(`Local directory "${url}" has no ${entryFile} at its root.`, {
+                code: 'INVALID_INPUT',
+                hint: 'Point Pake at the built output directory that contains index.html.',
+            });
+        }
+        logger.info(`✺ Packaging local directory: ${url}`);
+        await stageLocalTree(url);
+        tauriConf.pake.windows[0].url = entryFile;
+        tauriConf.pake.windows[0].url_type = 'local';
+        return;
+    }
+    logger.info(`✺ Packaging local file: ${url}`);
+    const fileName = path.basename(url);
+    const distDir = path.join(npmDirectory, 'dist');
+    if (!useLocalFile) {
+        const urlPath = path.join(distDir, fileName);
+        await fsExtra.copy(url, urlPath);
+    }
+    else {
+        await stageLocalTree(path.dirname(url));
+    }
+    tauriConf.pake.windows[0].url = fileName;
+    tauriConf.pake.windows[0].url_type = 'local';
 }
 function buildLinuxDesktopContent(name, title, linuxBinaryName) {
     const chineseName = title && /[\u4e00-\u9fa5]/.test(title) ? title : null;
@@ -1048,7 +1161,60 @@ const APPIMAGE_FAILURE_GUIDANCE = `\n\n${APPIMAGE_BAR}\n` +
     APPIMAGE_BAR;
 class BaseBuilder {
     constructor(options) {
+        this.artifacts = [];
         this.options = options;
+    }
+    /** Final artifacts produced by this build, for the `--json` result. */
+    getArtifacts() {
+        return [...this.artifacts];
+    }
+    /** Architecture reported in the `--json` result. */
+    getReportArch() {
+        return this.options.multiArch ? 'universal' : process.arch;
+    }
+    // Drop a recorded artifact whose file was later removed (e.g. the
+    // temporary .deb consumed by zst repacking), so --json never lists a
+    // path that no longer exists.
+    removeArtifact(artifactPath) {
+        const resolved = path.resolve(artifactPath);
+        this.artifacts = this.artifacts.filter((artifact) => artifact.path !== resolved);
+    }
+    async recordArtifact(artifactPath, format) {
+        try {
+            const stat = await fsExtra.stat(artifactPath);
+            let sizeBytes = stat.size;
+            if (stat.isDirectory()) {
+                sizeBytes = await BaseBuilder.getPathSize(artifactPath);
+            }
+            this.artifacts.push({
+                path: path.resolve(artifactPath),
+                sizeBytes,
+                format,
+            });
+        }
+        catch {
+            // Never fail a finished build over size bookkeeping.
+            this.artifacts.push({
+                path: path.resolve(artifactPath),
+                sizeBytes: 0,
+                format,
+            });
+        }
+    }
+    static async getPathSize(directory) {
+        let size = 0;
+        for (const entry of await fsExtra.readdir(directory, {
+            withFileTypes: true,
+        })) {
+            const entryPath = path.join(directory, entry.name);
+            if (entry.isDirectory()) {
+                size += await BaseBuilder.getPathSize(entryPath);
+            }
+            else if (entry.isFile()) {
+                size += (await fsExtra.stat(entryPath)).size;
+            }
+        }
+        return size;
     }
     async prepare() {
         const tauriSrcPath = path.join(npmDirectory, 'src-tauri');
@@ -1060,6 +1226,12 @@ class BaseBuilder {
         }
         ensureRustEnv();
         if (!checkRustInstalled()) {
+            if (!isInteractive()) {
+                throw new PakeError('Rust required to package your webapp.', {
+                    code: 'ENV_MISSING',
+                    hint: 'Install Rust via https://rustup.rs, then rerun the same command.',
+                });
+            }
             const res = await prompts({
                 type: 'confirm',
                 message: 'Rust not detected. Install now?',
@@ -1069,8 +1241,10 @@ class BaseBuilder {
                 await installRust();
             }
             else {
-                logger.error('✕ Rust required to package your webapp.');
-                process.exit(1);
+                throw new PakeError('Rust required to package your webapp.', {
+                    code: 'ENV_MISSING',
+                    hint: 'Install Rust via https://rustup.rs, then rerun the same command.',
+                });
             }
         }
         const spinner = getSpinner('Installing package...');
@@ -1129,8 +1303,9 @@ class BaseBuilder {
         // Let spinner run for a moment so user can see it, then stop before package manager command
         await new Promise((resolve) => setTimeout(resolve, 500));
         buildSpinner.stop();
-        // Show static message to keep the status visible
-        logger.warn('✸ Building app...');
+        // Show static message to keep the status visible. Info, not warn: warn
+        // entries feed the --json warnings array and this is a status line.
+        logger.info('✸ Building app...');
         const baseEnv = getBuildEnvironment();
         let buildEnv = {
             ...(baseEnv ?? {}),
@@ -1174,6 +1349,7 @@ class BaseBuilder {
         // executable the build produced instead.
         if (this.options.bundle === false) {
             await this.copyRawBinary(npmDirectory, name);
+            await this.recordArtifact(this.getRawBinaryPath(name), 'binary');
             if (logSuccess) {
                 logger.success('✔ Build success!');
                 logger.success('✔ Raw binary located in', path.resolve(this.getRawBinaryPath(name)));
@@ -1186,9 +1362,11 @@ class BaseBuilder {
         const appPath = this.getBuildAppPath(npmDirectory, fileName, fileType);
         const distPath = path.resolve(`${name}.${fileType}`);
         await fsExtra.copy(appPath, distPath);
+        await this.recordArtifact(distPath, fileType);
         // Copy raw binary if requested
         if (this.options.keepBinary) {
             await this.copyRawBinary(npmDirectory, name);
+            await this.recordArtifact(this.getRawBinaryPath(name), 'binary');
         }
         await fsExtra.remove(appPath);
         if (logSuccess) {
@@ -1215,6 +1393,13 @@ class BaseBuilder {
             // fsExtra.move uses fs.rename (atomic on same filesystem) and falls back
             // to copy+remove only when moving across volumes.
             await fsExtra.move(appBundlePath, appDest, { overwrite: true });
+            // Keep the JSON result pointing at where the artifact actually lives.
+            const movedFrom = path.resolve(appBundlePath);
+            for (const artifact of this.artifacts) {
+                if (artifact.path === movedFrom) {
+                    artifact.path = appDest;
+                }
+            }
             logger.success(`✔ ${appBundleName.replace(/\.app$/, '')} installed to /Applications`);
         }
         catch (error) {
@@ -1430,6 +1615,9 @@ class MacBuilder extends BaseBuilder {
         }
         return `${name}_${tauriConfig.version}_${arch}`;
     }
+    getReportArch() {
+        return this.getActualArch();
+    }
     getActualArch() {
         if (this.buildArch === 'universal' || this.options.multiArch) {
             return 'universal';
@@ -1482,6 +1670,9 @@ class WinBuilder extends BaseBuilder {
             ? this.resolveTargetArch(options.targets)
             : this.resolveTargetArch('auto');
         this.options.targets = this.buildFormat;
+    }
+    getReportArch() {
+        return this.buildArch;
     }
     getFileName() {
         const { name } = this.options;
@@ -1537,6 +1728,9 @@ class LinuxBuilder extends BaseBuilder {
             this.buildArch = this.resolveTargetArch('auto');
         }
         this.options.targets = this.buildFormat;
+    }
+    getReportArch() {
+        return this.buildArch;
     }
     getFileName() {
         const { name = 'pake-app', targets } = this.options;
@@ -1686,12 +1880,14 @@ post_remove() {
 }
 `);
             await shellExec(`bsdtar --zstd -cf "${packagePath}" -C "${dataDir}" .PKGINFO .INSTALL usr`);
+            await this.recordArtifact(packagePath, 'zst');
             logger.success('✔ Build success!');
             logger.success('✔ App installer located in', packagePath);
         }
         finally {
             if (removeSourceDeb) {
                 await fsExtra.remove(debPath);
+                this.removeArtifact(debPath);
             }
             await fsExtra.remove(workDir);
         }
@@ -2389,8 +2585,8 @@ async function handleIcon(options, url) {
             return localIconPath;
         }
     }
-    // Try favicon from website
-    if (url && options.name) {
+    // Try favicon from website; local file/directory input has no favicon.
+    if (url && options.name && /^https?:\/\//i.test(url)) {
         const faviconPath = await tryGetFavicon(url, options.name);
         if (faviconPath)
             return faviconPath;
@@ -2633,28 +2829,6 @@ function safeDomainsToRegex(domains) {
         : '';
 }
 
-/**
- * Error class used for user-facing CLI errors.
- *
- * The top-level catch in `bin/cli.ts` prints `message` directly without a
- * stack trace and exits with code 1. Use this for predictable failures
- * (invalid names, missing files, etc.) so users see a clean message instead
- * of a Node.js stack dump.
- */
-class PakeError extends Error {
-    constructor(message) {
-        super(message);
-        this.isUserError = true;
-        this.name = 'PakeError';
-    }
-}
-function isPakeError(error) {
-    return (error instanceof PakeError ||
-        (typeof error === 'object' &&
-            error !== null &&
-            error.isUserError === true));
-}
-
 function resolveAppName(name, platform) {
     const domain = getDomain(name) || 'pake';
     return platform !== 'linux' ? capitalizeFirstLetter(domain) : domain;
@@ -2686,9 +2860,14 @@ async function handleOptions(options, url) {
         const defaultName = pathExists
             ? resolveLocalAppName(url, platform)
             : resolveAppName(url, platform);
-        const promptMessage = 'Enter your application name';
-        const namePrompt = await promptText(promptMessage, defaultName);
-        name = namePrompt?.trim() || defaultName;
+        if (isInteractive()) {
+            const promptMessage = 'Enter your application name';
+            const namePrompt = await promptText(promptMessage, defaultName);
+            name = namePrompt?.trim() || defaultName;
+        }
+        else {
+            name = defaultName;
+        }
     }
     if (name && platform === 'linux') {
         name = generateLinuxPackageName(name);
@@ -2732,6 +2911,7 @@ const DEFAULT_PAKE_OPTIONS = {
     width: 1200,
     fullscreen: false,
     maximize: false,
+    resizable: true,
     hideTitleBar: false,
     hideWindowDecorations: false,
     alwaysOnTop: false,
@@ -2758,6 +2938,7 @@ const DEFAULT_PAKE_OPTIONS = {
     systemTrayIcon: '',
     proxyUrl: '',
     debug: false,
+    json: false,
     inject: [],
     installerLanguage: 'en-US',
     hideOnClose: undefined, // Platform-specific: true for macOS, false for others
@@ -2797,9 +2978,16 @@ function validateNumberInput(value) {
     }
     return parsedValue;
 }
+// Path-shaped input (./x, ../x, /x, ~/x, C:\x). A missing path must fail
+// loudly: appending https:// to "./typo" would otherwise produce a valid URL
+// like https://./typo and a silently broken app (worst case for agents).
+const PATH_LIKE_PATTERN = /^(\.{1,2}[\\/]|[\\/]|~[\\/]|[a-zA-Z]:[\\/])/;
 function validateUrlInput(url) {
     const isFile = fs.existsSync(url);
     if (!isFile) {
+        if (PATH_LIKE_PATTERN.test(url)) {
+            throw new InvalidArgumentError(`Local path "${url}" does not exist. Check the path, or pass a web URL instead.`);
+        }
         try {
             return normalizeUrl(url);
         }
@@ -2849,6 +3037,8 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         return previous ? [...previous, ...files] : files;
     }, DEFAULT_PAKE_OPTIONS.inject)
         .option('--debug', 'Debug build and more output', DEFAULT_PAKE_OPTIONS.debug)
+        .option('--json', 'Machine-readable output: logs to stderr, one JSON result on stdout', DEFAULT_PAKE_OPTIONS.json)
+        .option('--config <path>', 'Load options from a JSON config file (fields mirror CLI options, see schema/pake.schema.json)')
         .addOption(new Option('--proxy-url <url>', 'Proxy URL for all network requests (http://, https://, socks5://)')
         .default(DEFAULT_PAKE_OPTIONS.proxyUrl)
         .hideHelp())
@@ -2981,16 +3171,181 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     });
 }
 
+// Invocation concerns, not app manifest fields; pass these as CLI flags.
+const REJECTED_KEYS = new Set(['config', 'json', 'version']);
+// Optional CLI options that have no entry in DEFAULT_PAKE_OPTIONS.
+const EXTRA_STRING_KEYS = new Set(['name', 'title', 'identifier']);
+function expectedTypeFor(key) {
+    if (key === 'inject')
+        return 'string[]';
+    if (key === 'hideOnClose')
+        return 'boolean';
+    if (EXTRA_STRING_KEYS.has(key))
+        return 'string';
+    const defaultValue = DEFAULT_PAKE_OPTIONS[key];
+    const type = typeof defaultValue;
+    if (type === 'string' || type === 'number' || type === 'boolean') {
+        return type;
+    }
+    return null;
+}
+function matchesType(value, type) {
+    if (type === 'string[]') {
+        return Array.isArray(value) && value.every((v) => typeof v === 'string');
+    }
+    return typeof value === type;
+}
+async function loadConfigFile(configPath, validKeys) {
+    if (!(await fsExtra.pathExists(configPath))) {
+        throw new PakeError(`Config file not found: ${configPath}`, {
+            code: 'INVALID_INPUT',
+            hint: 'Pass a path to a JSON file matching schema/pake.schema.json.',
+        });
+    }
+    let parsed;
+    try {
+        parsed = JSON.parse(await fsExtra.readFile(configPath, 'utf8'));
+    }
+    catch (error) {
+        const detail = error instanceof Error ? error.message : String(error);
+        throw new PakeError(`Config file is not valid JSON: ${detail}`, {
+            code: 'INVALID_INPUT',
+            hint: `Fix the JSON syntax in ${configPath}.`,
+        });
+    }
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+        throw new PakeError('Config file must contain a JSON object.', {
+            code: 'INVALID_INPUT',
+            hint: 'See schema/pake.schema.json for the expected shape.',
+        });
+    }
+    const result = { options: {} };
+    for (const [key, value] of Object.entries(parsed)) {
+        if (key === '$schema')
+            continue;
+        if (key === 'url') {
+            if (typeof value !== 'string') {
+                throw new PakeError('Config field "url" must be a string.', {
+                    code: 'INVALID_INPUT',
+                    hint: 'Use a web URL or a local file/directory path.',
+                });
+            }
+            result.url = value;
+            continue;
+        }
+        if (REJECTED_KEYS.has(key)) {
+            throw new PakeError(`Config field "${key}" is not allowed in a config file.`, {
+                code: 'INVALID_INPUT',
+                hint: `Pass --${key} on the command line instead.`,
+            });
+        }
+        if (!validKeys.has(key)) {
+            throw new PakeError(`Unknown config field "${key}".`, {
+                code: 'INVALID_INPUT',
+                hint: 'Field names are camelCase CLI option names; see schema/pake.schema.json.',
+            });
+        }
+        const expected = expectedTypeFor(key);
+        if (expected && !matchesType(value, expected)) {
+            throw new PakeError(`Config field "${key}" must be of type ${expected}.`, {
+                code: 'INVALID_INPUT',
+                hint: 'See schema/pake.schema.json for field types.',
+            });
+        }
+        if (!expected && (typeof value === 'object' || value === null)) {
+            throw new PakeError(`Config field "${key}" must be a string, number, or boolean.`, {
+                code: 'INVALID_INPUT',
+                hint: 'See schema/pake.schema.json for field types.',
+            });
+        }
+        result.options[key] = value;
+    }
+    return result;
+}
+
 const program = getCliProgram();
+// Make commander throw instead of exiting so option/argument parse errors
+// honor the exit-code contract (2 = invalid input) and still emit the JSON
+// result object when --json was requested.
+program.exitOverride();
+function isCommanderExit(error) {
+    return (typeof error === 'object' &&
+        error !== null &&
+        typeof error.code === 'string' &&
+        error.code.startsWith('commander.'));
+}
+const PHASE_ERROR_CODES = {
+    input: 'INVALID_INPUT',
+    prepare: 'ENV_MISSING',
+    build: 'BUILD_FAILED',
+};
+function classifyError(error, phase) {
+    if (isPakeError(error)) {
+        return {
+            code: error.code ?? PHASE_ERROR_CODES[phase],
+            message: error.message,
+            hint: error.hint ?? null,
+        };
+    }
+    if (error instanceof Error) {
+        return {
+            code: PHASE_ERROR_CODES[phase],
+            message: error.message,
+            hint: null,
+        };
+    }
+    return {
+        code: 'UNEXPECTED',
+        message: `Unexpected error: ${String(error)}`,
+        hint: null,
+    };
+}
 async function checkUpdateTips() {
     updateNotifier({ pkg: packageJson, updateCheckInterval: 1000 * 60 }).notify({
         isGlobal: true,
     });
 }
-program.action(async (url, options) => {
+program.action(async (urlArg, options) => {
+    const jsonMode = Boolean(options.json);
+    if (jsonMode) {
+        enableMachineMode();
+    }
+    let phase = 'input';
+    let appName = null;
+    let url = urlArg;
     try {
-        await checkUpdateTips();
+        if (!jsonMode) {
+            await checkUpdateTips();
+        }
+        // Config file fills in whatever the command line did not set explicitly:
+        // CLI flag > config field > built-in default.
+        if (options.config) {
+            const validKeys = new Set(program.options.map((option) => option.attributeName()));
+            const loaded = await loadConfigFile(options.config, validKeys);
+            for (const [key, value] of Object.entries(loaded.options)) {
+                if (program.getOptionValueSource(key) !== 'cli') {
+                    options[key] = value;
+                }
+            }
+            if (!url && loaded.url) {
+                try {
+                    url = validateUrlInput(loaded.url);
+                }
+                catch (error) {
+                    const detail = error instanceof Error ? error.message : String(error);
+                    throw new PakeError(`Invalid "url" in config file: ${detail}`, {
+                        code: 'INVALID_INPUT',
+                    });
+                }
+            }
+        }
         if (!url) {
+            if (jsonMode) {
+                throw new PakeError('No URL or local path to package.', {
+                    code: 'INVALID_INPUT',
+                    hint: 'Pass a URL/path argument or a config file with a "url" field.',
+                });
+            }
             program.help({
                 error: false,
             });
@@ -3002,13 +3357,47 @@ program.action(async (url, options) => {
             log.setLevel('debug');
         }
         const appOptions = await handleOptions(options, url);
+        appName = appOptions.name ?? null;
         const builder = BuilderProvider.create(appOptions);
+        phase = 'prepare';
         await builder.prepare();
+        phase = 'build';
         await builder.build(url);
+        if (jsonMode) {
+            printJsonResult({
+                ok: true,
+                name: appName,
+                platform: process.platform,
+                arch: builder.getReportArch(),
+                outputs: builder.getArtifacts(),
+                warnings: getCapturedWarnings(),
+                error: null,
+            });
+        }
     }
     catch (error) {
-        if (isPakeError(error)) {
-            console.error(chalk.red(error.message));
+        // program.help() and --help/--version throw under exitOverride with
+        // exitCode 0; a clean commander exit is not a failure.
+        if (isCommanderExit(error) && error.exitCode === 0) {
+            process.exit(0);
+        }
+        const classified = classifyError(error, phase);
+        if (jsonMode) {
+            printJsonResult({
+                ok: false,
+                name: appName,
+                platform: process.platform,
+                arch: null,
+                outputs: [],
+                warnings: getCapturedWarnings(),
+                error: classified,
+            });
+        }
+        else if (isPakeError(error)) {
+            console.error(chalk.red(classified.message));
+            if (classified.hint) {
+                console.error(chalk.yellow(`✼ ${classified.hint}`));
+            }
         }
         else if (error instanceof Error) {
             console.error(chalk.red(`✕ ${error.message}`));
@@ -3019,10 +3408,35 @@ program.action(async (url, options) => {
         else {
             console.error(chalk.red(`✕ Unexpected error: ${String(error)}`));
         }
-        process.exit(1);
+        process.exit(ERROR_EXIT_CODES[classified.code]);
     }
 });
 program.parseAsync().catch((error) => {
+    if (isCommanderExit(error)) {
+        // --help / --version and friends exit clean; commander already printed.
+        if (error.exitCode === 0) {
+            process.exit(0);
+        }
+        // Parse errors (unknown option, invalid argument, missing value) are
+        // invalid input. Commander already printed the message to stderr; in
+        // json mode also emit the machine-readable result on stdout.
+        if (process.argv.includes('--json')) {
+            printJsonResult({
+                ok: false,
+                name: null,
+                platform: process.platform,
+                arch: null,
+                outputs: [],
+                warnings: [],
+                error: {
+                    code: 'INVALID_INPUT',
+                    message: error.message.trim(),
+                    hint: 'Run pake --help for the accepted options.',
+                },
+            });
+        }
+        process.exit(ERROR_EXIT_CODES.INVALID_INPUT);
+    }
     if (error instanceof Error) {
         console.error(chalk.red(`✕ ${error.message}`));
     }

@@ -123,10 +123,15 @@ Configure window properties in `pake.json`:
 Package local HTML/CSS/JS files:
 
 ```bash
+# A whole directory of static files (must contain index.html at its root),
+# e.g. the dist/ output of a web build. The full tree is packaged.
+pake ./dist --name my-tool
+
+# A single HTML file; add --use-local-file to also copy its sibling files
 pake ./my-app/index.html --name my-static-app --use-local-file
 ```
 
-Requirements: Pake CLI >= 3.0.0
+Hash-based routing works out of the box; history-mode SPA routing is not yet supported for local packaging. Single-file packaging requires Pake CLI >= 3.0.0; directory packaging requires >= 3.15.0.
 
 ## macOS Media Permissions
 
@@ -137,8 +142,8 @@ pake https://chatgpt.com --name ChatGPT --microphone
 pake https://meet.google.com --name GoogleMeet --camera --microphone
 ```
 
-- `--microphone` — grants microphone access (`com.apple.security.device.audio-input`)
-- `--camera` — grants camera access (`com.apple.security.device.camera`)
+- `--microphone`: grants microphone access (`com.apple.security.device.audio-input`)
+- `--camera`: grants camera access (`com.apple.security.device.camera`)
 
 macOS will prompt the user for permission on first use. Only add these flags for sites that actually need them.
 

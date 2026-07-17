@@ -34,6 +34,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   systemTrayIcon: '',
   proxyUrl: '',
   debug: false,
+  json: false,
   inject: [],
   installerLanguage: 'en-US',
   hideOnClose: undefined, // Platform-specific: true for macOS, false for others

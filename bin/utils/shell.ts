@@ -1,5 +1,6 @@
 import { execa } from 'execa';
 import { npmDirectory } from './dir';
+import { isMachineMode } from './output';
 
 export async function shellExec(
   command: string,
@@ -11,7 +12,11 @@ export async function shellExec(
       cwd: npmDirectory,
       // Use 'inherit' to show all output directly to user in real-time.
       // This ensures linuxdeploy and other tool outputs are visible during builds.
-      stdio: 'inherit',
+      // In machine mode (--json) stdout is reserved for the final JSON result,
+      // so subprocess stdout is rerouted to stderr instead.
+      stdin: 'inherit',
+      stdout: isMachineMode() ? process.stderr : 'inherit',
+      stderr: 'inherit',
       shell: true,
       timeout,
       env: env ? { ...process.env, ...env } : process.env,

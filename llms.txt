@@ -1,0 +1,31 @@
+# Pake
+
+> Pake turns any webpage or local web build into a lightweight desktop app (~5MB) for macOS, Windows, and Linux, using Tauri (Rust) and the system webview. One CLI command packages a URL, a local HTML file, or a static directory into a native installer.
+
+## Install and run
+
+- Install: `npm install -g pake-cli` (requires Node 18+ and Rust; the CLI offers to install Rust when missing)
+- Basic: `pake https://example.com --name MyApp`
+- Local build output: `pake ./dist --name MyTool` (directory must contain index.html at its root; hash routing only, history-mode SPA routing unsupported)
+
+## Agent contract
+
+- Always pass `--json` in automation: stdout carries exactly one JSON object `{ok, name, platform, arch, outputs: [{path, sizeBytes, format}], warnings, error: {code, message, hint} | null}`; all logs go to stderr; interactive prompts are disabled.
+- Exit codes: 0 success, 2 invalid input, 3 build failure, 4 missing environment or dependency setup failure, 1 unexpected.
+- On Linux multi-target builds, ok:true can carry fewer outputs than requested formats; failed targets land in warnings. Check outputs[].format.
+- Error codes: INVALID_INPUT, ENV_MISSING, BUILD_FAILED, NETWORK, UNEXPECTED. `error.hint` states how to fix.
+- Declarative config: `pake --config app.json --json`; fields are camelCase CLI option names plus `url`. Explicit CLI flags win over config fields. Unknown fields fail fast.
+- Config schema: https://raw.githubusercontent.com/tw93/Pake/main/schema/pake.schema.json
+
+## Docs
+
+- [CLI usage, all options](https://github.com/tw93/Pake/blob/main/docs/cli-usage.md): every flag with defaults and examples
+- [Advanced usage](https://github.com/tw93/Pake/blob/main/docs/advanced-usage.md): style injection, containers, customization
+- [FAQ](https://github.com/tw93/Pake/blob/main/docs/faq.md): platform-specific troubleshooting
+
+## Notes
+
+- Output formats: dmg/app (macOS), msi (Windows), deb/AppImage/rpm/zst (Linux); pick with `--targets`.
+- Icons auto-fetch from the site favicon when `--icon` is omitted.
+- `--proxy-url` is baked into the app webview at build time; it does not proxy the icon download itself.
+- Google OAuth and similar providers may reject embedded webviews regardless of flags; `--new-window` and `--safe-domain` help with most SSO flows.

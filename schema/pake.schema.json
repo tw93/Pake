@@ -1,0 +1,249 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/tw93/Pake/main/schema/pake.schema.json",
+  "title": "Pake CLI config file",
+  "description": "Declarative config for `pake --config <path>`. Fields mirror the camelCase CLI options; an explicit CLI flag always wins over a config field. Invocation concerns (--json, --config) are CLI-only.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional reference to this schema for editor validation."
+    },
+    "url": {
+      "type": "string",
+      "description": "Web URL, local HTML file, or local directory to package. A positional CLI argument wins over this field."
+    },
+    "name": {
+      "type": "string",
+      "description": "Application name."
+    },
+    "identifier": {
+      "type": "string",
+      "description": "Application identifier / bundle ID. Derived from url and name when omitted."
+    },
+    "title": {
+      "type": "string",
+      "description": "Window title."
+    },
+    "icon": {
+      "type": "string",
+      "description": "Application icon path or URL. Fetched from the site favicon when omitted.",
+      "default": ""
+    },
+    "width": {
+      "type": "number",
+      "description": "Window width in pixels.",
+      "default": 1200
+    },
+    "height": {
+      "type": "number",
+      "description": "Window height in pixels.",
+      "default": 780
+    },
+    "useLocalFile": {
+      "type": "boolean",
+      "description": "When url is a local file, recursively copy its sibling files into the app.",
+      "default": false
+    },
+    "fullscreen": {
+      "type": "boolean",
+      "description": "Start in full screen.",
+      "default": false
+    },
+    "hideTitleBar": {
+      "type": "boolean",
+      "description": "macOS only: hide title bar (immersive header).",
+      "default": false
+    },
+    "hideWindowDecorations": {
+      "type": "boolean",
+      "description": "Windows/Linux only: hide native window decorations.",
+      "default": false
+    },
+    "multiArch": {
+      "type": "boolean",
+      "description": "macOS only: build a universal binary for both Intel and Apple Silicon.",
+      "default": false
+    },
+    "inject": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Local CSS/JS file paths injected into the page.",
+      "default": []
+    },
+    "debug": {
+      "type": "boolean",
+      "description": "Debug build with more output.",
+      "default": false
+    },
+    "proxyUrl": {
+      "type": "string",
+      "description": "Proxy URL for all network requests (http://, https://, socks5://).",
+      "default": ""
+    },
+    "userAgent": {
+      "type": "string",
+      "description": "Custom user agent.",
+      "default": ""
+    },
+    "targets": {
+      "type": "string",
+      "description": "Build target format. Linux: deb/appimage/rpm/zst and *-arm64 variants (comma-separated allowed); Windows: x64/arm64; macOS: intel/apple/universal/app/dmg. Defaults to the platform installer format."
+    },
+    "appVersion": {
+      "type": "string",
+      "description": "App version written into the bundle.",
+      "default": "1.0.0"
+    },
+    "alwaysOnTop": {
+      "type": "boolean",
+      "description": "Keep the window always on top.",
+      "default": false
+    },
+    "maximize": {
+      "type": "boolean",
+      "description": "Start window maximized.",
+      "default": false
+    },
+    "darkMode": {
+      "type": "boolean",
+      "description": "Force dark mode (macOS, Windows, Linux).",
+      "default": false
+    },
+    "disabledWebShortcuts": {
+      "type": "boolean",
+      "description": "Disable web page shortcuts.",
+      "default": false
+    },
+    "activationShortcut": {
+      "type": "string",
+      "description": "Global shortcut that activates the app window.",
+      "default": ""
+    },
+    "showSystemTray": {
+      "type": "boolean",
+      "description": "Show a system tray icon.",
+      "default": false
+    },
+    "systemTrayIcon": {
+      "type": "string",
+      "description": "Custom system tray icon path.",
+      "default": ""
+    },
+    "hideOnClose": {
+      "type": "boolean",
+      "description": "Hide the window on close instead of exiting. Defaults to true on macOS, false elsewhere."
+    },
+    "incognito": {
+      "type": "boolean",
+      "description": "Launch in incognito/private mode (no persisted cookies or storage).",
+      "default": false
+    },
+    "wasm": {
+      "type": "boolean",
+      "description": "Enable WebAssembly support (Flutter Web, etc.).",
+      "default": false
+    },
+    "enableDragDrop": {
+      "type": "boolean",
+      "description": "Enable drag and drop.",
+      "default": false
+    },
+    "keepBinary": {
+      "type": "boolean",
+      "description": "Keep the raw binary alongside the installer.",
+      "default": false
+    },
+    "bundle": {
+      "type": "boolean",
+      "description": "Linux only: false skips packaging and outputs the raw executable (CLI: --no-bundle).",
+      "default": true
+    },
+    "multiInstance": {
+      "type": "boolean",
+      "description": "Allow multiple app instances.",
+      "default": false
+    },
+    "multiWindow": {
+      "type": "boolean",
+      "description": "Allow opening multiple windows in one instance.",
+      "default": false
+    },
+    "startToTray": {
+      "type": "boolean",
+      "description": "Start minimized to tray.",
+      "default": false
+    },
+    "forceInternalNavigation": {
+      "type": "boolean",
+      "description": "Keep every link inside the Pake window.",
+      "default": false
+    },
+    "internalUrlRegex": {
+      "type": "string",
+      "description": "Regex for URLs treated as internal navigation.",
+      "default": ""
+    },
+    "safeDomain": {
+      "type": "string",
+      "description": "Comma-separated domains kept inside the app (e.g. SSO callbacks).",
+      "default": ""
+    },
+    "enableFind": {
+      "type": "boolean",
+      "description": "Enable in-page Find UI with Cmd/Ctrl+F/G.",
+      "default": false
+    },
+    "installerLanguage": {
+      "type": "string",
+      "description": "Windows installer language.",
+      "default": "en-US"
+    },
+    "zoom": {
+      "type": "number",
+      "description": "Initial page zoom level (50-200).",
+      "default": 100
+    },
+    "minWidth": {
+      "type": "number",
+      "description": "Minimum window width (0 = no limit).",
+      "default": 0
+    },
+    "minHeight": {
+      "type": "number",
+      "description": "Minimum window height (0 = no limit).",
+      "default": 0
+    },
+    "ignoreCertificateErrors": {
+      "type": "boolean",
+      "description": "Ignore certificate errors (self-signed certs).",
+      "default": false
+    },
+    "iterativeBuild": {
+      "type": "boolean",
+      "description": "Rapid build mode (app only, no dmg/deb/msi), for debugging.",
+      "default": false
+    },
+    "newWindow": {
+      "type": "boolean",
+      "description": "Allow sites to open new windows (auth flows, tabs).",
+      "default": false
+    },
+    "install": {
+      "type": "boolean",
+      "description": "macOS only: move the built app into /Applications.",
+      "default": false
+    },
+    "camera": {
+      "type": "boolean",
+      "description": "macOS only: request camera permission.",
+      "default": false
+    },
+    "microphone": {
+      "type": "boolean",
+      "description": "macOS only: request microphone permission.",
+      "default": false
+    }
+  }
+}

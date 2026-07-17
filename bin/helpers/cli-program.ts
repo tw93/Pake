@@ -70,6 +70,15 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
       DEFAULT.inject,
     )
     .option('--debug', 'Debug build and more output', DEFAULT.debug)
+    .option(
+      '--json',
+      'Machine-readable output: logs to stderr, one JSON result on stdout',
+      DEFAULT.json,
+    )
+    .option(
+      '--config <path>',
+      'Load options from a JSON config file (fields mirror CLI options, see schema/pake.schema.json)',
+    )
     .addOption(
       new Option(
         '--proxy-url <url>',
