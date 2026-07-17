@@ -1,0 +1,13 @@
+{
+  "$schema": "https://code.claude.com/schemas/marketplace.json",
+  "name": "pake",
+  "owner": { "name": "tw93" },
+  "description": "Pake: turn any webpage into a lightweight desktop app.",
+  "plugins": [
+    {
+      "name": "pake",
+      "source": "./plugins/pake",
+      "description": "Package any website or local web build into a lightweight desktop app with Pake CLI."
+    }
+  ]
+}

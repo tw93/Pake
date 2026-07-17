@@ -1,0 +1,7 @@
+{
+  "name": "pake",
+  "description": "Package any website or local web build into a lightweight desktop app with Pake CLI.",
+  "version": "1.0.0",
+  "author": { "name": "tw93" },
+  "homepage": "https://github.com/tw93/Pake"
+}

@@ -1,6 +1,6 @@
 # AGENTS.md - Pake Project Knowledge Base
 
-> Project-specific Rust + Tauri rules: `.claude/rules/rust.md`. Release runbook: `.agents/skills/release/SKILL.md` (run `/release`; `.claude/skills/*` are symlinks into `.agents/skills/`, edit the `.agents` copy only).
+> Project-specific Rust + Tauri rules: `.claude/rules/rust.md`. Release runbook: `.agents/skills/release/SKILL.md` (run `/release`; `.claude/skills/*` are symlinks into `.agents/skills/`, edit the `.agents` copy only). Exception: the `pake` skill's real source is `plugins/pake/skills/pake/SKILL.md` (shipped to users via the Claude Code plugin marketplace, `.claude-plugin/marketplace.json`); `.agents/skills/pake` is a symlink to it.
 
 ## Project Identity
 
@@ -29,6 +29,9 @@ Pake/
 │   ├── cli-usage.md      # CLI parameters
 │   ├── advanced-usage.md # Customization guide
 │   └── faq.md           # Troubleshooting
+├── schema/               # pake.schema.json: --config JSON schema (public contract)
+├── plugins/              # Claude Code plugin source (user-facing pake skill)
+├── llms.txt              # Agent-facing contract summary (--json, --config, exit codes)
 ├── scripts/              # Utility scripts
 ├── tests/                # Unit, integration, and release-flow tests
 ├── .github/workflows/     # quality/test and release automation
@@ -92,9 +95,11 @@ Execution rules:
 
 ## Current Risk Areas
 
-- CLI options are user-facing and must stay synchronized across `bin/helpers/cli-program.ts`, `bin/types.ts`, `bin/defaults.ts`, `bin/helpers/merge.ts`, generated `dist/cli.js`, and `docs/cli-usage*.md`.
+- CLI options are user-facing and must stay synchronized across `bin/helpers/cli-program.ts`, `bin/types.ts`, `bin/defaults.ts`, `bin/helpers/merge.ts`, generated `dist/cli.js`, `schema/pake.schema.json`, and `docs/cli-usage*.md`. Schema-to-CLI sync is enforced by `tests/unit/config-file.test.ts`; the rest is manual discipline.
+- The `--json` machine contract is public API for agents: stdout carries exactly one JSON result (nothing else may write to stdout in machine mode), and the exit codes (0/2/3/4/1) plus error codes (`INVALID_INPUT`, `ENV_MISSING`, `BUILD_FAILED`, `NETWORK`, `UNEXPECTED`) must stay stable. `logger.warn` feeds the JSON `warnings` array, so warn is for real warnings only, not status lines. Owners: `bin/utils/output.ts`, `bin/cli.ts`, `bin/utils/shell.ts`.
+- Local file/directory packaging stages user content into the package's own `dist/` (moving it to `dist_bak` and restoring only `cli.js`). Local build runs can strand `dev.js` and test fixtures in `dist_bak`; restore them before committing. Owner: `stageLocalTree` in `bin/helpers/merge.ts`.
 - New user-visible CLI surface (a new flag, alias, subcommand, or extra help variant) needs a stated justification before implementation: name the user problem and why an existing flag, config key, or default cannot cover it, then get maintainer sign-off. Prefer quieter defaults over new options; never split help output into parallel variants.
-- Recent window/runtime options include `--incognito`, `--new-window`, `--min-width`, `--min-height`, `--maximize`, multi-window behavior, notification click handling, and Linux/Wayland WebKit compositing defaults.
+- Window/runtime options with platform-sensitive behavior include `--incognito`, `--new-window`, `--min-width`, `--min-height`, `--maximize`, multi-window behavior, notification click handling, and Linux/Wayland WebKit compositing defaults.
 - `--incognito` intentionally trades persistence for clean private sessions; be careful around login, cookies, local storage, and WeChat-style WebView detection.
 - `--new-window` and `--multi-window` do not bypass every provider policy. Google OAuth and similar embedded-WebView restrictions may still require a normal browser or native client.
 - macOS auth-popup behavior is fragile. Auth/sign-in URLs that trigger WebKit `SOAuthorization` popup creation should stay in the current window when that path can abort the app; changes in `src-tauri/src/inject/event.js` need targeted tests. Apple Sign-In (`appleid.apple.com` / `AppleAuthentication` named windows) is the exception and must keep the native `window.open` popup.
@@ -142,6 +147,8 @@ Four files must be updated in sync for every release:
 | `src-tauri/Cargo.lock`      | `version` for package `pake` |
 | `src-tauri/tauri.conf.json` | `"version"`                  |
 
+A version bump must also rebuild and commit `dist/cli.js` (it embeds the package version); see Troubleshooting.
+
 Tag format: `V<major.minor.patch>` with uppercase `V` (e.g. `V3.13.1`). Current version: check `package.json`.
 
 Find the previous release tag with `git tag --list 'V*' --sort=-version:refname | head -1`. A bare `git tag --sort` is polluted by stray non-version tags (`list`, `continuous`, `0.1.0`) and silently picks the wrong log range.
@@ -172,6 +179,8 @@ For release follow-through, keep these boundaries explicit:
 - The contributors bot can push `chore: update contributors [skip ci]` at any moment, including between local commits and the bump push. On a rejected push, `git pull --rebase` onto it and push again before tagging. After release, fast-forward local `main`; do not move an already pushed release tag to include it.
 
 `.github/workflows/quality-and-test.yml` runs auto-format on push, Rust quality checks, and CLI/build validation across Linux, Windows, and macOS.
+
+Deployment-surface note: the Claude Code plugin (`.claude-plugin/marketplace.json` + `plugins/pake`) ships from `main` via git, independent of `V*` releases. Skill and manifest edits reach new installs as soon as they land on `main`; npm and app assets still wait for their release workflows.
 
 ### Network Mirror Behavior
 
