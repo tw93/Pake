@@ -20,7 +20,7 @@ import * as psl from 'psl';
 import { InvalidArgumentError, program as program$1, Option } from 'commander';
 
 var name = "pake-cli";
-var version = "3.15.0";
+var version = "3.15.1";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=18.0.0"
@@ -680,15 +680,63 @@ async function copyTemplateConfigs() {
 async function stageLocalTree(sourceDir) {
     const distDir = path.join(npmDirectory, 'dist');
     const distBakDir = path.join(npmDirectory, 'dist_bak');
-    if (await fsExtra.pathExists(distBakDir)) {
+    // Resolve symlinked input up front: staging must produce a real copy, or
+    // the cli.js copy-back below would write through the link into the user's
+    // own directory.
+    const resolvedSource = await fsExtra.realpath(sourceDir);
+    const resolvedPackage = await fsExtra
+        .realpath(npmDirectory)
+        .catch(() => path.resolve(npmDirectory));
+    const packageDist = path.join(resolvedPackage, 'dist');
+    if (resolvedSource === resolvedPackage ||
+        resolvedPackage.startsWith(resolvedSource + path.sep) ||
+        resolvedSource === packageDist ||
+        resolvedSource.startsWith(packageDist + path.sep)) {
+        throw new PakeError(`Local input "${sourceDir}" contains the Pake CLI installation itself.`, {
+            code: 'INVALID_INPUT',
+            hint: 'Point Pake at your built output directory, not at a directory containing pake-cli.',
+        });
+    }
+    try {
+        if (await fsExtra.pathExists(distBakDir)) {
+            fsExtra.removeSync(distDir);
+        }
+        else {
+            fsExtra.moveSync(distDir, distBakDir);
+        }
+        fsExtra.copySync(resolvedSource, distDir, {
+            overwrite: true,
+            dereference: true,
+        });
+        const filesToCopyBack = ['cli.js'];
+        await Promise.all(filesToCopyBack.map((file) => fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file))));
+    }
+    catch (error) {
+        // Never leave the package without its own dist/: cli.js lives there and
+        // every later `pake` invocation would fail until a manual reinstall.
+        restoreLocalTree();
+        throw error;
+    }
+}
+// Put the package's original dist/ back once a local-input run is over (or
+// failed). Tauri bakes `frontendDist: ../dist` into every binary, so a stale
+// staged tree would leak this user's files into the next app built from the
+// same install. Safe to call on any run: a present dist_bak always holds the
+// original package dist, including one stranded by an older crashed run.
+function restoreLocalTree() {
+    const distDir = path.join(npmDirectory, 'dist');
+    const distBakDir = path.join(npmDirectory, 'dist_bak');
+    if (!fsExtra.pathExistsSync(distBakDir)) {
+        return;
+    }
+    try {
         fsExtra.removeSync(distDir);
+        fsExtra.moveSync(distBakDir, distDir);
     }
-    else {
-        fsExtra.moveSync(distDir, distBakDir);
+    catch (error) {
+        const detail = error instanceof Error ? error.message : String(error);
+        logger.warn(`Failed to restore the CLI's original dist/ from dist_bak: ${detail}`);
     }
-    fsExtra.copySync(sourceDir, distDir, { overwrite: true });
-    const filesToCopyBack = ['cli.js'];
-    await Promise.all(filesToCopyBack.map((file) => fsExtra.copy(path.join(distBakDir, file), path.join(distDir, file))));
 }
 // Exported for unit tests (web fallback and directory entry guard).
 async function handleLocalFile(url, useLocalFile, tauriConf) {
@@ -3175,6 +3223,15 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
 const REJECTED_KEYS = new Set(['config', 'json', 'version']);
 // Optional CLI options that have no entry in DEFAULT_PAKE_OPTIONS.
 const EXTRA_STRING_KEYS = new Set(['name', 'title', 'identifier']);
+// Numeric fields share the CLI flag ranges (see cli-program.ts validators),
+// so a config file cannot smuggle a value the same flag would reject.
+const NUMBER_RANGES = {
+    width: { min: 0 },
+    height: { min: 0 },
+    minWidth: { min: 0 },
+    minHeight: { min: 0 },
+    zoom: { min: 50, max: 200 },
+};
 function expectedTypeFor(key) {
     if (key === 'inject')
         return 'string[]';
@@ -3252,6 +3309,20 @@ async function loadConfigFile(configPath, validKeys) {
                 hint: 'See schema/pake.schema.json for field types.',
             });
         }
+        if (typeof value === 'number') {
+            const range = NUMBER_RANGES[key];
+            const min = range?.min ?? 0;
+            const max = range?.max;
+            if (!Number.isFinite(value) ||
+                value < min ||
+                (max !== undefined && value > max)) {
+                const bounds = max !== undefined ? `${min}-${max}` : `>= ${min}`;
+                throw new PakeError(`Config field "${key}" must be a finite number (${bounds}).`, {
+                    code: 'INVALID_INPUT',
+                    hint: 'See schema/pake.schema.json for field ranges.',
+                });
+            }
+        }
         if (!expected && (typeof value === 'object' || value === null)) {
             throw new PakeError(`Config field "${key}" must be a string, number, or boolean.`, {
                 code: 'INVALID_INPUT',
@@ -3314,6 +3385,9 @@ program.action(async (urlArg, options) => {
     let appName = null;
     let url = urlArg;
     try {
+        // Heal a dist_bak stranded by an earlier crashed local-input run before
+        // building, or this build would embed that run's staged files.
+        restoreLocalTree();
         if (!jsonMode) {
             await checkUpdateTips();
         }
@@ -3379,7 +3453,7 @@ program.action(async (urlArg, options) => {
         // program.help() and --help/--version throw under exitOverride with
         // exitCode 0; a clean commander exit is not a failure.
         if (isCommanderExit(error) && error.exitCode === 0) {
-            process.exit(0);
+            return;
         }
         const classified = classifyError(error, phase);
         if (jsonMode) {
@@ -3408,14 +3482,22 @@ program.action(async (urlArg, options) => {
         else {
             console.error(chalk.red(`✕ Unexpected error: ${String(error)}`));
         }
-        process.exit(ERROR_EXIT_CODES[classified.code]);
+        // exitCode + natural exit instead of process.exit: lets the finally
+        // restore run and guarantees the JSON result is flushed on piped stdout.
+        process.exitCode = ERROR_EXIT_CODES[classified.code];
+    }
+    finally {
+        // A local-input run replaces the package's own dist/ during staging; put
+        // it back so the CLI stays intact and later builds cannot embed this
+        // user's files.
+        restoreLocalTree();
     }
 });
 program.parseAsync().catch((error) => {
     if (isCommanderExit(error)) {
         // --help / --version and friends exit clean; commander already printed.
         if (error.exitCode === 0) {
-            process.exit(0);
+            return;
         }
         // Parse errors (unknown option, invalid argument, missing value) are
         // invalid input. Commander already printed the message to stderr; in
@@ -3435,7 +3517,8 @@ program.parseAsync().catch((error) => {
                 },
             });
         }
-        process.exit(ERROR_EXIT_CODES.INVALID_INPUT);
+        process.exitCode = ERROR_EXIT_CODES.INVALID_INPUT;
+        return;
     }
     if (error instanceof Error) {
         console.error(chalk.red(`✕ ${error.message}`));
@@ -3443,5 +3526,5 @@ program.parseAsync().catch((error) => {
     else {
         console.error(chalk.red(`✕ Unexpected error: ${String(error)}`));
     }
-    process.exit(1);
+    process.exitCode = 1;
 });
