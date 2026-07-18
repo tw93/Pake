@@ -23,6 +23,16 @@ const EXTRA_STRING_KEYS = new Set(['name', 'title', 'identifier']);
 
 type ExpectedType = 'string' | 'number' | 'boolean' | 'string[]';
 
+// Numeric fields share the CLI flag ranges (see cli-program.ts validators),
+// so a config file cannot smuggle a value the same flag would reject.
+const NUMBER_RANGES: Record<string, { min: number; max?: number }> = {
+  width: { min: 0 },
+  height: { min: 0 },
+  minWidth: { min: 0 },
+  minHeight: { min: 0 },
+  zoom: { min: 50, max: 200 },
+};
+
 function expectedTypeFor(key: string): ExpectedType | null {
   if (key === 'inject') return 'string[]';
   if (key === 'hideOnClose') return 'boolean';
@@ -114,6 +124,26 @@ export async function loadConfigFile(
         },
       );
     }
+    if (typeof value === 'number') {
+      const range = NUMBER_RANGES[key];
+      const min = range?.min ?? 0;
+      const max = range?.max;
+      if (
+        !Number.isFinite(value) ||
+        value < min ||
+        (max !== undefined && value > max)
+      ) {
+        const bounds = max !== undefined ? `${min}-${max}` : `>= ${min}`;
+        throw new PakeError(
+          `Config field "${key}" must be a finite number (${bounds}).`,
+          {
+            code: 'INVALID_INPUT',
+            hint: 'See schema/pake.schema.json for field ranges.',
+          },
+        );
+      }
+    }
+
     if (!expected && (typeof value === 'object' || value === null)) {
       throw new PakeError(
         `Config field "${key}" must be a string, number, or boolean.`,

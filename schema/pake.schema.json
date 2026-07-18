@@ -34,12 +34,14 @@
     "width": {
       "type": "number",
       "description": "Window width in pixels.",
-      "default": 1200
+      "default": 1200,
+      "minimum": 0
     },
     "height": {
       "type": "number",
       "description": "Window height in pixels.",
-      "default": 780
+      "default": 780,
+      "minimum": 0
     },
     "useLocalFile": {
       "type": "boolean",
@@ -68,7 +70,9 @@
     },
     "inject": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "description": "Local CSS/JS file paths injected into the page.",
       "default": []
     },
@@ -203,17 +207,21 @@
     "zoom": {
       "type": "number",
       "description": "Initial page zoom level (50-200).",
-      "default": 100
+      "default": 100,
+      "minimum": 50,
+      "maximum": 200
     },
     "minWidth": {
       "type": "number",
       "description": "Minimum window width (0 = no limit).",
-      "default": 0
+      "default": 0,
+      "minimum": 0
     },
     "minHeight": {
       "type": "number",
       "description": "Minimum window height (0 = no limit).",
-      "default": 0
+      "default": 0,
+      "minimum": 0
     },
     "ignoreCertificateErrors": {
       "type": "boolean",

@@ -122,6 +122,27 @@ describe('loadConfigFile', () => {
     );
   });
 
+  it('rejects numbers outside the CLI flag ranges', async () => {
+    const zoomPath = await writeConfig({ zoom: 1000 }, 'zoom.json');
+    await expect(loadConfigFile(zoomPath, validKeys)).rejects.toThrow(
+      /"zoom" must be a finite number \(50-200\)/,
+    );
+    const widthPath = await writeConfig({ width: -5 }, 'negwidth.json');
+    await expect(loadConfigFile(widthPath, validKeys)).rejects.toMatchObject({
+      code: 'INVALID_INPUT',
+    });
+    const okPath = await writeConfig({ zoom: 100, width: 800 }, 'ok.json');
+    const loaded = await loadConfigFile(okPath, validKeys);
+    expect(loaded.options).toEqual({ zoom: 100, width: 800 });
+  });
+
+  it('schema ranges match the loader ranges', () => {
+    expect(schema.properties.zoom).toMatchObject({ minimum: 50, maximum: 200 });
+    for (const key of ['width', 'height', 'minWidth', 'minHeight'] as const) {
+      expect(schema.properties[key]).toMatchObject({ minimum: 0 });
+    }
+  });
+
   it('rejects wrong value types naming the expected type', async () => {
     const configPath = await writeConfig({ width: 'wide' }, 'badtype.json');
     const rejection = expect(loadConfigFile(configPath, validKeys)).rejects;
