@@ -6,6 +6,7 @@ import BuilderProvider from './builders/BuilderProvider';
 import handleInputOptions from './options/index';
 import { getCliProgram } from './helpers/cli-program';
 import { loadConfigFile } from './helpers/config-file';
+import { restoreLocalTree } from './helpers/merge';
 import { isPakeError, PakeError } from './utils/error';
 import { validateUrlInput } from './utils/validate';
 import {
@@ -87,6 +88,10 @@ program.action(async (urlArg: string, options: PakeCliOptions) => {
   let url = urlArg;
 
   try {
+    // Heal a dist_bak stranded by an earlier crashed local-input run before
+    // building, or this build would embed that run's staged files.
+    restoreLocalTree();
+
     if (!jsonMode) {
       await checkUpdateTips();
     }
@@ -158,7 +163,7 @@ program.action(async (urlArg: string, options: PakeCliOptions) => {
     // program.help() and --help/--version throw under exitOverride with
     // exitCode 0; a clean commander exit is not a failure.
     if (isCommanderExit(error) && error.exitCode === 0) {
-      process.exit(0);
+      return;
     }
 
     const classified = classifyError(error, phase);
@@ -187,7 +192,14 @@ program.action(async (urlArg: string, options: PakeCliOptions) => {
       console.error(chalk.red(`✕ Unexpected error: ${String(error)}`));
     }
 
-    process.exit(ERROR_EXIT_CODES[classified.code]);
+    // exitCode + natural exit instead of process.exit: lets the finally
+    // restore run and guarantees the JSON result is flushed on piped stdout.
+    process.exitCode = ERROR_EXIT_CODES[classified.code];
+  } finally {
+    // A local-input run replaces the package's own dist/ during staging; put
+    // it back so the CLI stays intact and later builds cannot embed this
+    // user's files.
+    restoreLocalTree();
   }
 });
 
@@ -195,7 +207,7 @@ program.parseAsync().catch((error: unknown) => {
   if (isCommanderExit(error)) {
     // --help / --version and friends exit clean; commander already printed.
     if (error.exitCode === 0) {
-      process.exit(0);
+      return;
     }
     // Parse errors (unknown option, invalid argument, missing value) are
     // invalid input. Commander already printed the message to stderr; in
@@ -215,12 +227,13 @@ program.parseAsync().catch((error: unknown) => {
         },
       });
     }
-    process.exit(ERROR_EXIT_CODES.INVALID_INPUT);
+    process.exitCode = ERROR_EXIT_CODES.INVALID_INPUT;
+    return;
   }
   if (error instanceof Error) {
     console.error(chalk.red(`✕ ${error.message}`));
   } else {
     console.error(chalk.red(`✕ Unexpected error: ${String(error)}`));
   }
-  process.exit(1);
+  process.exitCode = 1;
 });
