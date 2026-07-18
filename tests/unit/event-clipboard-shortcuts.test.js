@@ -63,6 +63,8 @@ function loadEventHelpers({
   const context = {
     console,
     URL,
+    // Main-realm Date so tests can shift time seen by the fallback TTL.
+    Date,
     Event: class {},
     Notification: function Notification() {},
     setTimeout,
@@ -150,6 +152,8 @@ function loadEventHelpers({
 
   return {
     ...context,
+    // Live contextified global: assigning properties here reaches the vm.
+    sandbox: context,
     eventListeners,
     execCommandCalls,
     invokeCalls,
@@ -289,6 +293,49 @@ describe("event clipboard shortcuts", () => {
       ["insertText", false, "pasted text"],
     ]);
     expect(context.invokeCalls).toEqual([]);
+  });
+
+  it("does not re-arm the fallback from key-repeat after native paste fired", async () => {
+    const input = createElement("input");
+    const context = loadEventHelpers({ activeElement: input });
+    const shortcutHandler = getClipboardShortcutHandler(context);
+    const fallbackHandler = getClipboardPasteFallbackHandler(context);
+    const pasteHandler = getPasteHandler(context);
+    const nativePasteEvent = {
+      clipboardData: { types: ["image/png"], getData: () => "" },
+      preventDefault: vi.fn(),
+      stopImmediatePropagation: vi.fn(),
+    };
+
+    shortcutHandler(createKeyEvent("v"));
+    pasteHandler(nativePasteEvent);
+    // Held key: repeated keydown events arrive after the native paste.
+    shortcutHandler(createKeyEvent("v", { repeat: true }));
+    shortcutHandler(createKeyEvent("v", { repeat: true }));
+    fallbackHandler(createKeyEvent("v"));
+    await Promise.resolve();
+
+    // The image already pasted natively; keyup must not paste text on top.
+    expect(context.clipboardReadCalls).toEqual([]);
+    expect(context.execCommandCalls).toEqual([]);
+  });
+
+  it("expires a stale armed fallback instead of pasting on a later keyup", async () => {
+    const input = createElement("input");
+    const context = loadEventHelpers({ activeElement: input });
+    const shortcutHandler = getClipboardShortcutHandler(context);
+    const fallbackHandler = getClipboardPasteFallbackHandler(context);
+
+    shortcutHandler(createKeyEvent("v"));
+    // Keyup was lost (focus left mid-press); much later a plain "v" keyup
+    // arrives on the same element.
+    const realNow = Date.now();
+    context.sandbox.Date = { now: () => realNow + 10_000 };
+    fallbackHandler(createKeyEvent("v"));
+    await Promise.resolve();
+
+    expect(context.clipboardReadCalls).toEqual([]);
+    expect(context.execCommandCalls).toEqual([]);
   });
 
   it("does not read clipboard for synthetic paste shortcuts", async () => {

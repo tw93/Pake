@@ -207,6 +207,11 @@ function insertTextIntoEditableElement(element, text) {
 }
 
 let clipboardPasteFallbackTarget;
+let clipboardPasteFallbackArmedAt = 0;
+// An armed fallback older than this is a leftover from a keyup the window
+// never saw (alt-tab mid-press); firing it on a later plain "v" keyup would
+// paste unexpectedly.
+const CLIPBOARD_PASTE_FALLBACK_TTL_MS = 5000;
 
 function pasteClipboardText(activeElement) {
   const readText = navigator.clipboard?.readText;
@@ -253,8 +258,16 @@ function handleClipboardShortcut(event) {
   if (key === "v" && canPasteIntoEditableElement(activeElement)) {
     // Let the native WebView paste event run first so images, files, and rich
     // clipboard formats remain intact. If the platform does not emit paste,
-    // keyup applies the existing text-only fallback.
-    clipboardPasteFallbackTarget = activeElement;
+    // keyup applies the existing text-only fallback. Key-repeat must not
+    // re-arm: after a native paste already fired and disarmed the fallback,
+    // a repeat keydown re-arming it would make keyup paste text a second
+    // time. Repeats only refresh the TTL of a still-armed target.
+    if (!event.repeat) {
+      clipboardPasteFallbackTarget = activeElement;
+      clipboardPasteFallbackArmedAt = Date.now();
+    } else if (clipboardPasteFallbackTarget === activeElement) {
+      clipboardPasteFallbackArmedAt = Date.now();
+    }
     return false;
   }
 
@@ -276,9 +289,11 @@ function handleClipboardPasteFallback(event) {
   }
 
   const activeElement = clipboardPasteFallbackTarget;
+  const armedAt = clipboardPasteFallbackArmedAt;
   clipboardPasteFallbackTarget = undefined;
   if (
     !activeElement ||
+    Date.now() - armedAt > CLIPBOARD_PASTE_FALLBACK_TTL_MS ||
     document.activeElement !== activeElement ||
     !canPasteIntoEditableElement(activeElement)
   ) {
