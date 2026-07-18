@@ -40,7 +40,7 @@ Exit codes: `0` success, `2` invalid input, `3` build failure, `4` missing envir
 | `INVALID_INPUT` | Fix the flag, name, or config field named in `message`; `hint` states the accepted form         |
 | `ENV_MISSING`   | Environment setup needed (usually Rust); relay `hint` to the user, or install and rerun         |
 | `BUILD_FAILED`  | Rerun once with `--debug` for verbose logs; check platform notes below before changing anything |
-| `NETWORK`       | Retry once; if it persists, ask about proxy/network before touching build options               |
+| `NETWORK`       | Reserved, not emitted today; network failures arrive as `ENV_MISSING` or `BUILD_FAILED` instead |
 | `UNEXPECTED`    | Report the message upstream; do not loop on retries                                             |
 
 On success, report `outputs[].path` to the user; that is the installer/bundle they need. On Linux multi-target builds, `ok: true` can carry fewer outputs than requested formats (failed targets land in `warnings`); check `outputs[].format` before declaring all formats built.

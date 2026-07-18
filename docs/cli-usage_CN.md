@@ -603,7 +603,7 @@ pake ./my-app/index.html --name "my-app" --use-local-file
 
 #### [config]
 
-用声明式 JSON 配置文件代替拼接命令行参数。字段名是 camelCase 的 CLI 选项名，外加 `url`；schema 见 [schema/pake.schema.json](../schema/pake.schema.json)。显式 CLI 参数始终优先于配置文件字段。未知字段与类型错误会立即报错。调用参数（`--json`、`--config`、`--version`）不允许写进配置文件。
+用声明式 JSON 配置文件代替拼接命令行参数。字段名是 camelCase 的 CLI 选项名，外加 `url`；schema 见 [schema/pake.schema.json](../schema/pake.schema.json)。显式 CLI 参数始终优先于配置文件字段。未知字段、类型错误与超出范围的数值会立即报错。相对路径形式的 `url` 相对当前工作目录解析，而非配置文件所在目录。调用参数（`--json`、`--config`、`--version`）不允许写进配置文件。
 
 ```shell
 --config <path>
@@ -635,7 +635,7 @@ pake --config app.json
 # {"ok":false, ..., "error":{"code":"ENV_MISSING","message":"...","hint":"..."}}
 ```
 
-退出码：`0` 成功、`2` 输入非法、`3` 构建失败、`4` 环境缺失或依赖安装失败（如未安装 Rust、依赖安装出错）、`1` 未预期错误。错误码：`INVALID_INPUT`、`ENV_MISSING`、`BUILD_FAILED`、`NETWORK`、`UNEXPECTED`。
+退出码：`0` 成功、`2` 输入非法、`3` 构建失败、`4` 环境缺失或依赖安装失败（如未安装 Rust、依赖安装出错）、`1` 未预期错误。错误码：`INVALID_INPUT`、`ENV_MISSING`、`BUILD_FAILED`、`UNEXPECTED`，另有 `NETWORK`（预留，当前版本的网络失败会按所处阶段归入 `ENV_MISSING` 或 `BUILD_FAILED`）。
 
 Linux 多 target 构建（如 `--targets deb,appimage`）时，`ok` 为 true 不代表全部格式成功：单个 target 失败而其余成功会记入 `warnings`。请用 `outputs[].format` 核对拿到的格式是否齐全。
 

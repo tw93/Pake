@@ -605,7 +605,7 @@ Enable developer tools and detailed logging for debugging.
 
 #### [config]
 
-Load options from a declarative JSON config file instead of assembling flags. Fields are the camelCase CLI option names plus `url`; the published schema is [schema/pake.schema.json](../schema/pake.schema.json). An explicit CLI flag always wins over a config field. Unknown fields and wrong types fail fast. Invocation flags (`--json`, `--config`, `--version`) are CLI-only and rejected inside the file.
+Load options from a declarative JSON config file instead of assembling flags. Fields are the camelCase CLI option names plus `url`; the published schema is [schema/pake.schema.json](../schema/pake.schema.json). An explicit CLI flag always wins over a config field. Unknown fields, wrong types, and out-of-range numbers fail fast. A relative `url` path resolves against the current working directory, not the config file's location. Invocation flags (`--json`, `--config`, `--version`) are CLI-only and rejected inside the file.
 
 ```shell
 --config <path>
@@ -637,7 +637,7 @@ Machine-readable mode for scripts and AI agents. All logs move to stderr and std
 # {"ok":false, ..., "error":{"code":"ENV_MISSING","message":"...","hint":"..."}}
 ```
 
-Exit codes: `0` success, `2` invalid input, `3` build failure, `4` missing environment or dependency setup failure (e.g. Rust not installed, package install failed), `1` unexpected error. Error codes: `INVALID_INPUT`, `ENV_MISSING`, `BUILD_FAILED`, `NETWORK`, `UNEXPECTED`.
+Exit codes: `0` success, `2` invalid input, `3` build failure, `4` missing environment or dependency setup failure (e.g. Rust not installed, package install failed), `1` unexpected error. Error codes: `INVALID_INPUT`, `ENV_MISSING`, `BUILD_FAILED`, `UNEXPECTED`, plus `NETWORK` (reserved; current versions report network failures under the phase code).
 
 On Linux multi-target builds (e.g. `--targets deb,appimage`), `ok` can be true with fewer `outputs` than requested: a target that fails while others succeed is reported in `warnings`, not as a failure. Check `outputs[].format` against the formats you asked for.
 
