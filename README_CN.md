@@ -195,6 +195,12 @@ pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/week
 
 在脚本或 AI agent 里使用 Pake？加 `--json` 获得机器可读结果，用 `--config app.json` 声明式描述应用（[schema](schema/pake.schema.json)），本地构建产物可直接 `pake ./dist --name MyTool` 打包。完整 agent 契约见 [llms.txt](llms.txt)。Claude Code 用户可通过 `/plugin marketplace add tw93/Pake` 和 `/plugin install pake@pake` 安装官方 skill。
 
+把下面这段复制给你的 AI agent 即可开始：
+
+```text
+用 Pake（npm i -g pake-cli）把网页打包成桌面应用。先阅读 https://raw.githubusercontent.com/tw93/Pake/main/llms.txt，运行 pake 时始终加 --json 并把 stdout 解析为单个 JSON 对象。把 <url-or-local-dist> 打包成名为 <AppName> 的应用。
+```
+
 ## 定制开发
 
 需要 Rust `>=1.85` 和 Node `>=22`（推荐 LTS，较旧的 `>=18` 也可使用），详细安装指南参考 [Tauri 文档](https://tauri.app/start/prerequisites/)。不熟悉开发环境建议直接使用命令行工具。

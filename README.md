@@ -194,6 +194,12 @@ First-time packaging requires environment setup and may be slower, subsequent bu
 
 Using Pake from a script or AI agent? Pass `--json` for machine-readable results, describe apps declaratively with `--config app.json` ([schema](schema/pake.schema.json)), and package local build output directly with `pake ./dist --name MyTool`. See [llms.txt](llms.txt) for the full agent contract. Claude Code users can install the official skill with `/plugin marketplace add tw93/Pake` and `/plugin install pake@pake`.
 
+Copy this to your AI agent to get started:
+
+```text
+Use Pake (npm i -g pake-cli) to package webpages as desktop apps. Read https://raw.githubusercontent.com/tw93/Pake/main/llms.txt first; always run pake with --json and parse stdout as a single JSON object. Package <url-or-local-dist> into an app named <AppName>.
+```
+
 ## Development
 
 Requires Rust `>=1.85` and Node `>=22` (recommended LTS; `>=18` also works). For detailed installation guide, see [Tauri documentation](https://v2.tauri.app/start/prerequisites/). If unfamiliar with development environment, use the CLI tool instead.
