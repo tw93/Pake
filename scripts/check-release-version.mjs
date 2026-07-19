@@ -91,6 +91,12 @@ if (!packageJson.files?.includes("LICENSE-EXCEPTION")) {
   );
 }
 
+if (!packageJson.files?.includes("llms.txt")) {
+  errors.push(
+    "package.json files: llms.txt must be included in the npm package",
+  );
+}
+
 if (errors.length > 0) {
   console.error("Release version check failed:");
   for (const error of errors) {

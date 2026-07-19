@@ -6,10 +6,21 @@ on:
       - "V*"
   # Manual npm-only publish for CLI hotfixes that do not need the full
   # V* tag release (popular apps, Docker). Version files must already be
-  # bumped on main; the check step then validates against package.json.
+  # bumped on main. Manual publishing is bound to an exact commit and its
+  # successful cross-platform Quality & Testing run.
   workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Exact main commit to publish
+        required: true
+        type: string
+      quality_run_id:
+        description: Successful Quality & Testing run for expected_sha
+        required: true
+        type: string
 
 permissions:
+  actions: read
   contents: read
   id-token: write
 
@@ -25,11 +36,32 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Check manual publish branch
+      - name: Check manual publish source and quality gate
         if: github.event_name == 'workflow_dispatch'
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          GH_TOKEN: ${{ github.token }}
+          QUALITY_RUN_ID: ${{ inputs.quality_run_id }}
         run: |
           if [ "$GITHUB_REF" != "refs/heads/main" ]; then
             echo "Manual npm publish must run from main, got ${GITHUB_REF}."
+            exit 1
+          fi
+          if [ "$GITHUB_SHA" != "$EXPECTED_SHA" ]; then
+            echo "Manual npm publish expected ${EXPECTED_SHA}, but main resolved to ${GITHUB_SHA}."
+            exit 1
+          fi
+
+          QUALITY_WORKFLOW_ID="$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/quality-and-test.yml" --jq '.id')"
+          RUN_JSON="$(gh run view "$QUALITY_RUN_ID" --repo "$GITHUB_REPOSITORY" --json event,headBranch,headSha,status,conclusion,workflowDatabaseId)"
+          RUN_EVENT="$(jq -r '.event' <<<"$RUN_JSON")"
+          RUN_BRANCH="$(jq -r '.headBranch' <<<"$RUN_JSON")"
+          RUN_SHA="$(jq -r '.headSha' <<<"$RUN_JSON")"
+          RUN_STATUS="$(jq -r '.status' <<<"$RUN_JSON")"
+          RUN_CONCLUSION="$(jq -r '.conclusion' <<<"$RUN_JSON")"
+          RUN_WORKFLOW_ID="$(jq -r '.workflowDatabaseId' <<<"$RUN_JSON")"
+          if [ "$RUN_WORKFLOW_ID" != "$QUALITY_WORKFLOW_ID" ] || [ "$RUN_EVENT" != "push" ] || [ "$RUN_BRANCH" != "main" ] || [ "$RUN_SHA" != "$EXPECTED_SHA" ] || [ "$RUN_STATUS" != "completed" ] || [ "$RUN_CONCLUSION" != "success" ]; then
+            echo "Quality run ${QUALITY_RUN_ID} does not prove ${EXPECTED_SHA}: ${RUN_JSON}"
             exit 1
           fi
 

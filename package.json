@@ -27,6 +27,7 @@
   ],
   "files": [
     "LICENSE-EXCEPTION",
+    "llms.txt",
     "dist",
     "src-tauri"
   ],

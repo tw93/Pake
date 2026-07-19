@@ -1,7 +1,7 @@
 ---
 name: github-ops
 description: GitHub issue, PR, and release operations via gh CLI. Not for code review or release builds.
-version: 2.0.0
+version: 2.1.0
 allowed-tools:
   - Bash
   - Read
@@ -29,5 +29,5 @@ Always use `gh` CLI and query live state before acting. Never assume state from 
 2. **NEVER** merge, close, or modify without explicit user request.
 3. **ALWAYS** query current state before taking action — never assume.
 4. Before replying to an issue or PR, read the body to confirm the author's language; match their language in the reply. This applies to the author, not to arbitrary thread commenters.
-5. Before replying that a fix is released, verify the public artifact first: `npm view pake-cli version` for CLI releases or `gh release view <tag>` for app releases.
+5. Before replying that a CLI fix is released, verify the exact artifact with `npm view pake-cli@<version> version gitHead dist.tarball --json` and confirm `gitHead` contains the fix. Check `npm view pake-cli version` separately for the `latest` pointer. For app releases, use `gh release view <tag> --json assets`.
 6. Before closing an issue after release, confirm the target with `gh issue view <id> --json number,title,state,author,url` and include the concrete version or upgrade command in the comment.

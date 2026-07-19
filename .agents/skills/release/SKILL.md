@@ -1,7 +1,7 @@
 ---
 name: release
 description: Prepare, validate, and publish a Pake release. Not for version bumps without release intent.
-version: 1.5.0
+version: 1.6.0
 allowed-tools:
   - Bash
   - Read
@@ -76,13 +76,14 @@ Do not collapse these into "released" without naming which surface was verified.
 
 For CLI or Rust-template fixes that must reach npm fast without an app release. Precedent: 3.15.0 and 3.15.2 shipped this way; the version number is still consumed, so the next `V*` tag skips over it.
 
-1. [ ] Bump all four version files, rebuild `dist/cli.js` (`pnpm run cli:build`), stage with `git add -f dist/cli.js`
-2. [ ] Run the pre-release gates that apply: `npx vitest run` and `pnpm run release:check`
+1. [ ] Bump all four version files, rebuild `dist/cli.js` with `pnpm run cli:build`, stage the version files, and stage the ignored artifact with `git add -f dist/cli.js`
+2. [ ] Run `pnpm run release:check`. For a Rust-template fix, also run the narrow current-platform Rust check before pushing. Do not run `npx vitest run` separately because `release:check` already includes it.
 3. [ ] Commit `chore: bump version to VX.Y.Z` and push `main`
-4. [ ] Dispatch: `gh workflow run npm-publish.yml --ref main`
-5. [ ] Poll: `gh run view <run-id> --json status,conclusion`
-6. [ ] Verify: `npm view pake-cli@X.Y.Z version gitHead dist.tarball --json` (gitHead must match the bump commit) and `npm view pake-cli version` for the `latest` pointer
-7. [ ] Issue closeout per AGENTS.md; if the fix lives in the Rust template, tell users to rebuild their app after upgrading, because upgrading the CLI alone does not update already-built apps
+4. [ ] Record the exact commit selected for publishing with `git rev-parse HEAD`. Find its Quality & Testing run with `gh run list --workflow=quality-and-test.yml --commit <publish-sha> --limit 3 --json databaseId,headSha,status,conclusion`. Wait until that exact SHA is `completed` with `conclusion: success`. For Rust-template changes, confirm the Windows real Tauri build job passed before publishing.
+5. [ ] Dispatch with both gates: `gh workflow run npm-publish.yml --ref main -f expected_sha=<publish-sha> -f quality_run_id=<quality-run-id>`. If `main` moved, select the new exact head and wait for its own successful Quality run instead of publishing against stale evidence.
+6. [ ] Poll the npm workflow with `gh run view <run-id> --json headSha,status,conclusion`; its `headSha` must match `<publish-sha>`.
+7. [ ] Verify `npm view pake-cli@X.Y.Z version gitHead dist.tarball --json`; `gitHead` must match `<publish-sha>`. Check `npm view pake-cli version` separately for the `latest` pointer.
+8. [ ] Issue closeout per AGENTS.md; if the fix lives in the Rust template, tell users to rebuild their app after upgrading, because upgrading the CLI alone does not update already-built apps
 
 Skip list, do not do these for a hotfix: no `V*` tag, no GitHub Release or notes, no release reactions, no Docker. App-release surfaces stay untouched until the next `V*` release bundles the fix.
 
@@ -126,7 +127,7 @@ Apply with a notes file to avoid shell escaping: `gh release edit VX.Y.Z --title
 - npm package settings should use the strict publishing option: require two-factor authentication and disallow tokens. Trusted Publishing still works with this setting.
 - If local fallback is unavoidable, prefer `npm exec --yes --package=pnpm@10.26.2 -- npm publish --registry=https://registry.npmjs.org` so `prepublishOnly` can find the pinned pnpm version.
 - Do not reply to GitHub issues or close them as released until `npm view pake-cli@X.Y.Z version` returns the expected version. `npm view pake-cli version` alone is not enough because `latest` can point at a different commit than the fix under review.
-- A `workflow_dispatch` run may execute on `main`; do not treat `headBranch`, run title, or compare UI as the release tag. Check the pushed tag and published package `gitHead`.
+- A `workflow_dispatch` run executes on a branch. For npm-only publishing, pass the exact `main` commit as `expected_sha` and a successful Quality run for that SHA as `quality_run_id`; the workflow rejects mismatches. Do not treat `headBranch`, run title, or compare UI as proof of the published source.
 - If CI creates `chore: update contributors [skip ci]` after the tag is pushed, fast-forward local `main` after the release. Do not retag just to include generated contributor art.
 
 ## Build Commands (local only)

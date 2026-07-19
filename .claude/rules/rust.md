@@ -17,6 +17,10 @@
 - No `tauriConf: any` or other untyped config bags. Use `PakeTauriConfig`.
 - Window options live in `bin/helpers/cli-program.ts`, `bin/types.ts`, `bin/defaults.ts`, `bin/helpers/merge.ts`. Adding an option means touching all four plus `schema/pake.schema.json` and `docs/cli-usage*.md`. Forgetting any is a regression; the schema half is caught by `tests/unit/config-file.test.ts`.
 
+### Tauri trust boundary
+
+- Packaged remote pages are untrusted. Validate semantic bounds for every `#[tauri::command]` input, keep remote capabilities limited to the exact operations required, and keep long-running IPC asynchronous so page code cannot block the app loop.
+
 ### Platform sensitivity
 
 - WebKit compositing on Linux/Wayland is platform-sensitive. Don't change defaults without testing on the affected platform or documenting the risk.

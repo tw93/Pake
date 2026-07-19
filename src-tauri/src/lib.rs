@@ -302,6 +302,7 @@ pub fn run_app() {
                 if !has_visible_windows {
                     if let Some(window) = _app.get_webview_window("pake") {
                         let _ = window.show();
+                        reapply_window_icon(&window);
                         let _ = window.set_focus();
                     }
                 }

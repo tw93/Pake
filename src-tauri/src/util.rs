@@ -183,16 +183,21 @@ mod tests {
     use std::env;
     use std::fs;
     use std::path::PathBuf;
+    use std::sync::atomic::{AtomicU64, Ordering};
+
+    static TEMP_PATH_COUNTER: AtomicU64 = AtomicU64::new(0);
 
     fn temp_path(name: &str) -> PathBuf {
         let mut dir = env::temp_dir();
+        let unique = TEMP_PATH_COUNTER.fetch_add(1, Ordering::Relaxed);
         dir.push(format!(
-            "pake-util-test-{}-{}",
+            "pake-util-test-{}-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .map(|d| d.as_nanos())
-                .unwrap_or(0)
+                .unwrap_or(0),
+            unique
         ));
         fs::create_dir_all(&dir).unwrap();
         dir.push(name);
