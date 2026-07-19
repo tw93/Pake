@@ -97,6 +97,18 @@ if (!packageJson.files?.includes("llms.txt")) {
   );
 }
 
+if (!packageJson.files?.includes("dist/cli.js")) {
+  errors.push(
+    "package.json files: dist/cli.js must be included in the npm package",
+  );
+}
+
+if (packageJson.files?.includes("dist")) {
+  errors.push(
+    "package.json files: include dist/cli.js instead of the entire generated dist directory",
+  );
+}
+
 if (errors.length > 0) {
   console.error("Release version check failed:");
   for (const error of errors) {
