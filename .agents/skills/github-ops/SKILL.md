@@ -1,7 +1,7 @@
 ---
 name: github-ops
 description: GitHub issue, PR, and release operations via gh CLI. Not for code review or release builds.
-version: 1.2.0
+version: 2.0.0
 allowed-tools:
   - Bash
   - Read
@@ -9,93 +9,19 @@ allowed-tools:
 
 # GitHub Operations Skill
 
-Use this skill when working with GitHub issues, PRs, and releases for Pake.
+Use this skill when working with GitHub issues, PRs, and releases for Pake. It carries the project facts and boundaries; standard `gh` usage is assumed.
 
 ## Golden Rule
 
-**ALWAYS use `gh` CLI** for GitHub operations. Never use the web UI or make assumptions about state — always query first.
+Always use `gh` CLI and query live state before acting. Never assume state from memory or a previous turn.
 
-## Issue Operations
+## Project Facts
 
-```bash
-# View a specific issue
-gh issue view 123
-
-# List open issues
-gh issue list --state open
-
-# List issues with a label
-gh issue list --label bug
-
-# Add a comment (only with explicit user request)
-gh issue comment 123 --body "..."
-
-# Close an issue
-gh issue close 123
-```
-
-## PR Operations
-
-```bash
-# List open PRs
-gh pr list
-
-# View a PR
-gh pr view 456
-
-# Check PR status and CI checks
-gh pr checks 456
-
-# View PR diff
-gh pr diff 456
-
-# Read inline review comments on a PR
-gh api repos/tw93/Pake/pulls/456/comments
-
-# Merge a PR (only with explicit user request)
-gh pr merge 456 --squash
-
-# Create a PR
-gh pr create --title "..." --body "..."
-```
-
-## Release Operations
-
-```bash
-# List releases
-gh release list
-
-# View a specific release
-gh release view V3.10.0
-
-# Check CI runs for a tag
-gh run list --workflow=release.yml
-gh run list --workflow=npm-publish.yml
-
-# Poll a running CI job (structured status; never pipe `gh run watch` to tail/head, pipes swallow the exit code)
-gh run view <run-id> --json status,conclusion
-
-# View CI run logs
-gh run view <run-id> --log
-
-# Verify npm registry state after publish (gitHead ties the package to the intended commit)
-npm view pake-cli@<version> version gitHead dist.tarball --json
-npm view pake-cli version
-```
-
-## CI / Workflow Operations
-
-```bash
-# List recent workflow runs
-gh run list
-
-# Filter by workflow
-gh run list --workflow=release.yml
-gh run list --workflow=quality-and-test.yml
-
-# Re-run failed jobs
-gh run rerun <run-id> --failed-only
-```
+- Repo: `tw93/Pake`. Workflows: `release.yml` (`V*` tag, builds app assets), `npm-publish.yml` (npm Trusted Publishing; also `workflow_dispatch` from `main` for npm-only hotfixes), `quality-and-test.yml` (push CI), `pake-cli.yaml` / `single-app.yaml` (public build surfaces external users trigger from forks).
+- Poll CI with `gh run view <run-id> --json status,conclusion`. Never pipe `gh run watch` or build output through `tail`/`head`; pipes swallow the real exit code and misreport failures as green.
+- Verify npm state with `npm view pake-cli@<version> version gitHead dist.tarball --json`; `gitHead` ties the published package to the intended commit. Check the `latest` pointer separately with `npm view pake-cli version`; it can point at a different commit than the fix under review.
+- Inline PR review comments live at `gh api repos/tw93/Pake/pulls/<n>/comments`; `gh pr view` does not show them.
+- App-release truth is `gh release view <tag> --json assets` (asset count/state), not workflow names or source state.
 
 ## Safety Rules
 

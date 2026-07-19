@@ -12,12 +12,6 @@
 - In machine mode (`--json`) stdout is reserved for the single JSON result. Never `console.log` / `process.stdout.write` in `bin/`; subprocess stdout is rerouted to stderr by `shellExec`.
 - `shellExec` runs subprocesses with `stdio: 'inherit'`, so their output (linuxdeploy, cargo, npm) never reaches `error.message`; only the failed command line does. Do NOT classify a build failure by grepping `error.message`; you would be matching the command, not the diagnostics. Drive failure guidance off a structured fact the caller holds (e.g. `target === 'appimage'`). Owners: `bin/utils/shell.ts` + `bin/builders/BaseBuilder.ts`.
 
-### IPC
-
-- `#[tauri::command]` handlers validate every input from the renderer. The webview is untrusted.
-- Long work in handlers goes through `tauri::async_runtime::spawn`. Don't block the IPC thread.
-- Don't broaden the allowlist (filesystem, shell, http) past the exact paths and commands needed.
-
 ### Config types
 
 - No `tauriConf: any` or other untyped config bags. Use `PakeTauriConfig`.
