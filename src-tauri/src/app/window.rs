@@ -69,6 +69,21 @@ pub fn open_additional_window(app: &AppHandle) -> tauri::Result<WebviewWindow> {
     build_window_with_label(app, &state.pake_config, &state.tauri_config, &label)
 }
 
+// Apps autostarted at Windows logon can register their window icon before
+// Explorer's icon cache is ready, leaving a blank taskbar icon until the icon
+// is asserted again (#1323), so re-apply it whenever a window becomes visible.
+#[cfg(target_os = "windows")]
+pub fn reapply_window_icon(window: &WebviewWindow) {
+    if let Some(icon) = window.app_handle().default_window_icon().cloned() {
+        if let Err(error) = window.set_icon(icon) {
+            eprintln!("[Pake] Failed to re-apply window icon: {error}");
+        }
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn reapply_window_icon(_window: &WebviewWindow) {}
+
 struct WindowBuildOptions<'a> {
     label: &'a str,
     url: WebviewUrl,
