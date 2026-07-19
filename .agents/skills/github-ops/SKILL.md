@@ -1,7 +1,7 @@
 ---
 name: github-ops
 description: GitHub issue, PR, and release operations via gh CLI. Not for code review or release builds.
-version: 1.1.0
+version: 1.2.0
 allowed-tools:
   - Bash
   - Read
@@ -72,15 +72,15 @@ gh release view V3.10.0
 gh run list --workflow=release.yml
 gh run list --workflow=npm-publish.yml
 
-# Watch a running CI job
-gh run watch
+# Poll a running CI job (structured status; never pipe `gh run watch` to tail/head, pipes swallow the exit code)
+gh run view <run-id> --json status,conclusion
 
 # View CI run logs
 gh run view <run-id> --log
 
-# Verify npm registry state after publish
+# Verify npm registry state after publish (gitHead ties the package to the intended commit)
+npm view pake-cli@<version> version gitHead dist.tarball --json
 npm view pake-cli version
-npm view pake-cli@<version> dist.tarball
 ```
 
 ## CI / Workflow Operations

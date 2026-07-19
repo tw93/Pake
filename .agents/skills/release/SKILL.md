@@ -1,7 +1,7 @@
 ---
 name: release
 description: Prepare, validate, and publish a Pake release. Not for version bumps without release intent.
-version: 1.4.0
+version: 1.5.0
 allowed-tools:
   - Bash
   - Read
@@ -51,7 +51,7 @@ If the bump push is rejected, the contributors bot pushed `chore: update contrib
 ### Post-Tag Verification
 
 1. [ ] Confirm CI triggered: `gh run list --workflow=release.yml`
-2. [ ] Watch CI status: `gh run watch`
+2. [ ] Poll CI status: `gh run view <run-id> --json status,conclusion` (never pipe `gh run watch` or build output to `tail`/`head`; pipes swallow the real exit code and misreport failures as green)
 3. [ ] Verify GitHub Release was created: `gh release view VX.X.X --json tagName,url,assets`
 4. [ ] Fill the GitHub Release title and body from the template in **GitHub Release Notes** below. CI's `create-release` step only makes a bare placeholder (title = `VX.X.X`, empty body); do not leave it bare.
 5. [ ] Confirm npm workflow exists and is active: `gh workflow list --all | grep "Publish npm Package"`
@@ -71,6 +71,20 @@ Keep release surfaces separate in the final status:
 - Source/tag: the authority for what code was intended to ship.
 
 Do not collapse these into "released" without naming which surface was verified. If GitHub Release assets are visible while `gh run list` still reports the release workflow as queued or in progress, trust `gh release view` for asset state and report the workflow state separately.
+
+## npm-Only Hotfix (no tag)
+
+For CLI or Rust-template fixes that must reach npm fast without an app release. Precedent: 3.15.0 and 3.15.2 shipped this way; the version number is still consumed, so the next `V*` tag skips over it.
+
+1. [ ] Bump all four version files, rebuild `dist/cli.js` (`pnpm run cli:build`), stage with `git add -f dist/cli.js`
+2. [ ] Run the pre-release gates that apply: `npx vitest run` and `pnpm run release:check`
+3. [ ] Commit `chore: bump version to VX.Y.Z` and push `main`
+4. [ ] Dispatch: `gh workflow run npm-publish.yml --ref main`
+5. [ ] Poll: `gh run view <run-id> --json status,conclusion`
+6. [ ] Verify: `npm view pake-cli@X.Y.Z version gitHead dist.tarball --json` (gitHead must match the bump commit) and `npm view pake-cli version` for the `latest` pointer
+7. [ ] Issue closeout per AGENTS.md; if the fix lives in the Rust template, tell users to rebuild their app after upgrading, because upgrading the CLI alone does not update already-built apps
+
+Skip list, do not do these for a hotfix: no `V*` tag, no GitHub Release or notes, no release reactions, no Docker. App-release surfaces stay untouched until the next `V*` release bundles the fix.
 
 ## GitHub Release Notes
 

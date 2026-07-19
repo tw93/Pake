@@ -110,6 +110,8 @@ Execution rules:
 - Release state can be split. npm Trusted Publishing can succeed before the popular-app release workflow finishes, and GitHub Release assets can exist while a workflow run still shows queued or in progress. Report each surface explicitly.
 - Local app builds and test runs mutate tracked files as build state: `src-tauri/pake.json`, `src-tauri/tauri.conf.json`, `src-tauri/tauri.macos.conf.json`, and regenerated icons under `src-tauri/png/` and `src-tauri/icons/`. Before committing, `git restore` whatever you did not intentionally change; never let a feature or release commit absorb this churn.
 - Per-app optional fields in `default_app_list.json` consumed by workflows must get their defaults in the jq read step of `release.yml`, not in Actions expressions: GitHub expressions cast both `null` and `false` to `0`, so `matrix.config.x != false` cannot express "default true" and silently flips every app missing the field.
+- Windows taskbar icons can register blank when an autostarted app launches before Explorer's icon cache is ready (#1323). Every hidden-to-visible path for the main window (tray show/click, activation shortcut, single-instance activation, initial delayed show) must call `reapply_window_icon` from `src-tauri/src/app/window.rs`; adding a new `window.show()` path without it regresses the bug.
+- `.github/workflows/pake-cli.yaml` and `single-app.yaml` are public build surfaces that external users trigger from their own forks (see `docs/github-actions-usage*.md`). Changes there ship to outside users on push to `main`, independent of `V*` releases; treat them like public API, not internal CI.
 
 ## Platform-Specific Development
 
