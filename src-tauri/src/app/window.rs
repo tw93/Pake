@@ -583,7 +583,19 @@ fn build_window(
 
     window_builder = window_builder.on_navigation(|_| true);
 
-    window_builder.build()
+    let window = window_builder.build()?;
+
+    // macOS WKWebView ignores the Chromium --ignore-certificate-errors flag, so
+    // when the user opts in, install a navigation-delegate proxy that accepts
+    // invalid TLS certs (e.g. self-signed enterprise servers).
+    #[cfg(target_os = "macos")]
+    if window_config.ignore_certificate_errors {
+        let _ = window.with_webview(|webview| {
+            crate::app::cert::install_cert_bypass(webview.inner());
+        });
+    }
+
+    Ok(window)
 }
 
 #[cfg(all(test, target_os = "windows"))]
