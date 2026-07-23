@@ -1,0 +1,51 @@
+name: Sync with upstream
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-with-upstream
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync fork
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout fork branch
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: master
+
+      - name: Fetch upstream and check divergence
+        id: divergence
+        shell: bash
+        run: |
+          git remote add upstream https://github.com/tw93/Pake.git
+          git fetch --no-tags upstream main
+
+          read -r ahead behind < <(
+            git rev-list --left-right --count HEAD...upstream/main
+          )
+
+          echo "Fork is ${ahead} commit(s) ahead and ${behind} commit(s) behind upstream."
+
+          if [[ "${ahead}" -eq 0 && "${behind}" -gt 0 ]]; then
+            echo "should_sync=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "should_sync=false" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Fast-forward fork
+        if: steps.divergence.outputs.should_sync == 'true'
+        shell: bash
+        run: |
+          git merge --ff-only upstream/main
+          git push origin HEAD:master
