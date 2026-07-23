@@ -3,8 +3,12 @@ name: Build App With Pake CLI
 env:
   NODE_VERSION: "22"
   PNPM_VERSION: "10.26.2"
+  ONLINE_CONFIG_BRANCH: "pake-online-config"
 
 on:
+  push:
+    branches:
+      - "**"
   workflow_dispatch:
     inputs:
       platform:
@@ -62,17 +66,191 @@ on:
         description: "Package formats (comma-separated: deb,appimage,rpm,zst)"
         required: false
         default: "deb"
+      online_mode:
+        description: "Experimental: rebuild on every push and publish online installer"
+        required: false
+        type: boolean
+        default: false
+      online_operation:
+        description: "Enable/update or pause this app + platform + branch channel"
+        required: false
+        type: choice
+        default: "enable-or-update"
+        options:
+          - "enable-or-update"
+          - "pause"
+      offline_exe:
+        description: "Windows: also wrap the offline MSI as an EXE"
+        required: false
+        type: boolean
+        default: false
+      offline_exe_icon:
+        description: "Windows offline EXE icon URL (ICO/SVG/PNG/etc.)"
+        required: false
+      online_exe_icon:
+        description: "Windows online installer EXE icon URL (ICO/SVG/PNG/etc.)"
+        required: false
+
+permissions:
+  contents: write
 
 jobs:
+  prepare:
+    name: Resolve build configurations
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pake-online-config-registry
+      cancel-in-progress: false
+    outputs:
+      matrix: ${{ steps.resolve.outputs.matrix }}
+      has_configs: ${{ steps.resolve.outputs.has_configs }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Validate online mode
+        if: github.event_name == 'workflow_dispatch' && inputs.online_mode
+        env:
+          REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+          REF_TYPE: ${{ github.ref_type }}
+        run: |
+          if [ "$REPOSITORY_PRIVATE" = "true" ]; then
+            echo "::error::Experimental online installers support public repositories only."
+            exit 1
+          fi
+          if [ "$REF_TYPE" != "branch" ]; then
+            echo "::error::Online build configurations must be registered from a branch."
+            exit 1
+          fi
+
+      - name: Resolve manual configuration
+        id: manual
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          PAKE_ONLINE_INPUTS: ${{ toJSON(inputs) }}
+        run: node scripts/pake-online/config.mjs dispatch "$RUNNER_TEMP/pake-build-config.json"
+
+      - name: Update online configuration registry
+        if: github.event_name == 'workflow_dispatch' && inputs.online_mode
+        env:
+          OPERATION: ${{ inputs.online_operation }}
+          CONFIG_ID: ${{ steps.manual.outputs.config_id }}
+        run: |
+          set -euo pipefail
+          REGISTRY_WORKTREE="$RUNNER_TEMP/$ONLINE_CONFIG_BRANCH"
+          REMOTE_EXISTS=false
+
+          if git ls-remote --exit-code --heads origin "$ONLINE_CONFIG_BRANCH" >/dev/null 2>&1; then
+            REMOTE_EXISTS=true
+            git fetch origin "$ONLINE_CONFIG_BRANCH"
+            git worktree add -B "$ONLINE_CONFIG_BRANCH" \
+              "$REGISTRY_WORKTREE" "origin/$ONLINE_CONFIG_BRANCH"
+          elif [ "$OPERATION" = "pause" ]; then
+            echo "No online configuration registry exists; nothing to pause."
+            exit 0
+          else
+            git worktree add --detach "$REGISTRY_WORKTREE" HEAD
+            git -C "$REGISTRY_WORKTREE" switch --orphan "$ONLINE_CONFIG_BRANCH"
+            git -C "$REGISTRY_WORKTREE" rm -rf .
+            mkdir -p "$REGISTRY_WORKTREE/configs"
+            printf '%s\n' \
+              '# Pake Online Build Registry' \
+              '' \
+              'This branch is managed by Build App With Pake CLI.' \
+              > "$REGISTRY_WORKTREE/README.md"
+          fi
+
+          mkdir -p "$REGISTRY_WORKTREE/configs"
+          if [ "$OPERATION" = "pause" ]; then
+            node scripts/pake-online/config.mjs pause \
+              "$REGISTRY_WORKTREE/configs" "$CONFIG_ID"
+          else
+            node scripts/pake-online/config.mjs upsert \
+              "$RUNNER_TEMP/pake-build-config.json" \
+              "$REGISTRY_WORKTREE/configs"
+          fi
+
+          git -C "$REGISTRY_WORKTREE" config user.name "github-actions[bot]"
+          git -C "$REGISTRY_WORKTREE" config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C "$REGISTRY_WORKTREE" add README.md configs
+
+          if git -C "$REGISTRY_WORKTREE" diff --cached --quiet; then
+            echo "Online configuration registry is already up to date."
+            exit 0
+          fi
+
+          git -C "$REGISTRY_WORKTREE" commit \
+            -m "ci: $OPERATION Pake online configuration [skip ci]"
+          git -C "$REGISTRY_WORKTREE" push origin \
+            "HEAD:refs/heads/$ONLINE_CONFIG_BRANCH"
+
+      - name: Read matching push configurations
+        id: pushed
+        if: github.event_name == 'push'
+        env:
+          SOURCE_BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          REGISTRY_WORKTREE="$RUNNER_TEMP/$ONLINE_CONFIG_BRANCH"
+          if git ls-remote --exit-code --heads origin "$ONLINE_CONFIG_BRANCH" >/dev/null 2>&1; then
+            git fetch origin "$ONLINE_CONFIG_BRANCH"
+            git worktree add --detach \
+              "$REGISTRY_WORKTREE" "origin/$ONLINE_CONFIG_BRANCH"
+          fi
+          node scripts/pake-online/config.mjs matrix \
+            "$REGISTRY_WORKTREE/configs" "$SOURCE_BRANCH"
+
+      - name: Export resolved matrix
+        id: resolve
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          MANUAL_MATRIX: ${{ steps.manual.outputs.matrix }}
+          MANUAL_HAS_CONFIGS: ${{ steps.manual.outputs.has_configs }}
+          PUSH_MATRIX: ${{ steps.pushed.outputs.matrix }}
+          PUSH_HAS_CONFIGS: ${{ steps.pushed.outputs.has_configs }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "matrix=$MANUAL_MATRIX" >> "$GITHUB_OUTPUT"
+            echo "has_configs=$MANUAL_HAS_CONFIGS" >> "$GITHUB_OUTPUT"
+          else
+            echo "matrix=$PUSH_MATRIX" >> "$GITHUB_OUTPUT"
+            echo "has_configs=$PUSH_HAS_CONFIGS" >> "$GITHUB_OUTPUT"
+          fi
+
   build:
-    name: ${{ inputs.platform }}
-    runs-on: ${{ inputs.platform }}
+    name: ${{ matrix.config.cliConfig.name }} (${{ matrix.config.os }})
+    needs: prepare
+    if: needs.prepare.outputs.has_configs == 'true'
+    runs-on: ${{ matrix.config.runner }}
+    timeout-minutes: 45
+    concurrency:
+      group: pake-online-${{ matrix.config.id }}
+      cancel-in-progress: ${{ github.event_name == 'push' }}
     strategy:
       fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Write reproducible Pake configuration
+        shell: bash
+        env:
+          BUILD_CONFIG: ${{ toJSON(matrix.config) }}
+          CLI_CONFIG: ${{ toJSON(matrix.config.cliConfig) }}
+        run: |
+          node -e \
+            'const fs=require("fs");fs.writeFileSync(process.argv[1],process.env.BUILD_CONFIG+"\n")' \
+            "$RUNNER_TEMP/pake-build-config.json"
+          node -e \
+            'const fs=require("fs");fs.writeFileSync(process.argv[1],process.env.CLI_CONFIG+"\n")' \
+            "$RUNNER_TEMP/pake-cli-config.json"
+          echo "PAKE_BUILD_CONFIG=$RUNNER_TEMP/pake-build-config.json" >> "$GITHUB_ENV"
+          echo "PAKE_CLI_CONFIG=$RUNNER_TEMP/pake-cli-config.json" >> "$GITHUB_ENV"
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -101,116 +279,83 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             src-tauri/target/
+            online-installer/src-tauri/target/
+            offline-installer/windows/target/
           key: ${{ runner.os }}-cargo-pake-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Build App (Linux/macOS)
-        if: runner.os != 'Windows'
+      - name: Build App
+        timeout-minutes: 25
+        run: node dist/cli.js --config "$env:PAKE_CLI_CONFIG"
+        if: runner.os == 'Windows'
+
+      - name: Build App
         timeout-minutes: 25
         shell: bash
-        run: |
-          ARGS=("${{ inputs.url }}" "--name" "${{ inputs.name }}")
+        run: node dist/cli.js --config "$PAKE_CLI_CONFIG"
+        if: runner.os != 'Windows'
 
-          if [ -n "${{ inputs.icon }}" ]; then
-            ARGS+=("--icon" "${{ inputs.icon }}")
-          fi
-
-          if [ -n "${{ inputs.width }}" ]; then
-            ARGS+=("--width" "${{ inputs.width }}")
-          fi
-
-          if [ -n "${{ inputs.height }}" ]; then
-            ARGS+=("--height" "${{ inputs.height }}")
-          fi
-
-          if [ -n "${{ inputs.min_width }}" ]; then
-            ARGS+=("--min-width" "${{ inputs.min_width }}")
-          fi
-
-          if [ -n "${{ inputs.min_height }}" ]; then
-            ARGS+=("--min-height" "${{ inputs.min_height }}")
-          fi
-
-          if [ -n "${{ inputs.app_version }}" ]; then
-            ARGS+=("--app-version" "${{ inputs.app_version }}")
-          fi
-
-          if [ "${{ inputs.fullscreen }}" == "true" ]; then
-            ARGS+=("--fullscreen")
-          fi
-
-          if [ "${{ inputs.hide_title_bar }}" == "true" ]; then
-            ARGS+=("--hide-title-bar")
-          fi
-
-          if [ "${{ inputs.multi_arch }}" == "true" ]; then
-            ARGS+=("--multi-arch")
-          fi
-
-          if [ -n "${{ inputs.targets }}" ] && [ "${{ runner.os }}" == "Linux" ]; then
-            ARGS+=("--targets" "${{ inputs.targets }}")
-          fi
-
-          echo "Running: node dist/cli.js ${ARGS[@]}"
-          node dist/cli.js "${ARGS[@]}"
-
-      - name: Build App (Windows)
+      - name: Restore generated Cargo lock changes
         if: runner.os == 'Windows'
-        timeout-minutes: 25
-        shell: pwsh
+        run: git checkout -- src-tauri/Cargo.lock
+
+      - name: Prepare Windows EXE icons
+        if: runner.os == 'Windows' && (matrix.config.online || matrix.config.delivery.windowsOfflineExe)
+        env:
+          ONLINE_EXE_ICON_URL: ${{ matrix.config.delivery.onlineExeIcon }}
+          OFFLINE_EXE_ICON_URL: ${{ matrix.config.delivery.offlineExeIcon }}
         run: |
-          $args = "${{ inputs.url }}", "--name", "${{ inputs.name }}"
+          $iconDirectory = Join-Path $env:RUNNER_TEMP "pake-installer-icons"
+          New-Item -ItemType Directory -Force $iconDirectory | Out-Null
+          $defaultIcon = (Resolve-Path "src-tauri\png\icon_256.ico").Path
+          $onlineIcon = $defaultIcon
+          $offlineIcon = $defaultIcon
 
-          if ("${{ inputs.icon }}" -ne "") {
-            $args += "--icon", "${{ inputs.icon }}"
+          if ($env:ONLINE_EXE_ICON_URL) {
+            $onlineIcon = Join-Path $iconDirectory "online-installer.ico"
+            node scripts/pake-online/icon.mjs `
+              $env:ONLINE_EXE_ICON_URL $onlineIcon
+          }
+          if ($env:OFFLINE_EXE_ICON_URL) {
+            $offlineIcon = Join-Path $iconDirectory "offline-installer.ico"
+            node scripts/pake-online/icon.mjs `
+              $env:OFFLINE_EXE_ICON_URL $offlineIcon
           }
 
-          if ("${{ inputs.width }}" -ne "") {
-            $args += "--width", "${{ inputs.width }}"
+          "ONLINE_EXE_ICON=$onlineIcon" >> $env:GITHUB_ENV
+          "OFFLINE_EXE_ICON=$offlineIcon" >> $env:GITHUB_ENV
+
+      - name: Build offline EXE wrapper (Windows)
+        if: runner.os == 'Windows' && matrix.config.delivery.windowsOfflineExe
+        env:
+          PAKE_OFFLINE_APP_NAME: ${{ matrix.config.cliConfig.name }}
+        run: |
+          $msiFiles = @(Get-ChildItem -File -Filter "*.msi")
+          if ($msiFiles.Count -ne 1) {
+            throw "Expected exactly one MSI, found $($msiFiles.Count)."
           }
-
-          if ("${{ inputs.height }}" -ne "") {
-            $args += "--height", "${{ inputs.height }}"
-          }
-
-          if ("${{ inputs.min_width }}" -ne "") {
-            $args += "--min-width", "${{ inputs.min_width }}"
-          }
-
-          if ("${{ inputs.min_height }}" -ne "") {
-            $args += "--min-height", "${{ inputs.min_height }}"
-          }
-
-          if ("${{ inputs.app_version }}" -ne "") {
-            $args += "--app-version", "${{ inputs.app_version }}"
-          }
-
-          if ("${{ inputs.fullscreen }}" -eq "true") {
-            $args += "--fullscreen"
-          }
-
-          if ("${{ inputs.hide_title_bar }}" -eq "true") {
-            $args += "--hide-title-bar"
-          }
-
-          Write-Host "Running: node dist/cli.js $($args -join ' ')"
-          node dist/cli.js $args
-
-          git checkout -- src-tauri/Cargo.lock
+          $env:PAKE_OFFLINE_MSI = $msiFiles[0].FullName
+          $env:PAKE_OFFLINE_ICON = $env:OFFLINE_EXE_ICON
+          cargo build --locked --release `
+            --manifest-path offline-installer/windows/Cargo.toml
+          $exeName = [IO.Path]::ChangeExtension($msiFiles[0].Name, ".exe")
+          Copy-Item `
+            "offline-installer\windows\target\release\pake-offline-installer.exe" `
+            $exeName
 
       - name: Upload DMG (macOS)
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ inputs.name }}-macOS
-          path: ${{ inputs.name }}.dmg
+          name: ${{ matrix.config.cliConfig.name }}-macOS
+          path: "*.dmg"
           retention-days: 3
 
       - name: Upload DEB (Linux)
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ inputs.name }}-Linux-deb
-          path: ${{ inputs.name }}.deb
+          name: ${{ matrix.config.cliConfig.name }}-Linux-deb
+          path: "*.deb"
           retention-days: 3
           if-no-files-found: ignore
 
@@ -218,8 +363,8 @@ jobs:
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ inputs.name }}-Linux-AppImage
-          path: ${{ inputs.name }}.AppImage
+          name: ${{ matrix.config.cliConfig.name }}-Linux-AppImage
+          path: "*.AppImage"
           retention-days: 3
           if-no-files-found: ignore
 
@@ -227,8 +372,8 @@ jobs:
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ inputs.name }}-Linux-rpm
-          path: ${{ inputs.name }}.rpm
+          name: ${{ matrix.config.cliConfig.name }}-Linux-rpm
+          path: "*.rpm"
           retention-days: 3
           if-no-files-found: ignore
 
@@ -236,8 +381,8 @@ jobs:
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ inputs.name }}-Linux-zst
-          path: ${{ inputs.name }}-*.pkg.tar.zst
+          name: ${{ matrix.config.cliConfig.name }}-Linux-zst
+          path: "*.pkg.tar.zst"
           retention-days: 3
           if-no-files-found: ignore
 
@@ -245,13 +390,136 @@ jobs:
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ inputs.name }}-Windows
-          path: ${{ inputs.name }}.msi
+          name: ${{ matrix.config.cliConfig.name }}-Windows
+          path: "*.msi"
           retention-days: 3
+
+      - name: Upload offline EXE (Windows)
+        if: runner.os == 'Windows' && matrix.config.delivery.windowsOfflineExe
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.config.cliConfig.name }}-Windows-exe
+          path: "*.exe"
+          retention-days: 3
+
+      - name: Stage rolling release assets
+        id: release_assets
+        if: matrix.config.online
+        shell: bash
+        run: |
+          node scripts/pake-online/release.mjs stage \
+            "$PAKE_BUILD_CONFIG" "." ".pake-online-release"
+
+      - name: Build online installer (Windows)
+        if: matrix.config.online && runner.os == 'Windows'
+        env:
+          PAKE_ONLINE_REPOSITORY: ${{ matrix.config.repository }}
+          PAKE_ONLINE_RELEASE_TAG: ${{ matrix.config.releaseTag }}
+          PAKE_ONLINE_CONFIG_ID: ${{ matrix.config.id }}
+          ONLINE_INSTALLER_NAME: ${{ steps.release_assets.outputs.online_installer_name }}
+        run: |
+          $iconConfig = Join-Path $env:RUNNER_TEMP "pake-online-icon.json"
+          @{
+            bundle = @{
+              icon = @($env:ONLINE_EXE_ICON)
+            }
+          } | ConvertTo-Json -Depth 4 -Compress | Set-Content `
+            -Encoding utf8 $iconConfig
+          Push-Location online-installer
+          & '..\node_modules\.bin\tauri.CMD' build --no-bundle `
+            --config $iconConfig
+          Pop-Location
+          New-Item -ItemType Directory -Force ".pake-online-release\online"
+          Copy-Item `
+            "online-installer\src-tauri\target\release\pake-online-installer.exe" `
+            ".pake-online-release\online\$env:ONLINE_INSTALLER_NAME"
+
+      - name: Build online installer (macOS)
+        if: matrix.config.online && runner.os == 'macOS'
+        env:
+          PAKE_ONLINE_REPOSITORY: ${{ matrix.config.repository }}
+          PAKE_ONLINE_RELEASE_TAG: ${{ matrix.config.releaseTag }}
+          PAKE_ONLINE_CONFIG_ID: ${{ matrix.config.id }}
+          ONLINE_INSTALLER_NAME: ${{ steps.release_assets.outputs.online_installer_name }}
+        shell: bash
+        run: |
+          (
+            cd online-installer
+            ../node_modules/.bin/tauri build --bundles dmg
+          )
+          mkdir -p .pake-online-release/online
+          ONLINE_DMG="$(find online-installer/src-tauri/target/release/bundle/dmg -name '*.dmg' -type f | head -n 1)"
+          test -n "$ONLINE_DMG"
+          cp "$ONLINE_DMG" ".pake-online-release/online/$ONLINE_INSTALLER_NAME"
+
+      - name: Build online installer (Linux)
+        if: matrix.config.online && runner.os == 'Linux'
+        env:
+          PAKE_ONLINE_REPOSITORY: ${{ matrix.config.repository }}
+          PAKE_ONLINE_RELEASE_TAG: ${{ matrix.config.releaseTag }}
+          PAKE_ONLINE_CONFIG_ID: ${{ matrix.config.id }}
+          ONLINE_INSTALLER_NAME: ${{ steps.release_assets.outputs.online_installer_name }}
+        shell: bash
+        run: |
+          (
+            cd online-installer
+            ../node_modules/.bin/tauri build --bundles appimage
+          )
+          mkdir -p .pake-online-release/online
+          ONLINE_APPIMAGE="$(find online-installer/src-tauri/target/release/bundle/appimage -name '*.AppImage' -type f | head -n 1)"
+          test -n "$ONLINE_APPIMAGE"
+          cp "$ONLINE_APPIMAGE" ".pake-online-release/online/$ONLINE_INSTALLER_NAME"
+
+      - name: Publish rolling prerelease
+        if: matrix.config.online
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ matrix.config.releaseTag }}
+          RELEASE_TITLE: ${{ matrix.config.cliConfig.name }} Online Installer (${{ matrix.config.os }})
+          CONFIG_ID: ${{ matrix.config.id }}
+          SOURCE_BRANCH: ${{ matrix.config.sourceBranch }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          NOTES="$(printf '%s\n\n%s\n%s\n%s\n' \
+            '> [!WARNING]' \
+            'Experimental rolling Pake online installer channel.' \
+            "Source branch: \`$SOURCE_BRANCH\`" \
+            "Latest successful commit: \`$GITHUB_SHA\`")"
+
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release edit "$RELEASE_TAG" \
+              --prerelease \
+              --title "$RELEASE_TITLE" \
+              --notes "$NOTES"
+          else
+            gh release create "$RELEASE_TAG" \
+              --prerelease \
+              --target "$GITHUB_SHA" \
+              --title "$RELEASE_TITLE" \
+              --notes "$NOTES"
+          fi
+
+          for asset in .pake-online-release/actual/*; do
+            gh release upload "$RELEASE_TAG" "$asset" --clobber
+          done
+          for asset in .pake-online-release/online/*; do
+            gh release upload "$RELEASE_TAG" "$asset" --clobber
+          done
+          for manifest in .pake-online-release/manifest/*; do
+            gh release upload "$RELEASE_TAG" "$manifest" --clobber
+          done
+
+          node scripts/pake-online/release.mjs cleanup \
+            "$GITHUB_REPOSITORY" "$RELEASE_TAG" "$CONFIG_ID"
+
+          git tag -f "$RELEASE_TAG" "$GITHUB_SHA"
+          git push origin "refs/tags/$RELEASE_TAG" --force
 
       - name: Rust cache store
         uses: actions/cache/save@v4.2.0
-        if: steps.cache_store.outputs.cache-hit != 'true'
+        if: always() && steps.cache_store.outputs.cache-hit != 'true'
         with:
           path: |
             ~/.cargo/bin/
@@ -259,4 +527,6 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             src-tauri/target/
+            online-installer/src-tauri/target/
+            offline-installer/windows/target/
           key: ${{ runner.os }}-cargo-pake-${{ hashFiles('**/Cargo.lock') }}

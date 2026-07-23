@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "online-installer-capability",
+  "description": "Core permissions for the Pake online installer window.",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

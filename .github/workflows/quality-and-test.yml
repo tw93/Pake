@@ -40,7 +40,9 @@ jobs:
         run: npx prettier --write . --ignore-unknown --cache
 
       - name: Auto-fix Rust formatting
-        run: cargo fmt --all --manifest-path src-tauri/Cargo.toml
+        run: |
+          cargo fmt --all --manifest-path src-tauri/Cargo.toml
+          cargo fmt --all --manifest-path online-installer/src-tauri/Cargo.toml
 
       - name: Commit formatting fixes
         run: |
@@ -53,7 +55,6 @@ jobs:
           else
             echo "No formatting changes to commit"
           fi
-
 
   rust-quality:
     name: Rust Code Quality
@@ -168,10 +169,75 @@ jobs:
           CI: true
           NODE_ENV: test
 
+  online-installer-build:
+    name: Online Installer Build (${{ matrix.os }})
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Build Environment
+        uses: ./.github/actions/setup-env
+        with:
+          mode: build
+
+      - name: Build and verify online installer carrier
+        shell: bash
+        timeout-minutes: 30
+        env:
+          PAKE_ONLINE_REPOSITORY: example/Pake
+          PAKE_ONLINE_RELEASE_TAG: pake-online-ci
+          PAKE_ONLINE_CONFIG_ID: ci
+        run: |
+          set -euo pipefail
+          cd online-installer
+          case "$RUNNER_OS" in
+            Windows)
+              ../node_modules/.bin/tauri build --no-bundle
+              test -f src-tauri/target/release/pake-online-installer.exe
+              ;;
+            macOS)
+              ../node_modules/.bin/tauri build --bundles dmg
+              find src-tauri/target/release/bundle/dmg \
+                -name '*.dmg' -type f -print -quit | grep -q .
+              ;;
+            Linux)
+              ../node_modules/.bin/tauri build --bundles appimage
+              find src-tauri/target/release/bundle/appimage \
+                -name '*.AppImage' -type f -print -quit | grep -q .
+              ;;
+          esac
+
+      - name: Build and verify offline EXE wrapper
+        if: runner.os == 'Windows'
+        shell: bash
+        env:
+          PAKE_OFFLINE_APP_NAME: CI App
+        run: |
+          printf 'ci-msi-placeholder' > offline-installer/windows/ci-app.msi
+          export PAKE_OFFLINE_MSI="$GITHUB_WORKSPACE/offline-installer/windows/ci-app.msi"
+          export PAKE_OFFLINE_ICON="$GITHUB_WORKSPACE/src-tauri/png/icon_256.ico"
+          cargo build --locked --release \
+            --manifest-path offline-installer/windows/Cargo.toml
+          test -f \
+            offline-installer/windows/target/release/pake-offline-installer.exe
+
   summary:
     name: Quality Summary
     runs-on: ubuntu-latest
-    needs: [auto-format, rust-quality, validation-fast, validation-full]
+    needs:
+      [
+        auto-format,
+        rust-quality,
+        validation-fast,
+        validation-full,
+        online-installer-build,
+      ]
     if: always()
     steps:
       - name: Generate Summary
@@ -185,4 +251,5 @@ jobs:
             echo "| Rust Quality | ${{ needs.rust-quality.result == 'success' && 'PASSED' || 'FAILED' }} |"
             echo "| CLI Fast Validation | ${{ needs.validation-fast.result == 'success' && 'PASSED' || 'FAILED' }} |"
             echo "| Full Tauri Build | ${{ needs.validation-full.result == 'success' && 'PASSED' || needs.validation-full.result == 'skipped' && 'SKIPPED (PR fast lane)' || 'FAILED' }} |"
+            echo "| Online Installer Build | ${{ needs.online-installer-build.result == 'success' && 'PASSED' || needs.online-installer-build.result == 'skipped' && 'SKIPPED (PR fast lane)' || 'FAILED' }} |"
           } >> $GITHUB_STEP_SUMMARY

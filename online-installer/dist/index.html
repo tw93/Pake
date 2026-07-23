@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="color-scheme" content="light dark" />
+    <title>Pake Online Installer</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="installer-shell">
+      <section class="installer-summary" aria-labelledby="installer-title">
+        <header class="product-bar">
+          <div class="wordmark">PAKE</div>
+          <div class="product-context">ONLINE INSTALLER</div>
+          <div class="experiment-badge">EXPERIMENTAL</div>
+        </header>
+
+        <div class="summary-copy">
+          <p class="eyebrow">Verified cloud build</p>
+          <h1 id="installer-title">Install the latest build.</h1>
+          <p class="lede">
+            This lightweight installer resolves the newest successful build,
+            verifies its SHA-256 digest, and hands control to the native
+            installer.
+          </p>
+        </div>
+
+        <ol class="stage-list" aria-label="Installation progress">
+          <li class="stage-item is-active" data-stage="resolve">
+            <span class="stage-index">01</span>
+            <span>
+              <strong>Resolve</strong>
+              <small>Find the latest successful release</small>
+            </span>
+          </li>
+          <li class="stage-item" data-stage="download">
+            <span class="stage-index">02</span>
+            <span>
+              <strong>Download</strong>
+              <small>Fetch the platform installer</small>
+            </span>
+          </li>
+          <li class="stage-item" data-stage="verify">
+            <span class="stage-index">03</span>
+            <span>
+              <strong>Verify</strong>
+              <small>Match size and SHA-256</small>
+            </span>
+          </li>
+          <li class="stage-item" data-stage="install">
+            <span class="stage-index">04</span>
+            <span>
+              <strong>Install</strong>
+              <small>Stream the native installer output</small>
+            </span>
+          </li>
+        </ol>
+
+        <div class="action-panel">
+          <div class="build-meta" aria-live="polite">
+            <span id="app-name">Waiting to resolve a build</span>
+            <code id="source-sha">—</code>
+          </div>
+          <div
+            class="progress-track"
+            role="progressbar"
+            aria-label="Download progress"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+          >
+            <span id="progress-fill"></span>
+          </div>
+          <button id="install-button" type="button">Install latest</button>
+          <p id="status-message" class="status-message" aria-live="polite">
+            Ready. An internet connection and installation permission may be
+            required.
+          </p>
+        </div>
+      </section>
+
+      <section class="installer-console" aria-labelledby="console-title">
+        <header class="console-bar">
+          <div>
+            <span class="console-kicker">LIVE STREAM</span>
+            <h2 id="console-title">Installer output</h2>
+          </div>
+          <button id="copy-log" class="quiet-button" type="button">
+            Copy log
+          </button>
+        </header>
+        <div id="log-output" class="log-output" role="log" aria-live="polite">
+          <div class="log-line log-system">
+            <span class="log-time">00:00:00</span>
+            <span class="log-channel">SYSTEM</span>
+            <span class="log-message"
+              >No installer process has started yet.</span
+            >
+          </div>
+        </div>
+        <footer class="console-footer">
+          <span id="connection-state" class="connection-state">IDLE</span>
+          <span>stdout and stderr are preserved</span>
+        </footer>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

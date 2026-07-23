@@ -1,0 +1,41 @@
+[package]
+name = "pake-online-installer"
+version = "0.1.0"
+description = "Experimental online installer for Pake GitHub Actions builds."
+authors = ["Pake Contributors"]
+license = "GPL-3.0-or-later"
+edition = "2021"
+rust-version = "1.85.0"
+
+[build-dependencies]
+tauri-build = { version = "=2.5.5", features = [] }
+
+[dependencies]
+futures-util = "0.3"
+reqwest = { version = "0.12", default-features = false, features = [
+  "json",
+  "rustls-tls",
+  "stream",
+] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.10"
+tauri = { version = "=2.10.2", features = [] }
+tempfile = "3.20"
+tokio = { version = "1.49", features = [
+  "fs",
+  "io-util",
+  "macros",
+  "process",
+  "rt-multi-thread",
+  "sync",
+  "time",
+] }
+url = "2.5"
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = "thin"
+opt-level = "z"
+strip = true

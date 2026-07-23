@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Pake Online Installer",
+  "identifier": "com.pake.online-installer",
+  "version": "0.1.0",
+  "build": {
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "Pake Online Installer",
+        "width": 920,
+        "height": 680,
+        "minWidth": 720,
+        "minHeight": 540,
+        "center": true,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "../../src-tauri/png/icon_512.png",
+      "../../src-tauri/png/icon_256.ico",
+      "../../src-tauri/icons/icon.icns"
+    ]
+  }
+}
