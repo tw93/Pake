@@ -40,7 +40,7 @@ MSI and launches Windows Installer with its native UI. The MSI remains
 available as the regular offline package.
 
 `offline_exe_icon` and `online_exe_icon` are independent icon URLs for the
-offline wrapper and experimental online installer. ICO files are used
+offline wrapper and experimental Windows online installer. ICO files are used
 directly; SVG, PNG, JPEG, and other Sharp-supported images are converted to
 ICO. Icon URLs must use HTTP(S), cannot contain credentials, and are limited to
 10 MiB.
@@ -52,15 +52,25 @@ current form values for the selected branch. The first run builds immediately;
 each later push to that same branch rebuilds every registered configuration and
 updates its rolling prerelease.
 
-For every online-mode build, the regular offline package version is
-automatically set to the latest stable Pake Release version. In a fork, the
-workflow reads the latest Release from its upstream parent repository. The
-manual `app_version` value continues to apply to non-online builds.
+For every online-mode build, the application version is automatically set to
+the latest stable Pake Release version. In a fork, the workflow reads the
+latest Release from its upstream parent repository. The manual `app_version`
+value continues to apply to non-online builds.
 
-The prerelease contains both the regular offline package and a lightweight
-online installer:
+The prerelease contains a versioned application payload or native package plus
+a lightweight online installer:
 
-- Windows: `.exe`, which downloads and launches the verified MSI
+- Windows: `online_windows_format` selects an app-specific `.msi` or `.exe`.
+  The MSI installs the persistent online launcher. The EXE is a completely
+  windowless wrapper around that same online MSI; Windows Installer remains the
+  only visible setup UI, and `online_exe_icon` controls the wrapper icon. The
+  real Pake executable is published separately as a deterministic `.tar.zst`
+  payload. On first launch and every later launch, the launcher resolves the
+  newest completed manifest, downloads the payload, verifies both archive and
+  executable SHA-256 values, activates it under `%LOCALAPPDATA%\Pake\Online`,
+  and starts the app. It never nests or launches an application MSI.
+  The launcher uses version `255.0.0`, the highest major version Windows
+  Installer accepts; payload versions remain independent.
 - macOS: `.dmg` containing an installer app, which installs the verified app
   into `/Applications`
 - Linux: `.AppImage`, which selects a native DEB/RPM/ZST when available and
@@ -68,13 +78,17 @@ online installer:
 
 For online-mode runs, the Actions **Artifacts** section contains only the
 online installer. Open the rolling prerelease when you also need the real
-offline package. Non-online runs continue to upload only their regular offline
-packages as three-day Actions artifacts.
+payload or native package. Non-online runs continue to upload only their
+regular offline packages as three-day Actions artifacts.
 
 The online installer resolves only completed manifests, verifies file size and
-SHA-256, then displays the real installer output. In mainland China, verified
-GitHub asset downloads automatically try `v4.gh-proxy.org` first and fall back
-to GitHub. For example,
+SHA-256, then displays download and activation output. Windows payloads are
+single-file Zstandard-compressed tar archives; the launcher rejects absolute
+paths, parent traversal, unexpected entries, size mismatches, and executable
+digest mismatches before activation. The rolling Release and the Windows
+payload cache retain the current and previous successful builds. In mainland
+China, verified GitHub asset downloads automatically try `v4.gh-proxy.org`
+first and fall back to GitHub. For example,
 `https://github.com/owner/repo/releases/download/...` becomes
 `https://v4.gh-proxy.org/https://github.com/owner/repo/releases/download/...`;
 the result must still pass the manifest size and SHA-256 checks.
@@ -92,9 +106,10 @@ the result must still pass the manifest size and SHA-256 checks.
   builds. The last prerelease remains available.
 - Saved configurations live on the workflow-managed `pake-online-config`
   branch. Each configuration consumes a runner on every matching push.
-- Windows and Linux may request elevation through the native installer or
-  `pkexec`; macOS requests administrator authorization when replacing an app in
-  `/Applications`.
+- The Windows MSI may request installation permission for the launcher; its
+  downloaded application payload is installed per-user. Linux may request
+  elevation through `pkexec`; macOS requests administrator authorization when
+  replacing an app in `/Applications`.
 
 ## Tips
 

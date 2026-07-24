@@ -1,3 +1,4 @@
+#[cfg(any(target_os = "linux", test))]
 use std::path::Path;
 
 #[cfg(target_os = "linux")]
@@ -5,12 +6,14 @@ use std::path::PathBuf;
 
 use crate::model::{InstallerArtifact, OnlineManifest};
 
+#[cfg(any(target_os = "macos", target_os = "linux", test))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CommandSpec {
     pub program: String,
     pub args: Vec<String>,
 }
 
+#[cfg(any(target_os = "macos", target_os = "linux", test))]
 impl CommandSpec {
     pub fn new(program: impl Into<String>, args: Vec<String>) -> Self {
         Self {
@@ -26,7 +29,7 @@ pub fn select_artifact<'a>(
     os_release: &str,
 ) -> Result<&'a InstallerArtifact, String> {
     let preferred_formats: &[&str] = match operating_system {
-        "windows" => &["msi"],
+        "windows" => &["tar.zst"],
         "macos" => &["dmg"],
         "linux" if is_arch_family(os_release) => &["zst", "appimage"],
         "linux" if is_rpm_family(os_release) => &["rpm", "appimage"],
@@ -87,22 +90,6 @@ fn is_rpm_family(os_release: &str) -> bool {
                 | "opensuse-tumbleweed"
         )
     })
-}
-
-#[cfg(windows)]
-pub fn windows_installer_command(msi_path: &Path, log_path: &Path) -> CommandSpec {
-    CommandSpec::new(
-        "msiexec.exe",
-        vec![
-            "/i".into(),
-            msi_path.display().to_string(),
-            "/norestart".into(),
-            "REINSTALL=ALL".into(),
-            "REINSTALLMODE=amus".into(),
-            "/L*V".into(),
-            log_path.display().to_string(),
-        ],
-    )
 }
 
 #[cfg(target_os = "linux")]
@@ -200,6 +187,9 @@ mod tests {
             sha256: "a".repeat(64),
             download_url: format!("https://example.invalid/app.{format}"),
             package_id: "example".into(),
+            expanded_size: None,
+            executable_name: None,
+            executable_sha256: None,
         };
         OnlineManifest {
             schema_version: 1,
@@ -221,6 +211,7 @@ mod tests {
                 arch: "x64".into(),
             },
             artifacts: vec![
+                artifact("tar.zst"),
                 artifact("deb"),
                 artifact("rpm"),
                 artifact("zst"),
@@ -251,6 +242,26 @@ mod tests {
     }
 
     #[test]
+    fn selects_the_portable_windows_payload_instead_of_an_msi() {
+        let mut value = manifest();
+        value.artifacts.push(InstallerArtifact {
+            name: "app.msi".into(),
+            format: "msi".into(),
+            size: 1,
+            sha256: "a".repeat(64),
+            download_url: "https://example.invalid/app.msi".into(),
+            package_id: "example".into(),
+            expanded_size: None,
+            executable_name: None,
+            executable_sha256: None,
+        });
+        assert_eq!(
+            select_artifact(&value, "windows", "").unwrap().format,
+            "tar.zst"
+        );
+    }
+
+    #[test]
     fn falls_back_to_appimage_when_the_native_family_is_missing() {
         let mut value = manifest();
         value
@@ -262,22 +273,6 @@ mod tests {
                 .format,
             "appimage"
         );
-    }
-
-    #[cfg(windows)]
-    #[test]
-    fn windows_msi_command_enables_reinstall_and_verbose_logging() {
-        let command = windows_installer_command(
-            Path::new(r"C:\Temp\app.msi"),
-            Path::new(r"C:\Temp\install.log"),
-        );
-        assert_eq!(command.program, "msiexec.exe");
-        assert!(command.args.iter().any(|value| value == "REINSTALL=ALL"));
-        assert!(command
-            .args
-            .iter()
-            .any(|value| value == "REINSTALLMODE=amus"));
-        assert!(command.args.iter().any(|value| value == "/L*V"));
     }
 
     #[test]

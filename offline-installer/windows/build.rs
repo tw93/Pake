@@ -5,6 +5,7 @@ fn main() {
     println!("cargo:rerun-if-env-changed=PAKE_OFFLINE_MSI");
     println!("cargo:rerun-if-env-changed=PAKE_OFFLINE_ICON");
     println!("cargo:rerun-if-env-changed=PAKE_OFFLINE_APP_NAME");
+    println!("cargo:rerun-if-env-changed=PAKE_INSTALLER_KIND");
     if let Some(msi) = env::var_os("PAKE_OFFLINE_MSI") {
         println!("cargo:rerun-if-changed={}", PathBuf::from(msi).display());
     }
@@ -26,11 +27,15 @@ fn main() {
             .unwrap_or(default_icon);
         let app_name =
             env::var("PAKE_OFFLINE_APP_NAME").unwrap_or_else(|_| "Pake Application".into());
+        let installer_kind = env::var("PAKE_INSTALLER_KIND").unwrap_or_else(|_| "Offline".into());
 
         let mut resource = winres::WindowsResource::new();
         resource.set_icon(icon.to_string_lossy().as_ref());
         resource.set("ProductName", &app_name);
-        resource.set("FileDescription", &format!("{app_name} Offline Installer"));
+        resource.set(
+            "FileDescription",
+            &format!("{app_name} {installer_kind} Installer"),
+        );
         resource
             .compile()
             .expect("failed to compile the offline installer resources");

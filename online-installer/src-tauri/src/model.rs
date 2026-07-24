@@ -169,6 +169,12 @@ pub struct InstallerArtifact {
     pub sha256: String,
     pub download_url: String,
     pub package_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expanded_size: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub executable_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub executable_sha256: Option<String>,
 }
 
 impl OnlineManifest {
@@ -218,7 +224,7 @@ fn validate_artifact(artifact: &InstallerArtifact, channel: &ReleaseChannel) -> 
         || artifact.package_id.trim().is_empty()
         || !matches!(
             artifact.format.as_str(),
-            "msi" | "exe" | "dmg" | "deb" | "rpm" | "zst" | "appimage"
+            "msi" | "exe" | "dmg" | "deb" | "rpm" | "zst" | "appimage" | "tar.zst"
         )
     {
         return Err("The manifest contains invalid artifact metadata.".into());
@@ -233,6 +239,32 @@ fn validate_artifact(artifact: &InstallerArtifact, channel: &ReleaseChannel) -> 
             "Artifact {} has an invalid SHA-256.",
             artifact.name
         ));
+    }
+    if artifact.format == "tar.zst" {
+        let executable_name = artifact
+            .executable_name
+            .as_deref()
+            .ok_or_else(|| "The Windows payload is missing its executable name.".to_string())?;
+        let executable_sha256 = artifact
+            .executable_sha256
+            .as_deref()
+            .ok_or_else(|| "The Windows payload is missing its executable digest.".to_string())?;
+        if artifact.expanded_size == Some(0)
+            || artifact.expanded_size.is_none()
+            || artifact
+                .expanded_size
+                .is_some_and(|size| size > 512 * 1024 * 1024)
+            || executable_name.is_empty()
+            || executable_name.contains('/')
+            || executable_name.contains('\\')
+            || !executable_name.to_ascii_lowercase().ends_with(".exe")
+            || executable_sha256.len() != 64
+            || !executable_sha256
+                .chars()
+                .all(|character| character.is_ascii_hexdigit())
+        {
+            return Err("The Windows payload contains invalid archive metadata.".into());
+        }
     }
     let url = Url::parse(&artifact.download_url)
         .map_err(|error| format!("Artifact {} has an invalid URL: {error}", artifact.name))?;
@@ -300,6 +332,9 @@ mod tests {
                     "https://github.com/owner/repo/releases/download/pake-online-example/example.msi"
                         .into(),
                 package_id: "example".into(),
+                expanded_size: None,
+                executable_name: None,
+                executable_sha256: None,
             }],
         }
     }
@@ -319,6 +354,24 @@ mod tests {
         insecure.artifacts[0].download_url =
             "http://github.com/owner/repo/releases/download/pake-online-example/example.msi".into();
         assert!(insecure.validate(&channel()).is_err());
+    }
+
+    #[test]
+    fn requires_bounded_metadata_for_windows_tar_zst_payloads() {
+        let mut value = manifest();
+        let artifact = &mut value.artifacts[0];
+        artifact.name = "example.tar.zst".into();
+        artifact.format = "tar.zst".into();
+        artifact.download_url =
+            "https://github.com/owner/repo/releases/download/pake-online-example/example.tar.zst"
+                .into();
+        assert!(value.validate(&channel()).is_err());
+
+        let artifact = &mut value.artifacts[0];
+        artifact.expanded_size = Some(42);
+        artifact.executable_name = Some("app.exe".into());
+        artifact.executable_sha256 = Some("b".repeat(64));
+        assert!(value.validate(&channel()).is_ok());
     }
 
     #[test]

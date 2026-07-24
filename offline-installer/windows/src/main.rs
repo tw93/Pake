@@ -1,22 +1,85 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use std::fs;
 use std::io;
+use std::iter;
+use std::os::windows::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
+use windows_sys::Win32::System::ApplicationInstallationAndServicing::{
+    MsiCloseHandle, MsiGetProductPropertyW, MsiOpenPackageW, MsiQueryProductStateW,
+    INSTALLSTATE_DEFAULT, MSIHANDLE,
+};
 
 #[cfg(not(test))]
 static MSI_BYTES: &[u8] = include_bytes!(env!("PAKE_OFFLINE_MSI"));
 #[cfg(test)]
 static MSI_BYTES: &[u8] = b"test-msi";
 
-fn msiexec_arguments(msi_path: &Path) -> Vec<String> {
-    vec![
+struct MsiHandle(MSIHANDLE);
+
+impl Drop for MsiHandle {
+    fn drop(&mut self) {
+        unsafe {
+            MsiCloseHandle(self.0);
+        }
+    }
+}
+
+fn wide_null(value: &std::ffi::OsStr) -> Vec<u16> {
+    value.encode_wide().chain(iter::once(0)).collect()
+}
+
+fn msi_product_code(msi_path: &Path) -> Result<Vec<u16>, String> {
+    let package_path = wide_null(msi_path.as_os_str());
+    let mut raw_handle = 0;
+    let open_result = unsafe { MsiOpenPackageW(package_path.as_ptr(), &mut raw_handle) };
+    if open_result != 0 {
+        return Err(format!(
+            "Failed to inspect the MSI package (Windows Installer error {open_result})."
+        ));
+    }
+    let handle = MsiHandle(raw_handle);
+    let property: Vec<u16> = "ProductCode".encode_utf16().chain(iter::once(0)).collect();
+    let mut product_code = vec![0_u16; 39];
+    let mut length = product_code.len() as u32;
+    let property_result = unsafe {
+        MsiGetProductPropertyW(
+            handle.0,
+            property.as_ptr(),
+            product_code.as_mut_ptr(),
+            &mut length,
+        )
+    };
+    if property_result != 0 {
+        return Err(format!(
+            "Failed to read the MSI ProductCode (Windows Installer error {property_result})."
+        ));
+    }
+    product_code.truncate(length as usize);
+    if product_code.is_empty() {
+        return Err("The MSI package does not contain a ProductCode.".into());
+    }
+    product_code.push(0);
+    Ok(product_code)
+}
+
+fn product_is_installed(msi_path: &Path) -> Result<bool, String> {
+    let product_code = msi_product_code(msi_path)?;
+    Ok(unsafe { MsiQueryProductStateW(product_code.as_ptr()) } == INSTALLSTATE_DEFAULT)
+}
+
+fn msiexec_arguments(msi_path: &Path, reinstall: bool) -> Vec<String> {
+    let mut arguments = vec![
         "/i".into(),
         msi_path.display().to_string(),
         "/norestart".into(),
-        "REINSTALL=ALL".into(),
-        "REINSTALLMODE=amus".into(),
-    ]
+    ];
+    if reinstall {
+        arguments.extend(["REINSTALL=ALL".into(), "REINSTALLMODE=amus".into()]);
+    }
+    arguments
 }
 
 fn create_temporary_directory() -> io::Result<PathBuf> {
@@ -49,14 +112,19 @@ fn run() -> Result<i32, String> {
     let result = (|| {
         fs::write(&msi_path, MSI_BYTES)
             .map_err(|error| format!("Failed to extract the embedded MSI: {error}"))?;
+        let reinstall = product_is_installed(&msi_path)?;
         let status = Command::new("msiexec.exe")
-            .args(msiexec_arguments(&msi_path))
+            .args(msiexec_arguments(&msi_path, reinstall))
             .status()
             .map_err(|error| format!("Failed to launch Windows Installer: {error}"))?;
         Ok(status.code().unwrap_or(1))
     })();
-    let _ = fs::remove_file(&msi_path);
-    let _ = fs::remove_dir(&temporary);
+    if let Err(error) = fs::remove_file(&msi_path) {
+        eprintln!("Failed to remove the temporary MSI: {error}");
+    }
+    if let Err(error) = fs::remove_dir(&temporary) {
+        eprintln!("Failed to remove the temporary installer directory: {error}");
+    }
     result
 }
 
@@ -75,9 +143,16 @@ mod tests {
     use super::*;
 
     #[test]
-    fn passes_reinstall_arguments_to_msiexec() {
-        let arguments = msiexec_arguments(Path::new(r"C:\Temp\application.msi"));
+    fn first_install_omits_reinstall_arguments() {
+        let arguments = msiexec_arguments(Path::new(r"C:\Temp\application.msi"), false);
         assert_eq!(arguments[0], "/i");
+        assert!(!arguments.iter().any(|value| value == "REINSTALL=ALL"));
+        assert!(!arguments.iter().any(|value| value == "REINSTALLMODE=amus"));
+    }
+
+    #[test]
+    fn existing_install_passes_reinstall_arguments() {
+        let arguments = msiexec_arguments(Path::new(r"C:\Temp\application.msi"), true);
         assert!(arguments.iter().any(|value| value == "REINSTALL=ALL"));
         assert!(arguments.iter().any(|value| value == "REINSTALLMODE=amus"));
     }

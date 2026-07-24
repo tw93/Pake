@@ -49,6 +49,7 @@ function sampleInputs(overrides = {}) {
     targets: "deb",
     online_mode: true,
     online_operation: "enable-or-update",
+    online_windows_format: "msi",
     offline_exe: false,
     offline_exe_icon: "",
     online_exe_icon: "",
@@ -101,6 +102,7 @@ describe("Pake online build configuration", () => {
     expect(config.releaseTag).toBe(`pake-online-${config.id}`);
     expect(config.delivery).toEqual({
       windowsOfflineExe: false,
+      onlineWindowsFormat: "msi",
       offlineExeIcon: null,
       onlineExeIcon: null,
     });
@@ -160,6 +162,7 @@ describe("Pake online build configuration", () => {
     const config = createBuildConfig(
       sampleInputs({
         offline_exe: true,
+        online_windows_format: "exe",
         offline_exe_icon: "https://example.com/offline.ico",
         online_exe_icon: "https://example.com/online.png",
       }),
@@ -167,9 +170,19 @@ describe("Pake online build configuration", () => {
     );
     expect(config.delivery).toEqual({
       windowsOfflineExe: true,
+      onlineWindowsFormat: "exe",
       offlineExeIcon: "https://example.com/offline.ico",
       onlineExeIcon: "https://example.com/online.png",
     });
+  });
+
+  it("rejects unsupported Windows online installer formats", () => {
+    expect(() =>
+      createBuildConfig(
+        sampleInputs({ online_windows_format: "nsis" }),
+        sampleContext(),
+      ),
+    ).toThrow(/Windows installer format/);
   });
 
   it("preserves createdAt on update and filters configs by source branch", () => {
@@ -229,6 +242,7 @@ describe("Pake online release assets", () => {
     expect(detectArtifactFormat("App.rpm")).toBe("rpm");
     expect(detectArtifactFormat("App.AppImage")).toBe("appimage");
     expect(detectArtifactFormat("App-1.pkg.tar.zst")).toBe("zst");
+    expect(detectArtifactFormat("App.tar.zst")).toBe("tar.zst");
   });
 
   it("stages versioned assets and writes a checksummed manifest", () => {
@@ -236,8 +250,17 @@ describe("Pake online release assets", () => {
     const input = path.join(root, "input");
     const output = path.join(root, "output");
     fs.mkdirSync(input);
-    fs.writeFileSync(path.join(input, "Example App.msi"), "installer");
-    fs.writeFileSync(path.join(input, "Example App.exe"), "wrapper");
+    const payloadPath = path.join(input, "Example App.tar.zst");
+    fs.writeFileSync(payloadPath, "compressed-payload");
+    fs.writeFileSync(
+      `${payloadPath}.json`,
+      JSON.stringify({
+        format: "tar.zst",
+        expandedSize: 42,
+        executableName: "app.exe",
+        executableSha256: "a".repeat(64),
+      }),
+    );
     const config = createBuildConfig(sampleInputs(), sampleContext());
     const result = stageReleaseAssets(config, {
       inputDirectory: input,
@@ -248,22 +271,56 @@ describe("Pake online release assets", () => {
       builtAt: "2026-07-23T00:00:00.000Z",
     });
 
-    expect(result.manifest.artifacts).toHaveLength(2);
-    const msi = result.manifest.artifacts.find(
-      (artifact) => artifact.format === "msi",
+    expect(result.manifest.artifacts).toHaveLength(1);
+    const payload = result.manifest.artifacts.find(
+      (artifact) => artifact.format === "tar.zst",
     );
-    const exe = result.manifest.artifacts.find(
-      (artifact) => artifact.format === "exe",
-    );
-    expect(msi).toMatchObject({
-      format: "msi",
-      size: 9,
-      name: `${config.id}-1234567890ab.msi`,
+    expect(payload).toMatchObject({
+      format: "tar.zst",
+      size: 18,
+      name: `${config.id}-1234567890ab.tar.zst`,
+      packageId: config.id,
+      expandedSize: 42,
+      executableName: "app.exe",
+      executableSha256: "a".repeat(64),
     });
-    expect(exe.name).toBe(`${config.id}-1234567890ab.exe`);
-    expect(msi.sha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(payload.sha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(result.manifest.onlineInstaller.name).toBe(
+      `${config.id}-online-installer.msi`,
+    );
     expect(path.basename(result.manifestPath)).toBe(
       "pake-online-manifest-1234567890ab-2.json",
+    );
+  });
+
+  it("names the Windows online carrier from the configured format", () => {
+    const root = temporaryDirectory();
+    const input = path.join(root, "input");
+    const output = path.join(root, "output");
+    fs.mkdirSync(input);
+    const payloadPath = path.join(input, "payload.tar.zst");
+    fs.writeFileSync(payloadPath, "payload");
+    fs.writeFileSync(
+      `${payloadPath}.json`,
+      JSON.stringify({
+        format: "tar.zst",
+        expandedSize: 7,
+        executableName: "app.exe",
+        executableSha256: "b".repeat(64),
+      }),
+    );
+    const config = createBuildConfig(
+      sampleInputs({ online_windows_format: "exe" }),
+      sampleContext(),
+    );
+    const result = stageReleaseAssets(config, {
+      inputDirectory: input,
+      outputDirectory: output,
+      sourceSha: "1234567890abcdef",
+      arch: "X64",
+    });
+    expect(result.manifest.onlineInstaller.name).toBe(
+      `${config.id}-online-installer.exe`,
     );
   });
 
@@ -272,28 +329,28 @@ describe("Pake online release assets", () => {
       { id: 9, name: "pake-online-manifest-new.json" },
       { id: 8, name: "pake-online-manifest-previous.json" },
       { id: 7, name: "pake-online-manifest-old.json" },
-      { id: 6, name: "example-windows-id-new.msi" },
-      { id: 5, name: "example-windows-id-previous.msi" },
-      { id: 4, name: "example-windows-id-old.msi" },
-      { id: 3, name: "example-windows-id-online-installer.exe" },
+      { id: 6, name: "example-windows-id-new.tar.zst" },
+      { id: 5, name: "example-windows-id-previous.tar.zst" },
+      { id: 4, name: "example-windows-id-old.tar.zst" },
+      { id: 3, name: "example-windows-id-online-installer.msi" },
       { id: 2, name: "maintainer-notes.txt" },
     ];
     const manifests = new Map([
       [
         "pake-online-manifest-new.json",
         {
-          artifacts: [{ name: "example-windows-id-new.msi" }],
+          artifacts: [{ name: "example-windows-id-new.tar.zst" }],
           onlineInstaller: {
-            name: "example-windows-id-online-installer.exe",
+            name: "example-windows-id-online-installer.msi",
           },
         },
       ],
       [
         "pake-online-manifest-previous.json",
         {
-          artifacts: [{ name: "example-windows-id-previous.msi" }],
+          artifacts: [{ name: "example-windows-id-previous.tar.zst" }],
           onlineInstaller: {
-            name: "example-windows-id-online-installer.exe",
+            name: "example-windows-id-online-installer.msi",
           },
         },
       ],
@@ -303,7 +360,10 @@ describe("Pake online release assets", () => {
       selectReleaseAssetsToDelete(assets, manifests, "example-windows-id").map(
         ({ name }) => name,
       ),
-    ).toEqual(["pake-online-manifest-old.json", "example-windows-id-old.msi"]);
+    ).toEqual([
+      "pake-online-manifest-old.json",
+      "example-windows-id-old.tar.zst",
+    ]);
   });
 });
 
@@ -348,6 +408,7 @@ describe("Build App With Pake CLI online workflow", () => {
     expect(workflow).toContain("push:");
     expect(workflow).toContain("online_mode:");
     expect(workflow).toContain("online_operation:");
+    expect(workflow).toContain("online_windows_format:");
     expect(workflow).toContain("offline_exe:");
     expect(workflow).toContain("offline_exe_icon:");
     expect(workflow).toContain("online_exe_icon:");
@@ -357,8 +418,13 @@ describe("Build App With Pake CLI online workflow", () => {
       'node dist/cli.js --config "$env:PAKE_CLI_CONFIG"',
     );
     expect(workflow).toContain(
-      "& '..\\node_modules\\.bin\\tauri.CMD' build --no-bundle",
+      "& '..\\node_modules\\.bin\\tauri.CMD' build --bundles msi",
     );
+    expect(workflow).toContain("--bin pake-payload-pack");
+    expect(workflow).toContain("windows-payload.tar.zst");
+    expect(workflow).toContain("Clear stale Windows online entrypoints");
+    expect(workflow).toContain('if ($env:ONLINE_WINDOWS_FORMAT -eq "exe")');
+    expect(workflow).toContain('Resolve-Path "src-tauri\\assets\\main.wxs"');
     expect(workflow).toContain(
       "../node_modules/.bin/tauri build --bundles appimage",
     );
@@ -420,7 +486,9 @@ describe("Build App With Pake CLI online workflow", () => {
       "utf8",
     );
     expect(workflow).toContain("online-installer-build:");
-    expect(workflow).toContain("../node_modules/.bin/tauri build --no-bundle");
+    expect(workflow).toContain(
+      "../node_modules/.bin/tauri build --bundles msi",
+    );
     expect(workflow).toContain(
       "../node_modules/.bin/tauri build --bundles dmg",
     );

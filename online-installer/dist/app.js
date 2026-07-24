@@ -136,7 +136,7 @@ async function startInstall() {
   } finally {
     running = false;
     installButton.disabled = false;
-    installButton.textContent = "Install latest";
+    installButton.textContent = "Retry latest";
   }
 }
 
@@ -166,4 +166,8 @@ installButton.addEventListener("click", startInstall);
 if (!window.__TAURI__?.core) {
   connectionState.textContent = "PREVIEW";
   appendLog("system", "UI preview mode; native installation is disabled.");
+} else {
+  window.addEventListener("DOMContentLoaded", () => {
+    window.setTimeout(startInstall, 150);
+  });
 }

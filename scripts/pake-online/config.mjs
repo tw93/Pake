@@ -61,6 +61,14 @@ function positiveInteger(value, field, allowZero = false) {
   return parsed;
 }
 
+function normalizeOnlineWindowsFormat(value) {
+  const format = optionalString(value) ?? "msi";
+  if (!["msi", "exe"].includes(format)) {
+    throw new Error(`Unsupported online Windows installer format: ${format}`);
+  }
+  return format;
+}
+
 export function slugify(value, fallback = "app") {
   const slug = String(value)
     .normalize("NFKD")
@@ -191,6 +199,9 @@ export function createBuildConfig(inputs, context) {
     cliConfig,
     delivery: {
       windowsOfflineExe: asBoolean(inputs.offline_exe),
+      onlineWindowsFormat: normalizeOnlineWindowsFormat(
+        inputs.online_windows_format,
+      ),
       offlineExeIcon: optionalWebUrl(
         inputs.offline_exe_icon,
         "offline_exe_icon",

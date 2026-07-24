@@ -38,8 +38,8 @@
 勾选 `offline_exe` 会额外发布一个 `.exe`。它内嵌本次生成的 MSI，并使用原生
 Windows Installer 界面执行安装；原本的 MSI 离线包仍会保留。
 
-`offline_exe_icon` 与 `online_exe_icon` 可分别设置离线 EXE 包装器和实验性在线
-安装器的图标 URL。ICO 会直接使用；SVG、PNG、JPEG 以及其他 Sharp 支持的图片
+`offline_exe_icon` 与 `online_exe_icon` 可分别设置离线 EXE 包装器和实验性
+Windows 在线安装器的图标 URL。ICO 会直接使用；SVG、PNG、JPEG 以及其他 Sharp 支持的图片
 会自动转换成 ICO。图标 URL 必须使用 HTTP(S)、不得包含凭据，大小上限为 10 MiB。
 
 ## 实验性在线模式
@@ -48,23 +48,34 @@ Windows Installer 界面执行安装；原本的 MSI 离线包仍会保留。
 表单配置。首次运行会立即构建；以后每次向同一分支 push，都会重新构建该分支
 登记的全部配置，并更新各自的滚动预发布。
 
-每次在线模式构建都会自动把常规离线包的版本设为 Pake 最新正式 Release 的
-版本。在 Fork 中，工作流会读取其上游父仓库的最新 Release；非在线构建仍使用
-表单中的 `app_version`。
+每次在线模式构建都会自动把应用版本设为 Pake 最新正式 Release 的版本。在 Fork
+中，工作流会读取其上游父仓库的最新 Release；非在线构建仍使用表单中的
+`app_version`。
 
-预发布会同时提供常规离线包和轻量在线安装器：
+预发布会同时提供版本化应用负载或原生软件包，以及轻量在线安装器：
 
-- Windows：`.exe`，下载并启动通过校验的 MSI
+- Windows：`online_windows_format` 可选择应用专属 `.msi` 或 `.exe`。MSI
+  用于安装长期存在的在线启动器；EXE 是对同一个在线 MSI 的完全无窗口包装，
+  只有 Windows Installer 安装界面可见，`online_exe_icon` 用于设置此外壳图标。
+  真实 Pake 可执行文件会单独发布为确定性的 `.tar.zst` 负载。首次启动以及以后
+  每次启动时，启动器都会解析最新的完整 manifest，下载负载，校验归档与可执行
+  文件两层 SHA-256，在 `%LOCALAPPDATA%\Pake\Online` 下完成原子激活，然后启动
+  应用；不会嵌套或调用应用 MSI。引导器固定使用 Windows Installer 接受的最高
+  主版本 `255.0.0`，与真实负载版本相互独立
 - macOS：包含安装器应用的 `.dmg`，将通过校验的应用安装到 `/Applications`
 - Linux：`.AppImage`，优先选择匹配发行版的 DEB/RPM/ZST，否则执行用户级
   AppImage 安装
 
 在线模式运行时，Actions 的 **Artifacts** 区域只提供在线安装引导器；如需真实
-离线包，请打开对应的滚动预发布。非在线模式仍只上传常规离线包，并保留 3 天。
+负载或原生软件包，请打开对应的滚动预发布。非在线模式仍只上传常规离线包，并
+保留 3 天。
 
 在线安装器只解析已经完成发布的 manifest，校验文件大小和 SHA-256，然后实时
-显示真正安装程序的输出。在中国大陆，会优先通过 `v4.gh-proxy.org` 下载已经
-验证的 GitHub 资产，失败时回退 GitHub 官方地址。例如，
+显示下载与激活日志。Windows 负载使用只含单个文件的 Zstandard 压缩 tar 归档；
+启动器会在激活前拒绝绝对路径、父目录穿越、额外条目、大小不符和可执行文件摘要
+不符。滚动 Release 与 Windows 本地负载缓存都只保留当前和上一个成功版本。在
+中国大陆，会优先通过 `v4.gh-proxy.org` 下载已经验证的 GitHub 资产，失败时
+回退 GitHub 官方地址。例如，
 `https://github.com/owner/repo/releases/download/...` 会改写为
 `https://v4.gh-proxy.org/https://github.com/owner/repo/releases/download/...`；
 下载结果仍必须通过 manifest 中的大小和 SHA-256 校验。
@@ -81,8 +92,9 @@ Windows Installer 界面执行安装；原本的 MSI 离线包仍会保留。
   预发布仍然保留。
 - 配置保存在工作流管理的 `pake-online-config` 分支。每套配置都会在匹配分支
   的每次 push 中占用一个 runner。
-- Windows 和 Linux 可能分别通过原生安装程序或 `pkexec` 请求提权；macOS
-  替换 `/Applications` 中的应用时会请求管理员授权。
+- Windows MSI 可能请求安装在线启动器的权限，但下载的应用负载按用户安装；
+  Linux 可能通过 `pkexec` 请求提权；macOS 替换 `/Applications` 中的应用时会
+  请求管理员授权。
 
 ## 提示
 

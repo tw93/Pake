@@ -10,6 +10,7 @@ const MANIFEST_PREFIX = "pake-online-manifest-";
 
 const FORMATS = [
   [".pkg.tar.zst", "zst"],
+  [".tar.zst", "tar.zst"],
   [".AppImage", "appimage"],
   [".msi", "msi"],
   [".exe", "exe"],
@@ -25,7 +26,8 @@ function sha256File(filePath) {
 }
 
 function assetExtension(format) {
-  return format === "zst" ? "pkg.tar.zst" : format;
+  if (format === "zst") return "pkg.tar.zst";
+  return format;
 }
 
 export function detectArtifactFormat(fileName) {
@@ -47,7 +49,13 @@ export function findInstallerFiles(directory) {
 
 export function onlineInstallerAssetName(config) {
   const base = config.id;
-  if (config.os === "windows") return `${base}-online-installer.exe`;
+  if (config.os === "windows") {
+    const format = config.delivery?.onlineWindowsFormat ?? "msi";
+    if (!["msi", "exe"].includes(format)) {
+      throw new Error(`Unsupported Windows online installer format: ${format}`);
+    }
+    return `${base}-online-installer.${format}`;
+  }
   if (config.os === "macos") return `${base}-online-installer.dmg`;
   return `${base}-online-installer.AppImage`;
 }
@@ -73,7 +81,7 @@ export function stageReleaseAssets(config, context) {
     const targetPath = path.join(actualDirectory, name);
     fs.copyFileSync(sourcePath, targetPath);
     const size = fs.statSync(targetPath).size;
-    return {
+    const artifact = {
       name,
       format,
       size,
@@ -81,6 +89,27 @@ export function stageReleaseAssets(config, context) {
       downloadUrl: `https://github.com/${config.repository}/releases/download/${config.releaseTag}/${name}`,
       packageId: config.cliConfig.name,
     };
+    if (format === "tar.zst") {
+      const metadataPath = `${sourcePath}.json`;
+      if (!fs.existsSync(metadataPath)) {
+        throw new Error(`Windows payload metadata is missing: ${metadataPath}`);
+      }
+      const metadata = JSON.parse(fs.readFileSync(metadataPath, "utf8"));
+      if (
+        metadata.format !== "tar.zst" ||
+        !Number.isSafeInteger(metadata.expandedSize) ||
+        metadata.expandedSize <= 0 ||
+        typeof metadata.executableName !== "string" ||
+        typeof metadata.executableSha256 !== "string"
+      ) {
+        throw new Error(`Windows payload metadata is invalid: ${metadataPath}`);
+      }
+      artifact.expandedSize = metadata.expandedSize;
+      artifact.executableName = metadata.executableName;
+      artifact.executableSha256 = metadata.executableSha256;
+      artifact.packageId = config.id;
+    }
+    return artifact;
   });
 
   const onlineInstaller = {

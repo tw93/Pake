@@ -198,8 +198,17 @@ jobs:
           cd online-installer
           case "$RUNNER_OS" in
             Windows)
-              ../node_modules/.bin/tauri build --no-bundle
-              test -f src-tauri/target/release/pake-online-installer.exe
+              ../node_modules/.bin/tauri build --bundles msi
+              find src-tauri/target/release/bundle/msi \
+                -name '*.msi' -type f -print -quit | grep -q .
+              printf 'portable-pake-app' > "$RUNNER_TEMP/pake-app.exe"
+              cargo run --locked --release \
+                --manifest-path src-tauri/Cargo.toml \
+                --bin pake-payload-pack -- \
+                "$RUNNER_TEMP/pake-app.exe" \
+                "$RUNNER_TEMP/pake-app.tar.zst" \
+                "$RUNNER_TEMP/pake-app.tar.zst.json"
+              test -s "$RUNNER_TEMP/pake-app.tar.zst"
               ;;
             macOS)
               ../node_modules/.bin/tauri build --bundles dmg

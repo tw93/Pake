@@ -1,28 +1,31 @@
 mod model;
 mod network;
+pub mod payload;
 mod platform;
 
 use std::fs;
-#[cfg(windows)]
-use std::io::SeekFrom;
 use std::path::Path;
 #[cfg(target_os = "macos")]
 use std::path::PathBuf;
+#[cfg(not(windows))]
 use std::process::Stdio;
 use std::sync::atomic::{AtomicBool, Ordering};
-#[cfg(windows)]
-use std::sync::Arc;
 use std::time::Duration;
 
 use futures_util::StreamExt;
 use model::{GithubRelease, GithubReleaseAsset, InstallerArtifact, OnlineManifest, ReleaseChannel};
 use network::{download_response, is_mainland_china};
-use platform::{select_artifact, CommandSpec};
+use platform::select_artifact;
+#[cfg(not(windows))]
+use platform::CommandSpec;
 use reqwest::{redirect::Policy, Client};
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 use tauri::ipc::Channel;
-use tokio::io::{AsyncBufReadExt, AsyncRead, AsyncSeekExt, AsyncWriteExt, BufReader};
+use tokio::io::AsyncWriteExt;
+#[cfg(not(windows))]
+use tokio::io::{AsyncBufReadExt, AsyncRead, BufReader};
+#[cfg(not(windows))]
 use tokio::process::Command;
 
 const USER_AGENT: &str = "pake-online-installer/0.1";
@@ -198,6 +201,29 @@ async fn install_latest(reporter: &Reporter) -> Result<(), String> {
         ),
     );
 
+    #[cfg(windows)]
+    {
+        let cached_artifact = artifact.clone();
+        let cached_config_id = manifest.config_id.clone();
+        let cached_source_sha = manifest.source.sha.clone();
+        if let Some(activation) = tokio::task::spawn_blocking(move || {
+            payload::find_cached_windows_payload(
+                &cached_artifact,
+                &cached_config_id,
+                &cached_source_sha,
+            )
+        })
+        .await
+        .map_err(|error| format!("The payload cache check failed: {error}"))??
+        {
+            reporter.send(
+                "status",
+                "The latest verified build is already cached; skipping the download.",
+            );
+            return launch_windows_payload(activation, reporter);
+        }
+    }
+
     let temporary = tempfile::tempdir()
         .map_err(|error| format!("Failed to create a temporary directory: {error}"))?;
     let artifact_path = temporary.path().join(&artifact.name);
@@ -209,16 +235,8 @@ async fn install_latest(reporter: &Reporter) -> Result<(), String> {
         reporter,
     )
     .await?;
-    reporter.send("status", "SHA-256 verified. Starting the real installer…");
-    install_artifact(
-        &artifact,
-        &artifact_path,
-        &manifest,
-        &os_release,
-        temporary.path(),
-        reporter,
-    )
-    .await
+    reporter.send("status", "SHA-256 verified. Activating the build…");
+    install_artifact(&artifact, &artifact_path, &manifest, &os_release, reporter).await
 }
 
 async fn download_manifest(
@@ -367,15 +385,22 @@ async fn install_artifact(
     artifact_path: &Path,
     manifest: &OnlineManifest,
     os_release: &str,
-    temporary_directory: &Path,
     reporter: &Reporter,
 ) -> Result<(), String> {
     #[cfg(windows)]
     {
-        let _ = (artifact, manifest, os_release);
-        let log_path = temporary_directory.join("msi-install.log");
-        let command = platform::windows_installer_command(artifact_path, &log_path);
-        return run_command_with_log(command, &log_path, reporter).await;
+        let _ = os_release;
+        let archive_path = artifact_path.to_path_buf();
+        let artifact = artifact.clone();
+        let config_id = manifest.config_id.clone();
+        let source_sha = manifest.source.sha.clone();
+        reporter.send("status", "Extracting the verified Zstandard payload…");
+        let activation = tokio::task::spawn_blocking(move || {
+            payload::install_windows_payload(&archive_path, &artifact, &config_id, &source_sha)
+        })
+        .await
+        .map_err(|error| format!("The payload activation task failed: {error}"))??;
+        return launch_windows_payload(activation, reporter);
     }
 
     #[cfg(target_os = "macos")]
@@ -425,6 +450,31 @@ async fn install_artifact(
     ))
 }
 
+#[cfg(windows)]
+fn launch_windows_payload(
+    activation: payload::WindowsPayloadActivation,
+    reporter: &Reporter,
+) -> Result<(), String> {
+    for warning in activation.cleanup_warnings {
+        reporter.send("stderr", warning);
+    }
+    reporter.send(
+        "stdout",
+        format!(
+            "Activated application at {}",
+            activation.executable.display()
+        ),
+    );
+    let forwarded_arguments: Vec<_> = std::env::args_os().skip(1).collect();
+    std::process::Command::new(&activation.executable)
+        .args(forwarded_arguments)
+        .spawn()
+        .map_err(|error| format!("Failed to launch the installed application: {error}"))?;
+    reporter.send("stdout", "Launched the latest verified application build.");
+    Ok(())
+}
+
+#[cfg(not(windows))]
 async fn run_command(spec: CommandSpec, reporter: &Reporter) -> Result<i32, String> {
     reporter.send(
         "status",
@@ -462,12 +512,14 @@ async fn run_command(spec: CommandSpec, reporter: &Reporter) -> Result<i32, Stri
     installer_exit_result(code, status.success())
 }
 
+#[cfg(any(not(windows), test))]
 fn installer_exit_result(code: i32, success: bool) -> Result<i32, String> {
     success
         .then_some(code)
         .ok_or_else(|| format!("The real installer exited with code {code}."))
 }
 
+#[cfg(not(windows))]
 async fn stream_reader<R>(reader: R, kind: &'static str, reporter: Reporter) -> Vec<u8>
 where
     R: AsyncRead + Unpin,
@@ -485,80 +537,6 @@ where
         }
     }
     collected
-}
-
-#[cfg(windows)]
-async fn run_command_with_log(
-    spec: CommandSpec,
-    log_path: &Path,
-    reporter: &Reporter,
-) -> Result<(), String> {
-    let finished = Arc::new(AtomicBool::new(false));
-    let tail_finished = finished.clone();
-    let tail_reporter = reporter.clone();
-    let tail_path = log_path.to_path_buf();
-    let tail_task = tokio::spawn(async move {
-        tail_file(&tail_path, &tail_reporter, &tail_finished).await;
-    });
-    let result = run_command(spec, reporter).await.map(|_| ());
-    finished.store(true, Ordering::Release);
-    let _ = tail_task.await;
-    result
-}
-
-#[cfg(windows)]
-async fn tail_file(path: &Path, reporter: &Reporter, finished: &AtomicBool) {
-    let mut offset = 0_u64;
-    let mut utf16 = false;
-    loop {
-        if let Ok(mut file) = tokio::fs::File::open(path).await {
-            if file.seek(SeekFrom::Start(offset)).await.is_ok() {
-                let mut bytes = Vec::new();
-                if tokio::io::AsyncReadExt::read_to_end(&mut file, &mut bytes)
-                    .await
-                    .is_ok()
-                    && !bytes.is_empty()
-                {
-                    if offset == 0 {
-                        utf16 = bytes.starts_with(&[0xff, 0xfe])
-                            || bytes
-                                .chunks(2)
-                                .take(32)
-                                .filter(|pair| pair.len() == 2 && pair[1] == 0)
-                                .count()
-                                > 8;
-                    }
-                    let consumable = if utf16 {
-                        bytes.len() - (bytes.len() % 2)
-                    } else {
-                        bytes.len()
-                    };
-                    if consumable > 0 {
-                        reporter.send("stdout", decode_log_chunk(&bytes[..consumable], utf16));
-                        offset += consumable as u64;
-                    }
-                }
-            }
-        }
-        if finished.load(Ordering::Acquire) {
-            break;
-        }
-        tokio::time::sleep(Duration::from_millis(250)).await;
-    }
-}
-
-#[cfg(windows)]
-fn decode_log_chunk(bytes: &[u8], utf16: bool) -> String {
-    if utf16 {
-        let words: Vec<u16> = bytes
-            .chunks_exact(2)
-            .map(|pair| u16::from_le_bytes([pair[0], pair[1]]))
-            .filter(|word| *word != 0xfeff)
-            .collect();
-        String::from_utf16_lossy(&words)
-    } else {
-        String::from_utf8_lossy(bytes).into_owned()
-    }
 }
 
 #[cfg(target_os = "macos")]
@@ -930,19 +908,12 @@ mod tests {
             sha256: "a".repeat(64),
             download_url: "https://github.com/owner/repo/app.msi".into(),
             package_id: "app".into(),
+            expanded_size: None,
+            executable_name: None,
+            executable_sha256: None,
         };
         assert!(verify_installer_metadata(4, &"a".repeat(64), &artifact).is_ok());
         assert!(verify_installer_metadata(3, &"a".repeat(64), &artifact).is_err());
         assert!(verify_installer_metadata(4, &"b".repeat(64), &artifact).is_err());
-    }
-
-    #[cfg(windows)]
-    #[test]
-    fn decodes_verbose_msi_utf16_logs() {
-        let bytes: Vec<u8> = "\u{feff}MSI log line\r\n"
-            .encode_utf16()
-            .flat_map(u16::to_le_bytes)
-            .collect();
-        assert_eq!(decode_log_chunk(&bytes, true), "MSI log line\r\n");
     }
 }

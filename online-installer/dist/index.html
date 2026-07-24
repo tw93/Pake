@@ -24,8 +24,8 @@
           <h1 id="installer-title">Install the latest build.</h1>
           <p class="lede">
             This lightweight installer resolves the newest successful build,
-            verifies its SHA-256 digest, and hands control to the native
-            installer.
+            verifies its SHA-256 digest, and atomically activates the portable
+            application payload.
           </p>
         </div>
 
@@ -41,7 +41,7 @@
             <span class="stage-index">02</span>
             <span>
               <strong>Download</strong>
-              <small>Fetch the platform installer</small>
+              <small>Fetch the compressed application payload</small>
             </span>
           </li>
           <li class="stage-item" data-stage="verify">
@@ -55,7 +55,7 @@
             <span class="stage-index">04</span>
             <span>
               <strong>Install</strong>
-              <small>Stream the native installer output</small>
+              <small>Extract, activate, and launch the app</small>
             </span>
           </li>
         </ol>
@@ -104,7 +104,7 @@
         </div>
         <footer class="console-footer">
           <span id="connection-state" class="connection-state">IDLE</span>
-          <span>stdout and stderr are preserved</span>
+          <span>download and activation logs are preserved</span>
         </footer>
       </section>
     </main>

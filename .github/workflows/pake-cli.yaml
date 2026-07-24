@@ -79,6 +79,14 @@ on:
         options:
           - "enable-or-update"
           - "pause"
+      online_windows_format:
+        description: "Windows online installer format"
+        required: false
+        type: choice
+        default: "msi"
+        options:
+          - "msi"
+          - "exe"
       offline_exe:
         description: "Windows: also wrap the offline MSI as an EXE"
         required: false
@@ -300,6 +308,16 @@ jobs:
             offline-installer/windows/target/
           key: ${{ runner.os }}-cargo-pake-${{ hashFiles('**/Cargo.lock') }}
 
+      - name: Clear stale Windows online entrypoints
+        if: runner.os == 'Windows' && matrix.config.online
+        run: |
+          Get-ChildItem "src-tauri\target" -Recurse -File -Filter "pake-*.exe" |
+            Where-Object {
+              $_.Directory.Name -eq "release" -and
+              $_.FullName -notmatch '\\bundle\\'
+            } |
+            Remove-Item -Force
+
       - name: Build App
         timeout-minutes: 25
         run: node dist/cli.js --config "$env:PAKE_CLI_CONFIG"
@@ -342,7 +360,7 @@ jobs:
           "OFFLINE_EXE_ICON=$offlineIcon" >> $env:GITHUB_ENV
 
       - name: Build offline EXE wrapper (Windows)
-        if: runner.os == 'Windows' && matrix.config.delivery.windowsOfflineExe
+        if: runner.os == 'Windows' && !matrix.config.online && matrix.config.delivery.windowsOfflineExe
         env:
           PAKE_OFFLINE_APP_NAME: ${{ matrix.config.cliConfig.name }}
         run: |
@@ -419,13 +437,38 @@ jobs:
           path: "*.exe"
           retention-days: 3
 
+      - name: Package Windows online payload
+        if: matrix.config.online && runner.os == 'Windows'
+        run: |
+          $payloadDirectory = Join-Path $env:GITHUB_WORKSPACE ".pake-online-input"
+          New-Item -ItemType Directory -Force $payloadDirectory | Out-Null
+          $rawExecutables = @(
+            Get-ChildItem "src-tauri\target" -Recurse -File -Filter "pake-*.exe" |
+              Where-Object {
+                $_.Directory.Name -eq "release" -and
+                $_.FullName -notmatch '\\bundle\\'
+              }
+          )
+          if ($rawExecutables.Count -ne 1) {
+            throw "Expected exactly one raw Pake executable, found $($rawExecutables.Count)."
+          }
+          $archive = Join-Path $payloadDirectory "windows-payload.tar.zst"
+          cargo run --locked --release `
+            --manifest-path online-installer/src-tauri/Cargo.toml `
+            --bin pake-payload-pack -- `
+            $rawExecutables[0].FullName `
+            $archive `
+            "$archive.json"
+          "PAKE_RELEASE_INPUT=$payloadDirectory" >> $env:GITHUB_ENV
+
       - name: Stage rolling release assets
         id: release_assets
         if: matrix.config.online
         shell: bash
         run: |
+          INPUT_DIRECTORY="${PAKE_RELEASE_INPUT:-.}"
           node scripts/pake-online/release.mjs stage \
-            "$PAKE_BUILD_CONFIG" "." ".pake-online-release"
+            "$PAKE_BUILD_CONFIG" "$INPUT_DIRECTORY" ".pake-online-release"
 
       - name: Build online installer (Windows)
         if: matrix.config.online && runner.os == 'Windows'
@@ -434,22 +477,63 @@ jobs:
           PAKE_ONLINE_RELEASE_TAG: ${{ matrix.config.releaseTag }}
           PAKE_ONLINE_CONFIG_ID: ${{ matrix.config.id }}
           ONLINE_INSTALLER_NAME: ${{ steps.release_assets.outputs.online_installer_name }}
+          ONLINE_PRODUCT_NAME: ${{ matrix.config.cliConfig.name }} Online
+          ONLINE_WINDOWS_FORMAT: ${{ matrix.config.delivery.onlineWindowsFormat || 'msi' }}
         run: |
-          $iconConfig = Join-Path $env:RUNNER_TEMP "pake-online-icon.json"
+          $installerConfig = Join-Path $env:RUNNER_TEMP "pake-online-windows.json"
+          $wixTemplate = (Resolve-Path "src-tauri\assets\main.wxs").Path
           @{
+            productName = $env:ONLINE_PRODUCT_NAME
+            identifier = "com.pake.online.$($env:PAKE_ONLINE_CONFIG_ID)"
+            app = @{
+              windows = @(
+                @{
+                  label = "main"
+                  title = "$($env:ONLINE_PRODUCT_NAME) Installer"
+                }
+              )
+            }
             bundle = @{
               icon = @($env:ONLINE_EXE_ICON)
+              windows = @{
+                wix = @{
+                  language = @("en-US")
+                  template = $wixTemplate
+                }
+              }
             }
           } | ConvertTo-Json -Depth 4 -Compress | Set-Content `
-            -Encoding utf8 $iconConfig
+            -Encoding utf8 $installerConfig
           Push-Location online-installer
-          & '..\node_modules\.bin\tauri.CMD' build --no-bundle `
-            --config $iconConfig
+          & '..\node_modules\.bin\tauri.CMD' build --bundles msi `
+            --config $installerConfig
           Pop-Location
           New-Item -ItemType Directory -Force ".pake-online-release\online"
-          Copy-Item `
-            "online-installer\src-tauri\target\release\pake-online-installer.exe" `
-            ".pake-online-release\online\$env:ONLINE_INSTALLER_NAME"
+          $onlineInstallers = @(
+            Get-ChildItem `
+              "online-installer\src-tauri\target\release\bundle\msi" `
+              -Recurse -File -Filter "*.msi"
+          )
+          if ($onlineInstallers.Count -ne 1) {
+            throw "Expected exactly one online MSI, found $($onlineInstallers.Count)."
+          }
+          if ($env:ONLINE_WINDOWS_FORMAT -eq "exe") {
+            $env:PAKE_OFFLINE_MSI = $onlineInstallers[0].FullName
+            $env:PAKE_OFFLINE_ICON = $env:ONLINE_EXE_ICON
+            $env:PAKE_OFFLINE_APP_NAME = $env:ONLINE_PRODUCT_NAME
+            $env:PAKE_INSTALLER_KIND = "Online"
+            cargo build --locked --release `
+              --manifest-path offline-installer/windows/Cargo.toml
+            Copy-Item `
+              "offline-installer\windows\target\release\pake-offline-installer.exe" `
+              ".pake-online-release\online\$env:ONLINE_INSTALLER_NAME"
+          } elseif ($env:ONLINE_WINDOWS_FORMAT -eq "msi") {
+            Copy-Item `
+              $onlineInstallers[0].FullName `
+              ".pake-online-release\online\$env:ONLINE_INSTALLER_NAME"
+          } else {
+            throw "Unsupported Windows online installer format: $env:ONLINE_WINDOWS_FORMAT"
+          }
 
       - name: Build online installer (macOS)
         if: matrix.config.online && runner.os == 'macOS'

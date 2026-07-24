@@ -10,6 +10,11 @@ rust-version = "1.85.0"
 [build-dependencies]
 winres = "0.1.12"
 
+[dependencies]
+windows-sys = { version = "0.61", features = [
+  "Win32_System_ApplicationInstallationAndServicing",
+] }
+
 [profile.release]
 panic = "abort"
 codegen-units = 1
