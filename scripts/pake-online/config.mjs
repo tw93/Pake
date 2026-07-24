@@ -20,6 +20,9 @@ const DEFAULT_TARGETS = {
   "ubuntu-24.04": "deb",
 };
 
+const SEMVER_PATTERN =
+  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
+
 const BOOLEAN_INPUTS = [
   ["fullscreen", "fullscreen"],
   ["hide_title_bar", "hideTitleBar"],
@@ -76,6 +79,29 @@ export function createConfigId({ repository, sourceBranch, platform, name }) {
   const identity = `${repository}\n${sourceBranch}\n${platform}\n${name}`;
   const digest = crypto.createHash("sha256").update(identity).digest("hex");
   return `${slugify(name)}-${os}-${digest.slice(0, 10)}`;
+}
+
+export function normalizeReleaseVersion(tagName) {
+  const version = String(tagName ?? "")
+    .trim()
+    .replace(/^[vV]/, "");
+  if (!SEMVER_PATTERN.test(version)) {
+    throw new Error(
+      `Latest release tag must contain a semantic version, received: ${tagName || "<empty>"}`,
+    );
+  }
+  return version;
+}
+
+export function applyOnlineReleaseVersion(config, releaseTag) {
+  if (!config.online) return config;
+  return {
+    ...config,
+    cliConfig: {
+      ...config.cliConfig,
+      appVersion: normalizeReleaseVersion(releaseTag),
+    },
+  };
 }
 
 export function normalizeCliConfig(inputs) {
@@ -276,6 +302,25 @@ function runCli() {
       matrix: JSON.stringify(createMatrix(configs)),
       has_configs: configs.length > 0,
     });
+    return;
+  }
+
+  if (command === "runtime") {
+    const [buildConfigPath, cliConfigPath] = args;
+    if (!buildConfigPath || !cliConfigPath) {
+      throw new Error(
+        "runtime requires build config and CLI config output paths",
+      );
+    }
+    const config = applyOnlineReleaseVersion(
+      readJsonFromEnvironment("PAKE_ONLINE_BUILD_CONFIG"),
+      process.env.PAKE_LATEST_RELEASE_TAG,
+    );
+    fs.writeFileSync(buildConfigPath, `${JSON.stringify(config, null, 2)}\n`);
+    fs.writeFileSync(
+      cliConfigPath,
+      `${JSON.stringify(config.cliConfig, null, 2)}\n`,
+    );
     return;
   }
 

@@ -4,10 +4,12 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
+  applyOnlineReleaseVersion,
   createBuildConfig,
   createConfigId,
   createMatrix,
   loadRegistryConfigs,
+  normalizeReleaseVersion,
   pauseRegistryConfig,
   upsertRegistryConfig,
 } from "../../scripts/pake-online/config.mjs";
@@ -116,6 +118,25 @@ describe("Pake online build configuration", () => {
       hideTitleBar: false,
       multiArch: false,
     });
+  });
+
+  it("uses the latest Release version for online runtime builds", () => {
+    const config = createBuildConfig(sampleInputs(), sampleContext());
+    const runtimeConfig = applyOnlineReleaseVersion(config, "V3.15.1");
+
+    expect(runtimeConfig.cliConfig.appVersion).toBe("3.15.1");
+    expect(config.cliConfig.appVersion).toBe("1.2.3");
+    expect(normalizeReleaseVersion("v4.0.0-beta.1")).toBe("4.0.0-beta.1");
+    expect(() => normalizeReleaseVersion("latest")).toThrow(/semantic version/);
+  });
+
+  it("keeps the requested version for non-online builds", () => {
+    const config = createBuildConfig(
+      sampleInputs({ online_mode: false }),
+      sampleContext(),
+    );
+    expect(applyOnlineReleaseVersion(config)).toBe(config);
+    expect(config.cliConfig.appVersion).toBe("1.2.3");
   });
 
   it("keeps Linux targets and rejects non-web URLs", () => {
@@ -344,6 +365,10 @@ describe("Build App With Pake CLI online workflow", () => {
     expect(workflow).toContain("Build offline EXE wrapper (Windows)");
     expect(workflow).toContain("PAKE_OFFLINE_ICON");
     expect(workflow).toContain("ONLINE_EXE_ICON");
+    expect(workflow).toContain(
+      'gh api "repos/$RELEASE_REPOSITORY/releases/latest"',
+    );
+    expect(workflow).toContain("node scripts/pake-online/config.mjs runtime");
   });
 
   it("publishes the real package and online carrier before the manifest", () => {

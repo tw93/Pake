@@ -44,7 +44,7 @@ on:
         description: "Minimum window height (px)"
         required: false
       app_version:
-        description: "App version"
+        description: "App version (online mode uses the latest upstream Release)"
         required: false
         default: "1.0.0"
       fullscreen:
@@ -237,17 +237,34 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Resolve latest Pake Release for online mode
+        id: latest_release
+        if: matrix.config.online
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          RELEASE_REPOSITORY="$(
+            gh api "repos/$GITHUB_REPOSITORY" \
+              --jq '.parent.full_name // .full_name'
+          )"
+          RELEASE_TAG="$(
+            gh api "repos/$RELEASE_REPOSITORY/releases/latest" \
+              --jq '.tag_name'
+          )"
+          test -n "$RELEASE_TAG"
+          echo "Using latest Pake Release $RELEASE_REPOSITORY@$RELEASE_TAG"
+          echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+
       - name: Write reproducible Pake configuration
         shell: bash
         env:
-          BUILD_CONFIG: ${{ toJSON(matrix.config) }}
-          CLI_CONFIG: ${{ toJSON(matrix.config.cliConfig) }}
+          PAKE_ONLINE_BUILD_CONFIG: ${{ toJSON(matrix.config) }}
+          PAKE_LATEST_RELEASE_TAG: ${{ steps.latest_release.outputs.tag }}
         run: |
-          node -e \
-            'const fs=require("fs");fs.writeFileSync(process.argv[1],process.env.BUILD_CONFIG+"\n")' \
-            "$RUNNER_TEMP/pake-build-config.json"
-          node -e \
-            'const fs=require("fs");fs.writeFileSync(process.argv[1],process.env.CLI_CONFIG+"\n")' \
+          node scripts/pake-online/config.mjs runtime \
+            "$RUNNER_TEMP/pake-build-config.json" \
             "$RUNNER_TEMP/pake-cli-config.json"
           echo "PAKE_BUILD_CONFIG=$RUNNER_TEMP/pake-build-config.json" >> "$GITHUB_ENV"
           echo "PAKE_CLI_CONFIG=$RUNNER_TEMP/pake-cli-config.json" >> "$GITHUB_ENV"

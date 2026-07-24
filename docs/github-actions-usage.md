@@ -52,6 +52,11 @@ current form values for the selected branch. The first run builds immediately;
 each later push to that same branch rebuilds every registered configuration and
 updates its rolling prerelease.
 
+For every online-mode build, the regular offline package version is
+automatically set to the latest stable Pake Release version. In a fork, the
+workflow reads the latest Release from its upstream parent repository. The
+manual `app_version` value continues to apply to non-online builds.
+
 The prerelease contains both the regular offline package and a lightweight
 online installer:
 
