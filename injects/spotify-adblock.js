@@ -1,16 +1,16 @@
 (function () {
-  'use strict';
+  "use strict";
 
   // Visual ad-related selectors on Spotify's web player.
   const AD_SELECTORS = [
     '[data-testid="ad-placeholder"]',
     '[data-testid="ad-banner"]',
     '[data-testid="ad-label"]',
-    '.AdsContainer',
-    '.ads-container',
-    '.audio-ad-badge',
-    '.ad-banner',
-    '.main-adSlot',
+    ".AdsContainer",
+    ".ads-container",
+    ".audio-ad-badge",
+    ".ad-banner",
+    ".main-adSlot",
     '[aria-label*="Advertisement"]',
     '[aria-label*="Sponsor"]',
   ];
@@ -19,9 +19,9 @@
     AD_SELECTORS.forEach((selector) => {
       try {
         document.querySelectorAll(selector).forEach((el) => {
-          el.style.display = 'none';
-          el.style.visibility = 'hidden';
-          el.style.opacity = '0';
+          el.style.display = "none";
+          el.style.visibility = "hidden";
+          el.style.opacity = "0";
         });
       } catch (e) {
         // Ignore invalid selectors
@@ -40,14 +40,14 @@
   // mute the currently playing audio/video element.
   setInterval(() => {
     const adLabel = document.querySelector('[data-testid="ad-label"]');
-    const mediaElements = document.querySelectorAll('audio, video');
+    const mediaElements = document.querySelectorAll("audio, video");
     mediaElements.forEach((media) => {
       if (adLabel) {
         if (!media.muted) {
           media.muted = true;
-          media.dataset.adMuted = 'true';
+          media.dataset.adMuted = "true";
         }
-      } else if (media.dataset.adMuted === 'true') {
+      } else if (media.dataset.adMuted === "true") {
         media.muted = false;
         delete media.dataset.adMuted;
       }
