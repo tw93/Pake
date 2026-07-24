@@ -268,7 +268,7 @@ jobs:
               codesign --force --deep --sign - "$target"
               mkdir -p "$RUNNER_TEMP/dmg-source"
               cp -R "$target" "$RUNNER_TEMP/dmg-source/"
-              create-dmg \
+              if ! create-dmg \
                 --no-internet-enable \
                 --volname "CI App" \
                 --background "src-tauri/assets/macos/dmg/background.png" \
@@ -276,7 +276,10 @@ jobs:
                 --icon "online-installer.app" 190 250 \
                 --app-drop-link 500 250 \
                 "$RUNNER_TEMP/online-installer.dmg" \
-                "$RUNNER_TEMP/dmg-source"
+                "$RUNNER_TEMP/dmg-source"; then
+                test -s "$RUNNER_TEMP/online-installer.dmg"
+                hdiutil verify "$RUNNER_TEMP/online-installer.dmg"
+              fi
               test -s "$RUNNER_TEMP/online-installer.dmg"
               ;;
             Linux)

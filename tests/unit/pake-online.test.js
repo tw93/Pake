@@ -371,6 +371,7 @@ describe("Qt Installer Framework online packaging", () => {
     );
     expect(workflow).toContain("src-tauri/assets/macos/dmg/background.png");
     expect(workflow).toContain("--no-internet-enable");
+    expect(workflow).toContain('hdiutil verify "$online_dmg"');
     expect(workflow).toContain('--icon "$ONLINE_APP_NAME.app" 190 250');
     expect(workflow).toContain("--app-drop-link 500 250");
     expect(workflow).toContain("Name=$ONLINE_APP_NAME");
@@ -644,5 +645,11 @@ describe("Build App With Pake CLI online workflow", () => {
     expect(workflow).toContain("qtifw.mjs prepare");
     expect(workflow).toContain("repogen");
     expect(workflow).toContain("binarycreator");
+    expect(
+      fs.readFileSync(
+        path.join(process.cwd(), "scripts/pake-online/install-qtifw.sh"),
+        "utf8",
+      ),
+    ).toContain("libxkbcommon-x11-0");
   });
 });

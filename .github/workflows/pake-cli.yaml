@@ -603,7 +603,8 @@ jobs:
           mkdir -p "$dmg_source"
           cp -R "$qtifw_app" "$dmg_source/"
           mkdir -p .pake-online-release/online
-          create-dmg \
+          online_dmg=".pake-online-release/online/$ONLINE_INSTALLER_NAME"
+          if ! create-dmg \
             --no-internet-enable \
             --volname "$ONLINE_APP_NAME" \
             --volicon "${{ steps.qtifw.outputs.icon_path }}" \
@@ -612,8 +613,11 @@ jobs:
             --icon "$ONLINE_APP_NAME.app" 190 250 \
             --hide-extension "$ONLINE_APP_NAME.app" \
             --app-drop-link 500 250 \
-            ".pake-online-release/online/$ONLINE_INSTALLER_NAME" \
-            "$dmg_source"
+            "$online_dmg" \
+            "$dmg_source"; then
+            test -s "$online_dmg"
+            hdiutil verify "$online_dmg"
+          fi
 
       - name: Build online installer (Linux)
         if: matrix.config.online && runner.os == 'Linux'

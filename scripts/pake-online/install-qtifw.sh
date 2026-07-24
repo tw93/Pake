@@ -34,6 +34,11 @@ else
   echo "$expected  $installer" | sha256sum -c -
 fi
 
+if [[ "$RUNNER_OS" == "Linux" ]]; then
+  sudo apt-get update -qq
+  sudo apt-get install -y --no-install-recommends libxkbcommon-x11-0
+fi
+
 if [[ "$RUNNER_OS" == "macOS" ]]; then
   mount_point="$RUNNER_TEMP/qtifw-mount"
   mkdir -p "$mount_point"
