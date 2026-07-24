@@ -1,6 +1,6 @@
 [package]
 name = "pake-online-installer"
-version = "0.1.0"
+version = "999.0.0"
 description = "Experimental online installer for Pake GitHub Actions builds."
 authors = ["Pake Contributors"]
 license = "GPL-3.0-or-later"

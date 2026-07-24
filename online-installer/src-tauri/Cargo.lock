@@ -2202,7 +2202,7 @@ checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
 
 [[package]]
 name = "pake-online-installer"
-version = "0.1.0"
+version = "999.0.0"
 dependencies = [
  "futures-util",
  "reqwest 0.12.28",
