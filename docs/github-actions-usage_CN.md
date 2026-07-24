@@ -59,6 +59,9 @@ Windows Installer 界面执行安装；原本的 MSI 离线包仍会保留。
 - Linux：`.AppImage`，优先选择匹配发行版的 DEB/RPM/ZST，否则执行用户级
   AppImage 安装
 
+在线模式运行时，Actions 的 **Artifacts** 区域只提供在线安装引导器；如需真实
+离线包，请打开对应的滚动预发布。非在线模式仍只上传常规离线包，并保留 3 天。
+
 在线安装器只解析已经完成发布的 manifest，校验文件大小和 SHA-256，然后实时
 显示真正安装程序的输出。在中国大陆，会优先通过 `v4.gh-proxy.org` 下载已经
 验证的 GitHub 资产，失败时回退 GitHub 官方地址。例如，

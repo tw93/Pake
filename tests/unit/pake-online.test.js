@@ -393,6 +393,27 @@ describe("Build App With Pake CLI online workflow", () => {
     expect(manifestUpload).toBeGreaterThan(onlineUpload);
   });
 
+  it("uploads only the online carrier as an Actions artifact in online mode", () => {
+    const workflow = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/pake-cli.yaml"),
+      "utf8",
+    );
+    expect(workflow).toContain(
+      "if: runner.os == 'Windows' && !matrix.config.online",
+    );
+    expect(workflow).toContain(
+      "if: runner.os == 'macOS' && !matrix.config.online",
+    );
+    expect(workflow).toContain(
+      "if: runner.os == 'Linux' && !matrix.config.online",
+    );
+    expect(workflow).toContain("- name: Upload online installer");
+    expect(workflow).toContain(
+      "name: ${{ matrix.config.cliConfig.name }}-${{ matrix.config.os }}-online-installer",
+    );
+    expect(workflow).toContain('path: ".pake-online-release/online/*"');
+  });
+
   it("builds every online installer carrier in full CI", () => {
     const workflow = fs.readFileSync(
       path.join(process.cwd(), ".github/workflows/quality-and-test.yml"),

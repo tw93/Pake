@@ -360,7 +360,7 @@ jobs:
             $exeName
 
       - name: Upload DMG (macOS)
-        if: runner.os == 'macOS'
+        if: runner.os == 'macOS' && !matrix.config.online
         uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.config.cliConfig.name }}-macOS
@@ -368,7 +368,7 @@ jobs:
           retention-days: 3
 
       - name: Upload DEB (Linux)
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && !matrix.config.online
         uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.config.cliConfig.name }}-Linux-deb
@@ -377,7 +377,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Upload AppImage (Linux)
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && !matrix.config.online
         uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.config.cliConfig.name }}-Linux-AppImage
@@ -386,7 +386,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Upload RPM (Linux)
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && !matrix.config.online
         uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.config.cliConfig.name }}-Linux-rpm
@@ -395,7 +395,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Upload ZST (Linux)
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && !matrix.config.online
         uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.config.cliConfig.name }}-Linux-zst
@@ -404,7 +404,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Upload MSI (Windows)
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && !matrix.config.online
         uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.config.cliConfig.name }}-Windows
@@ -412,7 +412,7 @@ jobs:
           retention-days: 3
 
       - name: Upload offline EXE (Windows)
-        if: runner.os == 'Windows' && matrix.config.delivery.windowsOfflineExe
+        if: runner.os == 'Windows' && !matrix.config.online && matrix.config.delivery.windowsOfflineExe
         uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.config.cliConfig.name }}-Windows-exe
@@ -486,6 +486,15 @@ jobs:
           ONLINE_APPIMAGE="$(find online-installer/src-tauri/target/release/bundle/appimage -name '*.AppImage' -type f | head -n 1)"
           test -n "$ONLINE_APPIMAGE"
           cp "$ONLINE_APPIMAGE" ".pake-online-release/online/$ONLINE_INSTALLER_NAME"
+
+      - name: Upload online installer
+        if: matrix.config.online
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.config.cliConfig.name }}-${{ matrix.config.os }}-online-installer
+          path: ".pake-online-release/online/*"
+          retention-days: 3
+          if-no-files-found: error
 
       - name: Publish rolling prerelease
         if: matrix.config.online

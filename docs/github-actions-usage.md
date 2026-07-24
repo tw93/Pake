@@ -66,6 +66,11 @@ online installer:
 - Linux: `.AppImage`, which selects a native DEB/RPM/ZST when available and
   falls back to a user-level AppImage installation
 
+For online-mode runs, the Actions **Artifacts** section contains only the
+online installer. Open the rolling prerelease when you also need the real
+offline package. Non-online runs continue to upload only their regular offline
+packages as three-day Actions artifacts.
+
 The online installer resolves only completed manifests, verifies file size and
 SHA-256, then displays the real installer output. In mainland China, verified
 GitHub asset downloads automatically try `v4.gh-proxy.org` first and fall back
