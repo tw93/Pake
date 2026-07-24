@@ -2,12 +2,19 @@
   "use strict";
 
   // YouTube Music adblock injection.
+  //
+  // Adapted from proven community userscripts:
+  // - YouTube DeAd by mragonias (MIT) — API response blocking
+  // - YouTube Ads-Bypass by WakeUpNeo (MIT) — player class observation & fast-forward
+  // - YouTube Music Pro Audio Enhancer + Ad Blocker by huypro — YT Music selectors
+  //
   // To test outside Pake, load this file (or the matching .css) in any webpage
   // that contains the selectors below, or use the test fixture at
   // tests/fixtures/youtubemusic-adblock.html.
 
   // Known YouTube Music / shared YouTube ad-related selectors.
   const AD_SELECTORS = [
+    // YouTube Music specific.
     "ytmusic-ad-slot-renderer",
     ".ytmusic-ad-slot-renderer",
     "ytmusic-player-bar-ad-slot",
@@ -16,9 +23,25 @@
     "ytmusic-ad-hero-image-renderer",
     "ytmusic-ad-title-renderer",
     "ytmusic-ad-badge-renderer",
-    // Shared YouTube ad elements that can appear in the music player.
+    "ytmusic-mealbar-promo-renderer",
+    'ytmusic-popup-container:has(a[href="/premium"])',
+    // Shared YouTube ad UI that can appear in the music player.
     "ytd-ad-slot-renderer",
     ".ytd-ad-slot-renderer",
+    "ytd-companion-ad-renderer",
+    "ytd-promoted-sparkles-web-renderer",
+    "ytd-endpoint-ad-renderer",
+    "ytd-shorts-ad-renderer",
+    "ytd-in-feed-ad-layout-renderer",
+    "ytd-ad-selection-preview-renderer",
+    "ytd-video-masthead-ad-v3-renderer",
+    "ytd-player-legacy-desktop-watch-ads-renderer",
+    'ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"]',
+    "tp-yt-paper-dialog:has(#feedback.ytd-enforcement-message-view-model)",
+    ".yt-mealbar-promo-renderer",
+    "#masthead-ad",
+    "#player-ads",
+    ".video-ads",
     ".ytp-ad-module",
     ".ytp-ad-overlay-container",
     ".ytp-ad-progress-list",
@@ -27,8 +50,16 @@
     ".ytp-ad-overlay-slot",
     ".ytp-ad-player-overlay",
     ".ytp-ad-player-overlay-instream-info",
-    ".video-ads",
-    "#player-ads",
+    ".ytp-ad-player-overlay-layout__player-card-container",
+    ".ytp-ad-player-overlay-layout__ad-info-container",
+    ".ytp-ad-player-overlay-layout__ad-disclosure-banner-container",
+    ".ytp-ad-message-container",
+    ".ytp-ad-image-overlay",
+    ".ytp-ad-avatar",
+    ".ytp-ad-button-vm",
+    ".ytp-cued-thumbnail-overlay",
+    ".ytd-display-ad-renderer",
+    ".ad-container",
     // Promotional shelves.
     'ytmusic-shelf-renderer[subheader*="Sponsored"]',
     'ytmusic-shelf-renderer[subheader*="Ad"]',
@@ -42,9 +73,44 @@
     ".ytp-skip-ad-button",
     "button.ytp-ad-skip-button",
     "button.ytp-skip-ad-button",
+    ".ytp-ad-skip-button-slot",
+    ".ytp-ad-skip-button-container",
   ];
 
-  const AD_RESPONSE_KEYS = ["adPlacements", "playerAds", "adSlots"];
+  const PLAYER_SELECTORS = [
+    "#movie_player",
+    ".html5-video-player",
+    "ytmusic-player",
+    "#player",
+  ];
+
+  const AD_PLAYER_CLASSES = [
+    "ad-showing",
+    "ad-interrupting",
+    "ytp-ad-player-overlay",
+    "ytp-ad-display-override",
+  ];
+
+  const AD_RESPONSE_KEYS = {
+    adSlots: "blockedSlots",
+    adPlacements: "blockedPlacements",
+    playerAds: "blockedPlayerAds",
+  };
+
+  // Injected CSS used as a fallback when the script runs without the matching .css file.
+  function injectFallbackCSS() {
+    const id = "pake-ytmusic-adblock-css";
+    if (document.getElementById(id)) return;
+    const style = document.createElement("style");
+    style.setAttribute("id", id);
+    style.textContent = `${AD_SELECTORS.join(", ")} {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }`;
+    (document.head || document.body).appendChild(style);
+  }
 
   function hideElement(el) {
     if (!el) return;
@@ -81,7 +147,7 @@
 
   function stripPlayerAds(obj) {
     if (!obj || typeof obj !== "object") return;
-    AD_RESPONSE_KEYS.forEach((key) => {
+    Object.keys(AD_RESPONSE_KEYS).forEach((key) => {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
         obj[key] = undefined;
       }
@@ -112,7 +178,7 @@
     });
   }
 
-  // Replace ad-related keys in YouTube Music network responses so the player
+  // Rename ad-related keys in YouTube Music network responses so the player
   // does not schedule video/audio ad breaks.
   function interceptNetwork() {
     if (
@@ -125,9 +191,9 @@
     const replaceAds = (text) => {
       if (typeof text !== "string") return text;
       let modified = text;
-      AD_RESPONSE_KEYS.forEach((key, index) => {
+      Object.keys(AD_RESPONSE_KEYS).forEach((key) => {
         const pattern = new RegExp(`"${key}"`, "g");
-        modified = modified.replace(pattern, `"_pa_${index}"`);
+        modified = modified.replace(pattern, `"${AD_RESPONSE_KEYS[key]}"`);
       });
       return modified;
     };
@@ -137,7 +203,8 @@
         const s = typeof url === "string" ? url : String(url);
         return (
           s.includes("music.youtube.com") ||
-          s.includes("youtube.com/youtubei/v1")
+          s.includes("youtube.com/youtubei/v1") ||
+          s.includes("youtube.com/watch")
         );
       } catch (e) {
         return false;
@@ -214,10 +281,81 @@
     };
   }
 
+  // Detect ad playback from player class changes and fast-forward through it.
+  function interceptPlayerAds() {
+    let player = null;
+    let playerObserver = null;
+    let video = null;
+
+    const isAdActive = () =>
+      AD_PLAYER_CLASSES.some((cls) => player && player.classList.contains(cls));
+
+    const findPlayer = () => {
+      for (const selector of PLAYER_SELECTORS) {
+        player = document.querySelector(selector);
+        if (player) return true;
+      }
+      return false;
+    };
+
+    const restoreVideo = () => {
+      if (!video) return;
+      if (video.muted) video.muted = false;
+      if (video.playbackRate > 1) video.playbackRate = 1;
+      if (video.style.display === "none") video.style.display = "";
+    };
+
+    const skipAd = () => {
+      video = player.querySelector("video");
+      if (!video) return;
+
+      clickSkipButtons();
+
+      if (isAdActive()) {
+        if (!video.muted) video.muted = true;
+        // Try to reach the end of the ad as soon as possible.
+        if (isFinite(video.duration) && video.duration > 0) {
+          video.currentTime = video.duration - 0.1;
+        } else if (video.playbackRate < 16) {
+          video.playbackRate = 16;
+        }
+      } else {
+        restoreVideo();
+      }
+    };
+
+    const setupObserver = () => {
+      if (playerObserver || !findPlayer()) return;
+      video = player.querySelector("video");
+      playerObserver = new MutationObserver(skipAd);
+      playerObserver.observe(player, {
+        attributes: true,
+        attributeFilter: ["class"],
+      });
+      skipAd();
+    };
+
+    const bodyObserver = new MutationObserver(() => {
+      if (!player || !player.isConnected) {
+        playerObserver?.disconnect();
+        playerObserver = null;
+        player = null;
+        setupObserver();
+      }
+    });
+
+    if (document.body) {
+      bodyObserver.observe(document.body, { childList: true, subtree: true });
+    }
+    setupObserver();
+  }
+
   function init() {
+    injectFallbackCSS();
     hideAds();
     interceptPlayerResponse();
     interceptNetwork();
+    interceptPlayerAds();
 
     let observer;
     if (document.body) {
