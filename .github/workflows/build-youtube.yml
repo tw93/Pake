@@ -1,0 +1,26 @@
+name: Build YouTube
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_version:
+        description: "App version"
+        required: false
+        default: "1.0.0"
+        type: string
+
+jobs:
+  build:
+    uses: ./.github/workflows/pake-cli-full.yaml
+    with:
+      url: https://www.youtube.com
+      name: youtube
+      title: YouTube
+      new_window: true
+      dark_mode: true
+      maximize: true
+      linux_targets: deb
+      windows_targets: x64
+      macos_targets: universal
+      app_version: ${{ inputs.app_version }}
+      inject: injects/youtube-adblock.js,injects/youtube-adblock.css
