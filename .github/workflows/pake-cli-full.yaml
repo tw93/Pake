@@ -105,6 +105,95 @@ on:
       extra_args:
         description: "Additional CLI options as a single string (e.g. --proxy-url http://... --zoom 120)"
         required: false
+  workflow_call:
+    inputs:
+      url:
+        type: string
+        required: true
+      name:
+        type: string
+        required: true
+      platforms:
+        type: string
+        required: false
+        default: "linux,macos,windows"
+      linux_targets:
+        type: string
+        required: false
+      macos_targets:
+        type: string
+        required: false
+      windows_targets:
+        type: string
+        required: false
+      icon:
+        type: string
+        required: false
+      width:
+        type: string
+        required: false
+        default: "1200"
+      height:
+        type: string
+        required: false
+        default: "780"
+      app_version:
+        type: string
+        required: false
+        default: "1.0.0"
+      title:
+        type: string
+        required: false
+      fullscreen:
+        type: boolean
+        required: false
+        default: false
+      maximize:
+        type: boolean
+        required: false
+        default: false
+      hide_title_bar:
+        type: boolean
+        required: false
+        default: false
+      dark_mode:
+        type: boolean
+        required: false
+        default: false
+      show_system_tray:
+        type: boolean
+        required: false
+        default: false
+      incognito:
+        type: boolean
+        required: false
+        default: false
+      multi_arch:
+        type: boolean
+        required: false
+        default: false
+      multi_instance:
+        type: boolean
+        required: false
+        default: false
+      multi_window:
+        type: boolean
+        required: false
+        default: false
+      new_window:
+        type: boolean
+        required: false
+        default: false
+      inject:
+        type: string
+        required: false
+      debug:
+        type: boolean
+        required: false
+        default: false
+      extra_args:
+        type: string
+        required: false
 
 jobs:
   setup:
