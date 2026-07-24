@@ -2564,7 +2564,7 @@ dependencies = [
 
 [[package]]
 name = "pake"
-version = "3.15.1"
+version = "3.15.3"
 dependencies = [
  "objc2",
  "objc2-app-kit",
@@ -2582,6 +2582,7 @@ dependencies = [
  "tauri-plugin-single-instance",
  "tauri-plugin-window-state",
  "tokio",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]

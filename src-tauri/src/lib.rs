@@ -25,7 +25,7 @@ use app::{
         set_dock_badge_label, set_zoom, update_theme_mode,
     },
     setup::{set_global_shortcut, set_system_tray},
-    window::{open_additional_window_safe, set_window, MultiWindowState},
+    window::{open_additional_window_safe, reapply_window_icon, set_window, MultiWindowState},
 };
 use util::get_pake_config;
 
@@ -179,6 +179,7 @@ pub fn run_app() {
                 } else if let Some(window) = app.get_webview_window("pake") {
                     let _ = window.unminimize();
                     let _ = window.show();
+                    reapply_window_icon(&window);
                     let _ = window.set_focus();
                 }
             },
@@ -231,6 +232,7 @@ pub fn run_app() {
                 tauri::async_runtime::spawn(async move {
                     tokio::time::sleep(tokio::time::Duration::from_millis(WINDOW_SHOW_DELAY)).await;
                     let _ = window_clone.show();
+                    reapply_window_icon(&window_clone);
 
                     // Fixed: Linux fullscreen issue with virtual keyboard
                     #[cfg(target_os = "linux")]
@@ -300,6 +302,7 @@ pub fn run_app() {
                 if !has_visible_windows {
                     if let Some(window) = _app.get_webview_window("pake") {
                         let _ = window.show();
+                        reapply_window_icon(&window);
                         let _ = window.set_focus();
                     }
                 }

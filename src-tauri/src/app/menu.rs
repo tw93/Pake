@@ -1,5 +1,5 @@
 // Menu functionality is only used on macOS; the module is gated in app/mod.rs.
-use crate::app::window::open_additional_window_safe;
+use crate::app::window::{open_additional_window_safe, MultiWindowState};
 use tauri::menu::{AboutMetadata, Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::{AppHandle, Manager, Wry};
 use tauri_plugin_opener::OpenerExt;
@@ -224,6 +224,27 @@ fn help_menu(app: &AppHandle<Wry>, title: &str) -> tauri::Result<Submenu<Wry>> {
     Ok(help_menu)
 }
 
+// Resolve the app's real home URL from its window config. Split out from
+// `home_url` so the mapping can be unit-tested without an AppHandle.
+fn resolve_home_url(url_type: &str, url: &str) -> Option<tauri::Url> {
+    match url_type {
+        // A web app's configured url is already absolute.
+        "web" => tauri::Url::parse(url).ok(),
+        // A local-file app's url is only a basename; Tauri serves bundled assets
+        // from tauri://localhost on macOS (this menu is macOS-only). Resolving it
+        // against the currently loaded remote origin (as the old eval path did)
+        // would point at the wrong server.
+        "local" => tauri::Url::parse(&format!("tauri://localhost/{url}")).ok(),
+        _ => None,
+    }
+}
+
+fn home_url(app: &AppHandle) -> Option<tauri::Url> {
+    let state = app.try_state::<MultiWindowState>()?;
+    let window_config = state.pake_config.windows.first()?;
+    resolve_home_url(&window_config.url_type, &window_config.url)
+}
+
 pub fn handle_menu_click(app_handle: &AppHandle, id: &str) {
     match id {
         "new_window" => {
@@ -276,7 +297,17 @@ pub fn handle_menu_click(app_handle: &AppHandle, id: &str) {
         }
         "go_home" => {
             if let Some(window) = app_handle.get_webview_window("pake") {
-                let _ = window.eval("window.location.href = window.pakeConfig.url");
+                // Native navigation works even from a blank error page (where
+                // eval cannot run) and resolves local-file apps to the correct
+                // bundled asset instead of a path on the current origin.
+                match home_url(app_handle) {
+                    Some(url) => {
+                        let _ = window.navigate(url);
+                    }
+                    None => {
+                        let _ = window.eval("window.location.href = window.pakeConfig.url");
+                    }
+                }
             }
         }
         "copy_url" => {
@@ -318,5 +349,33 @@ pub fn handle_menu_click(app_handle: &AppHandle, id: &str) {
             }
         }
         _ => {}
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::resolve_home_url;
+
+    #[test]
+    fn web_url_passes_through_unchanged() {
+        assert_eq!(
+            resolve_home_url("web", "https://github.com").map(|u| u.to_string()),
+            Some("https://github.com/".to_string())
+        );
+    }
+
+    #[test]
+    fn local_basename_resolves_to_bundled_asset_url() {
+        // The fix: a local app's basename must become the bundled asset URL,
+        // not a path resolved against whatever origin is currently loaded.
+        assert_eq!(
+            resolve_home_url("local", "launcher.html").map(|u| u.to_string()),
+            Some("tauri://localhost/launcher.html".to_string())
+        );
+    }
+
+    #[test]
+    fn unknown_url_type_is_none() {
+        assert!(resolve_home_url("bogus", "whatever").is_none());
     }
 }

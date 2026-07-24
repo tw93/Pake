@@ -1,6 +1,6 @@
 [package]
 name = "pake"
-version = "3.15.1"
+version = "3.15.3"
 description = "🤱🏻 Turn any webpage into a desktop app with Rust."
 authors = ["Tw93"]
 license = "GPL-3.0-or-later"
@@ -40,6 +40,13 @@ tauri-plugin-notification = "2.3.3"
 objc2 = "0.6"
 objc2-app-kit = { version = "0.3", features = ["NSApplication", "NSDockTile"] }
 objc2-foundation = { version = "0.3", features = ["NSString"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61.2", features = [
+  "Win32_Foundation",
+  "Win32_UI_Shell",
+  "Win32_UI_WindowsAndMessaging",
+] }
 
 [features]
 # this feature is used for development builds from development cli

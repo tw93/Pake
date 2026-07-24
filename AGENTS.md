@@ -62,36 +62,13 @@ Keep shared project facts in this file so Codex, Claude Code, and other agents u
 
 - No Chinese comments in any source (Rust / TypeScript / any file). Comments and identifiers in English; follow the existing language of surrounding prose.
 
-## Task Intake And Investigation
+## Working Principles
 
-Prefer requests with:
+Goals and project facts only; trust the agent to find its own path.
 
-- `Goal`: exact bug, feature, refactor, or review target
-- `Scope`: files, directories, or subsystem boundaries to inspect first
-- `Repro`: command, input, fixture, or failing test
-- `Expected`: expected behavior
-- `Actual`: current behavior, error text, or regression note
-- `Constraints`: what must not change
-- `Verify`: minimum command or test that proves the result
-
-When task scope is incomplete, inspect in this order:
-
-1. CLI entry and option parsing under `bin/cli.ts`, `bin/options/`, and `bin/helpers/`
-2. Target TypeScript module under `bin/`
-3. Tauri runtime or packaging files under `src-tauri/src/` and `src-tauri/tauri*.conf.json`
-4. Narrow tests under `tests/unit/` or `tests/integration/`
-5. Release workflow files under `.github/workflows/` only for CI or release issues
-6. Docs only if behavior, ownership, or expected usage is still unclear
-
-Execution rules:
-
-- Start with the smallest plausible file set
-- Prefer targeted search (`rg <symbol|string> <paths>`) over repository-wide scans
-- Ignore generated or output-heavy areas unless the task directly targets them, especially `dist/`, `node_modules/`, `src-tauri/target/`, `.app/`, `src-tauri/icons/`, and `src-tauri/png/`. Exception: `dist/cli.js` is the shipped CLI build artifact (see `package.json` `files`); when you change anything under `bin/`, rebuild it via `pnpm run cli:build` and commit the regenerated `dist/cli.js` alongside the source change
-- If a task touches release status, issue closeout, npm delivery, or GitHub assets, verify live surfaces separately: source commit/tag, workflow run, npm registry, GitHub Release/assets, and issue state. Do not let one passing surface imply another
-- Keep changes local to one subsystem when possible
-- Run the narrowest relevant verification first, expand only if needed
-- If key context is missing, make one reasonable assumption and proceed
+- Deliver the smallest correct diff and prove it with the narrowest real verification; expand only when evidence demands it. If key context is missing, make one reasonable assumption and proceed.
+- Generated areas (`dist/`, `node_modules/`, `src-tauri/target/`, `.app/`, `src-tauri/icons/`, `src-tauri/png/`) are not source. Exception: `dist/cli.js` is the shipped CLI build artifact (see `package.json` `files`); any change under `bin/` rebuilds it via `pnpm run cli:build` and commits the regenerated file alongside the source change.
+- Release status, issue closeout, npm delivery, and GitHub assets are separate truth surfaces. Verify each one live (source commit/tag, workflow run, npm registry, GitHub Release/assets, issue state); never let one passing surface imply another.
 
 ## Current Risk Areas
 
@@ -110,6 +87,8 @@ Execution rules:
 - Release state can be split. npm Trusted Publishing can succeed before the popular-app release workflow finishes, and GitHub Release assets can exist while a workflow run still shows queued or in progress. Report each surface explicitly.
 - Local app builds and test runs mutate tracked files as build state: `src-tauri/pake.json`, `src-tauri/tauri.conf.json`, `src-tauri/tauri.macos.conf.json`, and regenerated icons under `src-tauri/png/` and `src-tauri/icons/`. Before committing, `git restore` whatever you did not intentionally change; never let a feature or release commit absorb this churn.
 - Per-app optional fields in `default_app_list.json` consumed by workflows must get their defaults in the jq read step of `release.yml`, not in Actions expressions: GitHub expressions cast both `null` and `false` to `0`, so `matrix.config.x != false` cannot express "default true" and silently flips every app missing the field.
+- Windows taskbar icons can register blank when an autostarted app launches before Explorer's icon cache is ready (#1323). Every hidden-to-visible path for the main window (tray show/click, activation shortcut, single-instance activation, initial delayed show) must call `reapply_window_icon` from `src-tauri/src/app/window.rs`, which reasserts both the small window icon and the large taskbar icon; adding a new `window.show()` path without it regresses the bug.
+- `.github/workflows/pake-cli.yaml` and `single-app.yaml` are public build surfaces that external users trigger from their own forks (see `docs/github-actions-usage*.md`). Changes there ship to outside users on push to `main`, independent of `V*` releases; treat them like public API, not internal CI.
 
 ## Platform-Specific Development
 
@@ -167,13 +146,13 @@ The workflow can also be triggered manually via `workflow_dispatch` with options
 
 Pushing the same `V*` tag also triggers `.github/workflows/npm-publish.yml`, which publishes `pake-cli` to npm through Trusted Publishing. Configure the npm package's Trusted Publisher as GitHub Actions, `tw93/Pake`, workflow file `npm-publish.yml`, with no environment. Local `npm publish` is only a fallback when CI or npm registry state blocks the trusted path.
 
-`npm-publish.yml` also supports `workflow_dispatch` from `main` for npm-only CLI hotfixes: bump the version files on `main`, then trigger the workflow to publish to npm without a `V*` tag or app release. npm publish and `git tag` are therefore independent actions; never infer one from the other. At the start of any release task, restate which surfaces this round touches (npm package, GitHub Release + app assets, Docker, git tag) and let the maintainer confirm. Each publish, tag, or issue-close action needs maintainer authorization in the current turn.
+`npm-publish.yml` also supports `workflow_dispatch` from `main` for npm-only CLI hotfixes: bump the version files on `main`, wait for a successful `quality-and-test.yml` run for the exact commit, then pass that commit as `expected_sha` and the successful run as `quality_run_id`. The publish workflow verifies both before publishing without a `V*` tag or app release. npm publish and `git tag` are therefore independent actions; never infer one from the other. At the start of any release task, restate which surfaces this round touches (npm package, GitHub Release + app assets, Docker, git tag) and let the maintainer confirm. Each publish, tag, or issue-close action needs maintainer authorization in the current turn.
 
 Before treating an npm release as shipped, verify both `gh workflow list --all | grep "Publish npm Package"` and `npm view pake-cli@X.Y.Z version`. Prefer `npm view pake-cli@X.Y.Z version gitHead dist.tarball --json` so the published package can be tied back to the intended commit. Do not reply to or close GitHub issues as released until the public registry returns the expected version.
 
 For release follow-through, keep these boundaries explicit:
 
-- `workflow_dispatch` runs on a branch unless a tag ref or input is supplied. Do not infer a release tag from the branch name, run title, or compare UI.
+- `workflow_dispatch` runs on a branch. Bind npm-only publishing to the exact `main` commit with `expected_sha` and a successful Quality run for that same SHA; do not infer a release tag or source commit from the branch name, run title, or compare UI.
 - For CLI/npm issue closeout, the npm registry is the decisive public surface. GitHub app release assets and quality workflows should still be reported, but they are separate surfaces.
 - For app-release claims, inspect the GitHub Release directly with `gh release view <tag> --json assets` and check asset count/state instead of trusting source state or workflow names alone.
 - The contributors bot can push `chore: update contributors [skip ci]` at any moment, including between local commits and the bump push. On a rejected push, `git pull --rebase` onto it and push again before tagging. After release, fast-forward local `main`; do not move an already pushed release tag to include it.
@@ -202,19 +181,6 @@ Sort every community PR into one of three outcomes; never rewrite a contribution
 - **Merge as-is**: implementation is sound. Verify locally (build + relevant tests), merge, thank the author.
 - **Right direction, implementation needs work**: push fixes directly onto the contributor's branch so their authorship is preserved, then merge and reply summarizing what was changed and why.
 - **Out of scope**: close as not planned with a one-line apology and the boundary reason (what Pake deliberately does not do). Keep it friendly and leave room for discussion.
-
-## CLI Usage Example
-
-```bash
-# Install CLI
-pnpm install -g pake-cli
-
-# Basic usage
-pake https://github.com --name GitHub
-
-# Advanced usage
-pake https://weekly.tw93.fun --name Weekly --width 1200 --height 800
-```
 
 ## Troubleshooting
 

@@ -1,4 +1,4 @@
-use crate::app::window::open_additional_window_safe;
+use crate::app::window::{open_additional_window_safe, reapply_window_icon};
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
@@ -56,6 +56,7 @@ pub fn set_system_tray(
             "show_app" => {
                 if let Some(window) = app.get_webview_window("pake") {
                     let _ = window.show();
+                    reapply_window_icon(&window);
                     #[cfg(target_os = "linux")]
                     if _init_fullscreen && !window.is_fullscreen().unwrap_or(false) {
                         let _ = window.set_fullscreen(true);
@@ -83,6 +84,7 @@ pub fn set_system_tray(
                             let _ = window.hide();
                         } else {
                             let _ = window.show();
+                            reapply_window_icon(&window);
                             let _ = window.set_focus();
                             #[cfg(target_os = "linux")]
                             if _init_fullscreen && !window.is_fullscreen().unwrap_or(false) {
@@ -153,6 +155,7 @@ pub fn set_global_shortcut(
                                 let _ = window.hide();
                             } else {
                                 let _ = window.show();
+                                reapply_window_icon(&window);
                                 let _ = window.set_focus();
                                 #[cfg(target_os = "linux")]
                                 if _init_fullscreen && !window.is_fullscreen().unwrap_or(false) {

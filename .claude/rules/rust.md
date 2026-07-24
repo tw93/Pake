@@ -1,6 +1,6 @@
 # Pake Rust + Tauri Rules
 
-> Pake-specific Rust + Tauri rules. Standard Rust hygiene is assumed: `?` over `unwrap()`, `cargo clippy` clean, `cargo fmt` before commit.
+> Pake-specific Rust + Tauri rules. Standard Rust hygiene is assumed: `?` over `unwrap()`, `cargo clippy` clean, `cargo fmt` before commit. The `dist/cli.js` rebuild rule and CN mirror policy live in AGENTS.md (Current Risk Areas / Network Mirror Behavior) and are not repeated here.
 
 ## Pake-Specific
 
@@ -12,26 +12,14 @@
 - In machine mode (`--json`) stdout is reserved for the single JSON result. Never `console.log` / `process.stdout.write` in `bin/`; subprocess stdout is rerouted to stderr by `shellExec`.
 - `shellExec` runs subprocesses with `stdio: 'inherit'`, so their output (linuxdeploy, cargo, npm) never reaches `error.message`; only the failed command line does. Do NOT classify a build failure by grepping `error.message`; you would be matching the command, not the diagnostics. Drive failure guidance off a structured fact the caller holds (e.g. `target === 'appimage'`). Owners: `bin/utils/shell.ts` + `bin/builders/BaseBuilder.ts`.
 
-### IPC
-
-- `#[tauri::command]` handlers validate every input from the renderer. The webview is untrusted.
-- Long work in handlers goes through `tauri::async_runtime::spawn`. Don't block the IPC thread.
-- Don't broaden the allowlist (filesystem, shell, http) past the exact paths and commands needed.
-
 ### Config types
 
 - No `tauriConf: any` or other untyped config bags. Use `PakeTauriConfig`.
 - Window options live in `bin/helpers/cli-program.ts`, `bin/types.ts`, `bin/defaults.ts`, `bin/helpers/merge.ts`. Adding an option means touching all four plus `schema/pake.schema.json` and `docs/cli-usage*.md`. Forgetting any is a regression; the schema half is caught by `tests/unit/config-file.test.ts`.
 
-### Network mirrors
+### Tauri trust boundary
 
-- CN mirror switching is **explicit opt-in** via `PAKE_USE_CN_MIRROR=1`. Do not reintroduce automatic CN-domain detection.
-- Behavior owners: `bin/utils/mirror.ts` and `bin/builders/BaseBuilder.ts`. Keep docs and tests aligned.
-
-### dist/cli.js
-
-- `dist/cli.js` is a tracked build artifact (declared in `package.json` `files`).
-- Any change under `bin/` must rebuild with `pnpm run cli:build` and commit the regenerated `dist/cli.js` alongside the source change.
+- Packaged remote pages are untrusted. Validate semantic bounds for every `#[tauri::command]` input, keep remote capabilities limited to the exact operations required, and keep long-running IPC asynchronous so page code cannot block the app loop.
 
 ### Platform sensitivity
 

@@ -198,7 +198,7 @@ pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/week
 把下面这段复制给你的 AI agent 即可开始：
 
 ```text
-用 Pake（npm i -g pake-cli）把网页打包成桌面应用。先阅读 https://raw.githubusercontent.com/tw93/Pake/main/llms.txt，运行 pake 时始终加 --json 并把 stdout 解析为单个 JSON 对象。把 <url-or-local-dist> 打包成名为 <AppName> 的应用。
+用 Pake（npm i -g pake-cli）把网页打包成桌面应用。先阅读 https://unpkg.com/pake-cli@latest/llms.txt，运行 pake 时始终加 --json 并把 stdout 解析为单个 JSON 对象。把 <url-or-local-dist> 打包成名为 <AppName> 的应用。
 ```
 
 ## 定制开发

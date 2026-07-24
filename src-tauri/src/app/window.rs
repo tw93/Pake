@@ -3,6 +3,8 @@ use crate::util::{
     check_file_or_append, get_data_dir, get_download_message_with_lang, sanitize_download_filename,
     show_toast, MessageType,
 };
+#[cfg(target_os = "windows")]
+use std::{os::windows::ffi::OsStrExt, ptr, sync::OnceLock};
 use std::{
     path::PathBuf,
     str::FromStr,
@@ -11,6 +13,12 @@ use std::{
 use tauri::{
     webview::{DownloadEvent, NewWindowFeatures, NewWindowResponse},
     AppHandle, Config, Manager, Url, WebviewUrl, WebviewWindow, WebviewWindowBuilder,
+};
+
+#[cfg(target_os = "windows")]
+use windows_sys::Win32::UI::{
+    Shell::ExtractIconExW,
+    WindowsAndMessaging::{SendMessageW, ICON_BIG, WM_SETICON},
 };
 
 use tauri::Theme;
@@ -69,6 +77,77 @@ pub fn open_additional_window(app: &AppHandle) -> tauri::Result<WebviewWindow> {
     build_window_with_label(app, &state.pake_config, &state.tauri_config, &label)
 }
 
+#[cfg(target_os = "windows")]
+fn taskbar_icon_handle() -> Option<isize> {
+    static TASKBAR_ICON: OnceLock<Option<isize>> = OnceLock::new();
+
+    *TASKBAR_ICON.get_or_init(|| {
+        let executable = match std::env::current_exe() {
+            Ok(path) => path,
+            Err(error) => {
+                eprintln!(
+                    "[Pake] Failed to resolve the app executable for its taskbar icon: {error}"
+                );
+                return None;
+            }
+        };
+        let executable_wide: Vec<u16> = executable
+            .as_os_str()
+            .encode_wide()
+            .chain(std::iter::once(0))
+            .collect();
+        let mut large_icon = ptr::null_mut();
+        let extracted = unsafe {
+            ExtractIconExW(
+                executable_wide.as_ptr(),
+                0,
+                &mut large_icon,
+                ptr::null_mut(),
+                1,
+            )
+        };
+        if extracted == 0 || large_icon.is_null() {
+            eprintln!(
+                "[Pake] Failed to extract the taskbar icon from {}.",
+                executable.display()
+            );
+            return None;
+        }
+
+        // WM_SETICON keeps this handle rather than copying it. Cache the single
+        // extracted icon for the process lifetime so repeated tray restores do
+        // not leak a new HICON or leave the window with a dangling handle.
+        Some(large_icon as isize)
+    })
+}
+
+// Apps autostarted at Windows logon can register their icons before Explorer's
+// icon cache is ready (#1323). Re-assert both the small/title-bar icon and the
+// large taskbar icon whenever a window becomes visible.
+#[cfg(target_os = "windows")]
+pub fn reapply_window_icon(window: &WebviewWindow) {
+    if let Some(icon) = window.app_handle().default_window_icon().cloned() {
+        if let Err(error) = window.set_icon(icon) {
+            eprintln!("[Pake] Failed to re-apply the window icon: {error}");
+        }
+    }
+
+    let Some(taskbar_icon) = taskbar_icon_handle() else {
+        return;
+    };
+    match window.hwnd() {
+        Ok(hwnd) => unsafe {
+            SendMessageW(hwnd.0, WM_SETICON, ICON_BIG as usize, taskbar_icon);
+        },
+        Err(error) => {
+            eprintln!("[Pake] Failed to resolve the window handle for its taskbar icon: {error}");
+        }
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn reapply_window_icon(_window: &WebviewWindow) {}
+
 struct WindowBuildOptions<'a> {
     label: &'a str,
     url: WebviewUrl,
@@ -99,6 +178,7 @@ fn open_requested_window(
 
     let title = target_url.host_str().unwrap_or(target_url.as_str());
     let _ = window.set_title(title);
+    reapply_window_icon(&window);
     let _ = window.set_focus();
 
     Ok(window)
@@ -111,6 +191,7 @@ pub fn open_additional_window_safe(app: &AppHandle) {
         std::thread::spawn(move || {
             if let Ok(window) = open_additional_window(&app_handle) {
                 let _ = window.show();
+                reapply_window_icon(&window);
                 let _ = window.set_focus();
             }
         });
@@ -120,6 +201,7 @@ pub fn open_additional_window_safe(app: &AppHandle) {
     {
         if let Ok(window) = open_additional_window(app) {
             let _ = window.show();
+            reapply_window_icon(&window);
             let _ = window.set_focus();
         }
     }
