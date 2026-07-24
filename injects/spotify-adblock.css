@@ -1,0 +1,14 @@
+[data-testid="ad-placeholder"],
+[data-testid="ad-banner"],
+[data-testid="ad-label"],
+.AdsContainer,
+.ads-container,
+.audio-ad-badge,
+.ad-banner,
+.main-adSlot,
+[aria-label*="Advertisement"],
+[aria-label*="Sponsor"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}

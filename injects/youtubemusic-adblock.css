@@ -1,0 +1,12 @@
+ytmusic-ad-slot-renderer,
+.ytmusic-ad-slot-renderer,
+ytmusic-player-bar-ad-slot,
+ytmusic-clip-ad-renderer,
+ytmusic-ad-avatar-renderer,
+ytmusic-ad-hero-image-renderer,
+ytmusic-ad-title-renderer,
+ytmusic-ad-badge-renderer {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}

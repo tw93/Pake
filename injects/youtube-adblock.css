@@ -1,0 +1,17 @@
+#masthead-ad,
+ytd-ad-slot-renderer,
+ytd-rich-item-renderer[is-ad],
+ytd-banner-promo-renderer,
+.ytd-ad-slot-renderer,
+.ytp-ad-module,
+.ytp-ad-overlay-container,
+.ytp-ad-progress-list,
+.ytp-ad-text,
+.video-ads,
+#player-ads,
+.ytp-ad-overlay-slot,
+ytd-consent-bump-v2-renderer {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
