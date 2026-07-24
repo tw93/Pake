@@ -16,6 +16,7 @@ function createElement(tagName = "div", overrides = {}) {
     attributes: {},
     children: [],
     hidden: false,
+    isConnected: true,
     offsetParent: null,
     clickCount: 0,
     textContent: "",
@@ -43,6 +44,7 @@ function createElement(tagName = "div", overrides = {}) {
     click() {
       this.clickCount += 1;
     },
+    querySelector: () => null,
     get subheader() {
       return this.attributes.subheader ?? "";
     },
@@ -170,6 +172,8 @@ function loadAdblock({
     }
   }
 
+  const injectedStyles = [];
+
   const MutationObserver = vi.fn(function MutationObserver(callback) {
     this.observe = () => {};
     this.disconnect = () => {};
@@ -178,12 +182,23 @@ function loadAdblock({
 
   const document = {
     readyState,
+    head: createElement("head"),
     body: createElement("body"),
     addEventListener: registerListener,
     removeEventListener: () => {},
     querySelector,
     querySelectorAll,
-    createElement: (tagName) => createElement(tagName),
+    createElement: (tagName) => {
+      const el = createElement(tagName);
+      if (tagName.toLowerCase() === "style") {
+        injectedStyles.push(el);
+      }
+      return el;
+    },
+    getElementById: (id) =>
+      querySelector(`#${id}`) ||
+      injectedStyles.find((el) => el.attributes.id === id) ||
+      null,
   };
 
   const window = {
@@ -229,6 +244,7 @@ function loadAdblock({
     window,
     MutationObserver,
     intervalCallbacks,
+    injectedStyles,
     MockXMLHttpRequest,
     triggerInterval: () => intervalCallbacks.forEach((fn) => fn()),
   };
@@ -260,9 +276,9 @@ describe("youtubemusic-adblock", () => {
 
     expect(MutationObserver).toHaveBeenCalled();
     document.body.appendChild(adSlot);
-    MutationObserver.mock.results[0].value._callback([
-      { addedNodes: [adSlot] },
-    ]);
+    MutationObserver.mock.results.forEach((result) => {
+      result.value._callback([{ addedNodes: [adSlot] }]);
+    });
 
     expect(adSlot.style.display).toBe("none");
   });
@@ -303,7 +319,7 @@ describe("youtubemusic-adblock", () => {
     const fetchImpl = vi.fn(() =>
       Promise.resolve(
         new context.Response(
-          '{"adPlacements":[{"ad":1}],"playerAds":[{"ad":2}],"videoDetails":{"id":"x"}}',
+          '{"adPlacements":[{"ad":1}],"playerAds":[{"ad":2}],"adSlots":[{"ad":3}],"videoDetails":{"id":"x"}}',
           { status: 200 },
         ),
       ),
@@ -315,8 +331,12 @@ describe("youtubemusic-adblock", () => {
     );
     const text = await response.text();
 
+    expect(text).toContain('"blockedPlacements"');
+    expect(text).toContain('"blockedPlayerAds"');
+    expect(text).toContain('"blockedSlots"');
     expect(text).not.toContain('"adPlacements"');
     expect(text).not.toContain('"playerAds"');
+    expect(text).not.toContain('"adSlots"');
     expect(text).toContain('"videoDetails"');
   });
 
@@ -327,6 +347,7 @@ describe("youtubemusic-adblock", () => {
     xhr.send();
     xhr.triggerLoad('{"adSlots":[{"ad":1}],"contents":{}}');
 
+    expect(xhr.responseText).toContain('"blockedSlots"');
     expect(xhr.responseText).not.toContain('"adSlots"');
     expect(xhr.responseText).toContain('"contents"');
   });
@@ -343,5 +364,80 @@ describe("youtubemusic-adblock", () => {
     const text = await response.text();
 
     expect(text).toContain('"adPlacements"');
+  });
+
+  it("injects a fallback style tag when the .css file is not loaded", () => {
+    const { injectedStyles } = loadAdblock();
+
+    expect(injectedStyles.length).toBeGreaterThan(0);
+    const style = injectedStyles[0];
+    expect(style.attributes.id).toBe("pake-ytmusic-adblock-css");
+    expect(style.textContent).toContain("ytmusic-ad-slot-renderer");
+  });
+
+  it("fast-forwards video ads when the player gets ad classes", () => {
+    const video = {
+      muted: false,
+      playbackRate: 1,
+      currentTime: 0,
+      duration: 30,
+      paused: false,
+      style: {},
+    };
+
+    const player = createElement("div", {
+      attributes: { id: "movie_player", class: "ad-showing" },
+      isConnected: true,
+      querySelector: (selector) => (selector === "video" ? video : null),
+    });
+    player.classList = {
+      contains: (cls) =>
+        (player.attributes.class || "").split(/\s+/).includes(cls),
+    };
+
+    const { MutationObserver } = loadAdblock({
+      elements: [player],
+    });
+
+    // Trigger the player-class observer that was set up on the movie_player.
+    MutationObserver.mock.results.forEach((result) => {
+      result.value._callback();
+    });
+
+    expect(video.muted).toBe(true);
+    expect(video.currentTime).toBeCloseTo(29.9);
+  });
+
+  it("restores normal playback after the ad class is removed", () => {
+    const video = {
+      muted: true,
+      playbackRate: 16,
+      currentTime: 29.9,
+      duration: 30,
+      paused: false,
+      style: { display: "none" },
+    };
+
+    const player = createElement("div", {
+      attributes: { id: "movie_player", class: "" },
+      isConnected: true,
+      querySelector: (selector) => (selector === "video" ? video : null),
+    });
+    player.classList = {
+      contains: (cls) =>
+        (player.attributes.class || "").split(/\s+/).includes(cls),
+    };
+
+    const { MutationObserver } = loadAdblock({
+      elements: [player],
+    });
+
+    MutationObserver.mock.results.forEach((result) => {
+      result.value._callback();
+    });
+
+    expect(video.muted).toBe(false);
+    expect(video.playbackRate).toBe(1);
+    expect(video.style.display).toBe("");
   });
 });
