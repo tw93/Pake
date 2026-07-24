@@ -153,7 +153,7 @@ jobs:
           else
             git worktree add --detach "$REGISTRY_WORKTREE" HEAD
             git -C "$REGISTRY_WORKTREE" switch --orphan "$ONLINE_CONFIG_BRANCH"
-            git -C "$REGISTRY_WORKTREE" rm -rf .
+            git -C "$REGISTRY_WORKTREE" rm -rf --ignore-unmatch .
             mkdir -p "$REGISTRY_WORKTREE/configs"
             printf '%s\n' \
               '# Pake Online Build Registry' \

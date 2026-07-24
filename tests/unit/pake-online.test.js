@@ -369,6 +369,9 @@ describe("Build App With Pake CLI online workflow", () => {
       'gh api "repos/$RELEASE_REPOSITORY/releases/latest"',
     );
     expect(workflow).toContain("node scripts/pake-online/config.mjs runtime");
+    expect(workflow).toContain(
+      'git -C "$REGISTRY_WORKTREE" rm -rf --ignore-unmatch .',
+    );
   });
 
   it("publishes the real package and online carrier before the manifest", () => {
