@@ -479,6 +479,11 @@ jobs:
         shell: bash
         run: bash scripts/pake-online/install-qtifw.sh
 
+      - name: Install macOS DMG layout tool
+        if: matrix.config.online && runner.os == 'macOS'
+        shell: bash
+        run: brew install create-dmg
+
       - name: Prepare QtIFW package definition
         id: qtifw
         if: matrix.config.online
@@ -527,7 +532,7 @@ jobs:
         if: matrix.config.online && runner.os == 'Windows'
         env:
           ONLINE_INSTALLER_NAME: ${{ steps.release_assets.outputs.online_installer_name }}
-          ONLINE_PRODUCT_NAME: ${{ matrix.config.cliConfig.name }} Online
+          ONLINE_PRODUCT_NAME: ${{ steps.qtifw.outputs.app_name }}
           ONLINE_WINDOWS_FORMAT: ${{ matrix.config.delivery.onlineWindowsFormat || 'msi' }}
         run: |
           $qtifwExe = Join-Path $env:RUNNER_TEMP "pake-online-qtifw.exe"
@@ -544,6 +549,7 @@ jobs:
           $onlineMsi = Join-Path $env:RUNNER_TEMP "pake-online.msi"
           & $candle -arch x64 `
             "-dQtIfwSource=$qtifwExe" `
+            "-dLauncherSource=${{ steps.qtifw.outputs.launcher_path }}" `
             "-dIconSource=${{ steps.qtifw.outputs.icon_path }}" `
             -out $wixObject "${{ steps.qtifw.outputs.wix_path }}"
           if ($LASTEXITCODE -ne 0) {
@@ -574,23 +580,45 @@ jobs:
         if: matrix.config.online && runner.os == 'macOS'
         env:
           ONLINE_INSTALLER_NAME: ${{ steps.release_assets.outputs.online_installer_name }}
+          ONLINE_APP_NAME: ${{ steps.qtifw.outputs.app_name }}
         shell: bash
         run: |
-          qtifw_app="$RUNNER_TEMP/Pake Online Installer.app"
+          qtifw_app="$RUNNER_TEMP/$ONLINE_APP_NAME.app"
           "$QTIFW_BIN/binarycreator" --online-only \
             -c "${{ steps.qtifw.outputs.config_path }}" \
             -p "${{ steps.qtifw.outputs.package_directory }}" \
             "$qtifw_app"
+          bundle_executable="$(
+            /usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' \
+              "$qtifw_app/Contents/Info.plist"
+          )"
+          mv "$qtifw_app/Contents/MacOS/$bundle_executable" \
+            "$qtifw_app/Contents/MacOS/pake-online-backend"
+          swiftc "${{ steps.qtifw.outputs.launcher_path }}" \
+            -framework AppKit \
+            -o "$qtifw_app/Contents/MacOS/$bundle_executable"
+          chmod +x "$qtifw_app/Contents/MacOS/pake-online-backend"
+          codesign --force --deep --sign - "$qtifw_app"
+          dmg_source="$RUNNER_TEMP/pake-online-dmg"
+          mkdir -p "$dmg_source"
+          cp -R "$qtifw_app" "$dmg_source/"
           mkdir -p .pake-online-release/online
-          hdiutil create \
-            -volname "${{ matrix.config.cliConfig.name }} Online Installer" \
-            -srcfolder "$qtifw_app" -ov -format UDZO \
-            ".pake-online-release/online/$ONLINE_INSTALLER_NAME"
+          create-dmg \
+            --volname "$ONLINE_APP_NAME" \
+            --volicon "${{ steps.qtifw.outputs.icon_path }}" \
+            --background "src-tauri/assets/macos/dmg/background.png" \
+            --window-size 680 420 \
+            --icon "$ONLINE_APP_NAME.app" 190 250 \
+            --hide-extension "$ONLINE_APP_NAME.app" \
+            --app-drop-link 500 250 \
+            ".pake-online-release/online/$ONLINE_INSTALLER_NAME" \
+            "$dmg_source"
 
       - name: Build online installer (Linux)
         if: matrix.config.online && runner.os == 'Linux'
         env:
           ONLINE_INSTALLER_NAME: ${{ steps.release_assets.outputs.online_installer_name }}
+          ONLINE_APP_NAME: ${{ steps.qtifw.outputs.app_name }}
         shell: bash
         run: |
           qtifw_binary="$RUNNER_TEMP/pake-online-installer"
@@ -599,24 +627,22 @@ jobs:
             -p "${{ steps.qtifw.outputs.package_directory }}" \
             "$qtifw_binary"
           appdir="$RUNNER_TEMP/PakeOnlineInstaller.AppDir"
-          mkdir -p "$appdir/usr/bin" "$appdir/usr/share/applications"
-          cp "$qtifw_binary" "$appdir/usr/bin/pake-online-installer"
-          cp "${{ steps.qtifw.outputs.icon_path }}" "$appdir/pake-online-installer.png"
-          printf '%s\n' \
-            '#!/bin/sh' \
-            'exec "$APPDIR/usr/bin/pake-online-installer" "$@"' \
-            > "$appdir/AppRun"
-          chmod +x "$appdir/AppRun" "$appdir/usr/bin/pake-online-installer"
+          mkdir -p "$appdir/usr/share/applications"
+          cp "$qtifw_binary" "$appdir/pake-online-backend"
+          cp "${{ steps.qtifw.outputs.launcher_path }}" "$appdir/AppRun"
+          cp "${{ steps.qtifw.outputs.icon_path }}" "$appdir/pake-app.png"
+          chmod +x "$appdir/AppRun" "$appdir/pake-online-backend"
           printf '%s\n' \
             '[Desktop Entry]' \
             'Type=Application' \
-            'Name=${{ matrix.config.cliConfig.name }} Online Installer' \
-            'Exec=pake-online-installer' \
-            'Icon=pake-online-installer' \
+            "Name=$ONLINE_APP_NAME" \
+            'Exec=AppRun' \
+            'Icon=pake-app' \
+            'Terminal=false' \
             'Categories=Network;' \
-            > "$appdir/pake-online-installer.desktop"
-          cp "$appdir/pake-online-installer.desktop" \
-            "$appdir/usr/share/applications/pake-online-installer.desktop"
+            > "$appdir/pake-app.desktop"
+          cp "$appdir/pake-app.desktop" \
+            "$appdir/usr/share/applications/pake-app.desktop"
           appimagetool="$(find "$HOME/.cache/tauri" src-tauri/target \
             -type f -name 'appimagetool*' 2>/dev/null | head -n 1)"
           test -n "$appimagetool"

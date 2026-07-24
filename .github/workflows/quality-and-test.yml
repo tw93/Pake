@@ -188,6 +188,11 @@ jobs:
         shell: bash
         run: bash scripts/pake-online/install-qtifw.sh
 
+      - name: Install macOS DMG layout tool
+        if: runner.os == 'macOS'
+        shell: bash
+        run: brew install create-dmg
+
       - name: Build and verify QtIFW online installer
         shell: bash
         timeout-minutes: 30
@@ -238,6 +243,60 @@ jobs:
             -p "$RUNNER_TEMP/qtifw-workspace/packages" \
             "$target"
           test -e "$target"
+          case "$RUNNER_OS" in
+            Windows)
+              candle.exe -arch x64 \
+                "-dQtIfwSource=$(cygpath -w "$target")" \
+                "-dLauncherSource=$(cygpath -w "$RUNNER_TEMP/qtifw-workspace/windows-launcher.ps1")" \
+                "-dIconSource=$(cygpath -w "$GITHUB_WORKSPACE/src-tauri/png/icon_256.ico")" \
+                -out "$RUNNER_TEMP/online-installer.wixobj" \
+                "$RUNNER_TEMP/qtifw-workspace/online-installer.wxs"
+              light.exe -sval -ext WixUIExtension \
+                -out "$RUNNER_TEMP/online-installer.msi" \
+                "$RUNNER_TEMP/online-installer.wixobj"
+              test -s "$RUNNER_TEMP/online-installer.msi"
+              ;;
+            macOS)
+              executable="$(
+                /usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' \
+                  "$target/Contents/Info.plist"
+              )"
+              mv "$target/Contents/MacOS/$executable" \
+                "$target/Contents/MacOS/pake-online-backend"
+              swiftc "$RUNNER_TEMP/qtifw-workspace/macos-launcher.swift" \
+                -framework AppKit -o "$target/Contents/MacOS/$executable"
+              codesign --force --deep --sign - "$target"
+              mkdir -p "$RUNNER_TEMP/dmg-source"
+              cp -R "$target" "$RUNNER_TEMP/dmg-source/"
+              create-dmg \
+                --volname "CI App" \
+                --background "src-tauri/assets/macos/dmg/background.png" \
+                --window-size 680 420 \
+                --icon "online-installer.app" 190 250 \
+                --app-drop-link 500 250 \
+                "$RUNNER_TEMP/online-installer.dmg" \
+                "$RUNNER_TEMP/dmg-source"
+              test -s "$RUNNER_TEMP/online-installer.dmg"
+              ;;
+            Linux)
+              appdir="$RUNNER_TEMP/CI.AppDir"
+              mkdir -p "$appdir/usr/share/applications"
+              cp "$target" "$appdir/pake-online-backend"
+              cp "$RUNNER_TEMP/qtifw-workspace/linux-launcher.sh" \
+                "$appdir/AppRun"
+              cp "src-tauri/png/icon_512.png" "$appdir/pake-app.png"
+              printf '%s\n' \
+                '[Desktop Entry]' \
+                'Type=Application' \
+                'Name=CI App' \
+                'Exec=AppRun' \
+                'Icon=pake-app' \
+                'Terminal=false' \
+                > "$appdir/pake-app.desktop"
+              test -x "$appdir/AppRun"
+              grep -q '^Name=CI App$' "$appdir/pake-app.desktop"
+              ;;
+          esac
           find "$RUNNER_TEMP/qtifw-workspace/repository" \
             -name '*content.7z' -type f -print -quit | grep -q .
 

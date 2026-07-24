@@ -102,7 +102,7 @@ function platformLayout(config, sourcePath) {
     const payloadName = `${appName}.app`;
     return {
       payloadName,
-      targetDir: "/Applications",
+      targetDir: `@HomeDir@/Library/Application Support/Pake/Apps/${config.id}`,
       runProgram: `@TargetDir@/${payloadName}`,
       iconSource: path.resolve("src-tauri/icons/icon.icns"),
       iconExtension: ".icns",
@@ -121,6 +121,117 @@ function platformLayout(config, sourcePath) {
     };
   }
   throw new Error(`Unsupported QtIFW platform: ${config.os}`);
+}
+
+function linuxLauncher(config, layout) {
+  const packageName = packageId(config.id);
+  const targetDirectory = `$HOME/.local/opt/${config.id}`;
+  const target = `${targetDirectory}/${layout.payloadName}`;
+  return `#!/bin/sh
+backend="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/pake-online-backend"
+maintenance="${targetDirectory}/pake-online-maintenance"
+command=install
+installer="$backend"
+if [ -x "$maintenance" ]; then
+  command=update
+  installer="$maintenance"
+fi
+"$installer" \
+  --accept-licenses \
+  --default-answer \
+  --confirm-command \
+  "$command" ${packageName}
+status=$?
+if [ "$status" -ne 0 ]; then
+  exit "$status"
+fi
+installed_app="${target}"
+if [ ! -e "$installed_app" ]; then
+  echo "The downloaded application was not installed at $installed_app." >&2
+  exit 1
+fi
+exec "$installed_app" "$@"
+`;
+}
+
+function macosLauncher(config, layout) {
+  const relativeTargetDirectory = `Library/Application Support/Pake/Apps/${config.id}`;
+  const relativeTarget = `${relativeTargetDirectory}/${layout.payloadName}`;
+  return `import AppKit
+import Darwin
+import Foundation
+
+func fail(_ message: String) -> Never {
+    NSApplication.shared.setActivationPolicy(.accessory)
+    NSApplication.shared.activate(ignoringOtherApps: true)
+    let alert = NSAlert()
+    alert.alertStyle = .critical
+    alert.messageText = ${JSON.stringify(safeFileStem(config.cliConfig.name))}
+    alert.informativeText = message
+    alert.runModal()
+    exit(1)
+}
+
+let backend = Bundle.main.bundleURL
+    .appendingPathComponent("Contents/MacOS/pake-online-backend")
+let targetDirectory = FileManager.default.homeDirectoryForCurrentUser
+    .appendingPathComponent(${JSON.stringify(relativeTargetDirectory)})
+let maintenance = targetDirectory
+    .appendingPathComponent("pake-online-maintenance.app/Contents/MacOS/pake-online-maintenance")
+let hasExistingInstallation = FileManager.default.isExecutableFile(atPath: maintenance.path)
+let process = Process()
+process.executableURL = hasExistingInstallation ? maintenance : backend
+process.arguments = [
+    "--accept-licenses",
+    "--default-answer",
+    "--confirm-command",
+    hasExistingInstallation ? "update" : "install",
+    ${JSON.stringify(packageId(config.id))}
+]
+
+do {
+    try process.run()
+    process.waitUntilExit()
+} catch {
+    fail("Could not start the online installation backend: \\(error.localizedDescription)")
+}
+
+guard process.terminationStatus == 0 else {
+    fail("The online installation failed with exit code \\(process.terminationStatus).")
+}
+
+let installedApplication = FileManager.default.homeDirectoryForCurrentUser
+    .appendingPathComponent(${JSON.stringify(relativeTarget)})
+guard FileManager.default.fileExists(atPath: installedApplication.path) else {
+    fail("The downloaded application could not be found.")
+}
+guard NSWorkspace.shared.open(installedApplication) else {
+    fail("The downloaded application could not be opened.")
+}
+`;
+}
+
+function windowsLauncher(config) {
+  const id = config.id.replaceAll("'", "''");
+  const component = packageId(config.id).replaceAll("'", "''");
+  return `$ErrorActionPreference = "Stop"
+$targetDirectory = Join-Path $env:LOCALAPPDATA 'Pake\\Apps\\${id}'
+$maintenance = Join-Path $targetDirectory 'pake-online-maintenance.exe'
+$backend = Join-Path $PSScriptRoot 'pake-online-backend.exe'
+$command = 'install'
+$installer = $backend
+if (Test-Path -LiteralPath $maintenance -PathType Leaf) {
+    $command = 'update'
+    $installer = $maintenance
+}
+& $installer \`
+    '--accept-licenses' \`
+    '--default-answer' \`
+    '--confirm-command' \`
+    $command \`
+    '${component}'
+exit $LASTEXITCODE
+`;
 }
 
 function controllerScript(officialRepository, proxyRepository) {
@@ -183,11 +294,6 @@ Component.prototype.createOperations = function() {
 Component.prototype.createOperations = function() {
     component.createOperations();
     component.addOperation("Execute", "/bin/chmod", "+x", "${layout.runProgram}");
-    component.addOperation(
-        "CreateDesktopEntry",
-        "${config.id}.desktop",
-        "Type=Application\\nName=${appName}\\nExec=\\"${layout.runProgram}\\"\\nTerminal=false\\nCategories=Network;"
-    );
 };
 `;
   }
@@ -195,7 +301,8 @@ Component.prototype.createOperations = function() {
 }
 
 function windowsWix(config) {
-  const productName = `${safeFileStem(config.cliConfig.name)} Online`;
+  const productName = safeFileStem(config.cliConfig.name);
+  const realApplication = `[LocalAppDataFolder]Pake\\Apps\\${config.id}\\app.exe`;
   return `<?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Product
@@ -205,59 +312,60 @@ function windowsWix(config) {
       Version="${QTIFW_INSTALLER_VERSION}"
       Manufacturer="Pake"
       UpgradeCode="${stableGuid(`pake-online:${config.id}`)}">
-    <Package InstallerVersion="450" Compressed="yes" InstallScope="perUser" />
+    <Package InstallerVersion="450" Compressed="yes" InstallScope="perMachine" />
+    <Property Id="REINSTALLMODE" Value="amus" />
     <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version is already installed." />
     <MediaTemplate EmbedCab="yes" />
     <Icon Id="ProductIcon" SourceFile="$(var.IconSource)" />
     <Property Id="ARPPRODUCTICON" Value="ProductIcon" />
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
-    <Property Id="LAUNCHARGS" Secure="yes" />
-    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Open the online installer" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch ${xml(
+      productName,
+    )}" />
     <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
     <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="LocalAppDataFolder">
-        <Directory Id="PakeFolder" Name="Pake">
-          <Directory Id="OnlineFolder" Name="Online">
-            <Directory Id="INSTALLDIR" Name="${xml(config.id)}" />
-          </Directory>
+      <Directory Id="ProgramFiles64Folder">
+        <Directory Id="INSTALLDIR" Name="${xml(productName)}">
+          <Directory Id="OnlineBackendFolder" Name=".pake-online" />
         </Directory>
       </Directory>
-      <Directory Id="ProgramMenuFolder">
-        <Directory Id="ApplicationProgramsFolder" Name="${xml(productName)}" />
-      </Directory>
     </Directory>
-    <DirectoryRef Id="INSTALLDIR">
+    <DirectoryRef Id="OnlineBackendFolder">
       <Component Id="OnlineInstallerComponent" Guid="${stableGuid(
         `pake-online-component:${config.id}`,
-      )}">
-        <File Id="OnlineInstaller" Source="$(var.QtIfwSource)" Checksum="yes" />
+      )}" Win64="yes">
+        <File Id="OnlineInstaller" Name="pake-online-backend.exe" Source="$(var.QtIfwSource)" Checksum="yes" />
+        <File Id="OnlineLauncher" Name="pake-online-launcher.ps1" Source="$(var.LauncherSource)" />
         <RegistryValue Root="HKCU" Key="Software\\Pake\\Online\\${xml(
           config.id,
         )}" Name="Installed" Type="integer" Value="1" KeyPath="yes" />
-        <RemoveFolder Id="RemoveInstallDir" Directory="INSTALLDIR" On="uninstall" />
-        <RemoveFolder Id="RemoveOnlineFolder" Directory="OnlineFolder" On="uninstall" />
-        <RemoveFolder Id="RemovePakeFolder" Directory="PakeFolder" On="uninstall" />
-      </Component>
-    </DirectoryRef>
-    <DirectoryRef Id="ApplicationProgramsFolder">
-      <Component Id="OnlineInstallerShortcut" Guid="*">
-        <Shortcut Id="StartMenuShortcut" Name="${xml(
-          productName,
-        )}" Target="[#OnlineInstaller]" WorkingDirectory="INSTALLDIR" Icon="ProductIcon" />
-        <RemoveFolder Id="RemoveProgramsFolder" On="uninstall" />
-        <RegistryValue Root="HKCU" Key="Software\\Pake\\Online\\${xml(
-          config.id,
-        )}" Name="Shortcut" Type="integer" Value="1" KeyPath="yes" />
+        <RemoveFolder Id="RemoveOnlineBackendFolder" Directory="OnlineBackendFolder" On="uninstall" />
       </Component>
     </DirectoryRef>
     <Feature Id="MainFeature" Title="${xml(productName)}" Level="1">
       <ComponentRef Id="OnlineInstallerComponent" />
-      <ComponentRef Id="OnlineInstallerShortcut" />
     </Feature>
-    <CustomAction Id="LaunchOnlineInstaller" FileKey="OnlineInstaller" ExeCommand="[LAUNCHARGS]" Return="asyncNoWait" Impersonate="yes" />
+    <CustomAction
+        Id="InstallOnlinePayload"
+        Directory="INSTALLDIR"
+        ExeCommand="powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -WindowStyle Hidden -File &quot;[#OnlineLauncher]&quot;"
+        Execute="deferred"
+        Return="check"
+        Impersonate="yes" />
+    <CustomAction
+        Id="LaunchApplication"
+        Directory="INSTALLDIR"
+        ExeCommand="&quot;${xml(realApplication)}&quot;"
+        Return="asyncNoWait"
+        Impersonate="yes" />
+    <InstallExecuteSequence>
+      <Custom Action="InstallOnlinePayload" After="InstallFiles">NOT REMOVE</Custom>
+    </InstallExecuteSequence>
     <UIRef Id="WixUI_InstallDir" />
     <UI>
-      <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="LaunchOnlineInstaller">
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="2">1</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">1</Publish>
+      <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="LaunchApplication">
         WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 AND NOT Installed
       </Publish>
     </UI>
@@ -331,6 +439,20 @@ export function prepareQtIfwWorkspace(
     controllerScript(officialRepository, proxyRepository),
   );
 
+  let launcherPath = null;
+  if (config.os === "windows") {
+    launcherPath = path.join(root, "windows-launcher.ps1");
+    fs.writeFileSync(launcherPath, windowsLauncher(config));
+  } else if (config.os === "macos") {
+    launcherPath = path.join(root, "macos-launcher.swift");
+    fs.writeFileSync(launcherPath, macosLauncher(config, layout));
+  } else if (config.os === "linux") {
+    launcherPath = path.join(root, "linux-launcher.sh");
+    fs.writeFileSync(launcherPath, linuxLauncher(config, layout), {
+      mode: 0o755,
+    });
+  }
+
   const installerIcon = path
     .join(configDirectory, "installer")
     .replaceAll("\\", "/");
@@ -338,14 +460,14 @@ export function prepareQtIfwWorkspace(
 <Installer>
   <Name>${xml(appName)}</Name>
   <Version>${QTIFW_INSTALLER_VERSION}</Version>
-  <Title>${xml(appName)} Online Installer</Title>
+  <Title>${xml(appName)}</Title>
   <Publisher>Pake</Publisher>
   <ProductUrl>https://github.com/${xml(config.repository)}</ProductUrl>
   <InstallerApplicationIcon>${xml(installerIcon)}</InstallerApplicationIcon>
   <StartMenuDir>${xml(appName)}</StartMenuDir>
   <TargetDir>${xml(layout.targetDir)}</TargetDir>
   <AdminTargetDir>${xml(layout.targetDir)}</AdminTargetDir>
-  <MaintenanceToolName>${xml(appName)} Online Maintenance</MaintenanceToolName>
+  <MaintenanceToolName>pake-online-maintenance</MaintenanceToolName>
   <AllowNonAsciiCharacters>true</AllowNonAsciiCharacters>
   <WizardStyle>Modern</WizardStyle>
   <RepositorySettingsPageVisible>false</RepositorySettingsPageVisible>
@@ -381,6 +503,9 @@ export function prepareQtIfwWorkspace(
     packageId: packageId(config.id),
     packageVersion: version,
     payloadName: layout.payloadName,
+    appName,
+    runProgram: layout.runProgram,
+    launcherPath,
     wixPath,
     qtifwDownloadUrl: `${DOWNLOAD_ROOT}/${tool.file}`,
     qtifwDownloadSha256: tool.sha256,

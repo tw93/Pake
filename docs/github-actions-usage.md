@@ -59,20 +59,22 @@ value continues to apply to non-online builds.
 
 The prerelease contains the versioned Qt Installer Framework component archive
 plus an online installer. Pake uses the open-source Qt Installer Framework
-(QtIFW) rather than a custom webview application. Its standard introduction,
-target directory, download, progress, and completion pages keep the native look
-and feel of each platform and remain customizable through checked-in controller
-and component scripts.
+(QtIFW) rather than a custom webview application. QtIFW runs as the extensible
+download and verification backend; it does not show a second installer wizard.
+The visible carrier reuses the offline package's application name, icon, and
+platform-native presentation.
 
 - Windows: `online_windows_format` selects an app-specific `.msi` or `.exe`.
-  The MSI installs and opens the QtIFW online wizard. The EXE is a completely
+  The MSI uses the same WiX page sequence and branding as the offline MSI while
+  running QtIFW unattended during installation. The EXE is a completely
   windowless wrapper around that same MSI; `online_exe_icon` controls both the
   wrapper and installer icon. The carrier uses version `255.0.0`, while the
   downloaded application keeps the latest stable Pake Release version.
-- macOS: `.dmg` containing a native QtIFW installer `.app`, which downloads the
-  latest application bundle and installs it into `/Applications`.
-- Linux: `.AppImage` containing the QtIFW installer, which downloads the latest
-  application AppImage and creates the normal user-level installation.
+- macOS: `.dmg` uses the offline DMG background, window size, icon positions,
+  and Applications drop link. Its app has the normal application name and icon;
+  opening it downloads the latest bundle in the background and launches it.
+- Linux: `.AppImage` uses the normal application name and icon. Opening it runs
+  QtIFW unattended, then launches the downloaded application AppImage.
 
 For online-mode runs, the Actions **Artifacts** section contains only the
 online installer. Open the rolling prerelease when you also need the real
@@ -83,9 +85,8 @@ All three platforms use the same maximum-compression QtIFW 7z repository
 format. Each configuration has an isolated
 `pake-online-repository-<config-id>` branch, updated only after its application
 and online carrier build successfully. QtIFW verifies repository metadata and
-archive hashes and shows download progress directly in its installation page.
-The rolling Release continues to retain the current and previous successful
-component archives and manifests.
+archive hashes in the background. The rolling Release continues to retain the
+current and previous successful component archives and manifests.
 
 Before QtIFW fetches repository metadata, the checked-in controller script
 queries Cloudflare's country trace. In mainland China it changes

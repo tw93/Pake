@@ -294,6 +294,20 @@ describe("Qt Installer Framework online packaging", () => {
     expect(fs.readFileSync(result.controllerPath, "utf8")).toContain(
       "installer.setTemporaryRepositories",
     );
+    const wix = fs.readFileSync(result.wixPath, "utf8");
+    expect(wix).toContain('Name="Example App"');
+    expect(wix).not.toContain('Name="Example App Online"');
+    expect(wix).toContain('Id="InstallOnlinePayload"');
+    expect(wix).toContain('Execute="deferred"');
+    expect(wix).toContain("pake-online-launcher.ps1");
+    expect(wix).not.toContain('Id="LaunchOnlineInstaller"');
+    expect(wix).toContain(
+      '<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg"',
+    );
+    const launcher = fs.readFileSync(result.launcherPath, "utf8");
+    expect(launcher).toContain("pake-online-maintenance.exe");
+    expect(launcher).toContain("$command = 'update'");
+    expect(launcher).toContain("org.pake.online.example.windows.123");
   });
 
   it.each([
@@ -328,9 +342,47 @@ describe("Qt Installer Framework online packaging", () => {
         ),
       ).toBe(true);
       expect(result.wixPath).toBeNull();
+      expect(fs.existsSync(result.launcherPath)).toBe(true);
+      const launcher = fs.readFileSync(result.launcherPath, "utf8");
+      expect(launcher).toContain("pake-online-backend");
+      expect(launcher).toContain(
+        "org.pake.online.example." +
+          (osName === "macos" ? "macos" : "linux") +
+          ".123",
+      );
+      expect(launcher).not.toContain("binarycreator");
+      expect(launcher).toContain("update");
+      expect(launcher).toContain("pake-online-maintenance");
+      if (osName === "macos") {
+        expect(path.extname(result.launcherPath)).toBe(".swift");
+        expect(launcher).toContain("NSWorkspace.shared.open");
+      } else {
+        expect(path.extname(result.launcherPath)).toBe(".sh");
+        expect(launcher).toContain('exec "$installed_app" "$@"');
+      }
       expect(result.qtifwDownloadSha256).toBe(QTIFW_DOWNLOADS[osName].sha256);
     },
   );
+
+  it("keeps the QtIFW wizard hidden behind native-looking carriers", () => {
+    const workflow = fs.readFileSync(
+      path.join(process.cwd(), ".github/workflows/pake-cli.yaml"),
+      "utf8",
+    );
+    expect(workflow).toContain("src-tauri/assets/macos/dmg/background.png");
+    expect(workflow).toContain('--icon "$ONLINE_APP_NAME.app" 190 250');
+    expect(workflow).toContain("--app-drop-link 500 250");
+    expect(workflow).toContain("Name=$ONLINE_APP_NAME");
+    expect(workflow).toContain(
+      'swiftc "${{ steps.qtifw.outputs.launcher_path }}"',
+    );
+    expect(workflow).toContain(
+      'cp "${{ steps.qtifw.outputs.launcher_path }}" "$appdir/AppRun"',
+    );
+    expect(workflow).not.toContain(
+      'exec "$APPDIR/usr/bin/pake-online-installer"',
+    );
+  });
 });
 
 describe("Pake online release assets", () => {
