@@ -11,6 +11,7 @@ const MANIFEST_PREFIX = "pake-online-manifest-";
 const FORMATS = [
   [".pkg.tar.zst", "zst"],
   [".tar.zst", "tar.zst"],
+  [".7z", "7z"],
   [".AppImage", "appimage"],
   [".msi", "msi"],
   [".exe", "exe"],

@@ -108,6 +108,7 @@ export function applyOnlineReleaseVersion(config, releaseTag) {
     cliConfig: {
       ...config.cliConfig,
       appVersion: normalizeReleaseVersion(releaseTag),
+      ...(config.os === "linux" ? { targets: "appimage" } : {}),
     },
   };
 }

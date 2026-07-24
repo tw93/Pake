@@ -40,9 +40,7 @@ jobs:
         run: npx prettier --write . --ignore-unknown --cache
 
       - name: Auto-fix Rust formatting
-        run: |
-          cargo fmt --all --manifest-path src-tauri/Cargo.toml
-          cargo fmt --all --manifest-path online-installer/src-tauri/Cargo.toml
+        run: cargo fmt --all --manifest-path src-tauri/Cargo.toml
 
       - name: Commit formatting fixes
         run: |
@@ -186,41 +184,62 @@ jobs:
         with:
           mode: build
 
-      - name: Build and verify online installer carrier
+      - name: Install Qt Installer Framework
+        shell: bash
+        run: bash scripts/pake-online/install-qtifw.sh
+
+      - name: Build and verify QtIFW online installer
         shell: bash
         timeout-minutes: 30
-        env:
-          PAKE_ONLINE_REPOSITORY: example/Pake
-          PAKE_ONLINE_RELEASE_TAG: pake-online-ci
-          PAKE_ONLINE_CONFIG_ID: ci
         run: |
           set -euo pipefail
-          cd online-installer
           case "$RUNNER_OS" in
             Windows)
-              ../node_modules/.bin/tauri build --bundles msi
-              find src-tauri/target/release/bundle/msi \
-                -name '*.msi' -type f -print -quit | grep -q .
-              printf 'portable-pake-app' > "$RUNNER_TEMP/pake-app.exe"
-              cargo run --locked --release \
-                --manifest-path src-tauri/Cargo.toml \
-                --bin pake-payload-pack -- \
-                "$RUNNER_TEMP/pake-app.exe" \
-                "$RUNNER_TEMP/pake-app.tar.zst" \
-                "$RUNNER_TEMP/pake-app.tar.zst.json"
-              test -s "$RUNNER_TEMP/pake-app.tar.zst"
+              config_os=windows
+              payload="$(cygpath -w "$(command -v node)")"
+              target="$RUNNER_TEMP/online-installer.exe"
               ;;
             macOS)
-              ../node_modules/.bin/tauri build --bundles dmg
-              find src-tauri/target/release/bundle/dmg \
-                -name '*.dmg' -type f -print -quit | grep -q .
+              config_os=macos
+              payload="$RUNNER_TEMP/CI App.app"
+              mkdir -p "$payload/Contents/MacOS"
+              printf '#!/bin/sh\nexit 0\n' > "$payload/Contents/MacOS/ci-app"
+              chmod +x "$payload/Contents/MacOS/ci-app"
+              target="$RUNNER_TEMP/online-installer.app"
               ;;
             Linux)
-              ../node_modules/.bin/tauri build --bundles appimage
-              find src-tauri/target/release/bundle/appimage \
-                -name '*.AppImage' -type f -print -quit | grep -q .
+              config_os=linux
+              payload="$RUNNER_TEMP/CI.AppImage"
+              printf '#!/bin/sh\nexit 0\n' > "$payload"
+              chmod +x "$payload"
+              target="$RUNNER_TEMP/online-installer"
               ;;
           esac
+          config="$RUNNER_TEMP/qtifw-ci-config.json"
+          node -e '
+            const fs = require("fs");
+            fs.writeFileSync(process.argv[1], JSON.stringify({
+              id: `ci-${process.argv[2]}`,
+              repository: "example/Pake",
+              sourceBranch: "main",
+              os: process.argv[2],
+              cliConfig: { name: "CI App", appVersion: "1.0.0" }
+            }));
+          ' "$config" "$config_os"
+          node scripts/pake-online/qtifw.mjs prepare \
+            "$config" "$payload" "$RUNNER_TEMP/qtifw-workspace" 1
+          suffix=""
+          [[ "$RUNNER_OS" == "Windows" ]] && suffix=".exe"
+          "$QTIFW_BIN/repogen$suffix" --remove --ac 9 \
+            -p "$RUNNER_TEMP/qtifw-workspace/packages" \
+            "$RUNNER_TEMP/qtifw-workspace/repository"
+          "$QTIFW_BIN/binarycreator$suffix" --online-only \
+            -c "$RUNNER_TEMP/qtifw-workspace/config/config.xml" \
+            -p "$RUNNER_TEMP/qtifw-workspace/packages" \
+            "$target"
+          test -e "$target"
+          find "$RUNNER_TEMP/qtifw-workspace/repository" \
+            -name '*content.7z' -type f -print -quit | grep -q .
 
       - name: Build and verify offline EXE wrapper
         if: runner.os == 'Windows'

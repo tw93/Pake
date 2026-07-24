@@ -304,7 +304,6 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             src-tauri/target/
-            online-installer/src-tauri/target/
             offline-installer/windows/target/
           key: ${{ runner.os }}-cargo-pake-${{ hashFiles('**/Cargo.lock') }}
 
@@ -437,11 +436,9 @@ jobs:
           path: "*.exe"
           retention-days: 3
 
-      - name: Package Windows online payload
+      - name: Locate Windows online payload
         if: matrix.config.online && runner.os == 'Windows'
         run: |
-          $payloadDirectory = Join-Path $env:GITHUB_WORKSPACE ".pake-online-input"
-          New-Item -ItemType Directory -Force $payloadDirectory | Out-Null
           $rawExecutables = @(
             Get-ChildItem "src-tauri\target" -Recurse -File -Filter "pake-*.exe" |
               Where-Object {
@@ -452,14 +449,70 @@ jobs:
           if ($rawExecutables.Count -ne 1) {
             throw "Expected exactly one raw Pake executable, found $($rawExecutables.Count)."
           }
-          $archive = Join-Path $payloadDirectory "windows-payload.tar.zst"
-          cargo run --locked --release `
-            --manifest-path online-installer/src-tauri/Cargo.toml `
-            --bin pake-payload-pack -- `
-            $rawExecutables[0].FullName `
-            $archive `
-            "$archive.json"
-          "PAKE_RELEASE_INPUT=$payloadDirectory" >> $env:GITHUB_ENV
+          "PAKE_QTIFW_PAYLOAD=$($rawExecutables[0].FullName)" >> $env:GITHUB_ENV
+
+      - name: Locate macOS online payload
+        if: matrix.config.online && runner.os == 'macOS'
+        shell: bash
+        run: |
+          app="$(find src-tauri/target -path '*/release/bundle/macos/*.app' \
+            -type d -print -quit)"
+          test -n "$app"
+          count="$(find src-tauri/target -path '*/release/bundle/macos/*.app' \
+            -type d -print | wc -l | tr -d ' ')"
+          test "$count" -eq 1
+          echo "PAKE_QTIFW_PAYLOAD=$app" >> "$GITHUB_ENV"
+
+      - name: Locate Linux online payload
+        if: matrix.config.online && runner.os == 'Linux'
+        shell: bash
+        run: |
+          appimage="$(find . -maxdepth 2 -name '*.AppImage' -type f -print -quit)"
+          test -n "$appimage"
+          count="$(find . -maxdepth 2 -name '*.AppImage' -type f -print \
+            | wc -l | tr -d ' ')"
+          test "$count" -eq 1
+          echo "PAKE_QTIFW_PAYLOAD=$appimage" >> "$GITHUB_ENV"
+
+      - name: Install Qt Installer Framework
+        if: matrix.config.online
+        shell: bash
+        run: bash scripts/pake-online/install-qtifw.sh
+
+      - name: Prepare QtIFW package definition
+        id: qtifw
+        if: matrix.config.online
+        shell: bash
+        run: |
+          args=(
+            prepare
+            "$PAKE_BUILD_CONFIG"
+            "$PAKE_QTIFW_PAYLOAD"
+            ".pake-qtifw"
+            "$GITHUB_RUN_NUMBER"
+          )
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            args+=("$ONLINE_EXE_ICON")
+          fi
+          node scripts/pake-online/qtifw.mjs "${args[@]}"
+
+      - name: Generate QtIFW online repository
+        if: matrix.config.online
+        shell: bash
+        run: |
+          "$QTIFW_BIN/repogen${{ runner.os == 'Windows' && '.exe' || '' }}" \
+            --remove --ac 9 \
+            -p "${{ steps.qtifw.outputs.package_directory }}" \
+            "${{ steps.qtifw.outputs.repository_directory }}"
+          mkdir -p .pake-online-input
+          archive="$(find "${{ steps.qtifw.outputs.repository_directory }}" \
+            -name '*content.7z' -type f -print -quit)"
+          test -n "$archive"
+          count="$(find "${{ steps.qtifw.outputs.repository_directory }}" \
+            -name '*content.7z' -type f -print | wc -l | tr -d ' ')"
+          test "$count" -eq 1
+          cp "$archive" .pake-online-input/application.7z
+          echo "PAKE_RELEASE_INPUT=.pake-online-input" >> "$GITHUB_ENV"
 
       - name: Stage rolling release assets
         id: release_assets
@@ -473,52 +526,36 @@ jobs:
       - name: Build online installer (Windows)
         if: matrix.config.online && runner.os == 'Windows'
         env:
-          PAKE_ONLINE_REPOSITORY: ${{ matrix.config.repository }}
-          PAKE_ONLINE_RELEASE_TAG: ${{ matrix.config.releaseTag }}
-          PAKE_ONLINE_CONFIG_ID: ${{ matrix.config.id }}
           ONLINE_INSTALLER_NAME: ${{ steps.release_assets.outputs.online_installer_name }}
           ONLINE_PRODUCT_NAME: ${{ matrix.config.cliConfig.name }} Online
           ONLINE_WINDOWS_FORMAT: ${{ matrix.config.delivery.onlineWindowsFormat || 'msi' }}
         run: |
-          $installerConfig = Join-Path $env:RUNNER_TEMP "pake-online-windows.json"
-          $wixTemplate = (Resolve-Path "src-tauri\assets\main.wxs").Path
-          @{
-            productName = $env:ONLINE_PRODUCT_NAME
-            identifier = "com.pake.online.$($env:PAKE_ONLINE_CONFIG_ID)"
-            app = @{
-              windows = @(
-                @{
-                  label = "main"
-                  title = "$($env:ONLINE_PRODUCT_NAME) Installer"
-                }
-              )
-            }
-            bundle = @{
-              icon = @($env:ONLINE_EXE_ICON)
-              windows = @{
-                wix = @{
-                  language = @("en-US")
-                  template = $wixTemplate
-                }
-              }
-            }
-          } | ConvertTo-Json -Depth 4 -Compress | Set-Content `
-            -Encoding utf8 $installerConfig
-          Push-Location online-installer
-          & '..\node_modules\.bin\tauri.CMD' build --bundles msi `
-            --config $installerConfig
-          Pop-Location
-          New-Item -ItemType Directory -Force ".pake-online-release\online"
-          $onlineInstallers = @(
-            Get-ChildItem `
-              "online-installer\src-tauri\target\release\bundle\msi" `
-              -Recurse -File -Filter "*.msi"
-          )
-          if ($onlineInstallers.Count -ne 1) {
-            throw "Expected exactly one online MSI, found $($onlineInstallers.Count)."
+          $qtifwExe = Join-Path $env:RUNNER_TEMP "pake-online-qtifw.exe"
+          & "$env:QTIFW_BIN\binarycreator.exe" --online-only `
+            -c "${{ steps.qtifw.outputs.config_path }}" `
+            -p "${{ steps.qtifw.outputs.package_directory }}" `
+            $qtifwExe
+          if ($LASTEXITCODE -ne 0) {
+            throw "QtIFW binarycreator failed with exit code $LASTEXITCODE."
           }
+          $candle = (Get-Command candle.exe -ErrorAction Stop).Source
+          $light = (Get-Command light.exe -ErrorAction Stop).Source
+          $wixObject = Join-Path $env:RUNNER_TEMP "pake-online.wixobj"
+          $onlineMsi = Join-Path $env:RUNNER_TEMP "pake-online.msi"
+          & $candle -arch x64 `
+            "-dQtIfwSource=$qtifwExe" `
+            "-dIconSource=${{ steps.qtifw.outputs.icon_path }}" `
+            -out $wixObject "${{ steps.qtifw.outputs.wix_path }}"
+          if ($LASTEXITCODE -ne 0) {
+            throw "WiX candle failed with exit code $LASTEXITCODE."
+          }
+          & $light -sval -ext WixUIExtension -out $onlineMsi $wixObject
+          if ($LASTEXITCODE -ne 0) {
+            throw "WiX light failed with exit code $LASTEXITCODE."
+          }
+          New-Item -ItemType Directory -Force ".pake-online-release\online"
           if ($env:ONLINE_WINDOWS_FORMAT -eq "exe") {
-            $env:PAKE_OFFLINE_MSI = $onlineInstallers[0].FullName
+            $env:PAKE_OFFLINE_MSI = $onlineMsi
             $env:PAKE_OFFLINE_ICON = $env:ONLINE_EXE_ICON
             $env:PAKE_OFFLINE_APP_NAME = $env:ONLINE_PRODUCT_NAME
             $env:PAKE_INSTALLER_KIND = "Online"
@@ -528,9 +565,7 @@ jobs:
               "offline-installer\windows\target\release\pake-offline-installer.exe" `
               ".pake-online-release\online\$env:ONLINE_INSTALLER_NAME"
           } elseif ($env:ONLINE_WINDOWS_FORMAT -eq "msi") {
-            Copy-Item `
-              $onlineInstallers[0].FullName `
-              ".pake-online-release\online\$env:ONLINE_INSTALLER_NAME"
+            Copy-Item $onlineMsi ".pake-online-release\online\$env:ONLINE_INSTALLER_NAME"
           } else {
             throw "Unsupported Windows online installer format: $env:ONLINE_WINDOWS_FORMAT"
           }
@@ -538,38 +573,76 @@ jobs:
       - name: Build online installer (macOS)
         if: matrix.config.online && runner.os == 'macOS'
         env:
-          PAKE_ONLINE_REPOSITORY: ${{ matrix.config.repository }}
-          PAKE_ONLINE_RELEASE_TAG: ${{ matrix.config.releaseTag }}
-          PAKE_ONLINE_CONFIG_ID: ${{ matrix.config.id }}
           ONLINE_INSTALLER_NAME: ${{ steps.release_assets.outputs.online_installer_name }}
         shell: bash
         run: |
-          (
-            cd online-installer
-            ../node_modules/.bin/tauri build --bundles dmg
-          )
+          qtifw_app="$RUNNER_TEMP/Pake Online Installer.app"
+          "$QTIFW_BIN/binarycreator" --online-only \
+            -c "${{ steps.qtifw.outputs.config_path }}" \
+            -p "${{ steps.qtifw.outputs.package_directory }}" \
+            "$qtifw_app"
           mkdir -p .pake-online-release/online
-          ONLINE_DMG="$(find online-installer/src-tauri/target/release/bundle/dmg -name '*.dmg' -type f | head -n 1)"
-          test -n "$ONLINE_DMG"
-          cp "$ONLINE_DMG" ".pake-online-release/online/$ONLINE_INSTALLER_NAME"
+          hdiutil create \
+            -volname "${{ matrix.config.cliConfig.name }} Online Installer" \
+            -srcfolder "$qtifw_app" -ov -format UDZO \
+            ".pake-online-release/online/$ONLINE_INSTALLER_NAME"
 
       - name: Build online installer (Linux)
         if: matrix.config.online && runner.os == 'Linux'
         env:
-          PAKE_ONLINE_REPOSITORY: ${{ matrix.config.repository }}
-          PAKE_ONLINE_RELEASE_TAG: ${{ matrix.config.releaseTag }}
-          PAKE_ONLINE_CONFIG_ID: ${{ matrix.config.id }}
           ONLINE_INSTALLER_NAME: ${{ steps.release_assets.outputs.online_installer_name }}
         shell: bash
         run: |
-          (
-            cd online-installer
-            ../node_modules/.bin/tauri build --bundles appimage
-          )
+          qtifw_binary="$RUNNER_TEMP/pake-online-installer"
+          "$QTIFW_BIN/binarycreator" --online-only \
+            -c "${{ steps.qtifw.outputs.config_path }}" \
+            -p "${{ steps.qtifw.outputs.package_directory }}" \
+            "$qtifw_binary"
+          appdir="$RUNNER_TEMP/PakeOnlineInstaller.AppDir"
+          mkdir -p "$appdir/usr/bin" "$appdir/usr/share/applications"
+          cp "$qtifw_binary" "$appdir/usr/bin/pake-online-installer"
+          cp "${{ steps.qtifw.outputs.icon_path }}" "$appdir/pake-online-installer.png"
+          printf '%s\n' \
+            '#!/bin/sh' \
+            'exec "$APPDIR/usr/bin/pake-online-installer" "$@"' \
+            > "$appdir/AppRun"
+          chmod +x "$appdir/AppRun" "$appdir/usr/bin/pake-online-installer"
+          printf '%s\n' \
+            '[Desktop Entry]' \
+            'Type=Application' \
+            'Name=${{ matrix.config.cliConfig.name }} Online Installer' \
+            'Exec=pake-online-installer' \
+            'Icon=pake-online-installer' \
+            'Categories=Network;' \
+            > "$appdir/pake-online-installer.desktop"
+          cp "$appdir/pake-online-installer.desktop" \
+            "$appdir/usr/share/applications/pake-online-installer.desktop"
+          appimagetool="$(find "$HOME/.cache/tauri" src-tauri/target \
+            -type f -name 'appimagetool*' 2>/dev/null | head -n 1)"
+          test -n "$appimagetool"
+          chmod +x "$appimagetool"
           mkdir -p .pake-online-release/online
-          ONLINE_APPIMAGE="$(find online-installer/src-tauri/target/release/bundle/appimage -name '*.AppImage' -type f | head -n 1)"
-          test -n "$ONLINE_APPIMAGE"
-          cp "$ONLINE_APPIMAGE" ".pake-online-release/online/$ONLINE_INSTALLER_NAME"
+          ARCH=x86_64 "$appimagetool" "$appdir" \
+            ".pake-online-release/online/$ONLINE_INSTALLER_NAME"
+
+      - name: Publish QtIFW repository branch
+        if: matrix.config.online
+        shell: bash
+        run: |
+          worktree="$RUNNER_TEMP/pake-online-repository-worktree"
+          git worktree add --detach "$worktree"
+          git -C "$worktree" checkout --orphan qtifw-repository
+          git -C "$worktree" rm -rf --ignore-unmatch .
+          cp -R "${{ steps.qtifw.outputs.repository_directory }}/." "$worktree/"
+          git -C "$worktree" add -A
+          git -C "$worktree" \
+            -c user.name=github-actions \
+            -c user.email=github-actions@github.com \
+            commit -m "Update ${{ matrix.config.id }} online repository"
+          git -C "$worktree" push origin \
+            "HEAD:refs/heads/${{ steps.qtifw.outputs.repository_branch }}" \
+            --force
+          git worktree remove "$worktree" --force
 
       - name: Upload online installer
         if: matrix.config.online
@@ -637,6 +710,5 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             src-tauri/target/
-            online-installer/src-tauri/target/
             offline-installer/windows/target/
           key: ${{ runner.os }}-cargo-pake-${{ hashFiles('**/Cargo.lock') }}

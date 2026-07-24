@@ -23,6 +23,11 @@ import {
   selectReleaseAssetsToDelete,
   stageReleaseAssets,
 } from "../../scripts/pake-online/release.mjs";
+import {
+  prepareQtIfwWorkspace,
+  QTIFW_DOWNLOADS,
+  QTIFW_INSTALLER_VERSION,
+} from "../../scripts/pake-online/qtifw.mjs";
 
 const temporaryDirectories = [];
 
@@ -132,6 +137,18 @@ describe("Pake online build configuration", () => {
     expect(() => normalizeReleaseVersion("latest")).toThrow(/semantic version/);
   });
 
+  it("uses AppImage as the portable Linux QtIFW component", () => {
+    const config = createBuildConfig(
+      sampleInputs({
+        platform: "ubuntu-24.04",
+        targets: "deb,rpm",
+      }),
+      sampleContext(),
+    );
+    const runtimeConfig = applyOnlineReleaseVersion(config, "V3.15.1");
+    expect(runtimeConfig.cliConfig.targets).toBe("appimage");
+  });
+
   it("keeps the requested version for non-online builds", () => {
     const config = createBuildConfig(
       sampleInputs({ online_mode: false }),
@@ -233,6 +250,89 @@ describe("Pake online build configuration", () => {
   });
 });
 
+describe("Qt Installer Framework online packaging", () => {
+  function onlineConfig(osName) {
+    return {
+      id: `example-${osName}-123`,
+      repository: "owner/repo",
+      sourceBranch: "main",
+      os: osName,
+      cliConfig: {
+        name: "Example App",
+        appVersion: "3.15.1",
+      },
+    };
+  }
+
+  it("generates a Windows QtIFW repository and native MSI definition", () => {
+    const directory = temporaryDirectory();
+    const source = path.join(directory, "source.exe");
+    fs.writeFileSync(source, "windows executable");
+
+    const result = prepareQtIfwWorkspace(onlineConfig("windows"), {
+      sourcePath: source,
+      outputDirectory: path.join(directory, "workspace"),
+      runNumber: "42",
+    });
+
+    expect(result.packageVersion).toBe("3.15.1.42");
+    expect(result.repositoryBranch).toBe(
+      "pake-online-repository-example-windows-123",
+    );
+    expect(result.proxyRepository).toBe(
+      `https://v4.gh-proxy.org/${result.officialRepository}`,
+    );
+    expect(fs.existsSync(result.wixPath)).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(result.packageDirectory, result.packageId, "data", "app.exe"),
+      ),
+    ).toBe(true);
+    expect(fs.readFileSync(result.configPath, "utf8")).toContain(
+      `<Version>${QTIFW_INSTALLER_VERSION}</Version>`,
+    );
+    expect(fs.readFileSync(result.controllerPath, "utf8")).toContain(
+      "installer.setTemporaryRepositories",
+    );
+  });
+
+  it.each([
+    ["macos", "Example Source.app", "Example App.app"],
+    ["linux", "Example.AppImage", "Example App.AppImage"],
+  ])(
+    "uses the same QtIFW 7z repository model for %s",
+    (osName, sourceName, payloadName) => {
+      const directory = temporaryDirectory();
+      const source = path.join(directory, sourceName);
+      if (osName === "macos") {
+        fs.mkdirSync(source);
+        fs.writeFileSync(path.join(source, "Info.plist"), "plist");
+      } else {
+        fs.writeFileSync(source, "appimage");
+      }
+
+      const result = prepareQtIfwWorkspace(onlineConfig(osName), {
+        sourcePath: source,
+        outputDirectory: path.join(directory, "workspace"),
+        runNumber: "7",
+      });
+
+      expect(
+        fs.existsSync(
+          path.join(
+            result.packageDirectory,
+            result.packageId,
+            "data",
+            payloadName,
+          ),
+        ),
+      ).toBe(true);
+      expect(result.wixPath).toBeNull();
+      expect(result.qtifwDownloadSha256).toBe(QTIFW_DOWNLOADS[osName].sha256);
+    },
+  );
+});
+
 describe("Pake online release assets", () => {
   it("detects every supported offline installer format", () => {
     expect(detectArtifactFormat("App.msi")).toBe("msi");
@@ -243,6 +343,7 @@ describe("Pake online release assets", () => {
     expect(detectArtifactFormat("App.AppImage")).toBe("appimage");
     expect(detectArtifactFormat("App-1.pkg.tar.zst")).toBe("zst");
     expect(detectArtifactFormat("App.tar.zst")).toBe("tar.zst");
+    expect(detectArtifactFormat("App.7z")).toBe("7z");
   });
 
   it("stages versioned assets and writes a checksummed manifest", () => {
@@ -417,17 +518,17 @@ describe("Build App With Pake CLI online workflow", () => {
     expect(workflow).toContain(
       'node dist/cli.js --config "$env:PAKE_CLI_CONFIG"',
     );
-    expect(workflow).toContain(
-      "& '..\\node_modules\\.bin\\tauri.CMD' build --bundles msi",
-    );
-    expect(workflow).toContain("--bin pake-payload-pack");
-    expect(workflow).toContain("windows-payload.tar.zst");
+    expect(workflow).toContain("Install Qt Installer Framework");
+    expect(workflow).toContain("scripts/pake-online/qtifw.mjs");
+    expect(workflow).toContain("--remove --ac 9");
+    expect(workflow).toContain("-name '*content.7z'");
     expect(workflow).toContain("Clear stale Windows online entrypoints");
     expect(workflow).toContain('if ($env:ONLINE_WINDOWS_FORMAT -eq "exe")');
-    expect(workflow).toContain('Resolve-Path "src-tauri\\assets\\main.wxs"');
-    expect(workflow).toContain(
-      "../node_modules/.bin/tauri build --bundles appimage",
-    );
+    expect(workflow).toContain("candle.exe");
+    expect(workflow).toContain("binarycreator");
+    expect(workflow).toContain("Publish QtIFW repository branch");
+    expect(workflow).toContain("pake-online-repository-worktree");
+    expect(workflow).toContain("appimagetool");
     expect(workflow).toContain("Build offline EXE wrapper (Windows)");
     expect(workflow).toContain("PAKE_OFFLINE_ICON");
     expect(workflow).toContain("ONLINE_EXE_ICON");
@@ -486,14 +587,9 @@ describe("Build App With Pake CLI online workflow", () => {
       "utf8",
     );
     expect(workflow).toContain("online-installer-build:");
-    expect(workflow).toContain(
-      "../node_modules/.bin/tauri build --bundles msi",
-    );
-    expect(workflow).toContain(
-      "../node_modules/.bin/tauri build --bundles dmg",
-    );
-    expect(workflow).toContain(
-      "../node_modules/.bin/tauri build --bundles appimage",
-    );
+    expect(workflow).toContain("scripts/pake-online/install-qtifw.sh");
+    expect(workflow).toContain("qtifw.mjs prepare");
+    expect(workflow).toContain("repogen");
+    expect(workflow).toContain("binarycreator");
   });
 });
