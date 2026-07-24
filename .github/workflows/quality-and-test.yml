@@ -238,10 +238,23 @@ jobs:
           "$QTIFW_BIN/repogen$suffix" --remove --ac 9 \
             -p "$RUNNER_TEMP/qtifw-workspace/packages" \
             "$RUNNER_TEMP/qtifw-workspace/repository"
-          archive="$(
-            find "$RUNNER_TEMP/qtifw-workspace/repository" \
-              -name '*content.7z' -type f -print -quit
+          archive_name="$(
+            node -e '
+              const fs = require("fs");
+              const xml = fs.readFileSync(process.argv[1], "utf8");
+              const match = xml.match(
+                /<DownloadableArchives>([^<]+)<\/DownloadableArchives>/,
+              );
+              if (!match) throw new Error("QtIFW repository has no payload archive.");
+              const names = match[1].split(",").map((name) => name.trim());
+              if (names.length !== 1) {
+                throw new Error(`Expected one QtIFW payload archive, found ${names.length}.`);
+              }
+              process.stdout.write(names[0]);
+            ' "$RUNNER_TEMP/qtifw-workspace/repository/Updates.xml"
           )"
+          archive="$(find "$RUNNER_TEMP/qtifw-workspace/repository" \
+            -name "$archive_name" -type f -print -quit)"
           test -n "$archive"
           "$QTIFW_BIN/binarycreator$suffix" --online-only \
             -c "$RUNNER_TEMP/qtifw-workspace/config/config.xml" \

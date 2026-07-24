@@ -510,11 +510,26 @@ jobs:
             -p "${{ steps.qtifw.outputs.package_directory }}" \
             "${{ steps.qtifw.outputs.repository_directory }}"
           mkdir -p .pake-online-input
+          archive_name="$(
+            node -e '
+              const fs = require("fs");
+              const xml = fs.readFileSync(process.argv[1], "utf8");
+              const match = xml.match(
+                /<DownloadableArchives>([^<]+)<\/DownloadableArchives>/,
+              );
+              if (!match) throw new Error("QtIFW repository has no payload archive.");
+              const names = match[1].split(",").map((name) => name.trim());
+              if (names.length !== 1) {
+                throw new Error(`Expected one QtIFW payload archive, found ${names.length}.`);
+              }
+              process.stdout.write(names[0]);
+            ' "${{ steps.qtifw.outputs.repository_directory }}/Updates.xml"
+          )"
           archive="$(find "${{ steps.qtifw.outputs.repository_directory }}" \
-            -name '*content.7z' -type f -print -quit)"
+            -name "$archive_name" -type f -print -quit)"
           test -n "$archive"
           count="$(find "${{ steps.qtifw.outputs.repository_directory }}" \
-            -name '*content.7z' -type f -print | wc -l | tr -d ' ')"
+            -name "$archive_name" -type f -print | wc -l | tr -d ' ')"
           test "$count" -eq 1
           cp "$archive" .pake-online-input/application.7z
           echo "PAKE_RELEASE_INPUT=.pake-online-input" >> "$GITHUB_ENV"

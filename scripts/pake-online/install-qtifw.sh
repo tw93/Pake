@@ -42,7 +42,11 @@ if [[ "$RUNNER_OS" == "Linux" ]]; then
     libxcb-icccm4 \
     libxcb-image0 \
     libxcb-keysyms1 \
+    libxcb-randr0 \
     libxcb-render-util0 \
+    libxcb-shape0 \
+    libxcb-sync1 \
+    libxcb-xfixes0 \
     libxcb-xinerama0
 fi
 

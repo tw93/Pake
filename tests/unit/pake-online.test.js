@@ -575,7 +575,7 @@ describe("Build App With Pake CLI online workflow", () => {
     expect(workflow).toContain("Install Qt Installer Framework");
     expect(workflow).toContain("scripts/pake-online/qtifw.mjs");
     expect(workflow).toContain("--remove --ac 9");
-    expect(workflow).toContain("-name '*content.7z'");
+    expect(workflow).toContain("<DownloadableArchives>");
     expect(workflow).toContain("Clear stale Windows online entrypoints");
     expect(workflow).toContain('if ($env:ONLINE_WINDOWS_FORMAT -eq "exe")');
     expect(workflow).toContain("candle.exe");
