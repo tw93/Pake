@@ -576,6 +576,8 @@ describe("Build App With Pake CLI online workflow", () => {
     expect(workflow).toContain("scripts/pake-online/qtifw.mjs");
     expect(workflow).toContain("--remove --ac 9");
     expect(workflow).toContain("<DownloadableArchives>");
+    expect(workflow).toContain('-name "*$archive_suffix"');
+    expect(workflow).toContain('test "$count" -eq 1');
     expect(workflow).toContain("Clear stale Windows online entrypoints");
     expect(workflow).toContain('if ($env:ONLINE_WINDOWS_FORMAT -eq "exe")');
     expect(workflow).toContain("candle.exe");
@@ -645,6 +647,8 @@ describe("Build App With Pake CLI online workflow", () => {
     expect(workflow).toContain("qtifw.mjs prepare");
     expect(workflow).toContain("repogen");
     expect(workflow).toContain("binarycreator");
+    expect(workflow).toContain('-name "*$archive_suffix"');
+    expect(workflow).toContain('test "$count" -eq 1');
     expect(
       fs.readFileSync(
         path.join(process.cwd(), "scripts/pake-online/install-qtifw.sh"),

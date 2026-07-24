@@ -510,7 +510,7 @@ jobs:
             -p "${{ steps.qtifw.outputs.package_directory }}" \
             "${{ steps.qtifw.outputs.repository_directory }}"
           mkdir -p .pake-online-input
-          archive_name="$(
+          archive_suffix="$(
             node -e '
               const fs = require("fs");
               const xml = fs.readFileSync(process.argv[1], "utf8");
@@ -526,8 +526,11 @@ jobs:
             ' "${{ steps.qtifw.outputs.repository_directory }}/Updates.xml"
           )"
           archive="$(find "${{ steps.qtifw.outputs.repository_directory }}" \
-            -name "$archive_name" -type f -print -quit)"
+            -name "*$archive_suffix" -type f -print -quit)"
           test -n "$archive"
+          count="$(find "${{ steps.qtifw.outputs.repository_directory }}" \
+            -name "*$archive_suffix" -type f -print | wc -l | tr -d ' ')"
+          test "$count" -eq 1
           count="$(find "${{ steps.qtifw.outputs.repository_directory }}" \
             -name "$archive_name" -type f -print | wc -l | tr -d ' ')"
           test "$count" -eq 1

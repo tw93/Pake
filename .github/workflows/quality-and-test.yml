@@ -234,11 +234,13 @@ jobs:
           node scripts/pake-online/qtifw.mjs prepare \
             "$config" "$payload" "$RUNNER_TEMP/qtifw-workspace" 1
           suffix=""
-          [[ "$RUNNER_OS" == "Windows" ]] && suffix=".exe"
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            suffix=".exe"
+          fi
           "$QTIFW_BIN/repogen$suffix" --remove --ac 9 \
             -p "$RUNNER_TEMP/qtifw-workspace/packages" \
             "$RUNNER_TEMP/qtifw-workspace/repository"
-          archive_name="$(
+          archive_suffix="$(
             node -e '
               const fs = require("fs");
               const xml = fs.readFileSync(process.argv[1], "utf8");
@@ -254,8 +256,11 @@ jobs:
             ' "$RUNNER_TEMP/qtifw-workspace/repository/Updates.xml"
           )"
           archive="$(find "$RUNNER_TEMP/qtifw-workspace/repository" \
-            -name "$archive_name" -type f -print -quit)"
+            -name "*$archive_suffix" -type f -print -quit)"
           test -n "$archive"
+          count="$(find "$RUNNER_TEMP/qtifw-workspace/repository" \
+            -name "*$archive_suffix" -type f -print | wc -l | tr -d ' ')"
+          test "$count" -eq 1
           "$QTIFW_BIN/binarycreator$suffix" --online-only \
             -c "$RUNNER_TEMP/qtifw-workspace/config/config.xml" \
             -p "$RUNNER_TEMP/qtifw-workspace/packages" \
