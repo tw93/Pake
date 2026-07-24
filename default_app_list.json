@@ -6,96 +6,160 @@
     "url": "https://wx.qq.com/",
     "incognito": true,
     "width": 1000,
-    "height": 720
+    "height": 720,
+    "app_version": "1.0.0",
+    "dark_mode": true,
+    "maximize": true,
+    "new_window": true
   },
   {
     "name": "deepseek",
     "title": "DeepSeek",
     "name_zh": "DeepSeek",
-    "url": "https://chat.deepseek.com/"
+    "url": "https://chat.deepseek.com/",
+    "app_version": "1.0.0",
+    "dark_mode": true,
+    "maximize": true,
+    "new_window": true
   },
   {
     "name": "grok",
     "title": "Grok",
     "name_zh": "Grok",
-    "url": "https://grok.com/"
+    "url": "https://grok.com/",
+    "app_version": "1.0.0",
+    "dark_mode": true,
+    "maximize": true,
+    "new_window": true
   },
   {
     "name": "gemini",
     "title": "Gemini",
     "name_zh": "Gemini",
-    "url": "https://gemini.google.com/"
+    "url": "https://gemini.google.com/",
+    "app_version": "1.0.0",
+    "dark_mode": true,
+    "maximize": true,
+    "new_window": true
   },
   {
     "name": "excalidraw",
     "title": "Excalidraw",
     "name_zh": "Excalidraw",
-    "url": "https://excalidraw.com/"
+    "url": "https://excalidraw.com/",
+    "app_version": "1.0.0",
+    "dark_mode": true,
+    "maximize": true,
+    "new_window": true
   },
   {
     "name": "notion",
     "title": "Notion",
     "name_zh": "Notion",
-    "url": "https://app.notion.com"
+    "url": "https://app.notion.com",
+    "app_version": "1.0.0",
+    "dark_mode": true,
+    "maximize": true,
+    "new_window": true
   },
   {
     "name": "programmusic",
     "title": "ProgramMusic",
     "name_zh": "ProgramMusic",
-    "url": "https://musicforprogramming.net/"
+    "url": "https://musicforprogramming.net/",
+    "app_version": "1.0.0",
+    "dark_mode": true,
+    "maximize": true,
+    "new_window": true
   },
   {
     "name": "twitter",
     "title": "Twitter",
     "name_zh": "推特",
-    "url": "https://x.com/"
+    "url": "https://x.com/",
+    "app_version": "1.0.0",
+    "dark_mode": true,
+    "maximize": true,
+    "new_window": true
   },
   {
     "name": "youtube",
     "title": "YouTube",
     "name_zh": "YouTube",
-    "url": "https://www.youtube.com"
+    "url": "https://www.youtube.com",
+    "app_version": "1.0.0",
+    "dark_mode": true,
+    "maximize": true,
+    "new_window": true
   },
   {
     "name": "chatgpt",
     "title": "ChatGPT",
     "name_zh": "ChatGPT",
-    "url": "https://chatgpt.com/"
+    "url": "https://chatgpt.com/",
+    "app_version": "1.0.0",
+    "dark_mode": true,
+    "maximize": true,
+    "new_window": true
   },
   {
     "name": "flomo",
     "title": "Flomo",
     "name_zh": "浮墨",
-    "url": "https://v.flomoapp.com/mine"
+    "url": "https://v.flomoapp.com/mine",
+    "app_version": "1.0.0",
+    "dark_mode": true,
+    "maximize": true,
+    "new_window": true
   },
   {
     "name": "qwerty",
     "title": "Qwerty",
     "name_zh": "Qwerty",
-    "url": "https://qwerty.kaiyi.cool/"
+    "url": "https://qwerty.kaiyi.cool/",
+    "app_version": "1.0.0",
+    "dark_mode": true,
+    "maximize": true,
+    "new_window": true
   },
   {
     "name": "lizhi",
     "title": "LiZhi",
     "name_zh": "李志",
-    "url": "https://lizhi.dengdengju.com/?from=pake"
+    "url": "https://lizhi.dengdengju.com/?from=pake",
+    "app_version": "1.0.0",
+    "dark_mode": true,
+    "maximize": true,
+    "new_window": true
   },
   {
     "name": "xiaohongshu",
     "title": "XiaoHongShu",
     "name_zh": "小红书",
-    "url": "https://www.xiaohongshu.com/explore"
+    "url": "https://www.xiaohongshu.com/explore",
+    "app_version": "1.0.0",
+    "dark_mode": true,
+    "maximize": true,
+    "new_window": true
   },
   {
     "name": "youtubemusic",
     "title": "YouTubeMusic",
     "name_zh": "YouTubeMusic",
-    "url": "https://music.youtube.com/"
+    "url": "https://music.youtube.com/",
+    "app_version": "1.0.0",
+    "dark_mode": true,
+    "maximize": true,
+    "new_window": true
   },
   {
     "name": "weread",
     "title": "WeRead",
     "name_zh": "微信阅读",
-    "url": "https://weread.qq.com/"
+    "url": "https://weread.qq.com/",
+    "app_version": "1.0.0",
+    "dark_mode": true,
+    "maximize": true,
+    "new_window": true
   }
 ]
