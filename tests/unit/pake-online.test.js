@@ -370,6 +370,7 @@ describe("Qt Installer Framework online packaging", () => {
       "utf8",
     );
     expect(workflow).toContain("src-tauri/assets/macos/dmg/background.png");
+    expect(workflow).toContain("--no-internet-enable");
     expect(workflow).toContain('--icon "$ONLINE_APP_NAME.app" 190 250');
     expect(workflow).toContain("--app-drop-link 500 250");
     expect(workflow).toContain("Name=$ONLINE_APP_NAME");

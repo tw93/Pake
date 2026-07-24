@@ -604,6 +604,7 @@ jobs:
           cp -R "$qtifw_app" "$dmg_source/"
           mkdir -p .pake-online-release/online
           create-dmg \
+            --no-internet-enable \
             --volname "$ONLINE_APP_NAME" \
             --volicon "${{ steps.qtifw.outputs.icon_path }}" \
             --background "src-tauri/assets/macos/dmg/background.png" \

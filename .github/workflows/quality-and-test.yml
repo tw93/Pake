@@ -269,6 +269,7 @@ jobs:
               mkdir -p "$RUNNER_TEMP/dmg-source"
               cp -R "$target" "$RUNNER_TEMP/dmg-source/"
               create-dmg \
+                --no-internet-enable \
                 --volname "CI App" \
                 --background "src-tauri/assets/macos/dmg/background.png" \
                 --window-size 680 420 \
