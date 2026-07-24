@@ -1,12 +1,30 @@
 ytmusic-ad-slot-renderer,
 .ytmusic-ad-slot-renderer,
+.ytmusic-ad-slot-renderer *,
 ytmusic-player-bar-ad-slot,
 ytmusic-clip-ad-renderer,
 ytmusic-ad-avatar-renderer,
 ytmusic-ad-hero-image-renderer,
 ytmusic-ad-title-renderer,
-ytmusic-ad-badge-renderer {
+ytmusic-ad-badge-renderer,
+ytd-ad-slot-renderer,
+.ytd-ad-slot-renderer,
+.ytp-ad-module,
+.ytp-ad-overlay-container,
+.ytp-ad-progress-list,
+.ytp-ad-text,
+.ytp-ad-action-interstitial,
+.ytp-ad-overlay-slot,
+.ytp-ad-player-overlay,
+.ytp-ad-player-overlay-instream-info,
+.video-ads,
+#player-ads,
+ytmusic-shelf-renderer[subheader*="Sponsored"],
+ytmusic-shelf-renderer[subheader*="Ad"],
+ytmusic-carousel-shelf-renderer[subheader*="Sponsored"],
+ytmusic-carousel-shelf-renderer[subheader*="Ad"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
+  pointer-events: none !important;
 }
