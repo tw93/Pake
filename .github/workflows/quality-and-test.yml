@@ -238,6 +238,11 @@ jobs:
           "$QTIFW_BIN/repogen$suffix" --remove --ac 9 \
             -p "$RUNNER_TEMP/qtifw-workspace/packages" \
             "$RUNNER_TEMP/qtifw-workspace/repository"
+          archive="$(
+            find "$RUNNER_TEMP/qtifw-workspace/repository" \
+              -name '*content.7z' -type f -print -quit
+          )"
+          test -n "$archive"
           "$QTIFW_BIN/binarycreator$suffix" --online-only \
             -c "$RUNNER_TEMP/qtifw-workspace/config/config.xml" \
             -p "$RUNNER_TEMP/qtifw-workspace/packages" \
@@ -301,8 +306,6 @@ jobs:
               grep -q '^Name=CI App$' "$appdir/pake-app.desktop"
               ;;
           esac
-          find "$RUNNER_TEMP/qtifw-workspace/repository" \
-            -name '*content.7z' -type f -print -quit | grep -q .
 
       - name: Build and verify offline EXE wrapper
         if: runner.os == 'Windows'

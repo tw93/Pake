@@ -36,7 +36,14 @@ fi
 
 if [[ "$RUNNER_OS" == "Linux" ]]; then
   sudo apt-get update -qq
-  sudo apt-get install -y --no-install-recommends libxkbcommon-x11-0
+  sudo apt-get install -y --no-install-recommends \
+    libxkbcommon-x11-0 \
+    libxcb-cursor0 \
+    libxcb-icccm4 \
+    libxcb-image0 \
+    libxcb-keysyms1 \
+    libxcb-render-util0 \
+    libxcb-xinerama0
 fi
 
 if [[ "$RUNNER_OS" == "macOS" ]]; then
