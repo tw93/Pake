@@ -54,7 +54,6 @@ jobs:
             echo "No formatting changes to commit"
           fi
 
-
   rust-quality:
     name: Rust Code Quality
     runs-on: ubuntu-latest
@@ -168,10 +167,189 @@ jobs:
           CI: true
           NODE_ENV: test
 
+  online-installer-build:
+    name: Online Installer Build (${{ matrix.os }})
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Build Environment
+        uses: ./.github/actions/setup-env
+        with:
+          mode: build
+
+      - name: Install Qt Installer Framework
+        shell: bash
+        run: bash scripts/pake-online/install-qtifw.sh
+
+      - name: Install macOS DMG layout tool
+        if: runner.os == 'macOS'
+        shell: bash
+        run: brew install create-dmg
+
+      - name: Build and verify QtIFW online installer
+        shell: bash
+        timeout-minutes: 30
+        run: |
+          set -euo pipefail
+          case "$RUNNER_OS" in
+            Windows)
+              config_os=windows
+              payload="$(cygpath -w "$(command -v node)")"
+              target="$RUNNER_TEMP/online-installer.exe"
+              ;;
+            macOS)
+              config_os=macos
+              payload="$RUNNER_TEMP/CI App.app"
+              mkdir -p "$payload/Contents/MacOS"
+              printf '#!/bin/sh\nexit 0\n' > "$payload/Contents/MacOS/ci-app"
+              chmod +x "$payload/Contents/MacOS/ci-app"
+              target="$RUNNER_TEMP/online-installer.app"
+              ;;
+            Linux)
+              config_os=linux
+              payload="$RUNNER_TEMP/CI.AppImage"
+              printf '#!/bin/sh\nexit 0\n' > "$payload"
+              chmod +x "$payload"
+              target="$RUNNER_TEMP/online-installer"
+              ;;
+          esac
+          config="$RUNNER_TEMP/qtifw-ci-config.json"
+          node -e '
+            const fs = require("fs");
+            fs.writeFileSync(process.argv[1], JSON.stringify({
+              id: `ci-${process.argv[2]}`,
+              repository: "example/Pake",
+              sourceBranch: "main",
+              os: process.argv[2],
+              cliConfig: { name: "CI App", appVersion: "1.0.0" }
+            }));
+          ' "$config" "$config_os"
+          node scripts/pake-online/qtifw.mjs prepare \
+            "$config" "$payload" "$RUNNER_TEMP/qtifw-workspace" 1
+          suffix=""
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            suffix=".exe"
+          fi
+          "$QTIFW_BIN/repogen$suffix" --remove --ac 9 \
+            -p "$RUNNER_TEMP/qtifw-workspace/packages" \
+            "$RUNNER_TEMP/qtifw-workspace/repository"
+          archive_suffix="$(
+            node -e '
+              const fs = require("fs");
+              const xml = fs.readFileSync(process.argv[1], "utf8");
+              const match = xml.match(
+                /<DownloadableArchives>([^<]+)<\/DownloadableArchives>/,
+              );
+              if (!match) throw new Error("QtIFW repository has no payload archive.");
+              const names = match[1].split(",").map((name) => name.trim());
+              if (names.length !== 1) {
+                throw new Error(`Expected one QtIFW payload archive, found ${names.length}.`);
+              }
+              process.stdout.write(names[0]);
+            ' "$RUNNER_TEMP/qtifw-workspace/repository/Updates.xml"
+          )"
+          archive="$(find "$RUNNER_TEMP/qtifw-workspace/repository" \
+            -name "*$archive_suffix" -type f -print -quit)"
+          test -n "$archive"
+          count="$(find "$RUNNER_TEMP/qtifw-workspace/repository" \
+            -name "*$archive_suffix" -type f -print | wc -l | tr -d ' ')"
+          test "$count" -eq 1
+          "$QTIFW_BIN/binarycreator$suffix" --online-only \
+            -c "$RUNNER_TEMP/qtifw-workspace/config/config.xml" \
+            -p "$RUNNER_TEMP/qtifw-workspace/packages" \
+            "$target"
+          test -e "$target"
+          case "$RUNNER_OS" in
+            Windows)
+              candle.exe -arch x64 \
+                "-dQtIfwSource=$(cygpath -w "$target")" \
+                "-dLauncherSource=$(cygpath -w "$RUNNER_TEMP/qtifw-workspace/windows-launcher.ps1")" \
+                "-dIconSource=$(cygpath -w "$GITHUB_WORKSPACE/src-tauri/png/icon_256.ico")" \
+                -out "$RUNNER_TEMP/online-installer.wixobj" \
+                "$RUNNER_TEMP/qtifw-workspace/online-installer.wxs"
+              light.exe -sval -ext WixUIExtension \
+                -out "$RUNNER_TEMP/online-installer.msi" \
+                "$RUNNER_TEMP/online-installer.wixobj"
+              test -s "$RUNNER_TEMP/online-installer.msi"
+              ;;
+            macOS)
+              executable="$(
+                /usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' \
+                  "$target/Contents/Info.plist"
+              )"
+              mv "$target/Contents/MacOS/$executable" \
+                "$target/Contents/MacOS/pake-online-backend"
+              swiftc "$RUNNER_TEMP/qtifw-workspace/macos-launcher.swift" \
+                -framework AppKit -o "$target/Contents/MacOS/$executable"
+              codesign --force --deep --sign - "$target"
+              mkdir -p "$RUNNER_TEMP/dmg-source"
+              cp -R "$target" "$RUNNER_TEMP/dmg-source/"
+              if ! create-dmg \
+                --no-internet-enable \
+                --volname "CI App" \
+                --background "src-tauri/assets/macos/dmg/background.png" \
+                --window-size 680 420 \
+                --icon "online-installer.app" 190 250 \
+                --app-drop-link 500 250 \
+                "$RUNNER_TEMP/online-installer.dmg" \
+                "$RUNNER_TEMP/dmg-source"; then
+                test -s "$RUNNER_TEMP/online-installer.dmg"
+                hdiutil verify "$RUNNER_TEMP/online-installer.dmg"
+              fi
+              test -s "$RUNNER_TEMP/online-installer.dmg"
+              ;;
+            Linux)
+              appdir="$RUNNER_TEMP/CI.AppDir"
+              mkdir -p "$appdir/usr/share/applications"
+              cp "$target" "$appdir/pake-online-backend"
+              cp "$RUNNER_TEMP/qtifw-workspace/linux-launcher.sh" \
+                "$appdir/AppRun"
+              cp "src-tauri/png/icon_512.png" "$appdir/pake-app.png"
+              printf '%s\n' \
+                '[Desktop Entry]' \
+                'Type=Application' \
+                'Name=CI App' \
+                'Exec=AppRun' \
+                'Icon=pake-app' \
+                'Terminal=false' \
+                > "$appdir/pake-app.desktop"
+              test -x "$appdir/AppRun"
+              grep -q '^Name=CI App$' "$appdir/pake-app.desktop"
+              ;;
+          esac
+
+      - name: Build and verify offline EXE wrapper
+        if: runner.os == 'Windows'
+        shell: bash
+        env:
+          PAKE_OFFLINE_APP_NAME: CI App
+        run: |
+          printf 'ci-msi-placeholder' > offline-installer/windows/ci-app.msi
+          export PAKE_OFFLINE_MSI="$GITHUB_WORKSPACE/offline-installer/windows/ci-app.msi"
+          export PAKE_OFFLINE_ICON="$GITHUB_WORKSPACE/src-tauri/png/icon_256.ico"
+          cargo build --locked --release \
+            --manifest-path offline-installer/windows/Cargo.toml
+          test -f \
+            offline-installer/windows/target/release/pake-offline-installer.exe
+
   summary:
     name: Quality Summary
     runs-on: ubuntu-latest
-    needs: [auto-format, rust-quality, validation-fast, validation-full]
+    needs:
+      [
+        auto-format,
+        rust-quality,
+        validation-fast,
+        validation-full,
+        online-installer-build,
+      ]
     if: always()
     steps:
       - name: Generate Summary
@@ -185,4 +363,5 @@ jobs:
             echo "| Rust Quality | ${{ needs.rust-quality.result == 'success' && 'PASSED' || 'FAILED' }} |"
             echo "| CLI Fast Validation | ${{ needs.validation-fast.result == 'success' && 'PASSED' || 'FAILED' }} |"
             echo "| Full Tauri Build | ${{ needs.validation-full.result == 'success' && 'PASSED' || needs.validation-full.result == 'skipped' && 'SKIPPED (PR fast lane)' || 'FAILED' }} |"
+            echo "| Online Installer Build | ${{ needs.online-installer-build.result == 'success' && 'PASSED' || needs.online-installer-build.result == 'skipped' && 'SKIPPED (PR fast lane)' || 'FAILED' }} |"
           } >> $GITHUB_STEP_SUMMARY

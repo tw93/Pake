@@ -1,0 +1,23 @@
+[package]
+name = "pake-offline-installer"
+version = "0.1.0"
+description = "Offline EXE wrapper for a Pake MSI."
+authors = ["Pake Contributors"]
+license = "GPL-3.0-or-later"
+edition = "2021"
+rust-version = "1.85.0"
+
+[build-dependencies]
+winres = "0.1.12"
+
+[dependencies]
+windows-sys = { version = "0.61", features = [
+  "Win32_System_ApplicationInstallationAndServicing",
+] }
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = "thin"
+opt-level = "z"
+strip = true

@@ -29,6 +29,8 @@ AGENTS.override.md
 # Logs
 AGENT.md
 dist
+!online-installer/dist/
+!online-installer/dist/**
 dist-ssr
 journal/
 lerna-debug.log*
@@ -41,6 +43,9 @@ src-tauri/.cargo/
 src-tauri/.cargo/config.toml
 src-tauri/.pake/
 src-tauri/gen
+online-installer/src-tauri/gen/
+online-installer/src-tauri/target/
+offline-installer/windows/target/
 yarn-debug.log*
 yarn-error.log*
 

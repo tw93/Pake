@@ -33,6 +33,70 @@
 - **后续运行**：约 5 分钟（使用缓存）
 - 缓存大小：完成时为 400-600MB
 
+### 可选的 Windows 离线 EXE
+
+勾选 `offline_exe` 会额外发布一个 `.exe`。它内嵌本次生成的 MSI，并使用原生
+Windows Installer 界面执行安装；原本的 MSI 离线包仍会保留。
+
+`offline_exe_icon` 与 `online_exe_icon` 可分别设置离线 EXE 包装器和实验性
+Windows 在线安装器的图标 URL。ICO 会直接使用；SVG、PNG、JPEG 以及其他 Sharp 支持的图片
+会自动转换成 ICO。图标 URL 必须使用 HTTP(S)、不得包含凭据，大小上限为 10 MiB。
+
+## 实验性在线模式
+
+运行 `Build App With Pake CLI` 时勾选 `online_mode`，即可为当前分支登记本次
+表单配置。首次运行会立即构建；以后每次向同一分支 push，都会重新构建该分支
+登记的全部配置，并更新各自的滚动预发布。
+
+每次在线模式构建都会自动把应用版本设为 Pake 最新正式 Release 的版本。在 Fork
+中，工作流会读取其上游父仓库的最新 Release；非在线构建仍使用表单中的
+`app_version`。
+
+预发布会同时提供版本化 Qt Installer Framework 组件归档和在线安装器。Pake
+使用开源的 Qt Installer Framework（QtIFW），不再维护自制 WebView 安装器。
+QtIFW 作为可扩展的下载和校验后端无界面运行，不会再弹出第二套安装向导；用户
+看到的载体直接复用离线包的应用名、图标和各平台原生外观。
+
+- Windows：`online_windows_format` 可选择应用专属 `.msi` 或 `.exe`。MSI
+  使用与离线 MSI 相同的 WiX 页面顺序和品牌外观，安装过程中由 QtIFW 在后台
+  下载；EXE 是对同一个在线 MSI 的完全无窗口包装。`online_exe_icon` 同时控制
+  包装器和安装器图标。载体版本固定为 `255.0.0`，下载的应用仍使用 Pake 最新
+  正式 Release 版本。
+- macOS：`.dmg` 复用离线 DMG 的背景、窗口大小、图标位置和 Applications
+  拖放入口；其中的 `.app` 使用正常应用名和图标，打开后在后台下载并启动应用。
+- Linux：`.AppImage` 使用正常应用名和图标，打开后由 QtIFW 在后台下载，再
+  启动最新的应用 AppImage。
+
+在线模式运行时，Actions 的 **Artifacts** 区域只提供在线安装引导器；如需真实
+负载或原生软件包，请打开对应的滚动预发布。非在线模式仍只上传常规离线包，并
+保留 3 天。
+
+三个平台统一使用 QtIFW 的最高压缩级别 7z 在线仓库格式。每套配置拥有独立的
+`pake-online-repository-<config-id>` 分支，只有应用和在线载体都构建成功后才会
+更新。QtIFW 会在后台验证仓库元数据与归档摘要。滚动 Release 继续只保留当前
+和上一个成功组件归档及 manifest。
+
+QtIFW 获取仓库元数据前，仓库内的控制脚本会查询 Cloudflare 国家信息。在中国
+大陆时把 `https://github.com/owner/repo/raw/...` 改写成
+`https://v4.gh-proxy.org/https://github.com/owner/repo/raw/...`；其他地区直接
+使用 GitHub。
+
+### 前置条件与限制
+
+- 在线模式为实验性功能，仅支持公开 Fork；配置和安装器绝不会保存 GitHub
+  token。
+- 在 **Settings → Actions → General → Workflow permissions** 中允许工作流
+  读写仓库，以便维护配置分支和预发布。
+- 配置按“应用名、平台、源码分支”区分；对同一组合再次选择
+  `enable-or-update` 会更新已保存配置。
+- 在同一应用、平台和分支下选择 `pause` 可停止后续 push 自动构建；最后一次
+  预发布仍然保留。
+- 配置保存在 `pake-online-config` 分支；QtIFW 仓库使用独立的
+  `pake-online-repository-<config-id>` 分支。每套配置都会在匹配分支的每次
+  push 中占用一个 runner。
+- Windows 的 MSI 外壳按系统安装，真实应用负载保存在用户目录；macOS 和 Linux
+  的真实应用负载也保存在用户级目录。
+
 ## 提示
 
 - 首次运行需要耐心等待，让缓存完全建立
