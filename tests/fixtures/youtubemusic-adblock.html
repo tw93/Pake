@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>YouTube Music adblock test fixture</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 720px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+      .ad,
+      ytmusic-ad-slot-renderer,
+      ytmusic-player-bar-ad-slot {
+        display: block;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        background: #ffcccc;
+        border: 2px dashed #c00;
+      }
+      .ok {
+        background: #ccffcc;
+        border-color: #0c0;
+      }
+      button {
+        margin: 0.5rem 0;
+      }
+      #log {
+        white-space: pre-wrap;
+        font-family: monospace;
+        background: #f4f4f4;
+        padding: 1rem;
+        margin-top: 1rem;
+      }
+    </style>
+    <!-- Load the adblock CSS the same way Pake does for .css injects. -->
+    <link rel="stylesheet" href="../../injects/youtubemusic-adblock.css" />
+  </head>
+  <body>
+    <h1>YouTube Music adblock test fixture</h1>
+    <p>
+      Open this page in a browser and verify that all red ad boxes are hidden.
+      The green box must remain visible. This fixture exercises the same
+      selectors and script logic used by Pake without needing a full build.
+    </p>
+
+    <button id="add-ad">Inject a dynamic ad element</button>
+    <button id="add-skip">Show a skip button</button>
+    <button id="run-checks">Run checks</button>
+
+    <h2>Static ad elements</h2>
+    <ytmusic-ad-slot-renderer
+      >ytmusic-ad-slot-renderer</ytmusic-ad-slot-renderer
+    >
+    <ytmusic-player-bar-ad-slot
+      >ytmusic-player-bar-ad-slot</ytmusic-player-bar-ad-slot
+    >
+    <div class="ytp-ad-module">.ytp-ad-module</div>
+    <div class="video-ads">.video-ads</div>
+    <ytmusic-shelf-renderer subheader="Sponsored"
+      >Sponsored shelf</ytmusic-shelf-renderer
+    >
+
+    <h2>Non-ad element</h2>
+    <ytmusic-player class="ok">ytmusic-player must stay visible</ytmusic-player>
+
+    <h2>Dynamic ad container</h2>
+    <div id="dynamic"></div>
+
+    <h2>Skip button area</h2>
+    <div id="skip-area"></div>
+
+    <div id="log"></div>
+
+    <!-- Load the adblock JS the same way Pake does for .js injects. -->
+    <script src="../../injects/youtubemusic-adblock.js"></script>
+    <script>
+      const log = (msg) => {
+        const el = document.getElementById("log");
+        el.textContent += `${new Date().toLocaleTimeString()} ${msg}\n`;
+      };
+
+      document.getElementById("add-ad").addEventListener("click", () => {
+        const el = document.createElement("ytmusic-ad-slot-renderer");
+        el.textContent = "Dynamically injected ad";
+        el.style.display = "block";
+        el.style.background = "#ffcccc";
+        document.getElementById("dynamic").appendChild(el);
+        log("Injected dynamic ytmusic-ad-slot-renderer");
+      });
+
+      document.getElementById("add-skip").addEventListener("click", () => {
+        const btn = document.createElement("button");
+        btn.className = "ytp-ad-skip-button-modern";
+        btn.textContent = "Skip ad";
+        btn.style.display = "block";
+        btn.addEventListener("click", () =>
+          log("Skip button clicked by script"),
+        );
+        document.getElementById("skip-area").appendChild(btn);
+        log("Injected skip button");
+      });
+
+      document.getElementById("run-checks").addEventListener("click", () => {
+        const hidden = Array.from(
+          document.querySelectorAll(
+            "ytmusic-ad-slot-renderer, ytmusic-player-bar-ad-slot, .ytp-ad-module, .video-ads, ytmusic-shelf-renderer[subheader*=Sponsored]",
+          ),
+        );
+        const visible = hidden.filter(
+          (el) =>
+            el.offsetParent !== null && getComputedStyle(el).display !== "none",
+        );
+        if (visible.length === 0) {
+          log("PASS: all known ad elements are hidden");
+        } else {
+          log(`FAIL: ${visible.length} ad element(s) still visible`);
+        }
+      });
+
+      log("Test fixture loaded");
+    </script>
+  </body>
+</html>
