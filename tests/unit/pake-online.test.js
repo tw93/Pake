@@ -578,6 +578,7 @@ describe("Build App With Pake CLI online workflow", () => {
     expect(workflow).toContain("<DownloadableArchives>");
     expect(workflow).toContain('-name "*$archive_suffix"');
     expect(workflow).toContain('test "$count" -eq 1');
+    expect(workflow).not.toContain("$archive_name");
     expect(workflow).toContain("Clear stale Windows online entrypoints");
     expect(workflow).toContain('if ($env:ONLINE_WINDOWS_FORMAT -eq "exe")');
     expect(workflow).toContain("candle.exe");

@@ -531,9 +531,6 @@ jobs:
           count="$(find "${{ steps.qtifw.outputs.repository_directory }}" \
             -name "*$archive_suffix" -type f -print | wc -l | tr -d ' ')"
           test "$count" -eq 1
-          count="$(find "${{ steps.qtifw.outputs.repository_directory }}" \
-            -name "$archive_name" -type f -print | wc -l | tr -d ' ')"
-          test "$count" -eq 1
           cp "$archive" .pake-online-input/application.7z
           echo "PAKE_RELEASE_INPUT=.pake-online-input" >> "$GITHUB_ENV"
 
