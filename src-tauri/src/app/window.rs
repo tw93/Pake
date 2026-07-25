@@ -3,6 +3,8 @@ use crate::util::{
     check_file_or_append, get_data_dir, get_download_message_with_lang, sanitize_download_filename,
     show_toast, MessageType,
 };
+#[cfg(target_os = "macos")]
+use dispatch::Queue;
 #[cfg(target_os = "windows")]
 use std::{os::windows::ffi::OsStrExt, ptr, sync::OnceLock};
 use std::{
@@ -279,6 +281,27 @@ fn build_window(
         ))
     })?;
 
+    #[cfg(target_os = "macos")]
+    let cert_bypass_target = if label == "pake"
+        && window_config.ignore_certificate_errors
+        && window_config.url_type == "web"
+    {
+        Url::parse(&window_config.url).ok()
+    } else {
+        None
+    };
+
+    // The delegate must be installed before the first TLS challenge. Start on
+    // a neutral page, then navigate from the with_webview callback below.
+    #[cfg(target_os = "macos")]
+    let url = if cert_bypass_target.is_some() {
+        WebviewUrl::CustomProtocol(
+            Url::parse("about:blank").expect("about:blank must be a valid URL"),
+        )
+    } else {
+        url
+    };
+
     let user_agent = config.user_agent.get();
 
     let config_script = format!(
@@ -406,11 +429,6 @@ fn build_window(
         #[cfg(target_os = "linux")]
         {
             linux_browser_args.push_str(" --ignore-certificate-errors");
-        }
-
-        #[cfg(target_os = "macos")]
-        {
-            window_builder = window_builder.additional_browser_args("--ignore-certificate-errors");
         }
     }
 
@@ -583,7 +601,35 @@ fn build_window(
 
     window_builder = window_builder.on_navigation(|_| true);
 
-    window_builder.build()
+    let window = window_builder.build()?;
+
+    // macOS WKWebView ignores the Chromium --ignore-certificate-errors flag, so
+    // install a host-scoped delegate on the process-lifetime main window only.
+    // Queue setup after construction so wry cannot replace the proxy while it
+    // finishes initializing its own navigation delegate.
+    #[cfg(target_os = "macos")]
+    if let Some(target_url) = cert_bypass_target {
+        let allowed_host = target_url
+            .host_str()
+            .expect("web URLs must have a host")
+            .to_owned();
+        let cert_window = window.clone();
+        Queue::main().exec_async(move || {
+            if let Err(error) = cert_window.with_webview(move |webview| {
+                if !crate::app::cert::install_cert_bypass_and_navigate(
+                    webview.inner(),
+                    allowed_host,
+                    target_url.to_string(),
+                ) {
+                    eprintln!("[Pake] Failed to configure macOS certificate bypass.");
+                }
+            }) {
+                eprintln!("[Pake] Failed to access the macOS webview: {error}");
+            }
+        });
+    }
+
+    Ok(window)
 }
 
 #[cfg(all(test, target_os = "windows"))]
