@@ -2567,6 +2567,7 @@ name = "pake"
 version = "3.15.3"
 dependencies = [
  "block2",
+ "dispatch",
  "objc2",
  "objc2-app-kit",
  "objc2-foundation",
