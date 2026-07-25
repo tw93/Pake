@@ -42,19 +42,20 @@ Pake/
 
 ## Development Commands
 
-| Command                              | Purpose                                                         |
-| ------------------------------------ | --------------------------------------------------------------- |
-| `pnpm install`                       | Install dependencies                                            |
-| `pnpm run dev`                       | Tauri development mode                                          |
-| `pnpm run cli:dev -- <url>`          | CLI wrapper + Tauri (recommended)                               |
-| `pnpm run cli:dev --iterative-build` | Faster dev (skip checks)                                        |
-| `pnpm run cli:build`                 | Rollup + TypeScript check (catches type errors Prettier misses) |
-| `pnpm run build`                     | Build for current platform                                      |
-| `pnpm run build:mac`                 | macOS universal binary                                          |
-| `pnpm run format`                    | Format code (prettier + cargo fmt)                              |
-| `npx vitest run`                     | Unit and integration tests only (sub-second)                    |
-| `pnpm test -- --no-build`            | Full suite minus the multi-arch real build                      |
-| `pnpm test`                          | Full suite including release workflow                           |
+| Command                                 | Purpose                                                         |
+| --------------------------------------- | --------------------------------------------------------------- |
+| `pnpm install`                          | Install dependencies                                            |
+| `pnpm run dev`                          | Tauri development mode                                          |
+| `pnpm run cli:dev -- <url>`             | CLI wrapper + Tauri (recommended)                               |
+| `pnpm run cli:dev -- --iterative-build` | Rapid build mode: app only, no dmg/deb/msi. Not a check skip    |
+| `pnpm run cli:build`                    | Rollup + TypeScript check (catches type errors Prettier misses) |
+| `pnpm run release:check`                | The full pre-release gate the `/release` skill requires         |
+| `pnpm run build`                        | Build for current platform                                      |
+| `pnpm run build:mac`                    | macOS universal binary                                          |
+| `pnpm run format`                       | Format code (prettier + cargo fmt)                              |
+| `npx vitest run`                        | Unit and integration tests only (sub-second)                    |
+| `pnpm test -- --no-build`               | Full suite minus the multi-arch real build                      |
+| `pnpm test`                             | Full suite including release workflow                           |
 
 Keep shared project facts in this file so Codex, Claude Code, and other agents use the same source of truth. `CLAUDE.md` is a symlink to this file, so edit `AGENTS.md` only. Local-only overrides (`CLAUDE.local.md`, `AGENTS.override.md`, `.claude/settings.local.json`) stay ignored.
 
@@ -73,20 +74,20 @@ Goals and project facts only; trust the agent to find its own path.
 ## Current Risk Areas
 
 - CLI options are user-facing and must stay synchronized across `bin/helpers/cli-program.ts`, `bin/types.ts`, `bin/defaults.ts`, `bin/helpers/merge.ts`, generated `dist/cli.js`, `schema/pake.schema.json`, and `docs/cli-usage*.md`. Schema-to-CLI sync is enforced by `tests/unit/config-file.test.ts`; the rest is manual discipline.
-- The `--json` machine contract is public API for agents: stdout carries exactly one JSON result (nothing else may write to stdout in machine mode), and the exit codes (0/2/3/4/1) plus error codes (`INVALID_INPUT`, `ENV_MISSING`, `BUILD_FAILED`, `NETWORK`, `UNEXPECTED`) must stay stable. `logger.warn` feeds the JSON `warnings` array, so warn is for real warnings only, not status lines. Owners: `bin/utils/output.ts`, `bin/cli.ts`, `bin/utils/shell.ts`.
-- Local file/directory packaging stages user content into the package's own `dist/` (moving it to `dist_bak` and restoring only `cli.js`). Local build runs can strand `dev.js` and test fixtures in `dist_bak`; restore them before committing. Owner: `stageLocalTree` in `bin/helpers/merge.ts`.
+- The `--json` machine contract is public API for agents: stdout carries exactly one JSON result (nothing else may write to stdout in machine mode), and the exit codes (0/2/3/4/1) plus error codes (`INVALID_INPUT`, `ENV_MISSING`, `BUILD_FAILED`, `UNEXPECTED`, plus `NETWORK` which is reserved and currently unused, since network failures report under the phase code) must stay stable. `logger.warn` feeds the JSON `warnings` array, so warn is for real warnings only, not status lines. Owners: `bin/utils/output.ts`, `bin/cli.ts`, `bin/utils/shell.ts`.
+- Local file/directory packaging stages user content into the package's own `dist/` (moving it to `dist_bak` and restoring only `cli.js`). A crashed local-input run can strand `dev.js` and test fixtures in `dist_bak`; `restoreLocalTree()` heals that at the top of every CLI action, so it needs no manual cleanup. Owners: `stageLocalTree` and `restoreLocalTree` in `bin/helpers/merge.ts`.
 - New user-visible CLI surface (a new flag, alias, subcommand, or extra help variant) needs a stated justification before implementation: name the user problem and why an existing flag, config key, or default cannot cover it, then get maintainer sign-off. Prefer quieter defaults over new options; never split help output into parallel variants.
 - Window/runtime options with platform-sensitive behavior include `--incognito`, `--new-window`, `--min-width`, `--min-height`, `--maximize`, multi-window behavior, notification click handling, and Linux/Wayland WebKit compositing defaults.
 - `--incognito` intentionally trades persistence for clean private sessions; be careful around login, cookies, local storage, and WeChat-style WebView detection.
 - `--new-window` and `--multi-window` do not bypass every provider policy. Google OAuth and similar embedded-WebView restrictions may still require a normal browser or native client.
-- macOS auth-popup behavior is fragile. Auth/sign-in URLs that trigger WebKit `SOAuthorization` popup creation should stay in the current window when that path can abort the app; changes in `src-tauri/src/inject/event.js` need targeted tests. Apple Sign-In (`appleid.apple.com` / `AppleAuthentication` named windows) is the exception and must keep the native `window.open` popup.
+- macOS auth-popup behavior is fragile. Auth and sign-in URLs that trigger WebKit's native auth-popup path should stay in the current window when that path can abort the app. The surface is split: URL matching lives in `src-tauri/src/inject/auth.js` (`matchesAuthUrl`, injected from `src-tauri/src/app/window.rs`) and is covered by `tests/unit/auth-sso-patterns.test.js`; only the `window.open` interception is in `src-tauri/src/inject/event.js`. A change to either needs targeted tests. Apple Sign-In (`appleid.apple.com` / `AppleAuthentication` named windows) is the exception and must keep the native `window.open` popup.
 - Safe clipboard shortcuts (Ctrl+C/X/V/A) on Linux/Windows are bridged in `src-tauri/src/inject/event.js`. Copy/cut/select-all stay in the trusted `handleClipboardShortcut` keydown path; Ctrl+V must leave keydown unhandled so the native WebView paste event preserves images, files, and rich formats, with text-only `navigator.clipboard.readText()` fallback allowed only from a trusted keyup when no native paste event fired. The bridge is gated on `isNonMacDesktop()` and `event.isTrusted`, only acts on editable/selected targets, and must never fire on macOS (native shortcuts already work). Locked by `event-clipboard-shortcuts.test.js` tests `lets native paste preserve non-text clipboard data` and `falls back to clipboard text only when native paste does not fire`.
 - Notification flows cross injected JS, Tauri invokes, capabilities, and native notification plugins. Verify the Rust capability and JS caller together.
 - WebKit compositing behavior is platform-sensitive on Linux/Wayland. Runtime flag decisions live in `src-tauri/src/lib.rs`; keep the default conservative, cover compositor exceptions with unit tests, and document user-facing fallbacks in `docs/faq*.md`.
 - Linux AppImage reports often include harmless GTK, appindicator, or GStreamer warnings. Separate optional runtime warnings from the actual symptom before changing code; input/click failures on pure Wayland compositors are not the same class as blank-window failures.
 - Release state can be split. npm Trusted Publishing can succeed before the popular-app release workflow finishes, and GitHub Release assets can exist while a workflow run still shows queued or in progress. Report each surface explicitly.
 - Local app builds and test runs mutate tracked files as build state: `src-tauri/pake.json`, `src-tauri/tauri.conf.json`, `src-tauri/tauri.macos.conf.json`, and regenerated icons under `src-tauri/png/` and `src-tauri/icons/`. Before committing, `git restore` whatever you did not intentionally change; never let a feature or release commit absorb this churn.
-- Per-app optional fields in `default_app_list.json` consumed by workflows must get their defaults in the jq read step of `release.yml`, not in Actions expressions: GitHub expressions cast both `null` and `false` to `0`, so `matrix.config.x != false` cannot express "default true" and silently flips every app missing the field.
+- Per-app optional fields in `default_app_list.json` currently take their defaults in Actions expressions in `release.yml` (`matrix.config.x || false` and the numeric ones), which works because every field so far is default-false or numeric. The first default-true field cannot use that path and must move its default into the jq read step: GitHub expressions cast both `null` and `false` to `0`, so `matrix.config.x != false` cannot express "default true" and would silently flip every app missing the field.
 - Windows taskbar icons can register blank when an autostarted app launches before Explorer's icon cache is ready (#1323). Every hidden-to-visible path for the main window (tray show/click, activation shortcut, single-instance activation, initial delayed show) must call `reapply_window_icon` from `src-tauri/src/app/window.rs`, which reasserts both the small window icon and the large taskbar icon; adding a new `window.show()` path without it regresses the bug.
 - `.github/workflows/pake-cli.yaml` and `single-app.yaml` are public build surfaces that external users trigger from their own forks (see `docs/github-actions-usage*.md`). Changes there ship to outside users on push to `main`, independent of `V*` releases; treat them like public API, not internal CI.
 
@@ -211,7 +212,7 @@ The first `cargo build` on a fresh clone takes 10+ minutes as Cargo compiles eve
 - **Main README**: keep only common, frequently-used parameters to avoid clutter.
 - **CLI Documentation** (`docs/cli-usage.md` and locale variants): include **all** CLI parameters with detailed usage examples.
 - **Rare or advanced parameters**: should have full documentation in `docs/cli-usage*.md` but minimal or no mention in the main README. Examples: `--title`, `--incognito`, `--system-tray-icon`, `--multi-window`, `--min-width`, `--min-height`.
-- **README popular-packages showcase**: apps render in pairs of `<td>` cells, each with a 600px-wide screenshot from `https://raw.githubusercontent.com/tw93/static/main/pake/<Title>.png` (source spec 2624x1784, a Retina window capture). Upload the screenshot to `tw93/static` before pushing the README row, and note the app's download links stay 404 until the next `V*` release builds its assets.
+- **README popular-packages showcase**: apps render in pairs of `<td>` cells, each with a 600px-wide screenshot from `https://raw.githubusercontent.com/tw93/static/main/pake/<Title>.png` or `.jpg` (the showcase currently mixes both; source spec 2624x1784, a Retina window capture). Upload the screenshot to `tw93/static` before pushing the README row, and note the app's download links stay 404 until the next `V*` release builds its assets.
 - **App list curation**: judge showcase or `default_app_list.json` additions and removals with real demand from `gh release view <tag> --json assets` download counts, not intuition. Keep both README locales in the same order.
 - **Key configuration files**:
   - `src-tauri/pake.json` - default app configuration (CLI options are merged into it at build time).
