@@ -16,7 +16,7 @@ Use this skill when preparing or executing a Pake release.
 
 ## Version Files
 
-Four files must be updated in sync — never update one without the others:
+Four files must be updated in sync, never update one without the others:
 
 - `package.json` → `"version"`
 - `src-tauri/Cargo.toml` → `version` under `[package]`
@@ -27,13 +27,13 @@ Four files must be updated in sync — never update one without the others:
 
 ### Pre-Release
 
-1. [ ] Confirm the new version number (check current: `cat package.json | jq .version`; previous tag: `git tag --list 'V*' --sort=-version:refname | head -1` — a bare `git tag --sort` picks up stray non-version tags like `list` and `continuous`)
+1. [ ] Confirm the new version number (check current: `cat package.json | jq .version`; previous tag: `git tag --list 'V*' --sort=-version:refname | head -1`; a bare `git tag --sort` picks up stray non-version tags like `list` and `continuous`)
 2. [ ] Confirm the version is not already on npm: `npm view pake-cli@X.Y.Z version` should return 404 before publishing
 3. [ ] Update all four version files above
-4. [ ] Run `pnpm run format` — must pass cleanly
-5. [ ] Run `pnpm test` — must pass cleanly. If the release workflow step fails with `pnpm install ... exit code 1` against the CN mirror, re-run once; a single transient flake is acceptable, two consecutive failures is not.
-6. [ ] Run `pnpm run cli:build` — Rollup + TS must pass (catches type errors that `format` misses).
-7. [ ] Run `pnpm run release:check` — verifies version sync, package contents, and npm dry-run
+4. [ ] Run `pnpm run format`, must pass cleanly
+5. [ ] Run `pnpm test`, must pass cleanly. If the release workflow step fails with `pnpm install ... exit code 1` against the CN mirror, re-run once; a single transient flake is acceptable, two consecutive failures is not.
+6. [ ] Run `pnpm run cli:build`, Rollup + TS must pass (catches type errors that `format` misses).
+7. [ ] Run `pnpm run release:check`, verifies version sync, package contents, and npm dry-run
 8. [ ] No uncommitted changes: `git status`. Local tests and builds leave tracked churn (`src-tauri/pake.json`, `tauri.conf.json`, `tauri.macos.conf.json`, regenerated icons); `git restore` it instead of committing it.
 9. [ ] Commit version bump with message: `chore: bump version to VX.X.X`. Include the rebuilt `dist/cli.js` (it embeds the version); stage it with `git add -f dist/cli.js` since `dist/` is gitignored.
 
@@ -93,7 +93,7 @@ CI only creates a bare placeholder release. Every published release must be edit
 
 ### Title format
 
-`V<X.Y.Z> <Codename>` — version, then a single English codename word, optionally with one emoji. Examples: `V3.11.8 Polish`, `V3.11.10 Bedrock`, `V3.12.0 Gateway`, `V3.11.0 Evolve 👻`. The codename is the maintainer's call; pick one that fits the release theme. Even patch releases get a codename.
+`V<X.Y.Z> <Codename>`: version, then a single English codename word, optionally with one emoji. Examples: `V3.11.8 Polish`, `V3.11.10 Bedrock`, `V3.12.0 Gateway`, `V3.11.0 Evolve 👻`. The codename is the maintainer's call; pick one that fits the release theme. Even patch releases get a codename.
 
 ### Body template
 

@@ -46,8 +46,8 @@ Pake/
 | --------------------------------------- | --------------------------------------------------------------- |
 | `pnpm install`                          | Install dependencies                                            |
 | `pnpm run dev`                          | Tauri development mode                                          |
-| `pnpm run cli:dev -- <url>`             | CLI wrapper + Tauri (recommended)                               |
-| `pnpm run cli:dev -- --iterative-build` | Rapid build mode: app only, no dmg/deb/msi. Not a check skip    |
+| `pnpm run cli:dev`                      | Rollup watch build of `bin/dev.ts` into `dist/dev.js` (debug-level CLI) |
+| `node dist/dev.js <url> --iterative-build` | Rapid build mode: app only, no dmg/deb/msi. Not a check skip |
 | `pnpm run cli:build`                    | Rollup + TypeScript check (catches type errors Prettier misses) |
 | `pnpm run release:check`                | The full pre-release gate the `/release` skill requires         |
 | `pnpm run build`                        | Build for current platform                                      |
