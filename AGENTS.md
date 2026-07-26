@@ -42,20 +42,20 @@ Pake/
 
 ## Development Commands
 
-| Command                                 | Purpose                                                         |
-| --------------------------------------- | --------------------------------------------------------------- |
-| `pnpm install`                          | Install dependencies                                            |
-| `pnpm run dev`                          | Tauri development mode                                          |
-| `pnpm run cli:dev`                      | Rollup watch build of `bin/dev.ts` into `dist/dev.js` (debug-level CLI) |
-| `node dist/dev.js <url> --iterative-build` | Rapid build mode: app only, no dmg/deb/msi. Not a check skip |
-| `pnpm run cli:build`                    | Rollup + TypeScript check (catches type errors Prettier misses) |
-| `pnpm run release:check`                | The full pre-release gate the `/release` skill requires         |
-| `pnpm run build`                        | Build for current platform                                      |
-| `pnpm run build:mac`                    | macOS universal binary                                          |
-| `pnpm run format`                       | Format code (prettier + cargo fmt)                              |
-| `npx vitest run`                        | Unit and integration tests only (sub-second)                    |
-| `pnpm test -- --no-build`               | Full suite minus the multi-arch real build                      |
-| `pnpm test`                             | Full suite including release workflow                           |
+| Command                                    | Purpose                                                                 |
+| ------------------------------------------ | ----------------------------------------------------------------------- |
+| `pnpm install`                             | Install dependencies                                                    |
+| `pnpm run dev`                             | Tauri development mode                                                  |
+| `pnpm run cli:dev`                         | Rollup watch build of `bin/dev.ts` into `dist/dev.js` (debug-level CLI) |
+| `node dist/dev.js <url> --iterative-build` | Rapid build mode: app only, no dmg/deb/msi. Not a check skip            |
+| `pnpm run cli:build`                       | Rollup + TypeScript check (catches type errors Prettier misses)         |
+| `pnpm run release:check`                   | The full pre-release gate the `/release` skill requires                 |
+| `pnpm run build`                           | Build for current platform                                              |
+| `pnpm run build:mac`                       | macOS universal binary                                                  |
+| `pnpm run format`                          | Format code (prettier + cargo fmt)                                      |
+| `npx vitest run`                           | Unit and integration tests only (sub-second)                            |
+| `pnpm test -- --no-build`                  | Full suite minus the multi-arch real build                              |
+| `pnpm test`                                | Full suite including release workflow                                   |
 
 Keep shared project facts in this file so Codex, Claude Code, and other agents use the same source of truth. `CLAUDE.md` is a symlink to this file, so edit `AGENTS.md` only. Local-only overrides (`CLAUDE.local.md`, `AGENTS.override.md`, `.claude/settings.local.json`) stay ignored.
 
