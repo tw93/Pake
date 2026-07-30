@@ -182,6 +182,54 @@ describe("event link guard", () => {
     );
   });
 
+  it("navigates GitHub release pages instead of downloading them as documents", () => {
+    const context = loadEventHelpers({ withTauri: true });
+    context.window.location.href = "https://github.com/owner/repo/releases";
+    runDomReady(context);
+
+    const event = makeClickEvent(
+      makeAnchor(
+        "https://github.com/owner/repo/releases/tag/v1.28.3",
+        "_self",
+      ),
+    );
+    getClickGuard(context)(event);
+
+    expect(event.preventDefault).not.toHaveBeenCalled();
+    expect(event.stopImmediatePropagation).not.toHaveBeenCalled();
+    expect(context.invokeCalls).not.toContainEqual([
+      "download_file",
+      expect.anything(),
+    ]);
+  });
+
+  it("still downloads files linked from GitHub releases", () => {
+    const context = loadEventHelpers({ withTauri: true });
+    context.window.location.href = "https://github.com/owner/repo/releases";
+    runDomReady(context);
+
+    const event = makeClickEvent(
+      makeAnchor(
+        "https://github.com/owner/repo/releases/download/v1.28.3/app.dmg",
+        "_self",
+      ),
+    );
+    getClickGuard(context)(event);
+
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(event.stopImmediatePropagation).toHaveBeenCalled();
+    expect(context.invokeCalls).toContainEqual([
+      "download_file",
+      {
+        params: {
+          url: "https://github.com/owner/repo/releases/download/v1.28.3/app.dmg",
+          filename: "app.dmg",
+          language: "en-US",
+        },
+      },
+    ]);
+  });
+
   it("navigates macOS auth URLs in the current window", () => {
     const { openAuthNavigation, window } = loadEventHelpers({
       userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_5)",
