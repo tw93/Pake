@@ -663,9 +663,11 @@
   function getFindShortcutAction(event) {
     const userAgent = navigator.userAgent || "";
     const isMac = /macintosh|mac os x/i.test(userAgent);
-    const hasModifier = isMac
-      ? event.metaKey && !event.ctrlKey
-      : event.ctrlKey && !event.metaKey;
+    if (isMac) {
+      return "";
+    }
+
+    const hasModifier = event.ctrlKey && !event.metaKey;
 
     if (!hasModifier || event.altKey) {
       return "";

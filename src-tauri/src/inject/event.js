@@ -60,6 +60,20 @@ function handleShortcut(event) {
   }
 }
 
+function handleWebShortcut(event) {
+  if (isNonMacDesktop() && event.ctrlKey) {
+    handleShortcut(event);
+    return;
+  }
+
+  const isMac = /mac/i.test(getDesktopPlatform());
+  const isMacScrollShortcut =
+    event.key === "ArrowUp" || event.key === "ArrowDown";
+  if (isMac && event.metaKey && isMacScrollShortcut) {
+    handleShortcut(event);
+  }
+}
+
 function toggleNativeFullscreen(appWindow) {
   appWindow
     .isFullscreen()
@@ -622,14 +636,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (window["pakeConfig"]?.disabled_web_shortcuts !== true) {
     document.addEventListener("keydown", handleWindowFullscreenShortcut, true);
-    document.addEventListener("keyup", (event) => {
-      if (/windows|linux/i.test(navigator.userAgent) && event.ctrlKey) {
-        handleShortcut(event);
-      }
-      if (/macintosh|mac os x/i.test(navigator.userAgent) && event.metaKey) {
-        handleShortcut(event);
-      }
-    });
+    document.addEventListener("keyup", handleWebShortcut);
   }
 
   document.addEventListener("keydown", handleClipboardShortcut, true);

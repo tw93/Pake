@@ -240,7 +240,7 @@ describe("Find injection", () => {
     expect(previousEvent.propagationStopped).toBe(true);
   });
 
-  it("uses the macOS modifier for Find shortcuts", () => {
+  it("leaves macOS Find shortcuts to the native menu", () => {
     const context = loadFindScript({
       enabled: true,
       userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
@@ -252,7 +252,7 @@ describe("Find injection", () => {
     listener.handler(createKeyboardEvent("f", { ctrlKey: true }));
     listener.handler(createKeyboardEvent("f", { metaKey: true }));
 
-    expect(calls).toEqual(["open"]);
+    expect(calls).toEqual([]);
   });
 
   it("counts text matches and skips input and script content", () => {
