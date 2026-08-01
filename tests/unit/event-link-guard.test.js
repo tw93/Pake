@@ -188,10 +188,7 @@ describe("event link guard", () => {
     runDomReady(context);
 
     const event = makeClickEvent(
-      makeAnchor(
-        "https://github.com/owner/repo/releases/tag/v1.28.3",
-        "_self",
-      ),
+      makeAnchor("https://github.com/owner/repo/releases/tag/v1.28.3", "_self"),
     );
     getClickGuard(context)(event);
 
