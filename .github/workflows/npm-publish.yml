@@ -60,7 +60,14 @@ jobs:
           RUN_STATUS="$(jq -r '.status' <<<"$RUN_JSON")"
           RUN_CONCLUSION="$(jq -r '.conclusion' <<<"$RUN_JSON")"
           RUN_WORKFLOW_ID="$(jq -r '.workflowDatabaseId' <<<"$RUN_JSON")"
-          if [ "$RUN_WORKFLOW_ID" != "$QUALITY_WORKFLOW_ID" ] || [ "$RUN_EVENT" != "push" ] || [ "$RUN_BRANCH" != "main" ] || [ "$RUN_SHA" != "$EXPECTED_SHA" ] || [ "$RUN_STATUS" != "completed" ] || [ "$RUN_CONCLUSION" != "success" ]; then
+          case "$RUN_EVENT" in
+            push|workflow_dispatch) ;;
+            *)
+              echo "Quality run ${QUALITY_RUN_ID} has unsupported event ${RUN_EVENT}: ${RUN_JSON}"
+              exit 1
+              ;;
+          esac
+          if [ "$RUN_WORKFLOW_ID" != "$QUALITY_WORKFLOW_ID" ] || [ "$RUN_BRANCH" != "main" ] || [ "$RUN_SHA" != "$EXPECTED_SHA" ] || [ "$RUN_STATUS" != "completed" ] || [ "$RUN_CONCLUSION" != "success" ]; then
             echo "Quality run ${QUALITY_RUN_ID} does not prove ${EXPECTED_SHA}: ${RUN_JSON}"
             exit 1
           fi
