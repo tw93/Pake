@@ -37,6 +37,8 @@ Build Pake apps online without installing development tools locally.
 
 - Be patient on first run - let cache build completely
 - Stable network connection recommended
+- Enable `Allow sites to open new windows` when the site launches sign-in,
+  exam, or other flows in a separate window
 - If build fails, delete cache and retry
 
 ## Links

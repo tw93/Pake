@@ -135,6 +135,17 @@ describe("Workflow path integration", () => {
       expect(workflow).toContain("Upload ZST (Linux)");
       expect(workflow).toContain("path: ${{ inputs.name }}-*.pkg.tar.zst");
     });
+
+    it("should forward the new-window input on every platform", () => {
+      const workflow = fs.readFileSync(
+        ".github/workflows/pake-cli.yaml",
+        "utf8",
+      );
+
+      expect(workflow).toContain("new_window:");
+      expect(workflow).toContain('ARGS+=("--new-window")');
+      expect(workflow).toContain('$args += "--new-window"');
+    });
   });
 
   describe("Architecture-specific paths", () => {

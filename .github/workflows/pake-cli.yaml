@@ -53,6 +53,11 @@ on:
         required: false
         type: boolean
         default: false
+      new_window:
+        description: "Allow sites to open new windows"
+        required: false
+        type: boolean
+        default: false
       multi_arch:
         description: "Universal binary (macOS only)"
         required: false
@@ -142,6 +147,10 @@ jobs:
             ARGS+=("--hide-title-bar")
           fi
 
+          if [ "${{ inputs.new_window }}" == "true" ]; then
+            ARGS+=("--new-window")
+          fi
+
           if [ "${{ inputs.multi_arch }}" == "true" ]; then
             ARGS+=("--multi-arch")
           fi
@@ -190,6 +199,10 @@ jobs:
 
           if ("${{ inputs.hide_title_bar }}" -eq "true") {
             $args += "--hide-title-bar"
+          }
+
+          if ("${{ inputs.new_window }}" -eq "true") {
+            $args += "--new-window"
           }
 
           Write-Host "Running: node dist/cli.js $($args -join ' ')"
