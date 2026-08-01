@@ -25,7 +25,6 @@ tauri = { version = "2.10.2", features = [
   "tray-icon",
   "image-ico",
   "image-png",
-  "macos-proxy",
 ] }
 tauri-plugin-window-state = "2.4.1"
 tauri-plugin-oauth = "2.0.0"
@@ -53,6 +52,9 @@ windows-sys = { version = "0.61.2", features = [
 [features]
 # this feature is used for development builds from development cli
 cli-build = []
+# Tauri's macOS proxy APIs require macOS 14 or later. The CLI enables this
+# feature only after checking the host Darwin version.
+macos-proxy = ["tauri/macos-proxy"]
 # by default Tauri runs in production mode
 # when `tauri dev` runs it is executed with `cargo run --no-default-features` if `devPath` is an URL
 default = ["custom-protocol"]
