@@ -139,6 +139,7 @@ jobs:
         with:
           context: .
           push: true
+          sbom: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
