@@ -451,7 +451,6 @@ const DOWNLOAD_PATH_PATTERNS = [
   "/files/",
   "/attachments/",
   "/assets/",
-  "/releases/",
   "/dist/",
 ];
 
