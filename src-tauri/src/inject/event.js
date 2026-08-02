@@ -451,11 +451,7 @@ const PREVIEWABLE_MEDIA_EXTENSIONS = [
 // routes (e.g. MEXC /assets/future) and would be intercepted as downloads.
 // Extensionless links under these paths still match; prefer real extensions,
 // download attributes, or ?download / ?attachment query hints when possible.
-const DOWNLOAD_PATH_PATTERNS = [
-  "/download/",
-  "/files/",
-  "/attachments/",
-];
+const DOWNLOAD_PATH_PATTERNS = ["/download/", "/files/", "/attachments/"];
 
 // Language detection utilities
 function getUserLanguage() {

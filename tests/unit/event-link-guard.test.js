@@ -244,9 +244,9 @@ describe("event link guard", () => {
       "download_file",
       expect.anything(),
     ]);
-    expect(context.isDownloadableFile("https://www.mexc.com/assets/future")).toBe(
-      false,
-    );
+    expect(
+      context.isDownloadableFile("https://www.mexc.com/assets/future"),
+    ).toBe(false);
   });
 
   it("still downloads real files that live under /assets/ by extension", () => {
@@ -263,9 +263,9 @@ describe("event link guard", () => {
   it("keeps intentional download-path interception for extensionless /download/ links", () => {
     const { isDownloadableFile } = loadEventHelpers();
 
-    expect(
-      isDownloadableFile("https://example.com/download/export"),
-    ).toBe(true);
+    expect(isDownloadableFile("https://example.com/download/export")).toBe(
+      true,
+    );
     expect(isDownloadableFile("https://example.com/files/report.pdf")).toBe(
       true,
     );

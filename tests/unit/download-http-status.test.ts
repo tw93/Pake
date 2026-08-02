@@ -37,4 +37,3 @@ describe('download HTTP status handling', () => {
     expect(patternsBlock).toContain('/attachments/');
   });
 });
-
