@@ -22,17 +22,19 @@ Aim it at a boundary, not at a file.
 
 Name the area and the depth. A whole-repo sweep with no budget produces speculation; pick one hotspot and go deep. Start from the Hotspot Map in `AGENTS.md` (Current Risk Areas + table below) rather than inventing a scope.
 
-| Hotspot                    | Primary paths                                            | Locked tests (examples)                                    |
-| -------------------------- | -------------------------------------------------------- | ---------------------------------------------------------- |
-| Link / download heuristics | `src-tauri/src/inject/event.js`                          | `event-link-guard.test.js`, `download-http-status.test.ts` |
-| Download success semantics | `src-tauri/src/app/invoke.rs`, `window.rs` `on_download` | `download-http-status.test.ts`                             |
-| Menu / focused window      | `src-tauri/src/app/menu.rs`                              | `menu-focused-window.test.ts`                              |
-| Startup visibility         | `src-tauri/src/lib.rs`, `setup.rs`                       | `startup-window-reveal.test.ts`                            |
-| Auth / popup               | `inject/auth.js`, `inject/event.js`                      | `auth-sso-patterns.test.js`, `new-window-macos.test.js`    |
-| Clipboard                  | `inject/event.js`                                        | `event-clipboard-shortcuts.test.js`                        |
-| Multi-window / icon        | `window.rs`, `setup.rs`                                  | `window-icon-reapply.test.ts`                              |
-| Platform fake capability   | `cert.rs`, proxy, WebKit flags in `lib.rs`               | `macos-proxy-feature.test.ts`, Linux flag unit tests       |
-| CLI / config contract      | `bin/`, `schema/pake.schema.json`                        | `config-file.test.ts`, `cli-options.test.ts`               |
+| Hotspot                    | Primary paths                                            | Locked tests (examples)                                                          |
+| -------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Link / download heuristics | `src-tauri/src/inject/event.js`                          | `event-link-guard.test.js`, `download-http-status.test.ts`                       |
+| Download success semantics | `src-tauri/src/app/invoke.rs`, `window.rs` `on_download` | `download-http-status.test.ts`                                                   |
+| Menu / focused window      | `src-tauri/src/app/menu.rs`                              | `menu-focused-window.test.ts`                                                    |
+| Startup visibility         | `src-tauri/src/lib.rs`, `setup.rs`                       | `startup-window-reveal.test.ts`                                                  |
+| Auth / popup               | `inject/auth.js`, `inject/event.js`                      | `auth-sso-patterns.test.js`, `new-window-macos.test.js`                          |
+| Clipboard                  | `inject/event.js`                                        | `event-clipboard-shortcuts.test.js`                                              |
+| Multi-window / icon        | `window.rs`, `setup.rs`                                  | `window-icon-reapply.test.ts`, `startup-window-reveal.test.ts`                   |
+| Platform fake capability   | `cert.rs`, proxy, WebKit flags in `lib.rs`               | `macos-proxy-feature.test.ts`, Linux flag unit tests                             |
+| CLI / config contract      | `bin/`, `schema/pake.schema.json`                        | `config-file.test.ts`, `cli-options.test.ts`                                     |
+
+The AGENTS.md Hotspot Map third column is regression risk, not an open-bug list. Confirm against Current Risk Areas and the tests above before treating a row as a live defect.
 
 ## 2. Read the area's own fix history first
 

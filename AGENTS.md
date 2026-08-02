@@ -24,6 +24,7 @@ Pake/
 │   ├── Cargo.toml        # Rust dependencies and version
 │   ├── tauri.conf.json   # Tauri configuration and version
 │   └── .cargo/           # Cargo configuration (gitignored)
+├── .agents/skills/        # Agent skills (/release, /bugs, /github-ops, /code-review); .claude/skills/* symlinks here
 ├── dist/                 # Compiled CLI output
 ├── docs/                 # Documentation
 │   ├── cli-usage.md      # CLI parameters
@@ -73,19 +74,19 @@ Goals and project facts only; trust the agent to find its own path.
 
 ## Hotspot Map (for `/bugs`)
 
-Proactive latent-bug sweeps use `.agents/skills/bugs/SKILL.md`. Pick one row and go deep; do not invent a whole-repo scope.
+Proactive latent-bug sweeps use `.agents/skills/bugs/SKILL.md`. Pick one row and go deep; do not invent a whole-repo scope. The third column is **historical failure modes / regression risks**, not a claim that the tree is broken today. Prefer the matching Current Risk Areas invariant when judging a change.
 
-| Hotspot                    | Paths                                  | What usually goes wrong                                                      |
-| -------------------------- | -------------------------------------- | ---------------------------------------------------------------------------- |
-| Link / download heuristics | `src-tauri/src/inject/event.js`        | SPA routes intercepted as downloads; path roots too broad                    |
-| Download success semantics | `invoke.rs`, `window.rs` `on_download` | Non-2xx toasted as success; toast/IPC pinned to `"pake"`; no session cookies |
-| Menu / focused window      | `menu.rs`                              | Commands hit the main window, not the focused one; eval dead on error pages  |
-| Startup visibility         | `lib.rs`, `setup.rs`                   | Blank shell, `about:blank` false ready, user hide racing fallback reveal     |
-| Auth / popup               | `auth.js`, `event.js`                  | macOS auth crash, SSO in system browser, Apple popup exception               |
-| Clipboard                  | `event.js`                             | keydown steals native paste; double-paste fallback                           |
-| Multi-window / icon        | `window.rs`, `setup.rs`                | Missing `reapply_window_icon` on show; secondary window toast/target         |
-| Platform capability        | `cert.rs`, proxy, WebKit flags         | Flag name present, platform no-op                                            |
-| CLI / config contract      | `bin/`, `schema/`                      | Config smuggles out-of-range values CLI rejects                              |
+| Hotspot                    | Paths                                  | Regression risk if reintroduced                                                              |
+| -------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Link / download heuristics | `src-tauri/src/inject/event.js`        | SPA routes or Cmd/Ctrl+click treated as downloads; path roots too broad                      |
+| Download success semantics | `invoke.rs`, `window.rs` `on_download` | Non-2xx toasted as success; toast/IPC hardcoded to `"pake"`; request drops session cookies   |
+| Menu / focused window      | `menu.rs`                              | Commands hit the main window, not the focused one; eval dead on error pages                  |
+| Startup visibility         | `lib.rs`, `setup.rs`                   | Blank shell, `about:blank` false ready, user hide racing fallback reveal                     |
+| Auth / popup               | `auth.js`, `event.js`                  | macOS auth crash, SSO in system browser, Apple popup exception                               |
+| Clipboard                  | `event.js`                             | keydown steals native paste; double-paste fallback                                           |
+| Multi-window / icon        | `window.rs`, `setup.rs`                | Missing `reapply_window_icon` on show; secondary window toast/target; Cmd+N blank flash      |
+| Platform capability        | `cert.rs`, proxy, WebKit flags         | Flag name present, platform no-op                                                            |
+| CLI / config contract      | `bin/`, `schema/`                      | Config smuggles out-of-range values CLI rejects                                              |
 
 ## Current Risk Areas
 
@@ -104,8 +105,9 @@ Proactive latent-bug sweeps use `.agents/skills/bugs/SKILL.md`. Pick one row and
 - Release state can be split. npm Trusted Publishing can succeed before the popular-app release workflow finishes, and GitHub Release assets can exist while a workflow run still shows queued or in progress. Report each surface explicitly.
 - Local app builds and test runs mutate tracked files as build state: `src-tauri/pake.json`, `src-tauri/tauri.conf.json`, `src-tauri/tauri.macos.conf.json`, and regenerated icons under `src-tauri/png/` and `src-tauri/icons/`. Before committing, `git restore` whatever you did not intentionally change; never let a feature or release commit absorb this churn.
 - Per-app optional fields in `default_app_list.json` currently take their defaults in Actions expressions in `release.yml` (`matrix.config.x || false` and the numeric ones), which works because every field so far is default-false or numeric. The first default-true field cannot use that path and must move its default into the jq read step: GitHub expressions cast both `null` and `false` to `0`, so `matrix.config.x != false` cannot express "default true" and would silently flip every app missing the field.
-- Windows taskbar icons can register blank when an autostarted app launches before Explorer's icon cache is ready (#1323). Every hidden-to-visible path for the main window (tray show/click, activation shortcut, single-instance activation, initial delayed show) must call `reapply_window_icon` from `src-tauri/src/app/window.rs`, which reasserts both the small window icon and the large taskbar icon; adding a new `window.show()` path without it regresses the bug.
-- Download and toast paths must not hardcode `get_webview_window("pake")` when the action originates from a secondary window: IPC commands take the calling `WebviewWindow`, and `on_download` resolves toast by the event webview's label. Link-download heuristics prefer real file extensions, the `download` attribute, and `?download` / `?attachment` query hints; do not re-add broad SPA roots such as `/assets/`, `/dist/`, `/files/`, or `/releases/` (see #1337, #1339).
+- Windows taskbar icons can register blank when an autostarted app launches before Explorer's icon cache is ready (#1323). Every hidden-to-visible `window.show()` path (main or secondary: tray show/click, activation shortcut, single-instance activation, startup/page-load reveal, multi-window Cmd+N reveal) must call `reapply_window_icon` from `src-tauri/src/app/window.rs` (or go through `reveal_built_window` / `reveal_startup_window`, which already do). The helper reasserts both the small window icon and the large taskbar icon; a new show path without it regresses the bug.
+- Multi-window home clones (`open_additional_window_safe`, labels `pake-N`) are built hidden and revealed via `reveal_built_window` on the first real page load (or a 3s fallback), matching the main-window blank-shell guard. OAuth/pop-up windows from `--new-window` stay immediately visible by design.
+- Download and toast paths must not hardcode `get_webview_window("pake")` when the action originates from a secondary window: IPC commands take the calling `WebviewWindow`, and `on_download` resolves toast by the event webview's label. Authenticated downloads should attach webview session cookies when available. Link-download heuristics prefer real file extensions, the `download` attribute, and `?download` / `?attachment` query hints; Cmd/Ctrl+click is navigation, not "save as"; do not re-add broad SPA roots such as `/assets/`, `/dist/`, `/files/`, or `/releases/` (see #1337, #1339).
 - macOS menu navigation must keep working on blank error pages: Reload uses native `WebviewWindow::reload`, Go Home uses `navigate` + `resolve_home_url`, Back/Forward use the platform WKWebView history API rather than page `eval`. Copy URL reads `window.url()` so it does not depend on a live JS document.
 - `.github/workflows/pake-cli.yaml` and `single-app.yaml` are public build surfaces that external users trigger from their own forks (see `docs/github-actions-usage*.md`). Changes there ship to outside users on push to `main`, independent of `V*` releases; treat them like public API, not internal CI.
 
