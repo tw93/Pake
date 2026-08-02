@@ -21,9 +21,7 @@ describe('startup window reveal', () => {
   });
 
   it('does not treat about:blank as a ready first paint', () => {
-    expect(libSource).toMatch(
-      /is_placeholder_startup_url\(payload\.url\(\)\)/,
-    );
+    expect(libSource).toMatch(/is_placeholder_startup_url\(payload\.url\(\)\)/);
     expect(libSource).toMatch(
       /url\.scheme\(\)\.eq_ignore_ascii_case\("about"\)/,
     );
