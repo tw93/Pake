@@ -6,13 +6,15 @@ use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
 };
-use tauri::{webview::PageLoadEvent, Manager, WebviewWindow};
+use tauri::{webview::PageLoadEvent, Manager, Url, WebviewWindow};
 use tauri_plugin_window_state::Builder as WindowStatePlugin;
 use tauri_plugin_window_state::StateFlags;
 
 #[cfg(target_os = "macos")]
 use std::time::Duration;
 
+// Fallback when PageLoadEvent::Finished never arrives (offline / stalled).
+// Deliberately longer than a paint tick so the normal path can win first.
 const STARTUP_WINDOW_FALLBACK_DELAY: u64 = 3_000;
 #[cfg(target_os = "linux")]
 const PAKE_LINUX_WEBKIT_SAFE_MODE: &str = "PAKE_LINUX_WEBKIT_SAFE_MODE";
@@ -32,6 +34,13 @@ use app::{
     window::{open_additional_window_safe, reapply_window_icon, set_window, MultiWindowState},
 };
 use util::get_pake_config;
+
+/// Placeholder documents used before the real target URL navigates (e.g. macOS
+/// cert-bypass starts on about:blank). Revealing on these would reintroduce the
+/// blank-window flash the page-load gate is meant to prevent.
+fn is_placeholder_startup_url(url: &Url) -> bool {
+    url.scheme().eq_ignore_ascii_case("about")
+}
 
 fn reveal_startup_window(window: WebviewWindow, init_fullscreen: bool, revealed: &Arc<AtomicBool>) {
     if revealed.swap(true, Ordering::AcqRel) {
@@ -221,13 +230,26 @@ pub fn run_app() {
         ));
     }
 
+    // Reveal the main window after the first real document finishes loading so
+    // slow WKWebView cold starts do not expose an empty but interactive shell.
+    // start_to_tray keeps the window hidden for the whole session until the user
+    // opens it from the tray / shortcut.
     if !start_to_tray {
         let page_load_revealed = startup_window_revealed.clone();
         app_builder = app_builder.on_page_load(move |webview, payload| {
-            if webview.label() == "pake" && matches!(payload.event(), PageLoadEvent::Finished) {
-                if let Some(window) = webview.app_handle().get_webview_window("pake") {
-                    reveal_startup_window(window, init_fullscreen, &page_load_revealed);
-                }
+            if webview.label() != "pake" {
+                return;
+            }
+            if !matches!(payload.event(), PageLoadEvent::Finished) {
+                return;
+            }
+            // Skip about:blank (and other about: placeholders) used by the macOS
+            // cert-bypass path before the real target URL navigates.
+            if is_placeholder_startup_url(payload.url()) {
+                return;
+            }
+            if let Some(window) = webview.app_handle().get_webview_window("pake") {
+                reveal_startup_window(window, init_fullscreen, &page_load_revealed);
             }
         });
     }
@@ -351,6 +373,19 @@ pub fn run() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn placeholder_startup_urls_cover_about_blank() {
+        let blank: Url = "about:blank".parse().unwrap();
+        let srcdoc: Url = "about:srcdoc".parse().unwrap();
+        let https: Url = "https://github.com/".parse().unwrap();
+        let tauri: Url = "tauri://localhost/".parse().unwrap();
+
+        assert!(is_placeholder_startup_url(&blank));
+        assert!(is_placeholder_startup_url(&srcdoc));
+        assert!(!is_placeholder_startup_url(&https));
+        assert!(!is_placeholder_startup_url(&tauri));
+    }
 
     #[test]
     fn linux_webkit_safe_mode_stays_on_by_default() {
