@@ -25,15 +25,33 @@ describe('download HTTP status handling', () => {
     expect(createIdx).toBeGreaterThan(statusIdx);
   });
 
-  it('no longer treats /assets/ as a download path heuristic', () => {
+  it('keeps download path heuristics narrow (no SPA roots)', () => {
     const patternsBlock = eventSource.match(
       /const DOWNLOAD_PATH_PATTERNS = \[([\s\S]*?)\];/,
     )?.[1];
     expect(patternsBlock).toBeTruthy();
     expect(patternsBlock).not.toContain('/assets/');
     expect(patternsBlock).not.toContain('/dist/');
+    expect(patternsBlock).not.toContain('/files/');
+    expect(patternsBlock).not.toContain('/attachments/');
+    expect(patternsBlock).not.toContain('/releases/');
     expect(patternsBlock).toContain('/download/');
-    expect(patternsBlock).toContain('/files/');
-    expect(patternsBlock).toContain('/attachments/');
+  });
+
+  it('toasts download progress on the calling window, not a hard-coded main label', () => {
+    // The command must accept the invoker WebviewWindow so secondary windows
+    // see their own toast instead of failing with "Window not found".
+    const downloadFn = invokeSource.slice(
+      invokeSource.indexOf('pub async fn download_file'),
+      invokeSource.indexOf('pub fn send_notification'),
+    );
+    expect(downloadFn).toMatch(/window: WebviewWindow/);
+    expect(downloadFn).not.toContain('get_webview_window("pake")');
+  });
+
+  it('attaches webview cookies to authenticated HTTP downloads', () => {
+    expect(invokeSource).toContain('cookie_header_for_url');
+    expect(invokeSource).toContain('cookies_for_url');
+    expect(invokeSource).toContain('COOKIE');
   });
 });

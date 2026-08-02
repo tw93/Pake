@@ -1,6 +1,6 @@
 # AGENTS.md - Pake Project Knowledge Base
 
-> Project-specific Rust + Tauri rules: `.claude/rules/rust.md`. Release runbook: `.agents/skills/release/SKILL.md` (run `/release`; `.claude/skills/*` are symlinks into `.agents/skills/`, edit the `.agents` copy only). Exception: the `pake` skill's real source is `plugins/pake/skills/pake/SKILL.md` (shipped to users via the Claude Code plugin marketplace, `.claude-plugin/marketplace.json`); `.agents/skills/pake` is a symlink to it.
+> Project-specific Rust + Tauri rules: `.claude/rules/rust.md`. Skills live under `.agents/skills/` (`/release`, `/bugs`, `/github-ops`, `/code-review`; `.claude/skills/*` are symlinks into `.agents/skills/`, edit the `.agents` copy only). Exception: the `pake` skill's real source is `plugins/pake/skills/pake/SKILL.md` (shipped to users via the Claude Code plugin marketplace, `.claude-plugin/marketplace.json`); `.agents/skills/pake` is a symlink to it.
 
 ## Project Identity
 
@@ -71,6 +71,22 @@ Goals and project facts only; trust the agent to find its own path.
 - Generated areas (`dist/`, `node_modules/`, `src-tauri/target/`, `.app/`, `src-tauri/icons/`, `src-tauri/png/`) are not source. Exception: `dist/cli.js` is the shipped CLI build artifact (see `package.json` `files`); any change under `bin/` rebuilds it via `pnpm run cli:build` and commits the regenerated file alongside the source change.
 - Release status, issue closeout, npm delivery, and GitHub assets are separate truth surfaces. Verify each one live (source commit/tag, workflow run, npm registry, GitHub Release/assets, issue state); never let one passing surface imply another.
 
+## Hotspot Map (for `/bugs`)
+
+Proactive latent-bug sweeps use `.agents/skills/bugs/SKILL.md`. Pick one row and go deep; do not invent a whole-repo scope.
+
+| Hotspot | Paths | What usually goes wrong |
+|---|---|---|
+| Link / download heuristics | `src-tauri/src/inject/event.js` | SPA routes intercepted as downloads; path roots too broad |
+| Download success semantics | `invoke.rs`, `window.rs` `on_download` | Non-2xx toasted as success; toast/IPC pinned to `"pake"`; no session cookies |
+| Menu / focused window | `menu.rs` | Commands hit the main window, not the focused one; eval dead on error pages |
+| Startup visibility | `lib.rs`, `setup.rs` | Blank shell, `about:blank` false ready, user hide racing fallback reveal |
+| Auth / popup | `auth.js`, `event.js` | macOS auth crash, SSO in system browser, Apple popup exception |
+| Clipboard | `event.js` | keydown steals native paste; double-paste fallback |
+| Multi-window / icon | `window.rs`, `setup.rs` | Missing `reapply_window_icon` on show; secondary window toast/target |
+| Platform capability | `cert.rs`, proxy, WebKit flags | Flag name present, platform no-op |
+| CLI / config contract | `bin/`, `schema/` | Config smuggles out-of-range values CLI rejects |
+
 ## Current Risk Areas
 
 - CLI options are user-facing and must stay synchronized across `bin/helpers/cli-program.ts`, `bin/types.ts`, `bin/defaults.ts`, `bin/helpers/merge.ts`, generated `dist/cli.js`, `schema/pake.schema.json`, and `docs/cli-usage*.md`. Schema-to-CLI sync is enforced by `tests/unit/config-file.test.ts`; the rest is manual discipline.
@@ -89,6 +105,8 @@ Goals and project facts only; trust the agent to find its own path.
 - Local app builds and test runs mutate tracked files as build state: `src-tauri/pake.json`, `src-tauri/tauri.conf.json`, `src-tauri/tauri.macos.conf.json`, and regenerated icons under `src-tauri/png/` and `src-tauri/icons/`. Before committing, `git restore` whatever you did not intentionally change; never let a feature or release commit absorb this churn.
 - Per-app optional fields in `default_app_list.json` currently take their defaults in Actions expressions in `release.yml` (`matrix.config.x || false` and the numeric ones), which works because every field so far is default-false or numeric. The first default-true field cannot use that path and must move its default into the jq read step: GitHub expressions cast both `null` and `false` to `0`, so `matrix.config.x != false` cannot express "default true" and would silently flip every app missing the field.
 - Windows taskbar icons can register blank when an autostarted app launches before Explorer's icon cache is ready (#1323). Every hidden-to-visible path for the main window (tray show/click, activation shortcut, single-instance activation, initial delayed show) must call `reapply_window_icon` from `src-tauri/src/app/window.rs`, which reasserts both the small window icon and the large taskbar icon; adding a new `window.show()` path without it regresses the bug.
+- Download and toast paths must not hardcode `get_webview_window("pake")` when the action originates from a secondary window: IPC commands take the calling `WebviewWindow`, and `on_download` resolves toast by the event webview's label. Link-download heuristics prefer real file extensions, the `download` attribute, and `?download` / `?attachment` query hints; do not re-add broad SPA roots such as `/assets/`, `/dist/`, `/files/`, or `/releases/` (see #1337, #1339).
+- macOS menu navigation must keep working on blank error pages: Reload uses native `WebviewWindow::reload`, Go Home uses `navigate` + `resolve_home_url`, Back/Forward use the platform WKWebView history API rather than page `eval`. Copy URL reads `window.url()` so it does not depend on a live JS document.
 - `.github/workflows/pake-cli.yaml` and `single-app.yaml` are public build surfaces that external users trigger from their own forks (see `docs/github-actions-usage*.md`). Changes there ship to outside users on push to `main`, independent of `V*` releases; treat them like public API, not internal CI.
 
 ## Platform-Specific Development

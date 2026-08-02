@@ -8,6 +8,7 @@ use std::str::FromStr;
 use std::sync::atomic::{AtomicI64, Ordering};
 use tauri::http::Method;
 use tauri::{command, AppHandle, Manager, Url, WebviewWindow};
+use tauri_plugin_http::reqwest::header::{HeaderValue, COOKIE};
 use tauri_plugin_http::reqwest::{ClientBuilder, Request};
 
 use tauri::Theme;
@@ -82,10 +83,30 @@ pub struct NotificationParams {
     icon: String,
 }
 
-#[command]
-pub async fn download_file(app: AppHandle, params: DownloadFileParams) -> Result<(), String> {
-    let window: WebviewWindow = app.get_webview_window("pake").ok_or("Window not found")?;
+/// Build a Cookie header from the webview session so authenticated downloads
+/// match what the page itself would request. Best-effort: missing cookies
+/// fall through to an anonymous request.
+fn cookie_header_for_url(window: &WebviewWindow, url: &Url) -> Option<HeaderValue> {
+    let cookies = window.cookies_for_url(url.clone()).ok()?;
+    if cookies.is_empty() {
+        return None;
+    }
+    let header = cookies
+        .iter()
+        .map(|cookie| format!("{}={}", cookie.name(), cookie.value()))
+        .collect::<Vec<_>>()
+        .join("; ");
+    HeaderValue::from_str(&header).ok()
+}
 
+#[command]
+pub async fn download_file(
+    window: WebviewWindow,
+    app: AppHandle,
+    params: DownloadFileParams,
+) -> Result<(), String> {
+    // Toast on the calling window (secondary windows included), not a hard-coded
+    // main-window label. Tauri injects the invoker as `window`.
     show_toast(
         &window,
         &get_download_message_with_lang(MessageType::Start, params.language.clone()),
@@ -108,7 +129,10 @@ pub async fn download_file(app: AppHandle, params: DownloadFileParams) -> Result
 
     let url = Url::from_str(&params.url).map_err(|e| format!("Invalid URL: {}", e))?;
 
-    let request = Request::new(Method::GET, url);
+    let mut request = Request::new(Method::GET, url.clone());
+    if let Some(cookie_header) = cookie_header_for_url(&window, &url) {
+        request.headers_mut().insert(COOKIE, cookie_header);
+    }
 
     let response = client.execute(request).await;
 
@@ -195,12 +219,12 @@ pub fn set_dock_badge_label(app: AppHandle, label: Option<String>) -> Result<(),
 
 #[command]
 pub async fn update_theme_mode(app: AppHandle, mode: String) {
-    if let Some(window) = app.get_webview_window("pake") {
-        let theme = if mode == "dark" {
-            Theme::Dark
-        } else {
-            Theme::Light
-        };
+    let theme = if mode == "dark" {
+        Theme::Dark
+    } else {
+        Theme::Light
+    };
+    for window in app.webview_windows().values() {
         let _ = window.set_theme(Some(theme));
     }
 }

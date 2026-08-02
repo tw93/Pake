@@ -31,7 +31,10 @@ use app::{
         set_dock_badge_label, set_zoom, update_theme_mode,
     },
     setup::{set_global_shortcut, set_system_tray},
-    window::{open_additional_window_safe, reapply_window_icon, set_window, MultiWindowState},
+    window::{
+        open_additional_window_safe, reapply_window_icon, reveal_built_window, set_window,
+        MultiWindowState,
+    },
 };
 use util::get_pake_config;
 
@@ -244,16 +247,14 @@ pub fn run_app() {
         ));
     }
 
-    // Reveal the main window after the first real document finishes loading so
+    // Reveal hidden windows after the first real document finishes loading so
     // slow WKWebView cold starts do not expose an empty but interactive shell.
-    // start_to_tray keeps the window hidden for the whole session until the user
-    // opens it from the tray / shortcut.
-    if !start_to_tray {
+    // - Main label "pake": once-only latch + start_to_tray opt-out.
+    // - Secondary multi-window labels ("pake-N"): reveal if still hidden (Cmd+N).
+    // start_to_tray keeps the main window hidden until the user opens it.
+    {
         let page_load_revealed = startup_window_revealed.clone();
         app_builder = app_builder.on_page_load(move |webview, payload| {
-            if webview.label() != "pake" {
-                return;
-            }
             if !matches!(payload.event(), PageLoadEvent::Finished) {
                 return;
             }
@@ -262,8 +263,24 @@ pub fn run_app() {
             if is_placeholder_startup_url(payload.url()) {
                 return;
             }
-            if let Some(window) = webview.app_handle().get_webview_window("pake") {
-                reveal_startup_window(window, init_fullscreen, &page_load_revealed);
+
+            let label = webview.label();
+            if label == "pake" {
+                if start_to_tray {
+                    return;
+                }
+                if let Some(window) = webview.app_handle().get_webview_window("pake") {
+                    reveal_startup_window(window, init_fullscreen, &page_load_revealed);
+                }
+                return;
+            }
+
+            // Multi-window clones (pake-1, pake-2, …) built hidden by
+            // open_additional_window_safe.
+            if label.starts_with("pake-") {
+                if let Some(window) = webview.app_handle().get_webview_window(label) {
+                    reveal_built_window(&window);
+                }
             }
         });
     }

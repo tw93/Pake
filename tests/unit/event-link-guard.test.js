@@ -266,15 +266,94 @@ describe("event link guard", () => {
     expect(isDownloadableFile("https://example.com/download/export")).toBe(
       true,
     );
+    // Real files under /files/ still match by extension, not the path root.
     expect(isDownloadableFile("https://example.com/files/report.pdf")).toBe(
       true,
     );
+  });
+
+  it("does not treat /files/ SPA routes without a file extension as downloads", () => {
+    const { isDownloadableFile } = loadEventHelpers();
+
+    expect(isDownloadableFile("https://drive.example.com/files/inbox")).toBe(
+      false,
+    );
+    expect(
+      isDownloadableFile("https://app.example.com/attachments/latest"),
+    ).toBe(false);
   });
 
   it("does not treat static /dist/ SPA paths as downloads without a file extension", () => {
     const { isDownloadableFile } = loadEventHelpers();
 
     expect(isDownloadableFile("https://example.com/dist/app")).toBe(false);
+  });
+
+  it("does not force-download ordinary links on Cmd/Ctrl+click", () => {
+    const context = loadEventHelpers({ withTauri: true });
+    runDomReady(context);
+
+    const event = makeClickEvent(
+      makeAnchor("https://example.com/app/settings", "_self"),
+    );
+    event.metaKey = true;
+    event.ctrlKey = true;
+    getClickGuard(context)(event);
+
+    expect(event.preventDefault).not.toHaveBeenCalled();
+    expect(context.invokeCalls).not.toContainEqual([
+      "download_file",
+      expect.anything(),
+    ]);
+  });
+
+  it("still downloads when the anchor has a download attribute", () => {
+    const context = loadEventHelpers({ withTauri: true });
+    runDomReady(context);
+
+    const anchor = makeAnchor("https://example.com/app/settings", "_self");
+    anchor.download = "settings.html";
+    const event = makeClickEvent(anchor);
+    getClickGuard(context)(event);
+
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(context.invokeCalls).toContainEqual([
+      "download_file",
+      {
+        params: {
+          url: "https://example.com/app/settings",
+          filename: "settings.html",
+          language: "en-US",
+        },
+      },
+    ]);
+  });
+
+  it("does not treat navigable web formats as downloads by extension alone", () => {
+    const { isDownloadableFile } = loadEventHelpers();
+
+    expect(isDownloadableFile("https://example.com/api/config.json")).toBe(
+      false,
+    );
+    expect(isDownloadableFile("https://example.com/docs/app.js")).toBe(false);
+    expect(isDownloadableFile("https://example.com/theme.css")).toBe(false);
+    // Binary / archive extensions still download.
+    expect(isDownloadableFile("https://example.com/report.pdf")).toBe(true);
+    expect(isDownloadableFile("https://example.com/pkg.zip")).toBe(true);
+  });
+
+  it("scopes root domains correctly for multi-part public suffixes", () => {
+    const { getRootDomain } = loadEventHelpers();
+
+    expect(getRootDomain("www.amazon.co.uk")).toBe("amazon.co.uk");
+    expect(getRootDomain("evil.co.uk")).toBe("evil.co.uk");
+    expect(getRootDomain("www.amazon.co.uk")).not.toBe(
+      getRootDomain("evil.co.uk"),
+    );
+    expect(getRootDomain("alice.github.io")).toBe("alice.github.io");
+    expect(getRootDomain("bob.github.io")).toBe("bob.github.io");
+    expect(getRootDomain("m.bilibili.com")).toBe("bilibili.com");
+    expect(getRootDomain("www.bilibili.com")).toBe("bilibili.com");
   });
 
   it("navigates macOS auth URLs in the current window", () => {

@@ -186,15 +186,21 @@ fn open_requested_window(
     Ok(window)
 }
 
+/// Open a multi-window clone of the home app. The window is built hidden and
+/// revealed on its first real page load (see `lib.rs` on_page_load) so Cmd+N
+/// does not flash an empty shell the way the main window used to.
 pub fn open_additional_window_safe(app: &AppHandle) {
     #[cfg(target_os = "windows")]
     {
         let app_handle = app.clone();
         std::thread::spawn(move || {
             if let Ok(window) = open_additional_window(&app_handle) {
-                let _ = window.show();
-                reapply_window_icon(&window);
-                let _ = window.set_focus();
+                // Fallback if PageLoadEvent::Finished never arrives.
+                let fallback = window.clone();
+                tauri::async_runtime::spawn(async move {
+                    tokio::time::sleep(tokio::time::Duration::from_millis(3_000)).await;
+                    reveal_built_window(&fallback);
+                });
             }
         });
     }
@@ -202,11 +208,24 @@ pub fn open_additional_window_safe(app: &AppHandle) {
     #[cfg(not(target_os = "windows"))]
     {
         if let Ok(window) = open_additional_window(app) {
-            let _ = window.show();
-            reapply_window_icon(&window);
-            let _ = window.set_focus();
+            let fallback = window.clone();
+            tauri::async_runtime::spawn(async move {
+                tokio::time::sleep(tokio::time::Duration::from_millis(3_000)).await;
+                reveal_built_window(&fallback);
+            });
         }
     }
+}
+
+/// Show a window that was built hidden once content is ready (or the fallback
+/// timer fires). No-ops when already visible so page-load and fallback can race.
+pub fn reveal_built_window(window: &WebviewWindow) {
+    if window.is_visible().unwrap_or(true) {
+        return;
+    }
+    let _ = window.show();
+    reapply_window_icon(window);
+    let _ = window.set_focus();
 }
 
 fn build_window_with_label(
@@ -553,7 +572,7 @@ fn build_window(
     // catching it here is independent of the page CSP and the IPC channel.
     {
         let download_handle = app.clone();
-        window_builder = window_builder.on_download(move |_webview, event| match event {
+        window_builder = window_builder.on_download(move |webview, event| match event {
             DownloadEvent::Requested { url, destination } => {
                 match download_handle.path().download_dir() {
                     Ok(download_dir) => {
@@ -585,7 +604,12 @@ fn build_window(
                 path: _,
                 success,
             } => {
-                if let Some(window) = download_handle.get_webview_window("pake") {
+                // Toast on the window that started the download (including
+                // secondary multi-window labels), not a hard-coded "pake".
+                let toast_window = download_handle
+                    .get_webview_window(webview.label())
+                    .or_else(|| download_handle.get_webview_window("pake"));
+                if let Some(window) = toast_window {
                     let message_type = if success {
                         MessageType::Success
                     } else {

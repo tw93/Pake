@@ -28,7 +28,11 @@ describe('Windows taskbar icon reapplication', () => {
           (show.index ?? 0) + show[0].length,
           (show.index ?? 0) + show[0].length + 160,
         );
-        expect(followingSource).toContain(`reapply_window_icon(&${show[1]});`);
+        // Accept both reapply_window_icon(&window) and reapply_window_icon(window)
+        // when the binding is already a reference (reveal_built_window).
+        expect(followingSource).toMatch(
+          new RegExp(`reapply_window_icon\\(&?${show[1]}\\);`),
+        );
       }
     }
   });

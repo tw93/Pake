@@ -18,9 +18,11 @@ describe('startup window reveal', () => {
     expect(libSource).toContain('claim_startup_reveal');
     expect(libSource).toContain('STARTUP_WINDOW_FALLBACK_DELAY');
     expect(libSource).toContain('is_placeholder_startup_url');
-    expect(libSource).toMatch(
-      /if !start_to_tray \{[\s\S]*?app_builder = app_builder\.on_page_load/,
-    );
+    // Main window still respects start_to_tray; secondary multi-window labels
+    // share the same page-load hook via reveal_built_window.
+    expect(libSource).toContain('if start_to_tray');
+    expect(libSource).toContain('reveal_built_window');
+    expect(libSource).toContain('label.starts_with("pake-")');
     expect(libSource).not.toContain('WINDOW_SHOW_DELAY');
   });
 
