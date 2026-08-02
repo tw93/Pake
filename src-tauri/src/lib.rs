@@ -2,14 +2,20 @@
 mod app;
 mod util;
 
-use tauri::Manager;
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+};
+use tauri::{webview::PageLoadEvent, Manager, Url, WebviewWindow};
 use tauri_plugin_window_state::Builder as WindowStatePlugin;
 use tauri_plugin_window_state::StateFlags;
 
 #[cfg(target_os = "macos")]
 use std::time::Duration;
 
-const WINDOW_SHOW_DELAY: u64 = 50;
+// Fallback when PageLoadEvent::Finished never arrives (offline / stalled).
+// Deliberately longer than a paint tick so the normal path can win first.
+const STARTUP_WINDOW_FALLBACK_DELAY: u64 = 3_000;
 #[cfg(target_os = "linux")]
 const PAKE_LINUX_WEBKIT_SAFE_MODE: &str = "PAKE_LINUX_WEBKIT_SAFE_MODE";
 #[cfg(target_os = "linux")]
@@ -28,6 +34,43 @@ use app::{
     window::{open_additional_window_safe, reapply_window_icon, set_window, MultiWindowState},
 };
 use util::get_pake_config;
+
+/// Placeholder documents used before the real target URL navigates (e.g. macOS
+/// cert-bypass starts on about:blank). Revealing on these would reintroduce the
+/// blank-window flash the page-load gate is meant to prevent.
+fn is_placeholder_startup_url(url: &Url) -> bool {
+    url.scheme().eq_ignore_ascii_case("about")
+}
+
+fn reveal_startup_window(window: WebviewWindow, init_fullscreen: bool, revealed: &Arc<AtomicBool>) {
+    if revealed.swap(true, Ordering::AcqRel) {
+        return;
+    }
+
+    tauri::async_runtime::spawn(async move {
+        let _ = window.show();
+        reapply_window_icon(&window);
+
+        // Fixed: Linux fullscreen issue with virtual keyboard
+        #[cfg(target_os = "linux")]
+        {
+            if init_fullscreen {
+                let _ = window.set_fullscreen(true);
+                // Ensure webview maintains focus for input after fullscreen
+                let _ = window.set_focus();
+            } else {
+                // Fix: Ubuntu 24.04/GNOME window buttons non-functional until resize (#1122)
+                // The window manager needs time to process the MapWindow event before
+                // accepting focus requests. Without this, decorations remain non-interactive.
+                tokio::time::sleep(tokio::time::Duration::from_millis(30)).await;
+                let _ = window.set_focus();
+            }
+        }
+
+        #[cfg(not(target_os = "linux"))]
+        let _ = init_fullscreen;
+    });
+}
 
 #[cfg(any(target_os = "linux", test))]
 fn is_disabled_env_value(value: &str) -> bool {
@@ -149,6 +192,7 @@ pub fn run_app() {
     let multi_instance = pake_config.multi_instance;
     let multi_window = pake_config.multi_window;
     let _enable_find = pake_config.windows[0].enable_find;
+    let startup_window_revealed = Arc::new(AtomicBool::new(false));
 
     let window_state_plugin = WindowStatePlugin::default()
         .with_state_flags(if init_fullscreen {
@@ -184,6 +228,30 @@ pub fn run_app() {
                 }
             },
         ));
+    }
+
+    // Reveal the main window after the first real document finishes loading so
+    // slow WKWebView cold starts do not expose an empty but interactive shell.
+    // start_to_tray keeps the window hidden for the whole session until the user
+    // opens it from the tray / shortcut.
+    if !start_to_tray {
+        let page_load_revealed = startup_window_revealed.clone();
+        app_builder = app_builder.on_page_load(move |webview, payload| {
+            if webview.label() != "pake" {
+                return;
+            }
+            if !matches!(payload.event(), PageLoadEvent::Finished) {
+                return;
+            }
+            // Skip about:blank (and other about: placeholders) used by the macOS
+            // cert-bypass path before the real target URL navigates.
+            if is_placeholder_startup_url(payload.url()) {
+                return;
+            }
+            if let Some(window) = webview.app_handle().get_webview_window("pake") {
+                reveal_startup_window(window, init_fullscreen, &page_load_revealed);
+            }
+        });
     }
 
     app_builder
@@ -226,29 +294,17 @@ pub fn run_app() {
             set_global_shortcut(app.app_handle(), activation_shortcut, init_fullscreen)?;
 
             // Show window after state restoration to prevent position flashing
-            // Unless start_to_tray is enabled, then keep it hidden
+            // once its first page finishes. A fallback keeps offline or stalled
+            // pages reachable without exposing a blank webview during normal startup.
             if !start_to_tray {
                 let window_clone = window.clone();
+                let fallback_revealed = startup_window_revealed.clone();
                 tauri::async_runtime::spawn(async move {
-                    tokio::time::sleep(tokio::time::Duration::from_millis(WINDOW_SHOW_DELAY)).await;
-                    let _ = window_clone.show();
-                    reapply_window_icon(&window_clone);
-
-                    // Fixed: Linux fullscreen issue with virtual keyboard
-                    #[cfg(target_os = "linux")]
-                    {
-                        if init_fullscreen {
-                            let _ = window_clone.set_fullscreen(true);
-                            // Ensure webview maintains focus for input after fullscreen
-                            let _ = window_clone.set_focus();
-                        } else {
-                            // Fix: Ubuntu 24.04/GNOME window buttons non-functional until resize (#1122)
-                            // The window manager needs time to process the MapWindow event before
-                            // accepting focus requests. Without this, decorations remain non-interactive.
-                            tokio::time::sleep(tokio::time::Duration::from_millis(30)).await;
-                            let _ = window_clone.set_focus();
-                        }
-                    }
+                    tokio::time::sleep(tokio::time::Duration::from_millis(
+                        STARTUP_WINDOW_FALLBACK_DELAY,
+                    ))
+                    .await;
+                    reveal_startup_window(window_clone, init_fullscreen, &fallback_revealed);
                 });
             }
 
@@ -317,6 +373,19 @@ pub fn run() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn placeholder_startup_urls_cover_about_blank() {
+        let blank: Url = "about:blank".parse().unwrap();
+        let srcdoc: Url = "about:srcdoc".parse().unwrap();
+        let https: Url = "https://github.com/".parse().unwrap();
+        let tauri: Url = "tauri://localhost/".parse().unwrap();
+
+        assert!(is_placeholder_startup_url(&blank));
+        assert!(is_placeholder_startup_url(&srcdoc));
+        assert!(!is_placeholder_startup_url(&https));
+        assert!(!is_placeholder_startup_url(&tauri));
+    }
 
     #[test]
     fn linux_webkit_safe_mode_stays_on_by_default() {
