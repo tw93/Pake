@@ -1,11 +1,35 @@
+// Prefer native webview navigation over page JS so Ctrl+R / [ / ] still work
+// on blank error shells (no JS context). Falls back to history/location when
+// the IPC bridge is unavailable.
+function nativeNavigate(action) {
+  const invoke = window.__TAURI__?.core?.invoke;
+  if (invoke) {
+    invoke("webview_navigate", { action }).catch(() => {
+      fallbackNavigate(action);
+    });
+    return;
+  }
+  fallbackNavigate(action);
+}
+
+function fallbackNavigate(action) {
+  if (action === "reload") {
+    window.location.reload();
+  } else if (action === "back") {
+    window.history.back();
+  } else if (action === "forward") {
+    window.history.forward();
+  }
+}
+
 const shortcuts = {
-  "[": () => window.history.back(),
-  "]": () => window.history.forward(),
+  "[": () => nativeNavigate("back"),
+  "]": () => nativeNavigate("forward"),
   "-": () => zoomOut(),
   "=": () => zoomIn(),
   "+": () => zoomIn(),
   0: () => setZoom("100%"),
-  r: () => window.location.reload(),
+  r: () => nativeNavigate("reload"),
   ArrowUp: () => scrollTo(0, 0),
   ArrowDown: () => scrollTo(0, document.body.scrollHeight),
 };

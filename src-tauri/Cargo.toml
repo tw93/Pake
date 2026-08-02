@@ -48,6 +48,8 @@ windows-sys = { version = "0.61.2", features = [
   "Win32_UI_Shell",
   "Win32_UI_WindowsAndMessaging",
 ] }
+# Used for native WebView2 GoBack/GoForward on error pages (no page JS).
+webview2-com = "0.38"
 
 [features]
 # this feature is used for development builds from development cli

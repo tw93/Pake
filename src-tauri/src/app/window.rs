@@ -228,6 +228,54 @@ pub fn reveal_built_window(window: &WebviewWindow) {
     let _ = window.set_focus();
 }
 
+/// True when any Pake webview window is currently visible.
+pub fn any_app_window_visible(app: &AppHandle) -> bool {
+    app.webview_windows()
+        .values()
+        .any(|window| window.is_visible().unwrap_or(false))
+}
+
+/// Hide every webview window (main + multi-window clones). Used by tray Hide
+/// and the activation shortcut so secondary windows are not left on screen.
+pub fn hide_all_app_windows(app: &AppHandle) {
+    for window in app.webview_windows().values() {
+        let _ = window.hide();
+    }
+}
+
+/// Show every webview window, reassert icons, and focus the main window.
+pub fn show_all_app_windows(app: &AppHandle, init_fullscreen: bool) {
+    let windows = app.webview_windows();
+    for window in windows.values() {
+        let _ = window.unminimize();
+        let _ = window.show();
+        reapply_window_icon(window);
+        #[cfg(target_os = "linux")]
+        if init_fullscreen && !window.is_fullscreen().unwrap_or(false) {
+            let _ = window.set_fullscreen(true);
+        }
+    }
+    #[cfg(not(target_os = "linux"))]
+    let _ = init_fullscreen;
+
+    if let Some(main) = windows.get("pake") {
+        let _ = main.set_focus();
+    } else if let Some(any) = windows.values().next() {
+        let _ = any.set_focus();
+    }
+}
+
+/// Tray-click / activation-shortcut toggle: hide all if anything is visible,
+/// otherwise show all. Cancels startup reveal when the caller has already done
+/// so; this helper only touches visibility.
+pub fn toggle_all_app_windows(app: &AppHandle, init_fullscreen: bool) {
+    if any_app_window_visible(app) {
+        hide_all_app_windows(app);
+    } else {
+        show_all_app_windows(app, init_fullscreen);
+    }
+}
+
 fn build_window_with_label(
     app: &AppHandle,
     config: &PakeConfig,

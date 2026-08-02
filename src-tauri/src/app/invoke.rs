@@ -1,3 +1,4 @@
+use crate::app::navigation::{history_step, reload_window};
 use crate::util::{
     check_file_or_append, get_download_message_with_lang, sanitize_download_filename, show_toast,
     MessageType,
@@ -239,4 +240,28 @@ pub fn set_zoom(window: WebviewWindow, percent: f64) -> Result<(), String> {
     window
         .set_zoom(factor)
         .map_err(|e| format!("Failed to set zoom: {}", e))
+}
+
+/// Native navigation for injected shortcuts (Linux/Windows Ctrl+R / [ / ]).
+/// Blank error pages have no JS context, so page `history` / `location` calls
+/// are no-ops; these use the platform webview API instead.
+#[command]
+pub fn webview_navigate(window: WebviewWindow, action: String) -> Result<(), String> {
+    match action.as_str() {
+        "reload" => {
+            reload_window(&window);
+            Ok(())
+        }
+        "back" => {
+            history_step(&window, true);
+            Ok(())
+        }
+        "forward" => {
+            history_step(&window, false);
+            Ok(())
+        }
+        other => Err(format!(
+            "Unknown webview_navigate action '{other}' (expected reload|back|forward)"
+        )),
+    }
 }

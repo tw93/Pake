@@ -28,7 +28,7 @@ const GDK_BACKEND: &str = "GDK_BACKEND";
 use app::{
     invoke::{
         clear_dock_badge, download_file, increment_dock_badge, send_notification, set_dock_badge,
-        set_dock_badge_label, set_zoom, update_theme_mode,
+        set_dock_badge_label, set_zoom, update_theme_mode, webview_navigate,
     },
     setup::{set_global_shortcut, set_system_tray},
     window::{
@@ -300,6 +300,7 @@ pub fn run_app() {
             clear_dock_badge,
             update_theme_mode,
             set_zoom,
+            webview_navigate,
         ])
         .setup(move |app| {
             app.manage(MultiWindowState::new(

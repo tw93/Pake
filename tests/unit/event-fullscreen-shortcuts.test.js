@@ -43,6 +43,7 @@ function loadEventHelpers({
   const elementsById = new Map();
   const fullscreenCalls = [];
   const reloadCalls = [];
+  const navigateCalls = [];
   const body = createElement("body");
   body.appendChild = (child) => {
     body.children.push(child);
@@ -105,7 +106,12 @@ function loadEventHelpers({
       },
       __TAURI__: {
         core: {
-          invoke: () => Promise.resolve(),
+          invoke: (command, payload) => {
+            if (command === "webview_navigate") {
+              navigateCalls.push(payload?.action);
+            }
+            return Promise.resolve();
+          },
         },
         window: {
           getCurrentWindow: () => ({
@@ -147,6 +153,7 @@ function loadEventHelpers({
     eventListeners,
     fullscreenCalls,
     reloadCalls,
+    navigateCalls,
     get isFullscreen() {
       return isFullscreen;
     },
@@ -201,7 +208,8 @@ describe("event fullscreen shortcuts", () => {
 
     getWebShortcutHandler(context)(event);
 
-    expect(context.reloadCalls).toEqual([true]);
+    // Native webview_navigate so blank error pages still reload.
+    expect(context.navigateCalls).toEqual(["reload"]);
     expect(event.preventDefault).toHaveBeenCalled();
   });
 

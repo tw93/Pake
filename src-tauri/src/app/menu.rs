@@ -1,7 +1,6 @@
 // Menu functionality is only used on macOS; the module is gated in app/mod.rs.
+use crate::app::navigation::{history_step, reload_window};
 use crate::app::window::{open_additional_window_safe, MultiWindowState};
-use objc2::msg_send;
-use objc2::runtime::AnyObject;
 use std::io::Write;
 use std::process::{Command, Stdio};
 use tauri::menu::{AboutMetadata, Menu, MenuItem, PredefinedMenuItem, Submenu};
@@ -258,33 +257,6 @@ fn focused_webview_window(app_handle: &AppHandle) -> Option<WebviewWindow> {
         .or_else(|| windows.get("pake").cloned())
 }
 
-/// Drive WKWebView history without page JS. Blank error shells have no JS
-/// context, so `window.history.back()` via eval is a no-op exactly when the
-/// user is stuck (#1328 class).
-fn webview_history_step(window: &WebviewWindow, selector: SelName) {
-    let _ = window.with_webview(move |webview| {
-        let ptr = webview.inner() as *mut AnyObject;
-        if ptr.is_null() {
-            return;
-        }
-        unsafe {
-            match selector {
-                SelName::Back => {
-                    let _: *mut AnyObject = msg_send![ptr, goBack];
-                }
-                SelName::Forward => {
-                    let _: *mut AnyObject = msg_send![ptr, goForward];
-                }
-            }
-        }
-    });
-}
-
-enum SelName {
-    Back,
-    Forward,
-}
-
 /// Copy text via pbcopy so it works when the page has no JS context (error
 /// shells) and when the Clipboard API is blocked by the site CSP.
 fn copy_text_to_pasteboard(text: &str) {
@@ -310,7 +282,7 @@ pub fn handle_menu_click(app_handle: &AppHandle, id: &str) {
         "reload" => {
             if let Some(window) = focused_webview_window(app_handle) {
                 // Native reload works on blank error pages where eval cannot.
-                let _ = window.reload();
+                reload_window(&window);
             }
         }
         "toggle_devtools" => {
@@ -340,12 +312,12 @@ pub fn handle_menu_click(app_handle: &AppHandle, id: &str) {
         }
         "go_back" => {
             if let Some(window) = focused_webview_window(app_handle) {
-                webview_history_step(&window, SelName::Back);
+                history_step(&window, true);
             }
         }
         "go_forward" => {
             if let Some(window) = focused_webview_window(app_handle) {
-                webview_history_step(&window, SelName::Forward);
+                history_step(&window, false);
             }
         }
         "go_home" => {

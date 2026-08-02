@@ -19,9 +19,10 @@ describe('macOS menu window targeting', () => {
   it('uses native reload and history so error pages stay operable', () => {
     // Blank WebView error shells have no JS context; eval-based navigation
     // is a no-op exactly when the user is stuck (#1328 class).
-    expect(handler).toContain('window.reload()');
+    expect(handler).toContain('reload_window(&window)');
     expect(handler).not.toContain('window.location.reload()');
-    expect(handler).toContain('webview_history_step');
+    expect(handler).toContain('history_step(&window, true)');
+    expect(handler).toContain('history_step(&window, false)');
     expect(handler).not.toContain('window.history.back()');
     expect(handler).not.toContain('window.history.forward()');
   });
