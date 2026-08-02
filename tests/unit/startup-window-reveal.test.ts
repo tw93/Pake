@@ -40,9 +40,7 @@ describe('startup window reveal', () => {
     expect(setupSource).toMatch(/cancel_startup_reveal\(&menu_revealed\)/);
     expect(setupSource).toMatch(/cancel_startup_reveal\(&click_revealed\)/);
     expect(setupSource).toMatch(/cancel_startup_reveal\(&startup_revealed\)/);
-    expect(libSource).toMatch(
-      /cancel_startup_reveal\(&instance_revealed\)/,
-    );
+    expect(libSource).toMatch(/cancel_startup_reveal\(&instance_revealed\)/);
     expect(libSource).toMatch(/cancel_startup_reveal\(&close_revealed\)/);
   });
 });
