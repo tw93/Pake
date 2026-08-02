@@ -33,7 +33,9 @@ describe('multi-window visibility control', () => {
 
   it('routes tray hide/show/click and activation shortcut through multi-window helpers', () => {
     expect(setupSource).toContain('hide_all_app_windows(app)');
-    expect(setupSource).toContain('show_all_app_windows(app, _init_fullscreen)');
+    expect(setupSource).toContain(
+      'show_all_app_windows(app, _init_fullscreen)',
+    );
     expect(setupSource).toContain(
       'toggle_all_app_windows(tray.app_handle(), _init_fullscreen)',
     );
