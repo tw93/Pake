@@ -446,12 +446,15 @@ const PREVIEWABLE_MEDIA_EXTENSIONS = [
   "m4a",
 ];
 
+// Path fragments that often host real file downloads. Do not add broad static
+// asset roots such as "/assets/" or "/dist/": many SPAs use those as in-app
+// routes (e.g. MEXC /assets/future) and would be intercepted as downloads.
+// Extensionless links under these paths still match; prefer real extensions,
+// download attributes, or ?download / ?attachment query hints when possible.
 const DOWNLOAD_PATH_PATTERNS = [
   "/download/",
   "/files/",
   "/attachments/",
-  "/assets/",
-  "/dist/",
 ];
 
 // Language detection utilities

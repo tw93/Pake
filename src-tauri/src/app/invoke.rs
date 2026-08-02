@@ -114,8 +114,18 @@ pub async fn download_file(app: AppHandle, params: DownloadFileParams) -> Result
 
     match response {
         Ok(mut res) => {
+            // Transport success is not download success: 403/404 HTML error pages
+            // must not be written as files or toasted as successful downloads.
+            if !res.status().is_success() {
+                show_toast(
+                    &window,
+                    &get_download_message_with_lang(MessageType::Failure, params.language),
+                );
+                return Err(format!("Download failed with HTTP status {}", res.status()));
+            }
+
             let mut file =
-                File::create(file_path).map_err(|e| format!("Failed to create file: {}", e))?;
+                File::create(&file_path).map_err(|e| format!("Failed to create file: {}", e))?;
 
             while let Some(chunk) = res
                 .chunk()

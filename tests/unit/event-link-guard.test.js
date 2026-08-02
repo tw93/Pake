@@ -227,6 +227,56 @@ describe("event link guard", () => {
     ]);
   });
 
+  it("navigates SPA routes under /assets/ instead of treating them as downloads", () => {
+    const context = loadEventHelpers({ withTauri: true });
+    context.window.location.href = "https://www.mexc.com/";
+    context.window.location.origin = "https://www.mexc.com";
+    context.window.location.pathname = "/";
+    runDomReady(context);
+
+    const event = makeClickEvent(
+      makeAnchor("https://www.mexc.com/assets/future", "_self"),
+    );
+    getClickGuard(context)(event);
+
+    expect(event.preventDefault).not.toHaveBeenCalled();
+    expect(context.invokeCalls).not.toContainEqual([
+      "download_file",
+      expect.anything(),
+    ]);
+    expect(context.isDownloadableFile("https://www.mexc.com/assets/future")).toBe(
+      false,
+    );
+  });
+
+  it("still downloads real files that live under /assets/ by extension", () => {
+    const { isDownloadableFile } = loadEventHelpers();
+
+    expect(
+      isDownloadableFile("https://cdn.example.com/assets/export/report.pdf"),
+    ).toBe(true);
+    expect(
+      isDownloadableFile("https://cdn.example.com/assets/pkg/app.zip"),
+    ).toBe(true);
+  });
+
+  it("keeps intentional download-path interception for extensionless /download/ links", () => {
+    const { isDownloadableFile } = loadEventHelpers();
+
+    expect(
+      isDownloadableFile("https://example.com/download/export"),
+    ).toBe(true);
+    expect(isDownloadableFile("https://example.com/files/report.pdf")).toBe(
+      true,
+    );
+  });
+
+  it("does not treat static /dist/ SPA paths as downloads without a file extension", () => {
+    const { isDownloadableFile } = loadEventHelpers();
+
+    expect(isDownloadableFile("https://example.com/dist/app")).toBe(false);
+  });
+
   it("navigates macOS auth URLs in the current window", () => {
     const { openAuthNavigation, window } = loadEventHelpers({
       userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_5)",
