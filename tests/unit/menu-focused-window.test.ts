@@ -29,6 +29,8 @@ describe('macOS menu window targeting', () => {
   it('copies the native webview URL without requiring page JS', () => {
     expect(handler).toContain('window.url()');
     expect(handler).toContain('copy_text_to_pasteboard');
-    expect(handler).not.toContain('navigator.clipboard.writeText(window.location.href)');
+    expect(handler).not.toContain(
+      'navigator.clipboard.writeText(window.location.href)',
+    );
   });
 });
