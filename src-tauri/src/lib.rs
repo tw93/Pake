@@ -42,8 +42,20 @@ fn is_placeholder_startup_url(url: &Url) -> bool {
     url.scheme().eq_ignore_ascii_case("about")
 }
 
+/// First automatic reveal wins. Returns true if the caller should show the window.
+fn claim_startup_reveal(revealed: &AtomicBool) -> bool {
+    !revealed.swap(true, Ordering::AcqRel)
+}
+
+/// User took control of main-window visibility (tray, shortcut, dock, second
+/// instance, hide-on-close). Drop any pending page-load / fallback reveal so a
+/// slow cold start cannot re-open a window the user just hid.
+pub(crate) fn cancel_startup_reveal(revealed: &AtomicBool) {
+    revealed.store(true, Ordering::Release);
+}
+
 fn reveal_startup_window(window: WebviewWindow, init_fullscreen: bool, revealed: &Arc<AtomicBool>) {
-    if revealed.swap(true, Ordering::AcqRel) {
+    if !claim_startup_reveal(revealed) {
         return;
     }
 
@@ -216,11 +228,13 @@ pub fn run_app() {
 
     // Only add single instance plugin if multiple instances are not allowed
     if !multi_instance {
+        let instance_revealed = startup_window_revealed.clone();
         app_builder = app_builder.plugin(tauri_plugin_single_instance::init(
             move |app, _args, _cwd| {
                 if multi_window {
                     open_additional_window_safe(app);
                 } else if let Some(window) = app.get_webview_window("pake") {
+                    cancel_startup_reveal(&instance_revealed);
                     let _ = window.unminimize();
                     let _ = window.show();
                     reapply_window_icon(&window);
@@ -253,6 +267,11 @@ pub fn run_app() {
             }
         });
     }
+
+    // Clone before setup moves the Arc into tray / shortcut / fallback handlers.
+    let close_revealed = startup_window_revealed.clone();
+    #[cfg(target_os = "macos")]
+    let reopen_revealed = startup_window_revealed.clone();
 
     app_builder
         .invoke_handler(tauri::generate_handler![
@@ -290,22 +309,30 @@ pub fn run_app() {
                 &pake_config.system_tray_path,
                 init_fullscreen,
                 multi_window,
+                startup_window_revealed.clone(),
             )?;
-            set_global_shortcut(app.app_handle(), activation_shortcut, init_fullscreen)?;
+            set_global_shortcut(
+                app.app_handle(),
+                activation_shortcut,
+                init_fullscreen,
+                startup_window_revealed.clone(),
+            )?;
 
             // Show window after state restoration to prevent position flashing
             // once its first page finishes. A fallback keeps offline or stalled
             // pages reachable without exposing a blank webview during normal startup.
             if !start_to_tray {
                 let window_clone = window.clone();
-                let fallback_revealed = startup_window_revealed.clone();
                 tauri::async_runtime::spawn(async move {
                     tokio::time::sleep(tokio::time::Duration::from_millis(
                         STARTUP_WINDOW_FALLBACK_DELAY,
                     ))
                     .await;
-                    reveal_startup_window(window_clone, init_fullscreen, &fallback_revealed);
+                    reveal_startup_window(window_clone, init_fullscreen, &startup_window_revealed);
                 });
+            } else {
+                // Tray/shortcut already hold clones that cancel user-driven toggles.
+                drop(startup_window_revealed);
             }
 
             Ok(())
@@ -313,6 +340,8 @@ pub fn run_app() {
         .on_window_event(move |_window, _event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = _event {
                 if hide_on_close && _window.label() == "pake" {
+                    // User dismissed the window; do not let startup reveal reopen it.
+                    cancel_startup_reveal(&close_revealed);
                     // Hide window when hide_on_close is enabled (regardless of tray status)
                     let window = _window.clone();
                     tauri::async_runtime::spawn(async move {
@@ -347,7 +376,7 @@ pub fn run_app() {
             eprintln!("[Pake] Fatal error while building Tauri application: {error}");
             std::process::exit(1);
         })
-        .run(|_app, _event| {
+        .run(move |_app, _event| {
             // Handle macOS dock icon click to reopen hidden window
             #[cfg(target_os = "macos")]
             if let tauri::RunEvent::Reopen {
@@ -357,6 +386,7 @@ pub fn run_app() {
             {
                 if !has_visible_windows {
                     if let Some(window) = _app.get_webview_window("pake") {
+                        cancel_startup_reveal(&reopen_revealed);
                         let _ = window.show();
                         reapply_window_icon(&window);
                         let _ = window.set_focus();
@@ -385,6 +415,33 @@ mod tests {
         assert!(is_placeholder_startup_url(&srcdoc));
         assert!(!is_placeholder_startup_url(&https));
         assert!(!is_placeholder_startup_url(&tauri));
+    }
+
+    #[test]
+    fn first_claim_wins_startup_reveal() {
+        let revealed = AtomicBool::new(false);
+        assert!(claim_startup_reveal(&revealed));
+        assert!(!claim_startup_reveal(&revealed));
+    }
+
+    #[test]
+    fn user_show_then_hide_blocks_automatic_startup_reveal() {
+        // Slow page load: user opens from tray/shortcut, then hides again.
+        // Page-load finish and the 3s fallback must not reopen the window.
+        let revealed = AtomicBool::new(false);
+        cancel_startup_reveal(&revealed); // explicit show
+        cancel_startup_reveal(&revealed); // explicit hide
+        assert!(
+            !claim_startup_reveal(&revealed),
+            "automatic reveal must stay cancelled after user visibility control"
+        );
+    }
+
+    #[test]
+    fn cancel_before_any_claim_blocks_reveal() {
+        let revealed = AtomicBool::new(false);
+        cancel_startup_reveal(&revealed);
+        assert!(!claim_startup_reveal(&revealed));
     }
 
     #[test]

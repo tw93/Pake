@@ -1,6 +1,7 @@
 use crate::app::window::{open_additional_window_safe, reapply_window_icon};
+use crate::cancel_startup_reveal;
 use std::str::FromStr;
-use std::sync::{Arc, Mutex};
+use std::sync::{atomic::AtomicBool, Arc, Mutex};
 use std::time::{Duration, Instant};
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder},
@@ -16,6 +17,7 @@ pub fn set_system_tray(
     tray_icon_path: &str,
     _init_fullscreen: bool,
     allow_multi_window: bool,
+    startup_revealed: Arc<AtomicBool>,
 ) -> tauri::Result<()> {
     if !show_system_tray {
         app.remove_tray_by_id("pake-tray");
@@ -42,6 +44,8 @@ pub fn set_system_tray(
 
     app.app_handle().remove_tray_by_id("pake-tray");
 
+    let menu_revealed = startup_revealed.clone();
+    let click_revealed = startup_revealed;
     let mut tray_builder = TrayIconBuilder::new()
         .menu(&menu)
         .on_menu_event(move |app, event| match event.id().as_ref() {
@@ -50,11 +54,13 @@ pub fn set_system_tray(
             }
             "hide_app" => {
                 if let Some(window) = app.get_webview_window("pake") {
+                    cancel_startup_reveal(&menu_revealed);
                     let _ = window.minimize();
                 }
             }
             "show_app" => {
                 if let Some(window) = app.get_webview_window("pake") {
+                    cancel_startup_reveal(&menu_revealed);
                     let _ = window.show();
                     reapply_window_icon(&window);
                     #[cfg(target_os = "linux")]
@@ -79,6 +85,8 @@ pub fn set_system_tray(
             if let TrayIconEvent::Click { button, .. } = event {
                 if button == tauri::tray::MouseButton::Left {
                     if let Some(window) = tray.app_handle().get_webview_window("pake") {
+                        // Any tray toggle claims visibility control from startup reveal.
+                        cancel_startup_reveal(&click_revealed);
                         let is_visible = window.is_visible().unwrap_or(false);
                         if is_visible {
                             let _ = window.hide();
@@ -120,6 +128,7 @@ pub fn set_global_shortcut(
     app: &AppHandle,
     shortcut: String,
     _init_fullscreen: bool,
+    startup_revealed: Arc<AtomicBool>,
 ) -> tauri::Result<()> {
     if shortcut.is_empty() {
         return Ok(());
@@ -139,6 +148,7 @@ pub fn set_global_shortcut(
         tauri_plugin_global_shortcut::Builder::new()
             .with_handler({
                 let last_triggered = Arc::clone(&last_triggered);
+                let startup_revealed = startup_revealed.clone();
                 move |app, event, _shortcut| {
                     let Ok(mut last_triggered) = last_triggered.lock() else {
                         return;
@@ -150,6 +160,7 @@ pub fn set_global_shortcut(
 
                     if shortcut_hotkey.eq(event) {
                         if let Some(window) = app.get_webview_window("pake") {
+                            cancel_startup_reveal(&startup_revealed);
                             let is_visible = window.is_visible().unwrap_or(false);
                             if is_visible {
                                 let _ = window.hide();
