@@ -76,17 +76,17 @@ Goals and project facts only; trust the agent to find its own path.
 
 Proactive latent-bug sweeps use `.agents/skills/bugs/SKILL.md`. Pick one row and go deep; do not invent a whole-repo scope. The third column is **historical failure modes / regression risks**, not a claim that the tree is broken today. Prefer the matching Current Risk Areas invariant when judging a change.
 
-| Hotspot                    | Paths                                  | Regression risk if reintroduced                                                              |
-| -------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Link / download heuristics | `src-tauri/src/inject/event.js`        | SPA routes or Cmd/Ctrl+click treated as downloads; path roots too broad                      |
-| Download success semantics | `invoke.rs`, `window.rs` `on_download` | Non-2xx toasted as success; toast/IPC hardcoded to `"pake"`; request drops session cookies   |
-| Menu / focused window      | `menu.rs`                              | Commands hit the main window, not the focused one; eval dead on error pages                  |
-| Startup visibility         | `lib.rs`, `setup.rs`                   | Blank shell, `about:blank` false ready, user hide racing fallback reveal                     |
-| Auth / popup               | `auth.js`, `event.js`                  | macOS auth crash, SSO in system browser, Apple popup exception                               |
-| Clipboard                  | `event.js`                             | keydown steals native paste; double-paste fallback                                           |
-| Multi-window / icon        | `window.rs`, `setup.rs`                | Missing `reapply_window_icon` on show; secondary window toast/target; Cmd+N blank flash      |
-| Platform capability        | `cert.rs`, proxy, WebKit flags         | Flag name present, platform no-op                                                            |
-| CLI / config contract      | `bin/`, `schema/`                      | Config smuggles out-of-range values CLI rejects                                              |
+| Hotspot                    | Paths                                  | Regression risk if reintroduced                                                            |
+| -------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Link / download heuristics | `src-tauri/src/inject/event.js`        | SPA routes or Cmd/Ctrl+click treated as downloads; path roots too broad                    |
+| Download success semantics | `invoke.rs`, `window.rs` `on_download` | Non-2xx toasted as success; toast/IPC hardcoded to `"pake"`; request drops session cookies |
+| Menu / focused window      | `menu.rs`                              | Commands hit the main window, not the focused one; eval dead on error pages                |
+| Startup visibility         | `lib.rs`, `setup.rs`                   | Blank shell, `about:blank` false ready, user hide racing fallback reveal                   |
+| Auth / popup               | `auth.js`, `event.js`                  | macOS auth crash, SSO in system browser, Apple popup exception                             |
+| Clipboard                  | `event.js`                             | keydown steals native paste; double-paste fallback                                         |
+| Multi-window / icon        | `window.rs`, `setup.rs`                | Missing `reapply_window_icon` on show; secondary window toast/target; Cmd+N blank flash    |
+| Platform capability        | `cert.rs`, proxy, WebKit flags         | Flag name present, platform no-op                                                          |
+| CLI / config contract      | `bin/`, `schema/`                      | Config smuggles out-of-range values CLI rejects                                            |
 
 ## Current Risk Areas
 
