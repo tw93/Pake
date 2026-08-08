@@ -112,7 +112,8 @@ var devDependencies = {
 var pnpm = {
 	overrides: {
 		sharp: "^0.34.5",
-		"@img/sharp-libvips-darwin-arm64": "1.2.4"
+		"@img/sharp-libvips-darwin-arm64": "1.2.4",
+		tmp: "0.2.7"
 	},
 	onlyBuiltDependencies: [
 		"esbuild",
