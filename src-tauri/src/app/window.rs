@@ -228,11 +228,16 @@ pub fn reveal_built_window(window: &WebviewWindow) {
     let _ = window.set_focus();
 }
 
-/// True when any Pake webview window is currently visible.
+/// True when any Pake webview window is currently on screen.
+///
+/// A minimized window does not count. Windows keeps `IsWindowVisible` true while
+/// a window is iconic, and `hide_on_close` minimizes before hiding, so treating
+/// minimized as visible makes the tray toggle hide an already-invisible window
+/// instead of restoring it (#1343).
 pub fn any_app_window_visible(app: &AppHandle) -> bool {
-    app.webview_windows()
-        .values()
-        .any(|window| window.is_visible().unwrap_or(false))
+    app.webview_windows().values().any(|window| {
+        window.is_visible().unwrap_or(false) && !window.is_minimized().unwrap_or(false)
+    })
 }
 
 /// Hide every webview window (main + multi-window clones). Used by tray Hide
