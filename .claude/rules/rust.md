@@ -1,6 +1,6 @@
 # Pake Rust + Tauri Rules
 
-> Pake-specific Rust + Tauri rules. Standard Rust hygiene is assumed: `?` over `unwrap()`, `cargo clippy` clean, `cargo fmt` before commit. The `dist/cli.js` rebuild rule and CN mirror policy live in AGENTS.md (Current Risk Areas / Network Mirror Behavior) and are not repeated here.
+> Pake-specific Rust + Tauri rules. Standard Rust hygiene is assumed: `?` over `unwrap()`, `cargo clippy` clean, `cargo fmt` before commit. The `dist/cli.js` rebuild rule, CN mirror policy, and platform-sensitivity rules (Linux/Wayland WebKit compositing, AppImage warning noise, `--incognito`, embedded-WebView OAuth) live in AGENTS.md (Current Risk Areas / Network Mirror Behavior) and are not repeated here.
 
 ## Pake-Specific
 
@@ -20,11 +20,3 @@
 ### Tauri trust boundary
 
 - Packaged remote pages are untrusted. Validate semantic bounds for every `#[tauri::command]` input, keep remote capabilities limited to the exact operations required, and keep long-running IPC asynchronous so page code cannot block the app loop.
-
-### Platform sensitivity
-
-- WebKit compositing on Linux/Wayland is platform-sensitive. Don't change defaults without testing on the affected platform or documenting the risk.
-- Linux WebKit runtime flags live in `src-tauri/src/lib.rs`. Keep the default conservative; compositor-specific exceptions need unit tests for the decision function and FAQ guidance for users.
-- AppImage logs often contain optional GTK, appindicator, or GStreamer warnings. Do not treat those warnings as the root cause unless the user-visible symptom and target path confirm it.
-- `--incognito` trades persistence for clean private sessions; be deliberate around login / cookies / local storage / embedded-WebView detection.
-- Google OAuth and other embedded-WebView restrictions may still apply even with `--new-window` / `--multi-window`.

@@ -27,7 +27,6 @@ Always use `gh` CLI and query live state before acting. Never assume state from 
 
 1. **ALWAYS** draft the reply first and show it to the user for approval before calling any write operation (`gh issue comment`, `gh pr comment`, `gh pr merge`, `gh issue close`, `gh release create`, etc.). Approval of one draft does not extend to future comments.
 2. **NEVER** merge, close, or modify without explicit user request.
-3. **ALWAYS** query current state before taking action — never assume.
-4. Before replying to an issue or PR, read the body to confirm the author's language; match their language in the reply. This applies to the author, not to arbitrary thread commenters.
-5. Before replying that a CLI fix is released, verify the exact artifact with `npm view pake-cli@<version> version gitHead dist.tarball --json` and confirm `gitHead` contains the fix. Check `npm view pake-cli version` separately for the `latest` pointer. For app releases, use `gh release view <tag> --json assets`.
-6. Before closing an issue after release, confirm the target with `gh issue view <id> --json number,title,state,author,url` and include the concrete version or upgrade command in the comment.
+3. Before replying to an issue or PR, read the body to confirm the author's language; match their language in the reply. This applies to the author, not to arbitrary thread commenters.
+4. Before replying that a CLI fix is released, verify the exact artifact with `npm view pake-cli@<version> version gitHead dist.tarball --json` and confirm `gitHead` contains the fix. Check `npm view pake-cli version` separately for the `latest` pointer. For app releases, use `gh release view <tag> --json assets`.
+5. Before closing an issue after release, confirm the target with `gh issue view <id> --json number,title,state,author,url` and include the concrete version or upgrade command in the comment.
