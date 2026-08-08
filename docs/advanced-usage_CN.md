@@ -200,7 +200,7 @@ pake https://gmail.com --name "Gmail Work" --identifier com.example.gmail.work
 
 ### 前置条件
 
-- Node.js ≥22.0.0 (推荐 LTS，较旧版本 ≥18.0.0 可能可用)
+- Node.js ≥22.0.0 (推荐 LTS，较旧版本 ≥20.0.0 可能可用)
 - Rust ≥1.85.0 (推荐稳定版)
 
 #### 平台特定要求

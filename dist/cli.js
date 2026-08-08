@@ -23,7 +23,7 @@ var name = "pake-cli";
 var version = "3.15.5";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
-	node: ">=18.0.0"
+	node: ">=20.0.0"
 };
 var packageManager = "pnpm@10.26.2";
 var bin = {
@@ -78,7 +78,7 @@ var dependencies = {
 	chalk: "^5.6.2",
 	commander: "^14.0.3",
 	execa: "^9.6.1",
-	"file-type": "^21.3.0",
+	"file-type": "^21.3.4",
 	"fs-extra": "^11.3.3",
 	"icon-gen": "^5.0.0",
 	loglevel: "^1.9.2",

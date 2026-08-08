@@ -6,7 +6,7 @@ Complete command-line reference and basic usage for Pake CLI.
 
 ## Installation
 
-Ensure that your Node.js version is 22.0 or higher (e.g., 22.11.0). _Note: Older versions ≥18.0.0 may also work._
+Ensure that your Node.js version is 22.0 or higher (e.g., 22.11.0). _Note: Older versions ≥20.0.0 may also work._
 
 **Recommended (pnpm):**
 
@@ -34,7 +34,7 @@ source ~/.bashrc
 
 **Prerequisites:**
 
-- Node.js ≥18.0.0
+- Node.js ≥20.0.0
 - Rust ≥1.85.0 (installed automatically if missing)
 - **macOS/Linux**: `curl`, `wget`, `file` and `tar` used for dependency management
 
