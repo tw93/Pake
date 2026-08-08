@@ -51,6 +51,8 @@ fn history_step_platform(webview: &tauri::webview::PlatformWebview, back: bool) 
 
 #[cfg(target_os = "linux")]
 fn history_step_platform(webview: &tauri::webview::PlatformWebview, back: bool) {
+    use webkit2gtk::WebViewExt;
+
     let gtk_webview = webview.inner();
     if back {
         gtk_webview.go_back();

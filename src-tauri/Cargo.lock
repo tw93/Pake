@@ -2584,6 +2584,7 @@ dependencies = [
  "tauri-plugin-single-instance",
  "tauri-plugin-window-state",
  "tokio",
+ "webkit2gtk",
  "webview2-com",
  "windows-sys 0.61.2",
 ]
