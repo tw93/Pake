@@ -155,6 +155,8 @@ Tag format: `V<major.minor.patch>` with uppercase `V` (e.g. `V3.13.1`). Current 
 
 Find the previous release tag with `git tag --list 'V*' --sort=-version:refname | head -1`. A bare `git tag --sort` is polluted by stray non-version tags (`list`, `continuous`, `0.1.0`) and silently picks the wrong log range.
 
+Filter those tags out; do not delete them without checking each one first. `continuous` is not junk: it carries a real 2023 prerelease ("Continuous build") with 40 assets and roughly 700 downloads, so removing the tag breaks every historical download link. `list` and `0.1.0` point at old commits with no release attached. Any tag deletion here is a public, irreversible action and needs maintainer authorization in the current turn.
+
 ## Release Workflow (CI)
 
 Pushing a `V*` tag triggers `.github/workflows/release.yml`:
