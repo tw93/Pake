@@ -177,7 +177,7 @@ For release follow-through, keep these boundaries explicit:
 - `workflow_dispatch` runs on a branch. Bind npm-only publishing to the exact `main` commit with `expected_sha` and a successful Quality run for that same SHA; do not infer a release tag or source commit from the branch name, run title, or compare UI.
 - For CLI/npm issue closeout, the npm registry is the decisive public surface. GitHub app release assets and quality workflows should still be reported, but they are separate surfaces.
 - For app-release claims, inspect the GitHub Release directly with `gh release view <tag> --json assets` and check asset count/state instead of trusting source state or workflow names alone.
-- The contributors bot can push `chore: update contributors [skip ci]` at any moment, including between local commits and the bump push. On a rejected push, `git pull --rebase` onto it and push again before tagging. After release, fast-forward local `main`; do not move an already pushed release tag to include it.
+- The contributors bot can push `chore: update contributors [skip ci]` at any moment, including between local commits and the bump push. On a rejected push, `git pull --rebase` onto it and push again before tagging. After release, fast-forward local `main`; do not move an already pushed release tag to include it. Never tag that bot commit itself: GitHub evaluates `[skip ci]` against the head commit for tag pushes too, so a `V*` tag landing on it silently produces no workflow run, no release, and no assets, with no error anywhere. Before pushing a release tag, confirm the target commit's subject has no `[skip ci]` and that the commit has its own green Quality run; point the tag at the last real commit when the bot is on top.
 
 `.github/workflows/quality-and-test.yml` runs auto-format on push, Rust quality checks, and CLI/build validation across Linux, Windows, and macOS.
 
@@ -195,6 +195,8 @@ Pake uses official npm and Rust sources by default. CN mirrors are explicit opt-
 ## Issue Closeout After a Fix
 
 Default loop for a fixed user-reported CLI bug: ship the fix as an npm patch release first, then reply to the reporter with the concrete upgrade command (`npm install -g pake-cli@latest`, or `pake-cli@X.Y.Z` when `latest` may point elsewhere), then close the issue noting it can be reopened if the problem persists. Do not reply "fixed" pointing at an unreleased commit; the npm registry must return the fix version first. The publish itself follows the authorization rule in Release Workflow above.
+
+Keep `closes #N` / `fixes #N` out of commit messages for user-reported bugs. GitHub closes the issue the moment the commit reaches `main`, which is before npm has the fix, so the reporter sees a silent closure while still unable to get it. Reference the issue as a bare `#N` and close it by hand after the registry returns the fix version.
 
 ## Community PR Triage
 
