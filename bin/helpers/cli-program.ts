@@ -270,6 +270,14 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     )
     .addOption(
       new Option(
+        '--client-cert',
+        'Answer TLS client-certificate challenges with a matching keychain identity (mTLS); macOS only',
+      )
+        .default(DEFAULT.clientCert)
+        .hideHelp(),
+    )
+    .addOption(
+      new Option(
         '--iterative-build',
         'Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging',
       )

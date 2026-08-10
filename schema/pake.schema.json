@@ -228,6 +228,11 @@
       "description": "Ignore certificate errors (self-signed certs).",
       "default": false
     },
+    "clientCert": {
+      "type": "boolean",
+      "description": "Answer TLS client-certificate challenges (mTLS) with a matching keychain identity. macOS only.",
+      "default": false
+    },
     "iterativeBuild": {
       "type": "boolean",
       "description": "Rapid build mode (app only, no dmg/deb/msi), for debugging.",

@@ -38,6 +38,11 @@ pub struct WindowConfig {
     pub min_height: f64,
     #[serde(default)]
     pub ignore_certificate_errors: bool,
+    /// Answer TLS client-certificate challenges with a matching keychain
+    /// identity (mTLS). Independent from `ignore_certificate_errors`, which
+    /// only relaxes server-trust validation.
+    #[serde(default)]
+    pub client_cert: bool,
 }
 
 fn default_zoom() -> u32 {

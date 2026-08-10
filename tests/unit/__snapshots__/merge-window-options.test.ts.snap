@@ -4,6 +4,7 @@ exports[`buildWindowConfigOverrides > matches the default snapshot on Linux 1`] 
 {
   "activation_shortcut": "",
   "always_on_top": false,
+  "client_cert": false,
   "dark_mode": false,
   "disabled_web_shortcuts": false,
   "enable_drag_drop": false,
@@ -34,6 +35,7 @@ exports[`buildWindowConfigOverrides > matches the default snapshot on Windows 1`
 {
   "activation_shortcut": "",
   "always_on_top": false,
+  "client_cert": false,
   "dark_mode": false,
   "disabled_web_shortcuts": false,
   "enable_drag_drop": false,
@@ -64,6 +66,7 @@ exports[`buildWindowConfigOverrides > matches the default snapshot on macOS 1`] 
 {
   "activation_shortcut": "",
   "always_on_top": false,
+  "client_cert": false,
   "dark_mode": false,
   "disabled_web_shortcuts": false,
   "enable_drag_drop": false,

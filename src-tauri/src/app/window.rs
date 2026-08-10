@@ -353,9 +353,10 @@ fn build_window(
         ))
     })?;
 
+    // Either feature needs the delegate installed; they are independent opt-ins.
     #[cfg(target_os = "macos")]
     let cert_bypass_target = if label == "pake"
-        && window_config.ignore_certificate_errors
+        && (window_config.ignore_certificate_errors || window_config.client_cert)
         && window_config.url_type == "web"
     {
         Url::parse(&window_config.url).ok()
@@ -680,25 +681,34 @@ fn build_window(
 
     let window = window_builder.build()?;
 
-    // macOS WKWebView ignores the Chromium --ignore-certificate-errors flag, so
-    // install a host-scoped delegate on the process-lifetime main window only.
-    // Queue setup after construction so wry cannot replace the proxy while it
-    // finishes initializing its own navigation delegate.
+    // macOS WKWebView ignores the Chromium --ignore-certificate-errors flag and
+    // never offers a client certificate on its own, so install the delegate on
+    // the process-lifetime main window only. Queue setup after construction so
+    // wry cannot replace the proxy while it finishes initializing its own
+    // navigation delegate.
     #[cfg(target_os = "macos")]
     if let Some(target_url) = cert_bypass_target {
-        let allowed_host = target_url
-            .host_str()
-            .expect("web URLs must have a host")
-            .to_owned();
+        // Host scoping applies to the server-trust bypass only; leave it empty
+        // when that feature is off so we never relax validation implicitly.
+        let allowed_host = if window_config.ignore_certificate_errors {
+            target_url
+                .host_str()
+                .expect("web URLs must have a host")
+                .to_owned()
+        } else {
+            String::new()
+        };
+        let client_cert = window_config.client_cert;
         let cert_window = window.clone();
         Queue::main().exec_async(move || {
             if let Err(error) = cert_window.with_webview(move |webview| {
                 if !crate::app::cert::install_cert_bypass_and_navigate(
                     webview.inner(),
                     allowed_host,
+                    client_cert,
                     target_url.to_string(),
                 ) {
-                    eprintln!("[Pake] Failed to configure macOS certificate bypass.");
+                    eprintln!("[Pake] Failed to configure macOS certificate handling.");
                 }
             }) {
                 eprintln!("[Pake] Failed to access the macOS webview: {error}");

@@ -148,4 +148,26 @@ describe('buildWindowConfigOverrides', () => {
       internal_url_regex: '^https://example\\.com',
     });
   });
+
+  it('forwards client_cert independently from ignore_certificate_errors', () => {
+    // mTLS is a normal authentication mechanism, so opting into it must not
+    // require also disabling server-trust validation.
+    const onlyClientCert = buildWindowConfigOverrides(
+      makeOptions({ clientCert: true }),
+      'darwin',
+    );
+    expect(onlyClientCert).toMatchObject({
+      client_cert: true,
+      ignore_certificate_errors: false,
+    });
+
+    const onlyIgnoreErrors = buildWindowConfigOverrides(
+      makeOptions({ ignoreCertificateErrors: true }),
+      'darwin',
+    );
+    expect(onlyIgnoreErrors).toMatchObject({
+      client_cert: false,
+      ignore_certificate_errors: true,
+    });
+  });
 });

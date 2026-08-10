@@ -646,6 +646,7 @@ function buildWindowConfigOverrides(options, platform = asSupportedPlatform(proc
         min_width: options.minWidth,
         min_height: options.minHeight,
         ignore_certificate_errors: options.ignoreCertificateErrors,
+        client_cert: options.clientCert,
         new_window: options.newWindow,
     };
 }
@@ -3009,6 +3010,7 @@ const DEFAULT_PAKE_OPTIONS = {
     minWidth: 0,
     minHeight: 0,
     ignoreCertificateErrors: false,
+    clientCert: false,
     newWindow: false,
     install: false,
     camera: false,
@@ -3186,6 +3188,9 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .hideHelp())
         .addOption(new Option('--ignore-certificate-errors', 'Ignore certificate errors (for self-signed certificates)')
         .default(DEFAULT_PAKE_OPTIONS.ignoreCertificateErrors)
+        .hideHelp())
+        .addOption(new Option('--client-cert', 'Answer TLS client-certificate challenges with a matching keychain identity (mTLS); macOS only')
+        .default(DEFAULT_PAKE_OPTIONS.clientCert)
         .hideHelp())
         .addOption(new Option('--iterative-build', 'Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging')
         .default(DEFAULT_PAKE_OPTIONS.iterativeBuild)

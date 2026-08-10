@@ -139,6 +139,11 @@ export interface PakeCliOptions {
   // Ignore certificate errors (for self-signed certs), default false
   ignoreCertificateErrors: boolean;
 
+  // Answer TLS client-certificate challenges (mTLS) with a matching keychain
+  // identity, default false. macOS only. Independent from
+  // ignoreCertificateErrors, which only relaxes server-trust validation.
+  clientCert: boolean;
+
   // Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging
   iterativeBuild: boolean;
 
@@ -192,6 +197,7 @@ export interface WindowConfig {
   min_width: number;
   min_height: number;
   ignore_certificate_errors: boolean;
+  client_cert: boolean;
   new_window: boolean;
 }
 
