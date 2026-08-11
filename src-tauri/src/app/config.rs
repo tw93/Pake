@@ -43,6 +43,10 @@ pub struct WindowConfig {
     /// only relaxes server-trust validation.
     #[serde(default)]
     pub client_cert: bool,
+    /// Hosts allowed to receive a TLS client certificate. Empty means the
+    /// packaged target URL host only.
+    #[serde(default)]
+    pub client_cert_hosts: Vec<String>,
 }
 
 fn default_zoom() -> u32 {

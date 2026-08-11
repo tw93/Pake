@@ -46,6 +46,10 @@ pub struct PakeCertDelegateIvars {
     // identity from the keychain. Independent from `--ignore-certificate-errors`,
     // which only relaxes *server* trust validation.
     client_cert: bool,
+    // Hosts explicitly allowed to receive a client certificate. The
+    // window builder supplies the packaged target URL host when the user does
+    // not configure an explicit allowlist.
+    client_cert_hosts: Vec<String>,
 }
 
 static CERT_BYPASS_ASSOCIATION_KEY: u8 = 0;
@@ -56,23 +60,69 @@ fn hosts_match(allowed_host: &str, challenge_host: &str) -> bool {
         .eq_ignore_ascii_case(challenge_host.trim_end_matches('.'))
 }
 
-// Pick a keychain identity whose issuer matches one of the CA distinguished
-// names the server advertised in the TLS CertificateRequest. Relying on the
-// server's own `distinguishedNames` keeps this generic: no hardcoded issuer,
-// no hardcoded host list. Returns a retained SecIdentityRef as AnyObject.
-//
-// Only identities issued by a CA the server explicitly asked for are eligible,
-// so an unrelated identity (e.g. an Apple Developer ID) is never offered.
+fn host_in_allowlist(allowed_hosts: &[String], challenge_host: &str) -> bool {
+    allowed_hosts
+        .iter()
+        .any(|allowed_host| hosts_match(allowed_host, challenge_host))
+}
+
+fn dn_list_contains(dns: *mut AnyObject, dn_count: usize, normalized_dn: *mut AnyObject) -> bool {
+    if normalized_dn.is_null() {
+        return false;
+    }
+
+    for j in 0..dn_count {
+        let wanted: *mut AnyObject = unsafe { msg_send![dns, objectAtIndex: j] };
+        if wanted.is_null() {
+            continue;
+        }
+        let equal: Bool = unsafe { msg_send![normalized_dn, isEqualToData: wanted] };
+        if equal.as_bool() {
+            return true;
+        }
+    }
+    false
+}
+
+unsafe fn identity_matches_authorities(
+    identity: *mut AnyObject,
+    dns: *mut AnyObject,
+    dn_count: usize,
+) -> bool {
+    let mut cert: *mut AnyObject = core::ptr::null_mut();
+    if SecIdentityCopyCertificate(identity, &mut cert) != 0 || cert.is_null() {
+        return false;
+    }
+
+    // Match the leaf certificate's direct issuer against the CA DN list the
+    // server advertised. This also covers identities whose intermediate is not
+    // available in the keychain. The rest of the chain is deliberately not
+    // walked: a server that advertises a root CA while the client leaf is
+    // issued by an intermediate CA will not match here, and no identity is
+    // selected for the challenge.
+    let issuer: *mut AnyObject = SecCertificateCopyNormalizedIssuerSequence(cert);
+    let matches = dn_list_contains(dns, dn_count, issuer);
+    if !issuer.is_null() {
+        CFRelease(issuer.cast());
+    }
+    CFRelease(cert.cast());
+    matches
+}
+
+// Pick a keychain identity for a client-certificate challenge. When the server
+// advertises CA distinguished names, require the leaf certificate's issuer to
+// match one of them. When the list is empty, follow Chromium's behavior and do
+// not apply issuer filtering: the host allowlist remains the authorization
+// boundary, and the first signing identity from Keychain Services is used.
+// Returns a retained SecIdentityRef as AnyObject.
 unsafe fn find_matching_identity(space: *mut AnyObject) -> *mut AnyObject {
     // NSArray<NSData *> * — DER-encoded issuer DNs accepted by the server.
     let dns: *mut AnyObject = msg_send![space, distinguishedNames];
-    if dns.is_null() {
-        return core::ptr::null_mut();
-    }
-    let dn_count: usize = msg_send![dns, count];
-    if dn_count == 0 {
-        return core::ptr::null_mut();
-    }
+    let dn_count: usize = if dns.is_null() {
+        0
+    } else {
+        msg_send![dns, count]
+    };
 
     // Query every signing identity in the keychain (includes CryptoTokenKit
     // virtual smart cards, which is how corporate tools provision certs).
@@ -96,33 +146,20 @@ unsafe fn find_matching_identity(space: *mut AnyObject) -> *mut AnyObject {
     }
 
     let id_count: usize = msg_send![result, count];
+    let mut selected_identity = core::ptr::null_mut();
     for i in 0..id_count {
         let identity: *mut AnyObject = msg_send![result, objectAtIndex: i];
         if identity.is_null() {
             continue;
         }
-        let mut cert: *mut AnyObject = core::ptr::null_mut();
-        if SecIdentityCopyCertificate(identity, &mut cert) != 0 || cert.is_null() {
-            continue;
-        }
-        // Normalized issuer sequence is the DER DN, directly comparable to the
-        // entries the server sent.
-        let issuer: *mut AnyObject = SecCertificateCopyNormalizedIssuerSequence(cert);
-        if issuer.is_null() {
-            continue;
-        }
-        for j in 0..dn_count {
-            let wanted: *mut AnyObject = msg_send![dns, objectAtIndex: j];
-            if wanted.is_null() {
-                continue;
-            }
-            let equal: Bool = msg_send![issuer, isEqualToData: wanted];
-            if equal.as_bool() {
-                return identity;
-            }
+        if dn_count == 0 || identity_matches_authorities(identity, dns, dn_count) {
+            selected_identity = CFRetain(identity.cast()).cast();
+            break;
         }
     }
-    core::ptr::null_mut()
+
+    CFRelease(result.cast());
+    selected_identity
 }
 
 // Security.framework entry points used by `find_matching_identity`.
@@ -141,6 +178,12 @@ extern "C" {
     static kSecMatchLimit: *const AnyObject;
     static kSecMatchLimitAll: *const AnyObject;
     static kSecAttrCanSign: *const AnyObject;
+}
+
+#[link(name = "CoreFoundation", kind = "framework")]
+extern "C" {
+    fn CFRetain(cf: *const c_void) -> *mut c_void;
+    fn CFRelease(cf: *const c_void);
 }
 
 define_class!(
@@ -167,16 +210,25 @@ define_class!(
                     return;
                 }
 
-                // Client-certificate challenges carry a null serverTrust and are
-                // scoped by the CA list the server advertised, not by host, so
-                // they are handled before the host filter. mTLS logins (e.g. an
-                // SSO portal) redirect across several hosts that all request a
-                // cert, and the configured target host is usually not one of them.
+                // Client-certificate challenges must be authorized by host before
+                // matching any identity. The server controls the advertised CA DN
+                // list, so CA matching alone is not a user-consent boundary.
                 let auth_method: *mut NSString = msg_send![space, authenticationMethod];
                 if self.ivars().client_cert
                     && !auth_method.is_null()
                     && (&*auth_method).to_string() == "NSURLAuthenticationMethodClientCertificate"
                 {
+                    let host: *mut NSString = msg_send![space, host];
+                    if host.is_null()
+                        || !host_in_allowlist(
+                            &self.ivars().client_cert_hosts,
+                            &(&*host).to_string(),
+                        )
+                    {
+                        handler.call((PERFORM_DEFAULT_HANDLING, core::ptr::null_mut()));
+                        return;
+                    }
+
                     let identity = find_matching_identity(space);
                     if !identity.is_null() {
                         let credential: *mut AnyObject = msg_send![
@@ -185,6 +237,7 @@ define_class!(
                             certificates: core::ptr::null::<AnyObject>(),
                             persistence: NS_URL_CREDENTIAL_PERSISTENCE_FOR_SESSION
                         ];
+                        CFRelease(identity.cast());
                         handler.call((USE_CREDENTIAL, credential));
                         return;
                     }
@@ -246,6 +299,7 @@ impl PakeCertBypassDelegate {
         inner: &Retained<AnyObject>,
         allowed_host: String,
         client_cert: bool,
+        client_cert_hosts: Vec<String>,
         mtm: MainThreadMarker,
     ) -> Retained<Self> {
         let this = mtm
@@ -254,6 +308,7 @@ impl PakeCertBypassDelegate {
                 inner: Weak::from_retained(inner),
                 allowed_host,
                 client_cert,
+                client_cert_hosts,
             });
         unsafe { msg_send![super(this), init] }
     }
@@ -266,13 +321,15 @@ impl PakeCertBypassDelegate {
 /// that target. `webview_ptr` is the raw `WKWebView` from
 /// `PlatformWebview::inner()`. Returns false if setup cannot be completed.
 ///
-/// `allowed_host` scopes the server-trust bypass only. Client-certificate
-/// handling is scoped by the CA list the server advertises, so it stays active
-/// across login redirects even when `allowed_host` is empty.
+/// `allowed_host` scopes the server-trust bypass only. `client_cert_hosts`
+/// scopes the client-certificate response; the window builder supplies the
+/// packaged target URL host when the user does not configure an explicit
+/// allowlist.
 pub fn install_cert_bypass_and_navigate(
     webview_ptr: *mut c_void,
     allowed_host: String,
     client_cert: bool,
+    client_cert_hosts: Vec<String>,
     target_url: String,
 ) -> bool {
     if webview_ptr.is_null() || target_url.is_empty() {
@@ -294,7 +351,8 @@ pub fn install_cert_bypass_and_navigate(
         let Some(inner) = Retained::retain(existing) else {
             return false;
         };
-        let proxy = PakeCertBypassDelegate::new(&inner, allowed_host, client_cert, mtm);
+        let proxy =
+            PakeCertBypassDelegate::new(&inner, allowed_host, client_cert, client_cert_hosts, mtm);
         objc2::ffi::objc_setAssociatedObject(
             webview as *const AnyObject as *mut AnyObject,
             std::ptr::addr_of!(CERT_BYPASS_ASSOCIATION_KEY).cast(),
@@ -319,7 +377,7 @@ pub fn install_cert_bypass_and_navigate(
 
 #[cfg(test)]
 mod tests {
-    use super::hosts_match;
+    use super::{host_in_allowlist, hosts_match};
 
     #[test]
     fn accepts_the_configured_host_case_insensitively() {
@@ -330,5 +388,17 @@ mod tests {
     #[test]
     fn rejects_other_hosts() {
         assert!(!hosts_match("internal.example.com", "login.example.com"));
+    }
+
+    #[test]
+    fn client_cert_allowlist_accepts_only_configured_hosts() {
+        let allowed_hosts = vec![
+            "sso.example.com".to_string(),
+            "auth.example.com.".to_string(),
+        ];
+
+        assert!(host_in_allowlist(&allowed_hosts, "SSO.example.com."));
+        assert!(host_in_allowlist(&allowed_hosts, "auth.example.com"));
+        assert!(!host_in_allowlist(&allowed_hosts, "evil.example.com"));
     }
 }

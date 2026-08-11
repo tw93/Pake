@@ -82,6 +82,7 @@ describe('loadConfigFile', () => {
       width: 1000,
       hideTitleBar: true,
       inject: ['./patch.css'],
+      clientCertHosts: ['sso.example.com', 'auth.example.com'],
     });
 
     const loaded = await loadConfigFile(configPath, validKeys);
@@ -91,6 +92,7 @@ describe('loadConfigFile', () => {
       width: 1000,
       hideTitleBar: true,
       inject: ['./patch.css'],
+      clientCertHosts: ['sso.example.com', 'auth.example.com'],
     });
   });
 
@@ -150,6 +152,13 @@ describe('loadConfigFile', () => {
     const configPath2 = await writeConfig({ inject: 'a.css' }, 'badtype2.json');
     await expect(loadConfigFile(configPath2, validKeys)).rejects.toThrow(
       /"inject" must be of type string\[\]/,
+    );
+    const configPath3 = await writeConfig(
+      { clientCertHosts: 'sso.example.com' },
+      'badtype3.json',
+    );
+    await expect(loadConfigFile(configPath3, validKeys)).rejects.toThrow(
+      /"clientCertHosts" must be of type string\[\]/,
     );
   });
 });

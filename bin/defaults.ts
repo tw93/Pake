@@ -56,6 +56,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   minHeight: 0,
   ignoreCertificateErrors: false,
   clientCert: false,
+  clientCertHosts: [],
   newWindow: false,
   install: false,
   camera: false,

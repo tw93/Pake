@@ -62,6 +62,7 @@ export function buildWindowConfigOverrides(
     min_height: options.minHeight,
     ignore_certificate_errors: options.ignoreCertificateErrors,
     client_cert: options.clientCert,
+    client_cert_hosts: options.clientCertHosts,
     new_window: options.newWindow,
   };
 }

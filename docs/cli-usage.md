@@ -649,6 +649,28 @@ Ignore TLS certificate validation errors when loading the target URL. Useful for
 --ignore-certificate-errors
 ```
 
+#### [client-cert]
+
+On macOS, answer TLS client-certificate challenges (mTLS) with a matching identity from the user's Keychain. This is independent from `--ignore-certificate-errors`; mTLS does not disable server certificate validation.
+
+By default, Pake only sends a client certificate to the packaged target URL host. Use `--client-cert-hosts` when an mTLS login flow legitimately redirects to additional hosts. Values are host names only, comma-separated, and do not include paths.
+
+```shell
+--client-cert
+--client-cert-hosts sso.example.com,auth.example.com
+```
+
+Config file example:
+
+```json
+{
+  "clientCert": true,
+  "clientCertHosts": ["sso.example.com", "auth.example.com"]
+}
+```
+
+On Windows and Linux, `clientCert` is accepted for portable configs but is currently a no-op.
+
 #### [new-window]
 
 Allow sites to open new windows, such as authentication popups, extra tabs, or branch views.

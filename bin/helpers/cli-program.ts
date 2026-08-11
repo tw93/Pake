@@ -278,6 +278,21 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     )
     .addOption(
       new Option(
+        '--client-cert-hosts <hosts>',
+        'Comma-separated hosts allowed to receive a TLS client certificate; defaults to the target URL host',
+      )
+        .argParser((val, previous: string[]) => {
+          const hosts = val
+            .split(',')
+            .map((item) => item.trim())
+            .filter((item) => item.length > 0);
+          return previous ? [...previous, ...hosts] : hosts;
+        })
+        .default(DEFAULT.clientCertHosts)
+        .hideHelp(),
+    )
+    .addOption(
+      new Option(
         '--iterative-build',
         'Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging',
       )

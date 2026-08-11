@@ -647,6 +647,28 @@ Linux 多 target 构建（如 `--targets deb,appimage`）时，`ok` 为 true 不
 --ignore-certificate-errors
 ```
 
+#### [client-cert]
+
+在 macOS 上，使用用户钥匙串中匹配的身份响应 TLS 客户端证书挑战（mTLS）。它独立于 `--ignore-certificate-errors`；启用 mTLS 不会关闭服务端证书校验。
+
+默认情况下，Pake 只会把客户端证书发送给目标打包 URL 的 host。如果 mTLS 登录流程会合法跳转到其它 host，可用 `--client-cert-hosts` 显式加入允许列表。取值只写 host，不包含路径，多个值用英文逗号分隔。
+
+```shell
+--client-cert
+--client-cert-hosts sso.example.com,auth.example.com
+```
+
+配置文件示例：
+
+```json
+{
+  "clientCert": true,
+  "clientCertHosts": ["sso.example.com", "auth.example.com"]
+}
+```
+
+在 Windows 和 Linux 上，`clientCert` 可用于跨平台配置文件，但当前不会生效。
+
 #### [new-window]
 
 允许网站打开新窗口，例如登录授权弹窗、额外标签页或分支会话页面。

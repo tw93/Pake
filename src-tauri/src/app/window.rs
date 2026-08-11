@@ -699,6 +699,24 @@ fn build_window(
             String::new()
         };
         let client_cert = window_config.client_cert;
+        let client_cert_hosts = if client_cert {
+            let configured_hosts: Vec<String> = window_config
+                .client_cert_hosts
+                .iter()
+                .map(|host| host.trim().trim_end_matches('.').to_string())
+                .filter(|host| !host.is_empty())
+                .collect();
+            if configured_hosts.is_empty() {
+                vec![target_url
+                    .host_str()
+                    .expect("web URLs must have a host")
+                    .to_owned()]
+            } else {
+                configured_hosts
+            }
+        } else {
+            Vec::new()
+        };
         let cert_window = window.clone();
         Queue::main().exec_async(move || {
             if let Err(error) = cert_window.with_webview(move |webview| {
@@ -706,6 +724,7 @@ fn build_window(
                     webview.inner(),
                     allowed_host,
                     client_cert,
+                    client_cert_hosts,
                     target_url.to_string(),
                 ) {
                     eprintln!("[Pake] Failed to configure macOS certificate handling.");

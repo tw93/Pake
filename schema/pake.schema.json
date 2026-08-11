@@ -233,6 +233,14 @@
       "description": "Answer TLS client-certificate challenges (mTLS) with a matching keychain identity. macOS only.",
       "default": false
     },
+    "clientCertHosts": {
+      "type": "array",
+      "description": "Hosts allowed to receive a TLS client certificate. Defaults to the target URL host when empty. macOS only.",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
     "iterativeBuild": {
       "type": "boolean",
       "description": "Rapid build mode (app only, no dmg/deb/msi), for debugging.",

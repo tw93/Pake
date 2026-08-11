@@ -144,6 +144,10 @@ export interface PakeCliOptions {
   // ignoreCertificateErrors, which only relaxes server-trust validation.
   clientCert: boolean;
 
+  // Hosts allowed to receive a TLS client certificate. Defaults to the target
+  // URL host when empty. macOS only.
+  clientCertHosts: string[];
+
   // Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging
   iterativeBuild: boolean;
 
@@ -198,6 +202,7 @@ export interface WindowConfig {
   min_height: number;
   ignore_certificate_errors: boolean;
   client_cert: boolean;
+  client_cert_hosts: string[];
   new_window: boolean;
 }
 

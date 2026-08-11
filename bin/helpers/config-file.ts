@@ -34,7 +34,7 @@ const NUMBER_RANGES: Record<string, { min: number; max?: number }> = {
 };
 
 function expectedTypeFor(key: string): ExpectedType | null {
-  if (key === 'inject') return 'string[]';
+  if (key === 'inject' || key === 'clientCertHosts') return 'string[]';
   if (key === 'hideOnClose') return 'boolean';
   if (EXTRA_STRING_KEYS.has(key)) return 'string';
   const defaultValue = (DEFAULT as unknown as Record<string, unknown>)[key];

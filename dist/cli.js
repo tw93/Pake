@@ -647,6 +647,7 @@ function buildWindowConfigOverrides(options, platform = asSupportedPlatform(proc
         min_height: options.minHeight,
         ignore_certificate_errors: options.ignoreCertificateErrors,
         client_cert: options.clientCert,
+        client_cert_hosts: options.clientCertHosts,
         new_window: options.newWindow,
     };
 }
@@ -3011,6 +3012,7 @@ const DEFAULT_PAKE_OPTIONS = {
     minHeight: 0,
     ignoreCertificateErrors: false,
     clientCert: false,
+    clientCertHosts: [],
     newWindow: false,
     install: false,
     camera: false,
@@ -3192,6 +3194,16 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .addOption(new Option('--client-cert', 'Answer TLS client-certificate challenges with a matching keychain identity (mTLS); macOS only')
         .default(DEFAULT_PAKE_OPTIONS.clientCert)
         .hideHelp())
+        .addOption(new Option('--client-cert-hosts <hosts>', 'Comma-separated hosts allowed to receive a TLS client certificate; defaults to the target URL host')
+        .argParser((val, previous) => {
+        const hosts = val
+            .split(',')
+            .map((item) => item.trim())
+            .filter((item) => item.length > 0);
+        return previous ? [...previous, ...hosts] : hosts;
+    })
+        .default(DEFAULT_PAKE_OPTIONS.clientCertHosts)
+        .hideHelp())
         .addOption(new Option('--iterative-build', 'Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging')
         .default(DEFAULT_PAKE_OPTIONS.iterativeBuild)
         .hideHelp())
@@ -3240,7 +3252,7 @@ const NUMBER_RANGES = {
     zoom: { min: 50, max: 200 },
 };
 function expectedTypeFor(key) {
-    if (key === 'inject')
+    if (key === 'inject' || key === 'clientCertHosts')
         return 'string[]';
     if (key === 'hideOnClose')
         return 'boolean';
