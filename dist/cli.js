@@ -621,6 +621,7 @@ function buildWindowConfigOverrides(options, platform = asSupportedPlatform(proc
     const platformHideOnClose = options.hideOnClose ?? platform === 'darwin';
     const platformHideTitleBar = platform === 'darwin' ? options.hideTitleBar : false;
     const platformHideWindowDecorations = platform !== 'darwin' ? options.hideWindowDecorations : false;
+    const clientCert = options.clientCert || options.clientCertHosts.length > 0;
     return {
         width: options.width,
         height: options.height,
@@ -646,7 +647,7 @@ function buildWindowConfigOverrides(options, platform = asSupportedPlatform(proc
         min_width: options.minWidth,
         min_height: options.minHeight,
         ignore_certificate_errors: options.ignoreCertificateErrors,
-        client_cert: options.clientCert,
+        client_cert: clientCert,
         client_cert_hosts: options.clientCertHosts,
         new_window: options.newWindow,
     };
@@ -3203,6 +3204,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         return previous ? [...previous, ...hosts] : hosts;
     })
         .default(DEFAULT_PAKE_OPTIONS.clientCertHosts)
+        .implies({ clientCert: true })
         .hideHelp())
         .addOption(new Option('--iterative-build', 'Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging')
         .default(DEFAULT_PAKE_OPTIONS.iterativeBuild)

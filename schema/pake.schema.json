@@ -235,7 +235,7 @@
     },
     "clientCertHosts": {
       "type": "array",
-      "description": "Hosts allowed to receive a TLS client certificate. Defaults to the target URL host when empty. macOS only.",
+      "description": "Hosts allowed to receive a TLS client certificate. Defaults to the target URL host when empty. Non-empty values enable clientCert. macOS only.",
       "items": {
         "type": "string"
       },

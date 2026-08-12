@@ -67,6 +67,18 @@ describe('CLI options', () => {
     expect(option?.hidden).toBeFalsy();
   });
 
+  it('makes --client-cert-hosts imply --client-cert', () => {
+    const option = program.options.find(
+      (item) => item.long === '--client-cert-hosts',
+    );
+
+    expect(option).toBeDefined();
+    expect(option?.defaultValue).toEqual([]);
+    expect((option as unknown as { implied?: unknown })?.implied).toEqual({
+      clientCert: true,
+    });
+  });
+
   it('registers hidden --identifier option', () => {
     const option = program.options.find((item) => item.long === '--identifier');
 

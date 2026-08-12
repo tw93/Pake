@@ -36,6 +36,8 @@ export function buildWindowConfigOverrides(
     platform === 'darwin' ? options.hideTitleBar : false;
   const platformHideWindowDecorations =
     platform !== 'darwin' ? options.hideWindowDecorations : false;
+  const clientCert = options.clientCert || options.clientCertHosts.length > 0;
+
   return {
     width: options.width,
     height: options.height,
@@ -61,7 +63,7 @@ export function buildWindowConfigOverrides(
     min_width: options.minWidth,
     min_height: options.minHeight,
     ignore_certificate_errors: options.ignoreCertificateErrors,
-    client_cert: options.clientCert,
+    client_cert: clientCert,
     client_cert_hosts: options.clientCertHosts,
     new_window: options.newWindow,
   };

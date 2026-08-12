@@ -651,7 +651,7 @@ Linux 多 target 构建（如 `--targets deb,appimage`）时，`ok` 为 true 不
 
 在 macOS 上，使用用户钥匙串中匹配的身份响应 TLS 客户端证书挑战（mTLS）。它独立于 `--ignore-certificate-errors`；启用 mTLS 不会关闭服务端证书校验。
 
-默认情况下，Pake 只会把客户端证书发送给目标打包 URL 的 host。如果 mTLS 登录流程会合法跳转到其它 host，可用 `--client-cert-hosts` 显式加入允许列表。取值只写 host，不包含路径，多个值用英文逗号分隔。
+默认情况下，Pake 只会把客户端证书发送给目标打包 URL 的 host。如果 mTLS 登录流程会合法跳转到其它 host，可用 `--client-cert-hosts` 显式加入允许列表。取值只写 host，不包含路径，多个值用英文逗号分隔。传入 `--client-cert-hosts` 也会自动启用 `--client-cert`。
 
 ```shell
 --client-cert

@@ -172,4 +172,19 @@ describe('buildWindowConfigOverrides', () => {
       ignore_certificate_errors: true,
     });
   });
+
+  it('enables client_cert when client_cert_hosts are configured', () => {
+    const result = buildWindowConfigOverrides(
+      makeOptions({
+        clientCert: false,
+        clientCertHosts: ['sso.example.com'],
+      }),
+      'darwin',
+    );
+
+    expect(result).toMatchObject({
+      client_cert: true,
+      client_cert_hosts: ['sso.example.com'],
+    });
+  });
 });
