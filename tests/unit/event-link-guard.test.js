@@ -146,6 +146,28 @@ function makeClickEvent(anchor) {
 }
 
 describe("event link guard", () => {
+  it("grants only the supported external protocol entry points", () => {
+    const capability = JSON.parse(
+      fs.readFileSync(
+        path.join(process.cwd(), "src-tauri/capabilities/default.json"),
+        "utf-8",
+      ),
+    );
+    const openerPermission = capability.permissions.find(
+      (permission) =>
+        typeof permission === "object" &&
+        permission.identifier === "opener:allow-open-url",
+    );
+
+    expect(openerPermission.allow).toEqual([
+      { url: "sms:*" },
+      { url: "geo:*" },
+      { url: "tencent://ntqq-open[?]*" },
+      { url: "mqqapi://userprofile/friend_profile_card[?]*" },
+      { url: "mqq://card/show_pslcard[?]*" },
+    ]);
+  });
+
   it("falls back from malformed saved zoom values", () => {
     const context = loadEventHelpers({
       withTauri: true,
@@ -538,10 +560,33 @@ describe("event link guard", () => {
     expect(event.preventDefault).toHaveBeenCalled();
     expect(event.stopImmediatePropagation).toHaveBeenCalled();
     expect(context.invokeCalls).toContainEqual([
-      "plugin:shell|open",
-      { path: "https://other.example.org/page" },
+      "plugin:opener|open_url",
+      { url: "https://other.example.org/page" },
     ]);
   });
+
+  it.each([
+    "sms:+15551234567?body=Hello",
+    "geo:31.2304,121.4737",
+    "tencent://ntqq-open?subcmd=OpenRobotProfile&robot_uin=962283577",
+  ])(
+    "opens supported external protocol links with the native handler",
+    (url) => {
+      const context = loadEventHelpers({ withTauri: true });
+      context.window.pakeConfig = { new_window: false };
+      runDomReady(context);
+
+      const event = makeClickEvent(makeAnchor(url, "_self"));
+      getClickGuard(context)(event);
+
+      expect(event.preventDefault).toHaveBeenCalled();
+      expect(event.stopImmediatePropagation).toHaveBeenCalled();
+      expect(context.invokeCalls).toContainEqual([
+        "plugin:opener|open_url",
+        { url },
+      ]);
+    },
+  );
 
   it("bridges Web Badging API calls to explicit badge commands", async () => {
     const { navigator, invokeCalls } = loadEventHelpers({ withTauri: true });

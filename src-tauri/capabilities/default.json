@@ -7,7 +7,17 @@
     "urls": ["https://*.*"]
   },
   "permissions": [
-    "shell:allow-open",
+    "opener:default",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        { "url": "sms:*" },
+        { "url": "geo:*" },
+        { "url": "tencent://ntqq-open[?]*" },
+        { "url": "mqqapi://userprofile/friend_profile_card[?]*" },
+        { "url": "mqq://card/show_pslcard[?]*" }
+      ]
+    },
     "core:window:allow-theme",
     "core:window:allow-start-dragging",
     "core:window:allow-toggle-maximize",

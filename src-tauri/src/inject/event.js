@@ -715,16 +715,14 @@ document.addEventListener("DOMContentLoaded", () => {
     Boolean(anchorElement.download) || isDownloadableFile(url);
 
   const handleExternalLink = (url) => {
-    // Don't try to open blob: or data: URLs with shell
+    // Don't try to open blob: or data: URLs with the system URL handler.
     if (isSpecialDownload(url)) {
-      console.warn("Cannot open special URL with shell:", url);
+      console.warn("Cannot open special URL with opener:", url);
       return;
     }
 
-    invoke("plugin:shell|open", {
-      path: url,
-    }).catch((error) => {
-      console.error("Failed to open URL with shell:", url, error);
+    invoke("plugin:opener|open_url", { url }).catch((error) => {
+      console.error("Failed to open URL with opener:", url, error);
     });
   };
 
@@ -1219,7 +1217,7 @@ document.addEventListener("DOMContentLoaded", () => {
             navigator.clipboard.writeText(data.url),
           ),
           createMenuItem(menuTexts.openInBrowser, () =>
-            invoke("plugin:shell|open", { path: data.url }),
+            handleExternalLink(data.url),
           ),
         );
         break;
@@ -1243,7 +1241,7 @@ document.addEventListener("DOMContentLoaded", () => {
             navigator.clipboard.writeText(data.url),
           ),
           createMenuItem(menuTexts.openInBrowser, () =>
-            invoke("plugin:shell|open", { path: data.url }),
+            handleExternalLink(data.url),
           ),
         );
         break;
