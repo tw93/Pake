@@ -7,11 +7,20 @@
  * test files with a single, easy-to-use interface.
  */
 
-import { execSync, spawn } from "child_process";
+import { execSync, spawn, spawnSync } from "child_process";
 import fs from "fs";
 import path from "path";
 import ora from "ora";
 import config, { TIMEOUTS, TEST_URLS } from "./config.js";
+
+const rejectImageDependenciesLoader = `data:text/javascript,${encodeURIComponent(`
+  export async function resolve(specifier, context, nextResolve) {
+    if (specifier === "sharp" || specifier === "icon-gen") {
+      throw new Error("Image dependency loaded during CLI startup: " + specifier);
+    }
+    return nextResolve(specifier, context);
+  }
+`)}`;
 
 class PakeTestRunner {
   constructor() {
@@ -196,6 +205,31 @@ class PakeTestRunner {
           timeout: TIMEOUTS.QUICK,
         });
         return /^\d+\.\d+\.\d+/.test(output.trim());
+      },
+      TIMEOUTS.QUICK,
+    );
+
+    // Metadata-only commands must not initialize native image tooling.
+    await this.runTest(
+      "Version Command Without Image Dependencies",
+      () => {
+        const result = spawnSync(
+          process.execPath,
+          [
+            "--no-warnings",
+            "--experimental-loader",
+            rejectImageDependenciesLoader,
+            config.CLI_PATH,
+            "--version",
+          ],
+          {
+            encoding: "utf8",
+            timeout: TIMEOUTS.QUICK,
+          },
+        );
+        return (
+          result.status === 0 && /^\d+\.\d+\.\d+/.test(result.stdout.trim())
+        );
       },
       TIMEOUTS.QUICK,
     );

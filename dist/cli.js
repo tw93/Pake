@@ -14,8 +14,6 @@ import fs from 'fs';
 import fs$1 from 'fs/promises';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
-import icongen from 'icon-gen';
-import sharp from 'sharp';
 import * as psl from 'psl';
 import { InvalidArgumentError, program as program$1, Option } from 'commander';
 
@@ -2114,6 +2112,9 @@ function getIconSourcePriority(url, appName) {
         : ['domain', 'dashboard'];
 }
 
+async function loadSharp$1() {
+    return (await import('sharp')).default;
+}
 const ICO_HEADER_SIZE = 6;
 const ICO_DIR_ENTRY_SIZE = 16;
 const ICO_TYPE_ICON = 1;
@@ -2247,6 +2248,7 @@ async function pickLargestFrameAsPng(buffer, entries) {
     // Fallback: let sharp render directly from the ICO buffer. sharp picks the
     // largest embedded frame on its own.
     try {
+        const sharp = await loadSharp$1();
         return await sharp(buffer).png().toBuffer();
     }
     catch {
@@ -2268,6 +2270,7 @@ async function ensureMultiResolutionIco(sourcePath, outputPath, preferredSize = 
         if (!sourcePng) {
             return await writeIcoWithPreferredSize(sourcePath, outputPath, preferredSize);
         }
+        const sharp = await loadSharp$1();
         const frames = await Promise.all(desiredSizes.map(async (size) => {
             // Reuse an existing exact-size PNG frame when possible to keep any
             // hand-tuned small icon (e.g. a 16x16 with deliberate pixel hinting).
@@ -2334,6 +2337,9 @@ function buildIcoFromPngBuffers(frames) {
     return output;
 }
 
+async function loadSharp() {
+    return (await import('sharp')).default;
+}
 const ICON_CONFIG = {
     minFileSize: 100,
     supportedFormats: [
@@ -2414,6 +2420,7 @@ async function preprocessIcon(inputPath) {
         if (!shouldNormalize) {
             return inputPath;
         }
+        const sharp = await loadSharp();
         const { path: tempDir } = await dir();
         const outputPath = path.join(tempDir, 'icon-normalized.png');
         await sharp(inputPath).ensureAlpha().png().toFile(outputPath);
@@ -2431,6 +2438,7 @@ async function preprocessIcon(inputPath) {
  */
 async function applyMacOSMask(inputPath) {
     try {
+        const sharp = await loadSharp();
         const { path: tempDir } = await dir();
         const outputPath = path.join(tempDir, 'icon-macos-rounded.png');
         // 1. Create a 1024x1024 rounded rect mask
@@ -2488,6 +2496,7 @@ async function convertIconFormat(inputPath, appName) {
         const iconName = getIconBaseName(appName);
         // Generate platform-specific format
         if (IS_WIN) {
+            const sharp = await loadSharp();
             const icoPath = path.join(platformOutputDir, `${iconName}_256${PLATFORM_CONFIG.win.format}`);
             const sourceBuffer = await fsExtra.readFile(processedInputPath);
             const frames = await Promise.all(PLATFORM_CONFIG.win.sizes.map(async (size) => {
@@ -2506,6 +2515,7 @@ async function convertIconFormat(inputPath, appName) {
             return icoPath;
         }
         if (IS_LINUX) {
+            const sharp = await loadSharp();
             const outputPath = path.join(platformOutputDir, `${iconName}_${PLATFORM_CONFIG.linux.size}${PLATFORM_CONFIG.linux.format}`);
             // Ensure we convert to proper PNG format with correct size
             await sharp(processedInputPath)
@@ -2520,6 +2530,7 @@ async function convertIconFormat(inputPath, appName) {
         }
         // macOS
         const macIconPath = await applyMacOSMask(processedInputPath);
+        const { default: icongen } = await import('icon-gen');
         await icongen(macIconPath, platformOutputDir, {
             report: false,
             icns: { name: iconName, sizes: PLATFORM_CONFIG.macos.sizes },
@@ -2539,6 +2550,7 @@ async function isLinuxBundleIconReady(iconPath) {
         return false;
     }
     try {
+        const sharp = await loadSharp();
         const { width, height } = await sharp(iconPath).metadata();
         return (width === PLATFORM_CONFIG.linux.size &&
             height === PLATFORM_CONFIG.linux.size);

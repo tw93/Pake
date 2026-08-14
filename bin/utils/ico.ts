@@ -1,6 +1,11 @@
 import path from 'path';
 import fsExtra from 'fs-extra';
-import sharp from 'sharp';
+
+type Sharp = (typeof import('sharp'))['default'];
+
+async function loadSharp(): Promise<Sharp> {
+  return (await import('sharp')).default;
+}
 
 const ICO_HEADER_SIZE = 6;
 const ICO_DIR_ENTRY_SIZE = 16;
@@ -186,6 +191,7 @@ async function pickLargestFrameAsPng(
   // Fallback: let sharp render directly from the ICO buffer. sharp picks the
   // largest embedded frame on its own.
   try {
+    const sharp = await loadSharp();
     return await sharp(buffer).png().toBuffer();
   } catch {
     return null;
@@ -218,6 +224,7 @@ export async function ensureMultiResolutionIco(
       );
     }
 
+    const sharp = await loadSharp();
     const frames = await Promise.all(
       desiredSizes.map(async (size) => {
         // Reuse an existing exact-size PNG frame when possible to keep any

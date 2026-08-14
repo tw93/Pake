@@ -3,8 +3,6 @@ import fsExtra from 'fs-extra';
 import chalk from 'chalk';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
-import icongen from 'icon-gen';
-import sharp from 'sharp';
 
 import logger from './logger';
 import { getSpinner } from '@/utils/info';
@@ -29,6 +27,13 @@ type PlatformIconConfig = {
   sizes?: number[];
   size?: number;
 };
+
+type Sharp = (typeof import('sharp'))['default'];
+
+async function loadSharp(): Promise<Sharp> {
+  return (await import('sharp')).default;
+}
+
 const ICON_CONFIG = {
   minFileSize: 100,
   supportedFormats: [
@@ -134,6 +139,7 @@ async function preprocessIcon(inputPath: string): Promise<string> {
       return inputPath;
     }
 
+    const sharp = await loadSharp();
     const { path: tempDir } = await dir();
     const outputPath = path.join(tempDir, 'icon-normalized.png');
 
@@ -153,6 +159,7 @@ async function preprocessIcon(inputPath: string): Promise<string> {
  */
 async function applyMacOSMask(inputPath: string): Promise<string> {
   try {
+    const sharp = await loadSharp();
     const { path: tempDir } = await dir();
     const outputPath = path.join(tempDir, 'icon-macos-rounded.png');
 
@@ -221,6 +228,7 @@ async function convertIconFormat(
 
     // Generate platform-specific format
     if (IS_WIN) {
+      const sharp = await loadSharp();
       const icoPath = path.join(
         platformOutputDir,
         `${iconName}_256${PLATFORM_CONFIG.win.format}`,
@@ -245,6 +253,7 @@ async function convertIconFormat(
     }
 
     if (IS_LINUX) {
+      const sharp = await loadSharp();
       const outputPath = path.join(
         platformOutputDir,
         `${iconName}_${PLATFORM_CONFIG.linux.size}${PLATFORM_CONFIG.linux.format}`,
@@ -265,6 +274,7 @@ async function convertIconFormat(
 
     // macOS
     const macIconPath = await applyMacOSMask(processedInputPath);
+    const { default: icongen } = await import('icon-gen');
     await icongen(macIconPath, platformOutputDir, {
       report: false,
       icns: { name: iconName, sizes: PLATFORM_CONFIG.macos.sizes },
@@ -288,6 +298,7 @@ async function isLinuxBundleIconReady(iconPath: string): Promise<boolean> {
   }
 
   try {
+    const sharp = await loadSharp();
     const { width, height } = await sharp(iconPath).metadata();
     return (
       width === PLATFORM_CONFIG.linux.size &&
