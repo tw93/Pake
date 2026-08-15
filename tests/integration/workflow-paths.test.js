@@ -266,4 +266,18 @@ describe("Workflow path integration", () => {
       expect(parts.length).toBeGreaterThan(1);
     });
   });
+
+  describe("npm package boundaries", () => {
+    it("excludes generated Tauri build state from the shipped template", () => {
+      const ignoredPaths = fs
+        .readFileSync("src-tauri/.npmignore", "utf8")
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter((line) => line && !line.startsWith("#"));
+
+      expect(ignoredPaths).toEqual(
+        expect.arrayContaining([".pake/", "target/", ".cargo/config.toml"]),
+      );
+    });
+  });
 });
