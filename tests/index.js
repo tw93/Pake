@@ -7,11 +7,20 @@
  * test files with a single, easy-to-use interface.
  */
 
-import { execSync, spawn } from "child_process";
+import { execSync, spawn, spawnSync } from "child_process";
 import fs from "fs";
 import path from "path";
 import ora from "ora";
 import config, { TIMEOUTS, TEST_URLS } from "./config.js";
+
+const rejectImageDependenciesLoader = `data:text/javascript,${encodeURIComponent(`
+  export async function resolve(specifier, context, nextResolve) {
+    if (specifier === "sharp") {
+      throw new Error("Image dependency loaded during CLI startup: " + specifier);
+    }
+    return nextResolve(specifier, context);
+  }
+`)}`;
 
 class PakeTestRunner {
   constructor() {
@@ -200,6 +209,31 @@ class PakeTestRunner {
       TIMEOUTS.QUICK,
     );
 
+    // Metadata-only commands must not initialize native image tooling.
+    await this.runTest(
+      "Version Command Without Image Dependencies",
+      () => {
+        const result = spawnSync(
+          process.execPath,
+          [
+            "--no-warnings",
+            "--experimental-loader",
+            rejectImageDependenciesLoader,
+            config.CLI_PATH,
+            "--version",
+          ],
+          {
+            encoding: "utf8",
+            timeout: TIMEOUTS.QUICK,
+          },
+        );
+        return (
+          result.status === 0 && /^\d+\.\d+\.\d+/.test(result.stdout.trim())
+        );
+      },
+      TIMEOUTS.QUICK,
+    );
+
     // Help command test
     await this.runTest(
       "Help Command",
@@ -315,8 +349,10 @@ class PakeTestRunner {
         );
 
         const essentialDeps = ["commander", "chalk", "fs-extra", "execa"];
-        return essentialDeps.every(
-          (dep) => packageJson.dependencies && packageJson.dependencies[dep],
+        return (
+          essentialDeps.every(
+            (dep) => packageJson.dependencies && packageJson.dependencies[dep],
+          ) && !packageJson.dependencies["icon-gen"]
         );
       } catch {
         return false;

@@ -3,7 +3,7 @@
   "version": "3.15.6",
   "description": "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=20.9.0"
   },
   "packageManager": "pnpm@10.26.2",
   "bin": {
@@ -60,7 +60,6 @@
     "execa": "^9.6.1",
     "file-type": "^21.3.4",
     "fs-extra": "^11.3.3",
-    "icon-gen": "^5.0.0",
     "loglevel": "^1.9.2",
     "ora": "^9.3.0",
     "prompts": "^2.4.2",

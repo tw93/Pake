@@ -14,8 +14,6 @@ import fs from 'fs';
 import fs$1 from 'fs/promises';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
-import icongen from 'icon-gen';
-import sharp from 'sharp';
 import * as psl from 'psl';
 import { InvalidArgumentError, program as program$1, Option } from 'commander';
 
@@ -23,7 +21,7 @@ var name = "pake-cli";
 var version = "3.15.6";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
-	node: ">=20.0.0"
+	node: ">=20.9.0"
 };
 var packageManager = "pnpm@10.26.2";
 var bin = {
@@ -80,7 +78,6 @@ var dependencies = {
 	execa: "^9.6.1",
 	"file-type": "^21.3.4",
 	"fs-extra": "^11.3.3",
-	"icon-gen": "^5.0.0",
 	loglevel: "^1.9.2",
 	ora: "^9.3.0",
 	prompts: "^2.4.2",
@@ -2114,6 +2111,9 @@ function getIconSourcePriority(url, appName) {
         : ['domain', 'dashboard'];
 }
 
+async function loadSharp$1() {
+    return (await import('sharp')).default;
+}
 const ICO_HEADER_SIZE = 6;
 const ICO_DIR_ENTRY_SIZE = 16;
 const ICO_TYPE_ICON = 1;
@@ -2247,6 +2247,7 @@ async function pickLargestFrameAsPng(buffer, entries) {
     // Fallback: let sharp render directly from the ICO buffer. sharp picks the
     // largest embedded frame on its own.
     try {
+        const sharp = await loadSharp$1();
         return await sharp(buffer).png().toBuffer();
     }
     catch {
@@ -2268,6 +2269,7 @@ async function ensureMultiResolutionIco(sourcePath, outputPath, preferredSize = 
         if (!sourcePng) {
             return await writeIcoWithPreferredSize(sourcePath, outputPath, preferredSize);
         }
+        const sharp = await loadSharp$1();
         const frames = await Promise.all(desiredSizes.map(async (size) => {
             // Reuse an existing exact-size PNG frame when possible to keep any
             // hand-tuned small icon (e.g. a 16x16 with deliberate pixel hinting).
@@ -2334,6 +2336,9 @@ function buildIcoFromPngBuffers(frames) {
     return output;
 }
 
+async function loadSharp() {
+    return (await import('sharp')).default;
+}
 const ICON_CONFIG = {
     minFileSize: 100,
     supportedFormats: [
@@ -2354,8 +2359,20 @@ const ICON_CONFIG = {
 const PLATFORM_CONFIG = {
     win: { format: '.ico', sizes: [...WIN_STANDARD_ICO_SIZES] },
     linux: { format: '.png', size: 512 },
-    macos: { format: '.icns', sizes: [16, 32, 64, 128, 256, 512, 1024] },
+    macos: { format: '.icns' },
 };
+const MACOS_ICONSET_FILES = [
+    ['icon_16x16.png', 16],
+    ['icon_16x16@2x.png', 32],
+    ['icon_32x32.png', 32],
+    ['icon_32x32@2x.png', 64],
+    ['icon_128x128.png', 128],
+    ['icon_128x128@2x.png', 256],
+    ['icon_256x256.png', 256],
+    ['icon_256x256@2x.png', 512],
+    ['icon_512x512.png', 512],
+    ['icon_512x512@2x.png', 1024],
+];
 const API_KEYS = {
     logoDev: ['pk_JLLMUKGZRpaG5YclhXaTkg', 'pk_Ph745P8mQSeYFfW2Wk039A'],
     brandfetch: ['1idqvJC0CeFSeyp3Yf7', '1idej-yhU_ThggIHFyG'],
@@ -2414,6 +2431,7 @@ async function preprocessIcon(inputPath) {
         if (!shouldNormalize) {
             return inputPath;
         }
+        const sharp = await loadSharp();
         const { path: tempDir } = await dir();
         const outputPath = path.join(tempDir, 'icon-normalized.png');
         await sharp(inputPath).ensureAlpha().png().toFile(outputPath);
@@ -2431,6 +2449,7 @@ async function preprocessIcon(inputPath) {
  */
 async function applyMacOSMask(inputPath) {
     try {
+        const sharp = await loadSharp();
         const { path: tempDir } = await dir();
         const outputPath = path.join(tempDir, 'icon-macos-rounded.png');
         // 1. Create a 1024x1024 rounded rect mask
@@ -2474,6 +2493,32 @@ async function applyMacOSMask(inputPath) {
         return inputPath;
     }
 }
+async function generateMacOSIcns(inputPath, outputDir, iconName) {
+    const sharp = await loadSharp();
+    const iconsetPath = path.join(outputDir, `${iconName}.iconset`);
+    const outputPath = path.join(outputDir, `${iconName}${PLATFORM_CONFIG.macos.format}`);
+    await fsExtra.ensureDir(iconsetPath);
+    const source = sharp(inputPath);
+    await Promise.all(MACOS_ICONSET_FILES.map(async ([fileName, size]) => {
+        await source
+            .clone()
+            .resize(size, size, {
+            fit: 'contain',
+            background: ICON_CONFIG.transparentBackground,
+        })
+            .ensureAlpha()
+            .png()
+            .toFile(path.join(iconsetPath, fileName));
+    }));
+    await execa('/usr/bin/iconutil', [
+        '-c',
+        'icns',
+        iconsetPath,
+        '-o',
+        outputPath,
+    ]);
+    return outputPath;
+}
 /**
  * Converts icon to platform-specific format
  */
@@ -2488,6 +2533,7 @@ async function convertIconFormat(inputPath, appName) {
         const iconName = getIconBaseName(appName);
         // Generate platform-specific format
         if (IS_WIN) {
+            const sharp = await loadSharp();
             const icoPath = path.join(platformOutputDir, `${iconName}_256${PLATFORM_CONFIG.win.format}`);
             const sourceBuffer = await fsExtra.readFile(processedInputPath);
             const frames = await Promise.all(PLATFORM_CONFIG.win.sizes.map(async (size) => {
@@ -2506,6 +2552,7 @@ async function convertIconFormat(inputPath, appName) {
             return icoPath;
         }
         if (IS_LINUX) {
+            const sharp = await loadSharp();
             const outputPath = path.join(platformOutputDir, `${iconName}_${PLATFORM_CONFIG.linux.size}${PLATFORM_CONFIG.linux.format}`);
             // Ensure we convert to proper PNG format with correct size
             await sharp(processedInputPath)
@@ -2520,11 +2567,7 @@ async function convertIconFormat(inputPath, appName) {
         }
         // macOS
         const macIconPath = await applyMacOSMask(processedInputPath);
-        await icongen(macIconPath, platformOutputDir, {
-            report: false,
-            icns: { name: iconName, sizes: PLATFORM_CONFIG.macos.sizes },
-        });
-        const outputPath = path.join(platformOutputDir, `${iconName}${PLATFORM_CONFIG.macos.format}`);
+        const outputPath = await generateMacOSIcns(macIconPath, platformOutputDir, iconName);
         return (await fsExtra.pathExists(outputPath)) ? outputPath : null;
     }
     catch (error) {
@@ -2539,6 +2582,7 @@ async function isLinuxBundleIconReady(iconPath) {
         return false;
     }
     try {
+        const sharp = await loadSharp();
         const { width, height } = await sharp(iconPath).metadata();
         return (width === PLATFORM_CONFIG.linux.size &&
             height === PLATFORM_CONFIG.linux.size);
