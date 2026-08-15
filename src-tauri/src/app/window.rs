@@ -5,6 +5,10 @@ use crate::util::{
 };
 #[cfg(target_os = "macos")]
 use dispatch::Queue;
+#[cfg(target_os = "macos")]
+use objc2::MainThreadMarker;
+#[cfg(target_os = "macos")]
+use objc2_web_kit::WKUserContentController;
 #[cfg(target_os = "windows")]
 use std::{os::windows::ffi::OsStrExt, ptr, sync::OnceLock};
 use std::{
@@ -27,6 +31,24 @@ use tauri::Theme;
 
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
+
+#[cfg(target_os = "macos")]
+fn prepare_macos_new_window_configuration(features: &NewWindowFeatures) -> tauri::Result<()> {
+    let mtm = MainThreadMarker::new().ok_or_else(|| {
+        std::io::Error::other("macOS new-window configuration must run on the main thread")
+    })?;
+    // WebKit requires the exact target configuration it supplied to be used
+    // for the new page. Replace only the inherited content controller so Wry
+    // can register Pake's IPC handler and scripts once on the new webview.
+    let controller = unsafe { WKUserContentController::new(mtm) };
+    unsafe {
+        features
+            .opener()
+            .target_configuration
+            .setUserContentController(&controller);
+    }
+    Ok(())
+}
 
 #[cfg(target_os = "windows")]
 fn build_proxy_browser_arg(url: &Url) -> Option<String> {
@@ -594,26 +616,10 @@ fn build_window(
     }
 
     if let Some(features) = new_window_features {
-        // Reuse only opener-provided position/size on macOS; sharing the opener
-        // WKWebViewConfiguration triggers duplicate WKScriptMessageHandler
-        // registrations on macOS 26+ and crashes the app (issue #1194).
         #[cfg(target_os = "macos")]
-        {
-            if let Some(position) = features.position() {
-                window_builder = window_builder.position(position.x, position.y);
-            }
+        prepare_macos_new_window_configuration(&features)?;
 
-            if let Some(size) = features.size() {
-                window_builder = window_builder.inner_size(size.width, size.height);
-            }
-
-            window_builder = window_builder.focused(true);
-        }
-
-        #[cfg(not(target_os = "macos"))]
-        {
-            window_builder = window_builder.window_features(features).focused(true);
-        }
+        window_builder = window_builder.window_features(features).focused(true);
     }
 
     // Capture webview-initiated downloads (blob:, data:, Content-Disposition,

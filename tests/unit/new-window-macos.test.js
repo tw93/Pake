@@ -18,24 +18,27 @@ describe("macOS new-window handling (regression: #1194)", () => {
 
     const newWindowBlock = source.slice(blockStart, blockEnd);
 
-    // The fix for #1194 unifies all platforms behind open_requested_window so
-    // popups never reuse the opener WKWebViewConfiguration. Guard against
-    // accidental reintroduction of NewWindowResponse::Allow which crashes
-    // macOS 26 with WKUserContentController duplicate handler errors.
+    // Pake must create the popup itself so Wry can install its own delegates
+    // and custom protocol state. NewWindowResponse::Allow creates a plain
+    // WKWebView that does not have Pake's runtime state.
     expect(newWindowBlock).toContain("open_requested_window");
     expect(newWindowBlock).toContain("NewWindowResponse::Create");
     expect(newWindowBlock).not.toMatch(/NewWindowResponse::Allow\b/);
     expect(newWindowBlock).not.toMatch(/#\[cfg\(target_os = "macos"\)\]/);
   });
 
-  it("does not clone the opener WKWebViewConfiguration on macOS popup features", () => {
-    // The popup-features handler in build_window must never call
-    // .with_webview_configuration(features.opener().target_configuration)
-    // because the cloned configuration carries the parent's
-    // WKScriptMessageHandler set, which WebKit refuses to register twice and
-    // aborts the process on macOS 26.
+  it("uses WebKit's target configuration with a fresh user content controller", () => {
+    // WebKit requires createNewPage to return a WKWebView built from the exact
+    // target configuration. Reusing its inherited WKUserContentController,
+    // however, makes Wry register the `ipc` handler twice. Reset only the
+    // controller, then let Tauri consume all opener-provided window features.
     const source = fs.readFileSync(sourcePath, "utf-8");
-    expect(source).not.toContain("with_webview_configuration");
-    expect(source).not.toContain("target_configuration.clone()");
+    expect(source).toContain(
+      "prepare_macos_new_window_configuration(&features)?",
+    );
+    expect(source).toContain("setUserContentController(&controller)");
+    expect(source).toContain("window_features(features).focused(true)");
+    expect(source).not.toContain("removeAllUserScripts");
+    expect(source).not.toContain("removeAllScriptMessageHandlers");
   });
 });
