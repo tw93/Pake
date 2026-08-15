@@ -41,6 +41,7 @@ inputs:
 outputs:
   package-path:
     description: "Path to the generated package"
+    value: ${{ steps.build.outputs.package-path }}
 
 runs:
   using: "composite"
@@ -58,14 +59,16 @@ runs:
 
         # Install Rust/Cargo if needed
         if ! command -v cargo &> /dev/null; then
-          curl --proto '=https' --tlsv1.2 -sSf -o /tmp/rustup-init.sh https://sh.rustup.rs
-          sh /tmp/rustup-init.sh -y
-          rm -f /tmp/rustup-init.sh
+          rustup_init="$(mktemp)"
+          trap 'rm -f "$rustup_init"' EXIT
+          curl --proto '=https' --tlsv1.2 -sSf -o "$rustup_init" https://sh.rustup.rs
+          sh "$rustup_init" -y
           source ~/.cargo/env
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
         fi
 
     - name: Build Pake App
+      id: build
       shell: bash
       env:
         INPUT_URL: ${{ inputs.url }}
@@ -76,6 +79,11 @@ runs:
         INPUT_DEBUG: ${{ inputs.debug }}
         INPUT_OUTPUT_DIR: ${{ inputs.output-dir }}
       run: |
+        if [[ "$INPUT_OUTPUT_DIR" == *$'\n'* || "$INPUT_OUTPUT_DIR" == *$'\r'* ]]; then
+          echo "❌ Output directory must not contain line breaks" >&2
+          exit 1
+        fi
+
         # Build arguments
         ARGS=("$INPUT_URL")
 
@@ -93,11 +101,13 @@ runs:
         fi
 
         # Create output directory
-        mkdir -p "$INPUT_OUTPUT_DIR"
+        mkdir -p -- "$INPUT_OUTPUT_DIR"
         export PAKE_CREATE_APP=1
 
         # Run Pake CLI
-        echo "🔧 Running: node dist/cli.js ${ARGS[*]}"
+        printf '🔧 Running:'
+        printf ' %q' node dist/cli.js "${ARGS[@]}"
+        printf '\n'
         node dist/cli.js "${ARGS[@]}"
 
         # Find generated package and set output
@@ -110,9 +120,14 @@ runs:
         if [ -n "$PACKAGE" ]; then
           # Move to output directory
           BASENAME=$(basename "$PACKAGE")
-          mv "$PACKAGE" "$INPUT_OUTPUT_DIR/$BASENAME" 2>/dev/null || cp -r "$PACKAGE" "$INPUT_OUTPUT_DIR/$BASENAME"
-          echo "package-path=$INPUT_OUTPUT_DIR/$BASENAME" >> $GITHUB_OUTPUT
-          echo "✅ Package created: $INPUT_OUTPUT_DIR/$BASENAME"
+          PACKAGE_PATH="$INPUT_OUTPUT_DIR/$BASENAME"
+          if [[ "$PACKAGE_PATH" == *$'\n'* || "$PACKAGE_PATH" == *$'\r'* ]]; then
+            echo "❌ Package path must not contain line breaks" >&2
+            exit 1
+          fi
+          mv -- "$PACKAGE" "$PACKAGE_PATH" 2>/dev/null || cp -r -- "$PACKAGE" "$PACKAGE_PATH"
+          printf 'package-path=%s\n' "$PACKAGE_PATH" >> "$GITHUB_OUTPUT"
+          printf '✅ Package created: %s\n' "$PACKAGE_PATH"
         else
           echo "❌ No package found"
           exit 1
