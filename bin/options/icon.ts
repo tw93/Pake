@@ -3,6 +3,7 @@ import fsExtra from 'fs-extra';
 import chalk from 'chalk';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
+import { execa } from 'execa';
 
 import logger from './logger';
 import { getSpinner } from '@/utils/info';
@@ -55,8 +56,21 @@ const ICON_CONFIG = {
 const PLATFORM_CONFIG: Record<'win' | 'linux' | 'macos', PlatformIconConfig> = {
   win: { format: '.ico', sizes: [...WIN_STANDARD_ICO_SIZES] },
   linux: { format: '.png', size: 512 },
-  macos: { format: '.icns', sizes: [16, 32, 64, 128, 256, 512, 1024] },
+  macos: { format: '.icns' },
 };
+
+const MACOS_ICONSET_FILES = [
+  ['icon_16x16.png', 16],
+  ['icon_16x16@2x.png', 32],
+  ['icon_32x32.png', 32],
+  ['icon_32x32@2x.png', 64],
+  ['icon_128x128.png', 128],
+  ['icon_128x128@2x.png', 256],
+  ['icon_256x256.png', 256],
+  ['icon_256x256@2x.png', 512],
+  ['icon_512x512.png', 512],
+  ['icon_512x512@2x.png', 1024],
+] as const;
 
 const API_KEYS = {
   logoDev: ['pk_JLLMUKGZRpaG5YclhXaTkg', 'pk_Ph745P8mQSeYFfW2Wk039A'],
@@ -209,6 +223,44 @@ async function applyMacOSMask(inputPath: string): Promise<string> {
   }
 }
 
+export async function generateMacOSIcns(
+  inputPath: string,
+  outputDir: string,
+  iconName: string,
+): Promise<string> {
+  const sharp = await loadSharp();
+  const iconsetPath = path.join(outputDir, `${iconName}.iconset`);
+  const outputPath = path.join(
+    outputDir,
+    `${iconName}${PLATFORM_CONFIG.macos.format}`,
+  );
+  await fsExtra.ensureDir(iconsetPath);
+
+  const source = sharp(inputPath);
+  await Promise.all(
+    MACOS_ICONSET_FILES.map(async ([fileName, size]) => {
+      await source
+        .clone()
+        .resize(size, size, {
+          fit: 'contain',
+          background: ICON_CONFIG.transparentBackground,
+        })
+        .ensureAlpha()
+        .png()
+        .toFile(path.join(iconsetPath, fileName));
+    }),
+  );
+
+  await execa('/usr/bin/iconutil', [
+    '-c',
+    'icns',
+    iconsetPath,
+    '-o',
+    outputPath,
+  ]);
+  return outputPath;
+}
+
 /**
  * Converts icon to platform-specific format
  */
@@ -274,14 +326,10 @@ async function convertIconFormat(
 
     // macOS
     const macIconPath = await applyMacOSMask(processedInputPath);
-    const { default: icongen } = await import('icon-gen');
-    await icongen(macIconPath, platformOutputDir, {
-      report: false,
-      icns: { name: iconName, sizes: PLATFORM_CONFIG.macos.sizes },
-    });
-    const outputPath = path.join(
+    const outputPath = await generateMacOSIcns(
+      macIconPath,
       platformOutputDir,
-      `${iconName}${PLATFORM_CONFIG.macos.format}`,
+      iconName,
     );
     return (await fsExtra.pathExists(outputPath)) ? outputPath : null;
   } catch (error) {

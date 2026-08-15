@@ -15,7 +15,7 @@ import config, { TIMEOUTS, TEST_URLS } from "./config.js";
 
 const rejectImageDependenciesLoader = `data:text/javascript,${encodeURIComponent(`
   export async function resolve(specifier, context, nextResolve) {
-    if (specifier === "sharp" || specifier === "icon-gen") {
+    if (specifier === "sharp") {
       throw new Error("Image dependency loaded during CLI startup: " + specifier);
     }
     return nextResolve(specifier, context);
@@ -349,8 +349,10 @@ class PakeTestRunner {
         );
 
         const essentialDeps = ["commander", "chalk", "fs-extra", "execa"];
-        return essentialDeps.every(
-          (dep) => packageJson.dependencies && packageJson.dependencies[dep],
+        return (
+          essentialDeps.every(
+            (dep) => packageJson.dependencies && packageJson.dependencies[dep],
+          ) && !packageJson.dependencies["icon-gen"]
         );
       } catch {
         return false;

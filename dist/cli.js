@@ -21,7 +21,7 @@ var name = "pake-cli";
 var version = "3.15.6";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
-	node: ">=20.0.0"
+	node: ">=20.9.0"
 };
 var packageManager = "pnpm@10.26.2";
 var bin = {
@@ -78,7 +78,6 @@ var dependencies = {
 	execa: "^9.6.1",
 	"file-type": "^21.3.4",
 	"fs-extra": "^11.3.3",
-	"icon-gen": "^5.0.0",
 	loglevel: "^1.9.2",
 	ora: "^9.3.0",
 	prompts: "^2.4.2",
@@ -2360,8 +2359,20 @@ const ICON_CONFIG = {
 const PLATFORM_CONFIG = {
     win: { format: '.ico', sizes: [...WIN_STANDARD_ICO_SIZES] },
     linux: { format: '.png', size: 512 },
-    macos: { format: '.icns', sizes: [16, 32, 64, 128, 256, 512, 1024] },
+    macos: { format: '.icns' },
 };
+const MACOS_ICONSET_FILES = [
+    ['icon_16x16.png', 16],
+    ['icon_16x16@2x.png', 32],
+    ['icon_32x32.png', 32],
+    ['icon_32x32@2x.png', 64],
+    ['icon_128x128.png', 128],
+    ['icon_128x128@2x.png', 256],
+    ['icon_256x256.png', 256],
+    ['icon_256x256@2x.png', 512],
+    ['icon_512x512.png', 512],
+    ['icon_512x512@2x.png', 1024],
+];
 const API_KEYS = {
     logoDev: ['pk_JLLMUKGZRpaG5YclhXaTkg', 'pk_Ph745P8mQSeYFfW2Wk039A'],
     brandfetch: ['1idqvJC0CeFSeyp3Yf7', '1idej-yhU_ThggIHFyG'],
@@ -2482,6 +2493,32 @@ async function applyMacOSMask(inputPath) {
         return inputPath;
     }
 }
+async function generateMacOSIcns(inputPath, outputDir, iconName) {
+    const sharp = await loadSharp();
+    const iconsetPath = path.join(outputDir, `${iconName}.iconset`);
+    const outputPath = path.join(outputDir, `${iconName}${PLATFORM_CONFIG.macos.format}`);
+    await fsExtra.ensureDir(iconsetPath);
+    const source = sharp(inputPath);
+    await Promise.all(MACOS_ICONSET_FILES.map(async ([fileName, size]) => {
+        await source
+            .clone()
+            .resize(size, size, {
+            fit: 'contain',
+            background: ICON_CONFIG.transparentBackground,
+        })
+            .ensureAlpha()
+            .png()
+            .toFile(path.join(iconsetPath, fileName));
+    }));
+    await execa('/usr/bin/iconutil', [
+        '-c',
+        'icns',
+        iconsetPath,
+        '-o',
+        outputPath,
+    ]);
+    return outputPath;
+}
 /**
  * Converts icon to platform-specific format
  */
@@ -2530,12 +2567,7 @@ async function convertIconFormat(inputPath, appName) {
         }
         // macOS
         const macIconPath = await applyMacOSMask(processedInputPath);
-        const { default: icongen } = await import('icon-gen');
-        await icongen(macIconPath, platformOutputDir, {
-            report: false,
-            icns: { name: iconName, sizes: PLATFORM_CONFIG.macos.sizes },
-        });
-        const outputPath = path.join(platformOutputDir, `${iconName}${PLATFORM_CONFIG.macos.format}`);
+        const outputPath = await generateMacOSIcns(macIconPath, platformOutputDir, iconName);
         return (await fsExtra.pathExists(outputPath)) ? outputPath : null;
     }
     catch (error) {
