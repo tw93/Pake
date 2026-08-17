@@ -315,9 +315,9 @@ pub fn install_basic_auth_and_navigate(
             return false;
         };
 
-        // Capture the current navigation delegate, if any. A null value
-        // is expected: wry's default delegate is not installed until the
-        // first navigation callback fires, which is after we return.
+        // Capture the current navigation delegate, if any. wry sets its
+        // own delegate during WKWebView creation, so this is normally
+        // non-nil; a nil value (unusual) is handled gracefully.
         let existing: *mut AnyObject = msg_send![&*webview, navigationDelegate];
         let inner_weak: Weak<AnyObject> = if existing.is_null() {
             Weak::default()
@@ -327,6 +327,24 @@ pub fn install_basic_auth_and_navigate(
                 None => Weak::default(),
             }
         };
+
+        // Build the `Authorization: Basic <base64(user:pass)>` header up
+        // front (borrows user/pass) so the first navigation can carry it.
+        // Base64 goes through NSData so UTF-8 credentials survive; avoids
+        // adding a Rust base64 dependency. user/pass are moved into the
+        // delegate below, so this must run first.
+        let credentials = NSString::from_str(&format!("{user}:{pass}"));
+        let cred_data: *mut AnyObject =
+            msg_send![&*credentials, dataUsingEncoding: NS_UTF8_STRING_ENCODING];
+        if cred_data.is_null() {
+            return false;
+        }
+        let encoded: *mut NSString =
+            msg_send![cred_data, base64EncodedStringWithOptions: 0];
+        if encoded.is_null() {
+            return false;
+        }
+        let auth_header = NSString::from_str(&format!("Basic {}", &*encoded));
 
         let proxy = PakeBasicAuthDelegate::new(&webview, inner_weak, user, pass, mtm);
 
@@ -385,20 +403,6 @@ pub fn install_basic_auth_and_navigate(
         if ns_url.is_null() {
             return false;
         }
-        // Base64-encode `user:pass` through NSData so UTF-8 credentials
-        // survive; avoids adding a Rust base64 dependency.
-        let credentials = NSString::from_str(&format!("{user}:{pass}"));
-        let cred_data: *mut AnyObject =
-            msg_send![&*credentials, dataUsingEncoding: NS_UTF8_STRING_ENCODING];
-        if cred_data.is_null() {
-            return false;
-        }
-        let encoded: *mut NSString =
-            msg_send![cred_data, base64EncodedStringWithOptions: 0];
-        if encoded.is_null() {
-            return false;
-        }
-        let auth_header = NSString::from_str(&format!("Basic {}", &*encoded));
         let request: *mut AnyObject =
             msg_send![class!(NSMutableURLRequest), requestWithURL: ns_url];
         if request.is_null() {
