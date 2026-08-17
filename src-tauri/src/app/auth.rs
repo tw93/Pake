@@ -398,7 +398,7 @@ pub fn install_basic_auth_and_navigate(
         if encoded.is_null() {
             return false;
         }
-        let auth_header = NSString::from_str(&format!("Basic {}", encoded.to_string()));
+        let auth_header = NSString::from_str(&format!("Basic {}", &*encoded));
         let request: *mut AnyObject =
             msg_send![class!(NSMutableURLRequest), requestWithURL: ns_url];
         if request.is_null() {
