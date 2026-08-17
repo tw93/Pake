@@ -33,6 +33,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   useLocalFile: false,
   systemTrayIcon: '',
   proxyUrl: '',
+  basicAuth: '',
   debug: false,
   json: false,
   inject: [],

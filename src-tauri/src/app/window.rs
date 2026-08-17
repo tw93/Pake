@@ -385,10 +385,25 @@ fn build_window(
         None
     };
 
+    // macOS HTTP Basic auth: start on a neutral about:blank page, then
+    // install the auth delegate and navigate to the real URL from the
+    // with_webview callback (the initial navigation carries the
+    // Authorization header, so the cold-start 401 race never triggers;
+    // see app/auth.rs).
+    #[cfg(target_os = "macos")]
+    let basic_auth_target = if label == "pake"
+        && window_config.url_type == "web"
+        && crate::app::auth::parse_basic_auth(&config.basic_auth).is_some()
+    {
+        Url::parse(&window_config.url).ok()
+    } else {
+        None
+    };
+
     // The delegate must be installed before the first TLS challenge. Start on
     // a neutral page, then navigate from the with_webview callback below.
     #[cfg(target_os = "macos")]
-    let url = if cert_bypass_target.is_some() {
+    let url = if cert_bypass_target.is_some() || basic_auth_target.is_some() {
         WebviewUrl::CustomProtocol(
             Url::parse("about:blank").expect("about:blank must be a valid URL"),
         )
@@ -705,6 +720,30 @@ fn build_window(
                     target_url.to_string(),
                 ) {
                     eprintln!("[Pake] Failed to configure macOS certificate bypass.");
+                }
+            }) {
+                eprintln!("[Pake] Failed to access the macOS webview: {error}");
+            }
+        });
+    }
+
+    // macOS WKWebView does not show the system 401 dialog, so install an HTTP
+    // Basic auth delegate that responds to the challenge with the credentials
+    // from `--basic-auth user:pass`. See `app/auth.rs` for the rationale.
+    #[cfg(target_os = "macos")]
+    if let Some(target_url) = basic_auth_target {
+        let (user, pass) = crate::app::auth::parse_basic_auth(&config.basic_auth)
+            .expect("basic_auth was validated above");
+        let auth_window = window.clone();
+        Queue::main().exec_async(move || {
+            if let Err(error) = auth_window.with_webview(move |webview| {
+                if !crate::app::auth::install_basic_auth_and_navigate(
+                    webview.inner(),
+                    user,
+                    pass,
+                    target_url.to_string(),
+                ) {
+                    eprintln!("[Pake] Failed to configure macOS HTTP Basic auth.");
                 }
             }) {
                 eprintln!("[Pake] Failed to access the macOS webview: {error}");

@@ -593,6 +593,14 @@ pake ./my-app/index.html --name "my-app" --use-local-file
 --proxy-url socks5://127.0.0.1:7891
 ```
 
+#### [basic-auth]
+
+目标站点的 HTTP Basic 凭据，格式为 `user:pass`。仅 macOS：WKWebView 不显示系统 401 对话框，此选项会安装一个 navigation delegate 自动响应认证挑战。密码可包含冒号，支持 UTF-8 字符。注意密码会出现在 shell 进程列表中，请仅在可信机器上使用。
+
+```shell
+--basic-auth user:pass
+```
+
 #### [debug]
 
 启用开发者工具和详细日志输出，用于调试。

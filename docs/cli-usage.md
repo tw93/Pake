@@ -595,6 +595,14 @@ Set proxy server for all network requests. Supports HTTP, HTTPS, and SOCKS5. Ava
 --proxy-url socks5://127.0.0.1:7891
 ```
 
+#### [basic-auth]
+
+HTTP Basic credentials for the target site, format `user:pass`. macOS only: WKWebView does not show the native 401 dialog, so this installs a navigation delegate that answers the challenge automatically. The password may contain colons; UTF-8 characters are supported. Passwords appear in the shell process list, so prefer it on a machine you trust.
+
+```shell
+--basic-auth user:pass
+```
+
 #### [debug]
 
 Enable developer tools and detailed logging for debugging.

@@ -919,7 +919,7 @@ async function mergeIcons(options, name, tauriConf, platform, safeAppName) {
     delete tauriConf.app.trayIcon;
 }
 async function injectCustomCode(options, tauriConf) {
-    const { inject, proxyUrl, multiInstance, multiWindow, wasm } = options;
+    const { inject, proxyUrl, basicAuth, multiInstance, multiWindow, wasm } = options;
     const injectFilePath = path.join(npmDirectory, 'src-tauri/src/inject/custom.js');
     if (inject?.length > 0) {
         const injectArray = Array.isArray(inject) ? inject : [inject];
@@ -936,6 +936,7 @@ async function injectCustomCode(options, tauriConf) {
         await fsExtra.writeFile(injectFilePath, '');
     }
     tauriConf.pake.proxy_url = proxyUrl || '';
+    tauriConf.pake.basic_auth = basicAuth || '';
     tauriConf.pake.multi_instance = multiInstance;
     tauriConf.pake.multi_window = multiWindow;
     if (wasm) {
@@ -3031,6 +3032,7 @@ const DEFAULT_PAKE_OPTIONS = {
     useLocalFile: false,
     systemTrayIcon: '',
     proxyUrl: '',
+    basicAuth: '',
     debug: false,
     json: false,
     inject: [],
@@ -3133,6 +3135,21 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .option('--debug', 'Debug build and more output', DEFAULT_PAKE_OPTIONS.debug)
         .option('--json', 'Machine-readable output: logs to stderr, one JSON result on stdout', DEFAULT_PAKE_OPTIONS.json)
         .option('--config <path>', 'Load options from a JSON config file (fields mirror CLI options, see schema/pake.schema.json)')
+        .addOption(new Option('--basic-auth <credentials>', 'HTTP Basic credentials for the target site, format "user:pass" (macOS only; works around the missing WKWebView 401 dialog)')
+        .default(DEFAULT_PAKE_OPTIONS.basicAuth)
+        .argParser((value) => {
+        if (typeof value !== 'string' || !value.includes(':')) {
+            throw new Error('--basic-auth must be in the form "user:pass" (a single colon separator)');
+        }
+        const colon = value.indexOf(':');
+        const user = value.slice(0, colon);
+        value.slice(colon + 1);
+        if (!user) {
+            throw new Error('--basic-auth user portion must not be empty');
+        }
+        return value;
+    })
+        .hideHelp())
         .addOption(new Option('--proxy-url <url>', 'Proxy URL for all network requests (http://, https://, socks5://)')
         .default(DEFAULT_PAKE_OPTIONS.proxyUrl)
         .hideHelp())

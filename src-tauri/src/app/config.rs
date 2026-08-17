@@ -83,6 +83,13 @@ pub struct PakeConfig {
     pub system_tray: FunctionON,
     pub system_tray_path: String,
     pub proxy_url: String,
+    /// HTTP Basic credentials in `user:pass` form, empty when unset.
+    /// When non-empty, macOS installs a navigation delegate that responds
+    /// to HTTP Basic challenges with these credentials (Pake Issue #1348
+    /// upstream open). Windows and Linux auto-handle this case in the
+    /// WebView itself, so the field is read on macOS only.
+    #[serde(default)]
+    pub basic_auth: String,
     #[serde(default)]
     pub multi_instance: bool,
     #[serde(default)]

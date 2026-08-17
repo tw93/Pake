@@ -84,6 +84,10 @@ export interface PakeCliOptions {
   // Set Api Proxy
   proxyUrl: string;
 
+  // HTTP Basic credentials, format "user:pass" (applies to all Basic
+  // challenges in the loaded site, on any host). Default empty.
+  basicAuth: string;
+
   // Installer language, valid for Windows users, default is en-US
   installerLanguage: string;
 
@@ -201,6 +205,7 @@ export interface PakeConfig {
   system_tray: PlatformSpecific<boolean>;
   system_tray_path: string;
   proxy_url: string;
+  basic_auth: string;
   multi_instance: boolean;
   multi_window: boolean;
   inject?: string[];
