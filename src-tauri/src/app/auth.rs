@@ -181,10 +181,10 @@ define_class!(
         // KVO callback. The only key path we observe is "navigationDelegate";
         // everything else falls through to the superclass default, which
         // raises an NSInternalInconsistencyException (the standard KVO
-        // contract). When wry replaces our proxy on the webview (its
-        // default delegate installs lazily, see the timing-hazard comment
-        // at the top of this file), this callback fires; we re-assert
-        // ourselves so the next 401 challenge lands on us, not on wry.
+        // contract). If anything replaces our proxy on the webview, this
+        // callback fires; we re-assert ourselves so the next challenge
+        // lands on us (see the cold-start-race comment at the top of this
+        // file for why this is a defensive guard).
         #[unsafe(method(observeValueForKeyPath:ofObject:change:context:))]
         fn observe_value(
             &self,
@@ -293,9 +293,9 @@ pub fn parse_basic_auth(raw: &str) -> Option<(String, String)> {
 /// pointer returned by `PlatformWebview::inner()`. Returns false only
 /// when setup cannot start at all (e.g. nil webview, empty inputs, or
 /// no main thread). A nil pre-existing navigation delegate is **not** a
-/// failure: wry installs its default delegate lazily, and the KVO
-/// observer registered here will re-assert our proxy if wry's install
-/// later overwrites us.
+/// failure: wry sets its delegate at webview creation, and the KVO
+/// observer registered here re-asserts the proxy if anything later
+/// overwrites it.
 pub fn install_basic_auth_and_navigate(
     webview_ptr: *mut c_void,
     user: String,
@@ -332,19 +332,23 @@ pub fn install_basic_auth_and_navigate(
         // front (borrows user/pass) so the first navigation can carry it.
         // Base64 goes through NSData so UTF-8 credentials survive; avoids
         // adding a Rust base64 dependency. user/pass are moved into the
-        // delegate below, so this must run first.
+        // delegate below, so this must run first. Header failure is not
+        // fatal: we fall back to a bare navigation and let the delegate
+        // answer the 401 challenge instead.
         let credentials = NSString::from_str(&format!("{user}:{pass}"));
         let cred_data: *mut AnyObject =
             msg_send![&*credentials, dataUsingEncoding: NS_UTF8_STRING_ENCODING];
-        if cred_data.is_null() {
-            return false;
-        }
-        let encoded: *mut NSString =
-            msg_send![cred_data, base64EncodedStringWithOptions: 0];
-        if encoded.is_null() {
-            return false;
-        }
-        let auth_header = NSString::from_str(&format!("Basic {}", &*encoded));
+        let auth_header = if cred_data.is_null() {
+            None
+        } else {
+            let encoded: *mut NSString =
+                msg_send![cred_data, base64EncodedStringWithOptions: 0];
+            if encoded.is_null() {
+                None
+            } else {
+                Some(NSString::from_str(&format!("Basic {}", &*encoded)))
+            }
+        };
 
         let proxy = PakeBasicAuthDelegate::new(&webview, inner_weak, user, pass, mtm);
 
@@ -409,12 +413,18 @@ pub fn install_basic_auth_and_navigate(
             return false;
         }
         let header_field = NSString::from_str("Authorization");
-        let _: () = msg_send![
-            request,
-            setValue: &*auth_header,
-            forHTTPHeaderField: &*header_field
-        ];
-        eprintln!("[Pake] Sending initial navigation with Authorization header to {target_url}");
+        if let Some(auth_header) = &auth_header {
+            let _: () = msg_send![
+                request,
+                setValue: &**auth_header,
+                forHTTPHeaderField: &*header_field
+            ];
+            eprintln!(
+                "[Pake] Sending initial navigation with Authorization header to {target_url}"
+            );
+        } else {
+            eprintln!("[Pake] Authorization header build failed; relying on challenge delegate for {target_url}");
+        }
         let _: () = msg_send![&*webview, loadRequest: request];
     }
     true

@@ -85,9 +85,9 @@ pub struct PakeConfig {
     pub proxy_url: String,
     /// HTTP Basic credentials in `user:pass` form, empty when unset.
     /// When non-empty, macOS installs a navigation delegate that responds
-    /// to HTTP Basic challenges with these credentials (Pake Issue #1348
-    /// upstream open). Windows and Linux auto-handle this case in the
-    /// WebView itself, so the field is read on macOS only.
+    /// to HTTP Basic challenges with these credentials (WKWebView does not
+    /// show the native 401 dialog). Windows and Linux auto-handle this
+    /// case in the WebView itself, so the field is read on macOS only.
     #[serde(default)]
     pub basic_auth: String,
     #[serde(default)]
