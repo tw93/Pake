@@ -1,5 +1,6 @@
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 mod app;
+mod local_server;
 mod util;
 
 use std::sync::{
@@ -208,6 +209,8 @@ pub fn run_app() {
     let multi_window = pake_config.multi_window;
     let _enable_find = pake_config.windows[0].enable_find;
     let startup_window_revealed = Arc::new(AtomicBool::new(false));
+    let owned_server: local_server::OwnedServer = Arc::new(std::sync::Mutex::new(None));
+    let owned_server_for_setup = owned_server.clone();
 
     let window_state_plugin = WindowStatePlugin::default()
         .with_state_flags(if init_fullscreen {
@@ -227,6 +230,7 @@ pub fn run_app() {
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init()); // Add this
 
     // Only add single instance plugin if multiple instances are not allowed
@@ -303,6 +307,14 @@ pub fn run_app() {
             webview_navigate,
         ])
         .setup(move |app| {
+            let managed_server = match local_server::start_or_reuse(pake_config.server.as_ref()) {
+                Ok(server) => server,
+                Err(error) => {
+                    local_server::show_startup_error(app.handle(), error);
+                    return Ok(());
+                }
+            };
+
             app.manage(MultiWindowState::new(
                 pake_config.clone(),
                 tauri_config.clone(),
@@ -353,6 +365,10 @@ pub fn run_app() {
                 drop(startup_window_revealed);
             }
 
+            if let Ok(mut owned_server) = owned_server_for_setup.lock() {
+                *owned_server = managed_server;
+            }
+
             Ok(())
         })
         .on_window_event(move |_window, _event| {
@@ -394,14 +410,13 @@ pub fn run_app() {
             eprintln!("[Pake] Fatal error while building Tauri application: {error}");
             std::process::exit(1);
         })
-        .run(move |_app, _event| {
+        .run(move |_app, _event| match _event {
             // Handle macOS dock icon click to reopen hidden window
             #[cfg(target_os = "macos")]
-            if let tauri::RunEvent::Reopen {
+            tauri::RunEvent::Reopen {
                 has_visible_windows,
                 ..
-            } = _event
-            {
+            } => {
                 if !has_visible_windows {
                     if let Some(window) = _app.get_webview_window("pake") {
                         cancel_startup_reveal(&reopen_revealed);
@@ -411,6 +426,8 @@ pub fn run_app() {
                     }
                 }
             }
+            tauri::RunEvent::Exit => local_server::terminate_owned(&owned_server),
+            _ => {}
         });
 }
 

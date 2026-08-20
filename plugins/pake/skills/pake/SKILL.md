@@ -78,6 +78,36 @@ pake ./page.html --name MyPage --json
 
 Hash-based routing works out of the box; history-mode SPA routing is not yet supported for local packaging.
 
+## Managed local web services
+
+Use the managed-server options when the page is served by a local foreground process instead of a permanently hosted website. Pake first probes the configured loopback port, reuses an existing listener without ownership, or starts the command and waits for the listener. On application exit it stops only the process tree it started.
+
+DeepSeek Harness is a representative use case: its browser UI normally requires `dsh web` to remain open in a terminal. Package it as a desktop client with a fixed port:
+
+```bash
+pake http://127.0.0.1:3000 \
+  --name "DeepSeek Harness" \
+  --server-port 3000 \
+  --server-command "dsh --profile web --no-open --host 127.0.0.1 --port 3000" \
+  --server-timeout 60 \
+  --hide-title-bar \
+  --traffic-light-x 2 \
+  --traffic-light-y 6 \
+  --drag-region-height 10 \
+  --json
+```
+
+Important constraints:
+
+- Pair `--server-port` and `--server-command`, and use the same fixed port in the loopback target URL. Do not use an automatically assigned port such as `dsh web --port 0`.
+- Pass DeepSeek Harness's `--no-open` option so starting the managed process does not also open the system browser.
+- Keep the server command in the foreground. The executable must be available in the user's login-shell `PATH` on macOS/Linux or the `cmd.exe` `PATH` on Windows.
+- `--server-timeout` accepts 1-3600 seconds and defaults to 30.
+- Do not combine managed servers with `--multi-instance`.
+- Hiding a window does not stop an owned server. Quitting stops owned processes; a listener that existed before launch is never stopped.
+- The command is embedded in the app. Never include passwords, tokens, or other secrets directly.
+- Traffic-light coordinates require `--hide-title-bar` and apply only to macOS. For a frameless Windows/Linux client, use `--hide-window-decorations` with `--drag-region-height`.
+
 ## Workflow
 
 ### 1. Gather requirements

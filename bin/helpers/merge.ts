@@ -36,6 +36,7 @@ export function buildWindowConfigOverrides(
     platform === 'darwin' ? options.hideTitleBar : false;
   const platformHideWindowDecorations =
     platform !== 'darwin' ? options.hideWindowDecorations : false;
+  const useTrafficLightPosition = platform === 'darwin' && platformHideTitleBar;
   return {
     width: options.width,
     height: options.height,
@@ -62,6 +63,13 @@ export function buildWindowConfigOverrides(
     min_height: options.minHeight,
     ignore_certificate_errors: options.ignoreCertificateErrors,
     new_window: options.newWindow,
+    traffic_light_x: useTrafficLightPosition
+      ? options.trafficLightX
+      : undefined,
+    traffic_light_y: useTrafficLightPosition
+      ? options.trafficLightY
+      : undefined,
+    drag_region_height: options.dragRegionHeight,
   };
 }
 
@@ -487,6 +495,59 @@ async function injectCustomCode(
   }
 }
 
+export function buildServerRemoteUrlPattern(url: string): string {
+  const target = new URL(url);
+  const hostname = target.hostname.startsWith('[')
+    ? target.hostname.replace(/:/g, '\\:')
+    : target.hostname;
+  return `${target.protocol}//${hostname}${target.port ? `:${target.port}` : ''}/*`;
+}
+
+export async function configureServerCapability(
+  url: string,
+  options: PakeAppOptions,
+  tauriConf: PakeTauriConfig,
+): Promise<void> {
+  const security = (tauriConf.app.security ??= {});
+  if (!options.serverHost) {
+    delete security.capabilities;
+    return;
+  }
+
+  let capabilityPath = path.join(
+    npmDirectory,
+    'src-tauri',
+    'capabilities',
+    'default.json',
+  );
+  if (!(await fsExtra.pathExists(capabilityPath))) {
+    capabilityPath = path.join(
+      npmDirectory,
+      '..',
+      'src-tauri',
+      'capabilities',
+      'default.json',
+    );
+  }
+  const capability = (await fsExtra.readJSON(capabilityPath)) as Record<
+    string,
+    unknown
+  > & {
+    identifier: string;
+  };
+  const { $schema: _schema, ...baseCapability } = capability;
+  security.capabilities = [
+    capability.identifier,
+    {
+      ...baseCapability,
+      identifier: 'pake-managed-server-capability',
+      description: 'Capability for the configured managed loopback server.',
+      local: false,
+      remote: { urls: [buildServerRemoteUrlPattern(url)] },
+    },
+  ];
+}
+
 async function generateMacEntitlements(
   camera: boolean,
   microphone: boolean,
@@ -578,8 +639,34 @@ export async function mergeConfig(
       '✼ --hide-window-decorations is only supported on Windows and Linux and will be ignored on this platform.',
     );
   }
+  if (options.trafficLightX !== undefined) {
+    if (platform !== 'darwin') {
+      logger.warn(
+        '✼ --traffic-light-x/--traffic-light-y are only supported on macOS and will be ignored on this platform.',
+      );
+    } else if (!options.hideTitleBar) {
+      logger.warn(
+        '✼ --traffic-light-x/--traffic-light-y require --hide-title-bar and will be ignored.',
+      );
+    }
+  }
   const tauriConfWindowOptions = buildWindowConfigOverrides(options, platform);
   Object.assign(tauriConf.pake.windows[0], { url, ...tauriConfWindowOptions });
+
+  if (
+    options.serverHost &&
+    options.serverPort !== undefined &&
+    options.serverCommand
+  ) {
+    tauriConf.pake.server = {
+      host: options.serverHost,
+      port: options.serverPort,
+      command: options.serverCommand,
+      timeout: options.serverTimeout,
+    };
+  } else {
+    delete tauriConf.pake.server;
+  }
 
   tauriConf.productName = name;
   tauriConf.identifier = identifier;
@@ -630,6 +717,7 @@ export async function mergeConfig(
   await mergeIcons(options, name, tauriConf, platform, safeAppName);
 
   await injectCustomCode(options, tauriConf);
+  await configureServerCapability(url, options, tauriConf);
 
   if (platform === 'darwin') {
     await generateMacEntitlements(camera, microphone);

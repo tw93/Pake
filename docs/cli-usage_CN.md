@@ -88,6 +88,12 @@ pake ./dist --name MyTool
 | `--height`                  | 窗口高度（默认：780px）              | `--height 900`                                 |
 | `--hide-title-bar`          | 沉浸式标题栏（仅 macOS）             | `--hide-title-bar`                             |
 | `--hide-window-decorations` | 隐藏原生窗口装饰（仅 Windows/Linux） | `--hide-window-decorations`                    |
+| `--traffic-light-x`         | macOS 红黄绿按钮横向位置             | `--traffic-light-x 2`                          |
+| `--traffic-light-y`         | macOS 红黄绿按钮纵向位置             | `--traffic-light-y 6`                          |
+| `--drag-region-height`      | 顶部拖拽区域高度（默认 20px）        | `--drag-region-height 10`                      |
+| `--server-port`             | 受管理的本机服务端口                 | `--server-port 30141`                          |
+| `--server-command`          | 启动本机服务的命令                   | `--server-command "pi-web --port 30141"`       |
+| `--server-timeout`          | 服务启动超时（默认 30 秒）           | `--server-timeout 60`                          |
 | `--debug`                   | 启用开发者工具                       | `--debug`                                      |
 | `--config`                  | 从 JSON 配置文件读取选项             | `--config app.json`                            |
 | `--json`                    | stdout 输出机器可读结果（自动化用）  | `--json`                                       |
@@ -192,6 +198,61 @@ pake https://github.com --name GitHub
 ```shell
 --hide-window-decorations
 ```
+
+#### [traffic-light-x, traffic-light-y, drag-region-height]
+
+启用 `--hide-title-bar` 后，可同时传入 `--traffic-light-x` 和 `--traffic-light-y` 调整 macOS 红黄绿窗口按钮的位置。两个坐标都必须是非负逻辑像素，并且必须成对传入；在 Windows 和 Linux 上会被忽略。
+
+`--drag-region-height` 控制 macOS 沉浸式窗口或 Windows/Linux 无边框窗口顶部的拖拽区域高度，默认为 `20`；设为 `0` 可禁用该区域。
+
+```shell
+--hide-title-bar --traffic-light-x 2 --traffic-light-y 6 --drag-region-height 10
+```
+
+#### [server-port, server-command, server-timeout]
+
+可以把本机 Web 服务打包为由客户端管理的桌面应用。`--server-port` 与 `--server-command` 必须同时传入，目标 URL 必须使用 `localhost`、`127.0.0.1` 或 `::1`，并与服务参数使用相同端口。端口范围为 1-65535；`--server-timeout` 范围为 1-3600 秒，默认 `30` 秒。
+
+应用启动时会先复用已有监听端口，并且不会取得该进程的所有权。如果端口未监听，则在 macOS/Linux 上通过用户登录 Shell、在 Windows 上通过 `cmd.exe` 执行命令并等待端口就绪。隐藏窗口或关闭配置为 hide-on-close 的窗口不会停止服务；真正退出应用时，只会终止由该应用启动的进程树。受管理服务不能与 `--multi-instance` 组合使用，因为服务必须由唯一的应用进程持有。启动命令必须保持前台运行，无法可靠管理自行转为后台后退出的命令。
+
+```shell
+# Pi Web
+pake http://127.0.0.1:30141 \
+  --name "Pi Web" \
+  --server-port 30141 \
+  --server-command "pi-web --hostname 127.0.0.1 --port 30141 --no-open" \
+  --hide-title-bar \
+  --traffic-light-x 2 \
+  --traffic-light-y 6 \
+  --drag-region-height 10
+
+```
+
+启动命令会被编译进桌面客户端。不要在 `--server-command` 中直接写入密码、令牌等秘密；应引用继承的环境变量。Shell 语法因平台而异。
+
+##### DeepSeek Harness 桌面客户端
+
+DeepSeek Harness 通过 `dsh web` profile 提供浏览器界面。不使用服务管理参数时，用户需要先在终端执行 `dsh web`、保持终端运行，再手动打开浏览器地址。使用以下参数打包后，同一个本机进程就可以作为完整的桌面客户端运行：
+
+```shell
+pake http://127.0.0.1:3000 \
+  --name "DeepSeek Harness" \
+  --server-port 3000 \
+  --server-command "dsh --profile web --no-open --host 127.0.0.1 --port 3000" \
+  --server-timeout 60 \
+  --hide-title-bar \
+  --traffic-light-x 2 \
+  --traffic-light-y 6 \
+  --drag-region-height 10
+```
+
+这个示例中：
+
+- `--server-port 3000` 同时是目标 URL 的端口和 Pake 探测的监听端口。这里必须使用固定端口，不能使用 DeepSeek Harness 支持的 `--port 0`，因为桌面客户端需要稳定的访问地址。
+- 只有 3000 端口没有监听进程时，客户端才会执行 `--server-command`；其中 `--no-open` 用于阻止 DeepSeek Harness 同时打开系统浏览器。在 macOS/Linux 上，用户登录 Shell 的 `PATH` 必须能找到 `dsh`；在 Windows 上，`cmd.exe` 使用的 `PATH` 必须能找到它。
+- `--server-timeout 60` 为 DeepSeek Harness 组合 profile 和启动浏览器界面预留最多 60 秒。
+- 如果 `dsh web` 已经运行，客户端会直接复用，并且退出时不会停止它。如果服务由客户端启动，隐藏窗口不会停止服务，真正退出应用时才会清理自有进程树。
+- 最后四个窗口参数用于生成紧凑的 macOS 标题栏：隐藏标题栏、移动红黄绿按钮，并把顶部拖拽区域缩小为 10px。在 Windows/Linux 上可以改用 `--hide-window-decorations --drag-region-height 10` 获得对应的无边框拖拽区域；交通灯坐标会被忽略。
 
 #### [fullscreen]
 

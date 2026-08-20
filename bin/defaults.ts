@@ -9,6 +9,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   maximize: false,
   resizable: true,
   hideTitleBar: false,
+  dragRegionHeight: 20,
   hideWindowDecorations: false,
   alwaysOnTop: false,
   appVersion: '1.0.0',
@@ -59,4 +60,5 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   install: false,
   camera: false,
   microphone: false,
+  serverTimeout: 30,
 };

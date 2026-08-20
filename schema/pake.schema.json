@@ -58,6 +58,22 @@
       "description": "macOS only: hide title bar (immersive header).",
       "default": false
     },
+    "trafficLightX": {
+      "type": "number",
+      "description": "macOS only: horizontal position of the window traffic lights. Must be used with trafficLightY and hideTitleBar.",
+      "minimum": 0
+    },
+    "trafficLightY": {
+      "type": "number",
+      "description": "macOS only: vertical position of the window traffic lights. Must be used with trafficLightX and hideTitleBar.",
+      "minimum": 0
+    },
+    "dragRegionHeight": {
+      "type": "number",
+      "description": "Height in pixels of the draggable top strip for immersive or frameless windows. Set to 0 to disable it.",
+      "default": 20,
+      "minimum": 0
+    },
     "hideWindowDecorations": {
       "type": "boolean",
       "description": "Windows/Linux only: hide native window decorations.",
@@ -252,6 +268,24 @@
       "type": "boolean",
       "description": "macOS only: request microphone permission.",
       "default": false
+    },
+    "serverPort": {
+      "type": "integer",
+      "description": "Loopback port to probe and manage. Must be used with serverCommand.",
+      "minimum": 1,
+      "maximum": 65535
+    },
+    "serverCommand": {
+      "type": "string",
+      "description": "Shell command that starts the managed local server. Must be used with serverPort.",
+      "minLength": 1
+    },
+    "serverTimeout": {
+      "type": "integer",
+      "description": "Seconds to wait for a managed local server to listen.",
+      "default": 30,
+      "minimum": 1,
+      "maximum": 3600
     }
   }
 }

@@ -16,6 +16,29 @@ export function validateNumberInput(value: string) {
   return parsedValue;
 }
 
+function validateIntegerRange(
+  value: string,
+  name: string,
+  min: number,
+  max: number,
+) {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < min || parsed > max) {
+    throw new InvalidArgumentError(
+      `${name} must be an integer between ${min} and ${max}.`,
+    );
+  }
+  return parsed;
+}
+
+export function validateServerPort(value: string) {
+  return validateIntegerRange(value, 'Port', 1, 65535);
+}
+
+export function validateServerTimeout(value: string) {
+  return validateIntegerRange(value, 'Timeout', 1, 3600);
+}
+
 // Path-shaped input (./x, ../x, /x, ~/x, C:\x). A missing path must fail
 // loudly: appending https:// to "./typo" would otherwise produce a valid URL
 // like https://./typo and a silently broken app (worst case for agents).

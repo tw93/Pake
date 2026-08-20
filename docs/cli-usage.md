@@ -88,6 +88,12 @@ Various options are available for customization. `pake --help` shows every suppo
 | `--height`                  | Window height (default: 780px)                      | `--height 900`                                 |
 | `--hide-title-bar`          | Immersive header (macOS only)                       | `--hide-title-bar`                             |
 | `--hide-window-decorations` | Hide native window decorations (Windows/Linux only) | `--hide-window-decorations`                    |
+| `--traffic-light-x`         | macOS traffic light horizontal position             | `--traffic-light-x 2`                          |
+| `--traffic-light-y`         | macOS traffic light vertical position               | `--traffic-light-y 6`                          |
+| `--drag-region-height`      | Draggable top strip height (default: 20px)          | `--drag-region-height 10`                      |
+| `--server-port`             | Managed loopback server port                        | `--server-port 30141`                          |
+| `--server-command`          | Command that starts the managed server              | `--server-command "pi-web --port 30141"`       |
+| `--server-timeout`          | Server startup timeout (default: 30s)               | `--server-timeout 60`                          |
 | `--debug`                   | Enable development tools                            | `--debug`                                      |
 | `--config`                  | Load options from a JSON config file                | `--config app.json`                            |
 | `--json`                    | Machine-readable result on stdout (for automation)  | `--json`                                       |
@@ -192,6 +198,61 @@ Hide the native window decorations on Windows and Linux. Default is `false`. Thi
 ```shell
 --hide-window-decorations
 ```
+
+#### [traffic-light-x, traffic-light-y, drag-region-height]
+
+Use `--traffic-light-x` and `--traffic-light-y` together to position the macOS window controls when `--hide-title-bar` is enabled. Both coordinates are non-negative logical pixels. The options are ignored on Windows and Linux.
+
+`--drag-region-height` controls the draggable strip at the top of an immersive macOS window or a frameless Windows/Linux window. It defaults to `20`; use `0` to disable the strip.
+
+```shell
+--hide-title-bar --traffic-light-x 2 --traffic-light-y 6 --drag-region-height 10
+```
+
+#### [server-port, server-command, server-timeout]
+
+Package a loopback web server as a managed desktop client. `--server-port` and `--server-command` must be provided together, and the target URL must use `localhost`, `127.0.0.1`, or `::1` on the same port. The port range is 1-65535. `--server-timeout` accepts 1-3600 seconds and defaults to `30`.
+
+At startup, Pake reuses an existing listener without taking ownership. Otherwise it runs the command through the user's login shell on macOS/Linux or `cmd.exe` on Windows, then waits for the port. Hiding or closing a hide-on-close window leaves the server running. Quitting the app terminates only the process tree that app started. Managed servers cannot be combined with `--multi-instance`, because exactly one app process must own the server. The command must remain in the foreground; commands that daemonize and exit cannot be managed reliably.
+
+```shell
+# Pi Web
+pake http://127.0.0.1:30141 \
+  --name "Pi Web" \
+  --server-port 30141 \
+  --server-command "pi-web --hostname 127.0.0.1 --port 30141 --no-open" \
+  --hide-title-bar \
+  --traffic-light-x 2 \
+  --traffic-light-y 6 \
+  --drag-region-height 10
+
+```
+
+The command is compiled into the desktop application. Do not put passwords, tokens, or other secrets directly in `--server-command`; reference inherited environment variables instead. Shell syntax is platform-specific.
+
+##### DeepSeek Harness desktop client
+
+DeepSeek Harness exposes its browser UI through the `dsh web` profile. Without managed-server options, users must start `dsh web` in a terminal, keep that terminal open, and then open the browser URL themselves. A managed Pake build turns the same local process into a desktop-client workflow:
+
+```shell
+pake http://127.0.0.1:3000 \
+  --name "DeepSeek Harness" \
+  --server-port 3000 \
+  --server-command "dsh --profile web --no-open --host 127.0.0.1 --port 3000" \
+  --server-timeout 60 \
+  --hide-title-bar \
+  --traffic-light-x 2 \
+  --traffic-light-y 6 \
+  --drag-region-height 10
+```
+
+In this example:
+
+- `--server-port 3000` is both the port in the target URL and the listener Pake probes. Use a fixed port rather than DeepSeek Harness's `--port 0`, because the desktop client needs a stable URL.
+- `--server-command` is run only when nothing is listening on port 3000. `--no-open` prevents DeepSeek Harness from also opening the system browser. The `dsh` executable must be available through the user's login-shell `PATH` on macOS/Linux, or through `PATH` for `cmd.exe` on Windows.
+- `--server-timeout 60` allows up to 60 seconds for the composed DeepSeek Harness profile and browser UI to become ready.
+- If `dsh web` is already running, the client reuses it and never stops it. If the client starts the command, hiding the window leaves it running and quitting the application stops the owned process tree.
+- The final four window options create a compact macOS title-bar layout: hide the title bar, move the traffic lights, and reduce the draggable top strip to 10px. On Windows/Linux, use `--hide-window-decorations --drag-region-height 10` for the equivalent frameless drag strip; traffic-light coordinates are ignored.
 
 #### [fullscreen]
 

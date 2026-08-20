@@ -38,10 +38,33 @@ pub struct WindowConfig {
     pub min_height: f64,
     #[serde(default)]
     pub ignore_certificate_errors: bool,
+    #[serde(default)]
+    pub traffic_light_x: Option<f64>,
+    #[serde(default)]
+    pub traffic_light_y: Option<f64>,
+    #[serde(default = "default_drag_region_height")]
+    pub drag_region_height: f64,
 }
 
 fn default_zoom() -> u32 {
     100
+}
+
+fn default_drag_region_height() -> f64 {
+    20.0
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ServerConfig {
+    pub host: String,
+    pub port: u16,
+    pub command: String,
+    #[serde(default = "default_server_timeout")]
+    pub timeout: u64,
+}
+
+fn default_server_timeout() -> u64 {
+    30
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -87,6 +110,8 @@ pub struct PakeConfig {
     pub multi_instance: bool,
     #[serde(default)]
     pub multi_window: bool,
+    #[serde(default)]
+    pub server: Option<ServerConfig>,
 }
 
 impl PakeConfig {

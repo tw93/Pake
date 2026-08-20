@@ -16,6 +16,8 @@
 - Error codes: INVALID_INPUT, ENV_MISSING, BUILD_FAILED, UNEXPECTED, plus NETWORK (reserved; current versions report network failures under the phase code, e.g. ENV_MISSING or BUILD_FAILED). `error.hint` states how to fix.
 - Declarative config: `pake --config app.json --json`; fields are camelCase CLI option names plus `url`. Explicit CLI flags win over config fields. Unknown fields fail fast. A relative `url` path resolves against the process working directory, not the config file's directory.
 - Config schema: https://raw.githubusercontent.com/tw93/Pake/main/schema/pake.schema.json
+- Managed local server: pair `--server-port` with `--server-command`; the target must be a loopback HTTP(S) URL on the same port, and `--multi-instance` is not supported. `--server-timeout` defaults to 30 seconds. Existing listeners are reused; only a process tree started by the app is stopped on app exit. Commands are embedded in the binary, so never include secrets directly.
+- Immersive window controls: pair `--traffic-light-x` and `--traffic-light-y` with `--hide-title-bar` on macOS. `--drag-region-height` controls the top drag strip on immersive/frameless windows and defaults to 20px.
 
 ## Docs
 

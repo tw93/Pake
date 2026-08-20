@@ -1,4 +1,12 @@
 window.addEventListener("DOMContentLoaded", (_event) => {
+  const configuredDragRegionHeight = Number(
+    window["pakeConfig"]?.drag_region_height,
+  );
+  const dragRegionHeight =
+    Number.isFinite(configuredDragRegionHeight) &&
+    configuredDragRegionHeight >= 0
+      ? configuredDragRegionHeight
+      : 20;
   // Customize and transform existing functions
   const contentCSS = `
     #page #footer-wrapper,
@@ -483,7 +491,7 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       background:transparent;
       top:0;
       width: 100%;
-      height: 20px;
+      height: ${dragRegionHeight}px;
       cursor: grab;
       -webkit-app-region: drag;
       user-select: none;
@@ -517,7 +525,7 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       background: transparent;
       top: 0;
       width: 100%;
-      height: 20px;
+      height: ${dragRegionHeight}px;
       cursor: grab;
       -webkit-app-region: drag;
       user-select: none;

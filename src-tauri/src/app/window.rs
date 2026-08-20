@@ -566,6 +566,12 @@ fn build_window(
             TitleBarStyle::Visible
         };
         window_builder = window_builder.title_bar_style(title_bar_style);
+        if let (Some(x), Some(y)) = (window_config.traffic_light_x, window_config.traffic_light_y) {
+            if window_config.hide_title_bar {
+                window_builder =
+                    window_builder.traffic_light_position(tauri::LogicalPosition::new(x, y));
+            }
+        }
         window_builder = window_builder.theme(theme);
     }
 

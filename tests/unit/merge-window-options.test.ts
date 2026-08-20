@@ -130,6 +130,10 @@ describe('buildWindowConfigOverrides', () => {
         enableFind: true,
         forceInternalNavigation: true,
         internalUrlRegex: '^https://example\\.com',
+        trafficLightX: 2,
+        trafficLightY: 6,
+        dragRegionHeight: 10,
+        hideTitleBar: true,
       }),
       'darwin',
     );
@@ -146,6 +150,31 @@ describe('buildWindowConfigOverrides', () => {
       enable_find: true,
       force_internal_navigation: true,
       internal_url_regex: '^https://example\\.com',
+      traffic_light_x: 2,
+      traffic_light_y: 6,
+      drag_region_height: 10,
+    });
+  });
+
+  it('drops traffic light coordinates outside macOS immersive mode', () => {
+    const coordinates = { trafficLightX: 2, trafficLightY: 6 };
+    expect(
+      buildWindowConfigOverrides(
+        makeOptions({ ...coordinates, hideTitleBar: false }),
+        'darwin',
+      ),
+    ).toMatchObject({
+      traffic_light_x: undefined,
+      traffic_light_y: undefined,
+    });
+    expect(
+      buildWindowConfigOverrides(
+        makeOptions({ ...coordinates, hideTitleBar: true }),
+        'win32',
+      ),
+    ).toMatchObject({
+      traffic_light_x: undefined,
+      traffic_light_y: undefined,
     });
   });
 });

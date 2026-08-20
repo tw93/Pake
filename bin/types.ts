@@ -32,6 +32,13 @@ export interface PakeCliOptions {
   // Enable immersive header, default false. macOS only.
   hideTitleBar: boolean;
 
+  // macOS traffic light position. Both coordinates must be set together.
+  trafficLightX?: number;
+  trafficLightY?: number;
+
+  // Height of the draggable strip used by immersive/frameless windows.
+  dragRegionHeight: number;
+
   // Hide native window decorations, default false. Windows and Linux only.
   hideWindowDecorations: boolean;
 
@@ -153,10 +160,16 @@ export interface PakeCliOptions {
 
   // Request microphone entitlement on macOS, default false
   microphone: boolean;
+
+  // Optional local server managed by the packaged application.
+  serverPort?: number;
+  serverCommand?: string;
+  serverTimeout: number;
 }
 
 export interface PakeAppOptions extends PakeCliOptions {
   identifier: string;
+  serverHost?: string;
 }
 
 export interface PlatformSpecific<T> {
@@ -193,6 +206,16 @@ export interface WindowConfig {
   min_height: number;
   ignore_certificate_errors: boolean;
   new_window: boolean;
+  traffic_light_x?: number;
+  traffic_light_y?: number;
+  drag_region_height: number;
+}
+
+export interface ServerConfig {
+  host: string;
+  port: number;
+  command: string;
+  timeout: number;
 }
 
 export interface PakeConfig {
@@ -203,6 +226,7 @@ export interface PakeConfig {
   proxy_url: string;
   multi_instance: boolean;
   multi_window: boolean;
+  server?: ServerConfig;
   inject?: string[];
 }
 
@@ -228,7 +252,10 @@ export interface PakeTauriConfig {
     [key: string]: unknown;
   };
   app: {
-    security?: { headers?: Record<string, string> };
+    security?: {
+      headers?: Record<string, string>;
+      capabilities?: Array<string | Record<string, unknown>>;
+    };
     trayIcon?: unknown;
     [key: string]: unknown;
   };

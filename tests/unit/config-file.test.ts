@@ -3,7 +3,9 @@ import os from 'os';
 import fsExtra from 'fs-extra';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { getCliProgram } from '@/helpers/cli-program';
-import { loadConfigFile } from '@/helpers/config-file';
+import { applyConfigFileOptions, loadConfigFile } from '@/helpers/config-file';
+import { DEFAULT_PAKE_OPTIONS } from '@/defaults';
+import type { PakeCliOptions } from '@/types';
 import { PakeError } from '@/utils/error';
 import schema from '../../schema/pake.schema.json';
 
@@ -81,6 +83,12 @@ describe('loadConfigFile', () => {
       name: 'Weekly',
       width: 1000,
       hideTitleBar: true,
+      trafficLightX: 2,
+      trafficLightY: 6,
+      dragRegionHeight: 10,
+      serverPort: 30141,
+      serverCommand: 'pi-web --port 30141 --no-open',
+      serverTimeout: 45,
       inject: ['./patch.css'],
     });
 
@@ -90,6 +98,12 @@ describe('loadConfigFile', () => {
       name: 'Weekly',
       width: 1000,
       hideTitleBar: true,
+      trafficLightX: 2,
+      trafficLightY: 6,
+      dragRegionHeight: 10,
+      serverPort: 30141,
+      serverCommand: 'pi-web --port 30141 --no-open',
+      serverTimeout: 45,
       inject: ['./patch.css'],
     });
   });
@@ -134,13 +148,37 @@ describe('loadConfigFile', () => {
     const okPath = await writeConfig({ zoom: 100, width: 800 }, 'ok.json');
     const loaded = await loadConfigFile(okPath, validKeys);
     expect(loaded.options).toEqual({ zoom: 100, width: 800 });
+
+    const fractionalPortPath = await writeConfig(
+      { serverPort: 30141.5 },
+      'fractional-port.json',
+    );
+    await expect(loadConfigFile(fractionalPortPath, validKeys)).rejects.toThrow(
+      /"serverPort" must be a finite number \(1-65535\)/,
+    );
   });
 
   it('schema ranges match the loader ranges', () => {
     expect(schema.properties.zoom).toMatchObject({ minimum: 50, maximum: 200 });
-    for (const key of ['width', 'height', 'minWidth', 'minHeight'] as const) {
+    for (const key of [
+      'width',
+      'height',
+      'minWidth',
+      'minHeight',
+      'trafficLightX',
+      'trafficLightY',
+      'dragRegionHeight',
+    ] as const) {
       expect(schema.properties[key]).toMatchObject({ minimum: 0 });
     }
+    expect(schema.properties.serverPort).toMatchObject({
+      minimum: 1,
+      maximum: 65535,
+    });
+    expect(schema.properties.serverTimeout).toMatchObject({
+      minimum: 1,
+      maximum: 3600,
+    });
   });
 
   it('rejects wrong value types naming the expected type', async () => {
@@ -151,5 +189,32 @@ describe('loadConfigFile', () => {
     await expect(loadConfigFile(configPath2, validKeys)).rejects.toThrow(
       /"inject" must be of type string\[\]/,
     );
+  });
+});
+
+describe('applyConfigFileOptions', () => {
+  it('keeps explicit server CLI flags and fills unset values from config', () => {
+    const options = {
+      ...DEFAULT_PAKE_OPTIONS,
+      serverPort: 30141,
+      serverCommand: 'cli-command',
+    } as PakeCliOptions;
+
+    applyConfigFileOptions(
+      options,
+      {
+        serverPort: 3000,
+        serverCommand: 'config-command',
+        serverTimeout: 60,
+      },
+      (key) =>
+        key === 'serverPort' || key === 'serverCommand' ? 'cli' : 'default',
+    );
+
+    expect(options).toMatchObject({
+      serverPort: 30141,
+      serverCommand: 'cli-command',
+      serverTimeout: 60,
+    });
   });
 });

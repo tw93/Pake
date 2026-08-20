@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { getCliProgram } from '../../bin/helpers/cli-program.js';
-import { validateNumberInput } from '../../bin/utils/validate.js';
+import {
+  validateNumberInput,
+  validateServerPort,
+  validateServerTimeout,
+} from '../../bin/utils/validate.js';
 
 describe('CLI options', () => {
   const program = getCliProgram();
@@ -18,6 +22,12 @@ describe('CLI options', () => {
     expect(help).toContain('--enable-find');
     expect(help).toContain('--internal-url-regex');
     expect(help).toContain('--hide-on-close');
+    expect(help).toContain('--server-port');
+    expect(help).toContain('--server-command');
+    expect(help).toContain('--server-timeout');
+    expect(help).toContain('--traffic-light-x');
+    expect(help).toContain('--traffic-light-y');
+    expect(help).toContain('--drag-region-height');
   });
 
   it('registers hidden --multi-window option', () => {
@@ -121,5 +131,19 @@ describe('CLI options', () => {
   it('rejects negative numeric option values', () => {
     expect(() => validateNumberInput('-100')).toThrow('Must not be negative.');
     expect(validateNumberInput('0')).toBe(0);
+  });
+
+  it('validates managed server ports and timeouts as bounded integers', () => {
+    expect(validateServerPort('30141')).toBe(30141);
+    expect(() => validateServerPort('0')).toThrow(
+      'Port must be an integer between 1 and 65535',
+    );
+    expect(() => validateServerPort('1.5')).toThrow(
+      'Port must be an integer between 1 and 65535',
+    );
+    expect(validateServerTimeout('30')).toBe(30);
+    expect(() => validateServerTimeout('3601')).toThrow(
+      'Timeout must be an integer between 1 and 3600',
+    );
   });
 });
