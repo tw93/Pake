@@ -24,6 +24,8 @@ const CREDENTIAL_PERSISTENCE_FOR_SESSION: usize = 1;
 
 // NSKeyValueObservingOptionNew.
 const KVO_OPTION_NEW: usize = 1;
+const FORM_LABEL_LEFT_INSET: f64 = 4.0;
+const FORM_FIELD_WIDTH: f64 = 216.0;
 
 const HTTP_BASIC_METHOD: &str = "NSURLAuthenticationMethodHTTPBasic";
 const SERVER_TRUST_METHOD: &str = "NSURLAuthenticationMethodServerTrust";
@@ -104,22 +106,25 @@ fn prompt_for_credentials(
     );
     let username_label = NSTextField::labelWithString(&NSString::from_str("Username:"), mtm);
     username_label.setFrame(NSRect::new(
-        NSPoint::new(0.0, 45.0),
-        NSSize::new(76.0, 18.0),
+        NSPoint::new(FORM_LABEL_LEFT_INSET, 45.0),
+        NSSize::new(72.0, 18.0),
     ));
     let username = NSTextField::initWithFrame(
         mtm.alloc(),
-        NSRect::new(NSPoint::new(84.0, 38.0), NSSize::new(236.0, 28.0)),
+        NSRect::new(
+            NSPoint::new(84.0, 38.0),
+            NSSize::new(FORM_FIELD_WIDTH, 28.0),
+        ),
     );
     username.setControlSize(NSControlSize::Large);
     let password_label = NSTextField::labelWithString(&NSString::from_str("Password:"), mtm);
     password_label.setFrame(NSRect::new(
-        NSPoint::new(0.0, 11.0),
-        NSSize::new(76.0, 18.0),
+        NSPoint::new(FORM_LABEL_LEFT_INSET, 11.0),
+        NSSize::new(72.0, 18.0),
     ));
     let password = NSSecureTextField::initWithFrame(
         mtm.alloc(),
-        NSRect::new(NSPoint::new(84.0, 4.0), NSSize::new(236.0, 28.0)),
+        NSRect::new(NSPoint::new(84.0, 4.0), NSSize::new(FORM_FIELD_WIDTH, 28.0)),
     );
     password.setControlSize(NSControlSize::Large);
     accessory.addSubview(&username_label);
