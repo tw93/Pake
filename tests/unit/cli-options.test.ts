@@ -29,6 +29,16 @@ describe('CLI options', () => {
     expect(option?.defaultValue).toBe(false);
   });
 
+  it('registers hidden --basic-auth as a runtime opt-in', () => {
+    const option = program.options.find((item) => item.long === '--basic-auth');
+
+    expect(option).toBeDefined();
+    expect(option?.defaultValue).toBe(false);
+    expect(option?.hidden).toBe(true);
+    expect(option?.required).toBe(false);
+    expect(option?.optional).toBe(false);
+  });
+
   it('exposes --internal-url-regex option', () => {
     const option = program.options.find(
       (item) => item.long === '--internal-url-regex',

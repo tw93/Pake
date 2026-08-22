@@ -86,6 +86,11 @@
       "description": "Proxy URL for all network requests (http://, https://, socks5://).",
       "default": ""
     },
+    "basicAuth": {
+      "type": "boolean",
+      "description": "Prompt for HTTP Basic credentials at runtime on macOS (works around the missing WKWebView 401 dialog).",
+      "default": false
+    },
     "userAgent": {
       "type": "string",
       "description": "Custom user agent.",

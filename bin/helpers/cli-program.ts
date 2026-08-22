@@ -81,6 +81,14 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     )
     .addOption(
       new Option(
+        '--basic-auth',
+        'Prompt for HTTP Basic credentials at runtime (macOS only)',
+      )
+        .default(DEFAULT.basicAuth)
+        .hideHelp(),
+    )
+    .addOption(
+      new Option(
         '--proxy-url <url>',
         'Proxy URL for all network requests (http://, https://, socks5://)',
       )

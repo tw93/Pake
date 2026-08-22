@@ -447,7 +447,8 @@ async function injectCustomCode(
   options: PakeAppOptions,
   tauriConf: PakeTauriConfig,
 ): Promise<void> {
-  const { inject, proxyUrl, multiInstance, multiWindow, wasm } = options;
+  const { inject, proxyUrl, basicAuth, multiInstance, multiWindow, wasm } =
+    options;
   const injectFilePath = path.join(
     npmDirectory,
     'src-tauri/src/inject/custom.js',
@@ -474,6 +475,7 @@ async function injectCustomCode(
   }
 
   tauriConf.pake.proxy_url = proxyUrl || '';
+  tauriConf.pake.basic_auth = basicAuth;
   tauriConf.pake.multi_instance = multiInstance;
   tauriConf.pake.multi_window = multiWindow;
 

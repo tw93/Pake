@@ -593,6 +593,14 @@ pake ./my-app/index.html --name "my-app" --use-local-file
 --proxy-url socks5://127.0.0.1:7891
 ```
 
+#### [basic-auth]
+
+当目标站点请求 HTTP Basic 认证时显示登录提示。此选项仅用于 macOS，因为 WKWebView 不会自行显示 401 登录框。凭据在打包后的应用中运行时输入，并且只在当前会话中保留。
+
+```shell
+--basic-auth
+```
+
 #### [debug]
 
 启用开发者工具和详细日志输出，用于调试。
