@@ -87,9 +87,9 @@
       "default": ""
     },
     "basicAuth": {
-      "type": "string",
-      "description": "HTTP Basic credentials for the target site, format \"user:pass\" (macOS only; works around the missing WKWebView 401 dialog).",
-      "default": ""
+      "type": "boolean",
+      "description": "Prompt for HTTP Basic credentials at runtime on macOS (works around the missing WKWebView 401 dialog).",
+      "default": false
     },
     "userAgent": {
       "type": "string",

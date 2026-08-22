@@ -597,10 +597,10 @@ Set proxy server for all network requests. Supports HTTP, HTTPS, and SOCKS5. Ava
 
 #### [basic-auth]
 
-HTTP Basic credentials for the target site, format `user:pass`. macOS only: WKWebView does not show the native 401 dialog, so this installs a navigation delegate that answers the challenge automatically. The password may contain colons; UTF-8 characters are supported. Passwords appear in the shell process list, so prefer it on a machine you trust.
+Prompt for HTTP Basic credentials when the target site requests them. This is only needed on macOS, where WKWebView does not provide its own 401 login dialog. Credentials are entered in the packaged app at runtime and are kept only for the current session.
 
 ```shell
---basic-auth user:pass
+--basic-auth
 ```
 
 #### [debug]

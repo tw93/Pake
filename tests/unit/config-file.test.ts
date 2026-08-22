@@ -151,5 +151,12 @@ describe('loadConfigFile', () => {
     await expect(loadConfigFile(configPath2, validKeys)).rejects.toThrow(
       /"inject" must be of type string\[\]/,
     );
+    const configPath3 = await writeConfig(
+      { basicAuth: 'alice:secret' },
+      'bad-basic-auth.json',
+    );
+    await expect(loadConfigFile(configPath3, validKeys)).rejects.toThrow(
+      /"basicAuth" must be of type boolean/,
+    );
   });
 });

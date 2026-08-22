@@ -83,13 +83,11 @@ pub struct PakeConfig {
     pub system_tray: FunctionON,
     pub system_tray_path: String,
     pub proxy_url: String,
-    /// HTTP Basic credentials in `user:pass` form, empty when unset.
-    /// When non-empty, macOS installs a navigation delegate that responds
-    /// to HTTP Basic challenges with these credentials (WKWebView does not
-    /// show the native 401 dialog). Windows and Linux auto-handle this
-    /// case in the WebView itself, so the field is read on macOS only.
+    /// Prompt for HTTP Basic credentials at runtime on macOS. WKWebView does
+    /// not provide its own 401 login dialog, while Windows and Linux WebViews
+    /// handle this flow natively.
     #[serde(default)]
-    pub basic_auth: String,
+    pub basic_auth: bool,
     #[serde(default)]
     pub multi_instance: bool,
     #[serde(default)]

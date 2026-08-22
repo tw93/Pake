@@ -1,7 +1,5 @@
 #[cfg(target_os = "macos")]
 pub mod auth;
-#[cfg(target_os = "macos")]
-pub mod cert;
 pub mod config;
 pub mod invoke;
 #[cfg(target_os = "macos")]

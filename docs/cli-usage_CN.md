@@ -595,10 +595,10 @@ pake ./my-app/index.html --name "my-app" --use-local-file
 
 #### [basic-auth]
 
-目标站点的 HTTP Basic 凭据，格式为 `user:pass`。仅 macOS：WKWebView 不显示系统 401 对话框，此选项会安装一个 navigation delegate 自动响应认证挑战。密码可包含冒号，支持 UTF-8 字符。注意密码会出现在 shell 进程列表中，请仅在可信机器上使用。
+当目标站点请求 HTTP Basic 认证时显示登录提示。此选项仅用于 macOS，因为 WKWebView 不会自行显示 401 登录框。凭据在打包后的应用中运行时输入，并且只在当前会话中保留。
 
 ```shell
---basic-auth user:pass
+--basic-auth
 ```
 
 #### [debug]

@@ -475,7 +475,7 @@ async function injectCustomCode(
   }
 
   tauriConf.pake.proxy_url = proxyUrl || '';
-  tauriConf.pake.basic_auth = basicAuth || '';
+  tauriConf.pake.basic_auth = basicAuth;
   tauriConf.pake.multi_instance = multiInstance;
   tauriConf.pake.multi_window = multiWindow;
 

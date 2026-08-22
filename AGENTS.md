@@ -85,7 +85,7 @@ Proactive latent-bug sweeps use `.agents/skills/bugs/SKILL.md`. Pick one row and
 | Auth / popup               | `auth.js`, `event.js`                  | macOS auth crash, SSO in system browser, Apple popup exception                             |
 | Clipboard                  | `event.js`                             | keydown steals native paste; double-paste fallback                                         |
 | Multi-window / icon        | `window.rs`, `setup.rs`                | Missing `reapply_window_icon` on show; secondary window toast/target; Cmd+N blank flash    |
-| Platform capability        | `cert.rs`, proxy, WebKit flags         | Flag name present, platform no-op                                                          |
+| Platform capability        | `auth.rs`, proxy, WebKit flags         | Flag name present, platform no-op                                                          |
 | CLI / config contract      | `bin/`, `schema/`                      | Config smuggles out-of-range values CLI rejects                                            |
 
 ## Current Risk Areas
