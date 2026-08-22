@@ -240,19 +240,17 @@ window.addEventListener("DOMContentLoaded", (_event) => {
         position: fixed !important;
         top: 12px !important;
         right: 16px !important;
+        left: auto !important;
+        width: 182px !important;
       }
 
-      #react-root [data-testid="sidebarColumn"] input[placeholder="Search"] {
-        width: 150px;
+      #react-root [data-testid="sidebarColumn"] form[role="search"] input[data-testid="SearchBox_Search_Input"] {
+        width: 100% !important;
       }
 
       #react-root [data-testid="sidebarColumn"] form[role="search"]:focus-within {
         width: 280px !important;
         backdrop-filter: blur(12px) !important;
-      }
-
-      #react-root [data-testid="sidebarColumn"] input[placeholder="Search"]:focus {
-        width: 234px !important;
       }
     }
 
@@ -262,19 +260,17 @@ window.addEventListener("DOMContentLoaded", (_event) => {
         position: fixed !important;
         top: 12px !important;
         right: 16px !important;
+        left: auto !important;
+        width: 182px !important;
       }
 
-      #react-root [data-testid="sidebarColumn"] input[placeholder="Search"] {
-        width: 150px;
+      #react-root [data-testid="sidebarColumn"] form[role="search"] input[data-testid="SearchBox_Search_Input"] {
+        width: 100% !important;
       }
 
       #react-root [data-testid="sidebarColumn"] form[role="search"]:focus-within {
         width: 374px !important;
         backdrop-filter: blur(12px) !important;
-      }
-
-      #react-root [data-testid="sidebarColumn"] input[placeholder="Search"]:focus {
-        width: 328px !important;
       }
 
       #react-root div[style*="left: -12px"] {
