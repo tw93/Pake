@@ -8,7 +8,9 @@
 use objc2::rc::{Retained, Weak};
 use objc2::runtime::{AnyObject, Bool, NSObject, NSObjectProtocol, Sel};
 use objc2::{class, define_class, msg_send, DefinedClass, MainThreadMarker, MainThreadOnly};
-use objc2_app_kit::{NSAlert, NSAlertFirstButtonReturn, NSSecureTextField, NSTextField, NSView};
+use objc2_app_kit::{
+    NSAlert, NSAlertFirstButtonReturn, NSControlSize, NSSecureTextField, NSTextField, NSView,
+};
 use objc2_foundation::{NSPoint, NSRect, NSSize, NSString};
 use std::ffi::c_void;
 
@@ -90,38 +92,50 @@ fn prompt_for_credentials(
     alert.setMessageText(&NSString::from_str(&title));
 
     let detail = match (previous_failures, realm.filter(|value| !value.is_empty())) {
-        (0, Some(realm)) => format!("The server requires a username and password for {realm}."),
-        (0, None) => "The server requires a username and password.".to_string(),
+        (0, Some(realm)) => format!("Enter the username and password for {realm}."),
+        (0, None) => "Enter the username and password for this server.".to_string(),
         _ => "The username or password was incorrect. Try again.".to_string(),
     };
     alert.setInformativeText(&NSString::from_str(&detail));
 
     let accessory = NSView::initWithFrame(
         mtm.alloc(),
-        NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(360.0, 58.0)),
+        NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(320.0, 70.0)),
     );
     let username_label = NSTextField::labelWithString(&NSString::from_str("Username:"), mtm);
     username_label.setFrame(NSRect::new(
-        NSPoint::new(0.0, 35.0),
-        NSSize::new(84.0, 18.0),
+        NSPoint::new(0.0, 45.0),
+        NSSize::new(76.0, 18.0),
     ));
     let username = NSTextField::initWithFrame(
         mtm.alloc(),
-        NSRect::new(NSPoint::new(92.0, 31.0), NSSize::new(268.0, 24.0)),
+        NSRect::new(NSPoint::new(84.0, 38.0), NSSize::new(236.0, 28.0)),
     );
+    username.setControlSize(NSControlSize::Large);
     let password_label = NSTextField::labelWithString(&NSString::from_str("Password:"), mtm);
-    password_label.setFrame(NSRect::new(NSPoint::new(0.0, 4.0), NSSize::new(84.0, 18.0)));
+    password_label.setFrame(NSRect::new(
+        NSPoint::new(0.0, 11.0),
+        NSSize::new(76.0, 18.0),
+    ));
     let password = NSSecureTextField::initWithFrame(
         mtm.alloc(),
-        NSRect::new(NSPoint::new(92.0, 0.0), NSSize::new(268.0, 24.0)),
+        NSRect::new(NSPoint::new(84.0, 4.0), NSSize::new(236.0, 28.0)),
     );
+    password.setControlSize(NSControlSize::Large);
     accessory.addSubview(&username_label);
     accessory.addSubview(&username);
     accessory.addSubview(&password_label);
     accessory.addSubview(&password);
     alert.setAccessoryView(Some(&accessory));
-    alert.addButtonWithTitle(&NSString::from_str("Log In"));
-    alert.addButtonWithTitle(&NSString::from_str("Cancel"));
+    let sign_in_button = alert.addButtonWithTitle(&NSString::from_str("Sign In"));
+    sign_in_button.setControlSize(NSControlSize::Large);
+    let cancel_button = alert.addButtonWithTitle(&NSString::from_str("Cancel"));
+    cancel_button.setControlSize(NSControlSize::Large);
+    alert.layout();
+    for button in [&sign_in_button, &cancel_button] {
+        let size = button.frame().size;
+        button.setFrameSize(NSSize::new(size.width, 34.0));
+    }
     alert.window().makeFirstResponder(Some(&username));
 
     if alert.runModal() != NSAlertFirstButtonReturn {
