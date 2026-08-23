@@ -591,7 +591,10 @@ function shouldBypassPakeLinkHandling(rawHref) {
 }
 
 function shouldNavigateAuthInCurrentWindow() {
-  return /macintosh|mac os x/i.test(navigator.userAgent);
+  // On WebKitGTK window.open() returns a truthy proxy even when the native
+  // side denies creating the window, so the popup fallback never fires and
+  // auth clicks die silently. Auth flows must navigate in-place everywhere.
+  return true;
 }
 
 function canNavigateAuthUrl(url) {

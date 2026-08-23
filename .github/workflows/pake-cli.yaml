@@ -63,6 +63,12 @@ on:
         required: false
         type: boolean
         default: false
+      user_agent:
+        description: "Custom User-Agent (Chrome UA recommended for Google sites on Linux)"
+        required: false
+      safe_domains:
+        description: "Root domains kept in-app, comma-separated (e.g. google.com)"
+        required: false
       targets:
         description: "Package formats (comma-separated: deb,appimage,rpm,zst)"
         required: false
@@ -97,7 +103,7 @@ jobs:
         uses: rui314/setup-mold@v1
 
       - name: Rust cache restore
-        uses: actions/cache/restore@v4.2.0
+        uses: actions/cache/restore@v6.1.0
         id: cache_store
         with:
           path: |
@@ -155,6 +161,14 @@ jobs:
             ARGS+=("--multi-arch")
           fi
 
+          if [ -n "${{ inputs.user_agent }}" ]; then
+            ARGS+=("--user-agent" "${{ inputs.user_agent }}")
+          fi
+
+          if [ -n "${{ inputs.safe_domains }}" ]; then
+            ARGS+=("--safe-domain" "${{ inputs.safe_domains }}")
+          fi
+
           if [ -n "${{ inputs.targets }}" ] && [ "${{ runner.os }}" == "Linux" ]; then
             ARGS+=("--targets" "${{ inputs.targets }}")
           fi
@@ -203,6 +217,14 @@ jobs:
 
           if ("${{ inputs.new_window }}" -eq "true") {
             $args += "--new-window"
+          }
+
+          if ("${{ inputs.user_agent }}" -ne "") {
+            $args += "--user-agent", "${{ inputs.user_agent }}"
+          }
+
+          if ("${{ inputs.safe_domains }}" -ne "") {
+            $args += "--safe-domain", "${{ inputs.safe_domains }}"
           }
 
           Write-Host "Running: node dist/cli.js $($args -join ' ')"
@@ -263,7 +285,7 @@ jobs:
           retention-days: 3
 
       - name: Rust cache store
-        uses: actions/cache/save@v4.2.0
+        uses: actions/cache/save@v6.1.0
         if: steps.cache_store.outputs.cache-hit != 'true'
         with:
           path: |
