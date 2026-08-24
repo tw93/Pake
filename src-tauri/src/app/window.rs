@@ -422,6 +422,18 @@ fn build_window(
         .resizable(window_config.resizable)
         .maximized(window_config.maximize);
 
+    // Window tabs read NSWindow.title, which nothing keeps in sync with the
+    // page — tauri only forwards document-title changes when a handler is
+    // registered. With tabbing on, wire it so each tab shows the live page
+    // title; empty page titles keep the current window title.
+    if !window_config.tabbing_identifier.is_empty() {
+        window_builder = window_builder.on_document_title_changed(|window, title| {
+            if !title.trim().is_empty() {
+                let _ = window.set_title(&title);
+            }
+        });
+    }
+
     #[cfg(target_os = "windows")]
     {
         let scale_factor = app
