@@ -20,10 +20,19 @@ jobs:
         run: npm install -g pake-cli
 
       - name: Build Windows Executable
-        run: pake https://visitor.iskaan.com/dashboard --name "Iskaan Dashboard" --inject ./iskaan-toggle.js --width 1400 --height 900
+        shell: powershell
+        run: |
+          $scriptPath = Join-Path "${{ github.workspace }}" "iskaan-toggle.js"
+          pake https://visitor.iskaan.com/dashboard --name "Iskaan Dashboard" --inject "$scriptPath" --width 1400 --height 900 --debug
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Iskaan-Dashboard-Windows
-          path: "*.exe"
+          path: |
+            *.exe
+            *.msi
+            output/*
+            dist/*
+            **/*.exe
+            **/*.msi
