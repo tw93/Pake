@@ -696,6 +696,29 @@ fn build_window(
 
     let window = window_builder.build()?;
 
+    // A tabbing identifier alone keeps NSWindow.tabbingMode at .automatic, so
+    // windows stay separate and each one grows its own tab bar. Switching to
+    // .preferred makes new windows join the existing tab set and keeps the
+    // tab bar hidden until a window actually has two or more tabs.
+    #[cfg(target_os = "macos")]
+    if !window_config.tabbing_identifier.is_empty() {
+        let tabbing_window = window.clone();
+        Queue::main().exec_async(move || match tabbing_window.ns_window() {
+            Ok(ns_window_ptr) => unsafe {
+                let Some(ns_window) =
+                    objc2::rc::Retained::retain(ns_window_ptr as *mut objc2_app_kit::NSWindow)
+                else {
+                    eprintln!("[Pake] Failed to retain the macOS window for tabbing.");
+                    return;
+                };
+                ns_window.setTabbingMode(objc2_app_kit::NSWindowTabbingMode::Preferred);
+            },
+            Err(error) => {
+                eprintln!("[Pake] Failed to access the macOS window for tabbing: {error}");
+            }
+        });
+    }
+
     // WKWebView does not show an HTTP Basic login dialog and ignores Chromium's
     // certificate-error flag. Install one host-scoped delegate for both flows
     // on the process-lifetime main window, then navigate to the real target.
