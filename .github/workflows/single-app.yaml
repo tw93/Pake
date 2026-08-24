@@ -23,7 +23,7 @@ jobs:
         shell: powershell
         run: |
           $scriptPath = Join-Path "${{ github.workspace }}" "iskaan-toggle.js"
-          pake https://visitor.iskaan.com/dashboard --name "Iskaan Dashboard" --inject "$scriptPath" --width 1400 --height 900
+          pake https://visitor.iskaan.com --name "Iskaan Dashboard" --inject "$scriptPath" --width 1400 --height 900
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
