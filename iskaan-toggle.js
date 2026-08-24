@@ -1,166 +1,151 @@
-window.addEventListener('DOMContentLoaded', () => {
-  // --- Floating Control Panel (Bottom Right) ---
-  const panel = document.createElement('div');
-  panel.id = 'iskaan-control-panel';
-  Object.assign(panel.style, {
-    position: 'fixed',
-    bottom: '20px',
-    right: '20px',
-    zIndex: '99999',
-    display: 'flex',
-    gap: '10px'
-  });
+(function () {
+  function initIskaanEnhancements() {
+    if (window.iskaanLoaded) return;
+    window.iskaanLoaded = true;
 
-  function styleButton(btn, bgColor) {
-    Object.assign(btn.style, {
-      backgroundColor: bgColor,
-      color: '#FFFFFF',
-      border: '2px solid #C8A24D',
-      borderRadius: '20px',
-      padding: '10px 16px',
-      fontSize: '13px',
-      fontWeight: '600',
-      cursor: 'pointer',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-      transition: 'all 0.2s ease'
-    });
-  }
-
-  // 1. Auto-Refresh Toggle Button
-  const refreshBtn = document.createElement('button');
-  refreshBtn.innerHTML = '⚡ Auto-Refresh: ON';
-  styleButton(refreshBtn, '#0D2F5F');
-
-  let isRefreshEnabled = true;
-  let refreshInterval = setInterval(() => location.reload(), 60000);
-
-  refreshBtn.addEventListener('click', () => {
-    isRefreshEnabled = !isRefreshEnabled;
-    if (isRefreshEnabled) {
-      refreshBtn.innerHTML = '⚡ Auto-Refresh: ON';
-      refreshBtn.style.backgroundColor = '#0D2F5F';
-      refreshInterval = setInterval(() => location.reload(), 60000);
-    } else {
-      refreshBtn.innerHTML = '⏸️ Auto-Refresh: OFF';
-      refreshBtn.style.backgroundColor = '#64748B';
-      clearInterval(refreshInterval);
-    }
-  });
-
-  // 2. Light / Dark Mode Toggle Button
-  const themeBtn = document.createElement('button');
-  themeBtn.innerHTML = '🌙 Dark Mode';
-  styleButton(themeBtn, '#1E293B');
-
-  const darkStyleTag = document.createElement('style');
-  darkStyleTag.id = 'iskaan-dark-theme';
-  darkStyleTag.innerHTML = `
-    body, .main-content, .card, table, header, nav, div.modal-content, .bg-white {
-      background-color: #0f172a !important;
-      color: #f8fafc !important;
-    }
-    .card, div.modal-content, div.card-body, .list-group-item {
-      background-color: #1e293b !important;
-      border-color: #334155 !important;
-      color: #f8fafc !important;
-    }
-    h1, h2, h3, h4, h5, h6, p, span, td, th, label, div {
-      color: #f8fafc !important;
-    }
-    input, select, textarea {
-      background-color: #0f172a !important;
-      color: #ffffff !important;
-      border: 1px solid #475569 !important;
-    }
-  `;
-
-  let isDarkMode = false;
-  themeBtn.addEventListener('click', () => {
-    isDarkMode = !isDarkMode;
-    if (isDarkMode) {
-      document.head.appendChild(darkStyleTag);
-      themeBtn.innerHTML = '☀️ Light Mode';
-      themeBtn.style.backgroundColor = '#C8A24D';
-      themeBtn.style.color = '#000000';
-    } else {
-      if (document.getElementById('iskaan-dark-theme')) {
-        document.getElementById('iskaan-dark-theme').remove();
+    // --- 1. Inject Styles for Control Panel & Dark Mode ---
+    const style = document.createElement('style');
+    style.textContent = `
+      #iskaan-tools-panel {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 999999;
+        background: rgba(13, 47, 95, 0.95);
+        color: #ffffff;
+        padding: 10px 14px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 13px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        border: 1px solid #C8A24D;
       }
-      themeBtn.innerHTML = '🌙 Dark Mode';
-      themeBtn.style.backgroundColor = '#1E293B';
-      themeBtn.style.color = '#FFFFFF';
-    }
-  });
+      #iskaan-tools-panel button {
+        background: #C8A24D;
+        color: #0D2F5F;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      #iskaan-tools-panel button:hover {
+        background: #e5ba5c;
+      }
+      #iskaan-tools-panel button:disabled {
+        background: #888888;
+        cursor: not-allowed;
+      }
+      #iskaan-tools-panel label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        user-select: none;
+      }
+      body.iskaan-dark-mode {
+        filter: invert(0.9) hue-rotate(180deg) !important;
+      }
+      body.iskaan-dark-mode img, 
+      body.iskaan-dark-mode video, 
+      body.iskaan-dark-mode #iskaan-tools-panel {
+        filter: invert(0.9) hue-rotate(180deg) !important;
+      }
+    `;
+    document.head.appendChild(style);
 
-  panel.appendChild(refreshBtn);
-  panel.appendChild(themeBtn);
-  document.body.appendChild(panel);
+    // --- 2. Create Floating Control Widget ---
+    const panel = document.createElement('div');
+    panel.id = 'iskaan-tools-panel';
+    panel.innerHTML = `
+      <label>
+        <input type="checkbox" id="auto-refresh-toggle"> Auto Refresh (30s)
+      </label>
+      <button id="dark-mode-toggle">🌙 Dark Mode</button>
+      <button id="get-info-btn">⚡ Get Info</button>
+    `;
+    document.body.appendChild(panel);
 
-  // 3. Phone Auto-Detect & Loading Lock with 3 Retries (10s interval)
-  let attempts = 0;
-  let isExecuting = false;
-  let lastTriggeredNumber = '';
-
-  const observer = new MutationObserver(() => {
-    const buttons = Array.from(document.querySelectorAll('button'));
-    const getInfoBtn = buttons.find(b => b.textContent.trim().toLowerCase() === 'get info');
-
-    if (!getInfoBtn) {
-      attempts = 0;
-      lastTriggeredNumber = '';
-      return;
-    }
-
-    const container = getInfoBtn.closest('div.input-group') || getInfoBtn.parentElement;
-    const phoneInput = container ? container.querySelector('input') : null;
-
-    if (phoneInput && !phoneInput.dataset.listenerAttached) {
-      phoneInput.dataset.listenerAttached = 'true';
-
-      phoneInput.addEventListener('input', (e) => {
-        const digitsOnly = e.target.value.replace(/\D/g, '');
-        const isComplete = digitsOnly.length >= 9;
-
-        if (isComplete && digitsOnly !== lastTriggeredNumber && !isExecuting && attempts === 0) {
-          lastTriggeredNumber = digitsOnly;
-          attempts = 0;
-          runGetInfoSequence(getInfoBtn);
-        }
-      });
-    }
-  });
-
-  function runGetInfoSequence(button) {
-    if (attempts >= 3 || isExecuting) return;
-
-    isExecuting = true;
-    attempts++;
-
-    // Lock button state
-    button.disabled = true;
-    button.style.pointerEvents = 'none';
-    button.style.opacity = '0.65';
-    button.innerHTML = `⏳ Loading (${attempts}/3)...`;
-
-    button.click();
-
-    // 10-second check
-    setTimeout(() => {
-      isExecuting = false;
-      const nameInput = document.querySelector('input[name*="name"]') || document.querySelectorAll('form input')[2];
-      const hasData = nameInput && nameInput.value.trim().length > 0;
-
-      if (!hasData && attempts < 3) {
-        runGetInfoSequence(button);
+    // --- 3. Auto Refresh Feature ---
+    let refreshInterval = null;
+    const refreshCheckbox = document.getElementById('auto-refresh-toggle');
+    refreshCheckbox.addEventListener('change', (e) => {
+      if (e.target.checked) {
+        refreshInterval = setInterval(() => {
+          console.log("[Iskaan Tools] Executing auto-refresh...");
+          location.reload();
+        }, 30000); // 30 Seconds
       } else {
-        // Reset button for manual use after success or 3 failed tries
-        button.disabled = false;
-        button.style.pointerEvents = 'auto';
-        button.style.opacity = '1';
-        button.innerHTML = 'Get Info';
+        clearInterval(refreshInterval);
+        console.log("[Iskaan Tools] Auto-refresh disabled.");
       }
-    }, 10000);
+    });
+
+    // --- 4. Light / Dark Mode Toggle ---
+    const darkModeBtn = document.getElementById('dark-mode-toggle');
+    darkModeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('iskaan-dark-mode');
+      const isDark = document.body.classList.contains('iskaan-dark-mode');
+      darkModeBtn.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+    });
+
+    // --- 5. Automated Get Info (3-Retry Limit + Loading Lock) ---
+    const getInfoBtn = document.getElementById('get-info-btn');
+    let isFetching = false;
+
+    async function fetchInfoWithRetry(maxRetries = 3) {
+      if (isFetching) return; // Loading Lock
+      isFetching = true;
+      getInfoBtn.disabled = true;
+      getInfoBtn.textContent = '⏳ Processing...';
+
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          console.log(`[Get Info] Attempt ${attempt} of ${maxRetries}`);
+
+          // Search for existing "Get Info" or "Search" button on the active Iskaan DOM
+          const pageButton = Array.from(document.querySelectorAll('button, a, input[type="button"]')).find(el => {
+            const txt = (el.textContent || el.value || '').trim().toLowerCase();
+            return txt.includes('get info') || txt.includes('search') || txt.includes('fetch');
+          });
+
+          if (pageButton) {
+            pageButton.click();
+            console.log("[Get Info] Found and clicked native element successfully.");
+            break; 
+          } else {
+            throw new Error("Target button not currently visible on page.");
+          }
+        } catch (err) {
+          console.warn(`[Get Info] Attempt ${attempt} failed: ${err.message}`);
+          if (attempt === maxRetries) {
+            alert("Could not trigger 'Get Info'. Ensure the search panel is loaded on screen.");
+          } else {
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Delay 1 second before retrying
+          }
+        }
+      }
+
+      // Unlock
+      isFetching = false;
+      getInfoBtn.disabled = false;
+      getInfoBtn.textContent = '⚡ Get Info';
+    }
+
+    getInfoBtn.addEventListener('click', () => fetchInfoWithRetry(3));
+
+    console.log("[Iskaan Tools] Controls initialized successfully.");
   }
 
-  observer.observe(document.body, { childList: true, subtree: true });
-});
+  // DOM Load Observer / Polling Safeguard
+  const waitForDOM = setInterval(() => {
+    if (document.readyState === "complete" || document.body) {
+      clearInterval(waitForDOM);
+      initIskaanEnhancements();
+    }
+  }, 500);
+})();
