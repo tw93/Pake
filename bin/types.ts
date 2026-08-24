@@ -115,6 +115,10 @@ export interface PakeCliOptions {
   // Allow opening multiple windows in one app instance, default false
   multiWindow: boolean;
 
+  // macOS tabbing identifier shared by all windows so they can merge into
+  // native tabs, default '' (tabbing disabled)
+  macTabbingId: string;
+
   // Start app minimized to tray, default false
   startToTray: boolean;
 
@@ -196,6 +200,7 @@ export interface WindowConfig {
   min_height: number;
   ignore_certificate_errors: boolean;
   new_window: boolean;
+  tabbing_identifier: string;
 }
 
 export interface PakeConfig {

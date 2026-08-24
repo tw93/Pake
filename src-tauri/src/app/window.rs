@@ -570,6 +570,13 @@ fn build_window(
         };
         window_builder = window_builder.title_bar_style(title_bar_style);
         window_builder = window_builder.theme(theme);
+
+        // Without a tabbing identifier tauri-runtime-wry disables automatic
+        // window tabbing, so multi-window builds never offer "Merge All
+        // Windows". A shared identifier groups every window into one tab set.
+        if !window_config.tabbing_identifier.is_empty() {
+            window_builder = window_builder.tabbing_identifier(&window_config.tabbing_identifier);
+        }
     }
 
     // Windows and Linux: set data_directory before proxy_url

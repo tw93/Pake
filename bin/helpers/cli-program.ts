@@ -209,6 +209,14 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .hideHelp(),
     )
     .addOption(
+      new Option(
+        '--mac-tabbing-id <id>',
+        'macOS only: shared tabbing identifier that lets windows merge into native tabs',
+      )
+        .default(DEFAULT.macTabbingId)
+        .hideHelp(),
+    )
+    .addOption(
       new Option('--start-to-tray', 'Start app minimized to tray')
         .default(DEFAULT.startToTray)
         .hideHelp(),
