@@ -698,10 +698,14 @@ fn build_window(
 
     // A tabbing identifier alone keeps NSWindow.tabbingMode at .automatic, so
     // windows stay separate and each one grows its own tab bar. Switching to
-    // .preferred makes new windows join the existing tab set and keeps the
-    // tab bar hidden until a window actually has two or more tabs.
+    // .preferred makes new windows join the existing tab set.
+    //
+    // .preferred shows the tab bar even for a lone window, so only additional
+    // windows (Cmd+N / popups) get .preferred — they merge into the main
+    // window's tab set and the bar appears once a second tab exists. The main
+    // window stays in .automatic and keeps its bar-less solo look.
     #[cfg(target_os = "macos")]
-    if !window_config.tabbing_identifier.is_empty() {
+    if !window_config.tabbing_identifier.is_empty() && label != "pake" {
         let tabbing_window = window.clone();
         Queue::main().exec_async(move || match tabbing_window.ns_window() {
             Ok(ns_window_ptr) => unsafe {
