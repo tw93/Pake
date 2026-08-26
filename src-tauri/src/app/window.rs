@@ -718,6 +718,24 @@ fn build_window(
         });
     }
 
+    #[cfg(target_os = "linux")]
+    {
+        use webkit2gtk::{PermissionRequestExt, WebViewExt};
+
+        let permission_window = window.clone();
+        if let Err(error) = permission_window.with_webview(|webview| {
+            let gtk_webview = webview.inner();
+            gtk_webview.connect_permission_request(|_view, request| {
+                // wry never answers WebKitGTK permission requests, so camera,
+                // microphone and screen capture die silently without this.
+                request.allow();
+                true
+            });
+        }) {
+            eprintln!("[Pake] Failed to install permission handler: {error}");
+        }
+    }
+
     Ok(window)
 }
 
