@@ -537,6 +537,8 @@ pake https://chat.example.com --name ChatApp --multi-instance
 
 启用后，如果应用已在运行，再次启动会新开一个窗口，而不是仅聚焦已有窗口。
 
+在 macOS 上，通过 Cmd+N 打开的附加窗口会自动加入应用的原生标签页组；网页认证和 `window.open` 弹窗仍保持独立。
+
 这个选项可以改善基于弹窗的认证流程，但不能绕过认证提供方的策略限制。某些提供方，尤其是 Google，仍然可能拒绝在嵌入式 WebView 中完成登录。
 
 ```shell
