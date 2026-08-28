@@ -362,6 +362,11 @@ fn build_window(
         visible,
         new_window_features,
     } = opts;
+    #[cfg(target_os = "macos")]
+    let use_native_window_tabbing = config.multi_window && new_window_features.is_none();
+    #[cfg(target_os = "macos")]
+    let prefer_native_window_tabbing = use_native_window_tabbing && label != "pake";
+
     let package_name = tauri_config
         .product_name
         .clone()
@@ -421,18 +426,6 @@ fn build_window(
         .user_agent(user_agent)
         .resizable(window_config.resizable)
         .maximized(window_config.maximize);
-
-    // Window tabs read NSWindow.title, which nothing keeps in sync with the
-    // page — tauri only forwards document-title changes when a handler is
-    // registered. With tabbing on, wire it so each tab shows the live page
-    // title; empty page titles keep the current window title.
-    if !window_config.tabbing_identifier.is_empty() {
-        window_builder = window_builder.on_document_title_changed(|window, title| {
-            if !title.trim().is_empty() {
-                let _ = window.set_title(&title);
-            }
-        });
-    }
 
     #[cfg(target_os = "windows")]
     {
@@ -583,11 +576,20 @@ fn build_window(
         window_builder = window_builder.title_bar_style(title_bar_style);
         window_builder = window_builder.theme(theme);
 
-        // Without a tabbing identifier tauri-runtime-wry disables automatic
-        // window tabbing, so multi-window builds never offer "Merge All
-        // Windows". A shared identifier groups every window into one tab set.
-        if !window_config.tabbing_identifier.is_empty() {
-            window_builder = window_builder.tabbing_identifier(&window_config.tabbing_identifier);
+        // Tauri disables automatic tabbing unless an identifier is provided.
+        // Existing multi-window apps already have a stable bundle identifier,
+        // so use it without exposing another CLI/config option. Web-created
+        // popups keep their own native window.
+        if use_native_window_tabbing {
+            window_builder = window_builder
+                .tabbing_identifier(&tauri_config.identifier)
+                .on_document_title_changed(|window, title| {
+                    if !title.trim().is_empty() {
+                        if let Err(error) = window.set_title(&title) {
+                            eprintln!("[Pake] Failed to update the macOS tab title: {error}");
+                        }
+                    }
+                });
         }
     }
 
@@ -708,16 +710,12 @@ fn build_window(
 
     let window = window_builder.build()?;
 
-    // A tabbing identifier alone keeps NSWindow.tabbingMode at .automatic, so
-    // windows stay separate and each one grows its own tab bar. Switching to
-    // .preferred makes new windows join the existing tab set.
-    //
-    // .preferred shows the tab bar even for a lone window, so only additional
-    // windows (Cmd+N / popups) get .preferred — they merge into the main
-    // window's tab set and the bar appears once a second tab exists. The main
-    // window stays in .automatic and keeps its bar-less solo look.
+    // A shared identifier alone leaves each NSWindow in automatic mode.
+    // Prefer tabs only for Cmd+N clones so they join the main window's tab
+    // group. The main window stays bar-less until another tab exists, while
+    // web-auth and window.open popups remain separate native windows.
     #[cfg(target_os = "macos")]
-    if !window_config.tabbing_identifier.is_empty() && label != "pake" {
+    if prefer_native_window_tabbing {
         let tabbing_window = window.clone();
         Queue::main().exec_async(move || match tabbing_window.ns_window() {
             Ok(ns_window_ptr) => unsafe {

@@ -41,4 +41,18 @@ describe("macOS new-window handling (regression: #1194)", () => {
     expect(source).not.toContain("removeAllUserScripts");
     expect(source).not.toContain("removeAllScriptMessageHandlers");
   });
+
+  it("groups only multi-window clones into native macOS tabs", () => {
+    const source = fs.readFileSync(sourcePath, "utf-8");
+
+    expect(source).toContain(
+      "let use_native_window_tabbing = config.multi_window && new_window_features.is_none();",
+    );
+    expect(source).toContain(
+      'let prefer_native_window_tabbing = use_native_window_tabbing && label != "pake";',
+    );
+    expect(source).toContain(".tabbing_identifier(&tauri_config.identifier)");
+    expect(source).toContain("if prefer_native_window_tabbing");
+    expect(source).not.toContain("tabbing_identifier: String");
+  });
 });

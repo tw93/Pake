@@ -539,6 +539,8 @@ This is different from `--multi-instance`:
 
 When enabled, relaunching an already running app opens a new window instead of only focusing the existing one.
 
+On macOS, additional windows opened with Cmd+N join the app's native tab group. Web-auth and `window.open` popups remain separate.
+
 This can improve popup-based authentication flows, but it cannot bypass provider policy. Some providers, especially Google, may still reject sign-in inside embedded webviews.
 
 ```shell

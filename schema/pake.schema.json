@@ -179,11 +179,6 @@
       "description": "Allow opening multiple windows in one instance.",
       "default": false
     },
-    "macTabbingId": {
-      "type": "string",
-      "description": "macOS only: shared tabbing identifier so windows can merge into native tabs.",
-      "default": ""
-    },
     "startToTray": {
       "type": "boolean",
       "description": "Start minimized to tray.",

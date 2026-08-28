@@ -46,7 +46,6 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   keepBinary: false,
   multiInstance: false,
   multiWindow: false,
-  macTabbingId: '',
   startToTray: false,
   forceInternalNavigation: false,
   internalUrlRegex: '',

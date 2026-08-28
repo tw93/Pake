@@ -38,8 +38,6 @@ pub struct WindowConfig {
     pub min_height: f64,
     #[serde(default)]
     pub ignore_certificate_errors: bool,
-    #[serde(default)]
-    pub tabbing_identifier: String,
 }
 
 fn default_zoom() -> u32 {
