@@ -591,10 +591,10 @@ function shouldBypassPakeLinkHandling(rawHref) {
 }
 
 function shouldNavigateAuthInCurrentWindow() {
-  // On WebKitGTK window.open() returns a truthy proxy even when the native
-  // side denies creating the window, so the popup fallback never fires and
-  // auth clicks die silently. Auth flows must navigate in-place everywhere.
-  return true;
+  // WKWebView can abort on auth popups, while WebKitGTK may return a truthy
+  // proxy even when the native side denies the window. Keep those platforms
+  // in-place without changing the working WebView2 popup path on Windows.
+  return /mac|linux/i.test(getDesktopPlatform());
 }
 
 function canNavigateAuthUrl(url) {

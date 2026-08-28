@@ -1,24 +1,12 @@
 {
   "bundle": {
-    "icon": [
-      "png/weekly_512.png"
-    ],
+    "icon": ["png/weekly_512.png"],
     "active": true,
     "linux": {
       "deb": {
-        "depends": [
-          "curl",
-          "wget",
-          "gstreamer1.0-plugins-good",
-          "gstreamer1.0-plugins-bad",
-          "gstreamer1.0-libav",
-          "gstreamer1.0-pipewire"
-        ]
+        "depends": ["curl", "wget"]
       }
     },
-    "targets": [
-      "deb",
-      "appimage"
-    ]
+    "targets": ["deb", "appimage"]
   }
 }

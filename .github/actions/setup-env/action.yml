@@ -51,14 +51,14 @@ runs:
     # Node.js Environment Setup
     - name: Install pnpm
       if: env.SETUP_NODE == 'true'
-      uses: pnpm/action-setup@v6.0.10
+      uses: pnpm/action-setup@v4
       with:
         version: "10.26.2"
         run_install: false
 
     - name: Setup Node.js
       if: env.SETUP_NODE == 'true'
-      uses: actions/setup-node@v7.0.0
+      uses: actions/setup-node@v4
       with:
         node-version: "22"
         cache: pnpm
@@ -117,7 +117,7 @@ runs:
 
     - name: Cache WIX Toolset
       if: env.SETUP_SYSTEM == 'true' && runner.os == 'Windows'
-      uses: actions/cache@v6.1.0
+      uses: actions/cache@v4
       id: wix-cache
       with:
         path: C:\Program Files (x86)\WiX Toolset v3.11
@@ -149,7 +149,7 @@ runs:
     # Build optimizations (caching)
     - name: Setup sccache
       if: inputs.mode == 'build'
-      uses: mozilla-actions/sccache-action@v0.0.11
+      uses: mozilla-actions/sccache-action@v0.0.9
 
     - name: Enable sccache
       if: inputs.mode == 'build'
