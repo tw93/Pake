@@ -378,6 +378,49 @@ describe("event link guard", () => {
     expect(result).toBe(window);
   });
 
+  it("navigates Linux auth URLs in the current window", () => {
+    const { openAuthNavigation, window } = loadEventHelpers({
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64)",
+    });
+    const originalWindowOpen = vi.fn(() => ({}));
+
+    const result = openAuthNavigation(
+      originalWindowOpen,
+      "https://accounts.google.com/o/oauth2/auth",
+      "_blank",
+      "width=1200,height=800",
+    );
+
+    expect(originalWindowOpen).not.toHaveBeenCalled();
+    expect(window.location.href).toBe(
+      "https://accounts.google.com/o/oauth2/auth",
+    );
+    expect(result).toBe(window);
+  });
+
+  it("keeps Windows auth URLs on the native popup path", () => {
+    const popup = {};
+    const { openAuthNavigation, window } = loadEventHelpers({
+      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    });
+    const originalWindowOpen = vi.fn(() => popup);
+
+    const result = openAuthNavigation(
+      originalWindowOpen,
+      "https://accounts.google.com/o/oauth2/auth",
+      "_blank",
+      "width=1200,height=800",
+    );
+
+    expect(originalWindowOpen).toHaveBeenCalledWith(
+      "https://accounts.google.com/o/oauth2/auth",
+      "_blank",
+      "width=1200,height=800",
+    );
+    expect(window.location.href).toBe("https://example.com/app");
+    expect(result).toBe(popup);
+  });
+
   it("keeps blank macOS auth popups on the native popup path", () => {
     const popup = {};
     const { openAuthNavigation, window } = loadEventHelpers({
