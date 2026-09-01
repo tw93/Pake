@@ -1,8 +1,8 @@
 # Pake
 
-> Pake turns any webpage or local web build into a lightweight desktop app (~5MB) for macOS, Windows, and Linux, using Tauri (Rust) and the system webview. One CLI command packages a URL, a local HTML file, or a static directory into a native installer.
+> Pake turns any webpage or local web build into a lightweight desktop app, typically under 10 MB on disk, for macOS, Windows, and Linux. It uses Tauri (Rust) and the system WebView, and one CLI command packages a URL, a local HTML file, or a static directory into a native installer.
 
-Official product page: https://yobi.tw93.fun/projects/pake
+Official product page: https://faberon.io/projects/pake
 Source code: https://github.com/tw93/Pake
 npm package: https://www.npmjs.com/package/pake-cli
 Author: Tw93, https://tw93.fun/

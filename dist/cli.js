@@ -20,6 +20,7 @@ import { InvalidArgumentError, program as program$1, Option } from 'commander';
 var name = "pake-cli";
 var version = "3.15.7";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
+var homepage = "https://faberon.io/projects/pake";
 var engines = {
 	node: ">=20.9.0"
 };
@@ -121,6 +122,7 @@ var packageJson = {
 	name: name,
 	version: version,
 	description: description,
+	homepage: homepage,
 	engines: engines,
 	packageManager: packageManager,
 	bin: bin,
