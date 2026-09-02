@@ -17,7 +17,7 @@ Use Waza `/check` for the generic review method. This adapter adds Pake-specific
 ## Pake-Specific Hard Stops
 
 - [ ] Changes under `bin/` rebuild and commit `dist/cli.js` with `pnpm run cli:build`.
-- [ ] Changes to package metadata embedded by Rollup (`package.json` name/version/repository/bin/scripts/exports) rebuild and commit `dist/cli.js`.
+- [ ] Any `package.json` change (Rollup inlines the whole manifest, dependency bumps included) rebuilds and commits `dist/cli.js`.
 - [ ] Release version bumps keep `package.json`, `src-tauri/Cargo.toml`, `src-tauri/Cargo.lock`, and `src-tauri/tauri.conf.json` in sync.
 - [ ] npm release workflow changes preserve Trusted Publishing: `.github/workflows/npm-publish.yml`, `id-token: write`, canonical `git+https://github.com/tw93/Pake.git`, and `scripts/check-release-version.mjs`.
 - [ ] Release/status changes keep npm registry, GitHub Release/assets, workflow run state, and issue closeout as separate truth surfaces.
@@ -52,4 +52,4 @@ pnpm run cli:build
 
 ## Review Output Format
 
-Follow Waza `/check`: findings first, ordered by severity, with tight file/line references. Keep summaries brief.
+Follow Waza `/check`: findings first, ordered by severity, with tight file/line references.

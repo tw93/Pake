@@ -17,7 +17,7 @@ Always use `gh` CLI and query live state before acting. Never assume state from 
 
 ## Project Facts
 
-- Repo: `tw93/Pake`. Workflows: `release.yml` (`V*` tag, builds app assets), `npm-publish.yml` (npm Trusted Publishing; also `workflow_dispatch` from `main` for npm-only hotfixes), `quality-and-test.yml` (push CI), `pake-cli.yaml` / `single-app.yaml` (public build surfaces external users trigger from forks).
+- Repo: `tw93/Pake`. Workflows: `release.yml` (`V*` tag, builds app assets), `npm-publish.yml` (npm Trusted Publishing; also `workflow_dispatch` from `main` for npm-only hotfixes), `quality-and-test.yml` (push and PR CI), `pake-cli.yaml` / `single-app.yaml` (public build surfaces external users trigger from forks).
 - Poll CI with `gh run view <run-id> --json status,conclusion`. Never pipe `gh run watch` or build output through `tail`/`head`; pipes swallow the real exit code and misreport failures as green.
 - Verify npm state with `npm view pake-cli@<version> version gitHead dist.tarball --json`; `gitHead` ties the published package to the intended commit. Check the `latest` pointer separately with `npm view pake-cli version`; it can point at a different commit than the fix under review.
 - Inline PR review comments live at `gh api repos/tw93/Pake/pulls/<n>/comments`; `gh pr view` does not show them.
