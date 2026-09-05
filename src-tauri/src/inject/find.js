@@ -199,9 +199,7 @@
       return;
     }
 
-    const style = document.createElement("style");
-    style.id = STYLE_ID;
-    style.textContent = `
+    const css = `
       #${PANEL_ID} {
         position: fixed;
         top: 14px;
@@ -312,9 +310,16 @@
       }
     `;
 
-    (document.head || document.body || document.documentElement)?.appendChild(
-      style,
-    );
+    if (typeof window.__PAKE_INJECT_STYLE__ === "function") {
+      window.__PAKE_INJECT_STYLE__(css, STYLE_ID);
+    } else {
+      const style = document.createElement("style");
+      style.id = STYLE_ID;
+      style.textContent = css;
+      (document.head || document.body || document.documentElement)?.appendChild(
+        style,
+      );
+    }
   }
 
   function createButton(label, title, onClick) {

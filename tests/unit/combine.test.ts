@@ -42,8 +42,24 @@ describe('combineFiles', () => {
     const result = await fs.readFile(out, 'utf-8');
 
     expect(() => new Function(result)).not.toThrow();
-    expect(result).toContain('document.head.appendChild');
+    expect(result).toContain('window.__PAKE_INJECT_STYLE__');
     expect(result).toContain(JSON.stringify('body { color: red; }'));
+
+    const handlers: Array<() => void> = [];
+    const injectedCss: string[] = [];
+    const runtimeWindow = {
+      addEventListener(_event: string, handler: () => void) {
+        handlers.push(handler);
+      },
+      __PAKE_INJECT_STYLE__(css: string) {
+        injectedCss.push(css);
+      },
+    };
+
+    new Function('window', 'document', result)(runtimeWindow, {});
+    handlers[0]();
+
+    expect(injectedCss).toEqual(['body { color: red; }']);
   });
 
   it('returns the input file list', async () => {
