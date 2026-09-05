@@ -135,6 +135,7 @@ function createDocument(textNodes) {
     querySelectorAll() {
       return [];
     },
+    adoptedStyleSheets: [],
   };
 
   return document;
@@ -169,6 +170,10 @@ function loadFindScript({
     path.join(process.cwd(), "src-tauri/src/inject/find.js"),
     "utf-8",
   );
+  const styleSource = fs.readFileSync(
+    path.join(process.cwd(), "src-tauri/src/inject/styles.js"),
+    "utf-8",
+  );
   const context = {
     console,
     setTimeout,
@@ -182,12 +187,18 @@ function loadFindScript({
     },
     window: {
       pakeConfig: { enable_find: enabled },
+      CSSStyleSheet: class CSSStyleSheet {
+        replaceSync(css) {
+          this.cssText = css;
+        }
+      },
     },
     document: createDocument(nodes),
   };
   context.window.NodeFilter = context.NodeFilter;
   context.window.navigator = context.navigator;
 
+  runInNewContext(styleSource, context);
   runInNewContext(source, context);
   return context;
 }
@@ -238,6 +249,14 @@ describe("Find injection", () => {
     expect(calls).toEqual(["open", "next", "previous"]);
     expect(findEvent.defaultPrevented).toBe(true);
     expect(previousEvent.propagationStopped).toBe(true);
+  });
+
+  it("uses the shared style injector for the find panel", () => {
+    const context = loadFindScript({ enabled: true });
+
+    expect(context.window.pakeFind.open().isOpen).toBe(true);
+    expect(context.document.adoptedStyleSheets).toHaveLength(1);
+    expect(context.document.head.children).toHaveLength(0);
   });
 
   it("leaves macOS Find shortcuts to the native menu", () => {

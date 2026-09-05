@@ -25,9 +25,7 @@
     let monitorId = null;
 
     if (!document.getElementById("pake-fullscreen-style")) {
-      const styleEl = document.createElement("style");
-      styleEl.id = "pake-fullscreen-style";
-      styleEl.textContent = `
+      const css = `
       body.pake-fullscreen-active {
         overflow: hidden !important;
       }
@@ -51,7 +49,14 @@
         object-fit: contain !important;
       }
     `;
-      document.head.appendChild(styleEl);
+      if (typeof window.__PAKE_INJECT_STYLE__ === "function") {
+        window.__PAKE_INJECT_STYLE__(css, "pake-fullscreen-style");
+      } else {
+        const styleEl = document.createElement("style");
+        styleEl.id = "pake-fullscreen-style";
+        styleEl.textContent = css;
+        document.head.appendChild(styleEl);
+      }
     }
 
     function startFullscreenMonitor() {

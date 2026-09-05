@@ -7,9 +7,13 @@ export default async function combineFiles(files: string[], output: string) {
         const fileContent = await fs.readFile(file, 'utf-8');
         return `window.addEventListener('DOMContentLoaded', (_event) => {
         const css = ${JSON.stringify(fileContent)};
-        const style = document.createElement('style');
-        style.textContent = css;
-        document.head.appendChild(style);
+        if (typeof window.__PAKE_INJECT_STYLE__ === 'function') {
+          window.__PAKE_INJECT_STYLE__(css);
+        } else {
+          const style = document.createElement('style');
+          style.textContent = css;
+          document.head.appendChild(style);
+        }
       });`;
       }
 
