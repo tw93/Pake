@@ -151,6 +151,47 @@ function makeClickEvent(anchor) {
 }
 
 describe("event link guard", () => {
+  it.each([undefined, "", "  ", "about:blank", "about:blank#download"])(
+    "preserves a native blank popup proxy for %s",
+    (url) => {
+      const context = loadEventHelpers({ withTauri: true });
+      const popup = { location: { href: "about:blank" } };
+      const nativeOpen = vi.fn(() => popup);
+      context.window.open = nativeOpen;
+      runDomReady(context);
+      const result = context.window.open(url, "_blank");
+      expect(result).toBe(popup);
+      expect(nativeOpen).toHaveBeenCalledWith(
+        url === undefined || !url.trim() ? "about:blank" : url,
+        "_blank",
+        undefined,
+      );
+      result.location.href = "https://cdn.example.net/attachment";
+      expect(context.window.location.href).toBe("https://example.com/app");
+      expect(
+        context.invokeCalls.filter(([cmd]) => cmd === "plugin:shell|open"),
+      ).toEqual([]);
+    },
+  );
+
+  it.each(["https://outside.example/report", "https://example.com/report"])(
+    "retains the default route for a new named context: %s",
+    (url) => {
+      const context = loadEventHelpers({ withTauri: true });
+      context.window.open = vi.fn(() => null);
+      runDomReady(context);
+      context.window.open(url, "reportWindow");
+      if (url.startsWith("https://outside.example/")) {
+        expect(context.invokeCalls).toContainEqual([
+          "plugin:shell|open",
+          { path: url },
+        ]);
+      } else {
+        expect(context.window.location.href).toBe(url);
+      }
+    },
+  );
+
   it.each([
     ["internal", "https://example.com/forced", {}],
     ["auth", "https://accounts.google.com/o/oauth2/auth", {}],

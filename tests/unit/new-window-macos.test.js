@@ -8,7 +8,9 @@ describe("macOS new-window handling (regression: #1194)", () => {
   it("creates popups via open_requested_window on every platform", () => {
     const source = fs.readFileSync(sourcePath, "utf-8");
 
-    const blockStart = source.indexOf("if window_config.new_window");
+    const blockStart = source.indexOf(
+      "let allow_new_window = window_config.new_window;",
+    );
     const blockEnd = source.indexOf(
       "// Add initialization scripts",
       blockStart,
@@ -22,6 +24,9 @@ describe("macOS new-window handling (regression: #1194)", () => {
     // and custom protocol state. NewWindowResponse::Allow creates a plain
     // WKWebView that does not have Pake's runtime state.
     expect(newWindowBlock).toContain("open_requested_window");
+    expect(newWindowBlock).toContain(
+      "!allow_new_window && !is_blank_popup_url(&target_url)",
+    );
     expect(newWindowBlock).toContain("NewWindowResponse::Create");
     expect(newWindowBlock).not.toMatch(/NewWindowResponse::Allow\b/);
     expect(newWindowBlock).not.toMatch(/#\[cfg\(target_os = "macos"\)\]/);

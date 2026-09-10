@@ -4,11 +4,11 @@
 (function () {
   if (window === window.top) return;
   const config = window.pakeConfig || {};
-  if (config.force_internal_navigation === true) return;
   const isInternalUrl = createInternalUrlMatcher(config.internal_url_regex);
   const originalOpen = window.open;
 
   function externalDestination(rawUrl, name) {
+    if (config.force_internal_navigation === true) return null;
     if (
       typeof rawUrl !== "string" ||
       !rawUrl.trim() ||
@@ -33,6 +33,7 @@
   }
 
   window.open = function (url, name, specs) {
+    url = normalizePopupUrl(url);
     // Named targets can navigate an existing frame and must retain its proxy.
     if (name && String(name).toLowerCase() !== "_blank") {
       return originalOpen.call(window, url, name, specs);

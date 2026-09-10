@@ -179,6 +179,31 @@ struct WindowBuildOptions<'a> {
     new_window_features: Option<NewWindowFeatures>,
 }
 
+fn is_blank_popup_url(url: &Url) -> bool {
+    url.scheme() == "about" && url.path() == "blank"
+}
+
+#[cfg(test)]
+mod popup_tests {
+    use super::is_blank_popup_url;
+    use tauri::Url;
+
+    #[test]
+    fn only_blank_documents_get_the_default_popup_exception() {
+        for input in ["about:blank", "about:blank#download", "about:blank?pending"] {
+            assert!(is_blank_popup_url(&Url::parse(input).unwrap()));
+        }
+        for input in [
+            "https://example.com/",
+            "about:srcdoc",
+            "about:blankness",
+            "file:///tmp/file",
+        ] {
+            assert!(!is_blank_popup_url(&Url::parse(input).unwrap()));
+        }
+    }
+}
+
 fn open_requested_window(
     app: &AppHandle,
     config: &PakeConfig,
@@ -472,11 +497,17 @@ fn build_window(
         window_builder = window_builder.disable_drag_drop_handler();
     }
 
-    if window_config.new_window {
+    {
+        let allow_new_window = window_config.new_window;
         let app_handle = app.clone();
         let popup_config = config.clone();
         let popup_tauri_config = tauri_config.clone();
         window_builder = window_builder.on_new_window(move |target_url, features| {
+            // Even without --new-window, two-stage popups need a real webview
+            // with our download delegate, never a proxy for the main window.
+            if !allow_new_window && !is_blank_popup_url(&target_url) {
+                return NewWindowResponse::Deny;
+            }
             match open_requested_window(
                 &app_handle,
                 &popup_config,

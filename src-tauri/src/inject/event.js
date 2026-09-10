@@ -859,7 +859,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Rewrite the window.open function.
   const originalWindowOpen = window.open;
   window.open = function (url, name, specs) {
+    url = normalizePopupUrl(url);
     const normalizedUrl = normalizeAnchorHref(url);
+    // A two-stage popup needs its own WindowProxy. Returning the main window
+    // makes a later popup.location assignment navigate away from the app.
+    if (/^about:blank(?:[?#]|$)/i.test(normalizedUrl)) {
+      return originalWindowOpen.call(window, url, name, specs);
+    }
     if (normalizedUrl.startsWith("#")) {
       window.location.href = new URL(normalizedUrl, window.location.href).href;
       return window;

@@ -1,4 +1,11 @@
 // Shared by the main page and the lightweight subframe bridge.
+// Tauri rejects WebKit's empty popup URL before calling our native handler.
+function normalizePopupUrl(url) {
+  return url === undefined || (typeof url === "string" && !url.trim())
+    ? "about:blank"
+    : url;
+}
+
 // This list intentionally preserves Pake's existing domain routing policy.
 const MULTI_PART_PUBLIC_SUFFIXES = [
   "co.uk",

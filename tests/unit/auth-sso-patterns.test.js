@@ -68,4 +68,37 @@ describe("auth SSO patterns", () => {
   it("treats known auth window names as popups", () => {
     expect(isAuthPopup("https://example.com/dashboard", "oauth2")).toBe(true);
   });
+
+  it.each([
+    "https://outside.example/track?next=https://service.example/login",
+    "https://outside.example/track?next=https://accounts.google.com/o/oauth2/auth",
+    "https://outside.example/article#/signin",
+    "https://outside.example/login-tips",
+    "https://outside.example/authorize-your-team",
+    "https://accounts.google.com.evil.test/article",
+    "https://notaccounts.google.com/article",
+  ])(
+    "does not infer authentication from ordinary external content: %s",
+    (url) => {
+      expect(isAuthLink(url)).toBe(false);
+      expect(isAuthPopup(url, "_blank")).toBe(false);
+    },
+  );
+
+  it.each([
+    "https://slack.com/openid/connect/authorize?client_id=123",
+    "https://identity.example/connect/authorize",
+    "https://tenant.auth0.com/u/login/identifier",
+    "https://www.amazon.com/ap/signin",
+    "https://example.com/tenant/oauth/authorize",
+    "https://example.com/login?next=/dashboard",
+    "https://example.com/signin/",
+    "https://example.com/oauth/authorize",
+    "https://example.com/api/auth/signin/google",
+    "https://accounts.google.co.uk/ServiceLogin",
+    "https://github.com/login/oauth/authorize",
+    "https://appleid.apple.com/auth/authorize",
+  ])("preserves authentication endpoints: %s", (url) => {
+    expect(isAuthLink(url)).toBe(true);
+  });
 });

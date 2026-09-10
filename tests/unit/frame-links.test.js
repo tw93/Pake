@@ -38,6 +38,22 @@ function loadFrame(config = {}) {
 }
 
 describe("subframe external links", () => {
+  it.each([false, true])(
+    "normalizes omitted and empty popups with force_internal_navigation=%s",
+    (force_internal_navigation) => {
+      const frame = loadFrame({ force_internal_navigation });
+      for (const url of [undefined, "", "  "]) {
+        expect(frame.window.open(url, "_blank")).toBe(frame.nativeWindow);
+        expect(frame.nativeOpen).toHaveBeenLastCalledWith(
+          "about:blank",
+          "_blank",
+          undefined,
+        );
+      }
+      expect(frame.messages).toEqual([]);
+    },
+  );
+
   it("injects only the shared policy and frame bridge into subframes", () => {
     const source = fs.readFileSync(
       path.join(process.cwd(), "src-tauri/src/app/window.rs"),
@@ -99,7 +115,11 @@ describe("subframe external links", () => {
   ])("preserves native semantics for %s (%s)", (url, name, config) => {
     const frame = loadFrame(config);
     expect(frame.window.open(url, name, "width=400")).toBe(frame.nativeWindow);
-    expect(frame.nativeOpen).toHaveBeenCalledWith(url, name, "width=400");
+    expect(frame.nativeOpen).toHaveBeenCalledWith(
+      url === "" ? "about:blank" : url,
+      name,
+      "width=400",
+    );
     expect(frame.messages).toEqual([]);
   });
 
