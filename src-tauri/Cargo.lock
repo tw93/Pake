@@ -2564,7 +2564,7 @@ dependencies = [
 
 [[package]]
 name = "pake"
-version = "3.16.1"
+version = "3.16.2"
 dependencies = [
  "block2",
  "dispatch",
