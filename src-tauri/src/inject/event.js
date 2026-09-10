@@ -101,7 +101,12 @@ function handleWebShortcut(event) {
 function toggleNativeFullscreen(appWindow) {
   appWindow
     .isFullscreen()
-    .then((fullscreen) => appWindow.setFullscreen(!fullscreen))
+    .then((fullscreen) => {
+      if (document.fullscreenElement && document.exitFullscreen) {
+        return document.exitFullscreen();
+      }
+      return appWindow.setFullscreen(!fullscreen);
+    })
     .catch((error) => {
       console.warn("[Pake] Failed to toggle native fullscreen:", error);
     });

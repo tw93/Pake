@@ -525,9 +525,8 @@ fn build_window(
     }
 
     // Add initialization scripts. Order matters: pakeConfig must land before
-    // any script that reads it (e.g. fullscreen polyfill checks for an opt-out
-    // flag), and toast must register `window.pakeToast` before Rust code
-    // calls show_toast().
+    // any script that reads it, and toast must register `window.pakeToast`
+    // before Rust code calls show_toast().
     window_builder = window_builder
         .initialization_script_for_all_frames(&config_script)
         .initialization_script_for_all_frames(include_str!("../inject/link_policy.js"))
@@ -544,9 +543,17 @@ fn build_window(
         window_builder = window_builder.initialization_script(include_str!("../inject/find.js"));
     }
 
+    window_builder = window_builder.initialization_script(include_str!("../inject/toast.js"));
+
+    // WebView2's native Fullscreen API already drives Tauri's window fullscreen.
+    // Keep its top-layer layout and player controls instead of overriding the API.
+    #[cfg(not(target_os = "windows"))]
+    {
+        window_builder =
+            window_builder.initialization_script(include_str!("../inject/fullscreen.js"));
+    }
+
     window_builder = window_builder
-        .initialization_script(include_str!("../inject/toast.js"))
-        .initialization_script(include_str!("../inject/fullscreen.js"))
         .initialization_script(include_str!("../inject/event.js"))
         .initialization_script(include_str!("../inject/style.js"))
         .initialization_script(include_str!("../inject/theme_refresh.js"))
