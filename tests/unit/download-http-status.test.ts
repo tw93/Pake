@@ -25,6 +25,21 @@ describe('download HTTP status handling', () => {
     expect(createIdx).toBeGreaterThan(statusIdx);
   });
 
+  it.each(['File::create(&file_path)', 'file.write_all(&chunk)'])(
+    'reports download directory failure when %s fails',
+    (operation) => {
+      const start = invokeSource.indexOf(operation);
+      const end = invokeSource.indexOf('})?;', start);
+      expect(start).toBeGreaterThan(-1);
+      expect(end).toBeGreaterThan(start);
+      const handler = invokeSource.slice(start, end);
+      expect(handler).toMatch(/\.map_err\(\|e\|\s*\{/);
+      expect(handler).toMatch(
+        /show_toast\(\s*&window,\s*&get_download_message_with_lang\(\s*MessageType::DirectoryFailure,/,
+      );
+    },
+  );
+
   it('keeps download path heuristics narrow (no SPA roots)', () => {
     const patternsBlock = eventSource.match(
       /const DOWNLOAD_PATH_PATTERNS = \[([\s\S]*?)\];/,

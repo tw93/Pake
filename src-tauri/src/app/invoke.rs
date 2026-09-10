@@ -151,16 +151,32 @@ pub async fn download_file(
                 return Err(format!("Download failed with HTTP status {}", res.status()));
             }
 
-            let mut file =
-                File::create(&file_path).map_err(|e| format!("Failed to create file: {}", e))?;
+            let mut file = File::create(&file_path).map_err(|e| {
+                show_toast(
+                    &window,
+                    &get_download_message_with_lang(
+                        MessageType::DirectoryFailure,
+                        params.language.clone(),
+                    ),
+                );
+                format!("Failed to create file: {e}")
+            })?;
 
             while let Some(chunk) = res
                 .chunk()
                 .await
                 .map_err(|e| format!("Failed to get chunk: {}", e))?
             {
-                file.write_all(&chunk)
-                    .map_err(|e| format!("Failed to write chunk: {}", e))?;
+                file.write_all(&chunk).map_err(|e| {
+                    show_toast(
+                        &window,
+                        &get_download_message_with_lang(
+                            MessageType::DirectoryFailure,
+                            params.language.clone(),
+                        ),
+                    );
+                    format!("Failed to write chunk: {e}")
+                })?;
             }
 
             show_toast(
