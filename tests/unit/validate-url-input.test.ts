@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { InvalidArgumentError } from 'commander';
-import { validateUrlInput } from '@/utils/validate';
+import { validateUrlInput, validateDownloadDirInput } from '@/utils/validate';
 
 describe('validateUrlInput', () => {
   it('prepends https:// to a bare domain', () => {
@@ -41,5 +41,46 @@ describe('validateUrlInput', () => {
 
   it('still treats bare domains without scheme as web urls', () => {
     expect(validateUrlInput('example.com')).toBe('https://example.com');
+  });
+});
+
+describe('validateDownloadDirInput', () => {
+  it('keeps defaults, absolute paths, and runtime home paths unchanged', () => {
+    for (const value of ['', process.cwd(), '~', '~/Documents/My App']) {
+      expect(validateDownloadDirInput(value)).toBe(value);
+    }
+  });
+
+  it('rejects relative, user-specific tilde, and NUL paths', () => {
+    for (const value of [
+      'downloads',
+      './downloads',
+      '~alice/downloads',
+      '   ',
+      '~/bad\0path',
+      '~//tmp',
+    ]) {
+      expect(() => validateDownloadDirInput(value)).toThrow(
+        'Invalid download directory',
+      );
+    }
+  });
+
+  it('rejects drive-relative paths on Windows', () => {
+    if (process.platform === 'win32') {
+      for (const value of [
+        'C:downloads',
+        '\\downloads',
+        '/downloads',
+        '~/C:\\other',
+        '~/C:other',
+        '~/\\other',
+      ]) {
+        expect(() => validateDownloadDirInput(value)).toThrow(
+          'Invalid download directory',
+        );
+      }
+      expect(validateDownloadDirInput('C:\\Downloads')).toBe('C:\\Downloads');
+    }
   });
 });

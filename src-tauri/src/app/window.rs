@@ -1,7 +1,7 @@
 use crate::app::config::PakeConfig;
 use crate::util::{
-    check_file_or_append, get_data_dir, get_download_message_with_lang, sanitize_download_filename,
-    show_toast, MessageType,
+    check_file_or_append, get_data_dir, get_download_dir, get_download_message_with_lang,
+    sanitize_download_filename, show_toast, MessageType,
 };
 #[cfg(target_os = "macos")]
 use dispatch::Queue;
@@ -690,7 +690,7 @@ fn build_window(
     }
 
     // Capture webview-initiated downloads (blob:, data:, Content-Disposition,
-    // etc.) and write them to the OS Downloads folder. This is essential for
+    // etc.) and write them to the configured download folder. This is essential for
     // sites with a strict Content-Security-Policy (e.g. Gemini): their
     // `connect-src` blocks Tauri's IPC origin, so downloads cannot be routed
     // through the JS bridge, and downloads triggered from a sandboxed iframe
@@ -700,7 +700,7 @@ fn build_window(
         let download_handle = app.clone();
         window_builder = window_builder.on_download(move |webview, event| match event {
             DownloadEvent::Requested { url, destination } => {
-                match download_handle.path().download_dir() {
+                match get_download_dir(&download_handle) {
                     Ok(download_dir) => {
                         let filename = destination
                             .file_name()
@@ -717,10 +717,23 @@ fn build_window(
                         let target = download_dir.join(sanitize_download_filename(&filename));
                         if let Some(path_str) = target.to_str() {
                             *destination = PathBuf::from(check_file_or_append(path_str));
+                        } else {
+                            eprintln!("[Pake] Download destination is not valid UTF-8");
+                            return false;
                         }
                     }
                     Err(error) => {
                         eprintln!("[Pake] Failed to resolve download dir: {error}");
+                        if let Some(window) = download_handle.get_webview_window(webview.label()) {
+                            show_toast(
+                                &window,
+                                &get_download_message_with_lang(
+                                    MessageType::DirectoryFailure,
+                                    None,
+                                ),
+                            );
+                        }
+                        return false;
                     }
                 }
                 true

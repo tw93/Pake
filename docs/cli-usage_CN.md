@@ -586,6 +586,16 @@ pake ./my-app/index.html --name "my-app" --use-local-file
 --inject ./tools/style.css
 ```
 
+#### [download-dir]
+
+指定打包后应用的下载目录，普通链接下载和浏览器原生下载均使用该目录，默认仍为系统 Downloads 文件夹。
+
+```bash
+pake https://example.com --name MyApp --download-dir '~/Documents/MyApp'
+```
+
+支持绝对路径（如 Windows 的 `C:\Users\Alice\Documents\MyApp`）或带引号的 `~/路径`，引号可保留 `~`，让它在应用运行时指向使用者的主目录，而非打包机器的主目录。目录不存在时会在首次下载时创建；不支持相对路径，目录不可访问时下载会失败，不会悄悄改存到其他位置。JSON 配置对应字段为 `downloadDir`，修改已有应用的下载目录需要重新打包。
+
 #### [proxy-url]
 
 为所有网络请求设置代理服务器。支持 HTTP、HTTPS 和 SOCKS5。在 Windows 和 Linux 上可用。在 macOS 上需要 macOS 14+。

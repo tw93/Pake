@@ -1,4 +1,5 @@
 use crate::app::config::PakeConfig;
+use crate::app::window::MultiWindowState;
 use std::env;
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Config, Manager, WebviewWindow};
@@ -47,6 +48,55 @@ pub fn get_data_dir(app: &AppHandle, package_name: String) -> std::io::Result<Pa
     Ok(data_dir)
 }
 
+/// Both native and IPC downloads use the trusted, packaged configuration.
+pub fn get_download_dir(app: &AppHandle) -> Result<PathBuf, String> {
+    let state = app
+        .try_state::<MultiWindowState>()
+        .ok_or("Missing app download configuration")?;
+    let configured = &state.pake_config.download_dir;
+    let directory = if configured.is_empty() {
+        app.path().download_dir().map_err(|e| e.to_string())?
+    } else {
+        let home = if configured == "~" || configured.starts_with("~/") {
+            Some(app.path().home_dir().map_err(|e| e.to_string())?)
+        } else {
+            None
+        };
+        expand_download_dir(configured, home.as_deref())?
+    };
+    std::fs::create_dir_all(&directory).map_err(|e| {
+        format!(
+            "Cannot create download directory {}: {e}",
+            directory.display()
+        )
+    })?;
+    Ok(directory)
+}
+
+fn expand_download_dir(configured: &str, home: Option<&Path>) -> Result<PathBuf, String> {
+    let directory = if configured == "~" || configured.starts_with("~/") {
+        let home = home.ok_or("Cannot resolve the app user's home directory")?;
+        let relative = Path::new(configured.strip_prefix("~/").unwrap_or(""));
+        if relative.has_root()
+            || matches!(
+                relative.components().next(),
+                Some(std::path::Component::Prefix(_))
+            )
+        {
+            return Err(
+                "Download directory after ~/ must be relative to the home directory".into(),
+            );
+        }
+        home.join(relative)
+    } else {
+        PathBuf::from(configured)
+    };
+    if !directory.is_absolute() || configured.contains('\0') {
+        return Err("Download directory must be an absolute path or ~/path".into());
+    }
+    Ok(directory)
+}
+
 pub fn show_toast(window: &WebviewWindow, message: &str) {
     let script = format!(r#"pakeToast("{message}");"#);
     if let Err(error) = window.eval(&script) {
@@ -58,6 +108,7 @@ pub enum MessageType {
     Start,
     Success,
     Failure,
+    DirectoryFailure,
 }
 
 pub fn get_download_message_with_lang(
@@ -70,8 +121,8 @@ pub fn get_download_message_with_lang(
     let default_success_message = "Download successful, saved to download directory~";
     let chinese_success_message = "下载成功，已保存到下载目录~";
 
-    let default_failure_message = "Download failed, please check your network connection~";
-    let chinese_failure_message = "下载失败，请检查你的网络连接~";
+    let default_failure_message = "Download failed~";
+    let chinese_failure_message = "下载失败~";
 
     let is_chinese = language
         .as_ref()
@@ -100,12 +151,14 @@ pub fn get_download_message_with_lang(
             MessageType::Start => chinese_start_message,
             MessageType::Success => chinese_success_message,
             MessageType::Failure => chinese_failure_message,
+            MessageType::DirectoryFailure => "无法保存到下载目录~",
         }
     } else {
         match message_type {
             MessageType::Start => default_start_message,
             MessageType::Success => default_success_message,
             MessageType::Failure => default_failure_message,
+            MessageType::DirectoryFailure => "Cannot save to the download directory~",
         }
     }
     .to_string()
@@ -202,6 +255,57 @@ mod tests {
         fs::create_dir_all(&dir).unwrap();
         dir.push(name);
         dir
+    }
+
+    #[test]
+    fn expand_download_dir_preserves_absolute_paths_without_home() {
+        let absolute = temp_path("My Downloads");
+        assert_eq!(
+            expand_download_dir(absolute.to_str().unwrap(), None).unwrap(),
+            absolute
+        );
+        fs::remove_dir_all(absolute.parent().unwrap()).unwrap();
+    }
+
+    #[test]
+    fn expand_download_dir_uses_runtime_home() {
+        let home = temp_path("home");
+        assert_eq!(
+            expand_download_dir("~/Documents/My App", Some(&home)).unwrap(),
+            home.join("Documents/My App")
+        );
+        assert_eq!(expand_download_dir("~", Some(&home)).unwrap(), home);
+        assert!(expand_download_dir("~/Downloads", None).is_err());
+        fs::remove_dir_all(home.parent().unwrap()).unwrap();
+    }
+
+    #[test]
+    fn expand_download_dir_rejects_home_replacement() {
+        let home = temp_path("home");
+        assert!(expand_download_dir("~//tmp", Some(&home)).is_err());
+        #[cfg(target_os = "windows")]
+        for value in ["~/C:\\other", "~/C:other", "~/\\other"] {
+            assert!(
+                expand_download_dir(value, Some(&home)).is_err(),
+                "accepted {value}"
+            );
+        }
+        fs::remove_dir_all(home.parent().unwrap()).unwrap();
+    }
+
+    #[test]
+    fn expand_download_dir_rejects_relative_and_nul_paths() {
+        for value in [
+            "downloads",
+            "./downloads",
+            "~alice/downloads",
+            "~/bad\0path",
+        ] {
+            assert!(
+                expand_download_dir(value, None).is_err(),
+                "accepted {value}"
+            );
+        }
     }
 
     #[test]

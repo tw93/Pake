@@ -13,7 +13,7 @@ import {
   throwIfBuildCancelled,
 } from './utils/build-workspace';
 import { isPakeError, PakeError } from './utils/error';
-import { validateUrlInput } from './utils/validate';
+import { validateUrlInput, validateDownloadDirInput } from './utils/validate';
 import {
   ERROR_EXIT_CODES,
   PakeErrorCode,
@@ -126,6 +126,8 @@ program.action(async (urlArg: string, options: PakeCliOptions) => {
         }
       }
     }
+
+    validateDownloadDirInput(options.downloadDir);
 
     if (!url) {
       if (jsonMode) {

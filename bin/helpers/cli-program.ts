@@ -69,6 +69,11 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
       },
       DEFAULT.inject,
     )
+    .option(
+      '--download-dir <path>',
+      'App download directory (absolute path or ~/path; default: system Downloads)',
+      DEFAULT.downloadDir,
+    )
     .option('--debug', 'Debug build and more output', DEFAULT.debug)
     .option(
       '--json',

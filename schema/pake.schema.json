@@ -81,6 +81,11 @@
       "description": "Debug build with more output.",
       "default": false
     },
+    "downloadDir": {
+      "type": "string",
+      "description": "App download directory: an absolute path or ~/path resolved against the app user's home at runtime. Empty uses system Downloads. Created on first download if missing.",
+      "default": ""
+    },
     "proxyUrl": {
       "type": "string",
       "description": "Proxy URL for all network requests (http://, https://, socks5://).",

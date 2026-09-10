@@ -1,4 +1,6 @@
 import fs from 'fs';
+import path from 'path';
+import { PakeError } from './error';
 import { InvalidArgumentError } from 'commander';
 import { normalizeUrl } from './url';
 
@@ -41,4 +43,29 @@ export function validateUrlInput(url: string) {
   }
 
   return url;
+}
+
+export function validateDownloadDirInput(value: string): string {
+  if (value === '') return value;
+  const homeRelative = value.startsWith('~/') ? value.slice(2) : null;
+  const invalidHomePath =
+    homeRelative !== null &&
+    (path.isAbsolute(homeRelative) ||
+      (process.platform === 'win32' &&
+        /^(?:[a-zA-Z]:|[\\/])/.test(homeRelative)));
+  if (
+    invalidHomePath ||
+    value.includes('\0') ||
+    !(path.isAbsolute(value) || value === '~' || value.startsWith('~/')) ||
+    (process.platform === 'win32' &&
+      value !== '~' &&
+      !value.startsWith('~/') &&
+      !/^(?:[a-zA-Z]:[\\/]|[\\/]{2}[^\\/]+[\\/][^\\/]+)/.test(value))
+  ) {
+    throw new PakeError('Invalid download directory.', {
+      code: 'INVALID_INPUT',
+      hint: 'Use an absolute path or a quoted ~/path; relative paths are not supported.',
+    });
+  }
+  return value;
 }

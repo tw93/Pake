@@ -83,6 +83,8 @@ pub struct PakeConfig {
     pub system_tray: FunctionON,
     pub system_tray_path: String,
     pub proxy_url: String,
+    #[serde(default)]
+    pub download_dir: String,
     /// Prompt for HTTP Basic credentials at runtime on macOS. WKWebView does
     /// not provide its own 401 login dialog, while Windows and Linux WebViews
     /// handle this flow natively.

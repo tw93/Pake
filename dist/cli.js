@@ -1211,6 +1211,7 @@ async function injectCustomCode(options, tauriConf) {
         await fsExtra.writeFile(injectFilePath, '');
     }
     tauriConf.pake.proxy_url = proxyUrl || '';
+    tauriConf.pake.download_dir = options.downloadDir || '';
     tauriConf.pake.basic_auth = basicAuth;
     tauriConf.pake.multi_instance = multiInstance;
     tauriConf.pake.multi_window = multiWindow;
@@ -3368,6 +3369,7 @@ const DEFAULT_PAKE_OPTIONS = {
     useLocalFile: false,
     systemTrayIcon: '',
     proxyUrl: '',
+    downloadDir: '',
     basicAuth: false,
     debug: false,
     json: false,
@@ -3432,6 +3434,28 @@ function validateUrlInput(url) {
     }
     return url;
 }
+function validateDownloadDirInput(value) {
+    if (value === '')
+        return value;
+    const homeRelative = value.startsWith('~/') ? value.slice(2) : null;
+    const invalidHomePath = homeRelative !== null &&
+        (path.isAbsolute(homeRelative) ||
+            (process.platform === 'win32' &&
+                /^(?:[a-zA-Z]:|[\\/])/.test(homeRelative)));
+    if (invalidHomePath ||
+        value.includes('\0') ||
+        !(path.isAbsolute(value) || value === '~' || value.startsWith('~/')) ||
+        (process.platform === 'win32' &&
+            value !== '~' &&
+            !value.startsWith('~/') &&
+            !/^(?:[a-zA-Z]:[\\/]|[\\/]{2}[^\\/]+[\\/][^\\/]+)/.test(value))) {
+        throw new PakeError('Invalid download directory.', {
+            code: 'INVALID_INPUT',
+            hint: 'Use an absolute path or a quoted ~/path; relative paths are not supported.',
+        });
+    }
+    return value;
+}
 
 function getCliProgram() {
     const { green, yellow } = chalk;
@@ -3468,6 +3492,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         // If previous values exist (from multiple --inject options), merge them
         return previous ? [...previous, ...files] : files;
     }, DEFAULT_PAKE_OPTIONS.inject)
+        .option('--download-dir <path>', 'App download directory (absolute path or ~/path; default: system Downloads)', DEFAULT_PAKE_OPTIONS.downloadDir)
         .option('--debug', 'Debug build and more output', DEFAULT_PAKE_OPTIONS.debug)
         .option('--json', 'Machine-readable output: logs to stderr, one JSON result on stdout', DEFAULT_PAKE_OPTIONS.json)
         .option('--config <path>', 'Load options from a JSON config file (fields mirror CLI options, see schema/pake.schema.json)')
@@ -3802,6 +3827,7 @@ program.action(async (urlArg, options) => {
                 }
             }
         }
+        validateDownloadDirInput(options.downloadDir);
         if (!url) {
             if (jsonMode) {
                 throw new PakeError('No URL or local path to package.', {

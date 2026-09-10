@@ -94,6 +94,12 @@ describe('loadConfigFile', () => {
     });
   });
 
+  it('accepts a runtime download directory without resolving the build user home', async () => {
+    const configPath = await writeConfig({ downloadDir: '~/Documents/My App' });
+    const loaded = await loadConfigFile(configPath, validKeys);
+    expect(loaded.options.downloadDir).toBe('~/Documents/My App');
+  });
+
   it('rejects a missing file with INVALID_INPUT', async () => {
     const missing = path.join(tmpDir, 'nope.json');
     await expect(loadConfigFile(missing, validKeys)).rejects.toMatchObject({
