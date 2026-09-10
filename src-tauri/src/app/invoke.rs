@@ -113,12 +113,11 @@ pub async fn download_file(
         &get_download_message_with_lang(MessageType::Start, params.language.clone()),
     );
 
-    let download_dir = get_download_dir(&app).map_err(|error| {
+    let download_dir = get_download_dir(&app).inspect_err(|_| {
         show_toast(
             &window,
             &get_download_message_with_lang(MessageType::DirectoryFailure, params.language.clone()),
         );
-        error
     })?;
 
     let output_path = download_dir.join(sanitize_download_filename(&params.filename));
