@@ -1301,10 +1301,11 @@ document.addEventListener("DOMContentLoaded", () => {
 (function () {
   const invoke = window.__TAURI__?.core?.invoke;
   if (!invoke) return;
+  // Every webview Pake targets has EventTarget. Bail out instead of letting a
+  // ReferenceError from the class below abort the rest of this injected script.
+  if (typeof EventTarget !== "function" || typeof Event !== "function") return;
 
   let permVal = "granted";
-  let lastNotifTime = 0;
-  let lastNotif = null;
   // Pages that drive the badge directly via setAppBadge own its lifecycle;
   // notifications-driven counts auto-clear on the next user interaction.
   let pageManagedBadge = false;
@@ -1334,14 +1335,45 @@ document.addEventListener("DOMContentLoaded", () => {
     return invoke("increment_dock_badge").catch(() => {});
   };
 
+  // Notification click routing.
+  //
+  // On macOS the native center reports which notification was clicked and calls
+  // __pakeNotificationClick with its exact id (see app/notification.rs).
+  // Elsewhere the platform tells us nothing, so we approximate: a window that
+  // regains focus shortly after a notification arrived while it was in the
+  // background is treated as a click on that notification. The approximation is
+  // deliberately narrow -- one shot, time-limited, and cancelled by any in-page
+  // interaction -- because it cannot tell a notification click apart from the
+  // user switching back by hand.
+  const FOCUS_CLICK_WINDOW_MS = 60000;
+  const MAX_TRACKED_NOTIFICATIONS = 200;
+  const liveNotifications = new Map();
+  let notifSeq = 0;
+  let pendingFocusClick = null;
+
+  const forgetNotification = (id) => {
+    liveNotifications.delete(id);
+    if (pendingFocusClick?.id === id) pendingFocusClick = null;
+  };
+
+  const clickNotification = (id) => {
+    const notif = liveNotifications.get(id);
+    if (!notif) return;
+    pendingFocusClick = null;
+    notif.dispatchEvent(new Event("click"));
+  };
+
   window.addEventListener("focus", () => {
-    if (lastNotif?.onclick && Date.now() - lastNotifTime < 5000) {
-      lastNotif.onclick(new Event("click"));
-      lastNotif = null;
-    }
+    const pending = pendingFocusClick;
+    pendingFocusClick = null;
+    if (!pending || Date.now() - pending.at > FOCUS_CLICK_WINDOW_MS) return;
+    clickNotification(pending.id);
   });
 
   const clearAutoBadge = () => {
+    // A real interaction means the user is already reading the page, so a later
+    // focus is an app switch rather than a notification click.
+    pendingFocusClick = null;
     if (pageManagedBadge || !autoBadgeActive) return;
     autoBadgeActive = false;
     clearBadge();
@@ -1349,35 +1381,102 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("click", clearAutoBadge, true);
   document.addEventListener("keydown", clearAutoBadge, true);
 
-  const wrappedNotification = function (title, options) {
-    const body = options?.body || "";
-    let icon = options?.icon || "";
-    if (icon.startsWith("/")) {
-      icon = window.location.origin + icon;
-    }
-
-    const notif = {
-      onclick: null,
-      onclose: null,
-      onshow: null,
-      onerror: null,
-      close: () => {},
-    };
-
-    lastNotifTime = Date.now();
-    lastNotif = notif;
-    invoke("send_notification", { params: { title, body, icon } })
-      .then(() => incrementAutoBadge())
-      .then(() => {
-        if (notif.onshow) notif.onshow(new Event("show"));
+  // A real EventTarget, not a bare object with an onclick slot: pages commonly
+  // register their routing with addEventListener("click"), and the click
+  // handler needs event.target to be the notification it fired for.
+  class PakeNotification extends EventTarget {
+    constructor(title, options) {
+      super();
+      const opts = options || {};
+      Object.defineProperty(this, "_handlers", {
+        value: new Map(),
+        enumerable: false,
       });
 
-    return notif;
-  };
+      this.title = title === undefined ? "" : String(title);
+      this.body = opts.body ?? "";
+      this.tag = opts.tag ?? "";
+      this.data = opts.data ?? null;
+      this.dir = opts.dir ?? "auto";
+      this.lang = opts.lang ?? "";
+      this.silent = opts.silent ?? false;
+      this.requireInteraction = opts.requireInteraction ?? false;
+      this.timestamp = opts.timestamp ?? Date.now();
 
-  wrappedNotification.requestPermission = async () => "granted";
-  Object.defineProperty(wrappedNotification, "permission", {
+      let icon = opts.icon || "";
+      if (icon.startsWith("/")) {
+        icon = window.location.origin + icon;
+      }
+      this.icon = icon;
+
+      // Must match the id charset validated in app/notification.rs.
+      const id = `pake-${++notifSeq}-${Math.random().toString(36).slice(2, 10)}`;
+      Object.defineProperty(this, "_id", { value: id, enumerable: false });
+
+      // A new notification with the same tag replaces the previous one, which
+      // must therefore stop being a click target.
+      if (this.tag) {
+        for (const [otherId, other] of liveNotifications) {
+          if (other.tag === this.tag) forgetNotification(otherId);
+        }
+      }
+      liveNotifications.set(id, this);
+      while (liveNotifications.size > MAX_TRACKED_NOTIFICATIONS) {
+        forgetNotification(liveNotifications.keys().next().value);
+      }
+
+      const raisedInBackground =
+        typeof document.hasFocus === "function" ? !document.hasFocus() : true;
+
+      invoke("send_notification", {
+        params: { id, title: this.title, body: this.body, icon: this.icon },
+      })
+        .then((outcome) => {
+          if (raisedInBackground && !outcome?.nativeClick) {
+            pendingFocusClick = { id, at: Date.now() };
+          }
+          this.dispatchEvent(new Event("show"));
+          return incrementAutoBadge();
+        })
+        .catch(() => {
+          forgetNotification(id);
+          this.dispatchEvent(new Event("error"));
+        });
+    }
+
+    close() {
+      forgetNotification(this._id);
+      this.dispatchEvent(new Event("close"));
+    }
+  }
+
+  for (const type of ["click", "close", "show", "error"]) {
+    Object.defineProperty(PakeNotification.prototype, `on${type}`, {
+      configurable: true,
+      enumerable: true,
+      get() {
+        return this._handlers.get(type) || null;
+      },
+      set(handler) {
+        const previous = this._handlers.get(type);
+        if (previous) this.removeEventListener(type, previous);
+        if (typeof handler === "function") {
+          this._handlers.set(type, handler);
+          this.addEventListener(type, handler);
+        } else {
+          this._handlers.delete(type);
+        }
+      },
+    });
+  }
+
+  PakeNotification.requestPermission = (callback) => {
+    if (typeof callback === "function") callback(permVal);
+    return Promise.resolve(permVal);
+  };
+  Object.defineProperty(PakeNotification, "permission", {
     enumerable: true,
+    configurable: true,
     get: () => permVal,
     set: (v) => {
       permVal = v;
@@ -1388,7 +1487,15 @@ document.addEventListener("DOMContentLoaded", () => {
     Object.defineProperty(window, "Notification", {
       configurable: true,
       writable: true,
-      value: wrappedNotification,
+      value: PakeNotification,
+    });
+  } catch (_) {}
+
+  try {
+    Object.defineProperty(window, "__pakeNotificationClick", {
+      configurable: true,
+      writable: true,
+      value: clickNotification,
     });
   } catch (_) {}
 
