@@ -15,7 +15,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     libdbus-1-dev libsoup-3.0-dev libjavascriptcoregtk-4.1-dev \
     libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev \
     libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev \
-    gnome-video-effects && \
+    gnome-video-effects xdg-utils && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set PKG_CONFIG_PATH for GLib detection
