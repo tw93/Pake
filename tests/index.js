@@ -10,6 +10,8 @@
 import { execSync, spawn, spawnSync } from "child_process";
 import fs from "fs";
 import path from "path";
+import os from "node:os";
+import { verifyBuildOutput, verifyMacApp } from "./helpers/build-output.js";
 import ora from "ora";
 import config, { TIMEOUTS, TEST_URLS } from "./config.js";
 
@@ -701,615 +703,100 @@ class PakeTestRunner {
   }
 
   async runRealBuildTest() {
-    // Real build test that actually creates a complete app
-    await this.runTest(
-      "Complete GitHub.com App Build",
-      async () => {
-        return new Promise((resolve, reject) => {
-          const testName = "GitHubRealBuild";
-          // Platform-specific output files
-          const outputFiles = {
-            darwin: {
-              app: path.join(config.PROJECT_ROOT, `${testName}.app`),
-              installer: path.join(config.PROJECT_ROOT, `${testName}.dmg`),
-              bundleDir: path.join(
-                config.PROJECT_ROOT,
-                "src-tauri/target/release/bundle",
-              ),
-            },
-            linux: {
-              app: path.join(
-                config.PROJECT_ROOT,
-                `src-tauri/target/release/pake`,
-              ),
-              installer: path.join(
-                config.PROJECT_ROOT,
-                "src-tauri/target/release/bundle/deb",
-              ),
-              bundleDir: path.join(
-                config.PROJECT_ROOT,
-                "src-tauri/target/release/bundle",
-              ),
-            },
-            win32: {
-              app: path.join(
-                config.PROJECT_ROOT,
-                "src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi",
-              ),
-              installer: path.join(
-                config.PROJECT_ROOT,
-                "src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi",
-              ),
-              bundleDir: path.join(
-                config.PROJECT_ROOT,
-                "src-tauri/target/x86_64-pc-windows-msvc/release/bundle",
-              ),
-              // Alternative directories to check
-              altDirs: [
-                path.join(
-                  config.PROJECT_ROOT,
-                  "src-tauri/target/release/bundle/msi",
-                ),
-                path.join(
-                  config.PROJECT_ROOT,
-                  "src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis",
-                ),
-                path.join(
-                  config.PROJECT_ROOT,
-                  "src-tauri/target/release/bundle/nsis",
-                ),
-              ],
-            },
-          };
-          const platform = process.platform;
-          const expectedFiles = outputFiles[platform] || outputFiles.darwin;
-
-          console.log(
-            `[Integration] Starting real build test for GitHub.com...`,
-          );
-          console.log(`[Note] Platform: ${platform}`);
-          console.log(`[Note] Expected app directory: ${expectedFiles.app}`);
-          console.log(
-            `[Note] Expected installer directory: ${expectedFiles.installer}`,
-          );
-          if (expectedFiles.bundleDir) {
-            console.log(`[Note] Bundle directory: ${expectedFiles.bundleDir}`);
-          }
-          if (expectedFiles.altDirs) {
-            console.log(`[Note] Alternative directories to check:`);
-            expectedFiles.altDirs.forEach((dir, i) => {
-              console.log(`     ${i + 1}. ${dir}`);
-            });
-          }
-
-          const command = `node "${config.CLI_PATH}" "https://github.com" --name "${testName}" --width 1200 --height 800 --hide-title-bar`;
-
-          const child = spawn(command, {
-            shell: true,
-            cwd: config.PROJECT_ROOT,
-            stdio: ["pipe", "pipe", "pipe"],
-            env: {
-              ...process.env,
-              PAKE_CREATE_APP: "1",
-            },
-          });
-
-          let buildStarted = false;
-          let compilationStarted = false;
-
-          // Track progress without too much noise
-          child.stdout.on("data", (data) => {
-            const output = data.toString();
-            if (output.includes("Installing package")) {
-              console.log("   [Package] Installing dependencies...");
-            }
-            if (output.includes("Building app")) {
-              buildStarted = true;
-              console.log("   [Build]  Build started...");
-            }
-            if (output.includes("Compiling")) {
-              compilationStarted = true;
-              console.log("   ⚙️  Compiling...");
-            }
-            if (output.includes("Bundling")) {
-              console.log("   [Package] Bundling...");
-            }
-            if (output.includes("Built application at:")) {
-              console.log("   [PASS] Build completed!");
-            }
-          });
-
-          let errorOutput = "";
-          child.stderr.on("data", (data) => {
-            const output = data.toString();
-            if (output.includes("Building app")) buildStarted = true;
-            if (output.includes("Compiling")) compilationStarted = true;
-            if (output.includes("Finished"))
-              console.log("   [PASS] Compilation finished!");
-
-            // Capture error output for debugging
-            if (
-              output.includes("error:") ||
-              output.includes("Error:") ||
-              output.includes("ERROR")
-            ) {
-              errorOutput += output;
-            }
-          });
-
-          // Real timeout - 8 minutes for actual build
-          const timeout = setTimeout(() => {
-            console.log(
-              "   [Check] Build timeout reached, checking for output files...",
-            );
-
-            const foundFiles = this.findBuildOutputFiles(testName, platform);
-
-            if (foundFiles.length > 0) {
-              console.log(
-                "   [Success] Build completed successfully - found output files!",
-              );
-              foundFiles.forEach((file) => {
-                console.log(`   [App] Found: ${file.path} (${file.type})`);
-              });
-              console.log("   [Success] Build artifacts tracked for cleanup");
-              child.kill("SIGTERM");
-              resolve(true);
-            } else {
-              console.log(
-                "   [Warn]  Build process completed but no output files found",
-              );
-              this.debugBuildDirectories();
-              child.kill("SIGTERM");
-              reject(
-                new Error("Real build test timeout - no output files found"),
-              );
-            }
-          }, 480000); // 8 minutes
-
-          child.on("close", (code) => {
-            clearTimeout(timeout);
-
-            console.log(
-              `   [Status] Build process finished with exit code: ${code}`,
-            );
-
-            const foundFiles = this.findBuildOutputFiles(testName, platform);
-
-            if (foundFiles.length > 0) {
-              console.log(
-                "   [Success] Real build test SUCCESS: Build file(s) generated!",
-              );
-              foundFiles.forEach((file) => {
-                console.log(`   [App] ${file.type}: ${file.path}`);
-                try {
-                  const stats = fs.statSync(file.path);
-                  const size = (stats.size / 1024 / 1024).toFixed(1);
-                  console.log(`      Size: ${size}MB`);
-                } catch (error) {
-                  console.log(`      (Could not get file size)`);
-                }
-              });
-              console.log("   [Success] Build artifacts tracked for cleanup");
-              // Track files for cleanup
-              foundFiles.forEach((f) => this.trackTempFile(f.path));
-              resolve(true);
-            } else if (code === 0 && buildStarted && compilationStarted) {
-              console.log(
-                "   [Warn] Build process completed but no output files found",
-              );
-              this.debugBuildDirectories();
-              resolve(false);
-            } else {
-              console.log(
-                `   [FAIL] Build process failed with exit code: ${code}`,
-              );
-              if (buildStarted) {
-                console.log(
-                  "   [Status] Build was started but failed during execution",
-                );
-                if (errorOutput.trim()) {
-                  console.log("   [Check] Error details:");
-                  errorOutput.split("\n").forEach((line) => {
-                    if (line.trim()) console.log(`     ${line.trim()}`);
-                  });
-                }
-                this.debugBuildDirectories();
-              } else {
-                console.log(
-                  "   [Status] Build failed before starting compilation",
-                );
-                if (errorOutput.trim()) {
-                  console.log("   [Check] Error details:");
-                  errorOutput.split("\n").forEach((line) => {
-                    if (line.trim()) console.log(`     ${line.trim()}`);
-                  });
-                }
-              }
-              reject(new Error(`Real build test failed with code ${code}`));
-            }
-          });
-
-          child.on("error", (error) => {
-            clearTimeout(timeout);
-            reject(
-              new Error(`Real build test process error: ${error.message}`),
-            );
-          });
-
-          child.stdin.end();
-        });
-      },
-      500000, // 8+ minutes timeout
-    );
+    return this.runArtifactBuildTest(false);
   }
 
   async runMultiArchBuildTest() {
-    // Multi-arch build test specifically for macOS
-    await this.runTest(
-      "Multi-Arch GitHub.com Build (Universal Binary)",
-      async () => {
-        return new Promise((resolve, reject) => {
-          const testName = "GitHubMultiArch";
-          const appFile = path.join(config.PROJECT_ROOT, `${testName}.app`);
-          const dmgFile = path.join(config.PROJECT_ROOT, `${testName}.dmg`);
-
-          console.log(
-            `[Integration] Starting multi-arch build test for GitHub.com...`,
-          );
-          console.log(`[Note] Expected output: ${appFile}`);
-          console.log(
-            `[Build]  Building Universal Binary (Intel + Apple Silicon)`,
-          );
-
-          const command = `node "${config.CLI_PATH}" "https://github.com" --name "${testName}" --width 1200 --height 800 --hide-title-bar --multi-arch`;
-
-          const child = spawn(command, {
-            shell: true,
-            cwd: config.PROJECT_ROOT,
-            stdio: ["pipe", "pipe", "pipe"],
-            env: {
-              ...process.env,
-              PAKE_CREATE_APP: "1",
-              HDIUTIL_QUIET: "1",
-              HDIUTIL_NO_AUTOOPEN: "1",
-            },
-          });
-
-          let buildStarted = false;
-          let compilationStarted = false;
-
-          // Track progress
-          child.stdout.on("data", (data) => {
-            const output = data.toString();
-            if (output.includes("Installing package")) {
-              console.log("   [Package] Installing dependencies...");
-            }
-            if (output.includes("Building app")) {
-              buildStarted = true;
-              console.log("   [Build]  Multi-arch build started...");
-            }
-            if (output.includes("Compiling")) {
-              compilationStarted = true;
-              console.log("   ⚙️  Compiling for multiple architectures...");
-            }
-            if (
-              output.includes("universal-apple-darwin") ||
-              output.includes("Universal")
-            ) {
-              console.log("   [Multi] Universal binary target detected");
-            }
-            if (output.includes("Bundling")) {
-              console.log("   [Package] Bundling universal binary...");
-            }
-            if (output.includes("Built application at:")) {
-              console.log("   [PASS] Multi-arch build completed!");
-            }
-          });
-
-          child.stderr.on("data", (data) => {
-            const output = data.toString();
-            if (output.includes("Building app")) buildStarted = true;
-            if (output.includes("Compiling")) compilationStarted = true;
-            if (output.includes("Finished"))
-              console.log("   [PASS] Multi-arch compilation finished!");
-            process.stderr.write(data);
-          });
-
-          // Multi-arch builds take longer - 20 minutes timeout
-          const timeout = setTimeout(() => {
-            console.log(
-              "   [Check] Multi-arch build timeout reached, checking for output files...",
-            );
-
-            const foundFiles = this.findBuildOutputFiles(testName, "darwin");
-
-            if (foundFiles.length > 0) {
-              console.log(
-                "   [Success] Multi-arch build completed successfully!",
-              );
-              foundFiles.forEach((file) => {
-                console.log(`   [App] Found: ${file.path} (${file.type})`);
-              });
-              console.log(
-                "   [Multi] Universal binary preserved for inspection",
-              );
-              child.kill("SIGTERM");
-              resolve(true);
-            } else {
-              console.log(
-                "   [FAIL] Multi-arch build timeout - no output files generated",
-              );
-              this.debugBuildDirectories(
-                {
-                  app: appFile,
-                  installer: dmgFile,
-                  bundleDir: path.join(
-                    config.PROJECT_ROOT,
-                    "src-tauri/target/universal-apple-darwin/release/bundle",
-                  ),
-                },
-                "darwin",
-              );
-              child.kill("SIGTERM");
-              reject(new Error("Multi-arch build test timeout"));
-            }
-          }, 1200000); // 20 minutes for multi-arch
-
-          child.on("close", (code) => {
-            clearTimeout(timeout);
-
-            console.log(
-              `   [Status] Multi-arch build process finished with exit code: ${code}`,
-            );
-
-            const foundFiles = this.findBuildOutputFiles(testName, "darwin");
-
-            if (foundFiles.length > 0) {
-              console.log(
-                "   [Success] Multi-arch build test SUCCESS: Universal binary generated!",
-              );
-              foundFiles.forEach((file) => {
-                console.log(`   [App] ${file.type}: ${file.path}`);
-              });
-              console.log(
-                "   [Multi] Universal binary preserved for inspection",
-              );
-
-              // Verify it's actually a universal binary
-              const appFile = foundFiles.find((f) => f.type.includes("App"));
-              if (appFile) {
-                try {
-                  const binaryPath = path.join(
-                    appFile.path,
-                    "Contents/MacOS/pake",
-                  );
-                  const fileOutput = execSync(`file "${binaryPath}"`, {
-                    encoding: "utf8",
-                  });
-                  if (fileOutput.includes("universal binary")) {
-                    console.log(
-                      "   [PASS] Verified: Universal binary created successfully",
-                    );
-                  } else {
-                    console.log(
-                      "   [Warn]  Note: Binary architecture:",
-                      fileOutput.trim(),
-                    );
-                  }
-                } catch (error) {
-                  console.log(
-                    "   [Warn]  Could not verify binary architecture",
-                  );
-                }
-              }
-
-              resolve(true);
-            } else if (buildStarted && compilationStarted) {
-              // If build started and compilation happened, but no output files found
-              console.log(
-                "   [Warn]  Multi-arch build process completed but no output files found",
-              );
-              this.debugBuildDirectories(
-                {
-                  app: appFile,
-                  installer: dmgFile,
-                  bundleDir: path.join(
-                    config.PROJECT_ROOT,
-                    "src-tauri/target/universal-apple-darwin/release/bundle",
-                  ),
-                },
-                "darwin",
-              );
-              resolve(false);
-            } else {
-              // Only reject if the build never started or failed early
-              reject(
-                new Error(`Multi-arch build test failed with code ${code}`),
-              );
-            }
-          });
-
-          child.on("error", (error) => {
-            clearTimeout(timeout);
-            reject(
-              new Error(
-                `Multi-arch build test process error: ${error.message}`,
-              ),
-            );
-          });
-
-          child.stdin.end();
-        });
-      },
-      1250000, // 20+ minutes timeout
-    );
+    return this.runArtifactBuildTest(true);
   }
 
-  // Simplified build output detection - if build succeeds, check for any output files
-  findBuildOutputFiles(testName, platform) {
-    const foundFiles = [];
-    console.log(`   [Check] Checking for ${platform} build outputs...`);
-
-    // Simple approach: look for common build artifacts in project root and common locations
-    const searchLocations = [
-      // Always check project root first (most builds output there)
-      config.PROJECT_ROOT,
-      // Platform-specific bundle directories
-      ...(platform === "linux"
-        ? [
-            path.join(config.PROJECT_ROOT, "src-tauri/target/release"),
-            path.join(
-              config.PROJECT_ROOT,
-              "src-tauri/target/release/bundle/deb",
-            ),
-          ]
-        : []),
-      ...(platform === "win32"
-        ? [
-            path.join(
-              config.PROJECT_ROOT,
-              "src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi",
-            ),
-            path.join(
-              config.PROJECT_ROOT,
-              "src-tauri/target/release/bundle/msi",
-            ),
-          ]
-        : []),
-      ...(platform === "darwin"
-        ? [
-            path.join(
-              config.PROJECT_ROOT,
-              "src-tauri/target/release/bundle/macos",
-            ),
-            path.join(
-              config.PROJECT_ROOT,
-              "src-tauri/target/release/bundle/dmg",
-            ),
-            path.join(
-              config.PROJECT_ROOT,
-              "src-tauri/target/universal-apple-darwin/release/bundle",
-            ),
-          ]
-        : []),
-    ];
-
-    // Define what we're looking for based on platform
-    const buildPatterns = {
-      win32: [".msi", ".exe"],
-      linux: [".deb", ".appimage"],
-      darwin: [".dmg", ".app"],
-    };
-
-    const patterns = buildPatterns[platform] || buildPatterns.darwin;
-
-    for (const location of searchLocations) {
-      if (!fs.existsSync(location)) {
-        continue;
-      }
-
-      console.log(
-        `      [Dir] Checking: ${path.relative(config.PROJECT_ROOT, location)}`,
-      );
-
-      try {
-        const items = fs.readdirSync(location);
-        const buildFiles = items.filter((item) => {
-          const itemPath = path.join(location, item);
-          const stats = fs.statSync(itemPath);
-
-          // Skip common non-build directories
-          if (
-            stats.isDirectory() &&
-            [".git", ".github", "node_modules", "src", "bin", "tests"].includes(
-              item,
-            )
-          ) {
-            return false;
-          }
-
-          // Check if it's a build artifact we care about
-          const lowerItem = item.toLowerCase();
-          return (
-            patterns.some((pattern) => lowerItem.endsWith(pattern)) ||
-            lowerItem.includes(testName.toLowerCase()) ||
-            (lowerItem.includes("github") && !item.startsWith(".")) || // Avoid .github directory
-            (platform === "linux" && item === "pake")
-          ); // Linux binary
-        });
-
-        buildFiles.forEach((file) => {
-          const fullPath = path.join(location, file);
-          const stats = fs.statSync(fullPath);
-
-          let fileType = "Build Artifact";
-          if (file.endsWith(".msi")) fileType = "MSI Installer";
-          else if (file.endsWith(".exe")) fileType = "Windows Executable";
-          else if (file.endsWith(".deb")) fileType = "DEB Package";
-          else if (file.endsWith(".appimage")) fileType = "AppImage";
-          else if (file.endsWith(".dmg")) fileType = "DMG Image";
-          else if (file.endsWith(".app"))
-            fileType = stats.isDirectory() ? "macOS App Bundle" : "macOS App";
-          else if (file === "pake") fileType = "Linux Binary";
-
-          foundFiles.push({
-            path: fullPath,
-            type: fileType,
-            size: stats.isFile() ? stats.size : 0,
-          });
-
-          const size =
-            stats.isFile() && stats.size > 0
-              ? ` (${(stats.size / 1024 / 1024).toFixed(1)}MB)`
-              : "";
-          console.log(`      [PASS] Found ${fileType}: ${file}${size}`);
-        });
-
-        // For Linux, also check inside architecture directories
-        if (platform === "linux") {
-          const archDirs = items.filter(
-            (item) => item.includes("amd64") || item.includes("x86_64"),
+  async runArtifactBuildTest(multiArch) {
+    await this.runTest(
+      multiArch
+        ? "Multi-Arch GitHub.com Build (Universal Binary)"
+        : "Native GitHub.com Build",
+      async () => {
+        const directory = fs.mkdtempSync(
+          path.join(os.tmpdir(), "pake-universal-test-"),
+        );
+        this.trackTempDir(directory);
+        const extension =
+          process.platform === "darwin"
+            ? "app"
+            : process.platform === "win32"
+              ? "msi"
+              : "deb";
+        const appName =
+          process.platform === "linux" ? "githubmultiarch" : "GitHubMultiArch";
+        const app = path.join(directory, `${appName}.${extension}`);
+        return new Promise((resolve, reject) => {
+          const child = spawn(
+            process.execPath,
+            [
+              config.CLI_PATH,
+              "https://github.com",
+              "--name",
+              appName,
+              "--width",
+              "1200",
+              "--height",
+              "800",
+              "--hide-title-bar",
+              ...(multiArch ? ["--multi-arch"] : []),
+              "--targets",
+              process.platform === "win32" ? "x64" : extension,
+              "--json",
+              "--icon",
+              path.join(config.PROJECT_ROOT, "src-tauri/icons/icon.png"),
+            ],
+            {
+              cwd: directory,
+              stdio: ["ignore", "pipe", "pipe"],
+              env: {
+                ...process.env,
+                PAKE_CREATE_APP: "1",
+                HDIUTIL_QUIET: "1",
+                HDIUTIL_NO_AUTOOPEN: "1",
+              },
+            },
           );
-
-          for (const archDir of archDirs) {
-            const archPath = path.join(location, archDir);
-            if (fs.statSync(archPath).isDirectory()) {
-              console.log(`      [Check] Checking arch directory: ${archDir}`);
-              try {
-                const archFiles = fs.readdirSync(archPath);
-                archFiles
-                  .filter((f) => f.endsWith(".deb"))
-                  .forEach((debFile) => {
-                    const debPath = path.join(archPath, debFile);
-                    const debStats = fs.statSync(debPath);
-                    foundFiles.push({
-                      path: debPath,
-                      type: "DEB Package",
-                      size: debStats.size,
-                    });
-                    const size = `(${(debStats.size / 1024 / 1024).toFixed(1)}MB)`;
-                    console.log(
-                      `      [PASS] Found DEB Package: ${debFile} ${size}`,
-                    );
-                  });
-              } catch (error) {
-                console.log(
-                  `      [Warn]  Could not check ${archDir}: ${error.message}`,
+          let stdout = "";
+          child.stdout.on("data", (data) => {
+            stdout += data.toString();
+          });
+          child.stderr.on("data", (data) => process.stderr.write(data));
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            child.kill("SIGTERM");
+          }, 1200000);
+          child.on("error", (error) => {
+            clearTimeout(timeout);
+            reject(error);
+          });
+          child.on("close", (code) => {
+            clearTimeout(timeout);
+            try {
+              if (timedOut) throw new Error("Native build timed out");
+              verifyBuildOutput(code, stdout, app);
+              if (process.platform === "darwin") {
+                verifyMacApp(
+                  app,
+                  multiArch
+                    ? ["x86_64", "arm64"]
+                    : [process.arch === "arm64" ? "arm64" : "x86_64"],
                 );
               }
+              console.log("Verified the current build output.");
+              resolve(true);
+            } catch (error) {
+              reject(error);
             }
-          }
-        }
-      } catch (error) {
-        console.log(
-          `      [Warn]  Could not read ${location}: ${error.message}`,
-        );
-      }
-    }
-
-    console.log(`   [Status] Found ${foundFiles.length} build artifact(s)`);
-    return foundFiles;
+          });
+        });
+      },
+      1250000,
+    );
   }
 
   // Debug function to show directory structure
