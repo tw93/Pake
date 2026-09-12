@@ -108,7 +108,19 @@ try {
         timeout: 30_000,
       },
     );
-    if (signal) {
+    if (signal === "WAIT") {
+      running.catch(() => {});
+      let waiting = false;
+      running.child.stderr.on("data", (data) => {
+        if (data.toString().includes("Waiting for another Pake build"))
+          waiting = true;
+      });
+      const deadline = Date.now() + 10000;
+      while (!waiting && Date.now() < deadline)
+        await new Promise((resolve) => setTimeout(resolve, 25));
+      assert.ok(waiting, "CLI did not reach cache wait");
+      running.child.kill("SIGINT");
+    } else if (signal) {
       running.catch(() => {});
       const ready = path.join(root, name + "-ready.json");
       const started = Date.now();
@@ -135,6 +147,22 @@ try {
       running.child.kill(signal);
     }
     return running;
+  }
+  await fs.mkdir(cache, { recursive: true });
+  const ownedLock = path.join(cache, ".pake-build.lock");
+  await fs.writeFile(ownedLock, String(process.pid));
+  try {
+    await assert.rejects(build("Waiting", "WAIT"), (error) => {
+      assert.equal(JSON.parse(error.stdout).error.code, "BUILD_FAILED");
+      return true;
+    });
+    assert.equal(
+      await fs.readFile(ownedLock, "utf8"),
+      String(process.pid),
+      "A cancelled waiter must not remove the owner's lock",
+    );
+  } finally {
+    await fs.unlink(ownedLock);
   }
   const outcomes = await Promise.all([build("Alpha"), build("Beta")]);
   for (const [index, name] of ["Alpha", "Beta"].entries()) {

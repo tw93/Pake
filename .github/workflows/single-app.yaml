@@ -124,11 +124,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: ${{ matrix.rust }}
-
       - name: Setup Node.js Environment
         uses: ./.github/actions/setup-env
         with:
@@ -221,7 +216,7 @@ jobs:
           ARGS+=("--width" "${{ inputs.width }}")
           ARGS+=("--height" "${{ inputs.height }}")
 
-          # Build once with multiple targets (faster than separate builds)
+          # Compile once, then bundle each requested format independently.
           node dist/cli.js "${ARGS[@]}" --targets deb,appimage
 
           mkdir -p output/linux

@@ -1,7 +1,11 @@
 import fs from 'fs-extra';
 import path from 'path';
 import os from 'os';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+vi.mock('@/utils/dir', () => ({
+  packageDirectory: process.cwd(),
+  setBuildDirectory: vi.fn(),
+}));
 import {
   createBuildWorkspace,
   acquireBuildCache,
@@ -192,4 +196,36 @@ describe('build workspace', () => {
     ]);
     expect(await fs.readFile(lock, 'utf8')).toBe(owner);
   });
+});
+
+it('prepares private inputs without taking a busy compilation cache and leaves its owner intact', async () => {
+  const { enterBuildWorkspace } = await import('@/utils/build-workspace');
+  const source = await fixture();
+  const target = path.join(source, 'cache');
+  const original = process.env.CARGO_TARGET_DIR;
+  process.env.CARGO_TARGET_DIR = target;
+  const release = await acquireBuildCache(target);
+  const pending = enterBuildWorkspace();
+  let timer: ReturnType<typeof setTimeout>;
+  try {
+    const workspace = await Promise.race([
+      pending,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error('Preparation blocked by compilation lock')),
+          2000,
+        );
+      }),
+    ]);
+    await workspace();
+    expect(
+      await fs.readFile(path.join(target, '.pake-build.lock'), 'utf8'),
+    ).toBe(String(process.pid));
+  } finally {
+    clearTimeout(timer!);
+    await release();
+    await pending.then((workspace) => workspace());
+    if (original === undefined) delete process.env.CARGO_TARGET_DIR;
+    else process.env.CARGO_TARGET_DIR = original;
+  }
 });

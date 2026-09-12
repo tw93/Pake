@@ -245,11 +245,19 @@ export default abstract class BaseBuilder {
   }
 
   async buildAndCopy(url: string, target: string, logSuccess = true) {
-    const { name = 'pake-app' } = this.options;
+    await this.prepareBuild(url);
+    await this.runBuildCommand(
+      this.getBuildCommand(await detectPackageManager()),
+      target,
+    );
+    await this.copyBuildArtifacts(target, logSuccess);
+  }
+
+  protected async prepareBuild(url: string) {
     await mergeConfig(url, this.options, structuredClone(tauriConfig));
+  }
 
-    const packageManager = await detectPackageManager();
-
+  protected async runBuildCommand(buildCommand: ShellCommand, target: string) {
     // Build app
     const buildSpinner = getSpinner('Building app...');
     buildSpinner.stop();
@@ -277,7 +285,6 @@ export default abstract class BaseBuilder {
       );
     }
 
-    const buildCommand = this.getBuildCommand(packageManager);
     const buildTimeout = getBuildTimeout();
 
     try {
@@ -307,7 +314,10 @@ export default abstract class BaseBuilder {
         throw retryError;
       }
     }
+  }
 
+  protected async copyBuildArtifacts(target: string, logSuccess = true) {
+    const { name = 'pake-app' } = this.options;
     // With --no-bundle there is no installer to copy; surface the raw
     // executable the build produced instead.
     if (this.options.bundle === false) {

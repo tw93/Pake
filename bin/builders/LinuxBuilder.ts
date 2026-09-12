@@ -12,11 +12,13 @@ import {
   needsTemporaryDebForZst,
 } from '@/utils/targets';
 import logger from '@/options/logger';
+import { detectPackageManager } from './env';
 
 export default class LinuxBuilder extends BaseBuilder {
   private buildFormat: string;
   private buildArch: string;
   private currentBuildType: string = '';
+  private compiled = false;
 
   constructor(options: PakeAppOptions) {
     super(options);
@@ -61,6 +63,8 @@ export default class LinuxBuilder extends BaseBuilder {
   }
 
   async build(url: string) {
+    this.compiled = false;
+    this.currentBuildType = '';
     // --no-bundle: build the executable once with no per-format packaging loop.
     if (this.options.bundle === false) {
       await this.buildAndCopy(url, 'deb');
@@ -74,6 +78,14 @@ export default class LinuxBuilder extends BaseBuilder {
       );
     }
     const useTemporaryDebForZst = needsTemporaryDebForZst(targets);
+
+    if (targets.length > 1) {
+      await this.prepareBuild(url);
+      const command = this.getBuildCommand(await detectPackageManager());
+      command.args.push('--no-bundle');
+      await this.runBuildCommand(command, 'compile');
+      this.compiled = true;
+    }
 
     // With a single explicit target, fail fast. With multiple targets (the
     // distro-aware default, or an explicit comma list) keep building the rest
@@ -270,7 +282,31 @@ post_remove() {
   // Override buildAndCopy to ensure currentBuildType is synced if called directly, though the loop above handles it most of the time.
   async buildAndCopy(url: string, target: string, logSuccess = true) {
     this.currentBuildType = target;
-    await super.buildAndCopy(url, target, logSuccess);
+    if (!this.compiled) {
+      await super.buildAndCopy(url, target, logSuccess);
+      return;
+    }
+    const packageManager = await detectPackageManager();
+    const args = ['run', 'tauri'];
+    if (packageManager === 'npm') args.push('--');
+    args.push(
+      'bundle',
+      '--config',
+      path.join('src-tauri', '.pake', 'tauri.conf.json'),
+    );
+    args.push(
+      '--bundles',
+      target,
+      '--features',
+      this.getBuildFeatures().join(','),
+    );
+    if (this.options.debug) args.push('--debug');
+    if (this.options.debug || target === 'appimage' || process.env.PAKE_VERBOSE)
+      args.push('--verbose');
+    if (this.buildArch === 'arm64')
+      args.push('--target', this.getTauriTarget('arm64', 'linux')!);
+    await this.runBuildCommand({ executable: packageManager, args }, target);
+    await this.copyBuildArtifacts(target, logSuccess);
   }
 
   protected getBuildCommand(packageManager: string = 'pnpm'): ShellCommand {

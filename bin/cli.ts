@@ -150,7 +150,8 @@ program.action(async (urlArg: string, options: PakeCliOptions) => {
 
     endCancellation = beginBuildCancellation();
     phase = 'prepare';
-    leaveWorkspace = await enterBuildWorkspace();
+    const workspace = await enterBuildWorkspace();
+    leaveWorkspace = workspace;
     phase = 'input';
     const appOptions = await handleInputOptions(options, url);
     throwIfBuildCancelled();
@@ -161,6 +162,8 @@ program.action(async (urlArg: string, options: PakeCliOptions) => {
     await builder.prepare();
     throwIfBuildCancelled();
     phase = 'build';
+    await workspace.lockCache();
+    throwIfBuildCancelled();
     await builder.build(url);
     throwIfBuildCancelled();
 

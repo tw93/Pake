@@ -19,7 +19,7 @@ import * as psl from 'psl';
 import { InvalidArgumentError, program as program$1, Option } from 'commander';
 
 var name = "pake-cli";
-var version = "3.16.2";
+var version = "3.16.3";
 var description = "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。";
 var engines = {
 	node: ">=20.9.0"
@@ -538,15 +538,8 @@ async function acquireBuildCache(targetDirectory) {
 async function enterBuildWorkspace() {
     const previousTarget = process.env.CARGO_TARGET_DIR;
     const targetDirectory = path.resolve(packageDirectory, previousTarget || 'src-tauri/target');
-    const release = await acquireBuildCache(targetDirectory);
-    let directory;
-    try {
-        directory = await createBuildWorkspace(packageDirectory);
-    }
-    catch (error) {
-        await release();
-        throw error;
-    }
+    const directory = await createBuildWorkspace(packageDirectory);
+    let release;
     setBuildDirectory(directory);
     process.env.CARGO_TARGET_DIR = targetDirectory;
     const leave = async () => {
@@ -567,7 +560,7 @@ async function enterBuildWorkspace() {
         }
         finally {
             try {
-                await release();
+                await release?.();
             }
             catch (error) {
                 logger.warn(`Could not release the compilation cache lock: ${String(error)}`);
@@ -578,7 +571,11 @@ async function enterBuildWorkspace() {
         await leave();
         throwIfBuildCancelled();
     }
-    return leave;
+    return Object.assign(leave, {
+        async lockCache() {
+            release = await acquireBuildCache(targetDirectory);
+        },
+    });
 }
 
 async function terminateBuildTree(pid) {
@@ -1663,9 +1660,14 @@ class BaseBuilder {
         await shellExec({ executable: packageManager, args });
     }
     async buildAndCopy(url, target, logSuccess = true) {
-        const { name = 'pake-app' } = this.options;
+        await this.prepareBuild(url);
+        await this.runBuildCommand(this.getBuildCommand(await detectPackageManager()), target);
+        await this.copyBuildArtifacts(target, logSuccess);
+    }
+    async prepareBuild(url) {
         await mergeConfig(url, this.options, structuredClone(tauriConfig));
-        const packageManager = await detectPackageManager();
+    }
+    async runBuildCommand(buildCommand, target) {
         // Build app
         const buildSpinner = getSpinner('Building app...');
         buildSpinner.stop();
@@ -1684,7 +1686,6 @@ class BaseBuilder {
         if (isLinuxAppImage && !buildEnv.NO_STRIP && this.options.debug) {
             logger.warn('⚠ AppImage strip step can fail on glibc 2.38+; Pake will auto-retry with NO_STRIP=1.');
         }
-        const buildCommand = this.getBuildCommand(packageManager);
         const buildTimeout = getBuildTimeout();
         try {
             await shellExec(buildCommand, buildTimeout, resolveExecEnv());
@@ -1711,6 +1712,9 @@ class BaseBuilder {
                 throw retryError;
             }
         }
+    }
+    async copyBuildArtifacts(target, logSuccess = true) {
+        const { name = 'pake-app' } = this.options;
         // With --no-bundle there is no installer to copy; surface the raw
         // executable the build produced instead.
         if (this.options.bundle === false) {
@@ -2083,6 +2087,7 @@ class LinuxBuilder extends BaseBuilder {
     constructor(options) {
         super(options);
         this.currentBuildType = '';
+        this.compiled = false;
         const target = options.targets || 'deb';
         if (target.includes('-arm64')) {
             this.buildFormat = target.replace('-arm64', '');
@@ -2118,6 +2123,8 @@ class LinuxBuilder extends BaseBuilder {
         return `${name}_${version}_${arch}`;
     }
     async build(url) {
+        this.compiled = false;
+        this.currentBuildType = '';
         // --no-bundle: build the executable once with no per-format packaging loop.
         if (this.options.bundle === false) {
             await this.buildAndCopy(url, 'deb');
@@ -2128,6 +2135,13 @@ class LinuxBuilder extends BaseBuilder {
             throw new Error(`No valid Linux target in "${this.options.targets}". Valid targets: ${LINUX_TARGET_TYPES.join(', ')}.`);
         }
         const useTemporaryDebForZst = needsTemporaryDebForZst(targets);
+        if (targets.length > 1) {
+            await this.prepareBuild(url);
+            const command = this.getBuildCommand(await detectPackageManager());
+            command.args.push('--no-bundle');
+            await this.runBuildCommand(command, 'compile');
+            this.compiled = true;
+        }
         // With a single explicit target, fail fast. With multiple targets (the
         // distro-aware default, or an explicit comma list) keep building the rest
         // when one fails, so a usable installer is still produced, e.g. AppImage
@@ -2293,7 +2307,24 @@ post_remove() {
     // Override buildAndCopy to ensure currentBuildType is synced if called directly, though the loop above handles it most of the time.
     async buildAndCopy(url, target, logSuccess = true) {
         this.currentBuildType = target;
-        await super.buildAndCopy(url, target, logSuccess);
+        if (!this.compiled) {
+            await super.buildAndCopy(url, target, logSuccess);
+            return;
+        }
+        const packageManager = await detectPackageManager();
+        const args = ['run', 'tauri'];
+        if (packageManager === 'npm')
+            args.push('--');
+        args.push('bundle', '--config', path.join('src-tauri', '.pake', 'tauri.conf.json'));
+        args.push('--bundles', target, '--features', this.getBuildFeatures().join(','));
+        if (this.options.debug)
+            args.push('--debug');
+        if (this.options.debug || target === 'appimage' || process.env.PAKE_VERBOSE)
+            args.push('--verbose');
+        if (this.buildArch === 'arm64')
+            args.push('--target', this.getTauriTarget('arm64', 'linux'));
+        await this.runBuildCommand({ executable: packageManager, args }, target);
+        await this.copyBuildArtifacts(target, logSuccess);
     }
     getBuildCommand(packageManager = 'pnpm') {
         const configPath = path.join('src-tauri', '.pake', 'tauri.conf.json');
@@ -3847,7 +3878,8 @@ program.action(async (urlArg, options) => {
         }
         endCancellation = beginBuildCancellation();
         phase = 'prepare';
-        leaveWorkspace = await enterBuildWorkspace();
+        const workspace = await enterBuildWorkspace();
+        leaveWorkspace = workspace;
         phase = 'input';
         const appOptions = await handleOptions(options, url);
         throwIfBuildCancelled();
@@ -3857,6 +3889,8 @@ program.action(async (urlArg, options) => {
         await builder.prepare();
         throwIfBuildCancelled();
         phase = 'build';
+        await workspace.lockCache();
+        throwIfBuildCancelled();
         await builder.build(url);
         throwIfBuildCancelled();
         await leaveWorkspace();

@@ -153,20 +153,14 @@ export async function acquireBuildCache(
   }
 }
 
-export async function enterBuildWorkspace(): Promise<() => Promise<void>> {
+export async function enterBuildWorkspace() {
   const previousTarget = process.env.CARGO_TARGET_DIR;
   const targetDirectory = path.resolve(
     packageDirectory,
     previousTarget || 'src-tauri/target',
   );
-  const release = await acquireBuildCache(targetDirectory);
-  let directory: string;
-  try {
-    directory = await createBuildWorkspace(packageDirectory);
-  } catch (error) {
-    await release();
-    throw error;
-  }
+  const directory = await createBuildWorkspace(packageDirectory);
+  let release: (() => Promise<void>) | undefined;
   setBuildDirectory(directory);
   process.env.CARGO_TARGET_DIR = targetDirectory;
   const leave = async () => {
@@ -187,7 +181,7 @@ export async function enterBuildWorkspace(): Promise<() => Promise<void>> {
       );
     } finally {
       try {
-        await release();
+        await release?.();
       } catch (error) {
         logger.warn(
           `Could not release the compilation cache lock: ${String(error)}`,
@@ -199,5 +193,9 @@ export async function enterBuildWorkspace(): Promise<() => Promise<void>> {
     await leave();
     throwIfBuildCancelled();
   }
-  return leave;
+  return Object.assign(leave, {
+    async lockCache() {
+      release = await acquireBuildCache(targetDirectory);
+    },
+  });
 }

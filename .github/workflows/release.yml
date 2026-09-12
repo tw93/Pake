@@ -130,7 +130,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/V') || github.ref == 'refs/heads/main' }}
             type=ref,event=tag
             type=sha
 
