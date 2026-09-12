@@ -5,7 +5,8 @@ vi.mock('@/utils/dir', () => ({
   tauriConfigDirectory: path.join(process.cwd(), 'src-tauri', '.pake'),
 }));
 vi.mock('@/utils/shell', () => ({ shellExec: vi.fn() }));
-vi.mock('@/utils/platform', () => ({
+vi.mock('@/utils/platform', async (original) => ({
+  ...(await original<object>()),
   IS_MAC: false,
   IS_WIN: false,
   IS_LINUX: true,
