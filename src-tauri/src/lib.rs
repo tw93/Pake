@@ -32,8 +32,8 @@ use app::{
     },
     setup::{set_global_shortcut, set_system_tray},
     window::{
-        open_additional_window_safe, reapply_window_icon, reveal_built_window, set_window,
-        MultiWindowState,
+        open_additional_window_safe, reapply_window_icon, reveal_built_window, save_last_url,
+        set_window, MultiWindowState,
     },
 };
 use util::get_pake_config;
@@ -201,6 +201,8 @@ pub fn run_app() {
 
     let show_system_tray = pake_config.show_system_tray();
     let hide_on_close = pake_config.windows[0].hide_on_close;
+    let remember_url =
+        pake_config.windows[0].url_type == "web" && !pake_config.windows[0].incognito;
     let activation_shortcut = pake_config.windows[0].activation_shortcut.clone();
     let init_fullscreen = pake_config.windows[0].fullscreen;
     let start_to_tray = pake_config.windows[0].start_to_tray && show_system_tray; // Only valid when tray is enabled
@@ -357,6 +359,9 @@ pub fn run_app() {
         })
         .on_window_event(move |_window, _event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = _event {
+                if remember_url && _window.label() == "pake" {
+                    save_last_url(_window.app_handle());
+                }
                 if hide_on_close && _window.label() == "pake" {
                     // User dismissed the window; do not let startup reveal reopen it.
                     cancel_startup_reveal(&close_revealed);
@@ -395,6 +400,9 @@ pub fn run_app() {
             std::process::exit(1);
         })
         .run(move |_app, _event| {
+            if remember_url && matches!(&_event, tauri::RunEvent::Exit) {
+                save_last_url(_app);
+            }
             // Handle macOS dock icon click to reopen hidden window
             #[cfg(target_os = "macos")]
             if let tauri::RunEvent::Reopen {

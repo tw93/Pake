@@ -48,6 +48,26 @@ pub fn get_data_dir(app: &AppHandle, package_name: String) -> std::io::Result<Pa
     Ok(data_dir)
 }
 
+pub fn read_last_url(path: &Path) -> std::io::Result<Option<tauri::Url>> {
+    match std::fs::read_to_string(path) {
+        Ok(value) => Ok(tauri::Url::parse(&value)
+            .ok()
+            .filter(|url| matches!(url.scheme(), "http" | "https"))),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(None),
+        Err(error) => Err(error),
+    }
+}
+
+pub fn write_last_url(path: &Path, url: &tauri::Url) -> std::io::Result<()> {
+    if matches!(url.scheme(), "http" | "https") {
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent)?;
+        }
+        std::fs::write(path, url.as_str())?;
+    }
+    Ok(())
+}
+
 /// Both native and IPC downloads use the trusted, packaged configuration.
 pub fn get_download_dir(app: &AppHandle) -> Result<PathBuf, String> {
     let state = app
@@ -255,6 +275,25 @@ mod tests {
         fs::create_dir_all(&dir).unwrap();
         dir.push(name);
         dir
+    }
+
+    #[test]
+    fn last_url_round_trip_preserves_full_address() {
+        let path = temp_path("state/last-url.txt");
+        assert_eq!(read_last_url(&path).unwrap(), None);
+        for address in [
+            "https://acme.example/projects/42?view=board#activity",
+            "https://login.example/callback?code=example#result",
+        ] {
+            let url = tauri::Url::parse(address).unwrap();
+            write_last_url(&path, &url).unwrap();
+            assert_eq!(read_last_url(&path).unwrap(), Some(url));
+        }
+        write_last_url(&path, &tauri::Url::parse("about:blank").unwrap()).unwrap();
+        assert!(read_last_url(&path).unwrap().is_some());
+        std::fs::write(&path, "invalid URL").unwrap();
+        assert_eq!(read_last_url(&path).unwrap(), None);
+        fs::remove_dir_all(path.parent().unwrap().parent().unwrap()).unwrap();
     }
 
     #[test]
