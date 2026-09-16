@@ -192,7 +192,14 @@ pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/week
 
 First-time packaging requires environment setup and may be slower, subsequent builds are fast. For complete parameter documentation, see [CLI Usage Guide](docs/cli-usage.md). Don't want to use CLI? Try [GitHub Actions Online Building](docs/github-actions-usage.md).
 
-Using Pake from a script or AI agent? Pass `--json` for machine-readable results, describe apps declaratively with `--config app.json` ([schema](schema/pake.schema.json)), and package local build output directly with `pake ./dist --name MyTool`. See [llms.txt](llms.txt) for the full agent contract. Claude Code users can install the official skill with `/plugin marketplace add tw93/Pake` and `/plugin install pake@pake`.
+Using Pake from a script or AI agent? Pass `--json` for machine-readable results, describe apps declaratively with `--config app.json` ([schema](schema/pake.schema.json)), and package local build output directly with `pake ./dist --name MyTool`. See [llms.txt](llms.txt) for the full agent contract.
+
+Install the official skill as a plugin:
+
+- **Claude Code**: run `/plugin marketplace add tw93/Pake`, then `/plugin install pake@pake`.
+- **Codex**: run `codex plugin marketplace add tw93/Pake`, then `codex plugin add pake@pake` in your terminal. Start a new Codex session after installation.
+
+Both plugins share the same [Pake skill](plugins/pake/skills/pake/SKILL.md). The Codex package follows the [official plugin documentation](https://developers.openai.com/plugins/build/plugins).
 
 Copy this to your AI agent to get started:
 
