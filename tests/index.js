@@ -263,6 +263,25 @@ class PakeTestRunner {
       );
     });
 
+    // Rejected option values follow the same invalid-input contract.
+    await this.runTest("Option Value Validation", () =>
+      [
+        ["--zoom", "99.5"],
+        ["--hide-on-close", "maybe"],
+      ].every(([flag, value]) => {
+        const result = spawnSync(
+          process.execPath,
+          [config.CLI_PATH, "https://example.com", flag, value, "--json"],
+          { encoding: "utf8", timeout: TIMEOUTS.QUICK },
+        );
+        return (
+          !result.error &&
+          result.status === 2 &&
+          JSON.parse(result.stdout).error?.code === "INVALID_INPUT"
+        );
+      }),
+    );
+
     // Number validation test
     await this.runTest("Number Validation", () => {
       try {
