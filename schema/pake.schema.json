@@ -215,7 +215,7 @@
       "default": "en-US"
     },
     "zoom": {
-      "type": "number",
+      "type": "integer",
       "description": "Initial page zoom level (50-200).",
       "default": 100,
       "minimum": 50,
