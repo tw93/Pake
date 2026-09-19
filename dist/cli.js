@@ -3668,12 +3668,13 @@ const REJECTED_KEYS = new Set(['config', 'json', 'version']);
 const EXTRA_STRING_KEYS = new Set(['name', 'title', 'identifier']);
 // Numeric fields share the CLI flag ranges (see cli-program.ts validators),
 // so a config file cannot smuggle a value the same flag would reject.
+// Like --zoom, zoom must be an integer: pake.json stores it as a Rust u32.
 const NUMBER_RANGES = {
     width: { min: 0 },
     height: { min: 0 },
     minWidth: { min: 0 },
     minHeight: { min: 0 },
-    zoom: { min: 50, max: 200 },
+    zoom: { min: 50, max: 200, integer: true },
 };
 function expectedTypeFor(key) {
     if (key === 'inject')
@@ -3756,11 +3757,14 @@ async function loadConfigFile(configPath, validKeys) {
             const range = NUMBER_RANGES[key];
             const min = range?.min ?? 0;
             const max = range?.max;
+            const integer = range?.integer === true;
             if (!Number.isFinite(value) ||
+                (integer && !Number.isInteger(value)) ||
                 value < min ||
                 (max !== undefined && value > max)) {
                 const bounds = max !== undefined ? `${min}-${max}` : `>= ${min}`;
-                throw new PakeError(`Config field "${key}" must be a finite number (${bounds}).`, {
+                const kind = integer ? 'an integer' : 'a finite number';
+                throw new PakeError(`Config field "${key}" must be ${kind} (${bounds}).`, {
                     code: 'INVALID_INPUT',
                     hint: 'See schema/pake.schema.json for field ranges.',
                 });
