@@ -1,3 +1,4 @@
+import { InvalidArgumentError } from 'commander';
 import { describe, expect, it } from 'vitest';
 import { getCliProgram } from '../../bin/helpers/cli-program.js';
 import { validateNumberInput } from '../../bin/utils/validate.js';
@@ -115,6 +116,21 @@ describe('CLI options', () => {
     expect(() => option?.parseArg?.('99.5', undefined)).toThrow(
       '--zoom must be an integer between 50 and 200',
     );
+  });
+
+  it('reports rejected zoom and hide-on-close values as invalid arguments', () => {
+    // Commander only treats InvalidArgumentError as a parse error, which
+    // bin/cli.ts reports as INVALID_INPUT (exit 2, JSON result with --json).
+    for (const [flag, value] of [
+      ['--zoom', '99.5'],
+      ['--hide-on-close', 'maybe'],
+    ]) {
+      const option = program.options.find((item) => item.long === flag);
+      expect(option).toBeDefined();
+      expect(() => option?.parseArg?.(value, undefined)).toThrow(
+        InvalidArgumentError,
+      );
+    }
   });
 
   it('rejects non-finite numeric option values', () => {
