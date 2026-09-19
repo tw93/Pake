@@ -12,6 +12,8 @@
     "developerName": "tw93",
     "category": "Productivity",
     "capabilities": ["Read", "Write"],
-    "defaultPrompt": ["Use Pake to package a website or local web build as a desktop app."]
+    "defaultPrompt": [
+      "Use Pake to package a website or local web build as a desktop app."
+    ]
   }
 }
