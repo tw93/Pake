@@ -52,17 +52,17 @@ Bugs recur by shape within a module. Two signals worth acting on:
 
 Highest historical yield first. For each, read the matching Risk Areas note in `AGENTS.md` before hypothesizing.
 
-| Boundary                         | What to ask                                                                                                                               | Where it lives                                  |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| Boundary                         | What to ask                                                                                                                               | Where it lives                                                      |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
 | Download / navigation heuristics | Would a SPA route under this path/extension be intercepted? Prefer extension + `download` attr + query hints over broad path roots.       | `inject/event.js`, `inject/link_policy.js`, `inject/frame_links.js` |
-| Success vs transport             | Is HTTP non-2xx, empty body, or missing file still toasted as success?                                                                    | `invoke.rs`, `on_download`                      |
-| Window identity                  | Does this path hardcode `"pake"` when the user may be on `pake-N` or the focused window?                                                  | `menu.rs`, `invoke.rs`, `setup.rs`, `window.rs` |
-| Eval on dead pages               | Does this menu/shortcut need a page JS context? Error and blank shells have none; prefer native `reload` / `navigate` / platform history. | `menu.rs`                                       |
-| Startup vs user control          | Can page-load or fallback re-show a window the user already hid? Latch every user visibility path.                                        | `lib.rs`, `setup.rs`                            |
-| Auth / popup                     | Does macOS auth still crash, strand about:blank, or open the system browser for SSO? Apple Sign-In stays native popup.                    | `auth.js`, `event.js`, `frame_links.js`, `link_policy.js` |
-| Clipboard                        | Does keydown steal native paste (images/files)? Is fallback gated on trusted keyup + TTL?                                                 | `event.js`                                      |
-| Platform capability              | Is this flag real on WKWebView / WebView2 / WebKitGTK, or a Chromium-only no-op?                                                          | `auth.rs`, `window.rs`, `lib.rs`                |
-| Config dual track                | Can a config file smuggle a value the CLI flag rejects?                                                                                   | `bin/helpers/merge.ts`, schema                  |
+| Success vs transport             | Is HTTP non-2xx, empty body, or missing file still toasted as success?                                                                    | `invoke.rs`, `on_download`                                          |
+| Window identity                  | Does this path hardcode `"pake"` when the user may be on `pake-N` or the focused window?                                                  | `menu.rs`, `invoke.rs`, `setup.rs`, `window.rs`                     |
+| Eval on dead pages               | Does this menu/shortcut need a page JS context? Error and blank shells have none; prefer native `reload` / `navigate` / platform history. | `menu.rs`                                                           |
+| Startup vs user control          | Can page-load or fallback re-show a window the user already hid? Latch every user visibility path.                                        | `lib.rs`, `setup.rs`                                                |
+| Auth / popup                     | Does macOS auth still crash, strand about:blank, or open the system browser for SSO? Apple Sign-In stays native popup.                    | `auth.js`, `event.js`, `frame_links.js`, `link_policy.js`           |
+| Clipboard                        | Does keydown steal native paste (images/files)? Is fallback gated on trusted keyup + TTL?                                                 | `event.js`                                                          |
+| Platform capability              | Is this flag real on WKWebView / WebView2 / WebKitGTK, or a Chromium-only no-op?                                                          | `auth.rs`, `window.rs`, `lib.rs`                                    |
+| Config dual track                | Can a config file smuggle a value the CLI flag rejects?                                                                                   | `bin/helpers/merge.ts`, schema                                      |
 
 For generic shapes (fail-open guards, recovery gated on the artifact it restores, watchdog tuned only to the fast path), use `/hunt` and load its `references/failure-patterns.md` catalog. Do not re-derive that catalog here.
 
