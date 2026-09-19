@@ -68,6 +68,10 @@ on:
         required: false
         default: "deb"
 
+# Builds an app on demand for anyone who runs it; it writes nothing.
+permissions:
+  contents: read
+
 jobs:
   build:
     name: ${{ inputs.platform }}

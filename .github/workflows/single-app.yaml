@@ -102,6 +102,11 @@ on:
       PAKE_NOTARIZE_PASSWORD:
         required: false
 
+# Called by release.yml. Its build job creates releases with ncipollo,
+# so contents: write is the scope it genuinely needs, not the repo default.
+permissions:
+  contents: write
+
 jobs:
   build:
     name: ${{ inputs.title }} (${{ matrix.build }})

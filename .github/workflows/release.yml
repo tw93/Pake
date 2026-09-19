@@ -30,6 +30,8 @@ concurrency:
 jobs:
   # Build and release popular apps
   release-apps:
+    permissions:
+      contents: read
     if: |
       (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) ||
       (github.event_name == 'workflow_dispatch' && inputs.release_apps)
@@ -61,6 +63,8 @@ jobs:
           skipIfReleaseExists: true
 
   build-cli:
+    permissions:
+      contents: read
     name: Build CLI
     needs: release-apps
     if: needs.release-apps.result == 'success'
@@ -85,6 +89,8 @@ jobs:
           retention-days: 1
 
   build-popular-apps:
+    permissions:
+      contents: write
     name: ${{ matrix.config.title }}
     needs: [release-apps, build-cli, create-release]
     if: |
