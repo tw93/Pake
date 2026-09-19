@@ -111,10 +111,21 @@ fn contains_niri(value: &str) -> bool {
 fn should_enable_linux_webkit_safe_mode_from_values(
     safe_mode: Option<&str>,
     niri_socket: Option<&str>,
+    wayland_display: Option<&str>,
     desktop_values: &[Option<&str>],
 ) -> bool {
     if let Some(value) = safe_mode.filter(|value| !value.trim().is_empty()) {
         return !is_disabled_env_value(value);
+    }
+
+    // The flags exist for blank screens on Wayland without a GPU (cb911ec7),
+    // and that is the only failure they were ever measured against. X11 never
+    // had it, while disabling compositing there segfaults WebKitGTK 2.52 as
+    // soon as a video plays (#1374, Intel i915 under i3). Keep them scoped to
+    // the sessions they were written for; PAKE_LINUX_WEBKIT_SAFE_MODE=1 still
+    // forces them anywhere.
+    if !is_non_empty_env_value(wayland_display) {
+        return false;
     }
 
     let is_niri_session = is_non_empty_env_value(niri_socket)
@@ -176,6 +187,7 @@ fn apply_linux_webkit_runtime_flags() {
     if !should_enable_linux_webkit_safe_mode_from_values(
         safe_mode.as_deref(),
         std::env::var("NIRI_SOCKET").ok().as_deref(),
+        std::env::var("WAYLAND_DISPLAY").ok().as_deref(),
         &desktop_refs,
     ) {
         return;
@@ -471,11 +483,34 @@ mod tests {
     }
 
     #[test]
-    fn linux_webkit_safe_mode_stays_on_by_default() {
+    fn linux_webkit_safe_mode_stays_on_by_default_on_wayland() {
         assert!(should_enable_linux_webkit_safe_mode_from_values(
             None,
             None,
+            Some("wayland-0"),
             &[None, None, None]
+        ));
+    }
+
+    #[test]
+    fn linux_webkit_safe_mode_stays_off_on_x11() {
+        // No WAYLAND_DISPLAY is an X11 session, where the flags never fixed
+        // anything and segfault WebKitGTK during playback (#1374).
+        assert!(!should_enable_linux_webkit_safe_mode_from_values(
+            None,
+            None,
+            None,
+            &[Some("i3"), None, None]
+        ));
+    }
+
+    #[test]
+    fn linux_webkit_safe_mode_can_be_forced_on_for_x11() {
+        assert!(should_enable_linux_webkit_safe_mode_from_values(
+            Some("1"),
+            None,
+            None,
+            &[Some("i3"), None, None]
         ));
     }
 
@@ -484,6 +519,7 @@ mod tests {
         assert!(!should_enable_linux_webkit_safe_mode_from_values(
             None,
             Some("/run/user/501/niri.sock"),
+            Some("wayland-0"),
             &[None, None, None]
         ));
     }
@@ -493,6 +529,7 @@ mod tests {
         assert!(!should_enable_linux_webkit_safe_mode_from_values(
             None,
             None,
+            Some("wayland-0"),
             &[Some("niri"), None, None]
         ));
     }
@@ -502,6 +539,7 @@ mod tests {
         assert!(should_enable_linux_webkit_safe_mode_from_values(
             Some("1"),
             Some("/run/user/501/niri.sock"),
+            Some("wayland-0"),
             &[Some("niri"), None, None]
         ));
     }
@@ -513,6 +551,7 @@ mod tests {
                 !should_enable_linux_webkit_safe_mode_from_values(
                     Some(value),
                     None,
+                    Some("wayland-0"),
                     &[None, None, None]
                 ),
                 "expected {value} to disable safe mode"

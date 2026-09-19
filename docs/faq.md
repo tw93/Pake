@@ -308,7 +308,7 @@ PAKE_LINUX_WEBKIT_SAFE_MODE=1 ./MyApp.AppImage
 ```
 
 **Why This Happens:**
-Pake normally enables WebKitGTK workarounds that help blank-window cases on Linux, but those same flags can make input and window controls unreliable on some Wayland compositors. The `PAKE_LINUX_WEBKIT_SAFE_MODE` variable lets you choose the safer rendering mode for your compositor.
+On Wayland, Pake enables WebKitGTK workarounds that help blank-window cases without a GPU, but those same flags can make input and window controls unreliable on some compositors. X11 sessions never needed the workarounds and are left on the native WebKit path, where the flags would instead crash playback. The `PAKE_LINUX_WEBKIT_SAFE_MODE` variable overrides either default.
 
 ---
 

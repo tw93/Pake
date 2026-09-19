@@ -305,7 +305,7 @@ PAKE_LINUX_WEBKIT_SAFE_MODE=1 ./MyApp.AppImage
 ```
 
 **原因：**
-Pake 默认启用的 WebKitGTK workaround 可以缓解 Linux 白屏，但在部分 Wayland 合成器上，这些参数可能导致输入和窗口控件不可用。`PAKE_LINUX_WEBKIT_SAFE_MODE` 可以按当前合成器选择更合适的渲染模式。
+Pake 在 Wayland 下启用的 WebKitGTK workaround 可以缓解无 GPU 时的白屏，但在部分合成器上会导致输入和窗口控件不可用。X11 会话本来就不需要这组参数，默认走原生 WebKit 路径，强行启用反而会让视频播放崩溃。`PAKE_LINUX_WEBKIT_SAFE_MODE` 可以覆盖这两个默认值。
 
 ---
 
