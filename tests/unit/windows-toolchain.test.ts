@@ -39,9 +39,9 @@ describe('WinBuilder toolchain target selection', () => {
   });
 
   it('keeps the msvc triples when windowsToolchain is explicitly msvc', () => {
-    expect(
-      (makeWinBuilder('x64', 'msvc') as any).getTauriTarget('x64'),
-    ).toBe('x86_64-pc-windows-msvc');
+    expect((makeWinBuilder('x64', 'msvc') as any).getTauriTarget('x64')).toBe(
+      'x86_64-pc-windows-msvc',
+    );
   });
 
   it('maps x64 to the gnu triple when windowsToolchain is gnu', () => {
@@ -103,8 +103,7 @@ describe('getWindowsGnuBuildEnvironment', () => {
     process.env.RUSTFLAGS = '-C target-cpu=native';
     delete process.env.RUSTUP_TOOLCHAIN;
     expect(getWindowsGnuBuildEnvironment()).toEqual({
-      RUSTFLAGS:
-        '-C target-cpu=native -C link-args=-Wl,--exclude-all-symbols',
+      RUSTFLAGS: '-C target-cpu=native -C link-args=-Wl,--exclude-all-symbols',
       RUSTUP_TOOLCHAIN: 'stable-x86_64-pc-windows-gnu',
     });
   });
