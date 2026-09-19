@@ -282,6 +282,28 @@ class PakeTestRunner {
       }),
     );
 
+    // An unquoted value leaves extra operands; the hint must name quoting
+    // rather than commander's generic "too many arguments" (#1378).
+    await this.runTest("Unquoted Value Hint", () => {
+      const result = spawnSync(
+        process.execPath,
+        [
+          config.CLI_PATH,
+          "https://example.com",
+          "--name",
+          "Google",
+          "Translate",
+          "--json",
+        ],
+        { encoding: "utf8", timeout: TIMEOUTS.QUICK },
+      );
+      if (result.error || result.status !== 2) return false;
+      const error = JSON.parse(result.stdout).error;
+      return (
+        error?.code === "INVALID_INPUT" && /must be quoted/.test(error.hint)
+      );
+    });
+
     // Number validation test
     await this.runTest("Number Validation", () => {
       try {

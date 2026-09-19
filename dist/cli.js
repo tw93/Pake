@@ -4073,6 +4073,15 @@ program.parseAsync().catch((error) => {
         // Parse errors (unknown option, invalid argument, missing value) are
         // invalid input. Commander already printed the message to stderr; in
         // json mode also emit the machine-readable result on stdout.
+        //
+        // Excess operands are almost always an unquoted value: `--name Google
+        // Translate` leaves `Translate` as a second operand, and commander's
+        // "too many arguments" names neither --name nor quoting, so the shape
+        // reads as "names with spaces are unsupported" (#1378).
+        const excessArguments = error.code === 'commander.excessArguments';
+        const hint = excessArguments
+            ? 'A value containing spaces must be quoted, for example --name "Google Translate".'
+            : 'Run pake --help for the accepted options.';
         if (process.argv.includes('--json')) {
             printJsonResult({
                 ok: false,
@@ -4084,9 +4093,14 @@ program.parseAsync().catch((error) => {
                 error: {
                     code: 'INVALID_INPUT',
                     message: error.message.trim(),
-                    hint: 'Run pake --help for the accepted options.',
+                    hint,
                 },
             });
+        }
+        else if (excessArguments) {
+            // Commander has already written its message and the full help, so this
+            // lands last, which is where the eye goes after a wall of help text.
+            console.error(chalk.red(`\u2715 ${hint}`));
         }
         process.exitCode = ERROR_EXIT_CODES.INVALID_INPUT;
         return;
