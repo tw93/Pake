@@ -1,6 +1,6 @@
 # AGENTS.md - Pake Project Knowledge Base
 
-> Project-specific Rust + Tauri rules: `.claude/rules/rust.md`. Skills live under `.agents/skills/` (`/release`, `/bugs`, `/github-ops`, `/code-review`; `.claude/skills/*` are symlinks into `.agents/skills/`, edit the `.agents` copy only). Exception: the `pake` skill's real source is `plugins/pake/skills/pake/SKILL.md` (shipped to users via the Claude Code plugin marketplace, `.claude-plugin/marketplace.json`); `.agents/skills/pake` is a symlink to it.
+> Project-specific Rust + Tauri rules: `.claude/rules/rust.md`. Skills live under `.agents/skills/` (`/release`, `/bugs`, `/github-ops`, `/code-review`; `.claude/skills/*` are symlinks into `.agents/skills/`, edit the `.agents` copy only). Exception: the `pake` skill's real source is `plugins/pake/skills/pake/SKILL.md` (shipped to users via the Claude Code and Codex plugin marketplaces, `.claude-plugin/marketplace.json` and `.agents/plugins/marketplace.json`); `.agents/skills/pake` is a symlink to it.
 
 ## Project Identity
 
@@ -31,7 +31,7 @@ Pake/
 │   ├── advanced-usage.md # Customization guide
 │   └── faq.md           # Troubleshooting
 ├── schema/               # pake.schema.json: --config JSON schema (public contract)
-├── plugins/              # Claude Code plugin source (user-facing pake skill)
+├── plugins/              # Claude Code and Codex plugin source (shared user-facing pake skill)
 ├── llms.txt              # Agent-facing contract summary (--json, --config, exit codes)
 ├── scripts/              # Utility scripts
 ├── tests/                # Unit, integration, and release-flow tests
@@ -200,7 +200,7 @@ For release follow-through, keep these boundaries explicit:
 
 `.github/workflows/quality-and-test.yml` runs auto-format on push, Rust quality checks, and CLI/build validation across Linux, Windows, and macOS.
 
-Deployment-surface note: the Claude Code plugin (`.claude-plugin/marketplace.json` + `plugins/pake`) ships from `main` via git, independent of `V*` releases. Skill and manifest edits reach new installs as soon as they land on `main`; npm and app assets still wait for their release workflows.
+Deployment-surface note: the Claude Code and Codex plugins (`.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`, and `plugins/pake`) ship from `main` via git, independent of `V*` releases. Skill and manifest edits reach new installs as soon as they land on `main`; npm and app assets still wait for their release workflows.
 
 ### Network Mirror Behavior
 

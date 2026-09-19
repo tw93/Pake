@@ -193,7 +193,7 @@ pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/week
 
 首次打包需要安装环境会比较慢，后续很快。完整参数说明查看 [CLI 使用指南](docs/cli-usage_CN.md)，不想用命令行可以试试 [GitHub Actions 在线构建](docs/github-actions-usage_CN.md)。
 
-在脚本或 AI agent 里使用 Pake？加 `--json` 获得机器可读结果，用 `--config app.json` 声明式描述应用（[schema](schema/pake.schema.json)），本地构建产物可直接 `pake ./dist --name MyTool` 打包。完整 agent 契约见 [llms.txt](llms.txt)。Claude Code 用户可通过 `/plugin marketplace add tw93/Pake` 和 `/plugin install pake@pake` 安装官方 skill。
+在脚本或 AI agent 里使用 Pake？加 `--json` 获得机器可读结果，用 `--config app.json` 声明式描述应用（[schema](schema/pake.schema.json)），本地构建产物可直接 `pake ./dist --name MyTool` 打包。完整 agent 契约见 [llms.txt](llms.txt)。安装官方 skill 在 Claude Code 里运行 `/plugin marketplace add tw93/Pake` 和 `/plugin install pake@pake`，在 Codex 里运行 `codex plugin marketplace add tw93/Pake` 和 `codex plugin add pake@pake`。
 
 把下面这段复制给你的 AI agent 即可开始：
 

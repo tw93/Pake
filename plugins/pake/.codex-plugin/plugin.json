@@ -1,0 +1,19 @@
+{
+  "name": "pake",
+  "description": "Package any website or local web build into a lightweight desktop app with Pake CLI.",
+  "version": "1.0.0",
+  "author": { "name": "tw93" },
+  "homepage": "https://github.com/tw93/Pake",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Pake",
+    "shortDescription": "Turn websites into lightweight desktop apps",
+    "longDescription": "Package websites or local web builds with Pake CLI, including app configuration, icons, proxies, and machine-readable build results.",
+    "developerName": "tw93",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "Use Pake to package a website or local web build as a desktop app."
+    ]
+  }
+}

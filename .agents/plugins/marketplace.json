@@ -1,0 +1,15 @@
+{
+  "name": "pake",
+  "interface": { "displayName": "Pake" },
+  "plugins": [
+    {
+      "name": "pake",
+      "source": { "source": "local", "path": "./plugins/pake" },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
