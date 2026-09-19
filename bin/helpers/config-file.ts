@@ -36,6 +36,14 @@ const NUMBER_RANGES: Record<string, NumberRange> = {
   zoom: { min: 50, max: 200, integer: true },
 };
 
+// Fields whose CLI flag restricts the value set (see the .choices() calls in
+// cli-program.ts), so a config file cannot smuggle a value the same flag
+// would reject. Without this, an unknown value falls through to the builder's
+// own fallback and silently produces the default behavior.
+const ENUM_VALUES: Record<string, readonly string[]> = {
+  windowsToolchain: ['msvc', 'gnu'],
+};
+
 function expectedTypeFor(key: string): ExpectedType | null {
   if (key === 'inject') return 'string[]';
   if (key === 'hideOnClose') return 'boolean';
@@ -127,6 +135,17 @@ export async function loadConfigFile(
         },
       );
     }
+    const allowed = ENUM_VALUES[key];
+    if (allowed && !allowed.includes(value as string)) {
+      throw new PakeError(
+        `Config field "${key}" must be one of: ${allowed.join(', ')}.`,
+        {
+          code: 'INVALID_INPUT',
+          hint: 'See schema/pake.schema.json for allowed values.',
+        },
+      );
+    }
+
     if (typeof value === 'number') {
       const range = NUMBER_RANGES[key];
       const min = range?.min ?? 0;
