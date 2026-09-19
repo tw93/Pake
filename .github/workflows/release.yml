@@ -21,6 +21,12 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+# A re-pushed tag or a manual dispatch must not run a second full matrix against
+# the same release; queue it rather than cancel a run that has already uploaded.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   # Build and release popular apps
   release-apps:

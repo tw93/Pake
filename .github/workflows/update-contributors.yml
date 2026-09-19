@@ -25,7 +25,7 @@ jobs:
           fetch-depth: 0
 
       - name: Generate contributors SVG
-        uses: tw93/contributors-list@master
+        uses: tw93/contributors-list@3722c5cb0d662c5e6dbffe78448002c461aab3b9 # master, pinned
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           svgPath: CONTRIBUTORS.svg
