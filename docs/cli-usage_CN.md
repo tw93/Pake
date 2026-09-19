@@ -357,6 +357,22 @@ pake https://github.com --name GitHub
 - 使用 `--target appimage-arm64` 可以创建便携式 ARM64 应用，在不同的 ARM64 Linux 发行版上运行。
 - 在基于 Arch Linux 的发行版上使用 `--targets zst` 可直接生成 `.pkg.tar.zst` 包。Pake 会按 Tauri 的 AUR 打包说明先生成 Linux 包内容，再写入 Arch 包元数据并输出 zstd 压缩包。需要预先安装 `binutils`（提供 `ar`）和 `libarchive`（提供 `bsdtar`）。
 
+#### [windows-toolchain]
+
+选择 Windows 构建使用的 Rust 工具链。仅适用于 Windows，其他平台忽略此选项。
+
+- `msvc`（默认）：Tauri 推荐的工具链，需要安装 [Visual Studio Build Tools](https://tauri.app/start/prerequisites/#windows)（勾选“使用 C++ 的桌面开发”工作负载）。
+- `gnu`：改用 MinGW/MSYS2 工具链构建，适合已安装 Rust 和 GNU 工具链（例如通过 [MSYS2](https://www.msys2.org/)）但没有安装 Visual Studio Build Tools 的机器。仅支持 `x64`（MSYS2 未提供该目标的 ARM64 GCC 工具链）。需要 `PATH` 中包含 `gcc`、`ld` 和 `dlltool`。
+
+```shell
+--windows-toolchain <msvc|gnu>
+
+# 示例：使用 MinGW/MSYS2 而非 MSVC 构建
+--windows-toolchain gnu
+```
+
+如果未检测到 MSVC Build Tools 但检测到可用的 GNU 工具链，Pake 会提示可以改用 `--windows-toolchain gnu` 重试，而不是让构建在链接阶段以难以理解的错误失败。使用 `gnu` 不会更改你的默认 Rust 工具链或任何全局 `rustup`/环境设置，仅影响当次构建子进程。
+
 #### [no-bundle]
 
 跳过打包，只输出编译好的可执行文件。仅 Linux 可用。适用于 Fedora、RHEL、Oracle Linux 等 RPM 系发行版，这些系统上原生打包器可能在打包阶段中止，用此选项仍能拿到可运行的二进制。

@@ -787,6 +787,49 @@ function checkRustInstalled() {
         return false;
     }
 }
+function getVsWherePath() {
+    const programFilesX86 = process.env['ProgramFiles(x86)'] || 'C:\\Program Files (x86)';
+    return path.join(programFilesX86, 'Microsoft Visual Studio', 'Installer', 'vswhere.exe');
+}
+/**
+ * Detects Visual Studio Build Tools the way rustc itself does: via the VS
+ * installer's vswhere.exe, not PATH. cl.exe/link.exe are normally absent
+ * from PATH even on a fully working MSVC setup (rustc locates them through
+ * the same registry vswhere reads), so checking PATH directly would warn on
+ * most MSVC machines.
+ */
+function hasWindowsMsvcBuildTools() {
+    const vswhere = getVsWherePath();
+    if (!fsExtra.pathExistsSync(vswhere))
+        return false;
+    try {
+        const { stdout } = execaSync(vswhere, [
+            '-products',
+            '*',
+            '-requires',
+            'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
+            '-property',
+            'installationPath',
+        ]);
+        return stdout.trim().length > 0;
+    }
+    catch {
+        return false;
+    }
+}
+/**
+ * MinGW/MSYS2's gcc drives the GNU Windows target directly off PATH (no
+ * registry lookup involved), so a PATH check is the correct signal here.
+ */
+function hasWindowsGnuToolchain() {
+    try {
+        execaSync('gcc', ['--version'], { stdio: 'ignore' });
+        return true;
+    }
+    catch {
+        return false;
+    }
+}
 
 async function combineFiles(files, output) {
     const contents = await Promise.all(files.map(async (file) => {
@@ -1362,6 +1405,27 @@ function getBuildEnvironment() {
     };
 }
 /**
+ * Build scripts and proc-macros compile for the rustup *host* toolchain, not
+ * the `--target` triple, even when cross-compiling. Pake's own
+ * rust-toolchain.toml pins a bare channel (no host), which rustup resolves
+ * against the machine's configured default host — msvc on most Windows
+ * installs, regardless of whether MSVC is actually present. Without this,
+ * a gnu `--target` build still shells out to the (possibly missing) MSVC
+ * `link.exe` for every build script. RUSTUP_TOOLCHAIN is rustup's documented
+ * per-invocation override (read by the cargo/rustc proxies it installs) and
+ * only affects this build subprocess. Left alone if the user already set it.
+ */
+function getWindowsGnuBuildEnvironment() {
+    const excludeAllSymbols = '-C link-args=-Wl,--exclude-all-symbols';
+    const existingRustflags = process.env.RUSTFLAGS;
+    return {
+        RUSTFLAGS: existingRustflags
+            ? `${existingRustflags} ${excludeAllSymbols}`
+            : excludeAllSymbols,
+        RUSTUP_TOOLCHAIN: process.env.RUSTUP_TOOLCHAIN || 'stable-x86_64-pc-windows-gnu',
+    };
+}
+/**
  * Windows needs more time due to native compilation and antivirus scanning.
  */
 function getInstallTimeout() {
@@ -1575,6 +1639,13 @@ class BaseBuilder {
             logger.warn('✼ See more in https://tauri.app/start/prerequisites/.');
         }
         ensureRustEnv();
+        if (IS_WIN &&
+            this.options.windowsToolchain !== 'gnu' &&
+            !hasWindowsMsvcBuildTools() &&
+            hasWindowsGnuToolchain()) {
+            logger.warn('✼ No Visual Studio Build Tools detected, but a MinGW/GNU toolchain (gcc) is available.');
+            logger.warn('✼ If the build fails to link, retry with --windows-toolchain gnu.');
+        }
         if (!checkRustInstalled()) {
             if (!isInteractive()) {
                 throw new PakeError('Rust required to package your webapp.', {
@@ -1675,8 +1746,10 @@ class BaseBuilder {
         // entries feed the --json warnings array and this is a status line.
         logger.info('✸ Building app...');
         const baseEnv = getBuildEnvironment();
+        const isWindowsGnuBuild = process.platform === 'win32' && this.options.windowsToolchain === 'gnu';
         let buildEnv = {
             ...(baseEnv ?? {}),
+            ...(isWindowsGnuBuild ? getWindowsGnuBuildEnvironment() : {}),
             ...(process.env.NO_STRIP ? { NO_STRIP: process.env.NO_STRIP } : {}),
         };
         const resolveExecEnv = () => Object.keys(buildEnv).length > 0 ? buildEnv : undefined;
@@ -2038,10 +2111,17 @@ class WinBuilder extends BaseBuilder {
         this.buildArch = validArchs.includes(options.targets || '')
             ? this.resolveTargetArch(options.targets)
             : this.resolveTargetArch('auto');
+        this.toolchain = options.windowsToolchain === 'gnu' ? 'gnu' : 'msvc';
         this.options.targets = this.buildFormat;
     }
     getReportArch() {
         return this.buildArch;
+    }
+    getTauriTarget(arch, platform = 'win32') {
+        if (this.toolchain === 'gnu') {
+            return WinBuilder.GNU_ARCH_MAPPINGS[arch] || null;
+        }
+        return super.getTauriTarget(arch, platform);
     }
     getFileName() {
         const { name } = this.options;
@@ -2082,6 +2162,12 @@ class WinBuilder extends BaseBuilder {
         return `pake-${generateIdentifierSafeName(appName)}.exe`;
     }
 }
+// MSYS2/MinGW only ships an x86_64 GCC toolchain, so gnu is x64-only;
+// arm64 falls through to getTauriTarget returning null, which the
+// existing call sites already turn into "Unsupported architecture".
+WinBuilder.GNU_ARCH_MAPPINGS = {
+    x64: 'x86_64-pc-windows-gnu',
+};
 
 class LinuxBuilder extends BaseBuilder {
     constructor(options) {
@@ -3537,6 +3623,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .default(DEFAULT_PAKE_OPTIONS.userAgent)
         .hideHelp())
         .addOption(new Option('--targets <string>', 'Build target format for your system').default(DEFAULT_PAKE_OPTIONS.targets))
+        .addOption(new Option('--windows-toolchain <toolchain>', 'Windows Rust toolchain: msvc (default, requires Visual Studio Build Tools) or gnu (MinGW/MSYS2, for machines without them)').choices(['msvc', 'gnu']))
         .addOption(new Option('--app-version <string>', 'App version, the same as package.json version')
         .default(DEFAULT_PAKE_OPTIONS.appVersion)
         .hideHelp())

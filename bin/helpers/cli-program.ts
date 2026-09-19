@@ -113,6 +113,12 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     )
     .addOption(
       new Option(
+        '--windows-toolchain <toolchain>',
+        'Windows Rust toolchain: msvc (default, requires Visual Studio Build Tools) or gnu (MinGW/MSYS2, for machines without them)',
+      ).choices(['msvc', 'gnu']),
+    )
+    .addOption(
+      new Option(
         '--app-version <string>',
         'App version, the same as package.json version',
       )

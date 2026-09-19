@@ -69,6 +69,11 @@ export interface PakeCliOptions {
   // Linux: "deb", "appimage", "rpm", "zst" and "*-arm64" variants; Windows: "x64", "arm64"; macOS: "intel", "apple", "universal"
   targets: string;
 
+  // Windows Rust toolchain: 'msvc' (default, Tauri's recommended toolchain)
+  // or 'gnu' (MinGW/MSYS2, for machines without Visual Studio Build Tools).
+  // Undefined keeps today's msvc-only behavior. Windows only; ignored elsewhere.
+  windowsToolchain?: 'msvc' | 'gnu';
+
   // Debug mode, outputs more logs
   debug: boolean;
 

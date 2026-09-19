@@ -4,7 +4,13 @@ import chalk from 'chalk';
 import prompts from 'prompts';
 
 import { PakeAppOptions } from '@/types';
-import { checkRustInstalled, ensureRustEnv, installRust } from '@/helpers/rust';
+import {
+  checkRustInstalled,
+  ensureRustEnv,
+  hasWindowsGnuToolchain,
+  hasWindowsMsvcBuildTools,
+  installRust,
+} from '@/helpers/rust';
 import { mergeConfig } from '@/helpers/merge';
 import tauriConfig from '@/helpers/tauriConfig';
 import {
@@ -18,7 +24,7 @@ import { BuildArtifact, isInteractive } from '@/utils/output';
 import { shellExec, type ShellCommand } from '@/utils/shell';
 import { hasReadyTauriCli } from '@/utils/tauri-cli';
 import { CN_MIRROR_ENV, isCnMirrorEnabled } from '@/utils/mirror';
-import { IS_MAC } from '@/utils/platform';
+import { IS_MAC, IS_WIN } from '@/utils/platform';
 import logger from '@/options/logger';
 import {
   configureCargoRegistry,
@@ -27,6 +33,7 @@ import {
   getBuildTimeout,
   getInstallCommand,
   getInstallTimeout,
+  getWindowsGnuBuildEnvironment,
 } from './env';
 // Appended to the error when a Linux AppImage build fails for good. linuxdeploy's
 // diagnostics stream to the terminal (stdio: 'inherit') and never reach
@@ -132,6 +139,20 @@ export default abstract class BaseBuilder {
     }
 
     ensureRustEnv();
+
+    if (
+      IS_WIN &&
+      this.options.windowsToolchain !== 'gnu' &&
+      !hasWindowsMsvcBuildTools() &&
+      hasWindowsGnuToolchain()
+    ) {
+      logger.warn(
+        '✼ No Visual Studio Build Tools detected, but a MinGW/GNU toolchain (gcc) is available.',
+      );
+      logger.warn(
+        '✼ If the build fails to link, retry with --windows-toolchain gnu.',
+      );
+    }
 
     if (!checkRustInstalled()) {
       if (!isInteractive()) {
@@ -266,8 +287,11 @@ export default abstract class BaseBuilder {
     logger.info('✸ Building app...');
 
     const baseEnv = getBuildEnvironment();
+    const isWindowsGnuBuild =
+      process.platform === 'win32' && this.options.windowsToolchain === 'gnu';
     let buildEnv: Record<string, string> = {
       ...(baseEnv ?? {}),
+      ...(isWindowsGnuBuild ? getWindowsGnuBuildEnvironment() : {}),
       ...(process.env.NO_STRIP ? { NO_STRIP: process.env.NO_STRIP } : {}),
     };
 
