@@ -29,7 +29,7 @@ Use Waza `/check` for the generic review method. This adapter adds Pake-specific
 - [ ] New helper in `bin/utils/` or `bin/helpers/` has a matching `tests/unit/<basename>.test.ts`.
 - [ ] Binary parsers have a round-trip test, not only builder assertions.
 - [ ] Linux WebKit/AppImage runtime flag changes keep the default conservative, add or update tests for the decision logic, and update `docs/faq*.md` when users need a fallback command.
-- [ ] macOS `--new-window` or auth URL changes include targeted tests for popup/auth routing in `src-tauri/src/inject/event.js`.
+- [ ] macOS `--new-window`, auth URL, or frame-link changes (`auth.js`, `event.js`, `frame_links.js`, `link_policy.js`) run `node tests/browser/popup-routing.mjs` with an installed Playwright runtime; see AGENTS.md Current Risk Areas for why classifier-only unit tests do not prove routing.
 
 ## Quick Review Commands
 
@@ -48,6 +48,10 @@ pnpm test -- --no-build
 
 # Build CLI and catch TypeScript errors
 pnpm run cli:build
+
+# Popup/auth routing probe: manual only, needs a Playwright runtime
+# (tests/browser/*.mjs are outside vitest and Playwright is not a devDependency)
+node tests/browser/popup-routing.mjs
 ```
 
 ## Review Output Format

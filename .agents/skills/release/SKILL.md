@@ -75,7 +75,7 @@ Do not collapse these into "released" without naming which surface was verified.
 
 ## npm-Only Hotfix (no tag)
 
-For CLI or Rust-template fixes that must reach npm fast without an app release. Precedent: 3.15.0, 3.15.2 through 3.15.5, and 3.15.7 shipped this way; the version number is still consumed, so the next `V*` tag skips over it.
+For CLI or Rust-template fixes that must reach npm fast without an app release. Most 3.15.x and 3.16.x point releases shipped this way; the version number is still consumed, so the next `V*` tag skips over it.
 
 1. [ ] Bump all four version files, rebuild `dist/cli.js` with `pnpm run cli:build`, stage the version files, and stage the ignored artifact with `git add -f dist/cli.js`
 2. [ ] Run `pnpm run release:check`. For a Rust-template fix, also run the narrow current-platform Rust check before pushing. Do not run `npx vitest run` separately because `release:check` already includes it.
