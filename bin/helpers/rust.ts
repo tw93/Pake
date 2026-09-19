@@ -132,3 +132,52 @@ export function checkRustInstalled() {
     return false;
   }
 }
+
+function getVsWherePath(): string {
+  const programFilesX86 =
+    process.env['ProgramFiles(x86)'] || 'C:\\Program Files (x86)';
+  return path.join(
+    programFilesX86,
+    'Microsoft Visual Studio',
+    'Installer',
+    'vswhere.exe',
+  );
+}
+
+/**
+ * Detects Visual Studio Build Tools the way rustc itself does: via the VS
+ * installer's vswhere.exe, not PATH. cl.exe/link.exe are normally absent
+ * from PATH even on a fully working MSVC setup (rustc locates them through
+ * the same registry vswhere reads), so checking PATH directly would warn on
+ * most MSVC machines.
+ */
+export function hasWindowsMsvcBuildTools(): boolean {
+  const vswhere = getVsWherePath();
+  if (!fsExtra.pathExistsSync(vswhere)) return false;
+  try {
+    const { stdout } = execaSync(vswhere, [
+      '-products',
+      '*',
+      '-requires',
+      'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
+      '-property',
+      'installationPath',
+    ]);
+    return stdout.trim().length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * MinGW/MSYS2's gcc drives the GNU Windows target directly off PATH (no
+ * registry lookup involved), so a PATH check is the correct signal here.
+ */
+export function hasWindowsGnuToolchain(): boolean {
+  try {
+    execaSync('gcc', ['--version'], { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}

@@ -105,6 +105,11 @@
       "type": "string",
       "description": "Build target format. Linux: deb/appimage/rpm/zst and *-arm64 variants (comma-separated allowed); Windows: x64/arm64; macOS: intel/apple/universal/app/dmg. Defaults to the platform installer format."
     },
+    "windowsToolchain": {
+      "type": "string",
+      "enum": ["msvc", "gnu"],
+      "description": "Windows Rust toolchain: msvc (default, requires Visual Studio Build Tools) or gnu (MinGW/MSYS2, for machines without them). Windows only; ignored elsewhere."
+    },
     "appVersion": {
       "type": "string",
       "description": "App version written into the bundle.",

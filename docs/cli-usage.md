@@ -359,6 +359,22 @@ Specify the build target architecture or format:
 - Use `--target appimage-arm64` for portable ARM64 applications that work across different ARM64 Linux distributions.
 - Use `--targets zst` on Arch Linux based distributions to produce a `.pkg.tar.zst` package directly. Pake follows Tauri's AUR packaging guidance by building the Linux package payload first, then emitting Arch package metadata and zstd-compressed output. Requires `binutils` (for `ar`) and `libarchive` (for `bsdtar`).
 
+#### [windows-toolchain]
+
+Select the Rust toolchain used for Windows builds. Windows only; ignored on other platforms.
+
+- `msvc` (default): Tauri's recommended toolchain. Requires [Visual Studio Build Tools](https://tauri.app/start/prerequisites/#windows) with the "Desktop development with C++" workload.
+- `gnu`: builds against a MinGW/MSYS2 toolchain instead, for machines that have Rust and a GNU toolchain (e.g. via [MSYS2](https://www.msys2.org/)) but not Visual Studio Build Tools. Only `x64` is supported (MSYS2 does not ship an ARM64 GCC toolchain for this target). Requires `gcc`, `ld` and `dlltool` on `PATH`.
+
+```shell
+--windows-toolchain <msvc|gnu>
+
+# Example: build with MinGW/MSYS2 instead of MSVC
+--windows-toolchain gnu
+```
+
+If no MSVC Build Tools are detected and a GNU toolchain is available, Pake logs a hint to retry with `--windows-toolchain gnu` rather than failing deep in the build with an unexplained linker error. Requesting `gnu` does not change your default Rust toolchain or any global `rustup`/environment settings — it only affects the current build subprocess.
+
 #### [no-bundle]
 
 Skip packaging and output only the compiled executable. Linux only. Useful on RPM-based distros (Fedora, RHEL, Oracle Linux, etc.) where the native bundler can abort during the packaging stage, so you still get a runnable binary.

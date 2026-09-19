@@ -7,6 +7,14 @@ import type { ShellCommand } from '@/utils/shell';
 export default class WinBuilder extends BaseBuilder {
   private buildFormat: string = 'msi';
   private buildArch: string;
+  private toolchain: 'msvc' | 'gnu';
+
+  // MSYS2/MinGW only ships an x86_64 GCC toolchain, so gnu is x64-only;
+  // arm64 falls through to getTauriTarget returning null, which the
+  // existing call sites already turn into "Unsupported architecture".
+  private static readonly GNU_ARCH_MAPPINGS: Record<string, string> = {
+    x64: 'x86_64-pc-windows-gnu',
+  };
 
   constructor(options: PakeAppOptions) {
     super(options);
@@ -14,11 +22,22 @@ export default class WinBuilder extends BaseBuilder {
     this.buildArch = validArchs.includes(options.targets || '')
       ? this.resolveTargetArch(options.targets)
       : this.resolveTargetArch('auto');
+    this.toolchain = options.windowsToolchain === 'gnu' ? 'gnu' : 'msvc';
     this.options.targets = this.buildFormat;
   }
 
   getReportArch(): string {
     return this.buildArch;
+  }
+
+  protected getTauriTarget(
+    arch: string,
+    platform: NodeJS.Platform = 'win32',
+  ): string | null {
+    if (this.toolchain === 'gnu') {
+      return WinBuilder.GNU_ARCH_MAPPINGS[arch] || null;
+    }
+    return super.getTauriTarget(arch, platform);
   }
 
   getFileName(): string {

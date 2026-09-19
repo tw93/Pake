@@ -32,6 +32,29 @@ export function getBuildEnvironment(): Record<string, string> | undefined {
 }
 
 /**
+ * Build scripts and proc-macros compile for the rustup *host* toolchain, not
+ * the `--target` triple, even when cross-compiling. Pake's own
+ * rust-toolchain.toml pins a bare channel (no host), which rustup resolves
+ * against the machine's configured default host — msvc on most Windows
+ * installs, regardless of whether MSVC is actually present. Without this,
+ * a gnu `--target` build still shells out to the (possibly missing) MSVC
+ * `link.exe` for every build script. RUSTUP_TOOLCHAIN is rustup's documented
+ * per-invocation override (read by the cargo/rustc proxies it installs) and
+ * only affects this build subprocess. Left alone if the user already set it.
+ */
+export function getWindowsGnuBuildEnvironment(): Record<string, string> {
+  const excludeAllSymbols = '-C link-args=-Wl,--exclude-all-symbols';
+  const existingRustflags = process.env.RUSTFLAGS;
+  return {
+    RUSTFLAGS: existingRustflags
+      ? `${existingRustflags} ${excludeAllSymbols}`
+      : excludeAllSymbols,
+    RUSTUP_TOOLCHAIN:
+      process.env.RUSTUP_TOOLCHAIN || 'stable-x86_64-pc-windows-gnu',
+  };
+}
+
+/**
  * Windows needs more time due to native compilation and antivirus scanning.
  */
 export function getInstallTimeout(): number {
