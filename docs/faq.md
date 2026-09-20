@@ -308,7 +308,7 @@ PAKE_LINUX_WEBKIT_SAFE_MODE=1 ./MyApp.AppImage
 ```
 
 **Why This Happens:**
-Pake sets two WebKitGTK variables on Linux. `WEBKIT_DISABLE_DMABUF_RENDERER` is on everywhere except niri, because the blank window it prevents also happens on X11 with the NVIDIA proprietary driver. `WEBKIT_DISABLE_COMPOSITING_MODE` is on for Wayland only, where it fixes a blank screen without a GPU. On WebKitGTK 2.52 both variables reach the same switch, so either one on its own turns hardware acceleration off, which is why `PAKE_LINUX_WEBKIT_SAFE_MODE` is the setting that matters: `1` forces both on, `0` turns both off.
+On X11 with WebKitGTK 2.52 or later, Pake uses shared-memory rendering (`WEBKIT_DMABUF_RENDERER_FORCE_SHM=1`) instead of disabling the renderer, preserving the backing store needed for video. Older WebKitGTK versions and Wayland keep the existing compatibility flags; niri keeps native rendering. Explicit WebKit variables are respected. `PAKE_LINUX_WEBKIT_SAFE_MODE=1` selects the old conservative mode, while `0` removes the two disabling flags and skips automatic workarounds.
 
 ---
 
