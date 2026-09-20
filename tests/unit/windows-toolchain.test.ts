@@ -75,13 +75,23 @@ describe('WinBuilder toolchain target selection', () => {
 
 describe('getWindowsGnuBuildEnvironment', () => {
   const originalRustflags = process.env.RUSTFLAGS;
+  const originalEncodedRustflags = process.env.CARGO_ENCODED_RUSTFLAGS;
   const originalRustupToolchain = process.env.RUSTUP_TOOLCHAIN;
+
+  beforeEach(() => {
+    delete process.env.CARGO_ENCODED_RUSTFLAGS;
+  });
 
   afterEach(() => {
     if (originalRustflags === undefined) {
       delete process.env.RUSTFLAGS;
     } else {
       process.env.RUSTFLAGS = originalRustflags;
+    }
+    if (originalEncodedRustflags === undefined) {
+      delete process.env.CARGO_ENCODED_RUSTFLAGS;
+    } else {
+      process.env.CARGO_ENCODED_RUSTFLAGS = originalEncodedRustflags;
     }
     if (originalRustupToolchain === undefined) {
       delete process.env.RUSTUP_TOOLCHAIN;
@@ -115,6 +125,27 @@ describe('getWindowsGnuBuildEnvironment', () => {
       RUSTFLAGS: '-C link-args=-Wl,--exclude-all-symbols',
       RUSTUP_TOOLCHAIN: '1.95.0-x86_64-pc-windows-gnu',
     });
+  });
+
+  it('appends to encoded flags without merging lower-priority RUSTFLAGS', () => {
+    process.env.CARGO_ENCODED_RUSTFLAGS =
+      '-C\x1flink-arg=C:/Path With Spaces/lib.a';
+    process.env.RUSTFLAGS = '-C target-cpu=native';
+    const env = getWindowsGnuBuildEnvironment();
+    expect(env.CARGO_ENCODED_RUSTFLAGS).toBe(
+      '-C\x1flink-arg=C:/Path With Spaces/lib.a\x1f-C\x1flink-args=-Wl,--exclude-all-symbols',
+    );
+    expect(env.RUSTFLAGS).toBeUndefined();
+  });
+
+  it('uses encoded flags even when the existing variable is empty', () => {
+    process.env.CARGO_ENCODED_RUSTFLAGS = '';
+    process.env.RUSTFLAGS = '-C target-cpu=native';
+    const env = getWindowsGnuBuildEnvironment();
+    expect(env.CARGO_ENCODED_RUSTFLAGS).toBe(
+      '-C\x1flink-args=-Wl,--exclude-all-symbols',
+    );
+    expect(env.RUSTFLAGS).toBeUndefined();
   });
 });
 

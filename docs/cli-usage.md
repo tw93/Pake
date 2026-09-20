@@ -373,7 +373,7 @@ Select the Rust toolchain used for Windows builds. Windows only; ignored on othe
 --windows-toolchain gnu
 ```
 
-If no MSVC Build Tools are detected and a GNU toolchain is available, Pake logs a hint to retry with `--windows-toolchain gnu` rather than failing deep in the build with an unexplained linker error. Requesting `gnu` does not change your default Rust toolchain or any global `rustup`/environment settings — it only affects the current build subprocess.
+If no MSVC Build Tools are detected and a GNU toolchain is available, Pake logs a hint to retry with `--windows-toolchain gnu` rather than failing deep in the build with an unexplained linker error. Requesting `gnu` does not change your default Rust toolchain or any global `rustup`/environment settings; it only affects the current build subprocess.
 
 #### [no-bundle]
 

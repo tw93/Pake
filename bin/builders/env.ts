@@ -35,7 +35,7 @@ export function getBuildEnvironment(): Record<string, string> | undefined {
  * Build scripts and proc-macros compile for the rustup *host* toolchain, not
  * the `--target` triple, even when cross-compiling. Pake's own
  * rust-toolchain.toml pins a bare channel (no host), which rustup resolves
- * against the machine's configured default host — msvc on most Windows
+ * against the machine's configured default host, msvc on most Windows
  * installs, regardless of whether MSVC is actually present. Without this,
  * a gnu `--target` build still shells out to the (possibly missing) MSVC
  * `link.exe` for every build script. RUSTUP_TOOLCHAIN is rustup's documented
@@ -43,12 +43,26 @@ export function getBuildEnvironment(): Record<string, string> | undefined {
  * only affects this build subprocess. Left alone if the user already set it.
  */
 export function getWindowsGnuBuildEnvironment(): Record<string, string> {
-  const excludeAllSymbols = '-C link-args=-Wl,--exclude-all-symbols';
+  const excludeAllSymbols = ['-C', 'link-args=-Wl,--exclude-all-symbols'];
   const existingRustflags = process.env.RUSTFLAGS;
+  const existingEncodedRustflags = process.env.CARGO_ENCODED_RUSTFLAGS;
+  // Cargo prefers encoded flags over RUSTFLAGS, even when set to an empty value.
+  const flags: Record<string, string> =
+    existingEncodedRustflags !== undefined
+      ? {
+          CARGO_ENCODED_RUSTFLAGS: [
+            ...(existingEncodedRustflags ? [existingEncodedRustflags] : []),
+            ...excludeAllSymbols,
+          ].join('\x1f'),
+        }
+      : {
+          RUSTFLAGS: [
+            ...(existingRustflags ? [existingRustflags] : []),
+            ...excludeAllSymbols,
+          ].join(' '),
+        };
   return {
-    RUSTFLAGS: existingRustflags
-      ? `${existingRustflags} ${excludeAllSymbols}`
-      : excludeAllSymbols,
+    ...flags,
     RUSTUP_TOOLCHAIN:
       process.env.RUSTUP_TOOLCHAIN || 'stable-x86_64-pc-windows-gnu',
   };
