@@ -247,8 +247,12 @@ program.parseAsync().catch((error: unknown) => {
     // "too many arguments" names neither --name nor quoting, so the shape
     // reads as "names with spaces are unsupported" (#1378).
     const excessArguments = error.code === 'commander.excessArguments';
+    // Name the operand rather than asserting why it is there. Unquoting is the
+    // usual cause, but two bare URLs produce the same error and the quoting
+    // advice would be wrong for them.
+    const extraOperand = excessArguments ? program.args.slice(1)[0] : undefined;
     const hint = excessArguments
-      ? 'A value containing spaces must be quoted, for example --name "Google Translate".'
+      ? `Unexpected extra argument${extraOperand ? ` "${extraOperand}"` : ''}. A value containing spaces must be quoted, for example --name "Google Translate".`
       : 'Run pake --help for the accepted options.';
     if (process.argv.includes('--json')) {
       printJsonResult({

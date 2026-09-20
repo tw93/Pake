@@ -132,10 +132,20 @@ fn should_disable_compositing_mode(
     safe_mode: Option<&str>,
     niri_socket: Option<&str>,
     wayland_display: Option<&str>,
+    gdk_backend: Option<&str>,
     desktop_values: &[Option<&str>],
 ) -> bool {
     if let Some(value) = safe_mode.filter(|value| !value.trim().is_empty()) {
         return !is_disabled_env_value(value);
+    }
+
+    // WAYLAND_DISPLAY says a compositor is reachable, not that GTK will use it.
+    // An explicit GDK_BACKEND=x11 renders through XWayland, which is the X11
+    // path this flag crashes, and it is also the workaround recommended in
+    // #1117, so the two would otherwise collide. should_force_wayland_gdk_backend
+    // already treats an explicit backend as authoritative; so does this.
+    if gdk_backend.is_some_and(|value| value.trim().eq_ignore_ascii_case("x11")) {
+        return false;
     }
 
     if !is_non_empty_env_value(wayland_display) {
@@ -208,6 +218,7 @@ fn apply_linux_webkit_runtime_flags() {
         safe_mode.as_deref(),
         std::env::var("NIRI_SOCKET").ok().as_deref(),
         std::env::var("WAYLAND_DISPLAY").ok().as_deref(),
+        std::env::var(GDK_BACKEND).ok().as_deref(),
         &desktop_refs,
     ) && std::env::var(WEBKIT_DISABLE_COMPOSITING_MODE).is_err()
     {
@@ -521,7 +532,30 @@ mod tests {
         // segfaults playback there.
         let desktop = [Some("i3"), None, None];
         assert!(should_disable_dmabuf_renderer(None));
-        assert!(!should_disable_compositing_mode(None, None, None, &desktop));
+        assert!(!should_disable_compositing_mode(
+            None, None, None, None, &desktop
+        ));
+    }
+
+    #[test]
+    fn explicit_x11_gdk_backend_keeps_compositing_on_wayland() {
+        // XWayland renders through the X11 path this flag crashes, and
+        // GDK_BACKEND=x11 is the workaround recommended in #1117.
+        assert!(!should_disable_compositing_mode(
+            None,
+            None,
+            Some("wayland-0"),
+            Some("x11"),
+            &[None, None, None]
+        ));
+        // An explicit wayland backend is still a Wayland session.
+        assert!(should_disable_compositing_mode(
+            None,
+            None,
+            Some("wayland-0"),
+            Some("wayland"),
+            &[None, None, None]
+        ));
     }
 
     #[test]
@@ -530,6 +564,7 @@ mod tests {
             None,
             None,
             Some("wayland-0"),
+            None,
             &[None, None, None]
         ));
     }
@@ -538,6 +573,7 @@ mod tests {
     fn compositing_mode_can_be_forced_on_x11() {
         assert!(should_disable_compositing_mode(
             Some("1"),
+            None,
             None,
             None,
             &[Some("i3"), None, None]
@@ -550,6 +586,7 @@ mod tests {
             None,
             Some("/run/user/501/niri.sock"),
             Some("wayland-0"),
+            None,
             &[None, None, None]
         ));
     }
@@ -560,6 +597,7 @@ mod tests {
             None,
             None,
             Some("wayland-0"),
+            None,
             &[Some("niri"), None, None]
         ));
     }
@@ -570,6 +608,7 @@ mod tests {
             Some("1"),
             Some("/run/user/501/niri.sock"),
             Some("wayland-0"),
+            None,
             &[Some("niri"), None, None]
         ));
     }
@@ -582,6 +621,7 @@ mod tests {
                     Some(value),
                     None,
                     Some("wayland-0"),
+                    None,
                     &[None, None, None]
                 ),
                 "expected {value} to restore compositing"
