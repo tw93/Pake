@@ -107,8 +107,28 @@ fn contains_niri(value: &str) -> bool {
         .any(|part| part.eq_ignore_ascii_case("niri"))
 }
 
+/// The two WebKit workarounds have different origins and therefore different
+/// scopes, which one gate cannot express.
+///
+/// `WEBKIT_DISABLE_DMABUF_RENDERER` came from #1117 (96e57376) for Linux
+/// stability in general, three months before anything Wayland-specific, and
+/// upstream still reports the blank window it prevents on X11 with the NVIDIA
+/// proprietary driver (tauri-apps/tauri#9394). It stays on for every session.
 #[cfg(any(target_os = "linux", test))]
-fn should_enable_linux_webkit_safe_mode_from_values(
+fn should_disable_dmabuf_renderer(safe_mode: Option<&str>) -> bool {
+    match safe_mode.filter(|value| !value.trim().is_empty()) {
+        Some(value) => !is_disabled_env_value(value),
+        None => true,
+    }
+}
+
+/// `WEBKIT_DISABLE_COMPOSITING_MODE` came from cb911ec7, for a blank screen on
+/// Wayland without a GPU. X11 never had that failure, and disabling compositing
+/// there segfaults WebKitGTK 2.52 as soon as a video decodes (#1374, Intel i915
+/// under i3), so this one is Wayland-only. niri keeps its existing exception.
+/// `PAKE_LINUX_WEBKIT_SAFE_MODE` still forces or suppresses both anywhere.
+#[cfg(any(target_os = "linux", test))]
+fn should_disable_compositing_mode(
     safe_mode: Option<&str>,
     niri_socket: Option<&str>,
     wayland_display: Option<&str>,
@@ -118,12 +138,6 @@ fn should_enable_linux_webkit_safe_mode_from_values(
         return !is_disabled_env_value(value);
     }
 
-    // The flags exist for blank screens on Wayland without a GPU (cb911ec7),
-    // and that is the only failure they were ever measured against. X11 never
-    // had it, while disabling compositing there segfaults WebKitGTK 2.52 as
-    // soon as a video plays (#1374, Intel i915 under i3). Keep them scoped to
-    // the sessions they were written for; PAKE_LINUX_WEBKIT_SAFE_MODE=1 still
-    // forces them anywhere.
     if !is_non_empty_env_value(wayland_display) {
         return false;
     }
@@ -184,19 +198,19 @@ fn apply_linux_webkit_runtime_flags() {
         .map(|value| value.as_deref())
         .collect::<Vec<_>>();
 
-    if !should_enable_linux_webkit_safe_mode_from_values(
+    if should_disable_dmabuf_renderer(safe_mode.as_deref())
+        && std::env::var(WEBKIT_DISABLE_DMABUF_RENDERER).is_err()
+    {
+        std::env::set_var(WEBKIT_DISABLE_DMABUF_RENDERER, "1");
+    }
+
+    if should_disable_compositing_mode(
         safe_mode.as_deref(),
         std::env::var("NIRI_SOCKET").ok().as_deref(),
         std::env::var("WAYLAND_DISPLAY").ok().as_deref(),
         &desktop_refs,
-    ) {
-        return;
-    }
-
-    if std::env::var(WEBKIT_DISABLE_DMABUF_RENDERER).is_err() {
-        std::env::set_var(WEBKIT_DISABLE_DMABUF_RENDERER, "1");
-    }
-    if std::env::var(WEBKIT_DISABLE_COMPOSITING_MODE).is_err() {
+    ) && std::env::var(WEBKIT_DISABLE_COMPOSITING_MODE).is_err()
+    {
         std::env::set_var(WEBKIT_DISABLE_COMPOSITING_MODE, "1");
     }
 }
@@ -483,78 +497,94 @@ mod tests {
     }
 
     #[test]
-    fn linux_webkit_safe_mode_stays_on_by_default_on_wayland() {
-        assert!(should_enable_linux_webkit_safe_mode_from_values(
-            None,
-            None,
-            Some("wayland-0"),
-            &[None, None, None]
-        ));
+    fn dmabuf_renderer_stays_disabled_on_every_session() {
+        // #1117 was never Wayland-scoped, and upstream still reports the blank
+        // window it prevents on X11 with the NVIDIA proprietary driver.
+        assert!(should_disable_dmabuf_renderer(None));
+        assert!(should_disable_dmabuf_renderer(Some("1")));
     }
 
     #[test]
-    fn linux_webkit_safe_mode_stays_off_on_x11() {
-        // No WAYLAND_DISPLAY is an X11 session, where the flags never fixed
-        // anything and segfault WebKitGTK during playback (#1374).
-        assert!(!should_enable_linux_webkit_safe_mode_from_values(
-            None,
-            None,
-            None,
-            &[Some("i3"), None, None]
-        ));
-    }
-
-    #[test]
-    fn linux_webkit_safe_mode_can_be_forced_on_for_x11() {
-        assert!(should_enable_linux_webkit_safe_mode_from_values(
-            Some("1"),
-            None,
-            None,
-            &[Some("i3"), None, None]
-        ));
-    }
-
-    #[test]
-    fn linux_webkit_safe_mode_is_disabled_for_niri_socket() {
-        assert!(!should_enable_linux_webkit_safe_mode_from_values(
-            None,
-            Some("/run/user/501/niri.sock"),
-            Some("wayland-0"),
-            &[None, None, None]
-        ));
-    }
-
-    #[test]
-    fn linux_webkit_safe_mode_is_disabled_for_niri_desktop() {
-        assert!(!should_enable_linux_webkit_safe_mode_from_values(
-            None,
-            None,
-            Some("wayland-0"),
-            &[Some("niri"), None, None]
-        ));
-    }
-
-    #[test]
-    fn linux_webkit_safe_mode_can_be_forced_on_for_niri() {
-        assert!(should_enable_linux_webkit_safe_mode_from_values(
-            Some("1"),
-            Some("/run/user/501/niri.sock"),
-            Some("wayland-0"),
-            &[Some("niri"), None, None]
-        ));
-    }
-
-    #[test]
-    fn linux_webkit_safe_mode_can_be_disabled_explicitly() {
+    fn dmabuf_renderer_can_be_re_enabled_explicitly() {
         for value in ["0", "false", "off", "no", "native", "disabled"] {
             assert!(
-                !should_enable_linux_webkit_safe_mode_from_values(
+                !should_disable_dmabuf_renderer(Some(value)),
+                "expected {value} to restore the dmabuf renderer"
+            );
+        }
+    }
+
+    #[test]
+    fn x11_keeps_dmabuf_disabled_but_keeps_compositing() {
+        // The exact shape of #1374: an X11 session gets the stability flag it
+        // has had since #1117, and does not get the compositing flag that
+        // segfaults playback there.
+        let desktop = [Some("i3"), None, None];
+        assert!(should_disable_dmabuf_renderer(None));
+        assert!(!should_disable_compositing_mode(None, None, None, &desktop));
+    }
+
+    #[test]
+    fn compositing_mode_stays_disabled_by_default_on_wayland() {
+        assert!(should_disable_compositing_mode(
+            None,
+            None,
+            Some("wayland-0"),
+            &[None, None, None]
+        ));
+    }
+
+    #[test]
+    fn compositing_mode_can_be_forced_on_x11() {
+        assert!(should_disable_compositing_mode(
+            Some("1"),
+            None,
+            None,
+            &[Some("i3"), None, None]
+        ));
+    }
+
+    #[test]
+    fn compositing_mode_is_kept_for_niri_socket() {
+        assert!(!should_disable_compositing_mode(
+            None,
+            Some("/run/user/501/niri.sock"),
+            Some("wayland-0"),
+            &[None, None, None]
+        ));
+    }
+
+    #[test]
+    fn compositing_mode_is_kept_for_niri_desktop() {
+        assert!(!should_disable_compositing_mode(
+            None,
+            None,
+            Some("wayland-0"),
+            &[Some("niri"), None, None]
+        ));
+    }
+
+    #[test]
+    fn compositing_mode_can_be_forced_on_for_niri() {
+        assert!(should_disable_compositing_mode(
+            Some("1"),
+            Some("/run/user/501/niri.sock"),
+            Some("wayland-0"),
+            &[Some("niri"), None, None]
+        ));
+    }
+
+    #[test]
+    fn compositing_mode_can_be_disabled_explicitly() {
+        for value in ["0", "false", "off", "no", "native", "disabled"] {
+            assert!(
+                !should_disable_compositing_mode(
                     Some(value),
                     None,
                     Some("wayland-0"),
                     &[None, None, None]
                 ),
-                "expected {value} to disable safe mode"
+                "expected {value} to restore compositing"
             );
         }
     }

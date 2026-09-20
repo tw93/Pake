@@ -305,7 +305,7 @@ PAKE_LINUX_WEBKIT_SAFE_MODE=1 ./MyApp.AppImage
 ```
 
 **原因：**
-Pake 在 Wayland 下启用的 WebKitGTK workaround 可以缓解无 GPU 时的白屏，但在部分合成器上会导致输入和窗口控件不可用。X11 会话本来就不需要这组参数，默认走原生 WebKit 路径，强行启用反而会让视频播放崩溃。`PAKE_LINUX_WEBKIT_SAFE_MODE` 可以覆盖这两个默认值。
+Pake 在 Linux 上会设两个 WebKitGTK 变量，默认值不一样。`WEBKIT_DISABLE_DMABUF_RENDERER` 在所有会话下都开，因为它挡住的白屏在 X11 配 NVIDIA 闭源驱动时同样会出现。`WEBKIT_DISABLE_COMPOSITING_MODE` 只在 Wayland 下开，它解决的是无 GPU 时的白屏，而在 X11 上它没修好过任何东西，反而会让视频播放崩溃。`PAKE_LINUX_WEBKIT_SAFE_MODE` 一次覆盖两个：`1` 全开，`0` 全关。
 
 ---
 

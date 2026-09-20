@@ -308,7 +308,7 @@ PAKE_LINUX_WEBKIT_SAFE_MODE=1 ./MyApp.AppImage
 ```
 
 **Why This Happens:**
-On Wayland, Pake enables WebKitGTK workarounds that help blank-window cases without a GPU, but those same flags can make input and window controls unreliable on some compositors. X11 sessions never needed the workarounds and are left on the native WebKit path, where the flags would instead crash playback. The `PAKE_LINUX_WEBKIT_SAFE_MODE` variable overrides either default.
+Pake sets two WebKitGTK variables on Linux, and they have different defaults. `WEBKIT_DISABLE_DMABUF_RENDERER` is on everywhere, because the blank window it prevents also happens on X11 with the NVIDIA proprietary driver. `WEBKIT_DISABLE_COMPOSITING_MODE` is on for Wayland only, where it fixes a blank screen without a GPU; on X11 it never fixed anything and it crashes video playback instead. `PAKE_LINUX_WEBKIT_SAFE_MODE` overrides both at once: `1` forces both on, `0` turns both off.
 
 ---
 
