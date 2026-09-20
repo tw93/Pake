@@ -107,25 +107,51 @@ fn contains_niri(value: &str) -> bool {
         .any(|part| part.eq_ignore_ascii_case("niri"))
 }
 
+#[cfg(any(target_os = "linux", test))]
+fn is_niri_session(niri_socket: Option<&str>, desktop_values: &[Option<&str>]) -> bool {
+    is_non_empty_env_value(niri_socket)
+        || desktop_values
+            .iter()
+            .flatten()
+            .any(|value| contains_niri(value))
+}
+
 /// The two WebKit workarounds have different origins and therefore different
 /// scopes, which one gate cannot express.
 ///
 /// `WEBKIT_DISABLE_DMABUF_RENDERER` came from #1117 (96e57376) for Linux
 /// stability in general, three months before anything Wayland-specific, and
 /// upstream still reports the blank window it prevents on X11 with the NVIDIA
-/// proprietary driver (tauri-apps/tauri#9394). It stays on for every session.
+/// proprietary driver (tauri-apps/tauri#9394), so it stays on everywhere except
+/// niri.
+///
+/// niri is excepted because #1226 was fixed by dropping both variables, and on
+/// WebKitGTK 2.52 either one alone is enough to undo that: disabling the dmabuf
+/// renderer leaves `AcceleratedBackingStore::rendererBufferTransportMode` empty,
+/// `checkRequirements()` then returns false, and `HardwareAccelerationManager`
+/// clears `m_canUseHardwareAcceleration` through an OR. Setting only this one
+/// would put niri back in the state #1226 reported.
 #[cfg(any(target_os = "linux", test))]
-fn should_disable_dmabuf_renderer(safe_mode: Option<&str>) -> bool {
-    match safe_mode.filter(|value| !value.trim().is_empty()) {
-        Some(value) => !is_disabled_env_value(value),
-        None => true,
+fn should_disable_dmabuf_renderer(
+    safe_mode: Option<&str>,
+    niri_socket: Option<&str>,
+    desktop_values: &[Option<&str>],
+) -> bool {
+    if let Some(value) = safe_mode.filter(|value| !value.trim().is_empty()) {
+        return !is_disabled_env_value(value);
     }
+
+    !is_niri_session(niri_socket, desktop_values)
 }
 
 /// `WEBKIT_DISABLE_COMPOSITING_MODE` came from cb911ec7, for a blank screen on
-/// Wayland without a GPU. X11 never had that failure, and disabling compositing
-/// there segfaults WebKitGTK 2.52 as soon as a video decodes (#1374, Intel i915
-/// under i3), so this one is Wayland-only. niri keeps its existing exception.
+/// Wayland without a GPU. X11 never had that failure, so this one is
+/// Wayland-only, with the same niri exception.
+///
+/// It is not on its own what segfaults playback in #1374. Both variables reach
+/// the same boolean on WebKitGTK 2.52, so the state that crashes is hardware
+/// acceleration being off, whichever variable turned it off. Narrowing this one
+/// changed nothing on X11 while the dmabuf flag still applied there.
 /// `PAKE_LINUX_WEBKIT_SAFE_MODE` still forces or suppresses both anywhere.
 #[cfg(any(target_os = "linux", test))]
 fn should_disable_compositing_mode(
@@ -152,13 +178,7 @@ fn should_disable_compositing_mode(
         return false;
     }
 
-    let is_niri_session = is_non_empty_env_value(niri_socket)
-        || desktop_values
-            .iter()
-            .flatten()
-            .any(|value| contains_niri(value));
-
-    !is_niri_session
+    !is_niri_session(niri_socket, desktop_values)
 }
 
 #[cfg(any(target_os = "linux", test))]
@@ -208,7 +228,9 @@ fn apply_linux_webkit_runtime_flags() {
         .map(|value| value.as_deref())
         .collect::<Vec<_>>();
 
-    if should_disable_dmabuf_renderer(safe_mode.as_deref())
+    let niri_socket = std::env::var("NIRI_SOCKET").ok();
+
+    if should_disable_dmabuf_renderer(safe_mode.as_deref(), niri_socket.as_deref(), &desktop_refs)
         && std::env::var(WEBKIT_DISABLE_DMABUF_RENDERER).is_err()
     {
         std::env::set_var(WEBKIT_DISABLE_DMABUF_RENDERER, "1");
@@ -216,7 +238,7 @@ fn apply_linux_webkit_runtime_flags() {
 
     if should_disable_compositing_mode(
         safe_mode.as_deref(),
-        std::env::var("NIRI_SOCKET").ok().as_deref(),
+        niri_socket.as_deref(),
         std::env::var("WAYLAND_DISPLAY").ok().as_deref(),
         std::env::var(GDK_BACKEND).ok().as_deref(),
         &desktop_refs,
@@ -508,30 +530,63 @@ mod tests {
     }
 
     #[test]
-    fn dmabuf_renderer_stays_disabled_on_every_session() {
+    fn dmabuf_renderer_stays_disabled_outside_niri() {
         // #1117 was never Wayland-scoped, and upstream still reports the blank
         // window it prevents on X11 with the NVIDIA proprietary driver.
-        assert!(should_disable_dmabuf_renderer(None));
-        assert!(should_disable_dmabuf_renderer(Some("1")));
+        let none = [None, None, None];
+        assert!(should_disable_dmabuf_renderer(None, None, &none));
+        assert!(should_disable_dmabuf_renderer(Some("1"), None, &none));
     }
 
     #[test]
     fn dmabuf_renderer_can_be_re_enabled_explicitly() {
+        let none = [None, None, None];
         for value in ["0", "false", "off", "no", "native", "disabled"] {
             assert!(
-                !should_disable_dmabuf_renderer(Some(value)),
+                !should_disable_dmabuf_renderer(Some(value), None, &none),
                 "expected {value} to restore the dmabuf renderer"
             );
         }
     }
 
     #[test]
-    fn x11_keeps_dmabuf_disabled_but_keeps_compositing() {
-        // The exact shape of #1374: an X11 session gets the stability flag it
-        // has had since #1117, and does not get the compositing flag that
-        // segfaults playback there.
+    fn dmabuf_renderer_is_kept_for_niri_socket() {
+        // #1226 was fixed by dropping both variables. Either one alone puts a
+        // niri session back into the state it reported, because both reach the
+        // same hardware-acceleration boolean in WebKitGTK 2.52.
+        assert!(!should_disable_dmabuf_renderer(
+            None,
+            Some("/run/user/501/niri.sock"),
+            &[None, None, None]
+        ));
+    }
+
+    #[test]
+    fn dmabuf_renderer_is_kept_for_niri_desktop() {
+        assert!(!should_disable_dmabuf_renderer(
+            None,
+            None,
+            &[Some("niri"), None, None]
+        ));
+    }
+
+    #[test]
+    fn dmabuf_renderer_can_be_forced_on_for_niri() {
+        assert!(should_disable_dmabuf_renderer(
+            Some("1"),
+            Some("/run/user/501/niri.sock"),
+            &[Some("niri"), None, None]
+        ));
+    }
+
+    #[test]
+    fn x11_keeps_dmabuf_disabled_and_skips_compositing() {
+        // The shape of #1374: an X11 session still gets the stability flag it
+        // has had since #1117, and does not get the compositing one. Both clear
+        // the same hardware-acceleration boolean, so leaving compositing unset
+        // here does not by itself restore acceleration.
         let desktop = [Some("i3"), None, None];
-        assert!(should_disable_dmabuf_renderer(None));
+        assert!(should_disable_dmabuf_renderer(None, None, &desktop));
         assert!(!should_disable_compositing_mode(
             None, None, None, None, &desktop
         ));

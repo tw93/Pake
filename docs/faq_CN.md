@@ -305,7 +305,7 @@ PAKE_LINUX_WEBKIT_SAFE_MODE=1 ./MyApp.AppImage
 ```
 
 **原因：**
-Pake 在 Linux 上会设两个 WebKitGTK 变量，默认值不一样。`WEBKIT_DISABLE_DMABUF_RENDERER` 在所有会话下都开，因为它挡住的白屏在 X11 配 NVIDIA 闭源驱动时同样会出现。`WEBKIT_DISABLE_COMPOSITING_MODE` 只在 Wayland 下开，它解决的是无 GPU 时的白屏，而在 X11 上它没修好过任何东西，反而会让视频播放崩溃。`PAKE_LINUX_WEBKIT_SAFE_MODE` 一次覆盖两个：`1` 全开，`0` 全关。
+Pake 在 Linux 上会设两个 WebKitGTK 变量。`WEBKIT_DISABLE_DMABUF_RENDERER` 除 niri 外都开，因为它挡住的白屏在 X11 配 NVIDIA 闭源驱动时同样会出现。`WEBKIT_DISABLE_COMPOSITING_MODE` 只在 Wayland 下开，它解决的是无 GPU 时的白屏。在 WebKitGTK 2.52 上这两个变量落到同一个开关，任意一个单独打开都会关掉硬件加速，所以真正起作用的是 `PAKE_LINUX_WEBKIT_SAFE_MODE`：`1` 全开，`0` 全关。
 
 ---
 
