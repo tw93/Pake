@@ -83,7 +83,34 @@ impl MultiWindowState {
 
     fn next_window_label(&self) -> String {
         let index = self.next_window_index.fetch_add(1, Ordering::Relaxed) + 1;
-        format!("pake-{index}")
+        format!("{SECONDARY_WINDOW_LABEL_PREFIX}{index}")
+    }
+}
+
+/// Secondary windows (Cmd+N clones, `--new-window` popups, blank two-stage
+/// popups) take `pake-N` labels. `capabilities/default.json` must cover them
+/// with a matching glob: an uncovered label has every IPC call denied, so
+/// external links, downloads and toasts silently stop working there.
+const SECONDARY_WINDOW_LABEL_PREFIX: &str = "pake-";
+
+#[cfg(test)]
+mod capability_tests {
+    use super::SECONDARY_WINDOW_LABEL_PREFIX;
+
+    #[test]
+    fn the_capability_covers_secondary_window_labels() {
+        let capability: serde_json::Value =
+            serde_json::from_str(include_str!("../../capabilities/default.json"))
+                .expect("capabilities/default.json should be valid JSON");
+        let webviews: Vec<&str> = capability["webviews"]
+            .as_array()
+            .expect("the capability should list its webviews")
+            .iter()
+            .filter_map(|entry| entry.as_str())
+            .collect();
+
+        assert!(webviews.contains(&"pake"));
+        assert!(webviews.contains(&format!("{SECONDARY_WINDOW_LABEL_PREFIX}*").as_str()));
     }
 }
 
