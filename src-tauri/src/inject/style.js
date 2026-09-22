@@ -152,6 +152,12 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       z-index: 1 !important;
     }
 
+    /* Keep Grok quote cards inside the column, including long author names. */
+    #react-root [data-testid="primaryColumn"] [aria-label="Grok"]
+      div:has(> div > div[role="link"]) {
+      max-width: 100% !important;
+    }
+
     @media only screen and (min-width: 1000px) {
       #react-root main[role="main"] {
         align-items: center !important;
