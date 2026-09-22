@@ -125,7 +125,7 @@ Build takes ~40s with cache, ~2min cold; the very first build on a fresh machine
 | Platform | Status    | Notes                                                                |
 | -------- | --------- | -------------------------------------------------------------------- |
 | Windows  | Full      | Via `--proxy-server` browser arg                                     |
-| Linux    | Full      | Via `--proxy-server` browser arg                                     |
+| Linux    | Full      | Via Tauri native `proxy_url`                                         |
 | macOS    | macOS 14+ | Uses Tauri native `macos-proxy` feature; auto-detected at build time |
 
 ### Chrome extensions
