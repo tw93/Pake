@@ -818,6 +818,14 @@ fn build_window(
 
     let window = window_builder.build()?;
 
+    // The tab bar's + button exists only while some window class answers
+    // `newWindowForTab:`. Install it for every tabbing window, the main one
+    // included: its tab bar is the one the user sees first.
+    #[cfg(target_os = "macos")]
+    if use_native_window_tabbing {
+        crate::app::tab_bar::install_new_tab_action(app, &window);
+    }
+
     // A shared identifier alone leaves each NSWindow in automatic mode.
     // Prefer tabs only for Cmd+N clones so they join the main window's tab
     // group. The main window stays bar-less until another tab exists, while
