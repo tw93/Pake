@@ -3,6 +3,7 @@ import path from 'path';
 import { PakeError } from './error';
 import { InvalidArgumentError } from 'commander';
 import { normalizeUrl } from './url';
+import { PakeCliOptions } from '../types';
 
 export function validateNumberInput(value: string) {
   if (value.trim() === '') {
@@ -69,3 +70,73 @@ export function validateDownloadDirInput(value: string): string {
   }
   return value;
 }
+
+/**
+ * Validates that mutually exclusive CLI options are not used together.
+ * Throws PakeError with INVALID_INPUT code if conflicts are detected.
+ */
+export function validateMutuallyExclusiveFlags(
+  options: Partial<PakeCliOptions>,
+): void {
+  // --fullscreen conflicts with explicit size settings (width, height, min-width, min-height)
+  if (options.fullscreen) {
+    if (options.width !== undefined && options.width !== 1200) {
+      throw new PakeError(
+        '"--fullscreen" and "--width" cannot be used together.',
+        {
+          code: 'INVALID_INPUT',
+          hint: 'Remove "--width" or use "--maximize" for adaptive sizing instead.',
+        },
+      );
+    }
+    if (options.height !== undefined && options.height !== 780) {
+      throw new PakeError(
+        '"--fullscreen" and "--height" cannot be used together.',
+        {
+          code: 'INVALID_INPUT',
+          hint: 'Remove "--height" or use "--maximize" for adaptive sizing instead.',
+        },
+      );
+    }
+    if (options.minWidth !== undefined && options.minWidth !== 0) {
+      throw new PakeError(
+        '"--fullscreen" and "--min-width" cannot be used together.',
+        {
+          code: 'INVALID_INPUT',
+          hint: 'Remove "--min-width" since fullscreen ignores size constraints.',
+        },
+      );
+    }
+    if (options.minHeight !== undefined && options.minHeight !== 0) {
+      throw new PakeError(
+        '"--fullscreen" and "--min-height" cannot be used together.',
+        {
+          code: 'INVALID_INPUT',
+          hint: 'Remove "--min-height" since fullscreen ignores size constraints.',
+        },
+      );
+    }
+    // --fullscreen and --maximize are both window fill modes
+    if (options.maximize) {
+      throw new PakeError(
+        '"--fullscreen" and "--maximize" cannot be used together.',
+        {
+          code: 'INVALID_INPUT',
+          hint: 'Use only "--fullscreen" to start the app in fullscreen mode.',
+        },
+      );
+    }
+  }
+
+  // --start-to-tray conflicts with --maximize (can't maximize hidden window)
+  if (options.startToTray && options.maximize) {
+    throw new PakeError(
+      '"--start-to-tray" and "--maximize" cannot be used together.',
+      {
+        code: 'INVALID_INPUT',
+        hint: 'Remove "--maximize" since the window starts hidden to tray.',
+      },
+    );
+  }
+}
+

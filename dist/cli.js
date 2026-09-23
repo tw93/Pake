@@ -3586,6 +3586,53 @@ function validateDownloadDirInput(value) {
     }
     return value;
 }
+/**
+ * Validates that mutually exclusive CLI options are not used together.
+ * Throws PakeError with INVALID_INPUT code if conflicts are detected.
+ */
+function validateMutuallyExclusiveFlags(options) {
+    // --fullscreen conflicts with explicit size settings (width, height, min-width, min-height)
+    if (options.fullscreen) {
+        if (options.width !== undefined && options.width !== 1200) {
+            throw new PakeError('"--fullscreen" and "--width" cannot be used together.', {
+                code: 'INVALID_INPUT',
+                hint: 'Remove "--width" or use "--maximize" for adaptive sizing instead.',
+            });
+        }
+        if (options.height !== undefined && options.height !== 780) {
+            throw new PakeError('"--fullscreen" and "--height" cannot be used together.', {
+                code: 'INVALID_INPUT',
+                hint: 'Remove "--height" or use "--maximize" for adaptive sizing instead.',
+            });
+        }
+        if (options.minWidth !== undefined && options.minWidth !== 0) {
+            throw new PakeError('"--fullscreen" and "--min-width" cannot be used together.', {
+                code: 'INVALID_INPUT',
+                hint: 'Remove "--min-width" since fullscreen ignores size constraints.',
+            });
+        }
+        if (options.minHeight !== undefined && options.minHeight !== 0) {
+            throw new PakeError('"--fullscreen" and "--min-height" cannot be used together.', {
+                code: 'INVALID_INPUT',
+                hint: 'Remove "--min-height" since fullscreen ignores size constraints.',
+            });
+        }
+        // --fullscreen and --maximize are both window fill modes
+        if (options.maximize) {
+            throw new PakeError('"--fullscreen" and "--maximize" cannot be used together.', {
+                code: 'INVALID_INPUT',
+                hint: 'Use only "--fullscreen" to start the app in fullscreen mode.',
+            });
+        }
+    }
+    // --start-to-tray conflicts with --maximize (can't maximize hidden window)
+    if (options.startToTray && options.maximize) {
+        throw new PakeError('"--start-to-tray" and "--maximize" cannot be used together.', {
+            code: 'INVALID_INPUT',
+            hint: 'Remove "--maximize" since the window starts hidden to tray.',
+        });
+    }
+}
 
 function getCliProgram() {
     const { green, yellow } = chalk;
@@ -3977,6 +4024,7 @@ program.action(async (urlArg, options) => {
             }
         }
         validateDownloadDirInput(options.downloadDir);
+        validateMutuallyExclusiveFlags(options);
         if (!url) {
             if (jsonMode) {
                 throw new PakeError('No URL or local path to package.', {
