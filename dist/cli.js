@@ -1102,6 +1102,7 @@ Icon=${linuxBinaryName}
 Categories=Network;WebBrowser;Utility;
 MimeType=text/html;text/xml;application/xhtml_xml;
 StartupNotify=true
+StartupWMClass=${linuxBinaryName}
 Terminal=false
 `;
 }

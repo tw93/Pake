@@ -15,6 +15,16 @@ describe('buildLinuxDesktopContent', () => {
     expect(desktopContent).not.toContain('Icon=example-app_512');
   });
 
+  it('sets StartupWMClass so docks match the running window to the entry', () => {
+    const desktopContent = buildLinuxDesktopContent(
+      'YouTube',
+      undefined,
+      'pake-youtube',
+    );
+
+    expect(desktopContent).toContain('StartupWMClass=pake-youtube');
+  });
+
   it('keeps the localized Chinese name when title contains Chinese text', () => {
     const desktopContent = buildLinuxDesktopContent(
       'MiaoYan',
