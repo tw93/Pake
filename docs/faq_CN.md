@@ -305,7 +305,7 @@ PAKE_LINUX_WEBKIT_SAFE_MODE=1 ./MyApp.AppImage
 ```
 
 **原因：**
-在 X11 和 WebKitGTK 2.52 及以上版本上，Pake 默认使用共享内存渲染（`WEBKIT_DMABUF_RENDERER_FORCE_SHM=1`），保留视频需要的渲染缓冲；旧版 WebKitGTK 和 Wayland 沿用现有兼容参数，niri 保持原生渲染，手动设置的 WebKit 参数也会保留。`PAKE_LINUX_WEBKIT_SAFE_MODE=1` 切回原来的保守模式，`0` 则移除两个禁用参数，不再自动添加兼容参数。
+在 WebKitGTK 2.52 及以上版本上，X11 和 Wayland 都默认使用共享内存渲染（`WEBKIT_DMABUF_RENDERER_FORCE_SHM=1`），保留视频需要的硬件加速；旧版 WebKitGTK 沿用现有兼容参数，niri 保持原生渲染，手动设置的 WebKit 参数也会保留。`PAKE_LINUX_WEBKIT_SAFE_MODE=1` 切回原来的保守模式，`0` 则移除两个禁用参数，不再自动添加兼容参数。
 
 ---
 

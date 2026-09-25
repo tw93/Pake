@@ -182,19 +182,17 @@ fn should_disable_compositing_mode(
     !is_niri_session(niri_socket, desktop_values)
 }
 
-// Limit the replacement to the reported WebKitGTK generation and X11 path.
-// Older WebKit and Wayland keep their existing workarounds; niri stays native.
+// On WebKitGTK 2.52+, SHM replaces both legacy flags on X11 and Wayland:
+// either flag turns hardware acceleration off, which crashes video playback
+// (#1374 on X11, #1386 on GNOME Wayland) and makes Wayland sluggish (#1192).
+// Older WebKit keeps its existing workarounds; niri stays native.
 #[cfg(any(target_os = "linux", test))]
 fn should_use_shm_renderer(
     webkit_version: (u32, u32),
     safe_mode: Option<&str>,
     disable_dmabuf: bool,
-    disable_compositing: bool,
 ) -> bool {
-    webkit_version >= (2, 52)
-        && !is_non_empty_env_value(safe_mode)
-        && disable_dmabuf
-        && !disable_compositing
+    webkit_version >= (2, 52) && !is_non_empty_env_value(safe_mode) && disable_dmabuf
 }
 
 #[cfg(any(target_os = "linux", test))]
@@ -263,16 +261,12 @@ fn apply_linux_webkit_runtime_flags() {
             webkit2gtk::ffi::webkit_get_minor_version(),
         )
     };
-    if should_use_shm_renderer(
-        webkit_version,
-        safe_mode.as_deref(),
-        disable_dmabuf,
-        disable_compositing,
-    ) && std::env::var_os(WEBKIT_DISABLE_DMABUF_RENDERER).is_none()
+    if should_use_shm_renderer(webkit_version, safe_mode.as_deref(), disable_dmabuf)
+        && std::env::var_os(WEBKIT_DISABLE_DMABUF_RENDERER).is_none()
         && std::env::var_os(WEBKIT_DISABLE_COMPOSITING_MODE).is_none()
     {
         // Unlike disabling the renderer, SHM keeps the backing store available
-        // for video while avoiding hardware-buffer imports (#1374).
+        // for video while avoiding hardware-buffer imports (#1374, #1386).
         if std::env::var_os(WEBKIT_DMABUF_RENDERER_FORCE_SHM).is_none() {
             std::env::set_var(WEBKIT_DMABUF_RENDERER_FORCE_SHM, "1");
         }
@@ -655,37 +649,45 @@ mod tests {
     #[test]
     fn modern_x11_uses_shm_without_disabling_the_backing_store() {
         let desktop = [Some("i3"), None, None];
-        for (wayland, backend) in [(None, None), (Some("wayland-0"), Some("x11"))] {
-            assert!(should_use_shm_renderer(
-                (2, 52),
-                None,
-                should_disable_dmabuf_renderer(None, None, &desktop),
-                should_disable_compositing_mode(None, None, wayland, backend, &desktop),
-            ));
-        }
-        assert!(should_use_shm_renderer((2, 52), Some(" "), true, false));
-    }
-
-    #[test]
-    fn shm_preserves_legacy_wayland_niri_and_explicit_modes() {
-        assert!(!should_use_shm_renderer((2, 50), None, true, false));
-        assert!(!should_use_shm_renderer((2, 38), None, true, false));
-        let desktop = [None, None, None];
-        assert!(!should_use_shm_renderer(
+        assert!(should_use_shm_renderer(
             (2, 52),
             None,
             should_disable_dmabuf_renderer(None, None, &desktop),
-            should_disable_compositing_mode(None, None, Some("wayland-0"), None, &desktop),
         ));
+        assert!(should_use_shm_renderer((2, 52), Some(" "), true));
+    }
+
+    #[test]
+    fn modern_wayland_uses_shm_instead_of_disabling_compositing() {
+        // The shape of #1386: GNOME Wayland on WebKitGTK 2.52 got both legacy
+        // flags, which turn hardware acceleration off and crash video.
+        let desktop = [Some("GNOME"), None, None];
+        assert!(should_disable_compositing_mode(
+            None,
+            None,
+            Some("wayland-0"),
+            None,
+            &desktop
+        ));
+        assert!(should_use_shm_renderer(
+            (2, 52),
+            None,
+            should_disable_dmabuf_renderer(None, None, &desktop),
+        ));
+    }
+
+    #[test]
+    fn shm_preserves_legacy_webkit_niri_and_explicit_modes() {
+        assert!(!should_use_shm_renderer((2, 50), None, true));
+        assert!(!should_use_shm_renderer((2, 38), None, true));
         let niri = [Some("niri"), None, None];
         assert!(!should_use_shm_renderer(
             (2, 52),
             None,
             should_disable_dmabuf_renderer(None, None, &niri),
-            should_disable_compositing_mode(None, None, Some("wayland-0"), None, &niri),
         ));
         for mode in ["0", "false", "1", "true"] {
-            assert!(!should_use_shm_renderer((2, 52), Some(mode), true, false));
+            assert!(!should_use_shm_renderer((2, 52), Some(mode), true));
         }
     }
 

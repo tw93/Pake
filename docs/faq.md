@@ -308,7 +308,7 @@ PAKE_LINUX_WEBKIT_SAFE_MODE=1 ./MyApp.AppImage
 ```
 
 **Why This Happens:**
-On X11 with WebKitGTK 2.52 or later, Pake uses shared-memory rendering (`WEBKIT_DMABUF_RENDERER_FORCE_SHM=1`) instead of disabling the renderer, preserving the backing store needed for video. Older WebKitGTK versions and Wayland keep the existing compatibility flags; niri keeps native rendering. Explicit WebKit variables are respected. `PAKE_LINUX_WEBKIT_SAFE_MODE=1` selects the old conservative mode, while `0` removes the two disabling flags and skips automatic workarounds.
+With WebKitGTK 2.52 or later, on both X11 and Wayland, Pake uses shared-memory rendering (`WEBKIT_DMABUF_RENDERER_FORCE_SHM=1`) instead of disabling the renderer, preserving the hardware acceleration needed for video. Older WebKitGTK versions keep the existing compatibility flags; niri keeps native rendering. Explicit WebKit variables are respected. `PAKE_LINUX_WEBKIT_SAFE_MODE=1` selects the old conservative mode, while `0` removes the two disabling flags and skips automatic workarounds.
 
 ---
 
