@@ -1,6 +1,6 @@
 # AGENTS.md - Pake Project Knowledge Base
 
-> Project-specific Rust + Tauri rules: `.claude/rules/rust.md`. Skills live under `.agents/skills/` (`/release`, `/bugs`, `/github-ops`, `/code-review`; `.claude/skills/*` are symlinks into `.agents/skills/`, edit the `.agents` copy only). Exception: the `pake` skill's real source is `plugins/pake/skills/pake/SKILL.md` (shipped to users via the Claude Code and Codex plugin marketplaces, `.claude-plugin/marketplace.json` and `.agents/plugins/marketplace.json`); `.agents/skills/pake` is a symlink to it.
+> Project-specific Rust + Tauri rules: `.claude/rules/rust.md`. Skills live under `.agents/skills/` (`/release`; `.claude/skills/*` are symlinks into `.agents/skills/`, edit the `.agents` copy only). Exception: the `pake` skill's real source is `plugins/pake/skills/pake/SKILL.md` (shipped to users via the Claude Code and Codex plugin marketplaces, `.claude-plugin/marketplace.json` and `.agents/plugins/marketplace.json`); `.agents/skills/pake` is a symlink to it.
 
 ## Project Identity
 
@@ -24,7 +24,7 @@ Pake/
 │   ├── Cargo.toml        # Rust dependencies and version
 │   ├── tauri.conf.json   # Tauri configuration and version
 │   └── .cargo/           # Cargo configuration (gitignored)
-├── .agents/skills/        # Agent skills (/release, /bugs, /github-ops, /code-review); .claude/skills/* symlinks here
+├── .agents/skills/        # Agent skills (/release); .claude/skills/* symlinks here
 ├── dist/                 # Compiled CLI output
 ├── docs/                 # Documentation
 │   ├── cli-usage.md      # CLI parameters
@@ -72,9 +72,17 @@ Goals and project facts only; trust the agent to find its own path.
 - Generated areas (`dist/`, `node_modules/`, `src-tauri/target/`, `.app/`, `src-tauri/icons/`, `src-tauri/png/`) are not source. Exception: `dist/cli.js` is the shipped CLI build artifact (see `package.json` `files`); rebuild it via `pnpm run cli:build` and commit the regenerated file alongside the source change. Two things trigger a rebuild, not one: any change under `bin/`, and **any** change to `package.json`. Rollup inlines the whole manifest, so a dependency bump, a `pnpm.overrides` edit, an `engines` change, or a reworded `description` all leave `dist/cli.js` stale with no `bin/` diff to hint at it. Dependency-only PRs are the usual place this is missed.
 - Release status, issue closeout, npm delivery, and GitHub assets are separate truth surfaces. Verify each one live (source commit/tag, workflow run, npm registry, GitHub Release/assets, issue state); never let one passing surface imply another.
 
-## Hotspot Map (for `/bugs`)
+## Review Hard Stops
 
-Proactive latent-bug sweeps use `.agents/skills/bugs/SKILL.md`. Pick one row and go deep; do not invent a whole-repo scope. The third column is **historical failure modes / regression risks**, not a claim that the tree is broken today. Prefer the matching Current Risk Areas invariant when judging a change.
+Beyond the rebuild, version-sync, surface, CLI-flag, WebKit, and popup-routing invariants in this file and `.claude/rules/rust.md`, a review blocks on:
+
+- npm release workflow changes that drop Trusted Publishing: `.github/workflows/npm-publish.yml`, `id-token: write`, canonical `git+https://github.com/tw93/Pake.git`, and `scripts/check-release-version.mjs` must survive.
+- A new helper in `bin/utils/` or `bin/helpers/` without a matching `tests/unit/<basename>.test.ts`.
+- A binary parser without a round-trip test.
+
+## Hotspot Map
+
+For proactive latent-bug sweeps, pick one row and go deep; do not invent a whole-repo scope. The third column is **historical failure modes / regression risks**, not a claim that the tree is broken today. Prefer the matching Current Risk Areas invariant when judging a change.
 
 | Hotspot                    | Paths                                  | Regression risk if reintroduced                                                            |
 | -------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------ |
@@ -87,6 +95,8 @@ Proactive latent-bug sweeps use `.agents/skills/bugs/SKILL.md`. Pick one row and
 | Multi-window / icon        | `window.rs`, `setup.rs`                | Missing `reapply_window_icon` on show; secondary window toast/target; Cmd+N blank flash    |
 | Platform capability        | `auth.rs`, proxy, WebKit flags         | Flag name present, platform no-op                                                          |
 | CLI / config contract      | `bin/`, `schema/`                      | Config smuggles out-of-range values CLI rejects                                            |
+
+Oracles per row live under `tests/unit/` (for example `event-link-guard.test.js`, `download-http-status.test.ts`, `menu-focused-window.test.ts`, `startup-window-reveal.test.ts`, `window-icon-reapply.test.ts`); Linux WebKit flag decisions are covered by the `dmabuf_renderer_*` and `legacy_x11_*` `cargo test` cases in `src-tauri/src/lib.rs`.
 
 ## Current Risk Areas
 

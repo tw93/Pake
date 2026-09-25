@@ -1,1 +1,0 @@
-../../.agents/skills/code-review
