@@ -72,6 +72,7 @@ jobs:
         uses: ./.github/actions/setup-env
         with:
           mode: build
+          rust-cache-save: false
 
       - name: Install Rust components
         shell: bash
@@ -89,6 +90,9 @@ jobs:
 
       - name: Run Clippy lints
         run: cargo hack --feature-powerset --exclude-features cli-build --no-dev-deps clippy # cspell:disable-line
+
+      - name: Run Rust unit tests
+        run: cargo test --lib
 
   # Fast lane: runs on every PR and push. Skips the heavy real Tauri build
   # (kept under tests/index.js) but still covers Vitest + integration suites
@@ -108,6 +112,7 @@ jobs:
         uses: ./.github/actions/setup-env
         with:
           mode: build
+          rust-cache-save: false
 
       - name: Build CLI
         run: pnpm run cli:build

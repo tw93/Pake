@@ -10,6 +10,13 @@ inputs:
       - rust: Rust only (toolchain + targets)
     required: false
     default: "build"
+  rust-cache-save:
+    description: |
+      Whether this job may save the shared Rust cache. Jobs that do not compile
+      the Tauri app must pass "false": the first save wins the key, and a
+      target without compiled artifacts would be restored as a full match.
+    required: false
+    default: "true"
 
 outputs:
   setup-complete:
@@ -146,21 +153,12 @@ runs:
           echo $wixPath >> $env:GITHUB_PATH
         }
 
-    # Build optimizations (caching)
-    - name: Setup sccache
-      if: inputs.mode == 'build'
-      uses: mozilla-actions/sccache-action@v0.0.9
-
-    - name: Enable sccache
-      if: inputs.mode == 'build'
-      shell: bash
-      run: |
-        echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
-        echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
-
+    # Build optimizations (caching). No sccache: its per-crate cache entries hit
+    # GitHub's cache rate limit (HTTP 429) when a release starts 48 jobs at once.
     - name: Setup Rust cache
       if: inputs.mode == 'build'
       uses: swatinem/rust-cache@v2
       with:
         workspaces: "src-tauri -> target"
-        shared-key: "pake-${{ runner.os }}"
+        shared-key: "pake-build-${{ runner.os }}"
+        save-if: ${{ inputs.rust-cache-save == 'true' }}
