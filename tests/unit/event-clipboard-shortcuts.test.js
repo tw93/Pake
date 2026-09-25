@@ -69,7 +69,8 @@ function loadEventHelpers({
     URL,
     // Main-realm Date so tests can shift time seen by the fallback TTL.
     Date,
-    Event: class {},
+    Event,
+    EventTarget,
     Notification: function Notification() {},
     setTimeout,
     clearTimeout,

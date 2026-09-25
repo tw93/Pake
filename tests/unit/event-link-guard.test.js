@@ -60,7 +60,8 @@ function loadEventHelpers({
   const context = {
     console,
     URL,
-    Event: class {},
+    Event,
+    EventTarget,
     Notification: function Notification() {},
     setTimeout,
     clearTimeout,
@@ -776,6 +777,8 @@ describe("event link guard", () => {
         "send_notification",
         {
           params: {
+            // Correlates the native click callback back to this instance.
+            id: expect.stringMatching(/^[A-Za-z0-9_-]{1,64}$/),
             title: "Hello",
             body: "World",
             icon: "https://example.com/icon.png",

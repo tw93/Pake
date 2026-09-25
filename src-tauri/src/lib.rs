@@ -402,6 +402,10 @@ pub fn run_app() {
                 tauri_config.clone(),
             ));
 
+            // Main thread: installs the native notification-click delegate so a
+            // click can be routed back to the page that raised the notification.
+            app::notification::init_native_click(app.app_handle());
+
             // --- Menu Construction Start ---
             #[cfg(target_os = "macos")]
             {

@@ -65,7 +65,8 @@ function loadEventHelpers({
   const context = {
     console,
     URL,
-    Event: class {},
+    Event,
+    EventTarget,
     Notification: function Notification() {},
     setTimeout,
     clearTimeout,
