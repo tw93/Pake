@@ -6,4 +6,6 @@ pub mod invoke;
 pub mod menu;
 pub mod navigation;
 pub mod setup;
+#[cfg(target_os = "macos")]
+pub mod tab_bar;
 pub mod window;
