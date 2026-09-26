@@ -63,8 +63,6 @@ fn history_step_platform(webview: &tauri::webview::PlatformWebview, back: bool) 
 
 #[cfg(windows)]
 fn history_step_platform(webview: &tauri::webview::PlatformWebview, back: bool) {
-    use webview2_com::Microsoft::Web::WebView2::Win32::ICoreWebView2Controller;
-
     let controller = webview.controller();
     unsafe {
         // ICoreWebView2Controller::CoreWebView2 returns the underlying browser.
