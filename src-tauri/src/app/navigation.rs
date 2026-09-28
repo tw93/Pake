@@ -31,6 +31,30 @@ pub fn history_step(window: &WebviewWindow, back: bool) {
     }
 }
 
+/// Enable WebView2's profile-owned password manager for persistent windows.
+///
+/// This deliberately configures the app's own WebView2 profile; it does not
+/// access or share credentials with a Microsoft Edge profile.
+#[cfg(windows)]
+pub fn enable_password_autosave(webview: &tauri::webview::PlatformWebview) {
+    use webview2_com::Microsoft::Web::WebView2::Win32::{ICoreWebView2Profile6, ICoreWebView2_13};
+    use windows_core::Interface;
+
+    let controller = webview.controller();
+    let result = unsafe {
+        controller
+            .CoreWebView2()
+            .and_then(|core| core.cast::<ICoreWebView2_13>())
+            .and_then(|core| core.Profile())
+            .and_then(|profile| profile.cast::<ICoreWebView2Profile6>())
+            .and_then(|profile| profile.SetIsPasswordAutosaveEnabled(true))
+    };
+
+    if let Err(error) = result {
+        eprintln!("[Pake] Failed to enable WebView2 password autosave: {error}");
+    }
+}
+
 #[cfg(target_os = "macos")]
 fn history_step_platform(webview: &tauri::webview::PlatformWebview, back: bool) {
     use objc2::msg_send;
@@ -63,8 +87,6 @@ fn history_step_platform(webview: &tauri::webview::PlatformWebview, back: bool) 
 
 #[cfg(windows)]
 fn history_step_platform(webview: &tauri::webview::PlatformWebview, back: bool) {
-    use webview2_com::Microsoft::Web::WebView2::Win32::ICoreWebView2Controller;
-
     let controller = webview.controller();
     unsafe {
         // ICoreWebView2Controller::CoreWebView2 returns the underlying browser.

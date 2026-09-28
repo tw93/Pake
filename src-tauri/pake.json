@@ -15,6 +15,7 @@
       "disabled_web_shortcuts": false,
       "hide_on_close": true,
       "incognito": false,
+      "password_autosave": false,
       "enable_wasm": false,
       "enable_drag_drop": false,
       "maximize": false,

@@ -18,6 +18,8 @@ pub struct WindowConfig {
     pub activation_shortcut: String,
     pub hide_on_close: bool,
     pub incognito: bool,
+    #[serde(default)]
+    pub password_autosave: bool,
     pub title: Option<String>,
     pub enable_wasm: bool,
     pub enable_drag_drop: bool,
