@@ -1,13 +1,18 @@
 import path from 'path';
+import fsExtra from 'fs-extra';
 import BaseBuilder from './BaseBuilder';
 import { PakeAppOptions } from '@/types';
 import { generateIdentifierSafeName } from '@/utils/name';
 import type { ShellCommand } from '@/utils/shell';
+import logger from '@/options/logger';
+
+const WEBVIEW2_LOADER_DLL = 'WebView2Loader.dll';
 
 export default class WinBuilder extends BaseBuilder {
   private buildFormat: string = 'msi';
   private buildArch: string;
   private toolchain: 'msvc' | 'gnu';
+  private keptLoaderDllPath: string | null = null;
 
   // MSYS2/MinGW only ships an x86_64 GCC toolchain, so gnu is x64-only;
   // arm64 falls through to getTauriTarget returning null, which the
@@ -91,5 +96,45 @@ export default class WinBuilder extends BaseBuilder {
 
   protected getBinaryName(appName: string): string {
     return `pake-${generateIdentifierSafeName(appName)}.exe`;
+  }
+
+  protected async copyRawBinary(
+    npmDirectory: string,
+    appName: string,
+  ): Promise<void> {
+    await super.copyRawBinary(npmDirectory, appName);
+    if (this.toolchain !== 'gnu') return;
+
+    // GNU builds import WebView2Loader.dll at runtime (MSVC links
+    // WebView2LoaderStatic); tauri-build places it beside the binary and the
+    // MSI bundles it, so the kept .exe needs it beside it too.
+    const src = path.join(
+      path.dirname(this.getRawBinarySourcePath(npmDirectory, appName)),
+      WEBVIEW2_LOADER_DLL,
+    );
+    const dest = path.join(
+      path.dirname(path.resolve(this.getRawBinaryPath(appName))),
+      WEBVIEW2_LOADER_DLL,
+    );
+    if (await fsExtra.pathExists(src)) {
+      await fsExtra.copy(src, dest);
+      this.keptLoaderDllPath = dest;
+    } else {
+      logger.warn(
+        `✼ ${WEBVIEW2_LOADER_DLL} not found at ${src}; the raw binary will not start without it.`,
+      );
+    }
+  }
+
+  protected async copyBuildArtifacts(target: string, logSuccess = true) {
+    await super.copyBuildArtifacts(target, logSuccess);
+    if (!this.keptLoaderDllPath) return;
+
+    await this.recordArtifact(this.keptLoaderDllPath, 'dll');
+    if (logSuccess) {
+      logger.success(
+        `✔ ${WEBVIEW2_LOADER_DLL} copied beside it — keep them together`,
+      );
+    }
   }
 }
