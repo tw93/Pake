@@ -386,6 +386,8 @@ describe("event link guard", () => {
           url: "https://github.com/owner/repo/releases/download/v1.28.3/app.dmg",
           filename: "app.dmg",
           language: "en-US",
+          page_url: "https://github.com/owner/repo/releases",
+          user_agent: "Mozilla/5.0",
         },
       },
     ]);
@@ -488,6 +490,8 @@ describe("event link guard", () => {
           url: "https://example.com/app/settings",
           filename: "settings.html",
           language: "en-US",
+          page_url: "https://example.com/app",
+          user_agent: "Mozilla/5.0",
         },
       },
     ]);

@@ -20,7 +20,7 @@ tauri-build = { version = "2.5.5", features = [] }
 [dependencies]
 serde_json = "1.0.149"
 serde = { version = "1.0.228", features = ["derive"] }
-tokio = { version = "1.49.0", features = ["time"] }
+tokio = { version = "1.49.0", features = ["time", "fs"] }
 tauri = { version = "2.10.2", features = [
   "tray-icon",
   "image-ico",

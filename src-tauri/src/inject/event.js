@@ -828,7 +828,14 @@ document.addEventListener("DOMContentLoaded", () => {
         e.stopImmediatePropagation();
         const userLanguage = getUserLanguage();
         invoke("download_file", {
-          params: { url: absoluteUrl, filename, language: userLanguage },
+          // Send as the page itself would: webview UA + page URL for Referer.
+          params: {
+            url: absoluteUrl,
+            filename,
+            language: userLanguage,
+            user_agent: navigator.userAgent,
+            page_url: window.location.href,
+          },
         });
         return;
       }
@@ -1145,6 +1152,8 @@ document.addEventListener("DOMContentLoaded", () => {
           url: imageUrl,
           filename: filename,
           language: userLanguage,
+          user_agent: navigator.userAgent,
+          page_url: window.location.href,
         },
       }).catch((error) => {
         console.error("Failed to download image:", filename, error);
@@ -1222,7 +1231,13 @@ document.addEventListener("DOMContentLoaded", () => {
             createMenuItem(menuTexts.downloadFile, () => {
               const filename = getFilenameFromUrl(data.url);
               invoke("download_file", {
-                params: { url: data.url, filename, language: userLanguage },
+                params: {
+                  url: data.url,
+                  filename,
+                  language: userLanguage,
+                  user_agent: navigator.userAgent,
+                  page_url: window.location.href,
+                },
               }).catch((error) => {
                 console.error("Failed to download file:", filename, error);
                 showDownloadError(filename);
