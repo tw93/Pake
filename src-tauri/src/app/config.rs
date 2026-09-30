@@ -1,4 +1,8 @@
 use serde::{Deserialize, Serialize};
+use tauri::ipc::RuntimeCapability;
+use tauri::utils::acl::capability::{Capability, CapabilityFile, CapabilityRemote};
+use tauri::utils::acl::RemoteUrlPattern;
+use tauri::Url;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct WindowConfig {
@@ -99,5 +103,246 @@ pub struct PakeConfig {
 impl PakeConfig {
     pub fn show_system_tray(&self) -> bool {
         self.system_tray.copied()
+    }
+
+    pub fn remote_capability(
+        &self,
+    ) -> Result<Option<RemoteCapability>, Box<dyn std::error::Error>> {
+        let mut origins = Vec::new();
+        for window in self
+            .windows
+            .iter()
+            .filter(|window| window.url_type == "web")
+        {
+            let url = Url::parse(&window.url)?;
+            let host = url.host_str().ok_or("Remote IPC requires a hostname")?;
+            // URLPattern metacharacters in a host must never turn a configured
+            // literal origin into a wildcard or regular expression grant.
+            if !matches!(url.scheme(), "http" | "https")
+                || host.contains(['*', '?', '(', ')', '{', '}', '\\'])
+            {
+                return Err("Remote IPC requires a literal HTTP or HTTPS origin".into());
+            }
+            // Colons inside an IPv6 literal are URLPattern name delimiters
+            // unless escaped. Keep the actual port delimiter unescaped.
+            let port = url
+                .port()
+                .map(|port| format!(":{port}"))
+                .unwrap_or_default();
+            let origin = format!("{}://{}{}/*", url.scheme(), host.replace(':', "\\:"), port);
+            origin.parse::<RemoteUrlPattern>()?;
+            if !origins.contains(&origin) {
+                origins.push(origin);
+            }
+        }
+        if origins.is_empty() {
+            return Ok(None);
+        }
+
+        // Reuse the local permission set, including scopes, without keeping a
+        // second list that can drift or widening grants after navigation.
+        let mut capability: Capability =
+            serde_json::from_str(include_str!("../../capabilities/default.json"))?;
+        capability.identifier = "pake-configured-origins".into();
+        capability.local = false;
+        capability.remote = Some(CapabilityRemote { urls: origins });
+        Ok(Some(RemoteCapability(capability)))
+    }
+}
+
+pub struct RemoteCapability(Capability);
+
+impl RuntimeCapability for RemoteCapability {
+    fn build(self) -> CapabilityFile {
+        CapabilityFile::Capability(self.0)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::BTreeMap;
+    use tauri::utils::acl::{manifest::Manifest, resolved::Resolved, ExecutionContext};
+
+    fn config_for(url: &str) -> PakeConfig {
+        let mut config: PakeConfig = serde_json::from_str(include_str!("../../pake.json")).unwrap();
+        config.windows[0].url = url.into();
+        config.windows[0].url_type = "web".into();
+        config
+    }
+
+    fn resolve(config: &PakeConfig) -> Resolved {
+        let manifest: BTreeMap<String, Manifest> = serde_json::from_str(include_str!(concat!(
+            env!("OUT_DIR"),
+            "/acl-manifests.json"
+        )))
+        .unwrap();
+        let local: Capability =
+            serde_json::from_str(include_str!("../../capabilities/default.json")).unwrap();
+        let mut capabilities = BTreeMap::from([(local.identifier.clone(), local)]);
+        if let Some(remote) = config.remote_capability().unwrap() {
+            capabilities.insert(remote.0.identifier.clone(), remote.0);
+        }
+        Resolved::resolve(
+            &manifest,
+            capabilities,
+            tauri::utils::platform::Target::current(),
+        )
+        .unwrap()
+    }
+
+    fn allows(acl: &Resolved, command: &str, label: &str, url: Option<&str>) -> bool {
+        acl.allowed_commands.get(command).is_some_and(|grants| {
+            grants.iter().any(|grant| {
+                let context_matches = match (&grant.context, url) {
+                    (ExecutionContext::Local, None) => true,
+                    (ExecutionContext::Remote { url: pattern }, Some(url)) => {
+                        pattern.test(&Url::parse(url).unwrap())
+                    }
+                    _ => false,
+                };
+                context_matches && grant.webviews.iter().any(|pattern| pattern.matches(label))
+            })
+        })
+    }
+
+    #[test]
+    fn remote_ipc_requires_the_configured_scheme_host_and_port() {
+        let acl = resolve(&config_for("https://example.com/app?next=https://evil.com"));
+        assert!(acl.has_app_acl);
+        for command in ["download_file", "set_zoom", "plugin:window|is_fullscreen"] {
+            for label in ["pake", "pake-1"] {
+                assert!(allows(
+                    &acl,
+                    command,
+                    label,
+                    Some("https://example.com/other?q=1#x")
+                ));
+                for url in [
+                    "https://evil.com/",
+                    "https://sub.example.com/",
+                    "https://example.com.evil.com/",
+                    "http://example.com/",
+                    "https://example.com:8443/",
+                    "https://evil.com/?next=https://example.com/",
+                ] {
+                    assert!(
+                        !allows(&acl, command, label, Some(url)),
+                        "allowed {command} on {url}"
+                    );
+                }
+            }
+            assert!(!allows(
+                &acl,
+                command,
+                "unrelated",
+                Some("https://example.com/")
+            ));
+        }
+    }
+
+    #[test]
+    fn local_pages_keep_permissions_without_any_remote_grant() {
+        let mut config = config_for("index.html");
+        config.windows[0].url_type = "local".into();
+        assert!(config.remote_capability().unwrap().is_none());
+        let acl = resolve(&config);
+        assert!(acl.has_app_acl);
+        assert!(allows(&acl, "download_file", "pake", None));
+        assert!(!allows(
+            &acl,
+            "download_file",
+            "pake",
+            Some("https://example.com/")
+        ));
+    }
+
+    #[test]
+    fn remote_ipc_handles_loopback_ipv6_and_international_domains_literally() {
+        for url in [
+            "http://127.0.0.1:8123/app",
+            "http://[::1]:8123/app",
+            "https://例子.测试/app",
+        ] {
+            let acl = resolve(&config_for(url));
+            assert!(
+                allows(&acl, "download_file", "pake", Some(url)),
+                "denied {url}"
+            );
+            assert!(!allows(
+                &acl,
+                "download_file",
+                "pake",
+                Some("https://evil.com/")
+            ));
+        }
+    }
+
+    #[test]
+    fn remote_ipc_deduplicates_origins_and_ignores_local_entries() {
+        let mut config = config_for("https://example.com/one");
+        let mut second = config.windows[0].clone();
+        second.url = "https://example.com/two".into();
+        config.windows.push(second);
+        let mut local = config.windows[0].clone();
+        local.url = "index.html".into();
+        local.url_type = "local".into();
+        config.windows.push(local);
+        let remote = config.remote_capability().unwrap().unwrap();
+        assert_eq!(remote.0.remote.unwrap().urls, vec!["https://example.com/*"]);
+        assert!(!remote.0.local);
+    }
+
+    #[test]
+    fn remote_ipc_rejects_pattern_hosts_and_non_web_schemes() {
+        for url in [
+            "https://*.example.com/",
+            "https://(evil).com/",
+            "file:///tmp/index.html",
+            "data:text/html,hello",
+        ] {
+            assert!(
+                config_for(url).remote_capability().is_err(),
+                "accepted {url}"
+            );
+        }
+    }
+
+    #[test]
+    fn every_registered_app_command_is_gated_and_remains_available_on_the_entry_origin() {
+        let acl = resolve(&config_for("https://example.com/"));
+        assert!(acl.has_app_acl);
+        let source = include_str!("../lib.rs");
+        let registered = source
+            .split("tauri::generate_handler![")
+            .nth(1)
+            .unwrap()
+            .split(']')
+            .next()
+            .unwrap();
+        for command in registered
+            .split(',')
+            .map(str::trim)
+            .filter(|name| !name.is_empty())
+        {
+            assert!(
+                allows(&acl, command, "pake", None),
+                "missing local permission for {command}"
+            );
+            assert!(
+                allows(&acl, command, "pake", Some("https://example.com/")),
+                "missing remote permission for {command}"
+            );
+            assert!(
+                !allows(&acl, command, "pake", Some("https://evil.com/")),
+                "ungated {command}"
+            );
+        }
+        assert!(!allows(
+            &acl,
+            "unregistered_command",
+            "pake",
+            Some("https://example.com/")
+        ));
     }
 }

@@ -689,12 +689,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // on_download handler then writes the file to the Downloads folder. This is
   // used for blob:/data: URLs because routing their bytes through the Tauri
   // IPC fails on strict-CSP sites (e.g. Gemini), whose connect-src blocks the
-  // IPC origin. The native download path is independent of the page CSP.
+  // IPC origin. It also handles attachments when remote IPC is denied.
+  const nativeDownloadAnchors = new WeakSet();
   function triggerNativeDownload(url, filename) {
     const anchor = document.createElement("a");
     anchor.href = url;
     anchor.download = filename || "";
     anchor.style.display = "none";
+    nativeDownloadAnchors.add(anchor);
     document.body.appendChild(anchor);
     anchor.click();
     document.body.removeChild(anchor);
@@ -724,6 +726,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
+  function downloadFile(url, filename) {
+    return invoke("download_file", {
+      params: { url, filename, language: getUserLanguage() },
+    }).catch((error) => {
+      // Debug and release builds have different ACL rejection messages.
+      // Let the browser handle attachments without granting remote IPC.
+      if (/^(?:Command )?download_file not allowed\b/.test(String(error))) {
+        triggerNativeDownload(url, filename);
+        return;
+      }
+      console.error("Failed to download file:", filename, error);
+      showDownloadError(filename);
+    });
+  }
+
   const isInternalUrl = (url) => matchesInternalUrl(url, window.location.href);
 
   const detectAnchorElementClick = (e) => {
@@ -732,6 +749,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     const anchorElement = e.target.closest("a");
+
+    if (anchorElement && nativeDownloadAnchors.has(anchorElement)) return;
 
     if (anchorElement && anchorElement.href) {
       const rawHref = anchorElement.getAttribute("href") || "";
@@ -826,10 +845,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         e.preventDefault();
         e.stopImmediatePropagation();
-        const userLanguage = getUserLanguage();
-        invoke("download_file", {
-          params: { url: absoluteUrl, filename, language: userLanguage },
-        });
+        downloadFile(absoluteUrl, filename);
         return;
       }
 
@@ -1139,17 +1155,7 @@ document.addEventListener("DOMContentLoaded", () => {
       triggerNativeDownload(imageUrl, filename);
     } else {
       // Regular HTTP(S) image
-      const userLanguage = getUserLanguage();
-      invoke("download_file", {
-        params: {
-          url: imageUrl,
-          filename: filename,
-          language: userLanguage,
-        },
-      }).catch((error) => {
-        console.error("Failed to download image:", filename, error);
-        showDownloadError(filename);
-      });
+      downloadFile(imageUrl, filename);
     }
   }
 
@@ -1196,7 +1202,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Simplified menu builder
   function buildMenuItems(type, data) {
-    const userLanguage = getUserLanguage();
     const items = [];
 
     switch (type) {
@@ -1221,12 +1226,7 @@ document.addEventListener("DOMContentLoaded", () => {
           items.push(
             createMenuItem(menuTexts.downloadFile, () => {
               const filename = getFilenameFromUrl(data.url);
-              invoke("download_file", {
-                params: { url: data.url, filename, language: userLanguage },
-              }).catch((error) => {
-                console.error("Failed to download file:", filename, error);
-                showDownloadError(filename);
-              });
+              downloadFile(data.url, filename);
             }),
           );
         }

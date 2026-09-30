@@ -397,6 +397,11 @@ pub fn run_app() {
             webview_navigate,
         ])
         .setup(move |app| {
+            // Grant remote IPC only to the immutable, packaged entry origins,
+            // before any webview can start loading untrusted content.
+            if let Some(capability) = pake_config.remote_capability()? {
+                app.add_capability(capability)?;
+            }
             app.manage(MultiWindowState::new(
                 pake_config.clone(),
                 tauri_config.clone(),

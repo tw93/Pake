@@ -80,6 +80,8 @@ The download system automatically handles:
 
 Send messages between web content and Pake container.
 
+Native IPC is available to bundled local pages and the exact configured website origin (scheme, host, and port). Login redirects and other origins do not receive native permissions. Use the final website URL when packaging an app, including its `www` or workspace subdomain. On other origins, native notifications, zoom, Pake's fullscreen controls, and opening links in the system browser are unavailable; downloads fall back to the browser, which may display cross-origin media instead of saving it. Custom commands must be registered in both `generate_handler!` and the command manifest in `src-tauri/build.rs`, with the corresponding permission added to `src-tauri/capabilities/default.json`.
+
 **Web Side (JavaScript):**
 
 ```javascript

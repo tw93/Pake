@@ -80,44 +80,46 @@
     }
 
     function enterFullscreen(element) {
-      fullscreenElement = element;
-      // Preserve the requested subtree. Extracting a video from a document
-      // fullscreen request separates it from its controls and overlays.
-      const targetElement = element;
-      actualFullscreenElement = element;
+      // Commit DOM changes only after native fullscreen succeeds. An ACL
+      // rejection must leave the original player and its controls untouched.
+      return appWindow.setFullscreen(true).then(() => {
+        fullscreenElement = element;
+        // Preserve the requested subtree. Extracting a video from a document
+        // fullscreen request separates it from its controls and overlays.
+        const targetElement = element;
+        actualFullscreenElement = element;
 
-      originalStyles = {
-        position: targetElement.style.position,
-        top: targetElement.style.top,
-        left: targetElement.style.left,
-        width: targetElement.style.width,
-        height: targetElement.style.height,
-        maxWidth: targetElement.style.maxWidth,
-        maxHeight: targetElement.style.maxHeight,
-        margin: targetElement.style.margin,
-        padding: targetElement.style.padding,
-        zIndex: targetElement.style.zIndex,
-        background: targetElement.style.background,
-        objectFit: targetElement.style.objectFit,
-      };
+        originalStyles = {
+          position: targetElement.style.position,
+          top: targetElement.style.top,
+          left: targetElement.style.left,
+          width: targetElement.style.width,
+          height: targetElement.style.height,
+          maxWidth: targetElement.style.maxWidth,
+          maxHeight: targetElement.style.maxHeight,
+          margin: targetElement.style.margin,
+          padding: targetElement.style.padding,
+          zIndex: targetElement.style.zIndex,
+          background: targetElement.style.background,
+          objectFit: targetElement.style.objectFit,
+        };
 
-      wasInBody =
-        targetElement === document.documentElement ||
-        targetElement === document.body ||
-        targetElement.parentNode === document.body;
-      if (!wasInBody) {
-        originalParent = targetElement.parentNode;
-        originalNextSibling = targetElement.nextSibling;
-      }
+        wasInBody =
+          targetElement === document.documentElement ||
+          targetElement === document.body ||
+          targetElement.parentNode === document.body;
+        if (!wasInBody) {
+          originalParent = targetElement.parentNode;
+          originalNextSibling = targetElement.nextSibling;
+        }
 
-      targetElement.classList.add("pake-fullscreen-element");
-      document.body.classList.add("pake-fullscreen-active");
+        targetElement.classList.add("pake-fullscreen-element");
+        document.body.classList.add("pake-fullscreen-active");
 
-      if (!wasInBody) {
-        document.body.appendChild(targetElement);
-      }
+        if (!wasInBody) {
+          document.body.appendChild(targetElement);
+        }
 
-      appWindow.setFullscreen(true).then(() => {
         startFullscreenMonitor();
         const event = new Event("fullscreenchange", { bubbles: true });
         document.dispatchEvent(event);
@@ -129,8 +131,6 @@
         document.dispatchEvent(webkitEvent);
         element.dispatchEvent(webkitEvent);
       });
-
-      return Promise.resolve();
     }
 
     function exitFullscreen() {
