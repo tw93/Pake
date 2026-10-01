@@ -41,6 +41,7 @@ export const DEFAULT_PAKE_OPTIONS: PakeCliOptions = {
   installerLanguage: 'en-US',
   hideOnClose: undefined, // Platform-specific: true for macOS, false for others
   incognito: false,
+  passwordAutosave: false,
   wasm: false,
   enableDragDrop: false,
   bundle: true,
