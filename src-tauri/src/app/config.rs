@@ -341,6 +341,40 @@ mod tests {
     }
 
     #[test]
+    fn window_print_reaches_the_webview_only_from_trusted_contexts() {
+        // On macOS Tauri replaces `window.print` with an invoke of
+        // `plugin:webview|print`, so the page's own print button depends on it.
+        let command = "plugin:webview|print";
+        let mut local = config_for("index.html");
+        local.windows[0].url_type = "local".into();
+        let local = resolve(&local);
+        let remote = resolve(&config_for("https://example.com/app"));
+        for label in ["pake", "pake-1"] {
+            assert!(allows(&local, command, label, None), "local {label}");
+            assert!(allows(&remote, command, label, None), "bundled {label}");
+            assert!(
+                allows(&remote, command, label, Some("https://example.com/doc")),
+                "configured origin {label}"
+            );
+            for url in [
+                "https://evil.com/",
+                "https://sub.example.com/",
+                "http://example.com/",
+            ] {
+                assert!(!allows(&local, command, label, Some(url)), "{url}");
+                assert!(!allows(&remote, command, label, Some(url)), "{url}");
+            }
+        }
+        assert!(!allows(&remote, command, "unrelated", None));
+        assert!(!allows(
+            &remote,
+            command,
+            "unrelated",
+            Some("https://example.com/")
+        ));
+    }
+
+    #[test]
     fn every_registered_app_command_is_gated_and_remains_available_on_the_entry_origin() {
         let acl = resolve(&config_for("https://example.com/"));
         assert!(acl.has_app_acl);

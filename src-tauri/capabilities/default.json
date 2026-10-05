@@ -25,6 +25,7 @@
     "core:window:allow-minimize",
     "core:window:allow-close",
     "core:webview:allow-internal-toggle-devtools",
+    "core:webview:allow-print",
     "notification:allow-is-permission-granted",
     "notification:allow-notify",
     "notification:allow-get-active",

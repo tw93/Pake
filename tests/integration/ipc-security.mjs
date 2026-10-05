@@ -39,6 +39,9 @@ function page(stage, origin) {
   results.zoom = await check("set_zoom", {percent: 100});
   results.closeNotification = await check("close_notification", {id: "pake-probe-not-delivered"});
   results.window = await check("plugin:window|is_fullscreen", {label: "pake"});
+  results.printShim = String(window.print).includes("plugin:webview|print");
+  // A missing label fails after the ACL check without opening a print panel.
+  results.print = await check("plugin:webview|print", {label: "pake-probe-missing-webview"});
   ${
     stage === "entry"
       ? `results.traversal = await check("download_file", {params: {
@@ -206,13 +209,28 @@ try {
   ]) {
     assert.equal(trusted[command], "allowed", `configured origin: ${command}`);
   }
-  for (const command of ["download", "zoom", "window", "closeNotification"]) {
+  for (const command of [
+    "download",
+    "zoom",
+    "window",
+    "closeNotification",
+    "print",
+  ]) {
     assert.match(
       untrusted[command],
       /^denied: .*not allowed/i,
       `untrusted origin: ${command}`,
     );
   }
+  for (const report of [trusted, untrusted]) {
+    assert.equal(report.printShim, true, "window.print is not the IPC shim");
+  }
+  assert.doesNotMatch(
+    trusted.print,
+    /not allowed/i,
+    "configured origin: print",
+  );
+  assert.match(trusted.print, /^denied: .*webview not found/i);
   const downloadDeadline = Date.now() + 5000;
   while (Date.now() < downloadDeadline) {
     try {
@@ -249,7 +267,7 @@ try {
     await assert.rejects(fs.stat(file), { code: "ENOENT" });
   }
   console.log(
-    "Native IPC PASS: download UA, Referer and HttpOnly cookies match the webview; entry commands work, cross-origin commands are denied, browser downloads survive denied IPC, fullscreen denial preserves layout, traversal remains inside Downloads.",
+    "Native IPC PASS: download UA, Referer and HttpOnly cookies match the webview; entry commands and window.print work, cross-origin commands are denied, browser downloads survive denied IPC, fullscreen denial preserves layout, traversal remains inside Downloads.",
   );
 } finally {
   if (app && app.exitCode === null) {
