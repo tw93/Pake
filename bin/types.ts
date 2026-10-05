@@ -104,7 +104,7 @@ export interface PakeCliOptions {
   // Launch app in incognito/private mode, default false
   incognito: boolean;
 
-  // Enable the native WebView2 password save/autofill flow on Windows, default false
+  // Enable native WebView2 password-save prompts on Windows, default false
   passwordAutosave: boolean;
 
   // Enable WebAssembly support (Flutter Web, etc.), default false

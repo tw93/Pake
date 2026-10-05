@@ -161,7 +161,7 @@
     },
     "passwordAutosave": {
       "type": "boolean",
-      "description": "Enable the native WebView2 password save and autofill flow on Windows. Uses the app's own profile and does not share Edge or Chrome passwords.",
+      "description": "Enable native WebView2 password-save prompts on Windows. Disabled in incognito mode. Uses the app's own profile; existing saved passwords may still autofill when disabled.",
       "default": false
     },
     "wasm": {

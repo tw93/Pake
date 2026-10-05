@@ -375,6 +375,8 @@ Select the Rust toolchain used for Windows builds. Windows only; ignored on othe
 
 If no MSVC Build Tools are detected and a GNU toolchain is available, Pake logs a hint to retry with `--windows-toolchain gnu` rather than failing deep in the build with an unexplained linker error. Requesting `gnu` does not change your default Rust toolchain or any global `rustup`/environment settings; it only affects the current build subprocess.
 
+With `gnu`, the executable loads `WebView2Loader.dll` at runtime instead of linking it statically as MSVC does. The MSI already includes it, and `--keep-binary` copies it next to `AppName.exe`; keep the two files together or the raw binary will not start.
+
 #### [no-bundle]
 
 Skip packaging and output only the compiled executable. Linux only. Useful on RPM-based distros (Fedora, RHEL, Oracle Linux, etc.) where the native bundler can abort during the packaging stage, so you still get a runnable binary.
@@ -457,7 +459,7 @@ Launch the application in incognito/private browsing mode. Default is `false`. W
 
 #### [password-autosave]
 
-Enable the native WebView2 password save and autofill flow on Windows. Passwords are stored in the packaged app's own WebView2 profile and are not shared with Chrome or Edge. This option is ignored on macOS and Linux, and is disabled when `--incognito` is enabled. Default is `false`.
+Enable native WebView2 password-save prompts on Windows. Passwords are stored in the packaged app's own WebView2 profile and are not shared with Chrome or Edge. This option is ignored on macOS and Linux, and is disabled when `--incognito` is enabled. Default is `false`. Disabling it stops new saves and save/update prompts; existing saved passwords may still autofill, including in an InPrivate window using the same profile.
 
 ```bash
 --password-autosave
@@ -498,7 +500,7 @@ Keep the raw binary file alongside the installer. Default is `false`. When enabl
 pake https://github.com --name GitHub --keep-binary
 ```
 
-**Output**: Creates both installer and standalone executable (`AppName-binary` on Unix, `AppName.exe` on Windows).
+**Output**: Creates both installer and standalone executable (`AppName-binary` on Unix, `AppName.exe` on Windows). With `--windows-toolchain gnu`, `WebView2Loader.dll` is copied next to `AppName.exe` as well.
 
 #### [iterative-build]
 

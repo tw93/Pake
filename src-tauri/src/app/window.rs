@@ -1,6 +1,6 @@
 use crate::app::config::PakeConfig;
 #[cfg(target_os = "windows")]
-use crate::app::navigation::enable_password_autosave;
+use crate::app::navigation::set_password_autosave;
 use crate::util::{
     check_file_or_append, get_data_dir, get_download_dir, get_download_message_with_lang,
     sanitize_download_filename, show_toast, MessageType,
@@ -821,12 +821,21 @@ fn build_window(
     let window = window_builder.build()?;
 
     #[cfg(target_os = "windows")]
-    if window_config.password_autosave && !window_config.incognito {
-        if let Err(error) = window.with_webview(|webview| {
-            enable_password_autosave(&webview);
+    {
+        let password_autosave = window_config.password_autosave_enabled();
+        if let Err(error) = window.with_webview(move |webview| {
+            set_password_autosave(&webview, password_autosave);
         }) {
             eprintln!("[Pake] Failed to access WebView2 for password autosave: {error}");
         }
+    }
+
+    // The tab bar's + button exists only while some window class answers
+    // `newWindowForTab:`. Install it for every tabbing window, the main one
+    // included: its tab bar is the one the user sees first.
+    #[cfg(target_os = "macos")]
+    if use_native_window_tabbing {
+        crate::app::tab_bar::install_new_tab_action(app, &window);
     }
 
     // A shared identifier alone leaves each NSWindow in automatic mode.

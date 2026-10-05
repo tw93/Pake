@@ -188,7 +188,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     .addOption(
       new Option(
         '--password-autosave',
-        'Enable native password save and autofill on Windows',
+        'Enable native password-save prompts on Windows',
       )
         .default(DEFAULT.passwordAutosave)
         .hideHelp(),

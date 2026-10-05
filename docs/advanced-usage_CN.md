@@ -80,6 +80,8 @@ if (window.Notification && Notification.permission === "default") {
 
 在网页内容和 Pake 容器之间发送消息。
 
+原生 IPC 只开放给打包的本地页面和配置的网站来源，协议、主机名和端口都要一致，登录跳转和其他来源不会获得原生权限，打包时使用网站最终打开的网址，包括 `www` 或工作区子域。在其他来源的页面上，原生通知、缩放、Pake 的全屏控制和通过系统浏览器打开链接不可用，下载会交给网页浏览器处理，跨域图片等资源可能直接显示而不保存。自定义命令需要同时注册到 `generate_handler!` 和 `src-tauri/build.rs` 的命令清单，并在 `src-tauri/capabilities/default.json` 中添加对应权限。
+
 **网页端（JavaScript）：**
 
 ```javascript

@@ -7,6 +7,7 @@ function loadEventHelpers({
   withTauri = false,
   userAgent = "Mozilla/5.0",
   initialZoom = null,
+  downloadError = null,
 } = {}) {
   const source = ["link_policy.js", "event.js"]
     .map((file) =>
@@ -18,8 +19,11 @@ function loadEventHelpers({
     .join("\n");
 
   const invokeCalls = [];
+  const nativeDownloadClicks = [];
   const invoke = (command, payload) => {
     invokeCalls.push([command, payload]);
+    if (command === "download_file" && downloadError)
+      return Promise.reject(downloadError);
     return Promise.resolve();
   };
   const eventListeners = {};
@@ -45,7 +49,17 @@ function loadEventHelpers({
       this.children = this.children.filter((item) => item !== child);
       if (child.id) elementsById.delete(child.id);
     },
-    click: () => {},
+    click() {
+      nativeDownloadClicks.push([this.href, this.download]);
+      // A transient native-download anchor still passes through document capture.
+      getClickGuard({ eventListeners })(makeClickEvent(this));
+    },
+    closest() {
+      return this;
+    },
+    getAttribute(name) {
+      return name === "href" ? this.href : "";
+    },
     set id(value) {
       this._id = value;
       elementsById.set(value, this);
@@ -118,7 +132,13 @@ function loadEventHelpers({
   }
 
   runInNewContext(source, context);
-  return { ...context, eventListeners, invokeCalls, localStorageValues };
+  return {
+    ...context,
+    eventListeners,
+    invokeCalls,
+    localStorageValues,
+    nativeDownloadClicks,
+  };
 }
 
 function runDomReady(context) {
@@ -151,6 +171,46 @@ function makeClickEvent(anchor) {
 }
 
 describe("event link guard", () => {
+  it.each([
+    'download_file not allowed on window "pake", webview "pake", URL: https://other.example/',
+    "Command download_file not allowed by ACL",
+  ])(
+    "falls back once to browser downloads on ACL denial: %s",
+    async (downloadError) => {
+      const context = loadEventHelpers({ withTauri: true, downloadError });
+      runDomReady(context);
+      const anchor = makeAnchor("https://example.com/report.pdf", "_self");
+      anchor.download = "report.pdf";
+      getClickGuard(context)(makeClickEvent(anchor));
+      await vi.waitFor(() =>
+        expect(context.nativeDownloadClicks).toEqual([
+          [anchor.href, "report.pdf"],
+        ]),
+      );
+      expect(
+        context.invokeCalls.filter(([command]) => command === "download_file"),
+      ).toHaveLength(1);
+    },
+  );
+
+  it("does not retry failed HTTP downloads through the browser", async () => {
+    const context = loadEventHelpers({
+      withTauri: true,
+      downloadError: "Download failed with HTTP status 403 Forbidden",
+    });
+    runDomReady(context);
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      getClickGuard(context)(
+        makeClickEvent(makeAnchor("https://example.com/report.pdf", "_self")),
+      );
+      await vi.waitFor(() => expect(log).toHaveBeenCalled());
+      expect(context.nativeDownloadClicks).toEqual([]);
+    } finally {
+      log.mockRestore();
+    }
+  });
+
   it.each([undefined, "", "  ", "about:blank", "about:blank#download"])(
     "preserves a native blank popup proxy for %s",
     (url) => {

@@ -373,6 +373,8 @@ pake https://github.com --name GitHub
 
 如果未检测到 MSVC Build Tools 但检测到可用的 GNU 工具链，Pake 会提示可以改用 `--windows-toolchain gnu` 重试，而不是让构建在链接阶段以难以理解的错误失败。使用 `gnu` 不会更改你的默认 Rust 工具链或任何全局 `rustup`/环境设置，仅影响当次构建子进程。
 
+使用 `gnu` 时，可执行文件会在运行时加载 `WebView2Loader.dll`，而不是像 MSVC 那样静态链接。MSI 安装包已包含该文件；`--keep-binary` 会把它复制到 `AppName.exe` 旁边，请将两者放在一起，否则原始可执行文件无法启动。
+
 #### [no-bundle]
 
 跳过打包，只输出编译好的可执行文件。仅 Linux 可用。适用于 Fedora、RHEL、Oracle Linux 等 RPM 系发行版，这些系统上原生打包器可能在打包阶段中止，用此选项仍能拿到可运行的二进制。
@@ -455,7 +457,7 @@ pake https://github.com --name GitHub --show-system-tray --start-to-tray
 
 #### [password-autosave]
 
-在 Windows 上启用 WebView2 原生的密码保存和自动填充。密码保存在打包应用自己的 WebView2 Profile 中，不会与 Chrome 或 Edge 共享。在 macOS 和 Linux 上会忽略此选项；启用 `--incognito` 时也不会保存密码。默认值为 `false`。
+在 Windows 上启用 WebView2 原生的密码保存提示，密码保存在打包应用自己的 WebView2 配置文件中，不会与 Chrome 或 Edge 共享。默认值为 `false`，macOS 和 Linux 会忽略此选项，启用 `--incognito` 时也会关闭保存提示。关闭后不会保存新密码，也不会弹出保存或更新提示，但已有密码仍可能自动填充，包括使用同一配置文件的隐私窗口。
 
 ```bash
 --password-autosave
@@ -496,7 +498,7 @@ pake https://planka.example.com --name PlankApp --enable-drag-drop
 pake https://github.com --name GitHub --keep-binary
 ```
 
-**输出结果**：同时创建安装包和独立可执行文件（Unix 系统为 `AppName-binary`，Windows 为 `AppName.exe`）。
+**输出结果**：同时创建安装包和独立可执行文件（Unix 系统为 `AppName-binary`，Windows 为 `AppName.exe`）。使用 `--windows-toolchain gnu` 时，还会把 `WebView2Loader.dll` 复制到 `AppName.exe` 旁边。
 
 #### [iterative-build]
 
