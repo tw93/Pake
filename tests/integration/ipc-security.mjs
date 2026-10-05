@@ -34,6 +34,7 @@ function page(stage, origin) {
     url: ${JSON.stringify(origin + "/payload")}, filename: ${JSON.stringify(stage + ".txt")}
   }});
   results.zoom = await check("set_zoom", {percent: 100});
+  results.closeNotification = await check("close_notification", {id: "pake-probe-not-delivered"});
   results.window = await check("plugin:window|is_fullscreen", {label: "pake"});
   ${
     stage === "entry"
@@ -178,10 +179,16 @@ try {
   assert.ok(reports.has("attacker"), "cross-origin page did not report");
   const trusted = reports.get("entry");
   const untrusted = reports.get("attacker");
-  for (const command of ["download", "zoom", "window", "traversal"]) {
+  for (const command of [
+    "download",
+    "zoom",
+    "window",
+    "traversal",
+    "closeNotification",
+  ]) {
     assert.equal(trusted[command], "allowed", `configured origin: ${command}`);
   }
-  for (const command of ["download", "zoom", "window"]) {
+  for (const command of ["download", "zoom", "window", "closeNotification"]) {
     assert.match(
       untrusted[command],
       /^denied: .*not allowed/i,

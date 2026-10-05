@@ -236,7 +236,13 @@ mod tests {
     fn remote_ipc_requires_the_configured_scheme_host_and_port() {
         let acl = resolve(&config_for("https://example.com/app?next=https://evil.com"));
         assert!(acl.has_app_acl);
-        for command in ["download_file", "set_zoom", "plugin:window|is_fullscreen"] {
+        for command in [
+            "download_file",
+            "send_notification",
+            "close_notification",
+            "set_zoom",
+            "plugin:window|is_fullscreen",
+        ] {
             for label in ["pake", "pake-1"] {
                 assert!(allows(
                     &acl,
