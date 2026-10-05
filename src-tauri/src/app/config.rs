@@ -193,6 +193,7 @@ mod tests {
         let mut legacy = serde_json::to_value(window).unwrap();
         legacy.as_object_mut().unwrap().remove("password_autosave");
         let legacy: WindowConfig = serde_json::from_value(legacy).unwrap();
+        assert!(!legacy.password_autosave);
         assert!(!legacy.password_autosave_enabled());
     }
 
