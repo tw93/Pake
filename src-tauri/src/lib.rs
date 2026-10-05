@@ -289,7 +289,15 @@ pub fn run_app() {
         apply_linux_webkit_runtime_flags();
     }
 
-    let (pake_config, tauri_config) = get_pake_config();
+    let (pake_config, tauri_config, runtime_app) = get_pake_config();
+    let mut context = tauri::generate_context!();
+    // Paths, app data and the macOS menu derive from the context, so a runtime
+    // app must not share the template's identity.
+    if let Some(app) = runtime_app {
+        context.config_mut().identifier = app.identifier;
+        context.config_mut().product_name = Some(app.product_name.clone());
+        context.package_info_mut().name = app.product_name;
+    }
     let tauri_app = tauri::Builder::default();
 
     let show_system_tray = pake_config.show_system_tray();
@@ -504,7 +512,7 @@ pub fn run_app() {
                 // This lets tauri-plugin-window-state save the window position and size
             }
         })
-        .build(tauri::generate_context!())
+        .build(context)
         .unwrap_or_else(|error| {
             eprintln!("[Pake] Fatal error while building Tauri application: {error}");
             std::process::exit(1);

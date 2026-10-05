@@ -74,6 +74,9 @@ windows-core = "0.61.2"
 [features]
 # this feature is used for development builds from development cli
 cli-build = []
+# Prebuilt template that reads a pake-runtime folder at launch: Contents/Resources
+# on macOS, next to the executable elsewhere. The CLI never enables it.
+runtime-template = []
 # Tauri's macOS proxy APIs require macOS 14 or later. The CLI enables this
 # feature only after checking the host Darwin version.
 macos-proxy = ["tauri/macos-proxy"]
