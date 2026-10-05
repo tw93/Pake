@@ -270,6 +270,30 @@ async fn download_response(
     }
 }
 
+/// Reserve the destination with `create_new`, so two downloads that resolve the
+/// same free name at the same time cannot write into one file.
+async fn create_unique_file(path: &str) -> std::io::Result<(tokio::fs::File, String)> {
+    let mut candidate = check_file_or_append(path);
+    for _ in 0..100 {
+        match tokio::fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&candidate)
+            .await
+        {
+            Ok(file) => return Ok((file, candidate)),
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {
+                candidate = check_file_or_append(&candidate);
+            }
+            Err(error) => return Err(error),
+        }
+    }
+    Err(std::io::Error::new(
+        std::io::ErrorKind::AlreadyExists,
+        "no free download filename",
+    ))
+}
+
 #[command]
 pub async fn download_file(
     window: WebviewWindow,
@@ -293,8 +317,6 @@ pub async fn download_file(
     let output_path = download_dir.join(sanitize_download_filename(&params.filename));
 
     let path_str = output_path.to_str().ok_or("Invalid output path")?;
-
-    let file_path = check_file_or_append(path_str);
 
     let url = Url::from_str(&params.url).map_err(|e| format!("Invalid URL: {}", e))?;
     let page_url = trusted_page_url(params.page_url.as_deref(), window.url().ok().as_ref());
@@ -325,7 +347,7 @@ pub async fn download_file(
                 return Err(format!("Download failed with HTTP status {}", res.status()));
             }
 
-            let mut file = tokio::fs::File::create(&file_path).await.map_err(|e| {
+            let (mut file, file_path) = create_unique_file(path_str).await.map_err(|e| {
                 show_toast(
                     &window,
                     &get_download_message_with_lang(
@@ -336,12 +358,33 @@ pub async fn download_file(
                 format!("Failed to create file: {e}")
             })?;
 
-            while let Some(chunk) = res
-                .chunk()
-                .await
-                .map_err(|e| format!("Failed to get chunk: {}", e))?
-            {
-                file.write_all(&chunk).await.map_err(|e| {
+            // The error flags disk failures, which get the directory toast.
+            let written: Result<(), (bool, String)> = async {
+                while let Some(chunk) = res
+                    .chunk()
+                    .await
+                    .map_err(|e| (false, format!("Failed to get chunk: {e}")))?
+                {
+                    file.write_all(&chunk)
+                        .await
+                        .map_err(|e| (true, format!("Failed to write chunk: {e}")))?;
+                }
+                file.flush()
+                    .await
+                    .map_err(|e| (true, format!("Failed to finish writing file: {e}")))
+            }
+            .await;
+
+            if let Err((disk_failure, error)) = written {
+                // A truncated file under the final name looks like a finished
+                // download, so remove it before reporting the failure.
+                drop(file);
+                if let Err(remove_error) = tokio::fs::remove_file(&file_path).await {
+                    eprintln!(
+                        "[Pake] Failed to remove partial download {file_path}: {remove_error}"
+                    );
+                }
+                if disk_failure {
                     show_toast(
                         &window,
                         &get_download_message_with_lang(
@@ -349,20 +392,9 @@ pub async fn download_file(
                             params.language.clone(),
                         ),
                     );
-                    format!("Failed to write chunk: {e}")
-                })?;
+                }
+                return Err(error);
             }
-
-            file.flush().await.map_err(|e| {
-                show_toast(
-                    &window,
-                    &get_download_message_with_lang(
-                        MessageType::DirectoryFailure,
-                        params.language.clone(),
-                    ),
-                );
-                format!("Failed to finish writing file: {e}")
-            })?;
 
             show_toast(
                 &window,
@@ -475,6 +507,30 @@ pub fn webview_navigate(window: WebviewWindow, action: String) -> Result<(), Str
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn concurrent_downloads_of_one_name_reserve_distinct_files() {
+        let dir = std::env::temp_dir().join(format!("pake-unique-file-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let target = dir.join("report.pdf");
+        std::fs::write(&target, b"existing").unwrap();
+        let path = target.to_str().unwrap();
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
+
+        let (first, second) = runtime
+            .block_on(async { tokio::join!(create_unique_file(path), create_unique_file(path)) });
+        let (_first_file, first) = first.unwrap();
+        let (_second_file, second) = second.unwrap();
+
+        assert_ne!(first, second);
+        assert_ne!(first, path);
+        assert_ne!(second, path);
+        assert_eq!(std::fs::read(&target).unwrap(), b"existing");
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
 
     fn headers(
         cookie: Option<&str>,
