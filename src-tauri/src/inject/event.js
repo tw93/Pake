@@ -728,7 +728,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function downloadFile(url, filename) {
     return invoke("download_file", {
-      params: { url, filename, language: getUserLanguage() },
+      params: {
+        url,
+        filename,
+        language: getUserLanguage(),
+        user_agent: navigator.userAgent,
+        page_url: window.location.href,
+      },
     }).catch((error) => {
       // Debug and release builds have different ACL rejection messages.
       // Let the browser handle attachments without granting remote IPC.
