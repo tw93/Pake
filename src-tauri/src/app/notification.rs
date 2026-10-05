@@ -11,11 +11,80 @@
 //! originating webview. Other platforms keep the plugin path, and the page falls
 //! back to the focus heuristic in `inject/event.js`.
 
+use std::sync::Mutex;
+use std::time::{Duration, Instant};
 use tauri::{AppHandle, WebviewWindow};
 
 /// Ids are minted by the packaged (untrusted) page and echoed into a native
 /// notification identifier and a webview `eval`, so keep them short and opaque.
 const MAX_NOTIFICATION_ID_LEN: usize = 64;
+
+/// How long the same message coming from a different window counts as a repeat.
+/// Windows are driven by the same server event, so they fire near-simultaneously;
+/// this only needs to absorb ordinary scheduling jitter, and staying tight keeps
+/// a genuinely repeated message from being swallowed.
+const DEDUPE_WINDOW: Duration = Duration::from_secs(1);
+const MAX_DEDUPE_ENTRIES: usize = 64;
+
+struct DedupeEntry {
+    key: String,
+    window_label: String,
+    at: Instant,
+}
+
+/// Collapses the copies of one message that `--multi-window` produces.
+///
+/// Every Pake window runs its own instance of the site, so a single incoming
+/// message raises one notification per window, all identical and all competing
+/// for the same click. Only a *different* window repeating the same title+body
+/// counts as a duplicate, so a site legitimately repeating a message within one
+/// window still gets every notification.
+#[derive(Default)]
+struct Dedupe {
+    entries: Vec<DedupeEntry>,
+}
+
+impl Dedupe {
+    fn is_repeat(&mut self, window_label: &str, key: String, now: Instant) -> bool {
+        self.entries
+            .retain(|entry| now.duration_since(entry.at) < DEDUPE_WINDOW);
+
+        if self
+            .entries
+            .iter()
+            .any(|entry| entry.key == key && entry.window_label != window_label)
+        {
+            return true;
+        }
+
+        if self.entries.len() >= MAX_DEDUPE_ENTRIES {
+            self.entries.remove(0);
+        }
+        self.entries.push(DedupeEntry {
+            key,
+            window_label: window_label.to_string(),
+            at: now,
+        });
+        false
+    }
+}
+
+static DEDUPE: Mutex<Dedupe> = Mutex::new(Dedupe {
+    entries: Vec::new(),
+});
+
+/// Unit separator keeps a title ending in the body's prefix from colliding.
+fn dedupe_key(title: &str, body: &str) -> String {
+    format!("{title}\u{1f}{body}")
+}
+
+fn is_cross_window_repeat(window_label: &str, title: &str, body: &str) -> bool {
+    let key = dedupe_key(title, body);
+    // A poisoned lock only means some earlier caller panicked mid-update; the
+    // worst case here is a stale entry, never a reason to drop a notification.
+    let mut dedupe = DEDUPE.lock().unwrap_or_else(|e| e.into_inner());
+    dedupe.is_repeat(window_label, key, Instant::now())
+}
 
 #[derive(serde::Deserialize)]
 pub struct NotificationParams {
@@ -32,6 +101,10 @@ pub struct NotificationOutcome {
     /// keeps its focus-based fallback disabled in that case, so an ordinary app
     /// switch never fires a phantom click on the newest notification.
     native_click: bool,
+    /// True when another window already raised this exact message, so nothing
+    /// was shown. The page must stop tracking the notification: no click can
+    /// ever arrive for it, and it must not inflate the badge count either.
+    suppressed: bool,
 }
 
 fn validate_id(id: &str) -> Result<(), String> {
@@ -58,6 +131,15 @@ pub fn init_native_click(app: &AppHandle) {
     let _ = app;
 }
 
+fn native_click_ready() -> bool {
+    #[cfg(target_os = "macos")]
+    return macos::native_click_ready();
+    #[cfg(not(target_os = "macos"))]
+    {
+        false
+    }
+}
+
 pub fn send(
     app: &AppHandle,
     window: &WebviewWindow,
@@ -65,12 +147,23 @@ pub fn send(
 ) -> Result<NotificationOutcome, String> {
     validate_id(&params.id)?;
 
+    // Only a native click reaches the exact window that raised the copy. The
+    // focus fallback arms each window separately, so a copy suppressed there
+    // would drop the click when the OS activates that window instead.
+    if native_click_ready() && is_cross_window_repeat(window.label(), &params.title, &params.body) {
+        return Ok(NotificationOutcome {
+            native_click: false,
+            suppressed: true,
+        });
+    }
+
     #[cfg(target_os = "macos")]
     if macos::deliver(app, window.label(), params)? {
-        return Ok(NotificationOutcome { native_click: true });
+        return Ok(NotificationOutcome {
+            native_click: true,
+            suppressed: false,
+        });
     }
-    #[cfg(not(target_os = "macos"))]
-    let _ = window;
 
     use tauri_plugin_notification::NotificationExt;
     app.notification()
@@ -83,6 +176,7 @@ pub fn send(
 
     Ok(NotificationOutcome {
         native_click: false,
+        suppressed: false,
     })
 }
 
@@ -170,16 +264,23 @@ mod macos {
             #[unsafe(method(userNotificationCenter:didActivateNotification:))]
             fn did_activate(
                 &self,
-                _center: &NSUserNotificationCenter,
+                center: &NSUserNotificationCenter,
                 notification: &NSUserNotification,
             ) {
-                let Some(identifier) = notification.identifier() else {
+                // Read the identifier before removing: keep the two steps
+                // independent of any ordering assumption about the removal.
+                let raw = notification.identifier().map(|s| s.to_string());
+
+                // NSUserNotificationCenter keeps an activated notification in
+                // Notification Center; without this it piles up after every click.
+                center.removeDeliveredNotification(notification);
+
+                let Some(identifier) = raw else {
                     return;
                 };
                 // `rsplit_once` because a popup window label comes from the
                 // page's `window.open` name and may itself contain '|', while
                 // the id never can.
-                let identifier = identifier.to_string();
                 let Some((label, id)) = identifier.rsplit_once('|') else {
                     return;
                 };
@@ -233,6 +334,10 @@ mod macos {
             unsafe { center.setDelegate(Some(ProtocolObject::from_ref(&**delegate))) };
         });
         NATIVE_CLICK_READY.store(true, Ordering::SeqCst);
+    }
+
+    pub fn native_click_ready() -> bool {
+        NATIVE_CLICK_READY.load(Ordering::SeqCst)
     }
 
     /// Returns whether the notification was handed to the native center. `false`
@@ -293,7 +398,8 @@ mod macos {
 
 #[cfg(test)]
 mod tests {
-    use super::validate_id;
+    use super::{dedupe_key, validate_id, Dedupe, DEDUPE_WINDOW};
+    use std::time::{Duration, Instant};
 
     #[test]
     fn accepts_generated_ids() {
@@ -307,5 +413,52 @@ mod tests {
             assert!(validate_id(id).is_err(), "expected {id:?} to be rejected");
         }
         assert!(validate_id(&"a".repeat(65)).is_err());
+    }
+
+    #[test]
+    fn collapses_the_same_message_from_another_window() {
+        let mut dedupe = Dedupe::default();
+        let now = Instant::now();
+        let key = || dedupe_key("Ann", "hi");
+
+        assert!(!dedupe.is_repeat("pake", key(), now));
+        assert!(dedupe.is_repeat("pake-1", key(), now));
+        assert!(dedupe.is_repeat("pake-2", key(), now));
+    }
+
+    #[test]
+    fn keeps_a_message_the_same_window_repeats() {
+        let mut dedupe = Dedupe::default();
+        let now = Instant::now();
+        let key = || dedupe_key("Ann", "hi");
+
+        assert!(!dedupe.is_repeat("pake", key(), now));
+        assert!(!dedupe.is_repeat("pake", key(), now));
+    }
+
+    #[test]
+    fn keeps_a_different_message_from_another_window() {
+        let mut dedupe = Dedupe::default();
+        let now = Instant::now();
+
+        assert!(!dedupe.is_repeat("pake", dedupe_key("Ann", "hi"), now));
+        assert!(!dedupe.is_repeat("pake-1", dedupe_key("Bo", "hi"), now));
+        assert!(!dedupe.is_repeat("pake-1", dedupe_key("Ann", "bye"), now));
+    }
+
+    #[test]
+    fn stops_collapsing_once_the_window_has_passed() {
+        let mut dedupe = Dedupe::default();
+        let now = Instant::now();
+        let later = now + DEDUPE_WINDOW + Duration::from_millis(1);
+        let key = || dedupe_key("Ann", "hi");
+
+        assert!(!dedupe.is_repeat("pake", key(), now));
+        assert!(!dedupe.is_repeat("pake-1", key(), later));
+    }
+
+    #[test]
+    fn separates_title_and_body_so_they_cannot_run_together() {
+        assert_ne!(dedupe_key("ab", "c"), dedupe_key("a", "bc"));
     }
 }
