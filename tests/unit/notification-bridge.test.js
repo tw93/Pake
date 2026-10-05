@@ -24,6 +24,7 @@ function loadNotificationBridge({
   nativeClick = false,
   hasFocus = false,
   deferSend = false,
+  legacyEventTarget = false,
 } = {}) {
   const source = ["link_policy.js", "event.js"]
     .map((file) =>
@@ -44,7 +45,13 @@ function loadNotificationBridge({
     console,
     URL,
     Event,
-    EventTarget,
+    EventTarget: legacyEventTarget
+      ? class extends EventTarget {
+          constructor() {
+            throw new TypeError("Illegal constructor");
+          }
+        }
+      : EventTarget,
     setTimeout,
     clearTimeout,
     scrollTo: () => {},
@@ -102,6 +109,7 @@ function loadNotificationBridge({
       },
       hasFocus: () => hasFocus,
       createElement: (tagName) => createElement(tagName),
+      createDocumentFragment: () => new EventTarget(),
       createRange: () => ({ selectNodeContents: vi.fn() }),
       getElementById: () => null,
       getElementsByTagName: () => [{ style: {} }],
@@ -131,6 +139,26 @@ function loadNotificationBridge({
 }
 
 describe("notification bridge", () => {
+  it("preserves native event identity when EventTarget is not constructible", async () => {
+    const bridge = loadNotificationBridge({
+      nativeClick: true,
+      legacyEventTarget: true,
+    });
+    const notification = new bridge.Notification("Legacy WebKit");
+    const clicks = [];
+    notification.addEventListener("click", (event) => {
+      clicks.push([event.target, event.currentTarget]);
+    });
+    await bridge.settle();
+    bridge.notificationClick(notification._id);
+    expect(clicks).toEqual([[notification, notification]]);
+    notification.close();
+    expect(bridge.invokeCalls.at(-1)).toEqual({
+      command: "close_notification",
+      payload: { id: notification._id },
+    });
+  });
+
   it("queues close events so replacement cannot synchronously reenter Map iteration", async () => {
     const bridge = loadNotificationBridge({ nativeClick: true });
     let closeCalls = 0;

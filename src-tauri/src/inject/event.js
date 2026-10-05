@@ -1301,9 +1301,23 @@ document.addEventListener("DOMContentLoaded", () => {
 (function () {
   const invoke = window.__TAURI__?.core?.invoke;
   if (!invoke) return;
-  // Every webview Pake targets has EventTarget. Bail out instead of letting a
-  // ReferenceError from the class below abort the rest of this injected script.
   if (typeof EventTarget !== "function" || typeof Event !== "function") return;
+
+  let NotificationEventTarget = EventTarget;
+  try {
+    new EventTarget();
+  } catch (_) {
+    // Safari before 14 exposes EventTarget but its constructor throws. A
+    // fragment already has native event state and keeps event.target exact.
+    NotificationEventTarget = class extends EventTarget {
+      constructor() {
+        return Object.setPrototypeOf(
+          document.createDocumentFragment(),
+          new.target.prototype,
+        );
+      }
+    };
+  }
 
   let permVal = "granted";
   // Pages that drive the badge directly via setAppBadge own its lifecycle;
@@ -1392,7 +1406,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // A real EventTarget, not a bare object with an onclick slot: pages commonly
   // register their routing with addEventListener("click"), and the click
   // handler needs event.target to be the notification it fired for.
-  class PakeNotification extends EventTarget {
+  class PakeNotification extends NotificationEventTarget {
     constructor(title, options) {
       super();
       const opts = options || {};
