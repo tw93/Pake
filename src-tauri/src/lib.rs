@@ -290,6 +290,10 @@ pub fn run_app() {
     }
 
     let (pake_config, tauri_config, runtime_app) = get_pake_config();
+    #[cfg(windows)]
+    if let Some(id) = util::app_user_model_id(runtime_app.as_ref()) {
+        util::set_app_user_model_id(id);
+    }
     let mut context = tauri::generate_context!();
     // Paths, app data and the macOS menu derive from the context, so a runtime
     // app must not share the template's identity.

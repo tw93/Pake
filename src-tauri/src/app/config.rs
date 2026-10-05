@@ -110,6 +110,10 @@ pub struct PakeConfig {
     /// Replaces the compiled custom.js when a runtime override supplies one.
     #[serde(skip)]
     pub runtime_custom_js: Option<String>,
+    /// Set when a runtime override supplied the app identity, so per-app
+    /// directories follow the identifier rather than the product name.
+    #[serde(skip)]
+    pub runtime_app: bool,
 }
 
 impl PakeConfig {

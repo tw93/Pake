@@ -99,6 +99,14 @@ fn apply_runtime_override(
             app_path.display()
         ));
     }
+    // The identifier names per-app folders and the Windows AppUserModelID.
+    if !is_valid_identifier(&app.identifier) {
+        return Err(format!(
+            "{} has an invalid identifier {:?}",
+            app_path.display(),
+            app.identifier
+        ));
+    }
 
     pake_config.runtime_custom_js = read_optional(&dir.join("custom.js"))?;
     if !pake_config.system_tray_path.is_empty()
@@ -109,9 +117,58 @@ fn apply_runtime_override(
             .to_string_lossy()
             .into_owned();
     }
+    pake_config.runtime_app = true;
     tauri_config.identifier = app.identifier.clone();
     tauri_config.product_name = Some(app.product_name.clone());
     Ok((pake_config, tauri_config, Some(app)))
+}
+
+/// Same rule as the CLI's --identifier check, capped at the 128 characters an
+/// AppUserModelID allows.
+fn is_valid_identifier(id: &str) -> bool {
+    let bytes = id.as_bytes();
+    id.len() <= 128
+        && bytes.first().is_some_and(u8::is_ascii_alphabetic)
+        && bytes.last().is_some_and(u8::is_ascii_alphanumeric)
+        && bytes
+            .iter()
+            .all(|b| b.is_ascii_alphanumeric() || *b == b'.' || *b == b'-')
+}
+
+/// Folder under the config dir that holds the WebView profile (WebView2's
+/// EBWebView on Windows). CLI apps keep their product-name folder; a runtime
+/// app uses its identifier so a rename keeps its logins and a generated name
+/// cannot land in another program's folder.
+pub fn data_dir_name(pake_config: &PakeConfig, tauri_config: &Config) -> String {
+    if pake_config.runtime_app {
+        tauri_config.identifier.clone()
+    } else {
+        tauri_config
+            .product_name
+            .clone()
+            .unwrap_or_else(|| "pake".to_string())
+    }
+}
+
+/// The Windows AppUserModelID a runtime app sets before creating windows, so
+/// a shortcut carrying the identifier groups with the running window and
+/// toasts (sent under the identifier) are attributed to it. CLI apps keep the
+/// shell's default.
+#[cfg_attr(not(windows), allow(dead_code))]
+pub fn app_user_model_id(runtime_app: Option<&RuntimeApp>) -> Option<&str> {
+    runtime_app.map(|app| app.identifier.as_str())
+}
+
+/// Must run before any window exists; the shell reads the ID at window creation.
+#[cfg(windows)]
+pub fn set_app_user_model_id(id: &str) {
+    use windows_sys::Win32::UI::Shell::SetCurrentProcessExplicitAppUserModelID;
+    let wide: Vec<u16> = id.encode_utf16().chain(std::iter::once(0)).collect();
+    // SAFETY: `wide` is a NUL-terminated UTF-16 buffer that outlives the call.
+    let result = unsafe { SetCurrentProcessExplicitAppUserModelID(wide.as_ptr()) };
+    if result < 0 {
+        eprintln!("[Pake] Could not set the AppUserModelID {id}: HRESULT {result:#010x}");
+    }
 }
 
 pub fn get_data_dir(app: &AppHandle, package_name: String) -> std::io::Result<PathBuf> {
@@ -698,6 +755,20 @@ mod tests {
                 ("pake.json", pake_json),
                 ("app.json", r#"{"identifier":" ","productName":"Probe"}"#),
             ],
+            vec![
+                ("pake.json", pake_json),
+                (
+                    "app.json",
+                    r#"{"identifier":"com.pake/../x","productName":"Probe"}"#,
+                ),
+            ],
+            vec![
+                ("pake.json", pake_json),
+                (
+                    "app.json",
+                    r#"{"identifier":"com pake","productName":"Probe"}"#,
+                ),
+            ],
         ] {
             let dir = runtime_dir(&files);
             let (pake, tauri) = compiled_configs();
@@ -707,5 +778,54 @@ mod tests {
             );
             fs::remove_dir_all(dir.parent().unwrap()).unwrap();
         }
+    }
+
+    #[test]
+    fn data_dir_follows_product_name_for_cli_and_identifier_for_runtime() {
+        let (pake, tauri) = compiled_configs();
+        let cli_name = tauri.product_name.clone().unwrap();
+        let (pake, tauri, _) = apply_runtime_override(pake, tauri, None).unwrap();
+        assert_eq!(data_dir_name(&pake, &tauri), cli_name);
+
+        let mut nameless = tauri.clone();
+        nameless.product_name = None;
+        assert_eq!(data_dir_name(&pake, &nameless), "pake");
+
+        let dir = runtime_dir(&[
+            ("pake.json", include_str!("../pake.json")),
+            ("app.json", RUNTIME_APP),
+        ]);
+        let (pake, tauri, _) = apply_runtime_override(pake, tauri, Some(&dir)).unwrap();
+        assert_eq!(data_dir_name(&pake, &tauri), "com.pake.a1b2c3");
+        fs::remove_dir_all(dir.parent().unwrap()).unwrap();
+    }
+
+    #[test]
+    fn identifiers_follow_the_cli_rule() {
+        for id in ["com.pake.a1b2c3", "com.example.app-2", "a1"] {
+            assert!(is_valid_identifier(id), "{id}");
+        }
+        let too_long = format!("a{}", "b".repeat(128));
+        for id in [
+            "",
+            "1abc",
+            "com.pake.",
+            "com pake",
+            "com/pake",
+            "..x",
+            too_long.as_str(),
+        ] {
+            assert!(!is_valid_identifier(id), "{id}");
+        }
+    }
+
+    #[test]
+    fn app_user_model_id_is_set_only_for_runtime_apps() {
+        assert_eq!(app_user_model_id(None), None);
+        let app = RuntimeApp {
+            identifier: "com.pake.a1b2c3".into(),
+            product_name: "Runtime Probe".into(),
+        };
+        assert_eq!(app_user_model_id(Some(&app)), Some("com.pake.a1b2c3"));
     }
 }
