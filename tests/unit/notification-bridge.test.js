@@ -473,6 +473,21 @@ describe("notification bridge", () => {
     );
   });
 
+  it("lets a suppressed window clear the shared badge on interaction", async () => {
+    const bridge = loadNotificationBridge({
+      nativeClick: true,
+      suppressed: true,
+    });
+    new bridge.Notification("Ann");
+    await bridge.settle();
+
+    bridge.clickInPage();
+
+    const commands = bridge.invokeCalls.map(({ command }) => command);
+    expect(commands).toContain("clear_dock_badge");
+    expect(commands).not.toContain("increment_dock_badge");
+  });
+
   it("counts a delivered notification towards the badge", async () => {
     const bridge = loadNotificationBridge({ nativeClick: true });
     new bridge.Notification("Ann");

@@ -1471,14 +1471,17 @@ document.addEventListener("DOMContentLoaded", () => {
             // after its acknowledgement, using this object's unique id.
             return withdrawNotification(id);
           }
+          const unread = raisedAfterInteraction === interactionSeq;
           // Another window already raised this exact message, so nothing was
           // shown: no click can arrive, and counting it would multiply the
           // badge by the number of windows.
           if (outcome?.suppressed) {
             forgetNotification(id);
+            // The dock badge is shared, and the window that raised the copy
+            // counted it. Reading here must still clear it.
+            if (unread && !pageManagedBadge) autoBadgeActive = true;
             return undefined;
           }
-          const unread = raisedAfterInteraction === interactionSeq;
           if (
             unread &&
             sequence === notifSeq &&

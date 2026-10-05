@@ -131,6 +131,15 @@ pub fn init_native_click(app: &AppHandle) {
     let _ = app;
 }
 
+fn native_click_ready() -> bool {
+    #[cfg(target_os = "macos")]
+    return macos::native_click_ready();
+    #[cfg(not(target_os = "macos"))]
+    {
+        false
+    }
+}
+
 pub fn send(
     app: &AppHandle,
     window: &WebviewWindow,
@@ -138,7 +147,10 @@ pub fn send(
 ) -> Result<NotificationOutcome, String> {
     validate_id(&params.id)?;
 
-    if is_cross_window_repeat(window.label(), &params.title, &params.body) {
+    // Only a native click reaches the exact window that raised the copy. The
+    // focus fallback arms each window separately, so a copy suppressed there
+    // would drop the click when the OS activates that window instead.
+    if native_click_ready() && is_cross_window_repeat(window.label(), &params.title, &params.body) {
         return Ok(NotificationOutcome {
             native_click: false,
             suppressed: true,
@@ -322,6 +334,10 @@ mod macos {
             unsafe { center.setDelegate(Some(ProtocolObject::from_ref(&**delegate))) };
         });
         NATIVE_CLICK_READY.store(true, Ordering::SeqCst);
+    }
+
+    pub fn native_click_ready() -> bool {
+        NATIVE_CLICK_READY.load(Ordering::SeqCst)
     }
 
     /// Returns whether the notification was handed to the native center. `false`
