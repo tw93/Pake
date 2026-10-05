@@ -80,7 +80,7 @@ The download system automatically handles:
 
 Send messages between web content and Pake container.
 
-Native IPC is available to bundled local pages and the exact configured website origin (scheme, host, and port). Login redirects and other origins do not receive native permissions. Use the final website URL when packaging an app, including its `www` or workspace subdomain. On other origins, native notifications, zoom, Pake's fullscreen controls, and opening links in the system browser are unavailable; downloads fall back to the browser, which may display cross-origin media instead of saving it. Custom commands must be registered in both `generate_handler!` and the command manifest in `src-tauri/build.rs`, with the corresponding permission added to `src-tauri/capabilities/default.json`.
+Native IPC is available to bundled local pages and the exact configured website origin (scheme, host, and port). Login redirects and other origins do not receive native permissions. Use the final website URL when packaging an app, including its `www` or workspace subdomain. On other origins, native notifications, zoom, Pake's fullscreen controls, dragging the window by its hidden title bar, and opening links in the system browser are unavailable; downloads fall back to the browser, which may display cross-origin media instead of saving it. Custom commands must be registered in both `generate_handler!` and the command manifest in `src-tauri/build.rs`, with the corresponding permission added to `src-tauri/capabilities/default.json`.
 
 **Web Side (JavaScript):**
 
@@ -154,8 +154,8 @@ macOS will prompt the user for permission on first use. Only add these flags for
 If you need separate apps for the same site, for example two Gmail accounts with different login state, build them with different app names:
 
 ```bash
-pake https://gmail.com --name "Gmail Work"
-pake https://gmail.com --name "Gmail Personal"
+pake https://mail.google.com --name "Gmail Work"
+pake https://mail.google.com --name "Gmail Personal"
 ```
 
 Pake now generates a different app identifier for each `URL + name` pair, so these apps can be installed as separate desktop apps instead of resolving to the same app.
@@ -163,7 +163,7 @@ Pake now generates a different app identifier for each `URL + name` pair, so the
 For advanced cases, Pake also supports a hidden `--identifier` option if you need to pin the bundle identifier explicitly:
 
 ```bash
-pake https://gmail.com --name "Gmail Work" --identifier com.example.gmail.work
+pake https://mail.google.com --name "Gmail Work" --identifier com.example.gmail.work
 ```
 
 `--multi-instance` is different. It only allows multiple processes for the same packaged app, it does not create separate app identities.

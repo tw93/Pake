@@ -80,7 +80,7 @@ if (window.Notification && Notification.permission === "default") {
 
 在网页内容和 Pake 容器之间发送消息。
 
-原生 IPC 只开放给打包的本地页面和配置的网站来源，协议、主机名和端口都要一致，登录跳转和其他来源不会获得原生权限，打包时使用网站最终打开的网址，包括 `www` 或工作区子域。在其他来源的页面上，原生通知、缩放、Pake 的全屏控制和通过系统浏览器打开链接不可用，下载会交给网页浏览器处理，跨域图片等资源可能直接显示而不保存。自定义命令需要同时注册到 `generate_handler!` 和 `src-tauri/build.rs` 的命令清单，并在 `src-tauri/capabilities/default.json` 中添加对应权限。
+原生 IPC 只开放给打包的本地页面和配置的网站来源，协议、主机名和端口都要一致，登录跳转和其他来源不会获得原生权限，打包时使用网站最终打开的网址，包括 `www` 或工作区子域。在其他来源的页面上，原生通知、缩放、Pake 的全屏控制、隐藏标题栏时拖动窗口和通过系统浏览器打开链接不可用，下载会交给网页浏览器处理，跨域图片等资源可能直接显示而不保存。自定义命令需要同时注册到 `generate_handler!` 和 `src-tauri/build.rs` 的命令清单，并在 `src-tauri/capabilities/default.json` 中添加对应权限。
 
 **网页端（JavaScript）：**
 
@@ -154,8 +154,8 @@ macOS 会在首次使用时向用户弹出权限确认对话框。请仅在确�
 如果你需要为同一个站点生成多个彼此独立的应用，例如两个不同登录态的 Gmail，可以直接使用不同的应用名称进行构建：
 
 ```bash
-pake https://gmail.com --name "Gmail Work"
-pake https://gmail.com --name "Gmail Personal"
+pake https://mail.google.com --name "Gmail Work"
+pake https://mail.google.com --name "Gmail Personal"
 ```
 
 Pake 现在会基于 `URL + name` 生成不同的应用标识，因此这两个应用会被当作两个独立桌面应用安装，而不是落到同一个应用上。
@@ -163,7 +163,7 @@ Pake 现在会基于 `URL + name` 生成不同的应用标识，因此这两个�
 对于需要固定 bundle identifier 的高级场景，Pake 也支持一个隐藏参数 `--identifier`：
 
 ```bash
-pake https://gmail.com --name "Gmail Work" --identifier com.example.gmail.work
+pake https://mail.google.com --name "Gmail Work" --identifier com.example.gmail.work
 ```
 
 `--multi-instance` 和这个能力不同，它只是允许同一个已打包应用启动多个进程，并不会创建多个独立应用身份。
