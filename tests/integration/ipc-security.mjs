@@ -37,6 +37,7 @@ function page(stage, origin) {
   }});
   results.userAgent = navigator.userAgent;
   results.zoom = await check("set_zoom", {percent: 100});
+  results.closeNotification = await check("close_notification", {id: "pake-probe-not-delivered"});
   results.window = await check("plugin:window|is_fullscreen", {label: "pake"});
   ${
     stage === "entry"
@@ -196,10 +197,16 @@ try {
     /(?:^|; )pakeFixtureSession=entry(?:;|$)/,
   );
   assert.ok(!request.headers.cookie.includes("pakeWrongPath"));
-  for (const command of ["download", "zoom", "window", "traversal"]) {
+  for (const command of [
+    "download",
+    "zoom",
+    "window",
+    "traversal",
+    "closeNotification",
+  ]) {
     assert.equal(trusted[command], "allowed", `configured origin: ${command}`);
   }
-  for (const command of ["download", "zoom", "window"]) {
+  for (const command of ["download", "zoom", "window", "closeNotification"]) {
     assert.match(
       untrusted[command],
       /^denied: .*not allowed/i,

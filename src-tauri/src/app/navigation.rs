@@ -31,6 +31,29 @@ pub fn history_step(window: &WebviewWindow, back: bool) {
     }
 }
 
+/// Apply the password-save prompt setting, including explicit opt-out.
+///
+/// This deliberately configures the app's own WebView2 profile; it does not
+/// access or share credentials with a Microsoft Edge profile.
+#[cfg(windows)]
+pub fn set_password_autosave(webview: &tauri::webview::PlatformWebview, enabled: bool) {
+    use webview2_com::Microsoft::Web::WebView2::Win32::ICoreWebView2Settings4;
+    use windows_core::Interface;
+
+    let controller = webview.controller();
+    let result = unsafe {
+        controller
+            .CoreWebView2()
+            .and_then(|core| core.Settings())
+            .and_then(|settings| settings.cast::<ICoreWebView2Settings4>())
+            .and_then(|settings| settings.SetIsPasswordAutosaveEnabled(enabled))
+    };
+
+    if let Err(error) = result {
+        eprintln!("[Pake] Failed to configure WebView2 password autosave: {error}");
+    }
+}
+
 #[cfg(target_os = "macos")]
 fn history_step_platform(webview: &tauri::webview::PlatformWebview, back: bool) {
     use objc2::msg_send;

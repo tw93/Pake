@@ -159,6 +159,11 @@
       "description": "Launch in incognito/private mode (no persisted cookies or storage).",
       "default": false
     },
+    "passwordAutosave": {
+      "type": "boolean",
+      "description": "Enable native WebView2 password-save prompts on Windows. Disabled in incognito mode. Uses the app's own profile; existing saved passwords may still autofill when disabled.",
+      "default": false
+    },
     "wasm": {
       "type": "boolean",
       "description": "Enable WebAssembly support (Flutter Web, etc.).",

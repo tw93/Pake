@@ -40,6 +40,15 @@ describe('CLI options', () => {
     expect(option?.optional).toBe(false);
   });
 
+  it('registers password autosave as a hidden Windows opt-in', () => {
+    const option = program.options.find(
+      (item) => item.long === '--password-autosave',
+    );
+    expect(option?.defaultValue).toBe(false);
+    expect(option?.hidden).toBe(true);
+    expect(option?.required).toBe(false);
+  });
+
   it('exposes --internal-url-regex option', () => {
     const option = program.options.find(
       (item) => item.long === '--internal-url-regex',

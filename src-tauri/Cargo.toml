@@ -61,6 +61,8 @@ windows-sys = { version = "0.61.2", features = [
 ] }
 # Used for native WebView2 GoBack/GoForward on error pages (no page JS).
 webview2-com = "0.38"
+# The generated WebView2 interfaces use this trait for COM interface casts.
+windows-core = "0.61.2"
 
 [features]
 # this feature is used for development builds from development cli

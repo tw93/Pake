@@ -6,6 +6,7 @@
   "permissions": [
     "allow-download-file",
     "allow-send-notification",
+    "allow-close-notification",
     "allow-increment-dock-badge",
     "allow-set-dock-badge",
     "allow-set-dock-badge-label",

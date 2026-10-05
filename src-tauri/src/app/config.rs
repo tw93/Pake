@@ -22,6 +22,8 @@ pub struct WindowConfig {
     pub activation_shortcut: String,
     pub hide_on_close: bool,
     pub incognito: bool,
+    #[serde(default)]
+    pub password_autosave: bool,
     pub title: Option<String>,
     pub enable_wasm: bool,
     pub enable_drag_drop: bool,
@@ -46,6 +48,13 @@ pub struct WindowConfig {
 
 fn default_zoom() -> u32 {
     100
+}
+
+#[cfg(any(windows, test))]
+impl WindowConfig {
+    pub fn password_autosave_enabled(&self) -> bool {
+        self.password_autosave && !self.incognito
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -171,6 +180,23 @@ mod tests {
         config
     }
 
+    #[test]
+    fn password_autosave_is_opt_in_and_disabled_in_private_windows() {
+        let mut window = config_for("https://example.com").windows.remove(0);
+        for enabled in [false, true] {
+            for incognito in [false, true] {
+                window.password_autosave = enabled;
+                window.incognito = incognito;
+                assert_eq!(window.password_autosave_enabled(), enabled && !incognito);
+            }
+        }
+        let mut legacy = serde_json::to_value(window).unwrap();
+        legacy.as_object_mut().unwrap().remove("password_autosave");
+        let legacy: WindowConfig = serde_json::from_value(legacy).unwrap();
+        assert!(!legacy.password_autosave);
+        assert!(!legacy.password_autosave_enabled());
+    }
+
     fn resolve(config: &PakeConfig) -> Resolved {
         let manifest: BTreeMap<String, Manifest> = serde_json::from_str(include_str!(concat!(
             env!("OUT_DIR"),
@@ -210,7 +236,13 @@ mod tests {
     fn remote_ipc_requires_the_configured_scheme_host_and_port() {
         let acl = resolve(&config_for("https://example.com/app?next=https://evil.com"));
         assert!(acl.has_app_acl);
-        for command in ["download_file", "set_zoom", "plugin:window|is_fullscreen"] {
+        for command in [
+            "download_file",
+            "send_notification",
+            "close_notification",
+            "set_zoom",
+            "plugin:window|is_fullscreen",
+        ] {
             for label in ["pake", "pake-1"] {
                 assert!(allows(
                     &acl,

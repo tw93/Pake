@@ -12,6 +12,17 @@ function makeOptions(overrides: Partial<PakeAppOptions> = {}): PakeAppOptions {
 }
 
 describe('buildWindowConfigOverrides', () => {
+  it.each([false, true])(
+    'forwards password autosave=%s to native config',
+    (enabled) => {
+      expect(
+        buildWindowConfigOverrides(
+          makeOptions({ passwordAutosave: enabled }),
+          'win32',
+        ).password_autosave,
+      ).toBe(enabled);
+    },
+  );
   it('matches the default snapshot on macOS', () => {
     const result = buildWindowConfigOverrides(makeOptions(), 'darwin');
     expect(result).toMatchSnapshot();

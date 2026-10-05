@@ -29,8 +29,9 @@ const GDK_BACKEND: &str = "GDK_BACKEND";
 
 use app::{
     invoke::{
-        clear_dock_badge, download_file, increment_dock_badge, send_notification, set_dock_badge,
-        set_dock_badge_label, set_zoom, update_theme_mode, webview_navigate,
+        clear_dock_badge, close_notification, download_file, increment_dock_badge,
+        send_notification, set_dock_badge, set_dock_badge_label, set_zoom, update_theme_mode,
+        webview_navigate,
     },
     setup::{set_global_shortcut, set_system_tray},
     window::{
@@ -388,6 +389,7 @@ pub fn run_app() {
         .invoke_handler(tauri::generate_handler![
             download_file,
             send_notification,
+            close_notification,
             increment_dock_badge,
             set_dock_badge,
             set_dock_badge_label,
@@ -406,6 +408,10 @@ pub fn run_app() {
                 pake_config.clone(),
                 tauri_config.clone(),
             ));
+
+            // Main thread: installs the native notification-click delegate so a
+            // click can be routed back to the page that raised the notification.
+            app::notification::init_native_click(app.app_handle());
 
             // --- Menu Construction Start ---
             #[cfg(target_os = "macos")]

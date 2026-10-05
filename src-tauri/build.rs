@@ -5,6 +5,7 @@ fn main() {
         tauri_build::AppManifest::new().commands(&[
             "download_file",
             "send_notification",
+            "close_notification",
             "increment_dock_badge",
             "set_dock_badge",
             "set_dock_badge_label",

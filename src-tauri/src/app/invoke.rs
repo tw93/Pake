@@ -1,4 +1,5 @@
 use crate::app::navigation::{history_step, reload_window};
+use crate::app::notification::{self, NotificationOutcome, NotificationParams};
 use crate::util::{
     check_file_or_append, get_download_dir, get_download_message_with_lang,
     sanitize_download_filename, show_toast, MessageType,
@@ -83,13 +84,6 @@ pub struct DownloadFileParams {
     /// URL of the page that started the download; used to build a Referer
     /// header with browser-like strict-origin-when-cross-origin rules.
     page_url: Option<String>,
-}
-
-#[derive(serde::Deserialize)]
-pub struct NotificationParams {
-    title: String,
-    body: String,
-    icon: String,
 }
 
 /// Build a Cookie header from the webview session so authenticated downloads
@@ -387,16 +381,19 @@ pub async fn download_file(
 }
 
 #[command]
-pub fn send_notification(app: AppHandle, params: NotificationParams) -> Result<(), String> {
-    use tauri_plugin_notification::NotificationExt;
-    app.notification()
-        .builder()
-        .title(&params.title)
-        .body(&params.body)
-        .icon(&params.icon)
-        .show()
-        .map_err(|e| format!("Failed to show notification: {}", e))?;
-    Ok(())
+pub fn send_notification(
+    app: AppHandle,
+    window: WebviewWindow,
+    params: NotificationParams,
+) -> Result<NotificationOutcome, String> {
+    // Tauri injects the invoker as `window`, so a notification raised by a
+    // secondary window routes its click back to that window rather than "pake".
+    notification::send(&app, &window, &params)
+}
+
+#[command]
+pub fn close_notification(app: AppHandle, window: WebviewWindow, id: String) -> Result<(), String> {
+    notification::close(&app, &window, &id)
 }
 
 #[command]

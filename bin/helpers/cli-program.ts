@@ -186,6 +186,14 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .hideHelp(),
     )
     .addOption(
+      new Option(
+        '--password-autosave',
+        'Enable native password-save prompts on Windows',
+      )
+        .default(DEFAULT.passwordAutosave)
+        .hideHelp(),
+    )
+    .addOption(
       new Option('--wasm', 'Enable WebAssembly support (Flutter Web, etc.)')
         .default(DEFAULT.wasm)
         .hideHelp(),

@@ -100,6 +100,15 @@ describe('loadConfigFile', () => {
     expect(loaded.options.downloadDir).toBe('~/Documents/My App');
   });
 
+  it.each([false, true])(
+    'loads passwordAutosave=%s from config',
+    async (enabled) => {
+      const configPath = await writeConfig({ passwordAutosave: enabled });
+      const loaded = await loadConfigFile(configPath, validKeys);
+      expect(loaded.options.passwordAutosave).toBe(enabled);
+    },
+  );
+
   it('rejects a missing file with INVALID_INPUT', async () => {
     const missing = path.join(tmpDir, 'nope.json');
     await expect(loadConfigFile(missing, validKeys)).rejects.toMatchObject({
