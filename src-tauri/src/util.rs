@@ -193,7 +193,12 @@ pub fn sanitize_download_filename(filename: &str) -> String {
         return "download".to_string();
     };
 
-    if candidate == "." || candidate == ".." {
+    // A colon can retain a Windows drive prefix or alternate data stream even
+    // after separators have been removed. Colons are ordinary names on Unix.
+    if candidate == "."
+        || candidate == ".."
+        || (cfg!(target_os = "windows") && candidate.contains(':'))
+    {
         "download".to_string()
     } else {
         candidate.to_string()
@@ -413,6 +418,32 @@ mod tests {
                 "{filename}"
             );
         }
+    }
+
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn sanitize_download_filename_rejects_windows_drive_prefixes_and_streams() {
+        for filename in [
+            "C:payload.txt",
+            "C:",
+            "report.txt:payload",
+            "..\\D:payload.txt",
+        ] {
+            assert_eq!(
+                sanitize_download_filename(filename),
+                "download",
+                "{filename}"
+            );
+        }
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    #[test]
+    fn sanitize_download_filename_preserves_colons_on_unix() {
+        assert_eq!(
+            sanitize_download_filename("report-14:30.txt"),
+            "report-14:30.txt"
+        );
     }
 
     #[test]

@@ -8,8 +8,10 @@ use std::sync::atomic::{AtomicI64, Ordering};
 use std::sync::OnceLock;
 use tauri::http::Method;
 use tauri::{command, AppHandle, Manager, Url, WebviewWindow};
-use tauri_plugin_http::reqwest::header::{HeaderMap, HeaderValue, COOKIE, REFERER, USER_AGENT};
-use tauri_plugin_http::reqwest::{Client, ClientBuilder, Request};
+use tauri_plugin_http::reqwest::header::{
+    HeaderMap, HeaderValue, COOKIE, LOCATION, REFERER, USER_AGENT,
+};
+use tauri_plugin_http::reqwest::{redirect::Policy, Client, ClientBuilder, Request, Response};
 use tokio::io::AsyncWriteExt;
 
 use tauri::Theme;
@@ -94,6 +96,26 @@ pub struct NotificationParams {
 /// match what the page itself would request. Best-effort: missing cookies
 /// fall through to an anonymous request.
 fn cookie_header_for_url(window: &WebviewWindow, url: &Url) -> Option<HeaderValue> {
+    // Wry 0.54 compares Cookie.domain to Url.domain, which is None for IPs
+    // on macOS. Read this window's store only for that broken branch.
+    #[cfg(target_os = "macos")]
+    let cookies = if url.host_str().is_some_and(|host| {
+        host.trim_matches(['[', ']'])
+            .parse::<std::net::IpAddr>()
+            .is_ok()
+    }) {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .ok()?
+            .as_secs();
+        let mut cookies = window.cookies().ok()?;
+        cookies.retain(|cookie| cookie_matches_ip_url(cookie, url, now));
+        cookies.sort_by_key(|cookie| std::cmp::Reverse(cookie.path().unwrap_or("/").len()));
+        cookies
+    } else {
+        window.cookies_for_url(url.clone()).ok()?
+    };
+    #[cfg(not(target_os = "macos"))]
     let cookies = window.cookies_for_url(url.clone()).ok()?;
     if cookies.is_empty() {
         return None;
@@ -106,17 +128,52 @@ fn cookie_header_for_url(window: &WebviewWindow, url: &Url) -> Option<HeaderValu
     HeaderValue::from_str(&header).ok()
 }
 
+#[cfg(target_os = "macos")]
+fn cookie_matches_ip_url(cookie: &tauri::webview::Cookie<'_>, url: &Url, now: u64) -> bool {
+    use std::net::IpAddr;
+    let target = url
+        .host_str()
+        .and_then(|host| host.trim_matches(['[', ']']).parse::<IpAddr>().ok());
+    let domain = cookie
+        .domain()
+        .and_then(|domain| domain.trim_matches(['[', ']']).parse::<IpAddr>().ok());
+    if target.is_none()
+        || target != domain
+        || (cookie.secure() == Some(true) && url.scheme() != "https")
+    {
+        return false;
+    }
+    if cookie
+        .expires_datetime()
+        .is_some_and(|expiry| expiry.unix_timestamp() <= 0 || expiry.unix_timestamp() as u64 <= now)
+    {
+        return false;
+    }
+    let path = cookie
+        .path()
+        .filter(|path| path.starts_with('/'))
+        .unwrap_or("/");
+    url.path() == path
+        || (url.path().starts_with(path)
+            && (path.ends_with('/') || url.path().as_bytes().get(path.len()) == Some(&b'/')))
+}
+
 /// One client for all downloads: the TLS config and connection pool are built
 /// once and keep-alive connections are reused across files instead of paying
 /// for a fresh client per file.
-static DOWNLOAD_CLIENT: OnceLock<Client> = OnceLock::new();
+static DOWNLOAD_CLIENT: OnceLock<Result<Client, String>> = OnceLock::new();
 
-fn download_client() -> &'static Client {
-    DOWNLOAD_CLIENT.get_or_init(|| {
-        ClientBuilder::new()
-            .build()
-            .expect("failed to build the download HTTP client")
-    })
+fn download_client() -> Result<&'static Client, String> {
+    DOWNLOAD_CLIENT
+        .get_or_init(|| {
+            ClientBuilder::new()
+                .redirect(Policy::none())
+                .referer(false)
+                .build()
+                .map_err(|e| format!("Failed to build download HTTP client: {e}"))
+        })
+        .as_ref()
+        .map_err(Clone::clone)
 }
 
 /// Referer for a download, mirroring the browser default referrer policy
@@ -125,16 +182,20 @@ fn download_client() -> &'static Client {
 /// downgrade or from a non-http(s) page.
 fn referer_header_for(page_url: &str, download_url: &Url) -> Option<HeaderValue> {
     let mut page = Url::from_str(page_url).ok()?;
-    if !matches!(page.scheme(), "http" | "https") {
+    if !matches!(page.scheme(), "http" | "https")
+        || !matches!(download_url.scheme(), "http" | "https")
+    {
         return None;
     }
+    let _ = page.set_username("");
+    let _ = page.set_password(None);
+    page.set_fragment(None);
     let value = if page.origin() == download_url.origin() {
-        page.set_fragment(None);
         page.into()
     } else if page.scheme() == "https" && download_url.scheme() == "http" {
         return None;
     } else {
-        page.origin().ascii_serialization()
+        format!("{}/", page.origin().ascii_serialization())
     };
     HeaderValue::from_str(&value).ok()
 }
@@ -160,6 +221,59 @@ fn build_download_headers(
         headers.insert(REFERER, referer);
     }
     headers
+}
+
+/// IPC context must belong to the webview that actually made the request.
+fn trusted_page_url(requested: Option<&str>, actual: Option<&Url>) -> Option<String> {
+    let actual = actual?;
+    let page = Url::parse(requested?).ok()?;
+    if !matches!(actual.scheme(), "http" | "https") || page.origin() != actual.origin() {
+        return None;
+    }
+    Some(page.into())
+}
+
+/// Recompute session headers on every hop. Referrer information can only
+/// narrow, and the shared connection pool must never share window cookies.
+async fn download_response(
+    client: &Client,
+    mut url: Url,
+    user_agent: Option<&str>,
+    page_url: Option<&str>,
+    mut cookie_for_url: impl FnMut(&Url) -> Option<HeaderValue>,
+) -> Result<Response, String> {
+    let mut referrer = page_url.map(str::to_owned);
+    let mut redirects = 0;
+    loop {
+        if !matches!(url.scheme(), "http" | "https") {
+            return Err("Downloads require an HTTP(S) URL".into());
+        }
+        let mut request = Request::new(Method::GET, url.clone());
+        *request.headers_mut() =
+            build_download_headers(cookie_for_url(&url), user_agent, referrer.as_deref(), &url);
+        referrer = request
+            .headers()
+            .get(REFERER)
+            .and_then(|h| h.to_str().ok())
+            .map(str::to_owned);
+        let response = client.execute(request).await.map_err(|e| e.to_string())?;
+        if !matches!(response.status().as_u16(), 301 | 302 | 303 | 307 | 308) {
+            return Ok(response);
+        }
+        let Some(location) = response.headers().get(LOCATION) else {
+            return Ok(response);
+        };
+        if redirects == 10 {
+            return Err("Download exceeded 10 redirects".into());
+        }
+        let location = location
+            .to_str()
+            .map_err(|e| format!("Invalid download redirect: {e}"))?;
+        url = url
+            .join(location)
+            .map_err(|e| format!("Invalid download redirect: {e}"))?;
+        redirects += 1;
+    }
 }
 
 #[command]
@@ -189,16 +303,21 @@ pub async fn download_file(
     let file_path = check_file_or_append(path_str);
 
     let url = Url::from_str(&params.url).map_err(|e| format!("Invalid URL: {}", e))?;
+    let page_url = trusted_page_url(params.page_url.as_deref(), window.url().ok().as_ref());
 
-    let mut request = Request::new(Method::GET, url.clone());
-    *request.headers_mut() = build_download_headers(
-        cookie_header_for_url(&window, &url),
-        params.user_agent.as_deref(),
-        params.page_url.as_deref(),
-        &url,
-    );
-
-    let response = download_client().execute(request).await;
+    let response = match download_client() {
+        Ok(client) => {
+            download_response(
+                client,
+                url,
+                params.user_agent.as_deref(),
+                page_url.as_deref(),
+                |target| cookie_header_for_url(&window, target),
+            )
+            .await
+        }
+        Err(error) => Err(error),
+    };
 
     match response {
         Ok(mut res) => {
@@ -239,6 +358,17 @@ pub async fn download_file(
                     format!("Failed to write chunk: {e}")
                 })?;
             }
+
+            file.flush().await.map_err(|e| {
+                show_toast(
+                    &window,
+                    &get_download_message_with_lang(
+                        MessageType::DirectoryFailure,
+                        params.language.clone(),
+                    ),
+                );
+                format!("Failed to finish writing file: {e}")
+            })?;
 
             show_toast(
                 &window,
@@ -375,6 +505,20 @@ mod tests {
     }
 
     #[test]
+    fn same_origin_referer_never_contains_credentials() {
+        let h = headers(
+            None,
+            None,
+            Some("https://user:secret@example.com/account?token=1#private"),
+            "https://example.com/file.zip",
+        );
+        assert_eq!(
+            h.get(REFERER).unwrap(),
+            "https://example.com/account?token=1"
+        );
+    }
+
+    #[test]
     fn cross_origin_referer_sends_origin_only() {
         let h = headers(
             None,
@@ -382,7 +526,7 @@ mod tests {
             Some("https://example.com/articles/1"),
             "https://cdn.example.net/a.zip",
         );
-        assert_eq!(h.get(REFERER).unwrap(), "https://example.com");
+        assert_eq!(h.get(REFERER).unwrap(), "https://example.com/");
     }
 
     #[test]
@@ -423,5 +567,272 @@ mod tests {
     fn missing_context_leaves_headers_empty() {
         let h = headers(None, None, None, "https://example.com/a.zip");
         assert!(h.is_empty());
+    }
+
+    #[test]
+    fn referrer_information_only_narrows_across_redirects() {
+        let mut page = Some("https://example.com/account?token=fixture#private".to_string());
+        for (target, expected) in [
+            (
+                "https://example.com/file",
+                Some("https://example.com/account?token=fixture"),
+            ),
+            ("https://cdn.example.com/file", Some("https://example.com/")),
+            ("https://example.com/file", Some("https://example.com/")),
+            ("http://example.com/file", None),
+            ("https://example.com/file", None),
+        ] {
+            let result = headers(None, None, page.as_deref(), target);
+            page = result.get(REFERER).map(|h| h.to_str().unwrap().to_owned());
+            assert_eq!(page.as_deref(), expected);
+        }
+    }
+
+    #[test]
+    fn ipc_page_context_cannot_spoof_another_origin() {
+        let actual = Url::parse("https://app.example/current").unwrap();
+        assert_eq!(
+            trusted_page_url(Some("https://app.example/route#fragment"), Some(&actual)).as_deref(),
+            Some("https://app.example/route#fragment")
+        );
+        for requested in [
+            "https://victim.example/account",
+            "https://app.example:8443/",
+            "http://app.example/",
+            "file:///tmp/fixture",
+            "invalid",
+        ] {
+            assert!(trusted_page_url(Some(requested), Some(&actual)).is_none());
+        }
+        assert!(trusted_page_url(Some("https://victim.example/"), None).is_none());
+        assert!(trusted_page_url(None, Some(&actual)).is_none());
+        let local = Url::parse("tauri://localhost/index.html").unwrap();
+        assert!(trusted_page_url(Some("https://victim.example/"), Some(&local)).is_none());
+    }
+
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn ip_cookie_selection_keeps_domain_path_secure_and_expiry_boundaries() {
+        use tauri::webview::Cookie;
+        let url = Url::parse("http://127.0.0.1:8123/app/file").unwrap();
+        for (value, matches) in [
+            (
+                "session=fixture; Domain=127.0.0.1; Path=/app; HttpOnly",
+                true,
+            ),
+            ("session=fixture; Domain=127.0.0.2; Path=/", false),
+            ("session=fixture; Domain=example.com; Path=/", false),
+            (
+                "session=fixture; Domain=127.0.0.1; Path=/application",
+                false,
+            ),
+            ("session=fixture; Domain=127.0.0.1; Path=/app/file", true),
+            ("session=fixture; Domain=127.0.0.1; Path=/; Secure", false),
+            (
+                "session=fixture; Domain=127.0.0.1; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT",
+                false,
+            ),
+        ] {
+            assert_eq!(
+                cookie_matches_ip_url(&Cookie::parse(value).unwrap(), &url, 10),
+                matches,
+                "{value}"
+            );
+        }
+        let secure = Cookie::parse("session=fixture; Domain=127.0.0.1; Path=/; Secure").unwrap();
+        assert!(cookie_matches_ip_url(
+            &secure,
+            &Url::parse("https://127.0.0.1/app").unwrap(),
+            10
+        ));
+        let ipv6 = Cookie::parse("session=fixture; Domain=0:0:0:0:0:0:0:1; Path=/").unwrap();
+        assert!(cookie_matches_ip_url(
+            &ipv6,
+            &Url::parse("http://[::1]/").unwrap(),
+            10
+        ));
+        assert!(!cookie_matches_ip_url(
+            &ipv6,
+            &Url::parse("http://[::2]/").unwrap(),
+            10
+        ));
+    }
+
+    fn serve_downloads(
+        responses: impl FnOnce(&Url) -> Vec<(u16, Option<String>)>,
+    ) -> (Url, std::thread::JoinHandle<Vec<String>>) {
+        use std::io::{BufRead, BufReader, Write};
+        use std::net::TcpListener;
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let origin = Url::parse(&format!("http://{}/", listener.local_addr().unwrap())).unwrap();
+        let responses = responses(&origin);
+        let thread = std::thread::spawn(move || {
+            let mut requests = Vec::new();
+            for (status, location) in responses {
+                let (mut stream, _) = listener.accept().unwrap();
+                stream
+                    .set_read_timeout(Some(std::time::Duration::from_secs(5)))
+                    .unwrap();
+                let mut reader = BufReader::new(stream.try_clone().unwrap());
+                let mut request = String::new();
+                loop {
+                    let mut line = String::new();
+                    assert!(reader.read_line(&mut line).unwrap() > 0);
+                    if line == "\r\n" {
+                        break;
+                    }
+                    request.push_str(&line);
+                }
+                requests.push(request.to_lowercase());
+                let location = location
+                    .map(|value| format!("Location: {value}\r\n"))
+                    .unwrap_or_default();
+                write!(stream, "HTTP/1.1 {status} Test\r\n{location}Content-Length: 7\r\nConnection: close\r\n\r\npayload").unwrap();
+            }
+            requests
+        });
+        (origin, thread)
+    }
+
+    #[test]
+    fn redirects_recheck_cookies_and_never_restore_full_referrer() {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
+        let (origin, server) = serve_downloads(|origin| {
+            let mut other = origin.join("hop").unwrap();
+            other.set_host(Some("localhost")).unwrap();
+            vec![
+                (302, Some(other.into())),
+                (307, Some(origin.join("final").unwrap().into())),
+                (200, None),
+            ]
+        });
+        let mut cookie_targets = Vec::new();
+        let response = runtime
+            .block_on(download_response(
+                download_client().unwrap(),
+                origin.join("start").unwrap(),
+                Some("Pake-fixture"),
+                Some(
+                    origin
+                        .join("account?token=fixture#fragment")
+                        .unwrap()
+                        .as_str(),
+                ),
+                |target| {
+                    cookie_targets.push(target.clone());
+                    Some(HeaderValue::from_static(
+                        if target.host_str() == Some("localhost") {
+                            "target=fixture"
+                        } else {
+                            "source=fixture"
+                        },
+                    ))
+                },
+            ))
+            .unwrap();
+        assert_eq!(runtime.block_on(response.text()).unwrap(), "payload");
+        assert_eq!(cookie_targets.len(), 3);
+        let requests = server.join().unwrap();
+        assert!(requests[0].contains(&format!("referer: {}account?token=fixture\r\n", origin)));
+        for request in &requests[1..] {
+            assert!(request.contains(&format!("referer: {origin}\r\n")));
+            assert!(!request.contains("token=fixture"));
+        }
+        assert!(requests[0].contains("cookie: source=fixture\r\n"));
+        assert!(requests[1].contains("cookie: target=fixture\r\n"));
+        assert!(!requests[1].contains("source=fixture"));
+        assert!(requests[2].contains("cookie: source=fixture\r\n"));
+        assert!(requests
+            .iter()
+            .all(|r| r.contains("user-agent: pake-fixture\r\n")));
+    }
+
+    #[test]
+    fn redirects_keep_the_limit_relative_locations_and_statuses() {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
+        for status in [301, 302, 303, 307, 308] {
+            let (origin, server) =
+                serve_downloads(|_| vec![(status, Some("/final".into())), (200, None)]);
+            let response = runtime
+                .block_on(download_response(
+                    download_client().unwrap(),
+                    origin,
+                    None,
+                    None,
+                    |_| None,
+                ))
+                .unwrap();
+            assert_eq!(response.url().path(), "/final");
+            assert_eq!(server.join().unwrap().len(), 2);
+        }
+        for count in [10, 11] {
+            let (origin, server) = serve_downloads(|_| {
+                let mut responses = vec![(302, Some("/loop".into())); count];
+                if count == 10 {
+                    responses.push((200, None));
+                }
+                responses
+            });
+            let result = runtime.block_on(download_response(
+                download_client().unwrap(),
+                origin,
+                None,
+                None,
+                |_| None,
+            ));
+            assert_eq!(result.is_ok(), count == 10);
+            if count == 11 {
+                assert_eq!(result.unwrap_err(), "Download exceeded 10 redirects");
+            }
+            assert_eq!(server.join().unwrap().len(), 11);
+        }
+        for target in ["file:///tmp/fixture", "data:text/plain,fixture"] {
+            let (origin, server) = serve_downloads(|_| vec![(302, Some(target.into()))]);
+            let result = runtime.block_on(download_response(
+                download_client().unwrap(),
+                origin,
+                None,
+                None,
+                |_| None,
+            ));
+            assert_eq!(result.unwrap_err(), "Downloads require an HTTP(S) URL");
+            assert_eq!(server.join().unwrap().len(), 1);
+        }
+    }
+
+    #[test]
+    fn shared_client_does_not_reuse_another_windows_cookies() {
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .unwrap();
+        let (origin, server) = serve_downloads(|_| vec![(200, None), (200, None)]);
+        runtime
+            .block_on(download_response(
+                download_client().unwrap(),
+                origin.clone(),
+                None,
+                None,
+                |_| Some(HeaderValue::from_static("session=fixture")),
+            ))
+            .unwrap();
+        runtime
+            .block_on(download_response(
+                download_client().unwrap(),
+                origin,
+                None,
+                None,
+                |_| None,
+            ))
+            .unwrap();
+        let requests = server.join().unwrap();
+        assert!(requests[0].contains("cookie: session=fixture\r\n"));
+        assert!(!requests[1].contains("cookie:"));
     }
 }

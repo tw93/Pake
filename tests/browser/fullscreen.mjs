@@ -178,3 +178,62 @@ for (const target of ["html", "body", "#player"]) {
     }
   });
 }
+
+// A denied native request must not leave the page in a fake fullscreen layout.
+test("denied polyfill fullscreen leaves the player in its original layout", async () => {
+  const browser = await chromium.launch({
+    headless: true,
+    ...(process.env.PAKE_BROWSER_EXECUTABLE
+      ? { executablePath: process.env.PAKE_BROWSER_EXECUTABLE }
+      : {}),
+  });
+  try {
+    const page = await browser.newPage();
+    await page.setContent(
+      '<main><section id="player"><video></video><button>Pause</button></section></main>',
+    );
+    await page.evaluate(() => {
+      window.__TAURI__ = {
+        window: {
+          getCurrentWindow: () => ({
+            setFullscreen: async () => {
+              throw new Error(
+                "Command plugin:window|set_fullscreen not allowed by ACL",
+              );
+            },
+            isFullscreen: async () => false,
+          }),
+        },
+      };
+    });
+    await page.addScriptTag({
+      content: await fs.readFile(
+        `${process.env.PAKE_INJECT_ROOT || "src-tauri/src/inject"}/fullscreen.js`,
+        "utf8",
+      ),
+    });
+    assert.deepEqual(
+      await page.evaluate(async () => {
+        const player = document.querySelector("#player");
+        const parent = player.parentElement;
+        let denied = false;
+        try {
+          await player.requestFullscreen();
+        } catch {
+          denied = true;
+        }
+        return {
+          denied,
+          sameParent: player.parentElement === parent,
+          fullscreen: document.fullscreenElement === null,
+          styled: !!document.querySelector(
+            ".pake-fullscreen-element, .pake-fullscreen-active",
+          ),
+        };
+      }),
+      { denied: true, sameParent: true, fullscreen: true, styled: false },
+    );
+  } finally {
+    await browser.close();
+  }
+});

@@ -69,4 +69,17 @@ describe('download HTTP status handling', () => {
     expect(invokeSource).toContain('cookies_for_url');
     expect(invokeSource).toContain('COOKIE');
   });
+
+  it('waits for the final asynchronous disk write before reporting success', () => {
+    const downloadFn = invokeSource.slice(
+      invokeSource.indexOf('pub async fn download_file'),
+      invokeSource.indexOf('pub fn send_notification'),
+    );
+    const flush = downloadFn.indexOf('file.flush().await');
+    expect(flush).toBeGreaterThan(downloadFn.indexOf('file.write_all(&chunk)'));
+    expect(flush).toBeLessThan(downloadFn.indexOf('MessageType::Success'));
+    expect(
+      downloadFn.slice(flush, downloadFn.indexOf('})?;', flush)),
+    ).toContain('MessageType::DirectoryFailure');
+  });
 });
