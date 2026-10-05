@@ -1471,6 +1471,13 @@ document.addEventListener("DOMContentLoaded", () => {
             // after its acknowledgement, using this object's unique id.
             return withdrawNotification(id);
           }
+          // Another window already raised this exact message, so nothing was
+          // shown: no click can arrive, and counting it would multiply the
+          // badge by the number of windows.
+          if (outcome?.suppressed) {
+            forgetNotification(id);
+            return undefined;
+          }
           const unread = raisedAfterInteraction === interactionSeq;
           if (
             unread &&
