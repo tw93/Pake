@@ -426,6 +426,13 @@ pub fn run_app() {
             // --- Menu Construction End ---
 
             let window = set_window(app.app_handle(), &pake_config, &tauri_config)?;
+
+            // An explicit --dark-mode wins over the desktop preference.
+            #[cfg(target_os = "linux")]
+            if !pake_config.windows[0].dark_mode {
+                app::color_scheme::follow_desktop_color_scheme(app.app_handle());
+            }
+
             set_system_tray(
                 app.app_handle(),
                 show_system_tray,

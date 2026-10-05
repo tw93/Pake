@@ -52,6 +52,9 @@ objc2-web-kit = { version = "0.3", default-features = false, features = [
 # Version and features must match what wry resolves, or PlatformWebview::inner
 # hands back a WebView from a different crate instance.
 webkit2gtk = { version = "=2.0.2", features = ["v2_38"] }
+# Reads the freedesktop color-scheme from the settings portal. Same version
+# and features that tauri-plugin-opener and single-instance already lock.
+zbus = "5.14"
 
 [target.'cfg(windows)'.dependencies]
 windows-sys = { version = "0.61.2", features = [
