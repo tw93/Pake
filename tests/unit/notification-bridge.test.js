@@ -23,6 +23,7 @@ function createElement(tagName = "div") {
 function loadNotificationBridge({
   nativeClick = false,
   hasFocus = false,
+  deferSend = false,
 } = {}) {
   const source = ["link_policy.js", "event.js"]
     .map((file) =>
@@ -36,6 +37,7 @@ function loadNotificationBridge({
   const windowListeners = {};
   const documentListeners = {};
   const invokeCalls = [];
+  const sendRequests = [];
   const body = createElement("body");
 
   const context = {
@@ -75,6 +77,11 @@ function loadNotificationBridge({
           invoke: (command, payload) => {
             invokeCalls.push({ command, payload });
             if (command === "send_notification") {
+              if (deferSend) {
+                return new Promise((resolve, reject) => {
+                  sendRequests.push({ resolve, reject, payload });
+                });
+              }
               return Promise.resolve({ nativeClick });
             }
             return Promise.resolve();
@@ -115,6 +122,7 @@ function loadNotificationBridge({
     Notification: context.window.Notification,
     notificationClick: context.window.__pakeNotificationClick,
     invokeCalls,
+    sendRequests,
     focusWindow: () => fire(windowListeners, "focus", new Event("focus")),
     clickInPage: () => fire(documentListeners, "click", new Event("click")),
     // Drain the invoke promise chain that records the fallback state.
@@ -123,6 +131,130 @@ function loadNotificationBridge({
 }
 
 describe("notification bridge", () => {
+  it("queues close events so replacement cannot synchronously reenter Map iteration", async () => {
+    const bridge = loadNotificationBridge({ nativeClick: true });
+    let closeCalls = 0;
+    const retry = () => {
+      const notification = new bridge.Notification("retry", { tag: "thread" });
+      notification.onclose = () => {
+        closeCalls++;
+        if (closeCalls < 4) retry();
+      };
+    };
+    retry();
+    new bridge.Notification("replacement", { tag: "thread" });
+    expect(closeCalls).toBe(0);
+    await bridge.settle();
+    expect(closeCalls).toBe(1);
+  });
+  it("keeps the newest focus target when replies arrive out of order", async () => {
+    const bridge = loadNotificationBridge({ deferSend: true });
+    const older = new bridge.Notification("older");
+    const newer = new bridge.Notification("newer");
+    const oldClick = vi.fn();
+    const newClick = vi.fn();
+    older.onclick = oldClick;
+    newer.onclick = newClick;
+    bridge.sendRequests[1].resolve({ nativeClick: false });
+    await bridge.settle();
+    bridge.sendRequests[0].resolve({ nativeClick: false });
+    await bridge.settle();
+    bridge.focusWindow();
+    expect(oldClick).not.toHaveBeenCalled();
+    expect(newClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not revive a closed notification when delivery completes", async () => {
+    const bridge = loadNotificationBridge({ deferSend: true });
+    const notif = new bridge.Notification("closed");
+    const show = vi.fn();
+    const close = vi.fn();
+    notif.onshow = show;
+    notif.onclose = close;
+    notif.close();
+    notif.close();
+    bridge.sendRequests[0].resolve({ nativeClick: true });
+    await bridge.settle();
+    expect(show).not.toHaveBeenCalled();
+    expect(close).toHaveBeenCalledTimes(1);
+    expect(
+      bridge.invokeCalls.filter(
+        (call) => call.command === "increment_dock_badge",
+      ),
+    ).toHaveLength(0);
+    expect(bridge.invokeCalls).toContainEqual({
+      command: "close_notification",
+      payload: { id: bridge.sendRequests[0].payload.params.id },
+    });
+  });
+
+  it("does not rearm a focus click or badge after an interaction before the reply", async () => {
+    const bridge = loadNotificationBridge({ deferSend: true });
+    const notif = new bridge.Notification("already read");
+    const click = vi.fn();
+    notif.onclick = click;
+    bridge.clickInPage();
+    bridge.sendRequests[0].resolve({ nativeClick: false });
+    await bridge.settle();
+    bridge.focusWindow();
+    expect(click).not.toHaveBeenCalled();
+    expect(
+      bridge.invokeCalls.filter(
+        (call) => call.command === "increment_dock_badge",
+      ),
+    ).toHaveLength(0);
+  });
+
+  it("withdraws the old native notification on a tag replacement", async () => {
+    const bridge = loadNotificationBridge({ nativeClick: true });
+    new bridge.Notification("older", { tag: "thread" });
+    await bridge.settle();
+    const oldId = bridge.invokeCalls[0].payload.params.id;
+    new bridge.Notification("newer", { tag: "thread" });
+    await bridge.settle();
+    expect(bridge.invokeCalls).toContainEqual({
+      command: "close_notification",
+      payload: { id: oldId },
+    });
+  });
+
+  it("does not revive replaced notifications on late errors or successful deliveries", async () => {
+    const bridge = loadNotificationBridge({ deferSend: true });
+    const older = new bridge.Notification("older", { tag: "thread" });
+    const middle = new bridge.Notification("middle", { tag: "thread" });
+    const newest = new bridge.Notification("newest", { tag: "thread" });
+    const oldError = vi.fn();
+    const middleShow = vi.fn();
+    const newestClick = vi.fn();
+    older.onerror = oldError;
+    middle.onshow = middleShow;
+    newest.onclick = newestClick;
+    bridge.sendRequests[2].resolve({ nativeClick: true });
+    bridge.sendRequests[1].resolve({ nativeClick: true });
+    bridge.sendRequests[0].reject(new Error("late delivery failure"));
+    await bridge.settle();
+    bridge.notificationClick(bridge.sendRequests[2].payload.params.id);
+    expect(oldError).not.toHaveBeenCalled();
+    expect(middleShow).not.toHaveBeenCalled();
+    expect(newestClick).toHaveBeenCalledTimes(1);
+    expect(
+      bridge.invokeCalls.filter(
+        (call) =>
+          call.command === "close_notification" &&
+          call.payload.id === bridge.sendRequests[1].payload.params.id,
+      ),
+    ).toHaveLength(2);
+  });
+
+  it("validates native click callback ids even if they come from old stored notifications", () => {
+    const source = fs.readFileSync("src-tauri/src/app/notification.rs", "utf8");
+    const callback = source.slice(
+      source.indexOf("fn did_activate("),
+      source.indexOf("fn should_present("),
+    );
+    expect(callback).toContain("validate_id(id)");
+  });
+
   it("routes an addEventListener click handler with the notification as target", async () => {
     const bridge = loadNotificationBridge({ nativeClick: true });
     const notif = new bridge.Notification("Ann", { body: "hi" });
@@ -273,6 +405,7 @@ describe("notification bridge", () => {
     notif.onclose = closeHandler;
 
     notif.close();
+    await bridge.settle();
     bridge.notificationClick(id);
 
     expect(closeHandler).toHaveBeenCalledTimes(1);

@@ -29,8 +29,9 @@ const GDK_BACKEND: &str = "GDK_BACKEND";
 
 use app::{
     invoke::{
-        clear_dock_badge, download_file, increment_dock_badge, send_notification, set_dock_badge,
-        set_dock_badge_label, set_zoom, update_theme_mode, webview_navigate,
+        clear_dock_badge, close_notification, download_file, increment_dock_badge,
+        send_notification, set_dock_badge, set_dock_badge_label, set_zoom, update_theme_mode,
+        webview_navigate,
     },
     setup::{set_global_shortcut, set_system_tray},
     window::{
@@ -388,6 +389,7 @@ pub fn run_app() {
         .invoke_handler(tauri::generate_handler![
             download_file,
             send_notification,
+            close_notification,
             increment_dock_badge,
             set_dock_badge,
             set_dock_badge_label,
@@ -397,6 +399,11 @@ pub fn run_app() {
             webview_navigate,
         ])
         .setup(move |app| {
+            // Grant remote IPC only to the immutable, packaged entry origins,
+            // before any webview can start loading untrusted content.
+            if let Some(capability) = pake_config.remote_capability()? {
+                app.add_capability(capability)?;
+            }
             app.manage(MultiWindowState::new(
                 pake_config.clone(),
                 tauri_config.clone(),

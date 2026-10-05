@@ -86,6 +86,19 @@ pub fn send(
     })
 }
 
+/// Withdraw only the calling webview's notification. Other platforms retain
+/// their existing delivery path, which does not expose a withdrawal handle.
+pub fn close(app: &AppHandle, window: &WebviewWindow, id: &str) -> Result<(), String> {
+    validate_id(id)?;
+    #[cfg(target_os = "macos")]
+    return macos::withdraw(app, window.label(), id);
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = (app, window);
+        Ok(())
+    }
+}
+
 /// Reveal the window the notification came from and hand the click to the page.
 ///
 /// A hidden or minimized window is exactly the case where a notification click
@@ -119,7 +132,7 @@ mod macos {
     // notify-rust, so staying on it keeps notification appearance unchanged.
     #![allow(deprecated)]
 
-    use super::{dispatch_click, NotificationParams};
+    use super::{dispatch_click, validate_id, NotificationParams};
     use objc2::rc::Retained;
     use objc2::runtime::{AnyClass, ProtocolObject};
     use objc2::{define_class, msg_send, DefinedClass, MainThreadMarker, MainThreadOnly};
@@ -170,6 +183,9 @@ mod macos {
                 let Some((label, id)) = identifier.rsplit_once('|') else {
                     return;
                 };
+                if validate_id(id).is_err() {
+                    return;
+                }
                 dispatch_click(&self.ivars().app, label, id);
             }
 
@@ -251,6 +267,27 @@ mod macos {
         .map_err(|e| format!("Failed to dispatch notification: {e}"))?;
 
         Ok(true)
+    }
+
+    pub fn withdraw(app: &AppHandle, window_label: &str, id: &str) -> Result<(), String> {
+        let identifier = format!("{window_label}|{id}");
+        app.run_on_main_thread(move || {
+            let Some(mtm) = MainThreadMarker::new() else {
+                return;
+            };
+            let Some(center) = default_center(mtm) else {
+                return;
+            };
+            for notification in center.deliveredNotifications() {
+                if notification
+                    .identifier()
+                    .is_some_and(|value| value.to_string() == identifier)
+                {
+                    center.removeDeliveredNotification(&notification);
+                }
+            }
+        })
+        .map_err(|e| format!("Failed to withdraw notification: {e}"))
     }
 }
 

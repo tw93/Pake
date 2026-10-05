@@ -201,6 +201,11 @@ pub fn send_notification(
 }
 
 #[command]
+pub fn close_notification(app: AppHandle, window: WebviewWindow, id: String) -> Result<(), String> {
+    notification::close(&app, &window, &id)
+}
+
+#[command]
 pub fn set_dock_badge(app: AppHandle, count: Option<i64>) -> Result<(), String> {
     let normalized = normalize_badge_count(count);
     BADGE_COUNT.store(normalized.unwrap_or(0), Ordering::SeqCst);

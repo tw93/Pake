@@ -1,4 +1,6 @@
+import os from 'os';
 import path from 'path';
+import fsExtra from 'fs-extra';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/utils/dir', () => ({
@@ -16,6 +18,7 @@ vi.mock('@/utils/platform', async (original) => ({
 import BaseBuilder from '@/builders/BaseBuilder';
 import WinBuilder from '@/builders/WinBuilder';
 import { getWindowsGnuBuildEnvironment } from '@/builders/env';
+import logger from '@/options/logger';
 import { shellExec } from '@/utils/shell';
 import { PakeAppOptions } from '@/types';
 
@@ -213,5 +216,130 @@ describe('BaseBuilder.runBuildCommand Windows GNU RUSTFLAGS injection', () => {
 
     const env = vi.mocked(shellExec).mock.calls[0][2];
     expect(env?.RUSTFLAGS).toBeUndefined();
+  });
+});
+
+describe('WinBuilder raw binary WebView2Loader.dll', () => {
+  const originalCargoTargetDir = process.env.CARGO_TARGET_DIR;
+  const originalCwd = process.cwd();
+  const tempDirs: string[] = [];
+
+  afterEach(async () => {
+    process.chdir(originalCwd);
+    vi.restoreAllMocks();
+    if (originalCargoTargetDir === undefined) {
+      delete process.env.CARGO_TARGET_DIR;
+    } else {
+      process.env.CARGO_TARGET_DIR = originalCargoTargetDir;
+    }
+    await Promise.all(tempDirs.splice(0).map((dir) => fsExtra.remove(dir)));
+  });
+
+  // Lays out a fake cargo target dir holding the raw binary (and optionally
+  // the loader DLL) for the given triple, plus an empty output dir.
+  async function createFixture(triple: string, withDll = true) {
+    const tempDir = await fsExtra.mkdtemp(
+      path.join(os.tmpdir(), 'pake-win-binary-'),
+    );
+    tempDirs.push(tempDir);
+    const cargoTargetDir = path.join(tempDir, 'target');
+    const releaseDir = path.join(cargoTargetDir, triple, 'release');
+    const outDir = path.join(tempDir, 'out');
+    await fsExtra.outputFile(path.join(releaseDir, 'pake-demo.exe'), 'exe');
+    if (withDll) {
+      await fsExtra.outputFile(
+        path.join(releaseDir, 'WebView2Loader.dll'),
+        'dll',
+      );
+    }
+    await fsExtra.ensureDir(outDir);
+    process.env.CARGO_TARGET_DIR = cargoTargetDir;
+    return { releaseDir, outDir };
+  }
+
+  function makeBuilder(
+    outDir: string,
+    windowsToolchain: 'msvc' | 'gnu',
+    extra: Partial<PakeAppOptions> = {},
+  ) {
+    const builder = new WinBuilder({
+      name: 'Demo',
+      appVersion: '1.0.0',
+      installerLanguage: 'en-US',
+      targets: 'x64',
+      debug: false,
+      windowsToolchain,
+      ...extra,
+    } as PakeAppOptions);
+    vi.spyOn(builder as any, 'getRawBinaryPath').mockReturnValue(
+      path.join(outDir, 'Demo.exe'),
+    );
+    return builder;
+  }
+
+  it('copies WebView2Loader.dll beside the raw binary for gnu', async () => {
+    const { outDir } = await createFixture('x86_64-pc-windows-gnu');
+    const builder = makeBuilder(outDir, 'gnu');
+
+    await (builder as any).copyRawBinary(process.cwd(), 'Demo');
+
+    expect(await fsExtra.pathExists(path.join(outDir, 'Demo.exe'))).toBe(true);
+    expect(
+      await fsExtra.readFile(path.join(outDir, 'WebView2Loader.dll'), 'utf8'),
+    ).toBe('dll');
+  });
+
+  it('does not copy WebView2Loader.dll for msvc', async () => {
+    const { outDir } = await createFixture('x86_64-pc-windows-msvc');
+    const builder = makeBuilder(outDir, 'msvc');
+
+    await (builder as any).copyRawBinary(process.cwd(), 'Demo');
+
+    expect(await fsExtra.pathExists(path.join(outDir, 'Demo.exe'))).toBe(true);
+    expect(
+      await fsExtra.pathExists(path.join(outDir, 'WebView2Loader.dll')),
+    ).toBe(false);
+  });
+
+  it('warns without throwing when the gnu build has no WebView2Loader.dll', async () => {
+    const warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {});
+    const { outDir } = await createFixture('x86_64-pc-windows-gnu', false);
+    const builder = makeBuilder(outDir, 'gnu');
+
+    await expect(
+      (builder as any).copyRawBinary(process.cwd(), 'Demo'),
+    ).resolves.toBeUndefined();
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('WebView2Loader.dll not found'),
+    );
+    expect(
+      await fsExtra.pathExists(path.join(outDir, 'WebView2Loader.dll')),
+    ).toBe(false);
+  });
+
+  it('records the DLL as an artifact after the binary with --keep-binary', async () => {
+    const successSpy = vi.spyOn(logger, 'success').mockImplementation(() => {});
+    const { releaseDir, outDir } = await createFixture('x86_64-pc-windows-gnu');
+    await fsExtra.outputFile(
+      path.join(releaseDir, 'bundle', 'msi', 'Demo_1.0.0_x64_en-US.msi'),
+      'msi',
+    );
+    // copyBuildArtifacts writes the installer relative to the cwd.
+    process.chdir(outDir);
+    const builder = makeBuilder(outDir, 'gnu', { keepBinary: true });
+
+    await (builder as any).copyBuildArtifacts('msi');
+
+    const artifacts = builder.getArtifacts();
+    expect(artifacts.map((artifact) => artifact.format)).toEqual([
+      'msi',
+      'binary',
+      'dll',
+    ]);
+    expect(artifacts[2].path).toBe(path.join(outDir, 'WebView2Loader.dll'));
+    expect(successSpy).toHaveBeenLastCalledWith(
+      expect.stringContaining('WebView2Loader.dll copied beside it'),
+    );
   });
 });

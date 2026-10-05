@@ -689,12 +689,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // on_download handler then writes the file to the Downloads folder. This is
   // used for blob:/data: URLs because routing their bytes through the Tauri
   // IPC fails on strict-CSP sites (e.g. Gemini), whose connect-src blocks the
-  // IPC origin. The native download path is independent of the page CSP.
+  // IPC origin. It also handles attachments when remote IPC is denied.
+  const nativeDownloadAnchors = new WeakSet();
   function triggerNativeDownload(url, filename) {
     const anchor = document.createElement("a");
     anchor.href = url;
     anchor.download = filename || "";
     anchor.style.display = "none";
+    nativeDownloadAnchors.add(anchor);
     document.body.appendChild(anchor);
     anchor.click();
     document.body.removeChild(anchor);
@@ -724,6 +726,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
+  function downloadFile(url, filename) {
+    return invoke("download_file", {
+      params: { url, filename, language: getUserLanguage() },
+    }).catch((error) => {
+      // Debug and release builds have different ACL rejection messages.
+      // Let the browser handle attachments without granting remote IPC.
+      if (/^(?:Command )?download_file not allowed\b/.test(String(error))) {
+        triggerNativeDownload(url, filename);
+        return;
+      }
+      console.error("Failed to download file:", filename, error);
+      showDownloadError(filename);
+    });
+  }
+
   const isInternalUrl = (url) => matchesInternalUrl(url, window.location.href);
 
   const detectAnchorElementClick = (e) => {
@@ -732,6 +749,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     const anchorElement = e.target.closest("a");
+
+    if (anchorElement && nativeDownloadAnchors.has(anchorElement)) return;
 
     if (anchorElement && anchorElement.href) {
       const rawHref = anchorElement.getAttribute("href") || "";
@@ -826,10 +845,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         e.preventDefault();
         e.stopImmediatePropagation();
-        const userLanguage = getUserLanguage();
-        invoke("download_file", {
-          params: { url: absoluteUrl, filename, language: userLanguage },
-        });
+        downloadFile(absoluteUrl, filename);
         return;
       }
 
@@ -1139,17 +1155,7 @@ document.addEventListener("DOMContentLoaded", () => {
       triggerNativeDownload(imageUrl, filename);
     } else {
       // Regular HTTP(S) image
-      const userLanguage = getUserLanguage();
-      invoke("download_file", {
-        params: {
-          url: imageUrl,
-          filename: filename,
-          language: userLanguage,
-        },
-      }).catch((error) => {
-        console.error("Failed to download image:", filename, error);
-        showDownloadError(filename);
-      });
+      downloadFile(imageUrl, filename);
     }
   }
 
@@ -1196,7 +1202,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Simplified menu builder
   function buildMenuItems(type, data) {
-    const userLanguage = getUserLanguage();
     const items = [];
 
     switch (type) {
@@ -1221,12 +1226,7 @@ document.addEventListener("DOMContentLoaded", () => {
           items.push(
             createMenuItem(menuTexts.downloadFile, () => {
               const filename = getFilenameFromUrl(data.url);
-              invoke("download_file", {
-                params: { url: data.url, filename, language: userLanguage },
-              }).catch((error) => {
-                console.error("Failed to download file:", filename, error);
-                showDownloadError(filename);
-              });
+              downloadFile(data.url, filename);
             }),
           );
         }
@@ -1350,6 +1350,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const liveNotifications = new Map();
   let notifSeq = 0;
   let pendingFocusClick = null;
+  let interactionSeq = 0;
+
+  const withdrawNotification = (id) =>
+    invoke("close_notification", { id }).catch((error) => {
+      console.warn("[Pake] Failed to withdraw notification:", error);
+    });
 
   const forgetNotification = (id) => {
     liveNotifications.delete(id);
@@ -1364,6 +1370,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   window.addEventListener("focus", () => {
+    interactionSeq++;
     const pending = pendingFocusClick;
     pendingFocusClick = null;
     if (!pending || Date.now() - pending.at > FOCUS_CLICK_WINDOW_MS) return;
@@ -1371,6 +1378,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const clearAutoBadge = () => {
+    interactionSeq++;
     // A real interaction means the user is already reading the page, so a later
     // focus is an app switch rather than a notification click.
     pendingFocusClick = null;
@@ -1416,37 +1424,59 @@ document.addEventListener("DOMContentLoaded", () => {
       // A new notification with the same tag replaces the previous one, which
       // must therefore stop being a click target.
       if (this.tag) {
-        for (const [otherId, other] of liveNotifications) {
-          if (other.tag === this.tag) forgetNotification(otherId);
+        for (const other of liveNotifications.values()) {
+          if (other.tag === this.tag) other.close();
         }
       }
       liveNotifications.set(id, this);
       while (liveNotifications.size > MAX_TRACKED_NOTIFICATIONS) {
-        forgetNotification(liveNotifications.keys().next().value);
+        liveNotifications.values().next().value.close();
       }
 
       const raisedInBackground =
         typeof document.hasFocus === "function" ? !document.hasFocus() : true;
+      const raisedAt = Date.now();
+      const raisedAfterInteraction = interactionSeq;
+      const sequence = notifSeq;
+      // Clear the older candidate immediately, rather than when this IPC reply
+      // arrives. Replies and native delivery may complete out of order.
+      pendingFocusClick = null;
 
       invoke("send_notification", {
         params: { id, title: this.title, body: this.body, icon: this.icon },
       })
         .then((outcome) => {
-          if (raisedInBackground && !outcome?.nativeClick) {
-            pendingFocusClick = { id, at: Date.now() };
+          if (liveNotifications.get(id) !== this) {
+            // close/replacement may precede native delivery. Withdraw again
+            // after its acknowledgement, using this object's unique id.
+            return withdrawNotification(id);
+          }
+          const unread = raisedAfterInteraction === interactionSeq;
+          if (
+            unread &&
+            sequence === notifSeq &&
+            raisedInBackground &&
+            !outcome?.nativeClick
+          ) {
+            pendingFocusClick = { id, at: raisedAt };
           }
           this.dispatchEvent(new Event("show"));
-          return incrementAutoBadge();
+          if (unread) return incrementAutoBadge();
         })
         .catch(() => {
+          if (liveNotifications.get(id) !== this) return;
           forgetNotification(id);
           this.dispatchEvent(new Event("error"));
         });
     }
 
     close() {
+      if (liveNotifications.get(this._id) !== this) return;
       forgetNotification(this._id);
-      this.dispatchEvent(new Event("close"));
+      withdrawNotification(this._id);
+      // Notification events are tasks. A synchronous close handler can create
+      // another same-tag notification while the constructor is replacing it.
+      setTimeout(() => this.dispatchEvent(new Event("close")), 0);
     }
   }
 
