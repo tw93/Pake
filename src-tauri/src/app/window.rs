@@ -830,6 +830,15 @@ fn build_window(
         }
     }
 
+    // Every webview is built here (main window, Cmd+N clones, --new-window and
+    // blank two-stage popups), so trackpad history swipes match in all of them.
+    #[cfg(target_os = "macos")]
+    if let Err(error) = window.with_webview(|webview| {
+        crate::app::navigation::enable_back_forward_gestures(&webview);
+    }) {
+        eprintln!("[Pake] Failed to access WKWebView for history swipe gestures: {error}");
+    }
+
     // The tab bar's + button exists only while some window class answers
     // `newWindowForTab:`. Install it for every tabbing window, the main one
     // included: its tab bar is the one the user sees first.

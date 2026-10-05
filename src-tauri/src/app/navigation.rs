@@ -54,6 +54,25 @@ pub fn set_password_autosave(webview: &tauri::webview::PlatformWebview, enabled:
     }
 }
 
+/// Let a two-finger horizontal trackpad swipe step history, as in Safari.
+///
+/// WKWebView leaves `allowsBackForwardNavigationGestures` off, and Tauri does
+/// not expose Wry's builder switch, so set it on the native view directly.
+#[cfg(target_os = "macos")]
+pub fn enable_back_forward_gestures(webview: &tauri::webview::PlatformWebview) {
+    use objc2::msg_send;
+    use objc2::runtime::{AnyObject, Bool};
+
+    let ptr = webview.inner() as *mut AnyObject;
+    if ptr.is_null() {
+        eprintln!("[Pake] Failed to access WKWebView for history swipe gestures");
+        return;
+    }
+    unsafe {
+        let _: () = msg_send![ptr, setAllowsBackForwardNavigationGestures: Bool::YES];
+    }
+}
+
 #[cfg(target_os = "macos")]
 fn history_step_platform(webview: &tauri::webview::PlatformWebview, back: bool) {
     use objc2::msg_send;
