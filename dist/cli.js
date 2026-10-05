@@ -944,6 +944,7 @@ function buildWindowConfigOverrides(options, platform = asSupportedPlatform(proc
         disabled_web_shortcuts: options.disabledWebShortcuts,
         hide_on_close: platformHideOnClose,
         incognito: options.incognito,
+        password_autosave: options.passwordAutosave,
         title: options.title,
         enable_wasm: options.wasm,
         enable_drag_drop: options.enableDragDrop,
@@ -3536,6 +3537,7 @@ const DEFAULT_PAKE_OPTIONS = {
     installerLanguage: 'en-US',
     hideOnClose: undefined, // Platform-specific: true for macOS, false for others
     incognito: false,
+    passwordAutosave: false,
     wasm: false,
     enableDragDrop: false,
     bundle: true,
@@ -3705,6 +3707,9 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .addOption(new Option('--title <string>', 'Window title').hideHelp())
         .addOption(new Option('--incognito', 'Launch app in incognito/private mode')
         .default(DEFAULT_PAKE_OPTIONS.incognito)
+        .hideHelp())
+        .addOption(new Option('--password-autosave', 'Enable native password-save prompts on Windows')
+        .default(DEFAULT_PAKE_OPTIONS.passwordAutosave)
         .hideHelp())
         .addOption(new Option('--wasm', 'Enable WebAssembly support (Flutter Web, etc.)')
         .default(DEFAULT_PAKE_OPTIONS.wasm)

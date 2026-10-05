@@ -104,6 +104,9 @@ export interface PakeCliOptions {
   // Launch app in incognito/private mode, default false
   incognito: boolean;
 
+  // Enable native WebView2 password-save prompts on Windows, default false
+  passwordAutosave: boolean;
+
   // Enable WebAssembly support (Flutter Web, etc.), default false
   wasm: boolean;
 
@@ -192,6 +195,7 @@ export interface WindowConfig {
   activation_shortcut: string;
   hide_on_close: boolean;
   incognito: boolean;
+  password_autosave: boolean;
   title?: string;
   enable_wasm: boolean;
   enable_drag_drop: boolean;

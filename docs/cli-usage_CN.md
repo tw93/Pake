@@ -455,6 +455,14 @@ pake https://github.com --name GitHub --show-system-tray --start-to-tray
 --incognito
 ```
 
+#### [password-autosave]
+
+在 Windows 上启用 WebView2 原生的密码保存提示，密码保存在打包应用自己的 WebView2 配置文件中，不会与 Chrome 或 Edge 共享。默认值为 `false`，macOS 和 Linux 会忽略此选项，启用 `--incognito` 时也会关闭保存提示。关闭后不会保存新密码，也不会弹出保存或更新提示，但已有密码仍可能自动填充，包括使用同一配置文件的隐私窗口。
+
+```bash
+--password-autosave
+```
+
 #### [wasm]
 
 启用 WebAssembly 支持，添加跨域隔离头部，适用于 Flutter Web 应用以及其他使用 WebAssembly 模块（如 `sqlite3.wasm`、`canvaskit.wasm`）的 Web 应用，默认为 `false`。

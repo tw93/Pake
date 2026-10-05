@@ -457,6 +457,14 @@ Launch the application in incognito/private browsing mode. Default is `false`. W
 --incognito
 ```
 
+#### [password-autosave]
+
+Enable native WebView2 password-save prompts on Windows. Passwords are stored in the packaged app's own WebView2 profile and are not shared with Chrome or Edge. This option is ignored on macOS and Linux, and is disabled when `--incognito` is enabled. Default is `false`. Disabling it stops new saves and save/update prompts; existing saved passwords may still autofill, including in an InPrivate window using the same profile.
+
+```bash
+--password-autosave
+```
+
 #### [wasm]
 
 Enable WebAssembly support with cross-origin isolation headers. Required for Flutter Web applications and other web applications that use WebAssembly modules like `sqlite3.wasm`, `canvaskit.wasm`. Default is `false`.
