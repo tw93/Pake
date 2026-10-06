@@ -1,0 +1,15 @@
+{
+  "id": "claude",
+  "version": 1,
+  "name": {
+    "en": "Claude",
+    "zh-Hans": "Claude"
+  },
+  "url": "https://claude.ai/",
+  "category": "ai",
+  "description": {
+    "en": "Anthropic's assistant for writing, analysis and code",
+    "zh-Hans": "Anthropic 的 AI 助手，适合写作、分析和编程"
+  },
+  "icon": "https://claude.ai/apple-touch-icon.png"
+}

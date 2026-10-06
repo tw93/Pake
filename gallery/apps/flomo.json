@@ -1,0 +1,15 @@
+{
+  "id": "flomo",
+  "version": 1,
+  "name": {
+    "en": "flomo",
+    "zh-Hans": "flomo 浮墨"
+  },
+  "url": "https://v.flomoapp.com/mine",
+  "category": "productivity",
+  "description": {
+    "en": "Jot down short notes and ideas",
+    "zh-Hans": "随手记录想法的卡片笔记"
+  },
+  "icon": "https://v.flomoapp.com/img/icons/android-chrome-512x512.png"
+}

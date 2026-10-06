@@ -1,0 +1,15 @@
+{
+  "id": "qwerty-learner",
+  "version": 1,
+  "name": {
+    "en": "Qwerty Learner",
+    "zh-Hans": "Qwerty Learner"
+  },
+  "url": "https://qwerty.kaiyi.cool/",
+  "category": "developer",
+  "description": {
+    "en": "Typing practice for English words, made for programmers",
+    "zh-Hans": "给程序员的英语单词打字练习"
+  },
+  "icon": "https://qwerty.kaiyi.cool/android-chrome-512x512.png"
+}

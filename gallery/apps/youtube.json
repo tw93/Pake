@@ -1,0 +1,15 @@
+{
+  "id": "youtube",
+  "version": 1,
+  "name": {
+    "en": "YouTube",
+    "zh-Hans": "YouTube"
+  },
+  "url": "https://www.youtube.com/",
+  "category": "media",
+  "description": {
+    "en": "Watch videos and follow channels",
+    "zh-Hans": "看视频和订阅频道"
+  },
+  "icon": "https://www.gstatic.com/youtube/img/web/maskable/logo_512x512.png"
+}

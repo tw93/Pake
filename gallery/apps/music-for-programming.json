@@ -1,0 +1,15 @@
+{
+  "id": "music-for-programming",
+  "version": 1,
+  "name": {
+    "en": "Music For Programming",
+    "zh-Hans": "Music For Programming"
+  },
+  "url": "https://musicforprogramming.net/",
+  "category": "media",
+  "description": {
+    "en": "Long mixes to stay focused while you code",
+    "zh-Hans": "适合写代码时专注听的长混音"
+  },
+  "icon": "https://musicforprogramming.net/favicon.png"
+}

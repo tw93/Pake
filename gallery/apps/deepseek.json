@@ -1,0 +1,15 @@
+{
+  "id": "deepseek",
+  "version": 1,
+  "name": {
+    "en": "DeepSeek",
+    "zh-Hans": "DeepSeek"
+  },
+  "url": "https://chat.deepseek.com/",
+  "category": "ai",
+  "description": {
+    "en": "Chat with DeepSeek models",
+    "zh-Hans": "和 DeepSeek 模型对话"
+  },
+  "icon": "https://fe-static.deepseek.com/chat/icon-512.png"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "lizhi",
+  "version": 1,
+  "name": {
+    "en": "LiZhi",
+    "zh-Hans": "李志"
+  },
+  "url": "https://lizhi.dengdengju.com/?from=pake",
+  "category": "media",
+  "description": {
+    "en": "A web player for Li Zhi's songs",
+    "zh-Hans": "李志音乐作品的网页播放器"
+  },
+  "icon": "https://lizhi.dengdengju.com/favicon.png"
+}

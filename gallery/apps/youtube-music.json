@@ -1,0 +1,15 @@
+{
+  "id": "youtube-music",
+  "version": 1,
+  "name": {
+    "en": "YouTube Music",
+    "zh-Hans": "YouTube Music"
+  },
+  "url": "https://music.youtube.com/",
+  "category": "media",
+  "description": {
+    "en": "Songs, albums and playlists",
+    "zh-Hans": "听歌、专辑和歌单"
+  },
+  "icon": "https://www.gstatic.com/youtube/media/ytm/images/applauncher/music_icon_512x512.png"
+}

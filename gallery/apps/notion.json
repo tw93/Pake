@@ -1,0 +1,15 @@
+{
+  "id": "notion",
+  "version": 1,
+  "name": {
+    "en": "Notion",
+    "zh-Hans": "Notion"
+  },
+  "url": "https://app.notion.com/",
+  "category": "productivity",
+  "description": {
+    "en": "Docs, notes and wikis in one workspace",
+    "zh-Hans": "文档、笔记和知识库放在一个工作区"
+  },
+  "icon": "https://www.notion.com/front-static/logo-ios.png"
+}

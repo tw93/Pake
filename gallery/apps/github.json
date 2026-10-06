@@ -1,0 +1,15 @@
+{
+  "id": "github",
+  "version": 1,
+  "name": {
+    "en": "GitHub",
+    "zh-Hans": "GitHub"
+  },
+  "url": "https://github.com/",
+  "category": "developer",
+  "description": {
+    "en": "Code, issues and pull requests",
+    "zh-Hans": "代码、Issue 和 Pull Request"
+  },
+  "icon": "https://github.com/fluidicon.png"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "telegram",
+  "version": 1,
+  "name": {
+    "en": "Telegram",
+    "zh-Hans": "Telegram"
+  },
+  "url": "https://web.telegram.org/a/",
+  "category": "social",
+  "description": {
+    "en": "Telegram on the web",
+    "zh-Hans": "网页版 Telegram"
+  },
+  "icon": "https://web.telegram.org/a/icon-512x512.png"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "linear",
+  "version": 1,
+  "name": {
+    "en": "Linear",
+    "zh-Hans": "Linear"
+  },
+  "url": "https://linear.app/",
+  "category": "productivity",
+  "description": {
+    "en": "Plan and track product work",
+    "zh-Hans": "规划和跟踪产品开发"
+  },
+  "icon": "https://static.linear.app/assets/pwa/icon_512.png?v=3"
+}

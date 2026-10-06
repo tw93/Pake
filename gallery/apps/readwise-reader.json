@@ -1,0 +1,15 @@
+{
+  "id": "readwise-reader",
+  "version": 1,
+  "name": {
+    "en": "Readwise Reader",
+    "zh-Hans": "Readwise Reader"
+  },
+  "url": "https://read.readwise.io/",
+  "category": "reading",
+  "description": {
+    "en": "Save articles and read them later",
+    "zh-Hans": "收藏文章，稍后阅读"
+  },
+  "icon": "https://read.readwise.io/logo-dock-icon-with-padding/512x512.png"
+}

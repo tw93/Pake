@@ -1,0 +1,15 @@
+{
+  "id": "chatgpt",
+  "version": 1,
+  "name": {
+    "en": "ChatGPT",
+    "zh-Hans": "ChatGPT"
+  },
+  "url": "https://chatgpt.com/",
+  "category": "ai",
+  "description": {
+    "en": "OpenAI's assistant for chat, writing and code",
+    "zh-Hans": "OpenAI 的对话助手，写作和编程都能用"
+  },
+  "icon": "https://cdn.oaistatic.com/assets/apple-touch-icon-mz9nytnj.webp"
+}

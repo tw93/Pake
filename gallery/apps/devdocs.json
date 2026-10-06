@@ -1,0 +1,15 @@
+{
+  "id": "devdocs",
+  "version": 1,
+  "name": {
+    "en": "DevDocs",
+    "zh-Hans": "DevDocs"
+  },
+  "url": "https://devdocs.io/",
+  "category": "developer",
+  "description": {
+    "en": "API docs for many languages in one place",
+    "zh-Hans": "多种语言和框架的 API 文档合集"
+  },
+  "icon": "https://devdocs.io/images/webapp-icon-512.png"
+}

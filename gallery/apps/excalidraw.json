@@ -1,0 +1,15 @@
+{
+  "id": "excalidraw",
+  "version": 1,
+  "name": {
+    "en": "Excalidraw",
+    "zh-Hans": "Excalidraw"
+  },
+  "url": "https://excalidraw.com/",
+  "category": "productivity",
+  "description": {
+    "en": "Sketch diagrams in a hand-drawn style",
+    "zh-Hans": "手绘风格的白板和示意图"
+  },
+  "icon": "https://excalidraw.com/android-chrome-512x512.png"
+}

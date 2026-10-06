@@ -30,6 +30,7 @@ Pake/
 │   ├── cli-usage.md      # CLI parameters
 │   ├── advanced-usage.md # Customization guide
 │   └── faq.md           # Troubleshooting
+├── gallery/              # Site recipes for the Pake apps' gallery (schema.json, tests/unit/gallery.test.ts)
 ├── schema/               # pake.schema.json: --config JSON schema (public contract)
 ├── plugins/              # Claude Code and Codex plugin source (shared user-facing pake skill)
 ├── llms.txt              # Agent-facing contract summary (--json, --config, exit codes)

@@ -1,0 +1,15 @@
+{
+  "id": "gemini",
+  "version": 1,
+  "name": {
+    "en": "Gemini",
+    "zh-Hans": "Gemini"
+  },
+  "url": "https://gemini.google.com/",
+  "category": "ai",
+  "description": {
+    "en": "Google's AI assistant",
+    "zh-Hans": "Google 的 AI 助手"
+  },
+  "icon": "https://www.gstatic.com/lamda/images/gemini_sparkle_4g_512_lt_f94943af3be039176192d.png"
+}

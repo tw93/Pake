@@ -1,0 +1,15 @@
+{
+  "id": "x",
+  "version": 1,
+  "name": {
+    "en": "X",
+    "zh-Hans": "X"
+  },
+  "url": "https://x.com/",
+  "category": "social",
+  "description": {
+    "en": "Follow posts and conversations",
+    "zh-Hans": "看动态和讨论"
+  },
+  "icon": "https://x.com/apple-touch-icon.png"
+}

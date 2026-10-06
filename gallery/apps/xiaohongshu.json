@@ -1,0 +1,15 @@
+{
+  "id": "xiaohongshu",
+  "version": 1,
+  "name": {
+    "en": "Xiaohongshu",
+    "zh-Hans": "小红书"
+  },
+  "url": "https://www.xiaohongshu.com/explore",
+  "category": "social",
+  "description": {
+    "en": "Lifestyle notes and recommendations",
+    "zh-Hans": "生活方式笔记和分享"
+  },
+  "icon": "https://picasso-static.xiaohongshu.com/fe-platform/f43dc4a8baf03678996c62d8db6ebc01a82256ff.png"
+}

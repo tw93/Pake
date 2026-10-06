@@ -1,0 +1,15 @@
+{
+  "id": "grok",
+  "version": 1,
+  "name": {
+    "en": "Grok",
+    "zh-Hans": "Grok"
+  },
+  "url": "https://grok.com/",
+  "category": "ai",
+  "description": {
+    "en": "xAI's assistant",
+    "zh-Hans": "xAI 的 AI 助手"
+  },
+  "icon": "https://grok.com/images/android-chrome-512x512.png"
+}

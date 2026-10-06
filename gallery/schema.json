@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/tw93/Pake/main/gallery/schema.json",
+  "title": "Pake gallery recipe",
+  "description": "One site in the Pake gallery. Bump version on any change to the recipe or its inject files.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "name",
+    "url",
+    "category",
+    "description",
+    "icon"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable identifier, equal to the file name without .json.",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "maxLength": 40
+    },
+    "version": {
+      "type": "integer",
+      "description": "Recipe version, bumped only for changes that affect the built app (url, window, inject files) so installed apps can offer an update.",
+      "minimum": 1
+    },
+    "name": {
+      "$ref": "#/definitions/localized",
+      "description": "Display name, which is also the generated app's name."
+    },
+    "url": {
+      "type": "string",
+      "description": "Start page of the app.",
+      "pattern": "^https://[^\\s]+$"
+    },
+    "category": {
+      "type": "string",
+      "enum": ["ai", "productivity", "social", "media", "reading", "developer"]
+    },
+    "description": {
+      "$ref": "#/definitions/localized",
+      "description": "One short line on what the site does."
+    },
+    "icon": {
+      "type": "string",
+      "description": "The site's own apple-touch-icon or largest app icon, PNG, JPEG, WebP or ICO.",
+      "pattern": "^https://[^\\s]+$"
+    },
+    "window": {
+      "type": "object",
+      "description": "Options that differ from Pake's defaults, using the snake_case names of src-tauri/pake.json.",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "width": { "type": "integer", "minimum": 320, "maximum": 4000 },
+        "height": { "type": "integer", "minimum": 320, "maximum": 4000 },
+        "min_width": { "type": "integer", "minimum": 0, "maximum": 4000 },
+        "min_height": { "type": "integer", "minimum": 0, "maximum": 4000 },
+        "hide_title_bar": { "type": "boolean" },
+        "dark_mode": { "type": "boolean" },
+        "incognito": { "type": "boolean" },
+        "maximize": { "type": "boolean" },
+        "always_on_top": { "type": "boolean" },
+        "new_window": { "type": "boolean" },
+        "enable_find": { "type": "boolean" },
+        "force_internal_navigation": { "type": "boolean" },
+        "internal_url_regex": { "type": "string", "minLength": 1 },
+        "zoom": { "type": "integer", "minimum": 50, "maximum": 200 },
+        "user_agent": { "type": "string", "minLength": 1 }
+      }
+    },
+    "inject_css": {
+      "type": "string",
+      "description": "A .css file next to the recipe in gallery/apps/.",
+      "pattern": "^[a-z0-9-]+\\.css$"
+    },
+    "inject_js": {
+      "type": "string",
+      "description": "A .js file next to the recipe in gallery/apps/.",
+      "pattern": "^[a-z0-9-]+\\.js$"
+    },
+    "platforms": {
+      "type": "array",
+      "description": "Platforms the recipe is known to work on. Omit when it works on both.",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "enum": ["mac", "windows"] }
+    }
+  },
+  "definitions": {
+    "localized": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["en", "zh-Hans"],
+      "properties": {
+        "en": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "zh-Hans": { "type": "string", "minLength": 1, "maxLength": 80 }
+      }
+    }
+  }
+}

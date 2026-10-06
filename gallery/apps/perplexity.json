@@ -1,0 +1,15 @@
+{
+  "id": "perplexity",
+  "version": 1,
+  "name": {
+    "en": "Perplexity",
+    "zh-Hans": "Perplexity"
+  },
+  "url": "https://www.perplexity.ai/",
+  "category": "ai",
+  "description": {
+    "en": "Ask questions and get answers with sources",
+    "zh-Hans": "提问后给出带来源的回答"
+  },
+  "icon": "https://www.perplexity.ai/apple-touch-icon.png"
+}

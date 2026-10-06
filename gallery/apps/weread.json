@@ -1,0 +1,15 @@
+{
+  "id": "weread",
+  "version": 1,
+  "name": {
+    "en": "WeRead",
+    "zh-Hans": "微信读书"
+  },
+  "url": "https://weread.qq.com/",
+  "category": "reading",
+  "description": {
+    "en": "Read your WeRead books on the desktop",
+    "zh-Hans": "在电脑上读微信读书"
+  },
+  "icon": "https://rescdn.qqmail.com/node/wr/wrpage/style/images/independent/appleTouchIcon/apple-touch-icon-152x152.png"
+}
