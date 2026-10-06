@@ -607,13 +607,20 @@ fn build_window(
     window_builder = window_builder
         .initialization_script(include_str!("../inject/event.js"))
         .initialization_script(include_str!("../inject/style.js"))
-        .initialization_script(include_str!("../inject/theme_refresh.js"))
-        .initialization_script(
-            config
-                .runtime_custom_js
-                .as_deref()
-                .unwrap_or(include_str!("../inject/custom.js")),
-        );
+        .initialization_script(include_str!("../inject/theme_refresh.js"));
+
+    #[cfg(target_os = "macos")]
+    if window_config.title_bar_follows_page() {
+        window_builder =
+            window_builder.initialization_script(include_str!("../inject/title_bar.js"));
+    }
+
+    window_builder = window_builder.initialization_script(
+        config
+            .runtime_custom_js
+            .as_deref()
+            .unwrap_or(include_str!("../inject/custom.js")),
+    );
 
     #[cfg(target_os = "windows")]
     let mut windows_browser_args = String::from("--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-blink-features=AutomationControlled");
@@ -669,10 +676,17 @@ fn build_window(
     {
         let title_bar_style = if window_config.hide_title_bar {
             TitleBarStyle::Overlay
+        } else if window_config.title_bar_follows_page() {
+            // The page starts below the bar, so the traffic lights never cover
+            // it; title_bar.js paints the bar with the page's top color.
+            TitleBarStyle::Transparent
         } else {
             TitleBarStyle::Visible
         };
         window_builder = window_builder.title_bar_style(title_bar_style);
+        if window_config.title_bar_follows_page() {
+            window_builder = window_builder.hidden_title(true);
+        }
         window_builder = window_builder.theme(theme);
 
         // Tauri disables automatic tabbing unless an identifier is provided.

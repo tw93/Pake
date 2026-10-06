@@ -30,8 +30,8 @@ const GDK_BACKEND: &str = "GDK_BACKEND";
 use app::{
     invoke::{
         clear_dock_badge, close_notification, download_file, increment_dock_badge,
-        send_notification, set_dock_badge, set_dock_badge_label, set_zoom, update_theme_mode,
-        webview_navigate,
+        send_notification, set_dock_badge, set_dock_badge_label, set_title_bar_color, set_zoom,
+        update_theme_mode, webview_navigate,
     },
     setup::{set_global_shortcut, set_system_tray},
     window::{
@@ -409,6 +409,7 @@ pub fn run_app() {
             update_theme_mode,
             set_zoom,
             webview_navigate,
+            set_title_bar_color,
         ])
         .setup(move |app| {
             // Grant remote IPC only to the immutable, packaged entry origins,

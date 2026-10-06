@@ -13,6 +13,7 @@ fn main() {
             "update_theme_mode",
             "set_zoom",
             "webview_navigate",
+            "set_title_bar_color",
         ]),
     ))
     .expect("Failed to build Pake permissions")

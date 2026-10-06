@@ -14,6 +14,7 @@
     "allow-update-theme-mode",
     "allow-set-zoom",
     "allow-webview-navigate",
+    "allow-set-title-bar-color",
     "shell:allow-open",
     "core:window:allow-theme",
     "core:window:allow-start-dragging",

@@ -8,6 +8,10 @@ use tauri::Url;
 pub struct WindowConfig {
     pub url: String,
     pub hide_title_bar: bool,
+    /// macOS only, set by the runtime builder rather than a CLI flag: a native
+    /// transparent title bar above the page, painted with the page's top color.
+    #[serde(default)]
+    pub transparent_title_bar: bool,
     #[serde(default)]
     pub hide_window_decorations: bool,
     pub fullscreen: bool,
@@ -54,6 +58,14 @@ fn default_zoom() -> u32 {
 impl WindowConfig {
     pub fn password_autosave_enabled(&self) -> bool {
         self.password_autosave && !self.incognito
+    }
+}
+
+impl WindowConfig {
+    /// The overlay title bar (`hide_title_bar`) keeps precedence, so existing
+    /// configs behave exactly as before.
+    pub fn title_bar_follows_page(&self) -> bool {
+        self.transparent_title_bar && !self.hide_title_bar
     }
 }
 
@@ -202,6 +214,27 @@ mod tests {
         let legacy: WindowConfig = serde_json::from_value(legacy).unwrap();
         assert!(!legacy.password_autosave);
         assert!(!legacy.password_autosave_enabled());
+    }
+
+    #[test]
+    fn transparent_title_bar_is_opt_in_and_yields_to_the_overlay() {
+        let mut window = config_for("https://example.com").windows.remove(0);
+        let mut legacy = serde_json::to_value(&window).unwrap();
+        legacy
+            .as_object_mut()
+            .unwrap()
+            .remove("transparent_title_bar");
+        let legacy: WindowConfig = serde_json::from_value(legacy).unwrap();
+        assert!(!legacy.transparent_title_bar);
+        assert!(!legacy.title_bar_follows_page());
+
+        for transparent in [false, true] {
+            for hidden in [false, true] {
+                window.transparent_title_bar = transparent;
+                window.hide_title_bar = hidden;
+                assert_eq!(window.title_bar_follows_page(), transparent && !hidden);
+            }
+        }
     }
 
     fn resolve(config: &PakeConfig) -> Resolved {

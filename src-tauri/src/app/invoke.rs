@@ -468,6 +468,31 @@ pub async fn update_theme_mode(app: AppHandle, mode: String) {
     }
 }
 
+/// Paints the window behind a transparent macOS title bar with the color at
+/// the top of the page. Remote pages can call this, so it takes only bounded
+/// RGB channels and changes nothing but the calling window's background.
+#[command]
+pub fn set_title_bar_color(
+    window: WebviewWindow,
+    red: u8,
+    green: u8,
+    blue: u8,
+) -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    {
+        window
+            .as_ref()
+            .window()
+            .set_background_color(Some(tauri::window::Color(red, green, blue, 255)))
+            .map_err(|e| format!("Failed to set the title bar color: {}", e))
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = (window, red, green, blue);
+        Ok(())
+    }
+}
+
 // Apply native WebView zoom (WKWebView pageZoom / WebView2 ZoomFactor / WebKitGTK
 // zoom level) instead of CSS hacks. CSS `transform: scale` and `html.style.zoom`
 // break complex SPAs like ChatGPT (fixed positioning shifts, unrepainted layers);
