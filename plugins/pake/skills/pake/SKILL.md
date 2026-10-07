@@ -1,6 +1,6 @@
 ---
 name: pake
-description: "Package any website or local web build into a lightweight desktop app using Pake (Tauri/Rust). Use when the user wants to: wrap a URL as a native app, build a desktop app from a website or a local dist/ folder, use Pake CLI to package a page, set up proxy for a packaged app, customize app icons or bundle IDs, or mentions 'pake', 'tauri package', 'website to app', 'wrap site'. Also trigger when the user asks about Pake CLI options, proxy configuration for packaged apps, or icon handling."
+description: Package a website or local web build as a desktop app with Pake. Use for packaging, CLI options, icons, bundle identifiers, or WebView proxy setup. Not for unrelated Tauri development or uninstalling apps.
 version: 2.0.0
 allowed-tools:
   - Bash
@@ -82,7 +82,7 @@ Hash-based routing works out of the box; history-mode SPA routing is not yet sup
 
 ### 1. Gather requirements
 
-Confirm with the user before building:
+Use the supplied requirements and existing defaults; ask only for missing inputs that would materially change the build:
 
 | Parameter                  | Why it matters                                                                                                    |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
