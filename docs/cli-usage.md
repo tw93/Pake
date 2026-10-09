@@ -1,12 +1,12 @@
 # CLI Usage Guide
 
-<h4 align="right"><strong>English</strong> | <a href="cli-usage_CN.md">简体中文</a></h4>
+<h4 align="right"><strong>English</strong> · <a href="cli-usage_CN.md">中文</a></h4>
 
 Complete command-line reference and basic usage for Pake CLI.
 
 ## Installation
 
-Ensure that your Node.js version is 22.0 or higher (e.g., 22.11.0). _Note: Older versions ≥20.0.0 may also work._
+Ensure that your Node.js version is 20.0.0 or higher.
 
 **Recommended (pnpm):**
 
