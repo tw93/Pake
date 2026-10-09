@@ -1,6 +1,10 @@
 # GitHub Actions Usage Guide
 
-<h4 align="right"><strong>English</strong> · <a href="github-actions-usage_CN.md">中文</a></h4>
+<div align="center">
+
+**English** · [中文](github-actions-usage_CN.md)
+
+</div>
 
 Build Pake apps online without installing development tools locally.
 

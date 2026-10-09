@@ -1,6 +1,10 @@
 # Pake 文档
 
-<h4 align="right"><a href="README.md">English</a> · <strong>中文</strong></h4>
+<div align="center">
+
+[English](README.md) · **中文**
+
+</div>
 
 Pake 应用打包与开发的参考指南。
 
@@ -8,7 +12,7 @@ Pake 应用打包与开发的参考指南。
 
 - **[CLI 命令参考](cli-usage_CN.md)**：完整命令行参数说明与基础用法
 - **[GitHub Actions 在线构建](github-actions-usage_CN.md)**：无需本地环境的在线构建方式
-- **[Pake Action 集成](pake-action.md)**：在 CI 工作流中使用 Pake 进行自动化打包
+- **[Pake Action 集成](pake-action_CN.md)**：在 CI 工作流中使用 Pake 进行自动化打包
 
 ## 开发指南
 

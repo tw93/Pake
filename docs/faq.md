@@ -1,6 +1,10 @@
 # Frequently Asked Questions (FAQ)
 
-<h4 align="right"><strong>English</strong> · <a href="faq_CN.md">中文</a></h4>
+<div align="center">
+
+**English** · [中文](faq_CN.md)
+
+</div>
 
 Common issues and solutions when using Pake.
 

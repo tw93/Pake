@@ -1,6 +1,10 @@
 # CLI 使用指南
 
-<h4 align="right"><a href="cli-usage.md">English</a> · <strong>中文</strong></h4>
+<div align="center">
+
+[English](cli-usage.md) · **中文**
+
+</div>
 
 完整的命令行参数说明和基础用法指南。
 

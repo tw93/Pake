@@ -1,6 +1,10 @@
 # CLI Usage Guide
 
-<h4 align="right"><strong>English</strong> · <a href="cli-usage_CN.md">中文</a></h4>
+<div align="center">
+
+**English** · [中文](cli-usage_CN.md)
+
+</div>
 
 Complete command-line reference and basic usage for Pake CLI.
 

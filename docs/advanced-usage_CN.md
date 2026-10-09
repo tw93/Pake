@@ -1,6 +1,10 @@
 # 高级用法
 
-<h4 align="right"><a href="advanced-usage.md">English</a> · <strong>中文</strong></h4>
+<div align="center">
+
+[English](advanced-usage.md) · **中文**
+
+</div>
 
 通过样式修改、JavaScript 注入和容器通信等方式自定义 Pake 应用。
 

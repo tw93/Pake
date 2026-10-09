@@ -1,6 +1,10 @@
 # Pake Documentation
 
-<h4 align="right"><strong>English</strong> · <a href="README_CN.md">中文</a></h4>
+<div align="center">
+
+**English** · [中文](README_CN.md)
+
+</div>
 
 Guides and reference documentation for building lightweight desktop apps with Pake.
 

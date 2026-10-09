@@ -1,5 +1,11 @@
 # Pake Action
 
+<div align="center">
+
+**English** · [中文](pake-action_CN.md)
+
+</div>
+
 Transform any webpage into a lightweight desktop app with a single GitHub Actions step.
 
 > This guide shows how to use Pake as a GitHub Action in your own projects. For using our project's built-in GitHub Actions workflow, see [GitHub Actions Usage](github-actions-usage.md).
