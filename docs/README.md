@@ -1,6 +1,6 @@
 # Pake Documentation
 
-<h4 align="right"><strong>English</strong> | <a href="README_CN.md">简体中文</a></h4>
+<h4 align="right"><strong>English</strong> · <a href="README_CN.md">中文</a></h4>
 
 Welcome to Pake documentation! Here you'll find comprehensive guides and documentation to help you start working with Pake as quickly as possible.
 

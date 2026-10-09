@@ -1,6 +1,6 @@
 # Advanced Usage
 
-<h4 align="right"><strong>English</strong> | <a href="advanced-usage_CN.md">简体中文</a></h4>
+<h4 align="right"><strong>English</strong> · <a href="advanced-usage_CN.md">中文</a></h4>
 
 Customize Pake apps with style modifications, JavaScript injection, and container communication.
 

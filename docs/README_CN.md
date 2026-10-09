@@ -1,6 +1,6 @@
 # Pake 文档
 
-<h4 align="right"><a href="README.md">English</a> | <strong>简体中文</strong></h4>
+<h4 align="right"><a href="README.md">English</a> · <strong>中文</strong></h4>
 
 欢迎使用 Pake 文档！在这里您可以找到全面的指南和文档，帮助您快速开始使用 Pake。
 

@@ -1,6 +1,6 @@
 # 常见问题 (FAQ)
 
-<h4 align="right"><a href="faq.md">English</a> | <strong>简体中文</strong></h4>
+<h4 align="right"><a href="faq.md">English</a> · <strong>中文</strong></h4>
 
 使用 Pake 时的常见问题和解决方案。
 

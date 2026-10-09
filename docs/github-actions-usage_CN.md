@@ -1,6 +1,6 @@
 # GitHub Actions 使用指南
 
-<h4 align="right"><strong><a href="github-actions-usage.md">English</a></strong> | 简体中文</h4>
+<h4 align="right"><a href="github-actions-usage.md">English</a> · <strong>中文</strong></h4>
 
 无需本地安装开发工具，在线构建 Pake 应用。
 
