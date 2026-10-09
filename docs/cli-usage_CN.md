@@ -6,7 +6,7 @@
 
 ## 安装
 
-请确保您的 Node.js 版本为 22 或更高版本（例如 22.11.0）。_注意：较旧的版本 ≥20.0.0 也可能可以工作。_
+请确保 Node.js 版本为 22 或更高版本（例如 22.11.0）。_注意：较旧的版本 ≥20.0.0 也可正常使用。_
 
 **推荐方式 (pnpm)：**
 
@@ -58,15 +58,15 @@ pake https://github.com --name "GitHub Desktop" --width 1400 --height 900 --show
 pake [url] [options]
 ```
 
-应用程序的打包结果将默认保存在当前工作目录。由于首次打包需要配置环境，这可能需要一些时间，请耐心等待。
+打包结果默认保存在当前工作目录。由于首次打包需要配置构建环境，耗时会稍长一些，后续构建会很快。
 
-> **macOS 输出**：在 macOS 上，Pake 默认创建 DMG 安装程序。如需创建 `.app` 包进行测试（避免用户交互），请设置环境变量 `PAKE_CREATE_APP=1`。如果希望 Pake 直接将应用安装到 `/Applications`，可以使用 `--install`；该选项会构建 `.app`、复制到 `/Applications`，并在安装成功后删除当前目录中的本地 `.app`。
+> **macOS 输出**：在 macOS 上，Pake 默认创建 DMG 安装程序。如需创建 `.app` 包进行测试（避免交互），可设置环境变量 `PAKE_CREATE_APP=1`。如果希望 Pake 直接将应用安装到 `/Applications`，可以使用 `--install`；该选项会构建 `.app`、复制到 `/Applications`，并在安装成功后删除当前目录中的本地 `.app`。
 >
-> **注意**：打包过程需要使用 `Rust` 环境。如果您没有安装 `Rust`，系统会提示您是否要安装。如果遇到安装失败或超时的问题，您可以 [手动安装](https://www.rust-lang.org/tools/install)。
+> **注意**：打包过程需要使用 `Rust` 环境。如果未安装 `Rust`，系统会提示是否安装。如遇安装失败或超时，可参考指南 [手动安装](https://www.rust-lang.org/tools/install)。
 
 ### [url]
 
-`url` 是您需要打包的网页链接 🔗、本地 HTML 文件的路径，或包含根级 `index.html` 的静态文件目录（例如构建产物 `dist/`）。除非通过 `--config` 文件提供 `url`，此参数为必填。
+`url` 是需要打包的网页链接 🔗、本地 HTML 文件的路径，或包含根级 `index.html` 的静态文件目录（例如构建产物 `dist/`）。除非通过 `--config` 文件提供 `url`，此参数为必填。
 
 网页应用会在关闭或退出时记住主窗口的完整网址，下次启动时恢复；没有记录时打开打包网址，回到首页仍使用打包网址，隐身模式和本地 HTML 应用不保存或恢复网址。
 
@@ -80,7 +80,7 @@ pake ./dist --name MyTool
 
 ### [options]
 
-您可以通过传递以下选项来定制打包过程。`pake --help` 展示全部支持的 CLI 选项。本文档是完整参考。
+可以通过传递以下选项来定制打包过程。`pake --help` 展示全部支持的 CLI 选项。本文档是完整参考。
 
 | 选项                        | 描述                                 | 示例                                           |
 | --------------------------- | ------------------------------------ | ---------------------------------------------- |
@@ -100,7 +100,7 @@ pake ./dist --name MyTool
 
 #### [name]
 
-指定应用程序的名称，如果未指定，系统会提示您输入，建议使用英文单词。
+指定应用程序的名称，未指定时系统会提示输入，建议使用英文。
 
 **注意**: 支持带空格的名称，会自动处理不同平台的命名规范:
 
@@ -197,7 +197,7 @@ pake https://github.com --name GitHub
 
 #### [fullscreen]
 
-设置应用程序是否在启动时自动全屏，默认为 `false`。使用以下命令可以设置应用程序启动时自动全屏。
+设置应用程序启动时是否自动全屏，默认为 `false`。
 
 ```shell
 --fullscreen
@@ -205,7 +205,7 @@ pake https://github.com --name GitHub
 
 #### [maximize]
 
-设置应用程序是否在启动时最大化窗口，默认为 `false`。使用以下命令可以设置应用程序启动时窗口最大化。
+设置应用程序启动时是否最大化窗口，默认为 `false`。
 
 ```shell
 --maximize
@@ -221,7 +221,7 @@ pake https://github.com --name GitHub
 
 #### [always-on-top]
 
-设置是否窗口一直在最顶层，默认为 `false`。
+设置窗口是否始终置顶，默认为 `false`。
 
 ```shell
 --always-on-top
@@ -237,13 +237,13 @@ pake https://github.com --name GitHub
 
 #### [dark-mode]
 
-强制打包应用使用黑暗模式（支持 macOS、Windows 和 Linux），默认为 `false`。
+强制打包应用使用深色模式（支持 macOS、Windows 和 Linux），默认为 `false`。
 
 ```shell
 --dark-mode
 ```
 
-在 Linux 上黑暗模式经由 WebKitGTK 实现，页面是否真正渲染为暗色还取决于 WebKitGTK 是否尊重窗口主题以及站点是否实现了 `prefers-color-scheme: dark`。
+在 Linux 上深色模式经由 WebKitGTK 实现，页面是否真正渲染为暗色还取决于 WebKitGTK 是否尊重窗口主题以及站点是否实现了 `prefers-color-scheme: dark`。
 
 #### [disabled-web-shortcuts]
 
@@ -298,18 +298,18 @@ pake https://github.com --name GitHub
 
 #### [multi-arch]
 
-设置打包结果同时支持 Intel 和 M1 芯片，仅适用于 macOS，默认为 `false`。
+设置打包结果同时支持 Intel 和 Apple Silicon 芯片，仅适用于 macOS，默认为 `false`。
 
 ##### 准备工作
 
-- 注意：启用此选项后，需要使用 rust 官网的 rustup 安装 rust，不支持通过 brew 安装。
-- 对于 Intel 芯片用户，需要安装 arm64 跨平台包，以使安装包支持 M1 芯片。使用以下命令安装：
+- 注意：启用此选项后，需要使用 Rust 官网的 rustup 安装 Rust，不支持通过 Homebrew 安装。
+- 对于 Intel 芯片设备，需要安装 arm64 跨平台目标，以支持 Apple Silicon 芯片：
 
   ```shell
   rustup target add aarch64-apple-darwin
   ```
 
-- 对于 M1 芯片用户，需要安装 x86 跨平台包，以使安装包支持 Intel 芯片。使用以下命令安装：
+- 对于 Apple Silicon 设备，需要安装 x86 跨平台目标，以支持 Intel 芯片：
 
   ```shell
   rustup target add x86_64-apple-darwin
@@ -371,7 +371,7 @@ pake https://github.com --name GitHub
 --windows-toolchain gnu
 ```
 
-如果未检测到 MSVC Build Tools 但检测到可用的 GNU 工具链，Pake 会提示可以改用 `--windows-toolchain gnu` 重试，而不是让构建在链接阶段以难以理解的错误失败。使用 `gnu` 不会更改你的默认 Rust 工具链或任何全局 `rustup`/环境设置，仅影响当次构建子进程。
+如果未检测到 MSVC Build Tools 但检测到可用的 GNU 工具链，Pake 会提示可以改用 `--windows-toolchain gnu` 重试，而不是让构建在链接阶段以难以理解的错误失败。使用 `gnu` 不会更改默认的 Rust 工具链或任何全局 `rustup`/环境设置，仅影响当次构建子进程。
 
 使用 `gnu` 时，可执行文件会在运行时加载 `WebView2Loader.dll`，而不是像 MSVC 那样静态链接。MSI 安装包已包含该文件；`--keep-binary` 会把它复制到 `AppName.exe` 旁边，请将两者放在一起，否则原始可执行文件无法启动。
 
@@ -449,7 +449,7 @@ pake https://github.com --name GitHub --show-system-tray --start-to-tray
 
 #### [incognito]
 
-以隐私/隐身浏览模式启动应用程序。默认为 `false`。启用后，webview 将在隐私模式下运行，这意味着它不会存储 cookie、本地存储或浏览历史记录。这对于注重隐私的应用程序很有用。
+以无痕模式启动应用程序，默认为 `false`。启用后不保留 Cookie、Local Storage 和浏览历史，适合注重隐私或一次性登录的场景。
 
 ```shell
 --incognito
@@ -478,7 +478,7 @@ pake https://flutter.dev --name FlutterApp --wasm
 
 #### [enable-drag-drop]
 
-启用原生拖拽功能。默认为 `false`。启用后，允许在应用中进行拖拽操作，如重新排序项目、文件上传以及其他在常规浏览器中有效的交互式拖拽行为。
+启用原生拖拽支持，默认为 `false`。开启后支持网页元素拖拽重排、文件拖入上传等浏览器交互。
 
 ```shell
 --enable-drag-drop
@@ -489,7 +489,7 @@ pake https://planka.example.com --name PlankApp --enable-drag-drop
 
 #### [keep-binary]
 
-保留原始二进制文件与安装包一起。默认为 `false`。启用后，除了平台特定的安装包外，还会输出一个可独立运行的可执行文件。
+构建完成后同时保留独立可执行文件，默认为 `false`。开启后除平台安装包外，还会额外输出免安装的独立运行文件。
 
 ```shell
 --keep-binary
@@ -599,7 +599,7 @@ pake ./my-app/index.html --name "my-app" --use-local-file
 
 #### [inject]
 
-使用 `inject` 可以通过本地的绝对、相对路径的 `css` `js` 文件注入到你所指定 `url` 的页面中，从而为其做定制化改造。举个例子：一段可以通用到任何网页的广告屏蔽脚本，或者是优化页面 `UI` 展示的 `css`，你只需要书写一次可以将其通用到任何其他网页打包的 `app`。
+向页面注入本地 CSS 或 JavaScript 脚本，实现样式定制、脚本注入或广告拦截等能力。编写一次即可复用到多个打包应用中。
 
 支持逗号分隔和多个选项两种格式：
 
@@ -704,10 +704,6 @@ Linux 多 target 构建（如 `--targets deb,appimage`）时，`ok` 为 true 不
 ```shell
 --new-window
 ```
-
-### 打包完成
-
-完成上述步骤后，您的应用程序应该已经成功打包。请注意，根据您的系统配置和网络状况，打包过程可能需要一些时间。请耐心等待，一旦打包完成，您就可以在指定的目录中找到应用程序安装包。
 
 ## Docker 使用
 

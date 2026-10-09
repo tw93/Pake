@@ -579,42 +579,14 @@ pnpm install -g pake-cli
 
 ## 获取帮助
 
-如果您的问题未在此处涵盖：
+如果遇到的问题未在此处列出：
 
-1. 查看 [CLI 使用指南](cli-usage_CN.md) 了解详细参数文档
-2. 参阅 [高级用法](advanced-usage_CN.md) 了解前置条件和系统设置
+1. 查看 [CLI 使用指南](cli-usage_CN.md) 了解详细参数说明
+2. 参阅 [高级用法](advanced-usage_CN.md) 了解系统依赖与前置设置
 3. 搜索 [现有的 GitHub issues](https://github.com/tw93/Pake/issues)
-4. [提交新 issue](https://github.com/tw93/Pake/issues/new) 时请包含：
-   - 您的操作系统和版本
-   - Node.js 和 Rust 版本（`node --version`、`rustc --version`）
-   - 完整的错误信息
-   - 您使用的构建命令
+4. [提交新 issue](https://github.com/tw93/Pake/issues/new) 时请附带：
+   - 操作系统与系统版本
+   - Node.js 与 Rust 版本（`node --version`、`rustc --version`）
+   - 完整的错误日志
+   - 使用的构建命令
 
-### Linux: 打包失败，提示 `Can't detect any appindicator library`
-
-**问题描述：**
-在 Linux 上打包时，构建失败并显示以下错误：
-
-```txt
-Can't detect any appindicator library
-```
-
-**原因分析：**
-这个错误表示您的 Linux 系统缺少创建“系统托盘图标”所需的核心库 `libappindicator`。Pake 打包的应用支持系统托盘功能，因此该库是必需的。
-
-**解决方案：**
-您需要在您的 Linux 系统上安装这个缺失的开发库。
-
-- **对于 Debian / Ubuntu 系统：**
-
-  ```bash
-  sudo apt-get update && sudo apt-get install -y libappindicator3-dev
-  ```
-
-- **对于 Fedora / CentOS / RHEL 系统：**
-
-  ```bash
-  sudo dnf install -y libappindicator-devel
-  ```
-
-为了确保打包环境的完整性，推荐一次性安装所有 Tauri 所需的依赖。请参考本文档中关于 `failed to run linuxdeploy` 问题的解决方案，其中包含了完整的依赖列表。

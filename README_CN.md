@@ -17,9 +17,9 @@
     <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-## 特征
+## 特性
 
-- 🎐 **体积小巧**：安装包相比 Electron 应用小近 20 倍，通常小于 10M
+- 🎐 **体积小巧**：安装包相比 Electron 应用小近 20 倍，通常小于 10 MB
 - 🚀 **性能优异**：基于 Rust Tauri，比传统 JS 框架更快，内存占用更少
 - ⚡ **使用简单**：命令行一键打包，或在线构建，无需复杂配置
 - 📦 **功能丰富**：支持快捷键透传、沉浸式窗口、拖拽、样式定制、去广告
@@ -29,7 +29,7 @@
 - **新手用户**：直接下载现成的 [常用包](#常用包下载)，或通过 [在线构建](docs/github-actions-usage_CN.md) 无需环境配置即可打包
 - **开发者**：安装 [CLI 工具](docs/cli-usage_CN.md) 后一行命令打包任意网站，支持自定义图标、窗口等参数
 - **高级用户**：本地克隆项目进行 [定制开发](#定制开发)，或查看 [高级用法](docs/advanced-usage_CN.md) 实现样式定制、功能增强
-- **遇到问题**：查看 [常见问题](docs/faq_CN.md) 获取常见问题的解决方案
+- **遇到问题**：查看 [常见问题](docs/faq_CN.md) 排查故障与使用疑问
 
 ## 常用包下载
 
@@ -150,29 +150,29 @@
 
 <details>
 
-<summary>🏂 更多应用可去 <a href="https://github.com/tw93/Pake/releases">Release</a>下载，<b>此外点击可展开快捷键说明</b></summary>
+<summary>🏂 更多应用可去 <a href="https://github.com/tw93/Pake/releases">Release</a> 下载，<b>点击展开快捷键说明</b></summary>
 
 <br/>
 
 | Mac                                                       | Windows/Linux                                       | 功能                |
 | --------------------------------------------------------- | --------------------------------------------------- | ------------------- |
 | <kbd>⌘</kbd> + <kbd>[</kbd>                               | <kbd>Ctrl</kbd> + <kbd>←</kbd>                      | 返回上一个页面      |
-| <kbd>⌘</kbd> + <kbd>]</kbd>                               | <kbd>Ctrl</kbd> + <kbd>→</kbd>                      | 去下一个页面        |
+| <kbd>⌘</kbd> + <kbd>]</kbd>                               | <kbd>Ctrl</kbd> + <kbd>→</kbd>                      | 前进到下一个页面    |
 | <kbd>⌘</kbd> + <kbd>↑</kbd>                               | <kbd>Ctrl</kbd> + <kbd>↑</kbd>                      | 自动滚动到页面顶部  |
 | <kbd>⌘</kbd> + <kbd>↓</kbd>                               | <kbd>Ctrl</kbd> + <kbd>↓</kbd>                      | 自动滚动到页面底部  |
 | <kbd>⌘</kbd> + <kbd>r</kbd>                               | <kbd>Ctrl</kbd> + <kbd>r</kbd>                      | 刷新页面            |
-| <kbd>⌘</kbd> + <kbd>w</kbd>                               | <kbd>Ctrl</kbd> + <kbd>w</kbd>                      | 隐藏窗口,非退出     |
+| <kbd>⌘</kbd> + <kbd>w</kbd>                               | <kbd>Ctrl</kbd> + <kbd>w</kbd>                      | 隐藏窗口（非退出）  |
 | <kbd>⌘</kbd> + <kbd>-</kbd>                               | <kbd>Ctrl</kbd> + <kbd>-</kbd>                      | 缩小页面            |
 | <kbd>⌘</kbd> + <kbd>=</kbd>                               | <kbd>Ctrl</kbd> + <kbd>=</kbd>                      | 放大页面            |
 | <kbd>⌘</kbd> + <kbd>0</kbd>                               | <kbd>Ctrl</kbd> + <kbd>0</kbd>                      | 重置页面缩放        |
 | <kbd>⌘</kbd> + <kbd>L</kbd>                               | <kbd>Ctrl</kbd> + <kbd>L</kbd>                      | 复制当前页面网址    |
 | <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>⌥</kbd> + <kbd>V</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>V</kbd>   | 粘贴并匹配样式      |
 | <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>H</kbd>                | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>H</kbd>   | 回到首页            |
-| <kbd>⌘</kbd> + <kbd>⌥</kbd> + <kbd>I</kbd>                | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd>   | 开启调试 (仅开发版) |
+| <kbd>⌘</kbd> + <kbd>⌥</kbd> + <kbd>I</kbd>                | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd>   | 开启调试（仅开发版）|
 | <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>⌫</kbd>                | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Del</kbd> | 清除缓存并重启      |
 | <kbd>⌃</kbd> + <kbd>⌘</kbd> + <kbd>F</kbd>                | <kbd>F11</kbd>                                      | 切换原生全屏        |
 
-此外还支持双击头部全屏切换。Windows 和 Linux 可使用 `--hide-window-decorations` 创建带顶部拖拽区域的无边框窗口。Mac 用户支持手势返回和前进，新菜单也提供了导航、缩放和窗口控制等选项。
+此外还支持双击标题栏切换全屏。Windows 和 Linux 可使用 `--hide-window-decorations` 创建带顶部拖拽区域的无边框窗口。Mac 支持手势滑动返回与前进，菜单栏也提供了导航、缩放和窗口控制等选项。
 
 </details>
 
@@ -191,7 +191,7 @@ pake https://github.com --name GitHub
 pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/weekly.icns --width 1200 --height 800 --hide-title-bar
 ```
 
-首次打包需要安装环境会比较慢，后续很快。完整参数说明查看 [CLI 使用指南](docs/cli-usage_CN.md)，不想用命令行可以试试 [GitHub Actions 在线构建](docs/github-actions-usage_CN.md)。
+首次打包需要准备构建环境，耗时会稍长一些，后续打包会很快。完整参数说明查看 [CLI 使用指南](docs/cli-usage_CN.md)，不想用命令行可以试试 [GitHub Actions 在线构建](docs/github-actions-usage_CN.md)。
 
 在脚本或 AI agent 里使用 Pake？加 `--json` 获得机器可读结果，用 `--config app.json` 声明式描述应用（[schema](schema/pake.schema.json)），本地构建产物可直接 `pake ./dist --name MyTool` 打包。完整 agent 契约见 [llms.txt](llms.txt)。安装官方 skill 在 Claude Code 里运行 `/plugin marketplace add tw93/Pake` 和 `/plugin install pake@pake`，在 Codex 里运行 `codex plugin marketplace add tw93/Pake` 和 `codex plugin add pake@pake`。
 

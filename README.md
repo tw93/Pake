@@ -219,7 +219,7 @@ For style customization, feature enhancement, container communication and other 
 
 ## Developers
 
-Pake's development can not be without these Hackers. They contributed a lot of capabilities for Pake. Also, welcome to follow them! ❤️
+Pake wouldn't be possible without these incredible contributors. ❤️
 
 <a href="https://github.com/tw93/Pake/graphs/contributors">
   <img src="./CONTRIBUTORS.svg?v=2" alt="Contributors" width="1000" />
