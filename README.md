@@ -1,20 +1,13 @@
-<h4 align="right"><strong>English</strong> | <a href="README_CN.md">简体中文</a></h4>
-<p align="center">
-    <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
-</p>
-<h1 align="center">Pake</h1>
-<p align="center"><strong>Turn any website into a tiny, fast desktop app. Supports macOS, Windows, and Linux</strong></p>
 <div align="center">
-    <a href="https://twitter.com/HiTw93" target="_blank">
-    <img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
-    <a href="https://t.me/+9f9gf4ZrFSQ2OWVl" target="_blank">
-    <img alt="telegram" src="https://img.shields.io/badge/chat-telegram-blueviolet?style=flat-square&logo=Telegram"></a>
-    <a href="https://github.com/tw93/Pake/releases" target="_blank">
-    <img alt="GitHub downloads" src="https://img.shields.io/github/downloads/tw93/Pake/total.svg?style=flat-square"></a>
-    <a href="https://github.com/tw93/Pake/commits" target="_blank">
-    <img alt="GitHub commit" src="https://img.shields.io/github/commit-activity/m/tw93/Pake?style=flat-square"></a>
-    <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank">
-    <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
+  <img src="https://gw.alipayobjects.com/zos/k/fa/logo-modified.png" width="138" />
+  <h1>Pake</h1>
+  <p><b>Turn any website into a tiny, fast desktop app. Supports macOS, Windows, and Linux</b></p>
+  <p>English · <a href="README_CN.md">中文</a></p>
+  <a href="https://twitter.com/HiTw93" target="_blank"><img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
+  <a href="https://t.me/+9f9gf4ZrFSQ2OWVl" target="_blank"><img alt="telegram" src="https://img.shields.io/badge/chat-telegram-blueviolet?style=flat-square&logo=Telegram"></a>
+  <a href="https://github.com/tw93/Pake/releases" target="_blank"><img alt="GitHub downloads" src="https://img.shields.io/github/downloads/tw93/Pake/total.svg?style=flat-square"></a>
+  <a href="https://github.com/tw93/Pake/commits" target="_blank"><img alt="GitHub commit" src="https://img.shields.io/github/commit-activity/m/tw93/Pake?style=flat-square"></a>
+  <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
 ## Features
