@@ -6,7 +6,7 @@
 
 ## 安装
 
-确保 Node.js 版本 ≥20.0.0。
+确保 Node.js 版本 ≥20.9.0。
 
 **推荐方式 (pnpm)：**
 
@@ -34,7 +34,7 @@ source ~/.bashrc
 
 **前置条件：**
 
-- Node.js ≥20.0.0
+- Node.js ≥20.9.0
 - Rust ≥1.85.0（如缺失将自动安装）
 - **macOS/Linux**：`curl`、`wget`、`file` 和 `tar`（用于依赖管理）
 

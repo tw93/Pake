@@ -170,39 +170,30 @@ pake https://mail.google.com --name "Gmail Work" --identifier com.example.gmail.
 
 ## Project Structure
 
-Understanding Pake's codebase structure will help you navigate and contribute effectively:
-
 ```tree
 ├── bin/                    # CLI source code (TypeScript)
-│   ├── builders/          # Platform-specific builders
-│   ├── helpers/           # Utility functions
-│   └── options/           # CLI option processing
+│   ├── builders/          # Platform-specific packaging builders
+│   ├── helpers/           # Helper utilities and config merging
+│   ├── options/           # CLI option processing
+│   └── utils/             # Dependency detection, workspace, and environment
 ├── docs/                  # Project documentation
-├── src-tauri/             # Tauri application core
+├── src-tauri/             # Tauri application core (Rust)
 │   ├── src/
-│   │   ├── app/           # Core modules (window, tray, shortcuts)
-│   │   ├── inject/        # Web page injection logic
+│   │   ├── app/           # Core modules (window, menu, shortcuts, etc.)
+│   │   ├── inject/        # Injected scripts (CSS, JS, event listeners)
 │   │   └── lib.rs         # Application entry point
 │   ├── icons/             # macOS icons (.icns)
 │   ├── png/               # Windows/Linux icons (.ico, .png)
-│   ├── pake.json          # App configuration
-│   └── tauri.*.conf.json  # Platform-specific configs
+│   └── pake.json          # Runtime configuration template
 ├── scripts/               # Build and utility scripts
 └── tests/                 # Test suites
 ```
-
-### Key Components
-
-- **CLI Tool** (`bin/`): TypeScript-based command interface for packaging apps
-- **Tauri App** (`src-tauri/`): Rust-based desktop framework
-- **Injection System** (`src-tauri/src/inject/`): Custom CSS/JS injection for webpages
-- **Configuration**: Multi-platform app settings and build configurations
 
 ## Development Workflow
 
 ### Prerequisites
 
-- Node.js ≥22.0.0 (recommended LTS, older versions ≥20.0.0 may work)
+- Node.js ≥22.0.0 (recommended LTS, older versions ≥20.9.0 may work)
 - Rust ≥1.85.0 (recommended stable)
 
 #### Platform-Specific Requirements

@@ -6,7 +6,7 @@ Complete command-line reference and basic usage for Pake CLI.
 
 ## Installation
 
-Ensure that your Node.js version is 20.0.0 or higher.
+Ensure that your Node.js version is 20.9.0 or higher.
 
 **Recommended (pnpm):**
 
@@ -34,7 +34,7 @@ source ~/.bashrc
 
 **Prerequisites:**
 
-- Node.js ≥20.0.0
+- Node.js ≥20.9.0
 - Rust ≥1.85.0 (installed automatically if missing)
 - **macOS/Linux**: `curl`, `wget`, `file` and `tar` used for dependency management
 
@@ -706,10 +706,6 @@ This can help sites that rely on popup auth windows, but it does not guarantee i
 ```shell
 --new-window
 ```
-
-### Packaging Complete
-
-After completing the above steps, your application should be successfully packaged. Please note that the packaging process may take some time depending on your system configuration and network conditions. Be patient, and once the packaging is complete, you can find the application installer in the specified directory.
 
 ## Docker
 

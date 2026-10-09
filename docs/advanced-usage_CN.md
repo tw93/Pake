@@ -170,39 +170,30 @@ pake https://mail.google.com --name "Gmail Work" --identifier com.example.gmail.
 
 ## 项目结构
 
-了解 Pake 的代码库结构将帮助您有效地进行导航和贡献：
-
 ```tree
-├── bin/                    # CLI 源代码 (TypeScript)
-│   ├── builders/          # 平台特定的构建器
-│   ├── helpers/           # 实用函数
-│   └── options/           # CLI 选项处理
+├── bin/                    # CLI 源代码（TypeScript）
+│   ├── builders/          # 平台打包构建器
+│   ├── helpers/           # 辅助工具与配置合并
+│   ├── options/           # CLI 选项解析
+│   └── utils/             # 依赖检测、目录与执行环境处理
 ├── docs/                  # 项目文档
-├── src-tauri/             # Tauri 应用核心
+├── src-tauri/             # Tauri 应用核心（Rust）
 │   ├── src/
-│   │   ├── app/           # 核心模块（窗口、托盘、快捷键）
-│   │   ├── inject/        # 网页注入逻辑
-│   │   └── lib.rs         # 应用程序入口点
+│   │   ├── app/           # 核心模块（窗口、菜单、快捷键等）
+│   │   ├── inject/        # 网页注入脚本（CSS、JS、事件监听）
+│   │   └── lib.rs         # 应用入口
 │   ├── icons/             # macOS 图标 (.icns)
 │   ├── png/               # Windows/Linux 图标 (.ico, .png)
-│   ├── pake.json          # 应用配置
-│   └── tauri.*.conf.json  # 平台特定配置
-├── scripts/               # 构建和实用脚本
+│   └── pake.json          # 运行时配置模板
+├── scripts/               # 实用构建脚本
 └── tests/                 # 测试套件
 ```
-
-### 关键组件
-
-- **CLI 工具** (`bin/`): 基于 TypeScript 的命令接口，用于打包应用
-- **Tauri 应用** (`src-tauri/`): 基于 Rust 的桌面框架
-- **注入系统** (`src-tauri/src/inject/`): 用于网页的自定义 CSS/JS 注入
-- **配置**: 多平台应用设置和构建配置
 
 ## 开发工作流
 
 ### 前置条件
 
-- Node.js ≥22.0.0 (推荐 LTS，较旧版本 ≥20.0.0 可能可用)
+- Node.js ≥22.0.0 (推荐 LTS，较旧版本 ≥20.9.0 可能可用)
 - Rust ≥1.85.0 (推荐稳定版)
 
 #### 平台特定要求
@@ -319,7 +310,7 @@ node ./tests/release.js
 - 先构建 CLI，
 - 再运行 Vitest 套件，
 - 如果没有传 `--no-build`，继续执行真实构建 smoke test，
-- 然后在真实构建成功后继续执行发布流程 smoke test。
+- 然后在真实构建成功后继续执行发布流程 smoke test
 
 常用可选参数：
 

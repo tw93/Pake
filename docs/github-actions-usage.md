@@ -35,13 +35,12 @@ Build Pake apps online without installing development tools locally.
 
 ## Tips
 
-- Be patient on first run - let cache build completely
+- Initial runs take longer while the dependency cache is built
 - Stable network connection recommended
-- Enable `Allow sites to open new windows` when the site launches sign-in,
-  exam, or other flows in a separate window
-- If build fails, delete cache and retry
+- Enable `Allow sites to open new windows` when the site launches sign-in, exam, or other flows in a separate window
+- If a build fails due to interrupted cache, clear the Actions cache and retry
 
-## Links
+## Related Docs
 
-- [CLI Documentation](cli-usage.md)
+- [CLI Usage Guide](cli-usage.md)
 - [Advanced Usage](advanced-usage.md)
