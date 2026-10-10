@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://gw.alipayobjects.com/zos/k/fa/logo-modified.png" width="138" />
+  <img src="https://raw.githubusercontent.com/tw93/Pake/main/assets/logo.png" width="138" />
   <h1>Pake</h1>
   <p><b>명령어 하나로 모든 웹페이지를 데스크톱 앱으로 변환. macOS, Windows, Linux 지원.</b></p>
   <p><a href="README.md">English</a> · <a href="README_CN.md">中文</a> · <a href="README_TW.md">繁體</a> · <a href="README_JA.md">日本語</a> · 한국어 · <a href="README_DE.md">Deutsch</a> · <a href="README_FR.md">Français</a></p>

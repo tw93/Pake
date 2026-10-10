@@ -61,7 +61,7 @@ Before writing notes, `gh release view <previous release>` and treat its structu
 
 ```markdown
 <div align="center">
-<img src="https://gw.alipayobjects.com/zos/k/fa/logo-modified.png" alt="Pake Logo" width="120" height="120" style="border-radius:50%" />
+<img src="https://raw.githubusercontent.com/tw93/Pake/main/assets/logo.png" alt="Pake Logo" width="120" height="120" style="border-radius:50%" />
 <h1 style="margin: 12px 0 6px;">Pake VX.Y.Z</h1>
 <p><em>Turn any webpage into a desktop app with one command.</em></p>
 </div>

@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://gw.alipayobjects.com/zos/k/fa/logo-modified.png" width="138" />
+  <img src="https://raw.githubusercontent.com/tw93/Pake/main/assets/logo.png" width="138" />
   <h1>Pake</h1>
   <p><b>一個指令把任意網頁打包成桌面應用，支援 macOS、Windows 與 Linux</b></p>
   <p><a href="README.md">English</a> · <a href="README_CN.md">中文</a> · 繁體 · <a href="README_JA.md">日本語</a> · <a href="README_KR.md">한국어</a> · <a href="README_DE.md">Deutsch</a> · <a href="README_FR.md">Français</a></p>
