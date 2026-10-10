@@ -12,7 +12,7 @@
 
 - [构建问题](#构建问题)
   - [Rust 版本错误:"feature 'edition2024' is required"](#rust-版本错误feature-edition2024-is-required)
-  - [Linux：Ubuntu 24.04 构建报错 "Can't detect any appindicator library"](#linuxubuntu-2404-构建报错-cant-detect-any-appindicator-library)
+  - [Linux：构建报错 "Can't detect any appindicator library"](#linux构建报错-cant-detect-any-appindicator-library)
   - [Linux：在 Fedora / RHEL / Oracle Linux 等 RPM 系发行版上安装](#linux在-fedora--rhel--oracle-linux-等-rpm-系发行版上安装)
   - [Linux：AppImage 构建失败，提示 "failed to run linuxdeploy"](#linuxappimage-构建失败提示-failed-to-run-linuxdeploy)
   - [Linux：AppImage 启动即崩溃，提示找不到 WebKitNetworkProcess](#linuxappimage-启动即崩溃提示找不到-webkitnetworkprocess)
@@ -84,7 +84,7 @@ rustc --version
 
 ---
 
-### Linux：Ubuntu 24.04 构建报错 "Can't detect any appindicator library"
+### Linux：构建报错 "Can't detect any appindicator library"
 
 **问题描述：**
 在 Ubuntu 24.04 或更新版本上构建时，可能遇到以下错误：

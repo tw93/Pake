@@ -12,7 +12,7 @@ Common issues and solutions when using Pake.
 
 - [Build Issues](#build-issues)
   - [Rust Version Error: "feature 'edition2024' is required"](#rust-version-error-feature-edition2024-is-required)
-  - [Linux: Build Error "Can't detect any appindicator library" on Ubuntu 24.04](#linux-build-error-cant-detect-any-appindicator-library-on-ubuntu-2404)
+  - [Linux: Build Error "Can't detect any appindicator library"](#linux-build-error-cant-detect-any-appindicator-library)
   - [Linux: Installing on Fedora / RHEL / Oracle Linux (RPM-based distros)](#linux-installing-on-fedora--rhel--oracle-linux-rpm-based-distros)
   - [Linux: AppImage Build Fails with "failed to run linuxdeploy"](#linux-appimage-build-fails-with-failed-to-run-linuxdeploy)
   - [Linux: AppImage Crashes at Launch with WebKitNetworkProcess Not Found](#linux-appimage-crashes-at-launch-with-webkitnetworkprocess-not-found)
@@ -84,7 +84,7 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for complete prerequisites.
 
 ---
 
-### Linux: Build Error "Can't detect any appindicator library" on Ubuntu 24.04
+### Linux: Build Error "Can't detect any appindicator library"
 
 **Problem:**
 When building on Ubuntu 24.04 or newer, you may encounter:
@@ -104,6 +104,12 @@ Install the correct dependency:
 ```bash
 sudo apt-get update
 sudo apt-get install -y libayatana-appindicator3-dev
+```
+
+On Fedora and other RPM-based distros with the same error, install `libappindicator-gtk3-devel`:
+
+```bash
+sudo dnf install -y libappindicator-gtk3-devel
 ```
 
 ---
