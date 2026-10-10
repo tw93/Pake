@@ -10,7 +10,7 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-## Features
+## Funktionen
 
 - 🎐 **Leichtgewichtig**: Das Installationspaket ist fast 20-mal kleiner als bei Electron-Apps, meist unter 10 MB auf der Festplatte
 - 🚀 **Schnell**: Entwickelt mit Rust Tauri, deutlich schneller als herkömmliche JS-Frameworks bei geringerem Arbeitsspeicherbedarf
