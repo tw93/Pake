@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://gw.alipayobjects.com/zos/k/fa/logo-modified.png" width="138" />
   <h1>Pake</h1>
-  <p><b>把常用网页变身小巧好用的电脑软件，支持 macOS、Windows 和 Linux</b></p>
+  <p><b>一条命令把任意网页打包成桌面应用，支持 macOS、Windows 和 Linux</b></p>
   <p><a href="README.md">English</a> · 中文 · <a href="README_TW.md">繁體</a> · <a href="README_JA.md">日本語</a> · <a href="README_KR.md">한국어</a> · <a href="README_DE.md">Deutsch</a> · <a href="README_FR.md">Français</a></p>
   <a href="https://twitter.com/HiTw93" target="_blank"><img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
   <a href="https://t.me/+9f9gf4ZrFSQ2OWVl" target="_blank"><img alt="telegram" src="https://img.shields.io/badge/chat-telegram-blueviolet?style=flat-square&logo=Telegram"></a>

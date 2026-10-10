@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://gw.alipayobjects.com/zos/k/fa/logo-modified.png" width="138" />
   <h1>Pake</h1>
-  <p><b>把常用網頁變身小巧好用的電腦軟體，支援 macOS、Windows 與 Linux</b></p>
+  <p><b>一個指令把任意網頁打包成桌面應用，支援 macOS、Windows 與 Linux</b></p>
   <p><a href="README.md">English</a> · <a href="README_CN.md">中文</a> · 繁體 · <a href="README_JA.md">日本語</a> · <a href="README_KR.md">한국어</a> · <a href="README_DE.md">Deutsch</a> · <a href="README_FR.md">Français</a></p>
   <a href="https://twitter.com/HiTw93" target="_blank"><img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
   <a href="https://t.me/+9f9gf4ZrFSQ2OWVl" target="_blank"><img alt="telegram" src="https://img.shields.io/badge/chat-telegram-blueviolet?style=flat-square&logo=Telegram"></a>
@@ -222,7 +222,7 @@ Pake 的發展離不開這些優秀的貢獻者 ❤️
 ## 支持
 
 1. 購買我做的 Mac 清理應用 [Mole for Mac](https://mole.fit)，是對我最直接的支持。
-2. 如果你喜歡 Pake，可以在 GitHub 給一顆 Star，也歡迎 [推薦](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20把常用網頁變身小巧好用的電腦軟體，支援%20macOS、Windows%20與%20Linux) 給志同道合的朋友。
+2. 如果你喜歡 Pake，可以在 GitHub 給一顆 Star，也歡迎 [推薦](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20一個指令把任意網頁打包成桌面應用，支援%20macOS、Windows%20與%20Linux) 給志同道合的朋友。
 3. 可以追蹤我的 [Twitter](https://twitter.com/HiTw93) 獲取最新的 Pake 更新消息，也歡迎加入 [Telegram](https://t.me/+9f9gf4ZrFSQ2OWVl) 聊天群組。
 4. 希望大家在使用過程中能體會到學習新技術的樂趣，若發現適合做成桌面 App 的網頁也歡迎告訴我。
 5. 我養了兩隻貓：湯圓與可樂，如果 Pake 讓你的生活更美好，可以給她們 <a href="https://cats.tw93.fun?name=Pake" target="_blank">餵罐頭 🥩</a>。

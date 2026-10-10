@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://gw.alipayobjects.com/zos/k/fa/logo-modified.png" width="138" />
   <h1>Pake</h1>
-  <p><b>자주 쓰는 웹사이트를 가볍고 빠른 데스크톱 앱으로 변환. macOS, Windows, Linux 지원</b></p>
+  <p><b>명령어 하나로 모든 웹페이지를 데스크톱 앱으로 변환. macOS, Windows, Linux 지원</b></p>
   <p><a href="README.md">English</a> · <a href="README_CN.md">中文</a> · <a href="README_TW.md">繁體</a> · <a href="README_JA.md">日本語</a> · 한국어 · <a href="README_DE.md">Deutsch</a> · <a href="README_FR.md">Français</a></p>
   <a href="https://twitter.com/HiTw93" target="_blank"><img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
   <a href="https://t.me/+9f9gf4ZrFSQ2OWVl" target="_blank"><img alt="telegram" src="https://img.shields.io/badge/chat-telegram-blueviolet?style=flat-square&logo=Telegram"></a>
@@ -222,7 +222,7 @@ Pake의 성장은 훌륭한 오픈소스 기여자분들과 함께 만들어갑�
 ## 후원
 
 1. 가장 직접적인 후원 방법은 제가 개발한 Mac 정리 앱 [Mole for Mac](https://mole.fit)을 이용해 주시는 것입니다.
-2. Pake가 유용했다면 GitHub Star를 눌러주시고, [주변 개발자 동료들에게 추천](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20자주%20쓰는%20웹사이트를%20가볍고%20빠른%20데스크톱%20앱으로%20변환.%20macOS,%20Windows,%20Linux%20지원)해 주시면 큰 힘이 됩니다.
+2. Pake가 유용했다면 GitHub Star를 눌러주시고, [주변 개발자 동료들에게 추천](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20명령어%20하나로%20모든%20웹페이지를%20데스크톱%20앱으로%20변환.%20macOS,%20Windows,%20Linux%20지원)해 주시면 큰 힘이 됩니다.
 3. 최신 업데이트 소식은 [Twitter](https://twitter.com/HiTw93)에서 확인하실 수 있으며, [Telegram](https://t.me/+9f9gf4ZrFSQ2OWVl) 그룹에서도 자유롭게 이야기 나눌 수 있습니다.
 4. 새로운 기술을 탐구하는 즐거움을 느끼시길 바라며, 데스크톱 앱으로 만들면 좋은 웹사이트가 있다면 언제든 공유해 주세요.
 5. TangYuan과 Coke라는 두 마리의 고양이를 키우고 있습니다. Pake가 유용하셨다면 고양이들에게 <a href="https://cats.tw93.fun?name=Pake" target="_blank">캔 간식 🥩</a>을 선물해 주셔도 좋습니다.

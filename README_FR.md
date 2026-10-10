@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://gw.alipayobjects.com/zos/k/fa/logo-modified.png" width="138" />
   <h1>Pake</h1>
-  <p><b>Transformez n'importe quel site web en application de bureau compacte et rapide. Compatible macOS, Windows et Linux</b></p>
+  <p><b>Transformez n'importe quelle page web en application de bureau en une seule commande. Compatible macOS, Windows et Linux</b></p>
   <p><a href="README.md">English</a> · <a href="README_CN.md">中文</a> · <a href="README_TW.md">繁體</a> · <a href="README_JA.md">日本語</a> · <a href="README_KR.md">한국어</a> · <a href="README_DE.md">Deutsch</a> · Français</p>
   <a href="https://twitter.com/HiTw93" target="_blank"><img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
   <a href="https://t.me/+9f9gf4ZrFSQ2OWVl" target="_blank"><img alt="telegram" src="https://img.shields.io/badge/chat-telegram-blueviolet?style=flat-square&logo=Telegram"></a>
@@ -222,7 +222,7 @@ Pake ne serait pas possible sans ces précieux contributeurs ❤️
 ## Soutien
 
 1. La façon la plus directe de me soutenir est d'acheter [Mole for Mac](https://mole.fit), mon application de nettoyage pour Mac.
-2. Si Pake vous est utile, n'hésitez pas à lui attribuer une étoile sur GitHub ou à le [recommander](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20Transformez%20n'importe%20quel%20site%20web%20en%20application%20de%20bureau%20compacte%20et%20rapide.%20Compatible%20macOS,%20Windows%20et%20Linux) autour de vous.
+2. Si Pake vous est utile, n'hésitez pas à lui attribuer une étoile sur GitHub ou à le [recommander](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20Transformez%20n'importe%20quelle%20page%20web%20en%20application%20de%20bureau%20en%20une%20seule%20commande.%20Compatible%20macOS,%20Windows%20et%20Linux) autour de vous.
 3. Suivez les nouveautés sur [Twitter](https://twitter.com/HiTw93) ou rejoignez la communauté sur [Telegram](https://t.me/+9f9gf4ZrFSQ2OWVl).
 4. J'espère que vous prendrez plaisir à explorer ces technologies ; n'hésitez pas à suggérer des sites qui feraient d'excellentes applications de bureau.
 5. J'ai deux chats, TangYuan et Coke. Si Pake vous rend service, vous pouvez leur offrir <a href="https://cats.tw93.fun?name=Pake" target="_blank">une friandise 🥩</a>.
