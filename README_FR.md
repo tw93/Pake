@@ -159,7 +159,7 @@
 | <kbd>⌘</kbd> + <kbd>=</kbd>                               | <kbd>Ctrl</kbd> + <kbd>=</kbd>                      | Agrandir le zoom                  |
 | <kbd>⌘</kbd> + <kbd>0</kbd>                               | <kbd>Ctrl</kbd> + <kbd>0</kbd>                      | Réinitialiser le zoom             |
 | <kbd>⌘</kbd> + <kbd>L</kbd>                               | <kbd>Ctrl</kbd> + <kbd>L</kbd>                      | Copier l'URL actuelle             |
-| <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>⌥</kbd> + <kbd>V</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>V</kbd>   | Coller avec mise en forme         |
+| <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>⌥</kbd> + <kbd>V</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>V</kbd>   | Coller et adapter le style        |
 | <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>H</kbd>                | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>H</kbd>   | Page d'accueil                    |
 | <kbd>⌘</kbd> + <kbd>⌥</kbd> + <kbd>I</kbd>                | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd>   | Outils de développement (debug)   |
 | <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>⌫</kbd>                | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Del</kbd> | Vider le cache et redémarrer      |
@@ -209,7 +209,7 @@ pnpm run dev
 pnpm run build
 ```
 
-Pour la personnalisation de styles, l'ajout de fonctionnalités et la communication inter-conteneurs, consultez les [Fonctionnalités avancées](docs/advanced-usage.md).
+Pour la personnalisation de styles, l'ajout de fonctionnalités et la communication entre la page et le conteneur Pake, consultez les [Fonctionnalités avancées](docs/advanced-usage.md).
 
 ## Contributeurs
 

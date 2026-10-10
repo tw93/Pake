@@ -159,7 +159,7 @@
 | <kbd>⌘</kbd> + <kbd>=</kbd>                               | <kbd>Ctrl</kbd> + <kbd>=</kbd>                      | Seite vergrößern                   |
 | <kbd>⌘</kbd> + <kbd>0</kbd>                               | <kbd>Ctrl</kbd> + <kbd>0</kbd>                      | Zoom zurücksetzen                  |
 | <kbd>⌘</kbd> + <kbd>L</kbd>                               | <kbd>Ctrl</kbd> + <kbd>L</kbd>                      | Aktuelle URL kopieren              |
-| <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>⌥</kbd> + <kbd>V</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>V</kbd>   | Mit Formatierung einfügen          |
+| <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>⌥</kbd> + <kbd>V</kbd> | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>V</kbd>   | Einfügen und Stil anpassen         |
 | <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>H</kbd>                | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>H</kbd>   | Zur Startseite                     |
 | <kbd>⌘</kbd> + <kbd>⌥</kbd> + <kbd>I</kbd>                | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>I</kbd>   | Entwicklertools öffnen (nur Debug) |
 | <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>⌫</kbd>                | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Del</kbd> | Cache leeren und neu starten       |
@@ -184,7 +184,7 @@ pake https://github.com --name GitHub
 pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/weekly.icns --width 1200 --height 800 --hide-title-bar
 ```
 
-Die Erstpaketierung dauert durch die Einrichtung der Build-Umgebung etwas länger, Folgebilds sind sehr schnell. Vollständige Parameter finden Sie in der [CLI-Anleitung](docs/cli-usage.md). Alternativ steht der [GitHub Actions Online-Build](docs/github-actions-usage.md) bereit.
+Die Erstpaketierung dauert durch die Einrichtung der Build-Umgebung etwas länger, Folge-Builds sind sehr schnell. Vollständige Parameter finden Sie in der [CLI-Anleitung](docs/cli-usage.md). Alternativ steht der [GitHub Actions Online-Build](docs/github-actions-usage.md) bereit.
 
 Pake in Skripten oder mit AI-Agenten nutzen? Übergeben Sie `--json` für maschinenlesbare Ausgaben, beschreiben Sie Apps deklarativ mit `--config app.json` ([Schema](schema/pake.schema.json)), oder paketieren Sie lokale Build-Ausgaben direkt per `pake ./dist --name MyTool`. Vollständiger Agent-Vertrag unter [llms.txt](llms.txt). Offiziellen Skill installieren: in Claude Code `/plugin marketplace add tw93/Pake` und `/plugin install pake@pake` ausführen; in Codex `codex plugin marketplace add tw93/Pake` und `codex plugin add pake@pake`.
 

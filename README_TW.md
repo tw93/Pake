@@ -14,12 +14,12 @@
 
 - 🎐 **體積小巧**：安裝包比 Electron 應用小近 20 倍，通常小於 10 MB
 - 🚀 **效能優異**：基於 Rust Tauri，比傳統 JS 框架更快，記憶體占用更少
-- ⚡ **使用簡單**：命令列一行打包，或線上構建，無需繁瑣設定
+- ⚡ **使用簡單**：命令列一行打包，或線上建置，無需繁瑣設定
 - 📦 **功能豐富**：支援快捷鍵透傳、沉浸式視窗、拖曳、樣式自訂、去除廣告
 
 ## 快速開始
 
-- **新手用戶**：直接下載現成的 [常用包](#常用包下載)，或透過 [線上構建](docs/github-actions-usage_CN.md) 無需環境配置即可打包
+- **新手用戶**：直接下載現成的 [常用包](#常用包下載)，或透過 [線上建置](docs/github-actions-usage_CN.md) 無需環境配置即可打包
 - **開發者**：安裝 [CLI 工具](docs/cli-usage_CN.md) 後一行命令打包任意網站，支援自訂圖示、視窗等參數
 - **進階用戶**：本機複製專案進行 [自訂開發](#自訂開發)，或查看 [進階用法](docs/advanced-usage_CN.md) 實現樣式自訂、功能擴充
 - **遇到問題**：查看 [常見問題](docs/faq_CN.md) 排查故障與使用疑問
@@ -184,9 +184,9 @@ pake https://github.com --name GitHub
 pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/weekly.icns --width 1200 --height 800 --hide-title-bar
 ```
 
-首次打包需要準備構建環境，耗時會稍長一些，後續打包會很快。完整參數說明查看 [CLI 使用指南](docs/cli-usage_CN.md)，不想用命令列可以試試 [GitHub Actions 線上構建](docs/github-actions-usage_CN.md)。
+首次打包需要準備建置環境，耗時會稍長一些，後續打包會很快。完整參數說明查看 [CLI 使用指南](docs/cli-usage_CN.md)，不想用命令列可以試試 [GitHub Actions 線上建置](docs/github-actions-usage_CN.md)。
 
-在腳本或 AI agent 裡使用 Pake？加上 `--json` 取得機器可讀結果，使用 `--config app.json` 宣告式描述應用（[schema](schema/pake.schema.json)），本機構建產物可直接 `pake ./dist --name MyTool` 打包。完整 agent 契約見 [llms.txt](llms.txt)。安裝官方 skill 在 Claude Code 裡執行 `/plugin marketplace add tw93/Pake` 和 `/plugin install pake@pake`，在 Codex 裡執行 `codex plugin marketplace add tw93/Pake` 和 `codex plugin add pake@pake`。
+在腳本或 AI agent 裡使用 Pake？加上 `--json` 取得機器可讀結果，使用 `--config app.json` 宣告式描述應用（[schema](schema/pake.schema.json)），本機建置產物可直接 `pake ./dist --name MyTool` 打包。完整 agent 契約見 [llms.txt](llms.txt)。安裝官方 skill 在 Claude Code 裡執行 `/plugin marketplace add tw93/Pake` 和 `/plugin install pake@pake`，在 Codex 裡執行 `codex plugin marketplace add tw93/Pake` 和 `codex plugin add pake@pake`。
 
 把下面這段複製給你的 AI agent 即可開始：
 
@@ -194,12 +194,12 @@ pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/week
 用 Pake（npm i -g pake-cli）把網頁打包成桌面應用。先閱讀 https://unpkg.com/pake-cli@latest/llms.txt，執行 pake 時始終加上 --json 並把 stdout 解析為單個 JSON 物件。把 <url-or-local-dist> 打包成名為 <AppName> 的應用。
 ```
 
-## 定制開發
+## 自訂開發
 
 需要 Rust `>=1.85` 與 Node `>=22`（推薦 LTS，較舊的 `>=20.9` 亦可使用），詳細安裝指南參考 [Tauri 文件](https://tauri.app/start/prerequisites/)。不熟悉開發環境建議直接使用命令列工具。
 
 ```bash
-# 安裝依賴
+# 安裝相依套件
 pnpm i
 
 # 本機開發［右鍵可開啟偵錯模式］
