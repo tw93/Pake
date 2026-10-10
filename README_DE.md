@@ -196,7 +196,7 @@ Verwende Pake (npm i -g pake-cli), um Webseiten als Desktop-Apps zu paketieren. 
 
 ## Entwicklung
 
-Erfordert Rust `>=1.85` und Node `>=22` (empfohlenes LTS; `>=20` ebenfalls lauffähig). Installationsanleitung unter [Tauri-Dokumentation](https://tauri.app/start/prerequisites/). Wenn Sie mit der Entwicklungsumgebung nicht vertraut sind, empfiehlt sich das CLI-Tool.
+Erfordert Rust `>=1.85` und Node `>=22` (empfohlenes LTS; `>=20.9` ebenfalls lauffähig). Installationsanleitung unter [Tauri-Dokumentation](https://tauri.app/start/prerequisites/). Wenn Sie mit der Entwicklungsumgebung nicht vertraut sind, empfiehlt sich das CLI-Tool.
 
 ```bash
 # Abhängigkeiten installieren

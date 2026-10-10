@@ -196,7 +196,7 @@ Utilise Pake (npm i -g pake-cli) pour empaqueter des pages web en applications d
 
 ## Développement
 
-Nécessite Rust `>=1.85` et Node `>=22` (LTS recommandée ; `>=20` fonctionne également). Consultez la [Documentation Tauri](https://tauri.app/start/prerequisites/). Si vous n'êtes pas familier avec l'environnement de développement, préférez l'outil CLI.
+Nécessite Rust `>=1.85` et Node `>=22` (LTS recommandée ; `>=20.9` fonctionne également). Consultez la [Documentation Tauri](https://tauri.app/start/prerequisites/). Si vous n'êtes pas familier avec l'environnement de développement, préférez l'outil CLI.
 
 ```bash
 # Installer les dépendances

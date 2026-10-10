@@ -196,7 +196,7 @@ Pake(npm i -g pake-cli)를 사용하여 웹페이지를 데스크톱 앱으로 �
 
 ## 개발
 
-Rust `>=1.85` 및 Node `>=22`(LTS 권장, `>=20`도 지원)가 필요합니다. 자세한 설치 안내는 [Tauri 공식 문서](https://tauri.app/start/prerequisites/)를 참조하세요. 개발 환경 설정이 번거롭다면 CLI 도구 사용을 권장합니다.
+Rust `>=1.85` 및 Node `>=22`(LTS 권장, `>=20.9`도 지원)가 필요합니다. 자세한 설치 안내는 [Tauri 공식 문서](https://tauri.app/start/prerequisites/)를 참조하세요. 개발 환경 설정이 번거롭다면 CLI 도구 사용을 권장합니다.
 
 ```bash
 # 의존성 설치

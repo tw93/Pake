@@ -196,7 +196,7 @@ Pake（npm i -g pake-cli）を使ってウェブページをデスクトップ�
 
 ## 開発
 
-Rust `>=1.85` と Node `>=22`（推奨 LTS、`>=20` も利用可能）が必要です。環境構築の詳細は [Tauri 公式ドキュメント](https://tauri.app/start/prerequisites/) を参照してください。環境構築に不慣れな場合は CLI ツールの利用をおすすめします。
+Rust `>=1.85` と Node `>=22`（推奨 LTS、`>=20.9` も利用可能）が必要です。環境構築の詳細は [Tauri 公式ドキュメント](https://tauri.app/start/prerequisites/) を参照してください。環境構築に不慣れな場合は CLI ツールの利用をおすすめします。
 
 ```bash
 # 依存関係のインストール
