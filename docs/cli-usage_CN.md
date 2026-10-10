@@ -91,7 +91,7 @@ pake ./dist --name MyTool
 | `--icon`                    | 自定义图标（可选，自动获取网站图标） | `--icon https://cdn.tw93.fun/pake/weekly.icns` |
 | `--width`                   | 窗口宽度（默认：1200px）             | `--width 1400`                                 |
 | `--height`                  | 窗口高度（默认：780px）              | `--height 900`                                 |
-| `--hide-title-bar`          | 沉浸式标题栏（仅 macOS）             | `--hide-title-bar`                             |
+| `--hide-title-bar`          | 隐藏标题栏（仅 macOS）               | `--hide-title-bar`                             |
 | `--hide-window-decorations` | 隐藏原生窗口装饰（仅 Windows/Linux） | `--hide-window-decorations`                    |
 | `--debug`                   | 启用开发者工具                       | `--debug`                                      |
 | `--config`                  | 从 JSON 配置文件读取选项             | `--config app.json`                            |
@@ -184,7 +184,7 @@ pake https://github.com --name GitHub
 
 #### [hide-title-bar]
 
-启用沉浸式标题栏，默认为 `false`。仅对 macOS 有效。
+隐藏标题栏，默认为 `false`。仅对 macOS 有效。
 
 ```shell
 --hide-title-bar
