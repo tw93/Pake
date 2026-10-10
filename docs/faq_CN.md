@@ -11,13 +11,13 @@
 ## 目录
 
 - [构建问题](#构建问题)
-  - [Rust 版本错误:"feature 'edition2024' is required"](#rust-版本错误feature-edition2024-is-required)
+  - [Rust 版本错误："feature 'edition2024' is required"](#rust-版本错误feature-edition2024-is-required)
   - [Linux：构建报错 "Can't detect any appindicator library"](#linux构建报错-cant-detect-any-appindicator-library)
   - [Linux：在 Fedora / RHEL / Oracle Linux 等 RPM 系发行版上安装](#linux在-fedora--rhel--oracle-linux-等-rpm-系发行版上安装)
   - [Linux：AppImage 构建失败，提示 "failed to run linuxdeploy"](#linuxappimage-构建失败提示-failed-to-run-linuxdeploy)
   - [Linux：AppImage 启动即崩溃，提示找不到 WebKitNetworkProcess](#linuxappimage-启动即崩溃提示找不到-webkitnetworkprocess)
   - [Linux：AppImage 打开后按钮或键盘在 Wayland 下不可用](#linuxappimage-打开后按钮或键盘在-wayland-下不可用)
-  - [Linux:"cargo: command not found" 即使已安装 Rust](#linuxcargo-command-not-found-即使已安装-rust)
+  - [Linux："cargo: command not found" 即使已安装 Rust](#linuxcargo-command-not-found-即使已安装-rust)
   - [Windows：首次构建时安装超时](#windows首次构建时安装超时)
   - [Windows：缺少 Visual Studio 构建工具](#windows缺少-visual-studio-构建工具)
   - [macOS：构建失败，出现模块编译错误](#macos构建失败出现模块编译错误)
@@ -30,13 +30,10 @@
   - [全局安装时权限被拒绝](#全局安装时权限被拒绝)
 - [获取帮助](#获取帮助)
 
----
-
 ## 构建问题
 
-### Rust 版本错误:"feature 'edition2024' is required"
+### Rust 版本错误："feature 'edition2024' is required"
 
-**问题描述：**
 在构建 Pake 或使用 CLI 时，遇到如下错误：
 
 ```txt
@@ -49,15 +46,9 @@ Caused by:
 
 **原因分析：**
 
-Pake 的依赖项需要 Rust edition2024 支持，该特性仅在 Rust 1.85.0 或更高版本中可用。具体来说：
+Pake 的依赖链 `tauri`、`image`、`moxcms` 一直到 `pxfm v0.1.25` 需要 Rust edition2024，它在 Rust 1.85.0（2025 年 2 月发布）中成为稳定版，如果你的 Rust 版本较旧（例如 2024 年 8 月的 1.82.0），就会看到此错误。
 
-- 依赖链包括：`tauri` → `image` → `moxcms` → `pxfm v0.1.25`（需要 edition2024）
-- Rust edition2024 在 Rust 1.85.0（2025 年 2 月发布）中成为稳定版
-- 如果您的 Rust 版本较旧（例如 2024 年 8 月的 1.82.0），就会看到此错误
-
-**解决方案：**
-
-将 Rust 工具链更新到 1.85.0 或更高版本：
+将 Rust 工具链更新到 1.85.0 或更高版本，更新后重新执行构建命令：
 
 ```bash
 # 更新到最新稳定版 Rust
@@ -71,22 +62,15 @@ rustc --version
 # 应显示：rustc 1.85.0 或更高版本
 ```
 
-更新后，重新执行构建命令。
-
-**对于开发环境设置：**
-
-如果您正在设置开发环境，请确保：
+设置开发环境时需要：
 
 - Rust ≥1.85.0（使用 `rustc --version` 检查）
 - Node.js ≥20.9.0（使用 `node --version` 检查）
 
 详见 [CONTRIBUTING.md](../CONTRIBUTING.md) 获取完整的前置条件。
 
----
-
 ### Linux：构建报错 "Can't detect any appindicator library"
 
-**问题描述：**
 在 Ubuntu 24.04 或更新版本上构建时，可能遇到以下错误：
 
 ```txt
@@ -95,11 +79,7 @@ Can't detect any appindicator library
 
 或者在之前的版本中可能看到关于 Icon RGBA 的报错。
 
-**解决方案：**
-
-这是因为 Ubuntu 24.04+ 使用 `libayatana-appindicator3-dev` 替代了旧的 `libappindicator3-dev`。
-
-请安装正确的依赖库：
+这是因为 Ubuntu 24.04+ 使用 `libayatana-appindicator3-dev` 替代了旧的 `libappindicator3-dev`，安装正确的依赖库即可：
 
 ```bash
 sudo apt-get update
@@ -112,19 +92,11 @@ Fedora 等 RPM 系发行版遇到同样的报错，安装 `libappindicator-gtk3-
 sudo dnf install -y libappindicator-gtk3-devel
 ```
 
----
-
 ### Linux：在 Fedora / RHEL / Oracle Linux 等 RPM 系发行版上安装
 
-**问题：**
-在 RPM 系发行版（Fedora、RHEL、Oracle Linux、Rocky、AlmaLinux、openSUSE）上，
-`.deb` 包无法被系统包管理器安装，而旧版本 Pake 总是先构建 `.deb`。
+在 RPM 系发行版（Fedora、RHEL、Oracle Linux、Rocky、AlmaLinux、openSUSE）上，`.deb` 包无法被系统包管理器安装，而旧版本 Pake 总是先构建 `.deb`。
 
-**解决方法：**
-
-Pake 现在会读取 `/etc/os-release` 来决定默认打包目标：RPM 系发行版默认使用
-`rpm, appimage`，Debian/Ubuntu 仍然是 `deb, appimage`。所以基础命令就能直接产出
-可安装的包：
+Pake 会读取 `/etc/os-release` 来决定默认打包目标，RPM 系发行版默认使用 `rpm, appimage`，Debian/Ubuntu 仍然是 `deb, appimage`，所以基础命令就能直接产出可安装的包：
 
 ```bash
 pake https://github.com --name GitHub
@@ -138,22 +110,17 @@ pake https://github.com --name GitHub --targets rpm        # RPM 包
 pake https://github.com --name GitHub --targets appimage   # 便携 AppImage
 ```
 
-默认会构建多个目标，此时单个格式失败不再中断其余格式：如果 `.rpm`/`.deb` 打包失败，
-仍会产出 AppImage 作为便携回退方案。AppImage 无需安装即可运行：
+默认会构建多个目标，此时单个格式失败不再中断其余格式，如果 `.rpm`/`.deb` 打包失败，仍会产出 AppImage 作为便携回退方案，AppImage 无需安装即可运行：
 
 ```bash
 chmod +x ./GitHub.AppImage
 ./GitHub.AppImage
 ```
 
-> 构建 `.rpm` 需要 `rpm-build`（`sudo dnf install rpm-build`）。如果你只想要一个可运行
-> 的程序而不需要打包，可加上 `--keep-binary`，它会把原始可执行文件复制到安装包旁边。
-
----
+> 构建 `.rpm` 需要 `rpm-build`（`sudo dnf install rpm-build`），如果你只想要一个可运行的程序而不需要打包，可加上 `--keep-binary`，它会把原始可执行文件复制到安装包旁边。
 
 ### Linux：AppImage 构建失败，提示 "failed to run linuxdeploy"
 
-**问题描述：**
 在 Linux 系统（Debian、Ubuntu、Arch 等）上构建 AppImage 时，可能遇到如下错误：
 
 ```txt
@@ -189,7 +156,7 @@ NO_STRIP=1 pake https://example.com --name MyApp --targets appimage
 
 **解决方案 2：安装系统依赖**
 
-如果 NO_STRIP 不起作用，确保已安装所有必需的系统依赖：
+如果 NO_STRIP 不起作用，确保已安装所有必需的系统依赖后再次尝试构建：
 
 ```bash
 sudo apt update
@@ -210,8 +177,6 @@ sudo apt install -y \
   libgirepository1.0-dev \
   pkg-config
 ```
-
-然后再次尝试构建（也可以提前设置 `NO_STRIP=1`）。
 
 **解决方案 3：改用 DEB 格式**
 
@@ -244,13 +209,8 @@ docker run --rm --privileged \
 - 在较新的发行版上构建（Arch、Debian Trixie 等）
 - 缺少 WebKit2GTK 或 GTK 开发库
 
-`NO_STRIP=1` 环境变量是 Tauri 社区推荐的官方解决方法。
-
----
-
 ### Linux：AppImage 启动即崩溃，提示找不到 WebKitNetworkProcess
 
-**问题描述：**
 AppImage 构建成功，但启动时立即崩溃：
 
 ```txt
@@ -294,14 +254,10 @@ mkdir -p lib && ln -s ../usr/lib/webkit2gtk-4.1 lib/webkit2gtk-4.1
 ./AppRun
 ```
 
----
-
 ### Linux：AppImage 打开后按钮或键盘在 Wayland 下不可用
 
-**问题描述：**
 在某些纯 Wayland 合成器上，尤其是 niri，AppImage 可以打开，但页面按钮无法点击，键盘输入也无法进入 webview。
 
-**解决方案：**
 Pake 会在 niri 会话中自动避开保守的 WebKit 渲染参数。也可以手动强制使用原生 WebKit 渲染路径：
 
 ```bash
@@ -317,16 +273,11 @@ PAKE_LINUX_WEBKIT_SAFE_MODE=1 ./MyApp.AppImage
 **原因：**
 在 WebKitGTK 2.52 及以上版本上，X11 和 Wayland 都默认使用共享内存渲染（`WEBKIT_DMABUF_RENDERER_FORCE_SHM=1`），保留视频需要的硬件加速；旧版 WebKitGTK 沿用现有兼容参数，niri 保持原生渲染，手动设置的 WebKit 参数也会保留。`PAKE_LINUX_WEBKIT_SAFE_MODE=1` 切回原来的保守模式，`0` 则移除两个禁用参数，不再自动添加兼容参数。
 
----
+### Linux："cargo: command not found" 即使已安装 Rust
 
-### Linux:"cargo: command not found" 即使已安装 Rust
-
-**问题描述：**
 已安装 Rust 但 Pake 仍然提示 "cargo: command not found"。
 
-**解决方案：**
-
-Pake CLI 会自动重新加载 Rust 环境，但如果问题仍然存在：
+Pake CLI 会自动重新加载 Rust 环境，如果问题仍然存在，重新加载环境或重启终端后再次尝试构建：
 
 ```bash
 # 在当前终端重新加载环境
@@ -335,13 +286,8 @@ source ~/.cargo/env
 # 或者重启终端
 ```
 
-然后再次尝试构建。
-
----
-
 ### Windows：首次构建时安装超时
 
-**问题描述：**
 在 Windows 上首次构建时，可能遇到：
 
 ```txt
@@ -359,7 +305,7 @@ Windows 首次安装可能较慢，原因包括：
 
 **解决方案 1：显式启用国内镜像**
 
-Pake CLI 默认使用官方 npm 和 Rust 源。如果在国内下载较慢，可以显式启用国内镜像：
+Pake CLI 默认使用官方 npm 和 Rust 源，如果在国内下载较慢，可以显式启用国内镜像：
 
 ```bash
 # macOS/Linux
@@ -397,14 +343,9 @@ pake https://github.com --name GitHub
 - 首次安装：Windows 上需要 10-15 分钟
 - 后续构建：依赖已缓存，速度会快很多
 
----
-
 ### Windows：缺少 Visual Studio 构建工具
 
-**问题描述：**
 构建失败，提示缺少 MSVC 或 Windows SDK。
-
-**解决方案：**
 
 安装 Visual Studio 构建工具：
 
@@ -412,14 +353,9 @@ pake https://github.com --name GitHub
 2. 安装时选择"使用 C++ 的桌面开发"
 3. ARM64 支持：在"单个组件"下额外选择"MSVC v143 - VS 2022 C++ ARM64 构建工具"
 
----
-
 ### macOS：构建失败，出现模块编译错误
 
-**问题描述：**
 在 macOS 26 Beta 或更新版本上，可能看到与 `CoreFoundation` 或 `_Builtin_float` 模块相关的错误。
-
-**解决方案：**
 
 创建配置文件以使用兼容的 SDK：
 
@@ -433,32 +369,21 @@ EOF
 
 此文件已在 `.gitignore` 中，不会被提交。
 
----
-
 ## 运行时问题
 
 ### 应用窗口太小/太大
 
-**解决方案：**
-
-构建时指定自定义尺寸：
+构建时指定自定义尺寸，所有窗口选项见 [CLI 使用指南](cli-usage_CN.md#width)：
 
 ```bash
 pake https://example.com --width 1200 --height 800
 ```
 
-查看 [CLI 使用指南](cli-usage_CN.md#width) 了解所有窗口选项。
-
----
-
 ### 应用图标显示不正确
 
-**问题描述：**
 自定义图标没有显示或显示默认图标。
 
-**解决方案：**
-
-确保为您的平台使用正确的图标格式：
+确保为你的平台使用正确的图标格式：
 
 - **macOS**：`.icns` 格式
 - **Windows**：`.ico` 格式
@@ -477,16 +402,11 @@ pake https://example.com --icon ./icon.png
 
 Pake 可以自动转换图标，但提供正确的格式更可靠。
 
----
-
 ### 网站功能不工作（登录、上传等）
 
-**问题描述：**
 某些网站功能在 Pake 应用中无法工作。
 
-**解决方案：**
-
-这通常是由于 Web 兼容性问题。尝试：
+这通常是 Web 兼容性问题，可以尝试：
 
 1. **设置自定义 User Agent：**
 
@@ -500,7 +420,7 @@ Pake 可以自动转换图标，但提供正确的格式更可靠。
    pake https://example.com --inject ./fix.js
    ```
 
-   对于需要定时刷新的页面，建议把这类行为放在一个小的注入脚本里，而不是增加专门的 Pake 参数：
+   需要定时刷新的页面，把这类行为放在一个小的注入脚本里就行，不用增加专门的 Pake 参数：
 
    ```javascript
    function isEditing(element) {
@@ -531,9 +451,9 @@ Pake 可以自动转换图标，但提供正确的格式更可靠。
 
 4. **注意嵌入式 WebView 的登录限制**
 
-   某些认证提供方，尤其是 Google，可能会阻止在嵌入式 WebView 中完成登录。由于 Pake 是把网站包装进桌面 WebView，Google 自家站点或依赖 Google OAuth 的网站，即使启用了 `--new-window` 或 `--multi-window`，也仍然可能无法在应用内完成登录。这属于提供方策略限制，不是打包逻辑错误。遇到这种情况时，建议改用普通浏览器、浏览器安装版站点应用，或官方原生桌面客户端。
+   某些认证提供方，尤其是 Google，可能会阻止在嵌入式 WebView 中完成登录。由于 Pake 是把网站包装进桌面 WebView，Google 自家站点或依赖 Google OAuth 的网站，即使启用了 `--new-window` 或 `--multi-window`，也仍然可能无法在应用内完成登录。这属于提供方策略限制，不是打包逻辑错误，这类站点改用普通浏览器、浏览器安装版站点应用或官方原生桌面客户端。
 
-   在 macOS 上，Pake 会让 **Sign in with Apple**（弹窗模式，例如 Yelp、Upwork）继续走原生弹窗路径，确保 Apple 的回调可以返回原页面。其他认证弹窗仍可能在当前窗口内跳转，以规避 WebKit 崩溃。如果提供方拦截嵌入式 WebView，或登录仍然失败，建议改用普通浏览器、浏览器安装版站点应用，或官方原生桌面客户端。
+   在 macOS 上，Pake 会让 **Sign in with Apple**（弹窗模式，例如 Yelp、Upwork）继续走原生弹窗路径，确保 Apple 的回调可以返回原页面。其他认证弹窗仍可能在当前窗口内跳转，以规避 WebKit 崩溃。
 
 5. **微信 Web 版登录环境异常**
 
@@ -545,29 +465,21 @@ Pake 可以自动转换图标，但提供正确的格式更可靠。
 
 6. **Cloudflare 或人机验证一直循环**
 
-   某些站点（例如 ChatGPT）会在页面前加一层 Cloudflare 验证。系统 WebView，尤其是 Linux 上的 WebKitGTK，经常被这类验证判定为非标准浏览器而一直循环、无法通过，即使加了自定义 `--user-agent` 也无效。这是验证服务在识别浏览器引擎，不是 Pake 的 bug，Pake 侧没有可靠的绕过手段。遇到强制此类验证的站点，建议改用普通浏览器或官方原生客户端。
-
----
+   某些站点（例如 ChatGPT）会在页面前加一层 Cloudflare 验证。系统 WebView，尤其是 Linux 上的 WebKitGTK，经常被这类验证判定为非标准浏览器而一直循环、无法通过，即使加了自定义 `--user-agent` 也无效。这是验证服务在识别浏览器引擎，不是 Pake 的 bug，Pake 侧没有可靠的绕过手段，和上面第 4 条一样，这类站点改用普通浏览器或官方原生客户端。
 
 ### 应用占用内存比预期高
 
-**问题：**
-应用会启动一个 WebKitWebProcess（Linux）或 WebContent 进程（macOS），占用几百 MB 内存，看起来和"约 5MB"的说法矛盾。
+应用会启动一个 WebKitWebProcess（Linux）或 WebContent 进程（macOS），占用几百 MB 内存，看起来和 README 里通常小于 10 MB 的说法矛盾。
 
 **说明：**
 
-"约 5MB"指的是安装包/应用在磁盘上的体积，不是运行时内存。运行时 Pake 通过系统 WebView 渲染（Linux 上是 WebKitWebProcess，macOS 上是 WKWebView），这个进程的内存由引擎和你加载的页面决定，不由 Pake 控制。像 Gemini、Slack、ChatGPT 这类重型 SPA，用 GNOME Web 等任意 WebKitGTK 浏览器打开也会占用差不多的内存。Pake 在 WebView 之上几乎不增加额外开销，所以没有能显著降低它的 Pake 侧设置。这是使用系统 WebView 的固有代价，也是换取极小安装体积的取舍。
-
----
+这个体积指的是安装包在磁盘上的大小，不是运行时内存。运行时 Pake 通过系统 WebView 渲染（Linux 上是 WebKitWebProcess，macOS 上是 WKWebView），这个进程的内存由引擎和你加载的页面决定，不由 Pake 控制。像 Gemini、Slack、ChatGPT 这类重型 SPA，用 GNOME Web 等任意 WebKitGTK 浏览器打开也会占用差不多的内存。Pake 在 WebView 之上几乎不增加额外开销，所以没有能显著降低它的 Pake 侧设置。这是使用系统 WebView 的固有代价，也是换取极小安装体积的取舍。
 
 ## 安装问题
 
 ### 全局安装时权限被拒绝
 
-**问题描述：**
 `npm install -g pake-cli` 失败，提示权限错误。
-
-**解决方案：**
 
 使用以下方法之一：
 
@@ -585,8 +497,6 @@ npm install -g pake-cli
 pnpm install -g pake-cli
 ```
 
----
-
 ## 获取帮助
 
 如果遇到的问题未在此处列出：
@@ -594,7 +504,7 @@ pnpm install -g pake-cli
 1. 查看 [CLI 使用指南](cli-usage_CN.md) 了解详细参数说明
 2. 参阅 [高级用法](advanced-usage_CN.md) 了解系统依赖与前置设置
 3. 搜索 [现有的 GitHub issues](https://github.com/tw93/Pake/issues)
-4. [提交新 issue](https://github.com/tw93/Pake/issues/new) 时请附带：
+4. [提交新 issue](https://github.com/tw93/Pake/issues/new) 时附带：
    - 操作系统与系统版本
    - Node.js 与 Rust 版本（`node --version`、`rustc --version`）
    - 完整的错误日志

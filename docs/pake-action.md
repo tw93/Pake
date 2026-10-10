@@ -6,15 +6,13 @@
 
 </div>
 
-Transform any webpage into a lightweight desktop app with a single GitHub Actions step.
-
-> This guide shows how to use Pake as a GitHub Action in your own projects. For using our project's built-in GitHub Actions workflow, see [GitHub Actions Usage](github-actions-usage.md).
+Call Pake from your own GitHub Actions workflow to turn any webpage into a lightweight desktop app in a single step. To build online without writing a workflow, see [GitHub Actions Usage](github-actions-usage.md).
 
 ## Quick Start
 
 ```yaml
 - name: Build Pake App
-  uses: tw93/Pake@v3
+  uses: tw93/Pake@V3.17.3
   with:
     url: "https://example.com"
     name: "MyApp"
@@ -51,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: tw93/Pake@v3
+      - uses: tw93/Pake@V3.17.3
         with:
           url: "https://weekly.tw93.fun"
           name: "WeeklyApp"
@@ -60,7 +58,7 @@ jobs:
 ### With Custom Icon
 
 ```yaml
-- uses: tw93/Pake@v3
+- uses: tw93/Pake@V3.17.3
   with:
     url: "https://example.com"
     name: "MyApp"
@@ -80,7 +78,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: tw93/Pake@v3
+      - uses: tw93/Pake@V3.17.3
         with:
           url: "https://example.com"
           name: "CrossPlatformApp"
@@ -94,11 +92,11 @@ jobs:
 
 ## Supported Platforms
 
-- **Linux**: `.deb` packages (Ubuntu runners)
-- **macOS**: `.app` and `.dmg` packages (macOS runners)
-- **Windows**: `.exe` and `.msi` packages (Windows runners)
+- **Linux**: `.deb` package (Ubuntu runners)
+- **macOS**: `.app` bundle (macOS runners)
+- **Windows**: `.msi` or `.exe` (Windows runners)
 
-Use GitHub's matrix strategy to build for multiple platforms simultaneously.
+Each run moves only the first package it finds into the output directory and reports it as `package-path`. Use GitHub's matrix strategy to build for multiple platforms simultaneously.
 
 ## Related Documentation
 

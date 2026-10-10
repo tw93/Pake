@@ -10,8 +10,6 @@
 
 ## 安装
 
-确保 Node.js 版本 ≥20.9.0。
-
 **推荐方式 (pnpm)：**
 
 ```bash
@@ -39,19 +37,19 @@ source ~/.bashrc
 **前置条件：**
 
 - Node.js ≥20.9.0
-- Rust ≥1.85.0（如缺失将自动安装）
+- Rust ≥1.85.0（缺失时会提示安装，非交互或 `--json` 模式下直接报 `ENV_MISSING` 错误）
 - **macOS/Linux**：`curl`、`wget`、`file` 和 `tar`（用于依赖管理）
 
 ## 快速开始
 
 ```bash
-# 基础用法 - 自动获取网站图标
+# 基础用法，自动获取网站图标
 pake https://github.com --name "GitHub"
 
-# 高级用法：自定义选项
+# 高级用法，自定义选项
 pake https://weekly.tw93.fun --name "Weekly" --icon https://cdn.tw93.fun/pake/weekly.icns --width 1200 --height 800 --hide-title-bar
 
-# 完整示例：多个选项组合使用
+# 完整示例，多个选项组合使用
 pake https://github.com --name "GitHub Desktop" --width 1400 --height 900 --show-system-tray --debug
 ```
 
@@ -63,9 +61,9 @@ pake [url] [options]
 
 打包结果默认保存在当前工作目录。首次打包要准备构建环境，会慢一些，后续打包就快了。
 
-> **macOS 输出**：在 macOS 上，Pake 默认创建 DMG 安装程序。如需创建 `.app` 包进行测试（避免交互），可设置环境变量 `PAKE_CREATE_APP=1`。如果希望 Pake 直接将应用安装到 `/Applications`，可以使用 `--install`；该选项会构建 `.app`、复制到 `/Applications`，并在安装成功后删除当前目录中的本地 `.app`。
+> **macOS 输出**：在 macOS 上 Pake 默认创建 DMG 安装程序，测试时想要 `.app` 包（避免交互）可设置环境变量 `PAKE_CREATE_APP=1`，想直接装进 `/Applications` 可以用 `--install`，它会构建 `.app`、复制到 `/Applications`，并在安装成功后删除当前目录中的本地 `.app`。
 >
-> **注意**：打包过程需要使用 `Rust` 环境。如果未安装 `Rust`，系统会提示是否安装。如遇安装失败或超时，可参考指南 [手动安装](https://www.rust-lang.org/tools/install)。
+> **Rust 环境**：打包需要 Rust，未安装时会提示是否安装，安装失败或超时可以参考 [手动安装](https://www.rust-lang.org/tools/install)。
 
 ### [url]
 
@@ -83,7 +81,7 @@ pake ./dist --name MyTool
 
 ### [options]
 
-可以通过传递以下选项来定制打包过程。`pake --help` 展示全部支持的 CLI 选项。本文档是完整参考。
+常用选项先看下表，`pake --help` 能列出全部选项，后面逐个给出完整说明。
 
 | 选项                        | 描述                                 | 示例                                           |
 | --------------------------- | ------------------------------------ | ---------------------------------------------- |
@@ -99,13 +97,9 @@ pake ./dist --name MyTool
 | `--help`                    | 显示全部 CLI 选项                    | `--help`                                       |
 | `--version`                 | 显示 CLI 版本                        | `--version`                                    |
 
-完整选项请参见下面的详细说明：
-
 #### [name]
 
-指定应用程序的名称，未指定时系统会提示输入，建议使用英文。
-
-**注意**：支持带空格的名称，会自动处理不同平台的命名规范：
+指定应用程序的名称，未指定时会提示输入，最好使用英文，名称可以带空格，不同平台的命名规范会自动处理：
 
 - **Windows/macOS**：保持空格和大小写（如 `"Google Translate"`）
 - **Linux**：自动转换为小写并用连字符连接（如 `"google-translate"`）
@@ -120,7 +114,7 @@ pake ./dist --name MyTool
 
 #### [icon]
 
-**可选参数**：未指定时自动抓取网站 Favicon 并转换为目标平台格式。如需自定义图标，可访问 [icon-icons](https://icon-icons.com) 或 [macOSicons](https://macosicons.com/#/) 下载。
+**可选参数**：未指定时自动抓取网站 Favicon 并转换为目标平台格式，如需自定义图标，可访问 [icon-icons](https://icon-icons.com) 或 [macOSicons](https://macosicons.com/#/) 下载。
 
 支持本地或远程文件，自动转换为平台所需格式：
 
@@ -140,20 +134,20 @@ pake https://github.com --name GitHub
 --icon https://cdn.tw93.fun/pake/weekly.icns  # 远程图标（.icns 适用于 macOS）
 ```
 
-#### [height]
-
-设置应用窗口高度，默认为 `780px`。
-
-```shell
---height <number>
-```
-
 #### [width]
 
 设置应用窗口宽度，默认为 `1200px`。
 
 ```shell
 --width <number>
+```
+
+#### [height]
+
+设置应用窗口高度，默认为 `780px`。
+
+```shell
+--height <number>
 ```
 
 #### [min-width]
@@ -174,7 +168,7 @@ pake https://github.com --name GitHub
 
 #### [zoom]
 
-设置初始页面缩放比例，取值为 50 到 200 之间的整数，默认为 `100`。用户仍可通过快捷键（`Cmd/Ctrl +/-/0`）微调。
+设置初始页面缩放比例，取值为 50 到 200 之间的整数，默认为 `100`，用户仍可通过快捷键（`Cmd/Ctrl +/-/0`）微调。
 
 ```shell
 --zoom <number>
@@ -184,7 +178,7 @@ pake https://github.com --name GitHub
 
 #### [hide-title-bar]
 
-隐藏标题栏，默认为 `false`。仅对 macOS 有效。
+隐藏标题栏，仅对 macOS 有效，默认为 `false`。
 
 ```shell
 --hide-title-bar
@@ -192,7 +186,7 @@ pake https://github.com --name GitHub
 
 #### [hide-window-decorations]
 
-在 Windows 和 Linux 上隐藏原生窗口装饰，默认为 `false`。该选项会移除标题栏和窗口控制按钮，并在顶部提供拖拽区域以移动窗口。可使用 `F11` 切换原生全屏。在 macOS 上会被忽略。
+在 Windows 和 Linux 上隐藏原生窗口装饰，移除标题栏和窗口控制按钮，并在顶部提供拖拽区域以移动窗口，可使用 `F11` 切换原生全屏，在 macOS 上会被忽略，默认为 `false`。
 
 ```shell
 --hide-window-decorations
@@ -216,7 +210,7 @@ pake https://github.com --name GitHub
 
 #### [activation-shortcut]
 
-设置应用程序的全局激活快捷键。默认为空，可自定义快捷键，如 `CmdOrControl+Shift+P`，格式参考 [available-modifiers](https://www.electronjs.org/docs/latest/api/accelerator#available-modifiers)。
+设置应用程序的全局激活快捷键，默认为空，可自定义快捷键，如 `CmdOrControl+Shift+P`，格式参考 [available-modifiers](https://www.electronjs.org/docs/latest/api/accelerator#available-modifiers)。
 
 ```shell
 --activation-shortcut <string>
@@ -258,7 +252,7 @@ pake https://github.com --name GitHub
 
 #### [enable-find]
 
-启用 Pake 内置的页面查找浮层，默认为 `false`。开启后支持使用 `Cmd/Ctrl+F` 打开查找，`Cmd/Ctrl+G` 跳转到下一个匹配项，`Cmd/Ctrl+Shift+G` 跳转到上一个匹配项。
+启用 Pake 内置的页面查找浮层，默认为 `false`，开启后支持使用 `Cmd/Ctrl+F` 打开查找，`Cmd/Ctrl+G` 跳转到下一个匹配项，`Cmd/Ctrl+Shift+G` 跳转到上一个匹配项。
 
 ```shell
 --enable-find
@@ -274,7 +268,7 @@ pake https://github.com --name GitHub
 
 #### [internal-url-regex]
 
-使用正则表达式指定内部链接匹配规则（在应用内打开）。设置后优先于默认域名匹配逻辑，适用于仅允许特定路径在应用内打开的场景。
+使用正则表达式指定内部链接匹配规则（在应用内打开），设置后优先于默认域名匹配逻辑，适用于仅允许特定路径在应用内打开的场景。
 
 ```shell
 --internal-url-regex <pattern>
@@ -305,7 +299,7 @@ pake https://github.com --name GitHub
 
 ##### 准备工作
 
-- 注意：启用此选项后，需要使用 Rust 官方 rustup 安装工具链，不支持 Homebrew 安装的 Rust
+- 启用此选项后，需要使用 Rust 官方 rustup 安装工具链，不支持 Homebrew 安装的 Rust
 - Intel 设备需安装 arm64 跨平台 target：
 
   ```shell
@@ -362,7 +356,7 @@ pake https://github.com --name GitHub
 
 #### [windows-toolchain]
 
-选择 Windows 构建使用的 Rust 工具链。仅适用于 Windows，其他平台忽略此选项。
+选择 Windows 构建使用的 Rust 工具链，仅适用于 Windows，其他平台忽略此选项。
 
 - `msvc`（默认）：Tauri 推荐工具链，需安装 [Visual Studio Build Tools](https://tauri.app/start/prerequisites/#windows)（勾选“使用 C++ 的桌面开发”工作负载）。
 - `gnu`：改用 MinGW/MSYS2 工具链构建，适合已安装 Rust 和 GNU 工具链（例如通过 [MSYS2](https://www.msys2.org/)）但没有安装 Visual Studio Build Tools 的机器。仅支持 `x64`（MSYS2 未提供该目标的 ARM64 GCC 工具链）。需要 `PATH` 中包含 `gcc`、`ld` 和 `dlltool`。
@@ -374,19 +368,19 @@ pake https://github.com --name GitHub
 --windows-toolchain gnu
 ```
 
-若未检测到 MSVC 但存在可用 GNU 工具链，Pake 会提示使用 `--windows-toolchain gnu`，避免在链接阶段报出晦涩错误。使用 `gnu` 不影响系统全局 Rust 环境设置，仅作用于当次构建进程。
+若未检测到 MSVC 但存在可用 GNU 工具链，Pake 会提示使用 `--windows-toolchain gnu`，避免在链接阶段报出晦涩错误，使用 `gnu` 不影响系统全局 Rust 环境设置，仅作用于当次构建进程。
 
-使用 `gnu` 时，可执行文件会在运行时加载 `WebView2Loader.dll`，而不是像 MSVC 那样静态链接。MSI 安装包已包含该文件；`--keep-binary` 会把它复制到 `AppName.exe` 旁边，请将两者放在一起，否则原始可执行文件无法启动。
+使用 `gnu` 时，可执行文件会在运行时加载 `WebView2Loader.dll`，而不是像 MSVC 那样静态链接。MSI 安装包已包含该文件；`--keep-binary` 会把它复制到 `AppName.exe` 旁边，两者要放在一起，否则原始可执行文件无法启动。
 
 #### [no-bundle]
 
-跳过打包，只输出编译好的可执行文件。仅 Linux 可用。适用于 Fedora、RHEL、Oracle Linux 等 RPM 系发行版，这些系统上原生打包器可能在打包阶段中止，用此选项仍能拿到可运行的二进制。
+跳过打包，只输出编译好的可执行文件，仅 Linux 可用，适用于 Fedora、RHEL、Oracle Linux 等 RPM 系发行版，这些系统上原生打包器可能在打包阶段中止，用此选项仍能拿到可运行的二进制。
 
 ```shell
 pake https://github.com --name GitHub --no-bundle
 ```
 
-裸可执行文件会复制到当前目录，命名为 `<name>-binary`。在非 Linux 平台此选项会被忽略。
+裸可执行文件会复制到当前目录，命名为 `<name>-binary`，在非 Linux 平台此选项会被忽略。
 
 #### [user-agent]
 
@@ -406,7 +400,7 @@ pake https://github.com --name GitHub --no-bundle
 
 #### [system-tray-icon]
 
-设置托盘图标，仅在启用系统托盘时有效。图标必须为 `.ico` 或 `.png` 格式，尺寸应在 32x32 到 256x256 像素之间。
+设置托盘图标，仅在启用系统托盘时有效，图标必须为 `.ico` 或 `.png` 格式，尺寸应在 32x32 到 256x256 像素之间。
 
 ```shell
 --system-tray-icon <path>
@@ -414,7 +408,7 @@ pake https://github.com --name GitHub --no-bundle
 
 #### [hide-on-close]
 
-点击窗口关闭按钮时隐藏窗口而非退出应用。各平台默认值：macOS 为 `true`，Windows/Linux 为 `false`。
+点击窗口关闭按钮时隐藏窗口而非退出应用，macOS 默认为 `true`，Windows/Linux 默认为 `false`。
 
 ```shell
 # 关闭时隐藏（macOS 默认行为）
@@ -427,7 +421,7 @@ pake https://github.com --name GitHub --no-bundle
 
 #### [start-to-tray]
 
-启动时最小化到系统托盘而不展示主窗口。必须与 `--show-system-tray` 搭配使用，默认为 `false`。
+启动时最小化到系统托盘而不展示主窗口，必须与 `--show-system-tray` 搭配使用，默认为 `false`。
 
 ```shell
 --start-to-tray
@@ -436,7 +430,7 @@ pake https://github.com --name GitHub --no-bundle
 pake https://github.com --name GitHub --show-system-tray --start-to-tray
 ```
 
-**注意**：双击托盘图标可显示/隐藏窗口。未配置 `--show-system-tray` 时此选项被忽略。
+双击托盘图标可显示或隐藏窗口，未配置 `--show-system-tray` 时此选项被忽略。
 
 #### [title]
 
@@ -452,7 +446,7 @@ pake https://github.com --name GitHub --show-system-tray --start-to-tray
 
 #### [incognito]
 
-以无痕模式启动应用，默认为 `false`。启用后不保留 Cookie、Local Storage 和历史记录，适用于注重隐私或临时登录场景。
+以无痕模式启动应用，默认为 `false`，启用后不保留 Cookie、Local Storage 和历史记录，适用于注重隐私或临时登录场景。
 
 ```shell
 --incognito
@@ -479,7 +473,7 @@ pake https://flutter.dev --name FlutterApp --wasm
 
 #### [enable-drag-drop]
 
-启用原生拖拽支持，默认为 `false`。支持网页内元素拖拽排序及文件拖入上传等交互。
+启用原生拖拽支持，默认为 `false`，支持网页内元素拖拽排序及文件拖入上传等交互。
 
 ```shell
 --enable-drag-drop
@@ -490,7 +484,7 @@ pake https://planka.example.com --name PlankApp --enable-drag-drop
 
 #### [keep-binary]
 
-构建后保留免安装的独立运行文件，默认为 `false`。除各平台标准安装包外，还会在当前目录额外输出二进制（Unix 为 `AppName-binary`，Windows 为 `AppName.exe`）。使用 `--windows-toolchain gnu` 时同步输出 `WebView2Loader.dll`。
+构建后保留免安装的独立运行文件，默认为 `false`，除各平台标准安装包外，还会在当前目录额外输出二进制（Unix 为 `AppName-binary`，Windows 为 `AppName.exe`），使用 `--windows-toolchain gnu` 时同步输出 `WebView2Loader.dll`。
 
 ```shell
 --keep-binary
@@ -501,7 +495,7 @@ pake https://github.com --name GitHub --keep-binary
 
 #### [iterative-build]
 
-开启快速构建模式（仅生成 app，跳过 dmg/deb/msi 打包），适用于调试，默认为 `false`。
+开启快速构建模式，仅 macOS 有效，只生成 `.app`，跳过 DMG 打包，适合调试，默认为 `false`。
 
 ```shell
 --iterative-build
@@ -509,9 +503,7 @@ pake https://github.com --name GitHub --keep-binary
 
 #### [install]
 
-将构建出的 macOS 应用直接安装到 `/Applications`，默认为 `false`。
-
-该选项仅适用于 macOS，适合本地开发和快速验证。启用后，Pake 会构建 `.app` 包，将其复制到 `/Applications`，如果已存在同名应用则先替换，并在安装成功后删除当前工作目录中的本地 `.app`。如果安装失败，当前目录中的 `.app` 会被保留。
+将构建出的 macOS 应用直接安装到 `/Applications`，默认为 `false`，仅适用于 macOS，适合本地开发和快速验证。启用后 Pake 会构建 `.app` 包，将其复制到 `/Applications`，如果已存在同名应用则先替换，并在安装成功后删除当前工作目录中的本地 `.app`。如果安装失败，当前目录中的 `.app` 会被保留。
 
 ```shell
 --install
@@ -522,7 +514,7 @@ pake https://github.com --name GitHub --install
 
 #### [camera]
 
-在 macOS 上申请摄像头使用权限（添加 `com.apple.security.device.camera` entitlement），默认为 `false`。Windows 和 Linux 忽略此选项。适用于视频通话、扫码等网页场景。
+在 macOS 上申请摄像头使用权限（添加 `com.apple.security.device.camera` entitlement），默认为 `false`，Windows 和 Linux 忽略此选项，适用于视频通话、扫码等网页场景。
 
 ```shell
 --camera
@@ -533,7 +525,7 @@ pake https://meet.google.com --name Meet --camera
 
 #### [microphone]
 
-在 macOS 上申请麦克风使用权限（添加 `com.apple.security.device.audio-input` entitlement），默认为 `false`。Windows 和 Linux 忽略此选项。
+在 macOS 上申请麦克风使用权限（添加 `com.apple.security.device.audio-input` entitlement），默认为 `false`，Windows 和 Linux 忽略此选项。
 
 ```shell
 --microphone
@@ -625,7 +617,7 @@ pake https://example.com --name MyApp --download-dir '~/Documents/MyApp'
 
 #### [proxy-url]
 
-为所有网络请求配置代理服务器，支持 HTTP、HTTPS 和 SOCKS5。在 Windows 与 Linux 上直接可用，macOS 需 macOS 14+。
+为所有网络请求配置代理服务器，支持 HTTP、HTTPS 和 SOCKS5，在 Windows 与 Linux 上直接可用，macOS 需 macOS 14+。
 
 ```shell
 --proxy-url http://127.0.0.1:7890
@@ -634,7 +626,7 @@ pake https://example.com --name MyApp --download-dir '~/Documents/MyApp'
 
 #### [basic-auth]
 
-当目标站点请求 HTTP Basic 认证时弹出原生凭据输入框。仅用于 macOS（WKWebView 默认不显示 401 登录框）。凭据在运行时输入，仅保留在当前会话中。
+当目标站点请求 HTTP Basic 认证时弹出原生凭据输入框，仅用于 macOS（WKWebView 默认不显示 401 登录框），凭据在运行时输入，仅保留在当前会话中。
 
 ```shell
 --basic-auth
@@ -650,7 +642,7 @@ pake https://example.com --name MyApp --download-dir '~/Documents/MyApp'
 
 #### [config]
 
-使用声明式 JSON 配置文件代替命令行参数拼接。字段名为 camelCase 格式的 CLI 选项名，外加 `url`；详见 [schema/pake.schema.json](../schema/pake.schema.json)。显式传入的命令行参数优先级始终高于配置文件。未知字段、类型错误或超范围数值会立即报错。相对路径形式的 `url` 相对当前工作目录解析，而非配置文件所在目录。调用参数（`--json`、`--config`、`--version`）不允许写进配置文件。
+使用声明式 JSON 配置文件代替命令行参数拼接，字段名为 camelCase 格式的 CLI 选项名，外加 `url`，详见 [schema/pake.schema.json](../schema/pake.schema.json)，调用参数（`--json`、`--config`、`--version`）不允许写进配置文件。显式传入的命令行参数优先级始终高于配置文件，未知字段、类型错误或超范围数值会立即报错，相对路径形式的 `url` 相对当前工作目录解析，而非配置文件所在目录。
 
 ```shell
 --config <path>
@@ -668,7 +660,7 @@ pake --config app.json
 
 #### [json]
 
-面向脚本与 AI agent 的机器可读模式。所有日志改走 stderr，stdout 只输出一个 JSON 结果对象；交互式提示全部禁用（stdin 非 TTY 时同样禁用）。
+面向脚本与 AI agent 的机器可读模式，所有日志改走 stderr，stdout 只输出一个 JSON 结果对象；交互式提示全部禁用（stdin 非 TTY 时同样禁用）。
 
 ```shell
 --json
@@ -684,7 +676,7 @@ pake --config app.json
 
 退出码：`0` 成功、`2` 输入非法、`3` 构建失败、`4` 环境缺失或依赖安装失败（如未安装 Rust、依赖安装出错）、`1` 未预期错误。错误码：`INVALID_INPUT`、`ENV_MISSING`、`BUILD_FAILED`、`UNEXPECTED`，另有 `NETWORK`（预留，当前版本的网络失败会按所处阶段归入 `ENV_MISSING` 或 `BUILD_FAILED`）。
 
-Linux 多 target 构建（如 `--targets deb,appimage`）时，若单个 target 失败而其他成功，会记入 `warnings`，此时 `ok` 仍为 true。请通过 `outputs[].format` 确认产物完整性。
+Linux 多 target 构建（如 `--targets deb,appimage`）时，若单个 target 失败而其他成功，会记入 `warnings`，此时 `ok` 仍为 true，可以通过 `outputs[].format` 确认产物是否完整。
 
 #### [ignore-certificate-errors]
 
@@ -696,9 +688,7 @@ Linux 多 target 构建（如 `--targets deb,appimage`）时，若单个 target 
 
 #### [new-window]
 
-允许网页唤起新窗口（如 OAuth 登录弹窗、新标签页或会话窗口）。
-
-此选项有助于需要弹出授权窗口的站点，但能否在应用内完成登录仍取决于目标服务方的安全策略（部分服务商如 Google 可能会主动限制在嵌入式 WebView 中授权）。
+允许网页唤起新窗口（如 OAuth 登录弹窗、新标签页或会话窗口），有助于需要弹出授权窗口的站点，但能否在应用内完成登录仍取决于目标服务方的安全策略（部分服务商如 Google 可能会主动限制在嵌入式 WebView 中授权）。
 
 ```shell
 --new-window

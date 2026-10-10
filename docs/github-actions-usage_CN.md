@@ -10,37 +10,19 @@
 
 ## 快速步骤
 
-### 1. Fork 仓库
-
-[Fork 此项目](https://github.com/tw93/Pake/fork)
-
-### 2. 运行工作流
-
-1. 前往你 Fork 的仓库的 Actions 页面
-2. 选择 `Build App With Pake CLI`
-3. 填写表单（参数与 [CLI 选项](cli-usage_CN.md) 相同）
-4. 点击 `Run Workflow`
+1. [Fork 此项目](https://github.com/tw93/Pake/fork)
+2. 在你 Fork 的仓库里打开 Actions 页面，选择 `Build App With Pake CLI`，按 [CLI 选项](cli-usage_CN.md) 填写表单后点击 `Run Workflow`
 
    ![Actions 界面](https://raw.githubusercontent.com/tw93/static/main/pake/action.png)
 
-### 3. 下载应用
+3. 出现绿色勾号就是构建成功，点击工作流名称进入详情，在 `Artifacts` 部分下载应用
 
-- 绿色勾号 = 构建成功
-- 点击工作流名称查看详情
-- 在 `Artifacts` 部分下载应用
+   ![构建成功](https://raw.githubusercontent.com/tw93/static/main/pake/action2.png)
 
-  ![构建成功](https://raw.githubusercontent.com/tw93/static/main/pake/action2.png)
-
-### 4. 构建时间
-
-- **首次运行**：约 10-15 分钟（建立缓存）
-- **后续运行**：约 5 分钟（使用缓存）
-- 缓存大小：完成时为 400-600MB
+首次运行要建立依赖缓存，大约 10-15 分钟，之后用上缓存大约 5 分钟，缓存完整时为 400-600MB。
 
 ## 提示
 
-- 首次运行要建立依赖缓存，会慢一些
-- 建议保持网络稳定
 - 当网站通过新窗口打开登录、考试或其他流程时，启用 `Allow sites to open new windows`
 - 如果构建失败，清理 Actions 缓存后重试
 

@@ -19,7 +19,7 @@
 
 ## 시작하기
 
-- **일반 사용자**: 빌드된 [추천 앱 다운로드](#추천-패키지-다운로드)를 사용하거나, 환경 설정이 필요 없는 [GitHub Actions 온라인 빌드](docs/github-actions-usage.md) 활용
+- **일반 사용자**: 빌드된 [추천 패키지](#추천-패키지-다운로드)를 사용하거나, 환경 설정이 필요 없는 [GitHub Actions 온라인 빌드](docs/github-actions-usage.md) 활용
 - **개발자**: [CLI 도구](docs/cli-usage.md) 설치 후 명령어 한 줄로 아이콘과 창 설정이 포함된 앱 패키징
 - **고급 사용자**: 로컬에서 저장소를 클론하여 [커스텀 개발](#개발)을 진행하거나, [고급 사용 가이드](docs/advanced-usage.md)에서 스타일 커스텀 및 기능 확장 확인
 - **문제 해결**: [FAQ](docs/faq.md)에서 자주 묻는 질문 및 문제 해결 방법 확인
@@ -153,8 +153,8 @@
 | <kbd>⌘</kbd> + <kbd>]</kbd>                               | <kbd>Ctrl</kbd> + <kbd>→</kbd>                      | 다음 페이지로 이동            |
 | <kbd>⌘</kbd> + <kbd>↑</kbd>                               | <kbd>Ctrl</kbd> + <kbd>↑</kbd>                      | 페이지 맨 위로 스크롤         |
 | <kbd>⌘</kbd> + <kbd>↓</kbd>                               | <kbd>Ctrl</kbd> + <kbd>↓</kbd>                      | 페이지 맨 아래로 스크롤       |
-| <kbd>⌘</kbd> + <kbd>r</kbd>                               | <kbd>Ctrl</kbd> + <kbd>r</kbd>                      | 페이지 새로고침               |
-| <kbd>⌘</kbd> + <kbd>w</kbd>                               | <kbd>Ctrl</kbd> + <kbd>w</kbd>                      | 창 숨기기(종료 아님)          |
+| <kbd>⌘</kbd> + <kbd>R</kbd>                               | <kbd>Ctrl</kbd> + <kbd>R</kbd>                      | 페이지 새로고침               |
+| <kbd>⌘</kbd> + <kbd>W</kbd>                               | <kbd>Ctrl</kbd> + <kbd>W</kbd>                      | 창 숨기기(종료 아님)          |
 | <kbd>⌘</kbd> + <kbd>-</kbd>                               | <kbd>Ctrl</kbd> + <kbd>-</kbd>                      | 페이지 축소                   |
 | <kbd>⌘</kbd> + <kbd>=</kbd>                               | <kbd>Ctrl</kbd> + <kbd>=</kbd>                      | 페이지 확대                   |
 | <kbd>⌘</kbd> + <kbd>0</kbd>                               | <kbd>Ctrl</kbd> + <kbd>0</kbd>                      | 확대/축소 초기화              |
@@ -165,7 +165,7 @@
 | <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>⌫</kbd>                | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Del</kbd> | 캐시 삭제 및 재시작           |
 | <kbd>⌃</kbd> + <kbd>⌘</kbd> + <kbd>F</kbd>                | <kbd>F11</kbd>                                      | 전체화면 전환                 |
 
-타이틀 바를 더블 클릭하여 전체화면을 전환할 수도 있습니다. Windows 및 Linux에서는 `--hide-window-decorations`로 상단 드래그 영역이 있는 프레임리스 창을 만들 수 있습니다. Mac에서는 제스처로 뒤로 가기/앞으로 가기를 지원하며 메뉴 표시줄에서 탐색, 확대/축소 및 창 제어 옵션도 제공합니다.
+타이틀 바를 더블 클릭하여 전체화면을 전환할 수도 있습니다. Windows 및 Linux에서는 `--hide-window-decorations`로 상단 드래그 영역이 있는 프레임리스 창을 만들 수 있습니다. Mac에서는 제스처로 뒤로 가기/앞으로 가기와 타이틀 바 드래그로 창 이동을 지원하며 메뉴 표시줄에서 탐색, 확대/축소 및 창 제어 옵션도 제공합니다.
 
 </details>
 
@@ -177,16 +177,26 @@
 # Pake CLI 설치
 pnpm install -g pake-cli
 
-# 기본 사용법 - 파비콘 자동 다운로드
+# 기본 사용법, 파비콘 자동 다운로드
 pake https://github.com --name GitHub
 
-# 고급 사용법: 사용자 지정 옵션
+# 고급 사용법, 사용자 지정 옵션
 pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/weekly.icns --width 1200 --height 800 --hide-title-bar
 ```
 
 첫 패키징은 빌드 환경 준비로 인해 시간이 조금 더 걸릴 수 있으나 이후에는 빠르게 완료됩니다. 전체 옵션 설명은 [CLI 사용 가이드](docs/cli-usage.md)를 참조하세요. 명령줄 도구를 사용하지 않으려면 [GitHub Actions 온라인 빌드](docs/github-actions-usage.md)를 활용할 수 있습니다.
 
-스크립트나 AI agent에서 Pake를 사용할 경우: `--json`으로 결과를 파싱하고 `--config app.json`([schema](schema/pake.schema.json))으로 앱을 선언적으로 정의할 수 있습니다. 로컬 빌드 결과물은 `pake ./dist --name MyTool`로 바로 패키징 가능합니다. 전체 agent 사양은 [llms.txt](llms.txt)를 참조하세요. 공식 skill을 설치하려면 Claude Code에서 `/plugin marketplace add tw93/Pake` 및 `/plugin install pake@pake`, Codex에서 `codex plugin marketplace add tw93/Pake` 및 `codex plugin add pake@pake`를 실행하세요.
+스크립트나 AI agent에서 Pake를 사용할 때는 `--json`으로 기계가 읽을 수 있는 결과를 받고, `--config app.json`([schema](schema/pake.schema.json))으로 앱을 선언적으로 정의하며, 로컬 빌드 결과물은 `pake ./dist --name MyTool`로 바로 패키징할 수 있습니다. 전체 agent 사양은 [llms.txt](llms.txt)를 참조하세요. 공식 skill은 다음과 같이 설치합니다.
+
+```text
+# Claude Code
+/plugin marketplace add tw93/Pake
+/plugin install pake@pake
+
+# Codex
+codex plugin marketplace add tw93/Pake
+codex plugin add pake@pake
+```
 
 AI agent에게 다음 내용을 전달하여 실행할 수 있습니다:
 
@@ -196,7 +206,7 @@ Pake(npm i -g pake-cli)를 사용하여 웹페이지를 데스크톱 앱으로 �
 
 ## 개발
 
-Rust `>=1.85` 및 Node `>=22`(LTS 권장, `>=20.9`도 지원)가 필요합니다. 자세한 설치 안내는 [Tauri 공식 문서](https://tauri.app/start/prerequisites/)를 참조하세요. 개발 환경 설정이 번거롭다면 CLI 도구 사용을 권장합니다.
+Rust `>=1.85` 및 Node `>=22`(LTS 권장, `>=20.9`도 지원)가 필요합니다. 자세한 설치 안내는 [Tauri 공식 문서](https://v2.tauri.app/start/prerequisites/)를 참조하세요. 개발 환경 설정이 번거롭다면 CLI 도구 사용을 권장합니다.
 
 ```bash
 # 의존성 설치
@@ -216,21 +226,19 @@ pnpm run build
 Pake의 성장은 훌륭한 오픈소스 기여자분들과 함께 만들어갑니다 ❤️
 
 <a href="https://github.com/tw93/Pake/graphs/contributors">
-  <img src="https://raw.githubusercontent.com/tw93/Pake/main/CONTRIBUTORS.svg?sanitize=true" alt="Contributors" width="1000" />
+  <img src="./CONTRIBUTORS.svg?v=2" alt="Contributors" width="1000" />
 </a>
 
 ## 후원
 
-1. 가장 직접적인 후원 방법은 제가 개발한 Mac 정리 앱 [Mole for Mac](https://mole.fit)을 이용해 주시는 것입니다.
-2. Pake가 유용했다면 GitHub Star를 눌러주시고, [주변 개발자 동료들에게 추천](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20명령어%20하나로%20모든%20웹페이지를%20데스크톱%20앱으로%20변환.%20macOS,%20Windows,%20Linux%20지원)해 주시면 큰 힘이 됩니다.
-3. 최신 업데이트 소식은 [Twitter](https://twitter.com/HiTw93)에서 확인하실 수 있으며, [Telegram](https://t.me/+9f9gf4ZrFSQ2OWVl) 그룹에서도 자유롭게 이야기 나눌 수 있습니다.
-4. 새로운 기술을 탐구하는 즐거움을 느끼시길 바라며, 데스크톱 앱으로 만들면 좋은 웹사이트가 있다면 언제든 공유해 주세요.
-5. TangYuan과 Coke라는 두 마리의 고양이를 키우고 있습니다. Pake가 유용하셨다면 고양이들에게 <a href="https://cats.tw93.fun?name=Pake" target="_blank">캔 간식 🥩</a>을 선물해 주셔도 좋습니다.
+- 가장 직접적인 후원 방법은 제가 개발한 Mac 정리 앱 [Mole for Mac](https://mole.fit)을 이용해 주시는 것입니다
+- Pake가 유용했다면 GitHub Star를 눌러주시고, [주변 개발자 동료들에게 추천](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20명령어%20하나로%20모든%20웹페이지를%20데스크톱%20앱으로%20변환.%20macOS,%20Windows,%20Linux%20지원)해 주시면 큰 힘이 되며, 문제나 데스크톱 앱으로 만들면 좋은 웹사이트가 있다면 issue나 PR로 알려 주세요
+- TangYuan과 Coke라는 두 마리의 고양이를 키우고 있는데, Pake가 유용하셨다면 그 아이들에게 <a href="https://cats.tw93.fun?name=Pake" target="_blank">캔 간식 🥩</a>을 선물해 주셔도 좋습니다
 
 <details>
 <summary>따뜻한 응원을 보내주신 분들 🐱</summary>
 <br/>
-<a href="https://cats.tw93.fun?name=Pake"><img src="https://cdn.jsdelivr.net/gh/tw93/sponsors@main/assets/sponsors.svg" width="1000px" /></a>
+<a href="https://cats.tw93.fun?name=Pake"><img src="https://cdn.jsdelivr.net/gh/tw93/sponsors@main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
 </details>
 
 ## 오픈소스 라이선스

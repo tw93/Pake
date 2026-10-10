@@ -153,8 +153,8 @@
 | <kbd>⌘</kbd> + <kbd>]</kbd>                               | <kbd>Ctrl</kbd> + <kbd>→</kbd>                      | 前進到下一頁         |
 | <kbd>⌘</kbd> + <kbd>↑</kbd>                               | <kbd>Ctrl</kbd> + <kbd>↑</kbd>                      | 自動捲動到頁面頂端   |
 | <kbd>⌘</kbd> + <kbd>↓</kbd>                               | <kbd>Ctrl</kbd> + <kbd>↓</kbd>                      | 自動捲動到頁面底部   |
-| <kbd>⌘</kbd> + <kbd>r</kbd>                               | <kbd>Ctrl</kbd> + <kbd>r</kbd>                      | 重新整理頁面         |
-| <kbd>⌘</kbd> + <kbd>w</kbd>                               | <kbd>Ctrl</kbd> + <kbd>w</kbd>                      | 隱藏視窗（非退出）   |
+| <kbd>⌘</kbd> + <kbd>R</kbd>                               | <kbd>Ctrl</kbd> + <kbd>R</kbd>                      | 重新整理頁面         |
+| <kbd>⌘</kbd> + <kbd>W</kbd>                               | <kbd>Ctrl</kbd> + <kbd>W</kbd>                      | 隱藏視窗（非退出）   |
 | <kbd>⌘</kbd> + <kbd>-</kbd>                               | <kbd>Ctrl</kbd> + <kbd>-</kbd>                      | 縮小頁面             |
 | <kbd>⌘</kbd> + <kbd>=</kbd>                               | <kbd>Ctrl</kbd> + <kbd>=</kbd>                      | 放大頁面             |
 | <kbd>⌘</kbd> + <kbd>0</kbd>                               | <kbd>Ctrl</kbd> + <kbd>0</kbd>                      | 重設頁面縮放         |
@@ -165,7 +165,7 @@
 | <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>⌫</kbd>                | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Del</kbd> | 清除快取並重啟       |
 | <kbd>⌃</kbd> + <kbd>⌘</kbd> + <kbd>F</kbd>                | <kbd>F11</kbd>                                      | 切換原生全螢幕       |
 
-此外還支援雙擊標題列切換全螢幕。Windows 與 Linux 可使用 `--hide-window-decorations` 建立頂部具拖曳區域的無邊框視窗。Mac 支援手勢滑動返回與前進，選單列也提供導覽、縮放與視窗控制等選項。
+雙擊標題列可以切換全螢幕，Windows 與 Linux 加上 `--hide-window-decorations` 會得到頂部具拖曳區域的無邊框視窗，Mac 支援手勢滑動返回與前進，也可以拖曳標題列移動視窗，選單列裡也有導覽、縮放與視窗控制等選項。
 
 </details>
 
@@ -177,16 +177,26 @@
 # 安裝 Pake CLI
 pnpm install -g pake-cli
 
-# 基本用法 - 自動取得網站圖示
+# 基本用法，自動取得網站圖示
 pake https://github.com --name GitHub
 
-# 進階用法：自訂選項
+# 進階用法，自訂選項
 pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/weekly.icns --width 1200 --height 800 --hide-title-bar
 ```
 
 首次打包需要準備建置環境，耗時會稍長一些，後續打包會很快。完整參數說明查看 [CLI 使用指南](docs/cli-usage_CN.md)，不想用命令列可以試試 [GitHub Actions 線上建置](docs/github-actions-usage_CN.md)。
 
-在腳本或 AI agent 裡使用 Pake？加上 `--json` 取得機器可讀結果，使用 `--config app.json` 宣告式描述應用（[schema](schema/pake.schema.json)），本機建置產物可直接 `pake ./dist --name MyTool` 打包。完整 agent 契約見 [llms.txt](llms.txt)。安裝官方 skill 在 Claude Code 裡執行 `/plugin marketplace add tw93/Pake` 和 `/plugin install pake@pake`，在 Codex 裡執行 `codex plugin marketplace add tw93/Pake` 和 `codex plugin add pake@pake`。
+在腳本或 AI agent 裡使用 Pake 時，加上 `--json` 取得機器可讀結果，使用 `--config app.json` 宣告式描述應用（[schema](schema/pake.schema.json)），本機建置產物可直接 `pake ./dist --name MyTool` 打包，完整 agent 契約見 [llms.txt](llms.txt)，官方 skill 這樣安裝：
+
+```text
+# Claude Code
+/plugin marketplace add tw93/Pake
+/plugin install pake@pake
+
+# Codex
+codex plugin marketplace add tw93/Pake
+codex plugin add pake@pake
+```
 
 把下面這段複製給你的 AI agent 即可開始：
 
@@ -196,7 +206,7 @@ pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/week
 
 ## 自訂開發
 
-需要 Rust `>=1.85` 與 Node `>=22`（推薦 LTS，較舊的 `>=20.9` 亦可使用），詳細安裝指南參考 [Tauri 文件](https://tauri.app/start/prerequisites/)。不熟悉開發環境建議直接使用命令列工具。
+需要 Rust `>=1.85` 與 Node `>=22`（推薦 LTS，較舊的 `>=20.9` 亦可使用），詳細安裝指南參考 [Tauri 文件](https://v2.tauri.app/start/prerequisites/)，不熟悉開發環境的話可以直接使用命令列工具。
 
 ```bash
 # 安裝相依套件
@@ -216,23 +226,21 @@ pnpm run build
 Pake 的發展離不開這些優秀的貢獻者 ❤️
 
 <a href="https://github.com/tw93/Pake/graphs/contributors">
-  <img src="https://raw.githubusercontent.com/tw93/Pake/main/CONTRIBUTORS.svg?sanitize=true" alt="Contributors" width="1000" />
+  <img src="./CONTRIBUTORS.svg?v=2" alt="Contributors" width="1000" />
 </a>
 
 ## 支持
 
-1. 購買我做的 Mac 清理應用 [Mole for Mac](https://mole.fit)，是對我最直接的支持。
-2. 如果你喜歡 Pake，可以在 GitHub 給一顆 Star，也歡迎 [推薦](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20一個指令把任意網頁打包成桌面應用，支援%20macOS、Windows%20與%20Linux) 給志同道合的朋友。
-3. 可以追蹤我的 [Twitter](https://twitter.com/HiTw93) 獲取最新的 Pake 更新消息，也歡迎加入 [Telegram](https://t.me/+9f9gf4ZrFSQ2OWVl) 聊天群組。
-4. 希望大家在使用過程中能體會到學習新技術的樂趣，若發現適合做成桌面 App 的網頁也歡迎告訴我。
-5. 我養了兩隻貓：湯圓與可樂，如果 Pake 讓你的生活更美好，可以給她們 <a href="https://cats.tw93.fun?name=Pake" target="_blank">餵罐頭 🥩</a>。
+- 購買我做的 Mac 清理應用 [Mole for Mac](https://mole.fit)，是對我最直接的支持
+- 如果你喜歡 Pake，可以在 GitHub 給一顆 Star，[推薦](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20一個指令把任意網頁打包成桌面應用，支援%20macOS、Windows%20與%20Linux) 給志同道合的朋友，遇到問題或發現適合做成桌面 App 的網頁，也歡迎提 issue 和 PR
+- 我養了兩隻貓，一隻叫湯圓，一隻叫可樂，如果 Pake 讓你的生活更美好，可以給她們<a href="https://cats.tw93.fun?name=Pake" target="_blank">餵罐頭 🥩</a>
 
 <details>
 <summary>這些可愛的朋友已經贊助過 🐱</summary>
 <br/>
-<a href="https://cats.tw93.fun?name=Pake"><img src="https://cdn.jsdelivr.net/gh/tw93/sponsors@main/assets/sponsors.svg" width="1000px" /></a>
+<a href="https://cats.tw93.fun?name=Pake"><img src="https://cdn.jsdelivr.net/gh/tw93/sponsors@main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
 </details>
 
 ## 開源授權
 
-Pake 使用 GPL-3.0 條款開源，詳見 [LICENSE](./LICENSE) 與 [Pake Output Exception](./LICENSE-EXCEPTION)；用 Pake 打包生成的應用所有權完全歸你，可以自由使用和發布。如果你想基於 fork 重新做一個 Pake 產品，為了避免誤解，請更換名稱並註明出處。
+Pake 使用 GPL-3.0 條款開源，詳見 [LICENSE](./LICENSE) 與 [Pake Output Exception](./LICENSE-EXCEPTION)；用 Pake 打包生成的應用所有權完全歸你，可以自由使用和發布。如果你想基於 fork 重新做一個 Pake 產品，為了避免誤解，辛苦換一個名稱並註明出處。

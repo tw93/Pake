@@ -10,8 +10,6 @@ Complete command-line reference and basic usage for Pake CLI.
 
 ## Installation
 
-Ensure that your Node.js version is 20.9.0 or higher.
-
 **Recommended (pnpm):**
 
 ```bash
@@ -39,21 +37,20 @@ source ~/.bashrc
 **Prerequisites:**
 
 - Node.js ≥20.9.0
-- Rust ≥1.85.0 (installed automatically if missing)
+- Rust ≥1.85.0 (prompts to install if missing; non-interactive and `--json` runs fail with `ENV_MISSING` instead)
 - **macOS/Linux**: `curl`, `wget`, `file` and `tar` used for dependency management
 
 ## Quick Start
 
 ```bash
-# Basic usage - automatically fetches website icon
+# Basic usage, fetches the website icon automatically
 pake https://github.com --name "GitHub"
 
-# Advanced usage with custom options
+# Advanced usage, custom options
 pake https://weekly.tw93.fun --name "Weekly" --icon https://cdn.tw93.fun/pake/weekly.icns --width 1200 --height 800 --hide-title-bar
 
-# Complete example with multiple options
+# Complete example, multiple options combined
 pake https://github.com --name "GitHub Desktop" --width 1400 --height 900 --show-system-tray --debug
-
 ```
 
 ## CLI Usage
@@ -62,11 +59,11 @@ pake https://github.com --name "GitHub Desktop" --width 1400 --height 900 --show
 pake [url] [options]
 ```
 
-The packaged application will be located in the current working directory by default. The first packaging might take some time due to environment configuration. Please be patient.
+The packaged application will be located in the current working directory by default. The first build sets up the environment and takes longer, later builds are fast.
 
 > **macOS Output**: On macOS, Pake creates DMG installers by default. To create `.app` bundles for testing (to avoid user interaction), set the environment variable `PAKE_CREATE_APP=1`. If you want Pake to install the app directly into `/Applications`, use `--install`, which builds an `.app`, copies it into `/Applications`, and removes the local bundle after a successful install.
 >
-> **Note**: Packaging requires the Rust environment. If Rust is not installed, you will be prompted for installation confirmation. In case of installation failure or timeout, you can [install it manually](https://www.rust-lang.org/tools/install).
+> **Rust**: Packaging requires Rust. If it is missing, you will be asked whether to install it, and if installation fails or times out, you can [install it manually](https://www.rust-lang.org/tools/install).
 
 ### [url]
 
@@ -84,7 +81,7 @@ For local packaging, hash-based routing works out of the box; history-mode SPA r
 
 ### [options]
 
-Various options are available for customization. `pake --help` shows every supported CLI option. This page is the complete reference.
+The table lists the common options, `pake --help` shows every option, and each one is documented in full below.
 
 | Option                      | Description                                         | Example                                        |
 | --------------------------- | --------------------------------------------------- | ---------------------------------------------- |
@@ -100,13 +97,9 @@ Various options are available for customization. `pake --help` shows every suppo
 | `--help`                    | Show all CLI options                                | `--help`                                       |
 | `--version`                 | Show CLI version                                    | `--version`                                    |
 
-For complete options, see detailed sections below.
-
 #### [name]
 
-Specify the application name. If not provided, you will be prompted to enter it. It is recommended to use English.
-
-**Note**: Also supports multiple words with automatic platform-specific handling:
+Specify the application name. If not provided, you will be prompted to enter it. English names work best, and names with spaces are handled per platform:
 
 - **Windows/macOS**: Preserves spaces and case (e.g., `"Google Translate"`)
 - **Linux**: Converts to lowercase with hyphens (e.g., `"google-translate"`)
@@ -141,20 +134,20 @@ pake https://github.com --name GitHub
 --icon https://cdn.tw93.fun/pake/weekly.icns  # Remote icon (.icns for macOS)
 ```
 
-#### [height]
-
-Set the height of the application window. Default is `780px`.
-
-```shell
---height <number>
-```
-
 #### [width]
 
 Set the width of the application window. Default is `1200px`.
 
 ```shell
 --width <number>
+```
+
+#### [height]
+
+Set the height of the application window. Default is `780px`.
+
+```shell
+--height <number>
 ```
 
 #### [min-width]
@@ -201,8 +194,7 @@ Hide the native window decorations on Windows and Linux. Default is `false`. Thi
 
 #### [fullscreen]
 
-Determine whether the application launches in full screen. Default is `false`. Use the following command to enable full
-screen.
+Determine whether the application launches in full screen. Default is `false`. Use the following command to enable full screen.
 
 ```shell
 --fullscreen
@@ -210,8 +202,7 @@ screen.
 
 #### [maximize]
 
-Determine whether the application launches with a maximized window. Default is `false`. Use the following command to enable
-maximize.
+Determine whether the application launches with a maximized window. Default is `false`. Use the following command to enable maximize.
 
 ```shell
 --maximize
@@ -308,7 +299,7 @@ Package the application to support both Intel and M1 chips, exclusively for macO
 
 ##### Prerequisites
 
-- Note: After enabling this option, Rust must be installed using rustup from the official Rust website. Installation via brew is not supported.
+- After enabling this option, Rust must be installed using rustup from the official Rust website. Installation via brew is not supported.
 - For Intel chip users, install the arm64 cross-platform package to support M1 chips using the following command:
 
   ```shell
@@ -439,7 +430,7 @@ Start the application minimized to system tray instead of showing the window. Mu
 pake https://github.com --name GitHub --show-system-tray --start-to-tray
 ```
 
-**Note**: Double-click the tray icon to show/hide the window. If used without `--show-system-tray`, this option is ignored.
+Double-click the tray icon to show or hide the window. Without `--show-system-tray`, this option is ignored.
 
 #### [title]
 
@@ -508,7 +499,7 @@ pake https://github.com --name GitHub --keep-binary
 
 #### [iterative-build]
 
-Turn on rapid build mode (app only, no dmg/deb/msi), good for debugging. Default is `false`.
+macOS only: build the `.app` and skip DMG packaging, good for debugging. Default is `false`.
 
 ```shell
 --iterative-build

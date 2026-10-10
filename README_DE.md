@@ -153,8 +153,8 @@
 | <kbd>⌘</kbd> + <kbd>]</kbd>                               | <kbd>Ctrl</kbd> + <kbd>→</kbd>                      | Vorwärts zur nächsten Seite        |
 | <kbd>⌘</kbd> + <kbd>↑</kbd>                               | <kbd>Ctrl</kbd> + <kbd>↑</kbd>                      | Ganz nach oben scrollen            |
 | <kbd>⌘</kbd> + <kbd>↓</kbd>                               | <kbd>Ctrl</kbd> + <kbd>↓</kbd>                      | Ganz nach unten scrollen           |
-| <kbd>⌘</kbd> + <kbd>r</kbd>                               | <kbd>Ctrl</kbd> + <kbd>r</kbd>                      | Seite neu laden                    |
-| <kbd>⌘</kbd> + <kbd>w</kbd>                               | <kbd>Ctrl</kbd> + <kbd>w</kbd>                      | Fenster ausblenden (nicht beenden) |
+| <kbd>⌘</kbd> + <kbd>R</kbd>                               | <kbd>Ctrl</kbd> + <kbd>R</kbd>                      | Seite neu laden                    |
+| <kbd>⌘</kbd> + <kbd>W</kbd>                               | <kbd>Ctrl</kbd> + <kbd>W</kbd>                      | Fenster ausblenden (nicht beenden) |
 | <kbd>⌘</kbd> + <kbd>-</kbd>                               | <kbd>Ctrl</kbd> + <kbd>-</kbd>                      | Seite verkleinern                  |
 | <kbd>⌘</kbd> + <kbd>=</kbd>                               | <kbd>Ctrl</kbd> + <kbd>=</kbd>                      | Seite vergrößern                   |
 | <kbd>⌘</kbd> + <kbd>0</kbd>                               | <kbd>Ctrl</kbd> + <kbd>0</kbd>                      | Zoom zurücksetzen                  |
@@ -165,7 +165,7 @@
 | <kbd>⌘</kbd> + <kbd>⇧</kbd> + <kbd>⌫</kbd>                | <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Del</kbd> | Cache leeren und neu starten       |
 | <kbd>⌃</kbd> + <kbd>⌘</kbd> + <kbd>F</kbd>                | <kbd>F11</kbd>                                      | Vollbild umschalten                |
 
-Durch Doppelklick auf die Titelleiste lässt sich das Vollbild ebenfalls umschalten. Unter Windows und Linux ermöglicht `--hide-window-decorations` rahmenlose Fenster mit oberem Ziehbereich. Auf dem Mac werden Wischgesten für Vor und Zurück sowie Menübefehle zur Fenstersteuerung unterstützt.
+Durch Doppelklick auf die Titelleiste lässt sich das Vollbild ebenfalls umschalten. Unter Windows und Linux ermöglicht `--hide-window-decorations` rahmenlose Fenster mit oberem Ziehbereich. Auf dem Mac funktionieren Wischgesten für Vor und Zurück, die Titelleiste lässt sich zum Verschieben des Fensters ziehen, und die Menüleiste bietet Navigation, Zoom und Fenstersteuerung.
 
 </details>
 
@@ -177,16 +177,26 @@ Durch Doppelklick auf die Titelleiste lässt sich das Vollbild ebenfalls umschal
 # Pake CLI installieren
 pnpm install -g pake-cli
 
-# Standardnutzung - Website-Icon automatisch abrufen
+# Standardnutzung, Website-Icon automatisch abrufen
 pake https://github.com --name GitHub
 
-# Erweiterte Nutzung mit benutzerdefinierten Optionen
+# Erweiterte Nutzung, benutzerdefinierte Optionen
 pake https://weekly.tw93.fun --name Weekly --icon https://cdn.tw93.fun/pake/weekly.icns --width 1200 --height 800 --hide-title-bar
 ```
 
 Die Erstpaketierung dauert durch die Einrichtung der Build-Umgebung etwas länger, Folge-Builds sind sehr schnell. Vollständige Parameter finden Sie in der [CLI-Anleitung](docs/cli-usage.md). Alternativ steht der [GitHub Actions Online-Build](docs/github-actions-usage.md) bereit.
 
-Pake in Skripten oder mit AI-Agenten nutzen? Übergeben Sie `--json` für maschinenlesbare Ausgaben, beschreiben Sie Apps deklarativ mit `--config app.json` ([Schema](schema/pake.schema.json)), oder paketieren Sie lokale Build-Ausgaben direkt per `pake ./dist --name MyTool`. Vollständiger Agent-Vertrag unter [llms.txt](llms.txt). Offiziellen Skill installieren: in Claude Code `/plugin marketplace add tw93/Pake` und `/plugin install pake@pake` ausführen; in Codex `codex plugin marketplace add tw93/Pake` und `codex plugin add pake@pake`.
+Pake in Skripten oder mit AI-Agenten nutzen? Übergeben Sie `--json` für maschinenlesbare Ausgaben, beschreiben Sie Apps deklarativ mit `--config app.json` ([Schema](schema/pake.schema.json)), oder paketieren Sie lokale Build-Ausgaben direkt per `pake ./dist --name MyTool`. Vollständiger Agent-Vertrag unter [llms.txt](llms.txt). Den offiziellen Skill installieren Sie so:
+
+```text
+# Claude Code
+/plugin marketplace add tw93/Pake
+/plugin install pake@pake
+
+# Codex
+codex plugin marketplace add tw93/Pake
+codex plugin add pake@pake
+```
 
 Übergeben Sie folgenden Prompt an Ihren AI-Agenten:
 
@@ -196,7 +206,7 @@ Verwende Pake (npm i -g pake-cli), um Webseiten als Desktop-Apps zu paketieren. 
 
 ## Entwicklung
 
-Erfordert Rust `>=1.85` und Node `>=22` (empfohlenes LTS; `>=20.9` ebenfalls lauffähig). Installationsanleitung unter [Tauri-Dokumentation](https://tauri.app/start/prerequisites/). Wenn Sie mit der Entwicklungsumgebung nicht vertraut sind, empfiehlt sich das CLI-Tool.
+Erfordert Rust `>=1.85` und Node `>=22` (empfohlenes LTS; `>=20.9` ebenfalls lauffähig). Installationsanleitung unter [Tauri-Dokumentation](https://v2.tauri.app/start/prerequisites/). Wenn Sie mit der Entwicklungsumgebung nicht vertraut sind, empfiehlt sich das CLI-Tool.
 
 ```bash
 # Abhängigkeiten installieren
@@ -216,21 +226,19 @@ Stilanpassungen, Funktionserweiterungen und Container-Kommunikation finden Sie i
 Pake wäre ohne diese großartigen Mitwirkenden nicht möglich ❤️
 
 <a href="https://github.com/tw93/Pake/graphs/contributors">
-  <img src="https://raw.githubusercontent.com/tw93/Pake/main/CONTRIBUTORS.svg?sanitize=true" alt="Contributors" width="1000" />
+  <img src="./CONTRIBUTORS.svg?v=2" alt="Contributors" width="1000" />
 </a>
 
 ## Unterstützung
 
-1. Die direkteste Unterstützung ist der Kauf meiner Mac-Bereinigungs-App [Mole for Mac](https://mole.fit).
-2. Wenn Pake Ihnen geholfen hat, geben Sie dem Projekt einen Stern auf GitHub oder [empfehlen Sie es weiter](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20Verwandeln%20Sie%20jede%20Webseite%20mit%20einem%20einzigen%20Befehl%20in%20eine%20Desktop-App.%20Unterst%C3%BCtzt%20macOS,%20Windows%20und%20Linux).
-3. Neueste Updates teile ich auf [Twitter](https://twitter.com/HiTw93); treten Sie auch gerne unserer [Telegram](https://t.me/+9f9gf4ZrFSQ2OWVl)-Gruppe bei.
-4. Ich wünsche viel Freude beim Ausprobieren neuer Technologien. Wenn Sie Websites entdecken, die sich ideal als Desktop-App eignen, freue ich mich über Feedback.
-5. Ich habe zwei Katzen, TangYuan und Coke. Wenn Pake Ihren Alltag bereichert hat, spendieren Sie ihnen gerne ein <a href="https://cats.tw93.fun?name=Pake" target="_blank">Dosenfutter 🥩</a>.
+- Die direkteste Unterstützung ist der Kauf meiner Mac-Bereinigungs-App [Mole for Mac](https://mole.fit)
+- Wenn Pake Ihnen geholfen hat, geben Sie dem Projekt einen Stern auf GitHub, [empfehlen Sie es weiter](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20Verwandeln%20Sie%20jede%20Webseite%20mit%20einem%20einzigen%20Befehl%20in%20eine%20Desktop-App.%20Unterst%C3%BCtzt%20macOS,%20Windows%20und%20Linux) oder öffnen Sie ein Issue oder einen PR, auch für Websites, die sich gut als Desktop-App eignen
+- Ich habe zwei Katzen, TangYuan und Coke, und wenn Pake Ihren Alltag bereichert hat, spendieren Sie ihnen gerne ein <a href="https://cats.tw93.fun?name=Pake" target="_blank">Dosenfutter 🥩</a>
 
 <details>
 <summary>Diese freundlichen Menschen haben bereits gespendet 🐱</summary>
 <br/>
-<a href="https://cats.tw93.fun?name=Pake"><img src="https://cdn.jsdelivr.net/gh/tw93/sponsors@main/assets/sponsors.svg" width="1000px" /></a>
+<a href="https://cats.tw93.fun?name=Pake"><img src="https://cdn.jsdelivr.net/gh/tw93/sponsors@main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
 </details>
 
 ## Open-Source-Lizenz

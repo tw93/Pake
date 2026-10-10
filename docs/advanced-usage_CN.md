@@ -46,25 +46,7 @@ document.addEventListener("keydown", (e) => {
 
 ### 下载失败通知
 
-Pake 内置了下载失败通知支持：
-
-**特性：**
-
-- **双语支持**：自动匹配系统与浏览器语言（中文/英文）
-- **系统通知**：在授予通知权限后使用原生系统通知
-- **平稳降级**：通知权限未开启时降级到控制台日志
-- **全面覆盖**：支持常规 HTTP(S)、Data URI 与 Blob 等所有下载类型
-
-**用户体验：**
-
-当下载失败时，用户将看到通知：
-
-- 英文："Download Error - Download failed: filename.pdf"
-- 中文："下载错误 - 下载失败: filename.pdf"
-
-**请求通知权限：**
-
-要启用通知，请在注入的 JavaScript 中添加：
+下载失败时 Pake 会弹出通知，语言自动匹配系统与浏览器（中文或英文），覆盖常规 HTTP(S)、Data URI（base64 编码文件）、Blob URL（动态生成的文件）和右键菜单发起的下载，授予通知权限后使用原生系统通知，没有权限时降级到控制台日志。要启用通知，在注入的 JavaScript 中请求权限：
 
 ```javascript
 // 在应用启动时请求通知权限
@@ -72,13 +54,6 @@ if (window.Notification && Notification.permission === "default") {
   Notification.requestPermission();
 }
 ```
-
-下载系统自动处理：
-
-- 常规 HTTP(S) 下载
-- Data URI 下载（base64 编码文件）
-- Blob URL 下载（动态生成的文件）
-- 右键菜单发起的下载
 
 ## 容器通信
 
@@ -122,7 +97,7 @@ fn handle_scroll(scroll_y: f64, scroll_x: f64) {
 }
 ```
 
-`hide_title_bar` 是 `pake.json` 中的字段名（CLI 对应参数为 `--hide-title-bar`）。仅支持 macOS，在 Windows 和 Linux 上会被忽略。Windows 和 Linux 请使用 `hide_window_decorations`（`--hide-window-decorations`）。
+`hide_title_bar` 是 `pake.json` 中的字段名（CLI 对应参数为 `--hide-title-bar`），仅支持 macOS，在 Windows 和 Linux 上会被忽略，这两个平台改用 `hide_window_decorations`（`--hide-window-decorations`）。
 
 ## 静态文件打包
 
@@ -151,7 +126,7 @@ pake https://meet.google.com --name GoogleMeet --camera --microphone
 - `--microphone`: 申请麦克风权限（`com.apple.security.device.audio-input`）
 - `--camera`: 申请摄像头权限（`com.apple.security.device.camera`）
 
-macOS 会在首次使用时向用户弹出权限确认对话框。请仅在确实需要的站点上添加这些标志。
+macOS 会在首次使用时向用户弹出权限确认对话框，所以只给确实需要的站点加这些标志。
 
 ## 同一站点生成多个独立应用
 
@@ -162,9 +137,7 @@ pake https://mail.google.com --name "Gmail Work"
 pake https://mail.google.com --name "Gmail Personal"
 ```
 
-Pake 现在会基于 `URL + name` 生成不同的应用标识，因此这两个应用会被当作两个独立桌面应用安装，而不是落到同一个应用上。
-
-对于需要固定 bundle identifier 的高级场景，Pake 也支持一个隐藏参数 `--identifier`：
+Pake 会基于 `URL + name` 生成不同的应用标识，因此这两个应用会被当作两个独立桌面应用安装，而不是落到同一个应用上，需要固定 bundle identifier 的高级场景，还可以用隐藏参数 `--identifier`：
 
 ```bash
 pake https://mail.google.com --name "Gmail Work" --identifier com.example.gmail.work
@@ -197,8 +170,8 @@ pake https://mail.google.com --name "Gmail Work" --identifier com.example.gmail.
 
 ### 前置条件
 
-- Node.js ≥22.0.0 (推荐 LTS，较旧版本 ≥20.9.0 可能可用)
-- Rust ≥1.85.0 (推荐稳定版)
+- Node.js ≥22（推荐 LTS，最低 ≥20.9.0）
+- Rust ≥1.85.0（推荐稳定版）
 
 #### 平台特定要求
 
@@ -208,7 +181,7 @@ pake https://mail.google.com --name "Gmail Work" --identifier com.example.gmail.
 
 **Windows:**
 
-- **重要**：请先参阅 [Tauri 依赖项指南](https://v2.tauri.app/start/prerequisites/)
+- **重要**：先看 [Tauri 依赖项指南](https://v2.tauri.app/start/prerequisites/)
 - Windows 10 SDK (10.0.19041.0) 和 Visual Studio Build Tools 2022 (≥17.2)
 - 必需的运行库：
   1. Microsoft Visual C++ 2015-2022 Redistributable (x64)
@@ -217,7 +190,7 @@ pake https://mail.google.com --name "Gmail Work" --identifier com.example.gmail.
   4. Microsoft Visual C++ 2013 Redistributable (x86)（可选）
   5. Microsoft Visual C++ 2008 Redistributable (x86)（可选）
 
-- **Windows ARM (ARM64) 支持**：在 Visual Studio Installer 中的"单个组件"下安装"MSVC v143 - VS 2022 C++ ARM64 构建工具"
+- **Windows ARM (ARM64) 支持**：在 Visual Studio Installer 的单个组件里安装 MSVC v143 - VS 2022 C++ ARM64 构建工具
 
 **Linux (Ubuntu):**
 
@@ -277,11 +250,9 @@ pnpm run dev
 pnpm run cli:dev
 ```
 
-此脚本会读取上述配置并使用 watch 模式打包指定的应用，对 `pake-cli` 代码修改可实时热更新。
+此脚本以 watch 模式构建 CLI，用传入的参数运行后再以 `tauri dev` 启动应用，对 `pake-cli` 代码修改可实时热更新。
 
 ### 测试指南
-
-统一的 CLI 构建与发布验证指南，用于验证多平台打包功能。
 
 #### 运行测试
 
@@ -302,19 +273,9 @@ pnpm run cli:build
 node ./tests/release.js
 ```
 
-#### 🚀 完整测试套件包含
-
-- ✅ **Vitest 套件**：单元、集成、构建器和 CLI 选项覆盖
-- ✅ **真实构建 smoke test**：按平台验证实际打包流程
-- ✅ **发布流程 smoke test**：验证 popular apps 的发布构建路径
-
 #### 测试内容详情
 
-- `pnpm test` 会运行 [`tests/index.js`](../tests/index.js) 这个主测试入口，它会：
-- 先构建 CLI，
-- 再运行 Vitest 套件，
-- 如果没有传 `--no-build`，继续执行真实构建 smoke test，
-- 然后在真实构建成功后继续执行发布流程 smoke test
+`pnpm test` 运行主测试入口 [`tests/index.js`](../tests/index.js)，先构建 CLI，再跑覆盖单元、集成、构建器和 CLI 选项的 Vitest 套件，没有传 `--no-build` 时继续按平台执行真实构建 smoke test，真实构建成功后再跑验证 popular apps 发布构建路径的发布流程 smoke test。
 
 常用可选参数：
 
@@ -324,8 +285,6 @@ node ./tests/release.js
 - `--no-build`：跳过真实构建 smoke test 以及后续的发布流程 smoke test
 - `--e2e`：增加端到端配置测试
 - `--pake-cli`：增加 GitHub Actions 相关检查
-
-如果只想单独验证发布流程，可以直接运行 `node ./tests/release.js`。
 
 #### 故障排除
 

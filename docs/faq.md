@@ -30,13 +30,10 @@ Common issues and solutions when using Pake.
   - [Permission Denied When Installing Globally](#permission-denied-when-installing-globally)
 - [Getting Help](#getting-help)
 
----
-
 ## Build Issues
 
 ### Rust Version Error: "feature 'edition2024' is required"
 
-**Problem:**
 When building Pake or using the CLI, you encounter an error like:
 
 ```txt
@@ -49,15 +46,9 @@ Caused by:
 
 **Why This Happens:**
 
-Pake's dependencies require Rust edition2024 support, which is only available in Rust 1.85.0 or later. Specifically:
+Pake's dependency chain from `tauri` through `image` and `moxcms` to `pxfm v0.1.25` requires Rust edition2024, which became stable in Rust 1.85.0 (released February 2025). If your Rust version is older (e.g., 1.82.0 from August 2024), you'll see this error.
 
-- The dependency chain includes: `tauri` → `image` → `moxcms` → `pxfm v0.1.25` (requires edition2024)
-- Rust edition2024 became stable in Rust 1.85.0 (released February 2025)
-- If your Rust version is older (e.g., 1.82.0 from August 2024), you'll see this error
-
-**Solution:**
-
-Update your Rust toolchain to version 1.85.0 or later:
+Update your Rust toolchain to version 1.85.0 or later, then retry your build command:
 
 ```bash
 # Update to the latest stable Rust version
@@ -71,22 +62,15 @@ rustc --version
 # Should show: rustc 1.85.0 or higher
 ```
 
-After updating, retry your build command.
-
-**For Development Setup:**
-
-If you're setting up a development environment, ensure:
+A development environment needs:
 
 - Rust ≥1.85.0 (check with `rustc --version`)
 - Node.js ≥20.9.0 (check with `node --version`)
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md) for complete prerequisites.
 
----
-
 ### Linux: Build Error "Can't detect any appindicator library"
 
-**Problem:**
 When building on Ubuntu 24.04 or newer, you may encounter:
 
 ```txt
@@ -95,11 +79,7 @@ Can't detect any appindicator library
 
 Or potentially errors related to Icon RGBA in older versions.
 
-**Solution:**
-
-Ubuntu 24.04+ replaced `libappindicator3-dev` with `libayatana-appindicator3-dev`.
-
-Install the correct dependency:
+Ubuntu 24.04+ replaced `libappindicator3-dev` with `libayatana-appindicator3-dev`, so install the correct dependency:
 
 ```bash
 sudo apt-get update
@@ -112,20 +92,11 @@ On Fedora and other RPM-based distros with the same error, install `libappindica
 sudo dnf install -y libappindicator-gtk3-devel
 ```
 
----
-
 ### Linux: Installing on Fedora / RHEL / Oracle Linux (RPM-based distros)
 
-**Problem:**
-On RPM-based distros (Fedora, RHEL, Oracle Linux, Rocky, AlmaLinux, openSUSE) a
-`.deb` package cannot be installed by the system package manager, and older Pake
-versions always built a `.deb` first.
+On RPM-based distros (Fedora, RHEL, Oracle Linux, Rocky, AlmaLinux, openSUSE) a `.deb` package cannot be installed by the system package manager, and older Pake versions always built a `.deb` first.
 
-**Solution:**
-
-Pake now picks the default bundle target from `/etc/os-release`: RPM-based
-distros default to `rpm, appimage`, while Debian/Ubuntu keep `deb, appimage`. So
-the basic command already produces an installable package:
+Pake picks the default bundle target from `/etc/os-release`: RPM-based distros default to `rpm, appimage`, while Debian/Ubuntu keep `deb, appimage`, so the basic command already produces an installable package:
 
 ```bash
 pake https://github.com --name GitHub
@@ -139,24 +110,17 @@ pake https://github.com --name GitHub --targets rpm        # RPM package
 pake https://github.com --name GitHub --targets appimage   # portable AppImage
 ```
 
-When several targets build (the default), one format failing no longer aborts
-the others: if the `.rpm`/`.deb` bundler fails, the AppImage is still produced as
-a portable fallback. AppImage runs without installation:
+When several targets build (the default), one format failing no longer aborts the others: if the `.rpm`/`.deb` bundler fails, the AppImage is still produced as a portable fallback. AppImage runs without installation:
 
 ```bash
 chmod +x ./GitHub.AppImage
 ./GitHub.AppImage
 ```
 
-> Building an `.rpm` requires `rpm-build` (`sudo dnf install rpm-build`). If you
-> only need a runnable app without packaging, add `--keep-binary` to also copy
-> the raw executable next to the installer.
-
----
+> Building an `.rpm` requires `rpm-build` (`sudo dnf install rpm-build`). If you only need a runnable app without packaging, add `--keep-binary` to also copy the raw executable next to the installer.
 
 ### Linux: AppImage Build Fails with "failed to run linuxdeploy"
 
-**Problem:**
 When building AppImage on Linux (Debian, Ubuntu, Arch, etc.), you may encounter errors like:
 
 ```txt
@@ -192,7 +156,7 @@ This bypasses the library stripping process that often causes issues on certain 
 
 **Solution 2: Install System Dependencies**
 
-If NO_STRIP doesn't work, ensure you have all required system dependencies:
+If NO_STRIP doesn't work, install all required system dependencies, then try building again:
 
 ```bash
 sudo apt update
@@ -213,8 +177,6 @@ sudo apt install -y \
   libgirepository1.0-dev \
   pkg-config
 ```
-
-Then try building again (you can still pre-set `NO_STRIP=1` if you prefer).
 
 **Solution 3: Use DEB Format Instead**
 
@@ -247,13 +209,8 @@ This is a known issue with Tauri's linuxdeploy tool, which can fail when:
 - Building on newer distributions (Arch, Debian Trixie, etc.)
 - Missing WebKit2GTK or GTK development libraries
 
-The `NO_STRIP=1` environment variable is the official workaround recommended by the Tauri community.
-
----
-
 ### Linux: AppImage Crashes at Launch with WebKitNetworkProcess Not Found
 
-**Problem:**
 The AppImage builds successfully but crashes immediately at launch:
 
 ```txt
@@ -297,14 +254,10 @@ mkdir -p lib && ln -s ../usr/lib/webkit2gtk-4.1 lib/webkit2gtk-4.1
 ./AppRun
 ```
 
----
-
 ### Linux: AppImage Opens but Buttons or Keyboard Do Not Work on Wayland
 
-**Problem:**
 On some pure Wayland compositors, especially niri, the AppImage can open but page buttons cannot be clicked or keyboard input does not reach the webview.
 
-**Solution:**
 Pake automatically avoids the conservative WebKit rendering flags in niri sessions. To force the same native WebKit path manually, launch the app with:
 
 ```bash
@@ -320,16 +273,11 @@ PAKE_LINUX_WEBKIT_SAFE_MODE=1 ./MyApp.AppImage
 **Why This Happens:**
 With WebKitGTK 2.52 or later, on both X11 and Wayland, Pake uses shared-memory rendering (`WEBKIT_DMABUF_RENDERER_FORCE_SHM=1`) instead of disabling the renderer, preserving the hardware acceleration needed for video. Older WebKitGTK versions keep the existing compatibility flags; niri keeps native rendering. Explicit WebKit variables are respected. `PAKE_LINUX_WEBKIT_SAFE_MODE=1` selects the old conservative mode, while `0` removes the two disabling flags and skips automatic workarounds.
 
----
-
 ### Linux: "cargo: command not found" After Installing Rust
 
-**Problem:**
 You installed Rust but Pake still reports "cargo: command not found".
 
-**Solution:**
-
-Pake CLI automatically reloads the Rust environment, but if issues persist:
+Pake CLI automatically reloads the Rust environment. If the issue persists, reload it or restart your terminal, then try building again:
 
 ```bash
 # Reload environment in current terminal
@@ -338,13 +286,8 @@ source ~/.cargo/env
 # Or restart your terminal
 ```
 
-Then try building again.
-
----
-
 ### Windows: Installation Timeout During First Build
 
-**Problem:**
 When building for the first time on Windows, you may encounter:
 
 ```txt
@@ -400,14 +343,9 @@ pake https://github.com --name GitHub
 - First installation: 10-15 minutes on Windows
 - Subsequent builds: Much faster (dependencies cached)
 
----
-
 ### Windows: Missing Visual Studio Build Tools
 
-**Problem:**
 Build fails with errors about missing MSVC or Windows SDK.
-
-**Solution:**
 
 Install Visual Studio Build Tools:
 
@@ -415,14 +353,9 @@ Install Visual Studio Build Tools:
 2. During installation, select "Desktop development with C++"
 3. For ARM64 support: Also select "MSVC v143 - VS 2022 C++ ARM64 build tools" under Individual Components
 
----
-
 ### macOS: Build Fails with Module Compilation Errors
 
-**Problem:**
 On macOS 26 Beta or newer, you may see errors related to `CoreFoundation` or `_Builtin_float` modules.
-
-**Solution:**
 
 Create a configuration file to use compatible SDK:
 
@@ -436,13 +369,9 @@ EOF
 
 This file is already in `.gitignore` and won't be committed.
 
----
-
 ## Runtime Issues
 
 ### App Window is Too Small/Large
-
-**Solution:**
 
 Specify custom dimensions when building:
 
@@ -452,14 +381,9 @@ pake https://example.com --width 1200 --height 800
 
 See [CLI Usage Guide](cli-usage.md#width) for all window options.
 
----
-
 ### App Icon Not Showing Correctly
 
-**Problem:**
 Custom icon doesn't appear or shows default icon.
-
-**Solution:**
 
 Ensure you're using the correct icon format for your platform:
 
@@ -480,14 +404,9 @@ pake https://example.com --icon ./icon.png
 
 Pake can automatically convert icons, but providing the correct format is more reliable.
 
----
-
 ### Website Features Not Working (Login, Upload, etc.)
 
-**Problem:**
 Some website features don't work in the Pake app.
-
-**Solution:**
 
 This is usually due to web compatibility issues. Try:
 
@@ -534,9 +453,9 @@ This is usually due to web compatibility issues. Try:
 
 4. **Be aware of embedded-webview sign-in limits**
 
-   Some authentication providers, especially Google, may block sign-in inside embedded webviews. Because Pake packages sites into a desktop webview, Google properties or sites that rely on Google OAuth may still fail to sign in even when `--new-window` or `--multi-window` is enabled. This is provider policy, not a packaging bug. In those cases, use the normal browser, a browser-installed app, or a native desktop client.
+   Some authentication providers, especially Google, may block sign-in inside embedded webviews. Because Pake packages sites into a desktop webview, Google properties or sites that rely on Google OAuth may still fail to sign in even when `--new-window` or `--multi-window` is enabled. This is provider policy, not a packaging bug, so use the normal browser, a browser-installed app, or a native desktop client for those sites.
 
-   On macOS, Pake keeps **Sign in with Apple** popup flows (e.g. Yelp, Upwork) on the native popup path so Apple's callback can return to the opener page. Other auth popups may still be navigated in the current window to avoid WebKit crashes. If a provider blocks embedded webviews or the login still fails, use the normal browser, a browser-installed app, or a native desktop client.
+   On macOS, Pake keeps **Sign in with Apple** popup flows (e.g. Yelp, Upwork) on the native popup path so Apple's callback can return to the opener page. Other auth popups may still be navigated in the current window to avoid WebKit crashes.
 
 5. **WeChat Web login environment error**
 
@@ -548,29 +467,21 @@ This is usually due to web compatibility issues. Try:
 
 6. **Cloudflare or bot-verification loops forever**
 
-   Some sites (e.g. ChatGPT) put a Cloudflare challenge in front of the page. The system WebView, especially WebKitGTK on Linux, is often flagged by these challenges and loops without passing, even with a custom `--user-agent`. This is the challenge provider detecting a non-standard browser engine, not a Pake bug, and there is no reliable Pake-side workaround. Use the site in a regular browser or a native client when it gates behind such a check.
-
----
+   Some sites (e.g. ChatGPT) put a Cloudflare challenge in front of the page. The system WebView, especially WebKitGTK on Linux, is often flagged by these challenges and loops without passing, even with a custom `--user-agent`. This is the challenge provider detecting a non-standard browser engine, not a Pake bug, and there is no reliable Pake-side workaround. As with item 4, use the site in a regular browser or a native client when it gates behind such a check.
 
 ### App Uses More Memory Than Expected
 
-**Problem:**
-The app spawns a WebKitWebProcess (Linux) or WebContent process (macOS) that uses several hundred MB of RAM, which seems to contradict the "~5MB" figure.
+The app spawns a WebKitWebProcess (Linux) or WebContent process (macOS) that uses several hundred MB of RAM, which seems to contradict the README's "typically under 10 MB" figure.
 
 **Explanation:**
 
-The ~5MB number is the installer/app size on disk, not runtime memory. At runtime Pake renders through your system WebView (WebKitWebProcess on Linux, WKWebView on macOS), and that process's memory is governed by the engine and the page you load, not by Pake. A heavy SPA like Gemini, Slack, or ChatGPT uses a comparable amount opening in any WebKitGTK browser such as GNOME Web. Pake adds very little on top of the WebView, so there is no Pake-side setting that meaningfully lowers it. This is inherent to using the system WebView and is the trade-off for the small binary size.
-
----
+That number is the installer size on disk, not runtime memory. At runtime Pake renders through your system WebView (WebKitWebProcess on Linux, WKWebView on macOS), and that process's memory is governed by the engine and the page you load, not by Pake. A heavy SPA like Gemini, Slack, or ChatGPT uses a comparable amount opening in any WebKitGTK browser such as GNOME Web. Pake adds very little on top of the WebView, so there is no Pake-side setting that meaningfully lowers it. This is inherent to using the system WebView and is the trade-off for the small binary size.
 
 ## Installation Issues
 
 ### Permission Denied When Installing Globally
 
-**Problem:**
 `npm install -g pake-cli` fails with permission errors.
-
-**Solution:**
 
 Use one of these approaches:
 
@@ -587,8 +498,6 @@ npm install -g pake-cli
 # Option 3: Use pnpm (recommended)
 pnpm install -g pake-cli
 ```
-
----
 
 ## Getting Help
 
