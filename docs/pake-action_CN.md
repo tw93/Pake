@@ -2,7 +2,7 @@
 
 <div align="center">
 
-**English** · [中文](pake-action_CN.md)
+[English](pake-action.md) · **中文**
 
 </div>
 
@@ -88,7 +88,7 @@ jobs:
 
 ## 执行流程
 
-1. **环境准备**：自动安装 Rust、Node.js 运行时及对应平台系统依赖
+1. **环境准备**：安装 Node.js 依赖并构建 Pake CLI，缺少 Rust 时自动安装
 2. **构建应用**：解析参数调用 Pake CLI 完成本地编译打包
 3. **整理产物**：查找构建完成的安装包并归档至指定输出目录
 
