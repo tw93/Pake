@@ -406,7 +406,7 @@ pake https://github.com --name GitHub --no-bundle
 
 #### [system-tray-icon]
 
-设置托盘图标，仅在启用系统托盘时有效。图标支持 `.ico` 或 `.png` 格式，尺寸建议 32x32 到 256x256。
+设置托盘图标，仅在启用系统托盘时有效。图标必须为 `.ico` 或 `.png` 格式，尺寸应在 32x32 到 256x256 像素之间。
 
 ```shell
 --system-tray-icon <path>
