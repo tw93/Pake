@@ -37,7 +37,8 @@ If the bump push is rejected, rebase onto the contributors bot commit as AGENTS.
 2. [ ] `gh release view VX.Y.Z --json tagName,url,assets`, then fill the title and body per **GitHub Release Notes** below; CI leaves a bare placeholder.
 3. [ ] `gh run list --workflow=npm-publish.yml`, then `npm view pake-cli@X.Y.Z version gitHead dist.tarball --json` and `npm view pake-cli version` for `latest`.
 4. [ ] Record `gh run list --workflow=quality-and-test.yml --limit 3` separately.
-5. [ ] Add the six positive reactions (`+1`, `laugh`, `heart`, `hooray`, `rocket`, `eyes`) to `repos/tw93/Pake/releases/<id>/reactions` via `gh api` and read them back. Never `-1` or `confused`.
+5. [ ] Confirm the release workflow's `Move Major Action Tag` job moved the major tag: `git ls-remote origin refs/tags/v3` must equal the `VX.Y.Z` commit (`git rev-parse VX.Y.Z^{commit}`), since the Action docs pin `tw93/Pake@v3`. The job runs only after `Build CLI` succeeds and skips when the tag is not the newest `VX.*` release, so a re-pushed older tag never moves it back. Never force-push it by hand unless that job failed.
+6. [ ] Add the six positive reactions (`+1`, `laugh`, `heart`, `hooray`, `rocket`, `eyes`) to `repos/tw93/Pake/releases/<id>/reactions` via `gh api` and read them back. Never `-1` or `confused`.
 
 ## npm-Only Hotfix (no tag)
 

@@ -62,6 +62,45 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           skipIfReleaseExists: true
 
+  # Keep the moving major tag (e.g. v3) on the latest release so
+  # `uses: tw93/Pake@v3` picks up action fixes without a docs bump.
+  move-major-tag:
+    name: Move Major Action Tag
+    runs-on: ubuntu-latest
+    needs: build-cli
+    if: |
+      needs.build-cli.result == 'success' &&
+      github.event_name == 'push' && startsWith(github.ref, 'refs/tags/V')
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Force-move major tag
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^V([0-9]+)\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Skipping major tag for non-release tag $RELEASE_TAG"
+            exit 0
+          fi
+          MAJOR="${BASH_REMATCH[1]}"
+          MAJOR_TAG="v$MAJOR"
+          # Only the newest release of this major may own the tag, so re-pushing
+          # an older V tag never moves it back.
+          LATEST_TAG="$(git ls-remote --tags --refs origin "refs/tags/V$MAJOR.*" \
+            | sed 's#.*refs/tags/##' \
+            | grep -E "^V$MAJOR\.[0-9]+\.[0-9]+$" \
+            | sort -V | tail -n 1)"
+          if [ "$RELEASE_TAG" != "$LATEST_TAG" ]; then
+            echo "Skipping $MAJOR_TAG: $RELEASE_TAG is not the latest V$MAJOR release ($LATEST_TAG)"
+            exit 0
+          fi
+          git tag -f "$MAJOR_TAG" "$GITHUB_SHA"
+          git push -f origin "refs/tags/$MAJOR_TAG"
+          echo "Moved $MAJOR_TAG to $GITHUB_SHA ($RELEASE_TAG)"
+
   build-cli:
     permissions:
       contents: read

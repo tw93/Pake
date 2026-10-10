@@ -12,7 +12,7 @@ Call Pake from your own GitHub Actions workflow to turn any webpage into a light
 
 ```yaml
 - name: Build Pake App
-  uses: tw93/Pake@V3.17.3
+  uses: tw93/Pake@v3
   with:
     url: "https://example.com"
     name: "MyApp"
@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: tw93/Pake@V3.17.3
+      - uses: tw93/Pake@v3
         with:
           url: "https://weekly.tw93.fun"
           name: "WeeklyApp"
@@ -58,7 +58,7 @@ jobs:
 ### With Custom Icon
 
 ```yaml
-- uses: tw93/Pake@V3.17.3
+- uses: tw93/Pake@v3
   with:
     url: "https://example.com"
     name: "MyApp"
@@ -78,7 +78,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: tw93/Pake@V3.17.3
+      - uses: tw93/Pake@v3
         with:
           url: "https://example.com"
           name: "CrossPlatformApp"
