@@ -78,7 +78,7 @@ rustc --version
 如果您正在设置开发环境，请确保：
 
 - Rust ≥1.85.0（使用 `rustc --version` 检查）
-- Node.js ≥22.0.0（使用 `node --version` 检查）
+- Node.js ≥20.9.0（使用 `node --version` 检查）
 
 详见 [CONTRIBUTING.md](../CONTRIBUTING.md) 获取完整的前置条件。
 

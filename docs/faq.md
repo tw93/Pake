@@ -78,7 +78,7 @@ After updating, retry your build command.
 If you're setting up a development environment, ensure:
 
 - Rust ≥1.85.0 (check with `rustc --version`)
-- Node.js ≥22.0.0 (check with `node --version`)
+- Node.js ≥20.9.0 (check with `node --version`)
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md) for complete prerequisites.
 
