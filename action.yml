@@ -104,19 +104,46 @@ runs:
         mkdir -p -- "$INPUT_OUTPUT_DIR"
         export PAKE_CREATE_APP=1
 
+        # The CLI copies the final package into the working directory as
+        # <name>.<ext> (the name may be normalized, e.g. lowercased on Linux)
+        # and deletes the bundle under src-tauri/target, so select the file it
+        # wrote here during this run rather than searching the target tree.
+        # Linux defaults to deb,appimage (rpm,appimage on RPM distros) and still
+        # succeeds when only one target builds, so accept any of them.
+        case "$RUNNER_OS" in
+          Windows) PACKAGE_EXTS=(msi) ;;
+          Linux) PACKAGE_EXTS=(deb rpm AppImage) ;;
+          macOS) PACKAGE_EXTS=(app dmg) ;;
+          *)
+            echo "❌ Unsupported runner OS: $RUNNER_OS" >&2
+            exit 1
+            ;;
+        esac
+        BUILD_MARKER="$(mktemp)"
+        trap 'rm -f "$BUILD_MARKER"' EXIT
+
         # Run Pake CLI
         printf '🔧 Running:'
         printf ' %q' node dist/cli.js "${ARGS[@]}"
         printf '\n'
         node dist/cli.js "${ARGS[@]}"
 
-        # Find generated package and set output
-        PACKAGE=$(find src-tauri/target -type f \( -name "*.deb" -o -name "*.exe" -o -name "*.msi" -o -name "*.dmg" \) 2>/dev/null | head -1)
-
-        # If no file packages found, look for .app directory (macOS)
-        if [ -z "$PACKAGE" ]; then
-          PACKAGE=$(find src-tauri/target -type d -name "*.app" 2>/dev/null | head -1)
-        fi
+        # Pick the package for this platform, in preference order
+        PACKAGE=""
+        for EXT in "${PACKAGE_EXTS[@]}"; do
+          MATCHES=()
+          while IFS= read -r -d '' MATCH; do
+            MATCHES+=("$MATCH")
+          done < <(find . -maxdepth 1 -name "*.$EXT" -newer "$BUILD_MARKER" -print0)
+          if [ "${#MATCHES[@]}" -gt 1 ]; then
+            echo "❌ Multiple .$EXT packages found: ${MATCHES[*]}" >&2
+            exit 1
+          fi
+          if [ "${#MATCHES[@]}" -eq 1 ]; then
+            PACKAGE="${MATCHES[0]#./}"
+            break
+          fi
+        done
         if [ -n "$PACKAGE" ]; then
           # Move to output directory
           BASENAME=$(basename "$PACKAGE")
@@ -125,7 +152,10 @@ runs:
             echo "❌ Package path must not contain line breaks" >&2
             exit 1
           fi
-          mv -- "$PACKAGE" "$PACKAGE_PATH" 2>/dev/null || cp -r -- "$PACKAGE" "$PACKAGE_PATH"
+          if [ ! "$PACKAGE" -ef "$PACKAGE_PATH" ]; then
+            rm -rf -- "$PACKAGE_PATH"
+            mv -- "$PACKAGE" "$PACKAGE_PATH"
+          fi
           printf 'package-path=%s\n' "$PACKAGE_PATH" >> "$GITHUB_OUTPUT"
           printf '✅ Package created: %s\n' "$PACKAGE_PATH"
         else
