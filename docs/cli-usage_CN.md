@@ -103,7 +103,7 @@ pake ./dist --name MyTool
 
 #### [name]
 
-指定应用程序名称，未指定时将交互提示输入，建议使用英文。
+指定应用程序的名称，未指定时系统会提示输入，建议使用英文。
 
 **注意**：支持带空格的名称，会自动处理不同平台的命名规范：
 
@@ -258,7 +258,7 @@ pake https://github.com --name GitHub
 
 #### [enable-find]
 
-启用 Pake 内置的页面查找浮层，默认为 `false`。开启后支持使用 `Cmd/Ctrl+F` 呼出查找，`Cmd/Ctrl+G` 跳转到下一个匹配项，`Cmd/Ctrl+Shift+G` 跳转到上一个匹配项。
+启用 Pake 内置的页面查找浮层，默认为 `false`。开启后支持使用 `Cmd/Ctrl+F` 打开查找，`Cmd/Ctrl+G` 跳转到下一个匹配项，`Cmd/Ctrl+Shift+G` 跳转到上一个匹配项。
 
 ```shell
 --enable-find
@@ -266,7 +266,7 @@ pake https://github.com --name GitHub
 
 #### [force-internal-navigation]
 
-强制所有点击的链接（包括跨域链接）均在 Pake 窗口内打开，不再调起外部默认浏览器，默认为 `false`。
+强制所有点击的链接（包括跨域链接）都在 Pake 窗口内打开，不再调起外部默认浏览器，默认为 `false`。
 
 ```shell
 --force-internal-navigation
@@ -279,16 +279,16 @@ pake https://github.com --name GitHub
 ```shell
 --internal-url-regex <pattern>
 
-# 示例：仅将 facebook.com/messages 路径视为内部链接
+# 示例：只把 facebook.com/messages 路径视为内部链接
 --internal-url-regex "^https://www\\.facebook\\.com/messages(/.*)?$"
 
-# 示例：仅将特定子域名视为内部链接
+# 示例：只把特定子域名视为内部链接
 --internal-url-regex "^https://(app|api)\\.example\\.com"
 ```
 
 #### [safe-domain]
 
-将指定域名及其子域名保留在应用内打开，便于处理企业 SSO 登录与授权跳转（如 Slack 搭配 Okta）。Pake 会将此列表转译为 `internal_url_regex`；若同时传入 `--internal-url-regex`，则以显式正则为准。
+把指定域名及其子域名保留在应用内打开，便于处理企业 SSO 登录与授权跳转（如 Slack 搭配 Okta）。Pake 会把这个列表编译成 `internal_url_regex`；若同时传入 `--internal-url-regex`，则以显式正则为准。
 
 `--safe-domain` 仅匹配 URL Host，不会因路径或 Query 参数中包含域名而发生误判。
 
@@ -364,8 +364,8 @@ pake https://github.com --name GitHub
 
 选择 Windows 构建使用的 Rust 工具链。仅适用于 Windows，其他平台忽略此选项。
 
-- `msvc`（默认）：Tauri 推荐工具链，需安装 [Visual Studio Build Tools](https://tauri.app/start/prerequisites/#windows)（勾选“使用 C++ 的桌面开发”工作负载）
-- `gnu`：改用 MinGW/MSYS2 工具链构建，适合已安装 Rust 和 GNU 工具链（例如通过 [MSYS2](https://www.msys2.org/)）但没有安装 Visual Studio Build Tools 的机器。仅支持 `x64`（MSYS2 未提供该目标的 ARM64 GCC 工具链）。需要 `PATH` 中包含 `gcc`、`ld` 和 `dlltool`
+- `msvc`（默认）：Tauri 推荐工具链，需安装 [Visual Studio Build Tools](https://tauri.app/start/prerequisites/#windows)（勾选“使用 C++ 的桌面开发”工作负载）。
+- `gnu`：改用 MinGW/MSYS2 工具链构建，适合已安装 Rust 和 GNU 工具链（例如通过 [MSYS2](https://www.msys2.org/)）但没有安装 Visual Studio Build Tools 的机器。仅支持 `x64`（MSYS2 未提供该目标的 ARM64 GCC 工具链）。需要 `PATH` 中包含 `gcc`、`ld` 和 `dlltool`。
 
 ```shell
 --windows-toolchain <msvc|gnu>
@@ -490,7 +490,7 @@ pake https://planka.example.com --name PlankApp --enable-drag-drop
 
 #### [keep-binary]
 
-构建后保留免安装的独立运行文件，默认为 `false`。除各平台标准安装包外，将在当前目录额外输出二进制（Unix 为 `AppName-binary`，Windows 为 `AppName.exe`）。使用 `--windows-toolchain gnu` 时同步输出 `WebView2Loader.dll`。
+构建后保留免安装的独立运行文件，默认为 `false`。除各平台标准安装包外，还会在当前目录额外输出二进制（Unix 为 `AppName-binary`，Windows 为 `AppName.exe`）。使用 `--windows-toolchain gnu` 时同步输出 `WebView2Loader.dll`。
 
 ```shell
 --keep-binary
@@ -562,7 +562,7 @@ pake https://chat.example.com --name ChatApp --multi-instance
 - `--multi-instance`：启动多个独立应用进程
 - `--multi-window`：单进程内创建并维护多个窗口
 
-启用后，在应用运行状态下再次启动将新建窗口而非仅聚焦已有窗口。
+启用后，如果应用已在运行，再次启动会新开一个窗口，而不是仅聚焦已有窗口。
 
 在 macOS 上，通过 Cmd+N 打开的附加窗口会自动加入应用的原生标签页组；网页认证和 `window.open` 弹窗仍保持独立。
 
@@ -585,7 +585,7 @@ pake https://chat.example.com --name ChatApp --multi-window
 
 #### [use-local-file]
 
-当 `url` 为本地文件路径时，递归将目标文件所在目录及其子文件复制到应用的静态资源目录中，默认不启用。
+当 `url` 为本地文件路径时，如果启用此选项，则会递归地将 `url` 路径文件所在的文件夹及其所有子文件复制到 Pake 的静态文件夹。默认不启用。
 
 目录输入（如 `pake ./dist`）始终打包整个目录树，此选项仅影响单个 HTML 文件输入。
 
@@ -615,13 +615,13 @@ pake ./my-app/index.html --name "my-app" --use-local-file
 
 #### [download-dir]
 
-指定打包后应用的默认下载目录，普通链接下载与原生下载均生效，未指定时沿用系统 Downloads 目录。
+指定打包后应用的默认下载目录，普通链接下载和浏览器原生下载都用这个目录，未指定时沿用系统 Downloads 目录。
 
 ```bash
 pake https://example.com --name MyApp --download-dir '~/Documents/MyApp'
 ```
 
-支持绝对路径（如 Windows 的 `C:\Users\Alice\Documents\MyApp`）或带引号的 `~/路径`（引号可保留 `~`，确保在运行时动态解析为使用者的主目录）。目录不存在时将在首次下载时自动创建；不支持相对路径，目录不可访问时下载会失败，不会悄悄改存到其他位置。JSON 配置对应字段为 `downloadDir`，修改已有应用的下载目录需重新打包。
+支持绝对路径（如 Windows 的 `C:\Users\Alice\Documents\MyApp`）或带引号的 `~/路径`，引号可保留 `~`，让它在应用运行时指向使用者的主目录，而非打包机器的主目录。目录不存在时会在首次下载时创建；不支持相对路径，目录不可访问时下载会失败，不会悄悄改存到其他位置。JSON 配置对应字段为 `downloadDir`，修改已有应用的下载目录需重新打包。
 
 #### [proxy-url]
 
@@ -650,7 +650,7 @@ pake https://example.com --name MyApp --download-dir '~/Documents/MyApp'
 
 #### [config]
 
-使用声明式 JSON 配置文件代替命令行参数拼接。字段名为 camelCase 格式的 CLI 选项名，外加 `url`；详见 [schema/pake.schema.json](../schema/pake.schema.json)。显式传入的命令行参数优先级始终高于配置文件。未知字段、类型错误或超范围数值将直接报错中断。相对路径形式的 `url` 相对当前工作目录解析，而非配置文件所在目录。调用参数（`--json`、`--config`、`--version`）不允许写进配置文件。
+使用声明式 JSON 配置文件代替命令行参数拼接。字段名为 camelCase 格式的 CLI 选项名，外加 `url`；详见 [schema/pake.schema.json](../schema/pake.schema.json)。显式传入的命令行参数优先级始终高于配置文件。未知字段、类型错误或超范围数值会立即报错。相对路径形式的 `url` 相对当前工作目录解析，而非配置文件所在目录。调用参数（`--json`、`--config`、`--version`）不允许写进配置文件。
 
 ```shell
 --config <path>
