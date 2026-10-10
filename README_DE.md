@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://gw.alipayobjects.com/zos/k/fa/logo-modified.png" width="138" />
   <h1>Pake</h1>
-  <p><b>Verwandeln Sie jede Webseite mit einem einzigen Befehl in eine Desktop-App. Unterstützt macOS, Windows und Linux</b></p>
+  <p><b>Verwandeln Sie jede Webseite mit einem einzigen Befehl in eine Desktop-App. Unterstützt macOS, Windows und Linux.</b></p>
   <p><a href="README.md">English</a> · <a href="README_CN.md">中文</a> · <a href="README_TW.md">繁體</a> · <a href="README_JA.md">日本語</a> · <a href="README_KR.md">한국어</a> · Deutsch · <a href="README_FR.md">Français</a></p>
   <a href="https://twitter.com/HiTw93" target="_blank"><img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
   <a href="https://t.me/+9f9gf4ZrFSQ2OWVl" target="_blank"><img alt="telegram" src="https://img.shields.io/badge/chat-telegram-blueviolet?style=flat-square&logo=Telegram"></a>
