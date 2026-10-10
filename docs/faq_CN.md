@@ -106,6 +106,12 @@ sudo apt-get update
 sudo apt-get install -y libayatana-appindicator3-dev
 ```
 
+Fedora 等 RPM 系发行版遇到同样的报错，安装 `libappindicator-gtk3-devel`：
+
+```bash
+sudo dnf install -y libappindicator-gtk3-devel
+```
+
 ---
 
 ### Linux：在 Fedora / RHEL / Oracle Linux 等 RPM 系发行版上安装
