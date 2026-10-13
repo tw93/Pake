@@ -26,6 +26,8 @@ pub struct WindowConfig {
     pub activation_shortcut: String,
     pub hide_on_close: bool,
     pub incognito: bool,
+    #[serde(default = "default_restore_last_url")]
+    pub restore_last_url: bool,
     #[serde(default)]
     pub password_autosave: bool,
     pub title: Option<String>,
@@ -54,6 +56,10 @@ fn default_zoom() -> u32 {
     100
 }
 
+fn default_restore_last_url() -> bool {
+    true
+}
+
 #[cfg(any(windows, test))]
 impl WindowConfig {
     pub fn password_autosave_enabled(&self) -> bool {
@@ -62,6 +68,10 @@ impl WindowConfig {
 }
 
 impl WindowConfig {
+    pub fn remembers_last_url(&self) -> bool {
+        self.restore_last_url && self.url_type == "web" && !self.incognito
+    }
+
     /// The overlay title bar (`hide_title_bar`) keeps precedence, so existing
     /// configs behave exactly as before.
     pub fn title_bar_follows_page(&self) -> bool {
@@ -197,6 +207,36 @@ mod tests {
         config.windows[0].url = url.into();
         config.windows[0].url_type = "web".into();
         config
+    }
+
+    #[test]
+    fn last_url_restoration_defaults_on_and_preserves_private_and_local_exclusions() {
+        let mut window = config_for("https://example.com").windows.remove(0);
+        let mut legacy = serde_json::to_value(&window).unwrap();
+        legacy.as_object_mut().unwrap().remove("restore_last_url");
+        let legacy: WindowConfig = serde_json::from_value(legacy.clone()).unwrap();
+        assert!(legacy.restore_last_url);
+        assert!(legacy.remembers_last_url());
+
+        for enabled in [false, true] {
+            for incognito in [false, true] {
+                for url_type in ["web", "local"] {
+                    window.restore_last_url = enabled;
+                    window.incognito = incognito;
+                    window.url_type = url_type.into();
+                    assert_eq!(
+                        window.remembers_last_url(),
+                        enabled && !incognito && url_type == "web"
+                    );
+                }
+            }
+        }
+
+        let mut disabled = serde_json::to_value(legacy).unwrap();
+        disabled["restore_last_url"] = false.into();
+        let disabled: WindowConfig = serde_json::from_value(disabled).unwrap();
+        assert!(!disabled.remembers_last_url());
+        assert!(!disabled.incognito);
     }
 
     #[test]

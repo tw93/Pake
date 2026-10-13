@@ -444,6 +444,14 @@ pake https://github.com --name GitHub --show-system-tray --start-to-tray
 --title "音乐播放器"
 ```
 
+#### [no-restore-last-url]
+
+网页应用默认恢复主窗口上次打开的网址，使用此选项后每次启动都打开打包时的地址，仍保留 Cookie、Local Storage 和登录状态，使用 `--config` 时在 JSON 中设置 `"restoreLastUrl": false`，无痕模式和本地页面不恢复网址。
+
+```shell
+pake https://www.rememberthemilk.com --name RememberTheMilk --no-restore-last-url
+```
+
 #### [incognito]
 
 以无痕模式启动应用，默认为 `false`，启用后不保留 Cookie、Local Storage 和历史记录，适用于注重隐私或临时登录场景。

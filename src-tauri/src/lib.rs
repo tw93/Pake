@@ -306,8 +306,7 @@ pub fn run_app() {
 
     let show_system_tray = pake_config.show_system_tray();
     let hide_on_close = pake_config.windows[0].hide_on_close;
-    let remember_url =
-        pake_config.windows[0].url_type == "web" && !pake_config.windows[0].incognito;
+    let remember_url = pake_config.windows[0].remembers_last_url();
     let activation_shortcut = pake_config.windows[0].activation_shortcut.clone();
     let init_fullscreen = pake_config.windows[0].fullscreen;
     let start_to_tray = pake_config.windows[0].start_to_tray && show_system_tray; // Only valid when tray is enabled

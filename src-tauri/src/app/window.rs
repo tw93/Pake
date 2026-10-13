@@ -431,10 +431,7 @@ fn build_window(
         ))
     })?;
 
-    let restored_url = if label == "pake"
-        && window_config.url_type == "web"
-        && !window_config.incognito
-    {
+    let restored_url = if label == "pake" && window_config.remembers_last_url() {
         match app.path().app_data_dir() {
             Ok(directory) => match crate::util::read_last_url(&directory.join("last-url.txt")) {
                 Ok(url) => url,

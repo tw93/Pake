@@ -1,10 +1,26 @@
-import { InvalidArgumentError } from 'commander';
+import { Command, InvalidArgumentError } from 'commander';
 import { describe, expect, it } from 'vitest';
 import { getCliProgram } from '../../bin/helpers/cli-program.js';
 import { validateNumberInput } from '../../bin/utils/validate.js';
 
 describe('CLI options', () => {
   const program = getCliProgram();
+
+  it.each([{ args: [] }, { args: ['--no-restore-last-url'] }])(
+    'keeps URL restoration on by default and parses the opt-out: $args',
+    ({ args }) => {
+      const option = program.options.find(
+        (item) => item.long === '--no-restore-last-url',
+      );
+      expect(option).toBeDefined();
+      const command = new Command().addOption(option!);
+      command.parse(args, { from: 'user' });
+      expect(command.opts().restoreLastUrl).toBe(args.length === 0);
+      expect(command.getOptionValueSource('restoreLastUrl')).toBe(
+        args.length === 0 ? 'default' : 'cli',
+      );
+    },
+  );
 
   it('shows meta options in help', () => {
     const help = program.helpInformation();

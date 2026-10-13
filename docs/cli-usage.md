@@ -444,6 +444,14 @@ Set the window title bar text. macOS shows no title if not specified; Windows/Li
 --title "Google Translate"
 ```
 
+#### [no-restore-last-url]
+
+Web apps restore the main window's last URL by default. Use this option to open the packaged URL on every launch while keeping cookies, local storage, and login sessions. In a `--config` JSON file, set `"restoreLastUrl": false`. Incognito sessions and local pages do not restore URLs.
+
+```shell
+pake https://www.rememberthemilk.com --name RememberTheMilk --no-restore-last-url
+```
+
 #### [incognito]
 
 Launch the application in incognito/private browsing mode. Default is `false`. When enabled, the webview will run in private mode, which means it won't store cookies, local storage, or browsing history. This is useful for privacy-sensitive applications.

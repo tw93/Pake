@@ -54,6 +54,7 @@ export function buildWindowConfigOverrides(
     disabled_web_shortcuts: options.disabledWebShortcuts,
     hide_on_close: platformHideOnClose,
     incognito: options.incognito,
+    restore_last_url: options.restoreLastUrl,
     password_autosave: options.passwordAutosave,
     title: options.title,
     enable_wasm: options.wasm,

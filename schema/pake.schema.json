@@ -154,6 +154,11 @@
       "type": "boolean",
       "description": "Hide the window on close instead of exiting. Defaults to true on macOS, false elsewhere."
     },
+    "restoreLastUrl": {
+      "type": "boolean",
+      "description": "Restore the last main-window URL on launch. Set false to open the packaged URL while keeping cookies and storage. Ignored in incognito mode and for local pages.",
+      "default": true
+    },
     "incognito": {
       "type": "boolean",
       "description": "Launch in incognito/private mode (no persisted cookies or storage).",

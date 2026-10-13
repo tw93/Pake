@@ -12,6 +12,17 @@ function makeOptions(overrides: Partial<PakeAppOptions> = {}): PakeAppOptions {
 }
 
 describe('buildWindowConfigOverrides', () => {
+  it.each(['darwin', 'win32', 'linux'] as const)(
+    'disables URL restoration without enabling private mode on %s',
+    (platform) => {
+      expect(
+        buildWindowConfigOverrides(
+          makeOptions({ restoreLastUrl: false }),
+          platform,
+        ),
+      ).toMatchObject({ restore_last_url: false, incognito: false });
+    },
+  );
   it.each([false, true])(
     'forwards password autosave=%s to native config',
     (enabled) => {

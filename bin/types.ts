@@ -104,6 +104,9 @@ export interface PakeCliOptions {
   // Launch app in incognito/private mode, default false
   incognito: boolean;
 
+  // Restore the last main-window URL on launch, default true
+  restoreLastUrl: boolean;
+
   // Enable native WebView2 password-save prompts on Windows, default false
   passwordAutosave: boolean;
 
@@ -195,6 +198,7 @@ export interface WindowConfig {
   activation_shortcut: string;
   hide_on_close: boolean;
   incognito: boolean;
+  restore_last_url: boolean;
   password_autosave: boolean;
   title?: string;
   enable_wasm: boolean;

@@ -944,6 +944,7 @@ function buildWindowConfigOverrides(options, platform = asSupportedPlatform(proc
         disabled_web_shortcuts: options.disabledWebShortcuts,
         hide_on_close: platformHideOnClose,
         incognito: options.incognito,
+        restore_last_url: options.restoreLastUrl,
         password_autosave: options.passwordAutosave,
         title: options.title,
         enable_wasm: options.wasm,
@@ -3537,6 +3538,7 @@ const DEFAULT_PAKE_OPTIONS = {
     installerLanguage: 'en-US',
     hideOnClose: undefined, // Platform-specific: true for macOS, false for others
     incognito: false,
+    restoreLastUrl: true,
     passwordAutosave: false,
     wasm: false,
     enableDragDrop: false,
@@ -3705,6 +3707,9 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     })
         .hideHelp())
         .addOption(new Option('--title <string>', 'Window title').hideHelp())
+        .addOption(new Option('--no-restore-last-url', 'Open the packaged URL on launch while keeping cookies and storage')
+        .default(DEFAULT_PAKE_OPTIONS.restoreLastUrl)
+        .hideHelp())
         .addOption(new Option('--incognito', 'Launch app in incognito/private mode')
         .default(DEFAULT_PAKE_OPTIONS.incognito)
         .hideHelp())

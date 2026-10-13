@@ -101,6 +101,22 @@ describe('loadConfigFile', () => {
   });
 
   it.each([false, true])(
+    'loads restoreLastUrl=%s from config',
+    async (enabled) => {
+      const configPath = await writeConfig({ restoreLastUrl: enabled });
+      const loaded = await loadConfigFile(configPath, validKeys);
+      expect(loaded.options.restoreLastUrl).toBe(enabled);
+    },
+  );
+
+  it('rejects a non-boolean restoreLastUrl', async () => {
+    const configPath = await writeConfig({ restoreLastUrl: 'false' });
+    await expect(loadConfigFile(configPath, validKeys)).rejects.toMatchObject({
+      code: 'INVALID_INPUT',
+    });
+  });
+
+  it.each([false, true])(
     'loads passwordAutosave=%s from config',
     async (enabled) => {
       const configPath = await writeConfig({ passwordAutosave: enabled });

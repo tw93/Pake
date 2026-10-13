@@ -181,6 +181,14 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     )
     .addOption(new Option('--title <string>', 'Window title').hideHelp())
     .addOption(
+      new Option(
+        '--no-restore-last-url',
+        'Open the packaged URL on launch while keeping cookies and storage',
+      )
+        .default(DEFAULT.restoreLastUrl)
+        .hideHelp(),
+    )
+    .addOption(
       new Option('--incognito', 'Launch app in incognito/private mode')
         .default(DEFAULT.incognito)
         .hideHelp(),
