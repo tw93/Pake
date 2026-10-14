@@ -49,7 +49,7 @@ Pake/
 | `pnpm install`                             | Install dependencies                                                    |
 | `pnpm run dev`                             | Tauri development mode                                                  |
 | `pnpm run cli:dev`                         | Rollup watch build of `bin/dev.ts` into `dist/dev.js` (debug-level CLI) |
-| `node dist/dev.js <url> --iterative-build` | Rapid build mode: app only, no dmg/deb/msi. Not a check skip            |
+| `node dist/dev.js <url> --iterative-build` | Rapid build mode: macOS `.app` only, no dmg. Not a check skip           |
 | `pnpm run cli:build`                       | Rollup + TypeScript check (catches type errors Prettier misses)         |
 | `pnpm run release:check`                   | The full pre-release gate the `/release` skill requires                 |
 | `pnpm run build`                           | Build for current platform                                              |
@@ -148,6 +148,7 @@ Oracles per row live under `tests/unit/` (for example `event-link-guard.test.js`
 - Not every green CI step is evidence. `Test CLI Integration (smoke)` in `quality-and-test.yml` ends its command with `|| true`, so it reports success no matter how the CLI behaves; it is a log-producer, not a gate. The steps that actually fail on regressions are `Run Fast Test Suite` (all three platforms) and `Full Tauri Build` (real `pnpm test` with a build, push and dispatch only). Cite those when claiming a change is verified, and check for `|| true` and `continue-on-error` before treating any other step as proof. `Rust Code Quality` also runs `cargo test --lib`, the only CI gate for the Rust unit tests.
 - `setup-env` in build mode shares one rust-cache key per OS, and the first job to save wins it: every later restore is a full match and never saves again. A job that installs Rust but does not compile the app (fast lane, clippy) must pass `rust-cache-save: false`, or it seeds an empty target and every release recompiles from scratch. A healthy `v0-rust-pake-build-*` entry is about 1.1 GB and a poisoned one about 109 MB; check `gh cache list --key v0-rust-pake-build` before trusting release timings. Release builds reuse it because the CLI keeps `CARGO_TARGET_DIR` at `src-tauri/target` even inside its private workspace.
 - `.github/workflows/pake-cli.yaml` and `single-app.yaml` are public build surfaces that external users trigger from their own forks (see `docs/github-actions-usage*.md`). Changes there ship to outside users on push to `main`, independent of `V*` releases; treat them like public API, not internal CI.
+- `action.yml` is public too, but reaches `uses: tw93/Pake@v3` users only when the release workflow's `Move Major Action Tag` job moves `v3` to the newest `V3.*` release; an action fix on `main` is not live until then. Do not move `v3` by hand unless that job failed. The action exports `PAKE_CREATE_APP=1` and takes only the package the CLI wrote into the working directory during that run; keep `docs/pake-action*.md` output notes in step with it.
 
 ## Platform-Specific Development
 
