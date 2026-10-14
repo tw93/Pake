@@ -6,7 +6,7 @@
 
 **Pake** - Turn any webpage into a lightweight desktop app with one command.
 
-- **Purpose**: Package any website into a ~5MB desktop app (20x smaller than Electron)
+- **Purpose**: Package any website into a desktop app whose installer is typically under 10 MB (nearly 20x smaller than Electron)
 - **Stack**: Tauri v2 (Rust) + TypeScript CLI
 - **Platforms**: macOS, Windows, Linux
 - **Mechanism**: Uses system webview (WebKit on macOS/Linux, WebView2 on Windows)
