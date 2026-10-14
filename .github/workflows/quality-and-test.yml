@@ -12,7 +12,6 @@ env:
   PNPM_VERSION: "10.26.2"
 
 permissions:
-  actions: write
   contents: read
 
 concurrency:
@@ -57,7 +56,7 @@ jobs:
 
   rust-quality:
     name: Rust Code Quality
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
 
@@ -102,7 +101,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-24.04, windows-latest, macos-latest]
       fail-fast: false
     steps:
       - name: Checkout repository
@@ -137,16 +136,6 @@ jobs:
           CI: true
           NODE_ENV: test
 
-      - name: Test CLI Integration (smoke)
-        shell: bash
-        run: |
-          echo "Testing CLI integration..."
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            timeout 60s PAKE_CREATE_APP=1 node dist/cli.js https://weekly.tw93.fun --name "CITest" --debug --iterative-build || true
-          else
-            timeout 30s PAKE_CREATE_APP=1 node dist/cli.js https://weekly.tw93.fun --name "CITest" --debug --iterative-build || true
-          fi
-
   # Full lane: only runs after merge to main (push event) or manual dispatch.
   # Keeps the real Tauri build coverage off the PR critical path.
   validation-full:
@@ -155,7 +144,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-24.04, windows-latest, macos-latest]
       fail-fast: false
     steps:
       - name: Checkout repository

@@ -137,6 +137,8 @@ jobs:
       needs.build-cli.result == 'success' &&
       (needs.create-release.result == 'success' || needs.create-release.result == 'skipped')
     strategy:
+      # One app failing (e.g. a stuck notarization) must not cancel the others.
+      fail-fast: false
       matrix:
         config: ${{ fromJSON(needs.release-apps.outputs.apps_config) }}
     uses: ./.github/workflows/single-app.yaml
