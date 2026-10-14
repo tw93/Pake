@@ -149,7 +149,8 @@ describe("Workflow path integration", () => {
     ])(
       "passes inputs to %s scripts through env, not shell interpolation",
       (file) => {
-        const workflow = fs.readFileSync(file, "utf8");
+        // Windows checkouts use CRLF; normalize so the split sees each step.
+        const workflow = fs.readFileSync(file, "utf8").replace(/\r\n/g, "\n");
         const scripts = workflow
           .split(/\n\s+run: \|\n/)
           .slice(1)
