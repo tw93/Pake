@@ -35,7 +35,7 @@ Pake is not affiliated with any of these sites. Names, logos and icons belong to
 ## Proposing a site
 
 1. Package the site with the Pake CLI and use it for a few days: sign in, open links, download a file, and check that it is still logged in after a restart.
-2. Add `apps/<id>.json`. Keep `window` empty unless an option fixed a problem you saw, and keep inject files to the smallest change that fixes it.
+2. Add `apps/<id>.json`. Leave `window` out unless an option fixed a problem you saw, and keep inject files to the smallest change that fixes it.
 3. Run `npx vitest run tests/unit/gallery.test.ts`.
 4. Open a pull request saying what you tested and on which platform.
 

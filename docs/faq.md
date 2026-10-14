@@ -40,7 +40,7 @@ When building Pake or using the CLI, you encounter an error like:
 error: failed to parse manifest
 Caused by:
   feature `edition2024` is required
-  this Cargo does not support nightly features, but if you switch to nightly channel you can add `cargo-features = ["edition2024"]
+  this Cargo does not support nightly features, but if you switch to nightly channel you can add `cargo-features = ["edition2024"]`
   to enable this feature
 ```
 

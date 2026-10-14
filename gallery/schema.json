@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/tw93/Pake/main/gallery/schema.json",
   "title": "Pake gallery recipe",
-  "description": "One site in the Pake gallery. Bump version on any change to the recipe or its inject files.",
+  "description": "One site in the Pake gallery. Bump version only when url, window or the inject files change.",
   "type": "object",
   "additionalProperties": false,
   "required": [

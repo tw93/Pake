@@ -161,7 +161,8 @@ pake https://mail.google.com --name "Gmail Work" --identifier com.example.gmail.
 │   │   └── lib.rs         # Application entry point
 │   ├── icons/             # macOS icons (.icns)
 │   ├── png/               # Windows/Linux icons (.ico, .png)
-│   └── pake.json          # Runtime configuration template
+│   ├── pake.json          # Runtime configuration template
+│   └── tauri.*.conf.json  # Platform-specific configs
 ├── scripts/               # Build and utility scripts
 └── tests/                 # Test suites
 ```

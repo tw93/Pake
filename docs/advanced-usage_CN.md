@@ -161,7 +161,8 @@ pake https://mail.google.com --name "Gmail Work" --identifier com.example.gmail.
 │   │   └── lib.rs         # 应用入口
 │   ├── icons/             # macOS 图标 (.icns)
 │   ├── png/               # Windows/Linux 图标 (.ico, .png)
-│   └── pake.json          # 运行时配置模板
+│   ├── pake.json          # 运行时配置模板
+│   └── tauri.*.conf.json  # 平台特定配置
 ├── scripts/               # 实用构建脚本
 └── tests/                 # 测试套件
 ```

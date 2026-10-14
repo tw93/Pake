@@ -112,6 +112,14 @@ Specify the application name. If not provided, you will be prompted to enter it.
 --name "Google Translate"
 ```
 
+#### [identifier]
+
+Set the bundle identifier explicitly. By default Pake derives `com.pake.a<hash>` from the URL and `--name`, so two apps wrapping the same URL under different names install separately. The value must start with a letter, contain only letters, digits, hyphens and dots, and end with a letter or digit.
+
+```shell
+--identifier com.example.gmail.work
+```
+
 #### [icon]
 
 **Optional parameter**: If not provided, Pake will automatically fetch the website's icon and convert to the appropriate format. For custom icons, visit [icon-icons](https://icon-icons.com) or [macOSicons](https://macosicons.com/#/).
