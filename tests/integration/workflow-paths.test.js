@@ -133,8 +133,33 @@ describe("Workflow path integration", () => {
       expect(workflow).toContain("Upload AppImage (Linux)");
       expect(workflow).toContain("Upload RPM (Linux)");
       expect(workflow).toContain("Upload ZST (Linux)");
-      expect(workflow).toContain("path: ${{ inputs.name }}-*.pkg.tar.zst");
+      // The CLI lowercases and hyphenates Linux names, so uploads must not
+      // assume the package is named after the raw name input.
+      for (const ext of ["deb", "AppImage", "rpm", "pkg.tar.zst"]) {
+        expect(workflow).toContain(`path: "*.${ext}"`);
+      }
+      expect(workflow).not.toMatch(
+        /path: \$\{\{ inputs\.name \}\}\.(deb|AppImage|rpm)/,
+      );
     });
+
+    it.each([
+      ".github/workflows/pake-cli.yaml",
+      ".github/workflows/single-app.yaml",
+    ])(
+      "passes inputs to %s scripts through env, not shell interpolation",
+      (file) => {
+        const workflow = fs.readFileSync(file, "utf8");
+        const scripts = workflow
+          .split(/\n\s+run: \|\n/)
+          .slice(1)
+          .map((rest) => rest.split(/\n\s{6}- (?:name|uses):/)[0]);
+        expect(scripts.length).toBeGreaterThan(0);
+        for (const script of scripts) {
+          expect(script).not.toMatch(/\$\{\{\s*inputs\./);
+        }
+      },
+    );
 
     it("should forward the new-window input on every platform", () => {
       const workflow = fs.readFileSync(

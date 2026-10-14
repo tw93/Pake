@@ -83,11 +83,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
-
       - name: Setup Node.js Environment
         uses: ./.github/actions/setup-env
         with:
@@ -100,112 +95,131 @@ jobs:
         if: runner.os == 'Linux'
         uses: rui314/setup-mold@v1
 
-      - name: Rust cache restore
-        uses: actions/cache/restore@v4.2.0
-        id: cache_store
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            src-tauri/target/
-          key: ${{ runner.os }}-cargo-pake-${{ hashFiles('**/Cargo.lock') }}
-
       - name: Build App (Linux/macOS)
         if: runner.os != 'Windows'
         timeout-minutes: 25
         shell: bash
+        env:
+          INPUT_URL: ${{ inputs.url }}
+          INPUT_NAME: ${{ inputs.name }}
+          INPUT_ICON: ${{ inputs.icon }}
+          INPUT_WIDTH: ${{ inputs.width }}
+          INPUT_HEIGHT: ${{ inputs.height }}
+          INPUT_MIN_WIDTH: ${{ inputs.min_width }}
+          INPUT_MIN_HEIGHT: ${{ inputs.min_height }}
+          INPUT_APP_VERSION: ${{ inputs.app_version }}
+          INPUT_FULLSCREEN: ${{ inputs.fullscreen }}
+          INPUT_HIDE_TITLE_BAR: ${{ inputs.hide_title_bar }}
+          INPUT_NEW_WINDOW: ${{ inputs.new_window }}
+          INPUT_MULTI_ARCH: ${{ inputs.multi_arch }}
+          INPUT_TARGETS: ${{ inputs.targets }}
         run: |
-          ARGS=("${{ inputs.url }}" "--name" "${{ inputs.name }}")
+          ARGS=("$INPUT_URL" "--name" "$INPUT_NAME")
 
-          if [ -n "${{ inputs.icon }}" ]; then
-            ARGS+=("--icon" "${{ inputs.icon }}")
+          if [ -n "$INPUT_ICON" ]; then
+            ARGS+=("--icon" "$INPUT_ICON")
           fi
 
-          if [ -n "${{ inputs.width }}" ]; then
-            ARGS+=("--width" "${{ inputs.width }}")
+          if [ -n "$INPUT_WIDTH" ]; then
+            ARGS+=("--width" "$INPUT_WIDTH")
           fi
 
-          if [ -n "${{ inputs.height }}" ]; then
-            ARGS+=("--height" "${{ inputs.height }}")
+          if [ -n "$INPUT_HEIGHT" ]; then
+            ARGS+=("--height" "$INPUT_HEIGHT")
           fi
 
-          if [ -n "${{ inputs.min_width }}" ]; then
-            ARGS+=("--min-width" "${{ inputs.min_width }}")
+          if [ -n "$INPUT_MIN_WIDTH" ]; then
+            ARGS+=("--min-width" "$INPUT_MIN_WIDTH")
           fi
 
-          if [ -n "${{ inputs.min_height }}" ]; then
-            ARGS+=("--min-height" "${{ inputs.min_height }}")
+          if [ -n "$INPUT_MIN_HEIGHT" ]; then
+            ARGS+=("--min-height" "$INPUT_MIN_HEIGHT")
           fi
 
-          if [ -n "${{ inputs.app_version }}" ]; then
-            ARGS+=("--app-version" "${{ inputs.app_version }}")
+          if [ -n "$INPUT_APP_VERSION" ]; then
+            ARGS+=("--app-version" "$INPUT_APP_VERSION")
           fi
 
-          if [ "${{ inputs.fullscreen }}" == "true" ]; then
+          if [ "$INPUT_FULLSCREEN" == "true" ]; then
             ARGS+=("--fullscreen")
           fi
 
-          if [ "${{ inputs.hide_title_bar }}" == "true" ]; then
+          if [ "$INPUT_HIDE_TITLE_BAR" == "true" ]; then
             ARGS+=("--hide-title-bar")
           fi
 
-          if [ "${{ inputs.new_window }}" == "true" ]; then
+          if [ "$INPUT_NEW_WINDOW" == "true" ]; then
             ARGS+=("--new-window")
           fi
 
-          if [ "${{ inputs.multi_arch }}" == "true" ]; then
+          if [ "$INPUT_MULTI_ARCH" == "true" ]; then
             ARGS+=("--multi-arch")
           fi
 
-          if [ -n "${{ inputs.targets }}" ] && [ "${{ runner.os }}" == "Linux" ]; then
-            ARGS+=("--targets" "${{ inputs.targets }}")
+          if [ -n "$INPUT_TARGETS" ] && [ "$RUNNER_OS" == "Linux" ]; then
+            ARGS+=("--targets" "$INPUT_TARGETS")
           fi
 
-          echo "Running: node dist/cli.js ${ARGS[@]}"
+          printf 'Running: node dist/cli.js'
+          printf ' %q' "${ARGS[@]}"
+          printf '\n'
           node dist/cli.js "${ARGS[@]}"
 
       - name: Build App (Windows)
         if: runner.os == 'Windows'
         timeout-minutes: 25
         shell: pwsh
+        env:
+          INPUT_URL: ${{ inputs.url }}
+          INPUT_NAME: ${{ inputs.name }}
+          INPUT_ICON: ${{ inputs.icon }}
+          INPUT_WIDTH: ${{ inputs.width }}
+          INPUT_HEIGHT: ${{ inputs.height }}
+          INPUT_MIN_WIDTH: ${{ inputs.min_width }}
+          INPUT_MIN_HEIGHT: ${{ inputs.min_height }}
+          INPUT_APP_VERSION: ${{ inputs.app_version }}
+          INPUT_FULLSCREEN: ${{ inputs.fullscreen }}
+          INPUT_HIDE_TITLE_BAR: ${{ inputs.hide_title_bar }}
+          INPUT_NEW_WINDOW: ${{ inputs.new_window }}
+          INPUT_MULTI_ARCH: ${{ inputs.multi_arch }}
+          INPUT_TARGETS: ${{ inputs.targets }}
         run: |
-          $args = "${{ inputs.url }}", "--name", "${{ inputs.name }}"
+          $args = $env:INPUT_URL, "--name", $env:INPUT_NAME
 
-          if ("${{ inputs.icon }}" -ne "") {
-            $args += "--icon", "${{ inputs.icon }}"
+          # Empty environment variables are unset on Windows, so test for null too.
+          if (-not [string]::IsNullOrEmpty($env:INPUT_ICON)) {
+            $args += "--icon", $env:INPUT_ICON
           }
 
-          if ("${{ inputs.width }}" -ne "") {
-            $args += "--width", "${{ inputs.width }}"
+          if (-not [string]::IsNullOrEmpty($env:INPUT_WIDTH)) {
+            $args += "--width", $env:INPUT_WIDTH
           }
 
-          if ("${{ inputs.height }}" -ne "") {
-            $args += "--height", "${{ inputs.height }}"
+          if (-not [string]::IsNullOrEmpty($env:INPUT_HEIGHT)) {
+            $args += "--height", $env:INPUT_HEIGHT
           }
 
-          if ("${{ inputs.min_width }}" -ne "") {
-            $args += "--min-width", "${{ inputs.min_width }}"
+          if (-not [string]::IsNullOrEmpty($env:INPUT_MIN_WIDTH)) {
+            $args += "--min-width", $env:INPUT_MIN_WIDTH
           }
 
-          if ("${{ inputs.min_height }}" -ne "") {
-            $args += "--min-height", "${{ inputs.min_height }}"
+          if (-not [string]::IsNullOrEmpty($env:INPUT_MIN_HEIGHT)) {
+            $args += "--min-height", $env:INPUT_MIN_HEIGHT
           }
 
-          if ("${{ inputs.app_version }}" -ne "") {
-            $args += "--app-version", "${{ inputs.app_version }}"
+          if (-not [string]::IsNullOrEmpty($env:INPUT_APP_VERSION)) {
+            $args += "--app-version", $env:INPUT_APP_VERSION
           }
 
-          if ("${{ inputs.fullscreen }}" -eq "true") {
+          if ($env:INPUT_FULLSCREEN -eq "true") {
             $args += "--fullscreen"
           }
 
-          if ("${{ inputs.hide_title_bar }}" -eq "true") {
+          if ($env:INPUT_HIDE_TITLE_BAR -eq "true") {
             $args += "--hide-title-bar"
           }
 
-          if ("${{ inputs.new_window }}" -eq "true") {
+          if ($env:INPUT_NEW_WINDOW -eq "true") {
             $args += "--new-window"
           }
 
@@ -222,12 +236,13 @@ jobs:
           path: ${{ inputs.name }}.dmg
           retention-days: 3
 
+      # The CLI lowercases and hyphenates Linux names, so match packages by extension.
       - name: Upload DEB (Linux)
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v6
         with:
           name: ${{ inputs.name }}-Linux-deb
-          path: ${{ inputs.name }}.deb
+          path: "*.deb"
           retention-days: 3
           if-no-files-found: ignore
 
@@ -236,7 +251,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: ${{ inputs.name }}-Linux-AppImage
-          path: ${{ inputs.name }}.AppImage
+          path: "*.AppImage"
           retention-days: 3
           if-no-files-found: ignore
 
@@ -245,7 +260,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: ${{ inputs.name }}-Linux-rpm
-          path: ${{ inputs.name }}.rpm
+          path: "*.rpm"
           retention-days: 3
           if-no-files-found: ignore
 
@@ -254,7 +269,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: ${{ inputs.name }}-Linux-zst
-          path: ${{ inputs.name }}-*.pkg.tar.zst
+          path: "*.pkg.tar.zst"
           retention-days: 3
           if-no-files-found: ignore
 
@@ -265,15 +280,3 @@ jobs:
           name: ${{ inputs.name }}-Windows
           path: ${{ inputs.name }}.msi
           retention-days: 3
-
-      - name: Rust cache store
-        uses: actions/cache/save@v4.2.0
-        if: steps.cache_store.outputs.cache-hit != 'true'
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            src-tauri/target/
-          key: ${{ runner.os }}-cargo-pake-${{ hashFiles('**/Cargo.lock') }}

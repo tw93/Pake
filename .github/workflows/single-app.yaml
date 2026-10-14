@@ -117,7 +117,7 @@ jobs:
         build: [linux, macos, windows]
         include:
           - build: linux
-            os: ubuntu-latest
+            os: ubuntu-24.04
             rust: stable
           - build: windows
             os: windows-latest
@@ -146,7 +146,7 @@ jobs:
         run: pnpm run cli:build
 
       - name: Setup mold linker
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.build == 'linux'
         uses: rui314/setup-mold@v1
 
       - name: Prepare macOS signing
@@ -198,28 +198,37 @@ jobs:
           echo "Using signing identity: $SIGNING_IDENTITY"
 
       - name: Build for Linux
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.build == 'linux'
         timeout-minutes: 20
+        env:
+          INPUT_URL: ${{ inputs.url }}
+          INPUT_NAME: ${{ inputs.name }}
+          INPUT_TITLE: ${{ inputs.title }}
+          INPUT_ICON: ${{ inputs.icon }}
+          INPUT_NEW_WINDOW: ${{ inputs.new_window }}
+          INPUT_INCOGNITO: ${{ inputs.incognito }}
+          INPUT_WIDTH: ${{ inputs.width }}
+          INPUT_HEIGHT: ${{ inputs.height }}
         run: |
-          ARGS=("${{ inputs.url }}" "--name" "${{ inputs.name }}")
+          ARGS=("${INPUT_URL}" "--name" "${INPUT_NAME}")
 
           # Auto-detect local icon or use provided icon
-          if [ -n "${{ inputs.icon }}" ]; then
-            ARGS+=("--icon" "${{ inputs.icon }}")
-          elif [ -f "src-tauri/png/${{ inputs.name }}_512.png" ]; then
-            ARGS+=("--icon" "src-tauri/png/${{ inputs.name }}_512.png")
+          if [ -n "${INPUT_ICON}" ]; then
+            ARGS+=("--icon" "${INPUT_ICON}")
+          elif [ -f "src-tauri/png/${INPUT_NAME}_512.png" ]; then
+            ARGS+=("--icon" "src-tauri/png/${INPUT_NAME}_512.png")
           fi
 
-          if [ "${{ inputs.new_window }}" = "true" ]; then
+          if [ "${INPUT_NEW_WINDOW}" = "true" ]; then
             ARGS+=("--new-window")
           fi
 
-          if [ "${{ inputs.incognito }}" = "true" ]; then
+          if [ "${INPUT_INCOGNITO}" = "true" ]; then
             ARGS+=("--incognito")
           fi
 
-          ARGS+=("--width" "${{ inputs.width }}")
-          ARGS+=("--height" "${{ inputs.height }}")
+          ARGS+=("--width" "${INPUT_WIDTH}")
+          ARGS+=("--height" "${INPUT_HEIGHT}")
 
           # Compile once, then bundle each requested format independently.
           node dist/cli.js "${ARGS[@]}" --targets deb,appimage
@@ -228,20 +237,20 @@ jobs:
 
           # The CLI copies files to project root and removes them from bundle directory
           # Check project root first, then fallback to bundle directory
-          if [ -f "${{ inputs.name }}.deb" ]; then
-            mv "${{ inputs.name }}.deb" output/linux/${{inputs.title}}_`arch`.deb
+          if [ -f "${INPUT_NAME}.deb" ]; then
+            mv "${INPUT_NAME}.deb" "output/linux/${INPUT_TITLE}_$(arch).deb"
           elif [ -n "$(ls src-tauri/target/release/bundle/deb/*.deb 2>/dev/null)" ]; then
-            mv src-tauri/target/release/bundle/deb/*.deb output/linux/${{inputs.title}}_`arch`.deb
+            mv src-tauri/target/release/bundle/deb/*.deb "output/linux/${INPUT_TITLE}_$(arch).deb"
           else
             echo "Error: No DEB file found"
             find . -name "*.deb" -type f
             exit 1
           fi
 
-          if [ -f "${{ inputs.name }}.AppImage" ]; then
-            mv "${{ inputs.name }}.AppImage" output/linux/"${{inputs.title}}"_`arch`.AppImage
+          if [ -f "${INPUT_NAME}.AppImage" ]; then
+            mv "${INPUT_NAME}.AppImage" "output/linux/${INPUT_TITLE}_$(arch).AppImage"
           elif [ -n "$(ls src-tauri/target/release/bundle/appimage/*.AppImage 2>/dev/null)" ]; then
-            mv src-tauri/target/release/bundle/appimage/*.AppImage output/linux/"${{inputs.title}}"_`arch`.AppImage
+            mv src-tauri/target/release/bundle/appimage/*.AppImage "output/linux/${INPUT_TITLE}_$(arch).AppImage"
           else
             echo "Error: No AppImage file found"
             find . -name "*.AppImage" -type f
@@ -253,27 +262,35 @@ jobs:
         timeout-minutes: 25
         env:
           TAURI_BUNDLER_DMG_IGNORE_CI: "true"
+          INPUT_URL: ${{ inputs.url }}
+          INPUT_NAME: ${{ inputs.name }}
+          INPUT_TITLE: ${{ inputs.title }}
+          INPUT_ICON: ${{ inputs.icon }}
+          INPUT_NEW_WINDOW: ${{ inputs.new_window }}
+          INPUT_INCOGNITO: ${{ inputs.incognito }}
+          INPUT_WIDTH: ${{ inputs.width }}
+          INPUT_HEIGHT: ${{ inputs.height }}
         run: |
           # Use title as app product name on macOS to preserve display casing in .app
-          ARGS=("${{ inputs.url }}" "--name" "${{ inputs.title }}" "--hide-title-bar")
+          ARGS=("${INPUT_URL}" "--name" "${INPUT_TITLE}" "--hide-title-bar")
 
           # Auto-detect local icon or use provided icon
-          if [ -n "${{ inputs.icon }}" ]; then
-            ARGS+=("--icon" "${{ inputs.icon }}")
-          elif [ -f "src-tauri/icons/${{ inputs.name }}.icns" ]; then
-            ARGS+=("--icon" "src-tauri/icons/${{ inputs.name }}.icns")
+          if [ -n "${INPUT_ICON}" ]; then
+            ARGS+=("--icon" "${INPUT_ICON}")
+          elif [ -f "src-tauri/icons/${INPUT_NAME}.icns" ]; then
+            ARGS+=("--icon" "src-tauri/icons/${INPUT_NAME}.icns")
           fi
 
-          if [ "${{ inputs.new_window }}" = "true" ]; then
+          if [ "${INPUT_NEW_WINDOW}" = "true" ]; then
             ARGS+=("--new-window")
           fi
 
-          if [ "${{ inputs.incognito }}" = "true" ]; then
+          if [ "${INPUT_INCOGNITO}" = "true" ]; then
             ARGS+=("--incognito")
           fi
 
-          ARGS+=("--width" "${{ inputs.width }}")
-          ARGS+=("--height" "${{ inputs.height }}")
+          ARGS+=("--width" "${INPUT_WIDTH}")
+          ARGS+=("--height" "${INPUT_HEIGHT}")
 
           node dist/cli.js "${ARGS[@]}" --targets universal --multi-arch
 
@@ -281,16 +298,16 @@ jobs:
 
           # The CLI copies the DMG to project root and removes it from bundle directory
           # Check project root first, then fallback to bundle directory
-          if [ -f "${{ inputs.title }}.dmg" ]; then
-            mv "${{ inputs.title }}.dmg" output/macos/"${{inputs.title}}".dmg
-          elif [ -f "${{ inputs.name }}.dmg" ]; then
-            mv "${{ inputs.name }}.dmg" output/macos/"${{inputs.title}}".dmg
+          if [ -f "${INPUT_TITLE}.dmg" ]; then
+            mv "${INPUT_TITLE}.dmg" output/macos/"${INPUT_TITLE}".dmg
+          elif [ -f "${INPUT_NAME}.dmg" ]; then
+            mv "${INPUT_NAME}.dmg" output/macos/"${INPUT_TITLE}".dmg
           elif [ -n "$(ls src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg 2>/dev/null)" ]; then
-            mv src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg output/macos/"${{inputs.title}}".dmg
+            mv src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg output/macos/"${INPUT_TITLE}".dmg
           else
             echo "Error: No DMG file found"
             echo "Searched locations:"
-            echo "  - ${{ inputs.name }}.dmg (project root)"
+            echo "  - ${INPUT_NAME}.dmg (project root)"
             echo "  - src-tauri/target/universal-apple-darwin/release/bundle/dmg/"
             find . -name "*.dmg" -type f
             exit 1
@@ -298,7 +315,9 @@ jobs:
 
       - name: Notarize macOS DMG
         if: matrix.os == 'macos-latest'
+        timeout-minutes: 30
         env:
+          INPUT_TITLE: ${{ inputs.title }}
           PAKE_NOTARIZE_APPLE_ID: ${{ secrets.PAKE_NOTARIZE_APPLE_ID }}
           PAKE_NOTARIZE_TEAM_ID: ${{ secrets.PAKE_NOTARIZE_TEAM_ID }}
           PAKE_NOTARIZE_PASSWORD: ${{ secrets.PAKE_NOTARIZE_PASSWORD }}
@@ -310,7 +329,7 @@ jobs:
             exit 0
           fi
 
-          DMG_PATH="output/macos/${{inputs.title}}.dmg"
+          DMG_PATH="output/macos/${INPUT_TITLE}.dmg"
           if [ ! -f "$DMG_PATH" ]; then
             echo "Error: DMG file not found at $DMG_PATH"
             exit 1
@@ -329,27 +348,36 @@ jobs:
       - name: Build for Windows
         if: matrix.os == 'windows-latest'
         timeout-minutes: 20
+        env:
+          INPUT_URL: ${{ inputs.url }}
+          INPUT_NAME: ${{ inputs.name }}
+          INPUT_TITLE: ${{ inputs.title }}
+          INPUT_ICON: ${{ inputs.icon }}
+          INPUT_NEW_WINDOW: ${{ inputs.new_window }}
+          INPUT_INCOGNITO: ${{ inputs.incognito }}
+          INPUT_WIDTH: ${{ inputs.width }}
+          INPUT_HEIGHT: ${{ inputs.height }}
         run: |
           # Use title as app product name on Windows to preserve display casing
-          $args = "${{ inputs.url }}", "--name", "${{ inputs.title }}"
+          $args = $env:INPUT_URL, "--name", $env:INPUT_TITLE
 
           # Auto-detect local icon or use provided icon
-          if ("${{ inputs.icon }}" -ne "") {
-            $args += "--icon", "${{ inputs.icon }}"
-          } elseif (Test-Path "src-tauri\png\${{ inputs.name }}_256.ico") {
-            $args += "--icon", "src-tauri\png\${{ inputs.name }}_256.ico"
+          if (-not [string]::IsNullOrEmpty($env:INPUT_ICON)) {
+            $args += "--icon", $env:INPUT_ICON
+          } elseif (Test-Path "src-tauri\png\$($env:INPUT_NAME)_256.ico") {
+            $args += "--icon", "src-tauri\png\$($env:INPUT_NAME)_256.ico"
           }
 
-          if ("${{ inputs.new_window }}" -eq "true") {
+          if ($env:INPUT_NEW_WINDOW -eq "true") {
             $args += "--new-window"
           }
 
-          if ("${{ inputs.incognito }}" -eq "true") {
+          if ($env:INPUT_INCOGNITO -eq "true") {
             $args += "--incognito"
           }
 
-          $args += "--width", "${{ inputs.width }}"
-          $args += "--height", "${{ inputs.height }}"
+          $args += "--width", $env:INPUT_WIDTH
+          $args += "--height", $env:INPUT_HEIGHT
 
           $args += "--targets", "x64"
 
@@ -359,13 +387,13 @@ jobs:
 
           # The CLI copies the MSI to project root and removes it from bundle directory
           # Check project root first, then fallback to bundle directories
-          $projectRootMsi = "${{ inputs.title }}.msi"
-          $legacyProjectRootMsi = "${{ inputs.name }}.msi"
+          $projectRootMsi = "$($env:INPUT_TITLE).msi"
+          $legacyProjectRootMsi = "$($env:INPUT_NAME).msi"
 
           if (Test-Path $projectRootMsi) {
-            Move-Item -Path $projectRootMsi -Destination "output\windows\${{inputs.title}}_x64.msi"
+            Move-Item -Path $projectRootMsi -Destination "output\windows\$($env:INPUT_TITLE)_x64.msi"
           } elseif (Test-Path $legacyProjectRootMsi) {
-            Move-Item -Path $legacyProjectRootMsi -Destination "output\windows\${{inputs.title}}_x64.msi"
+            Move-Item -Path $legacyProjectRootMsi -Destination "output\windows\$($env:INPUT_TITLE)_x64.msi"
           } else {
             # Check architecture-specific path (x64 builds)
             $msiFiles = Get-ChildItem -Path "src-tauri\target\x86_64-pc-windows-msvc\release\bundle\msi\*.msi" -ErrorAction SilentlyContinue
@@ -376,7 +404,7 @@ jobs:
             }
 
             if ($msiFiles) {
-              Move-Item -Path $msiFiles[0].FullName -Destination "output\windows\${{inputs.title}}_x64.msi"
+              Move-Item -Path $msiFiles[0].FullName -Destination "output\windows\$($env:INPUT_TITLE)_x64.msi"
             } else {
               Write-Error "No MSI files found in expected locations"
               Write-Host "Searched paths:"
@@ -401,7 +429,7 @@ jobs:
 
       - name: Upload to release (Linux)
         uses: ncipollo/release-action@v1 # cspell:disable-line
-        if: matrix.os == 'ubuntu-latest' && startsWith(github.ref, 'refs/tags/')
+        if: matrix.build == 'linux' && startsWith(github.ref, 'refs/tags/')
         with:
           allowUpdates: true
           omitBody: true
