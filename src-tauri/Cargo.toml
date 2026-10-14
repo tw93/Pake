@@ -74,6 +74,8 @@ webview2-com = "0.38"
 windows-core = "0.61.2"
 
 [features]
+# Opt-in native Windows test harness; not enabled by packaged apps.
+native-download-probe = []
 # this feature is used for development builds from development cli
 cli-build = []
 # Prebuilt template that reads a pake-runtime folder at launch: Contents/Resources

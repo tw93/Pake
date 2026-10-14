@@ -995,3 +995,8 @@ mod proxy_arg_tests {
         assert!(build_proxy_browser_arg(&parse("https://proxy.local:8443")).is_none());
     }
 }
+
+#[cfg(all(test, target_os = "windows"))]
+#[cfg(feature = "native-download-probe")]
+#[path = "native_download_smoke.rs"]
+mod native_download_smoke;
