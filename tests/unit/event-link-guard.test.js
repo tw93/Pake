@@ -8,6 +8,7 @@ function loadEventHelpers({
   userAgent = "Mozilla/5.0",
   initialZoom = null,
   downloadError = null,
+  nativeDownloads = false,
 } = {}) {
   const source = ["link_policy.js", "event.js"]
     .map((file) =>
@@ -108,6 +109,7 @@ function loadEventHelpers({
       isAuthLink: () => false,
       isAuthPopup: () => false,
       pakeConfig: {},
+      pakeNativeDownloads: nativeDownloads,
     },
     document: {
       addEventListener: registerListener,
@@ -172,6 +174,51 @@ function makeClickEvent(anchor) {
 }
 
 describe("event link guard", () => {
+  it("uses native Windows downloads once for same-origin files without IPC", () => {
+    const context = loadEventHelpers({
+      withTauri: true,
+      nativeDownloads: true,
+    });
+    runDomReady(context);
+    const anchor = makeAnchor("https://example.com/report.pdf", "_self");
+    anchor.download = "report.pdf";
+    const click = makeClickEvent(anchor);
+    getClickGuard(context)(click);
+    expect(click.preventDefault).toHaveBeenCalledOnce();
+    expect(context.nativeDownloadClicks).toEqual([[anchor.href, "report.pdf"]]);
+    expect(
+      context.invokeCalls.filter(([command]) => command === "download_file"),
+    ).toEqual([]);
+  });
+
+  it("keeps cross-origin forced downloads on HTTP when the browser may preview them", () => {
+    const context = loadEventHelpers({
+      withTauri: true,
+      nativeDownloads: true,
+    });
+    runDomReady(context);
+    const anchor = makeAnchor("https://cdn.example.com/report.pdf", "_self");
+    anchor.download = "report.pdf";
+    getClickGuard(context)(makeClickEvent(anchor));
+    expect(context.nativeDownloadClicks).toEqual([]);
+    expect(
+      context.invokeCalls.filter(([command]) => command === "download_file"),
+    ).toEqual([
+      [
+        "download_file",
+        {
+          params: {
+            url: anchor.href,
+            filename: "report.pdf",
+            language: "en-US",
+            user_agent: "Mozilla/5.0",
+            page_url: "https://example.com/app",
+          },
+        },
+      ],
+    ]);
+  });
+
   it.each([
     'download_file not allowed on window "pake", webview "pake", URL: https://other.example/',
     "Command download_file not allowed by ACL",

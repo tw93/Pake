@@ -727,6 +727,17 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   function downloadFile(url, filename) {
+    // download attributes reliably force same-origin resources to save instead
+    // of navigating. Cross-origin resources retain the HTTP fallback because
+    // browsers can ignore their download attribute (including PDFs and images).
+    if (
+      window.pakeNativeDownloads === true &&
+      (isSpecialDownload(url) ||
+        new URL(url, window.location.href).origin === window.location.origin)
+    ) {
+      triggerNativeDownload(url, filename);
+      return Promise.resolve();
+    }
     return invoke("download_file", {
       params: {
         url,
