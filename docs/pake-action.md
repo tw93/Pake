@@ -92,11 +92,11 @@ jobs:
 
 ## Supported Platforms
 
-- **Linux**: `.deb` package (Ubuntu runners)
+- **Linux**: `.deb` package, or `.rpm` / `.AppImage` when that is the one that built (Ubuntu runners)
 - **macOS**: `.app` bundle (macOS runners)
-- **Windows**: `.msi` or `.exe` (Windows runners)
+- **Windows**: `.msi` installer (Windows runners)
 
-Each run moves only the first package it finds into the output directory and reports it as `package-path`. Use GitHub's matrix strategy to build for multiple platforms simultaneously.
+Each run moves the one package the CLI wrote during that run into the output directory and reports it as `package-path`; when two packages of the same format turn up, the step fails instead of guessing. Use GitHub's matrix strategy to build for multiple platforms simultaneously.
 
 ## Related Documentation
 

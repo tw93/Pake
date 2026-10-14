@@ -92,11 +92,11 @@ jobs:
 
 ## 支持平台
 
-- **Linux**：`.deb` 安装包（Ubuntu 运行器）
+- **Linux**：`.deb` 安装包，只打出 `.rpm` 或 `.AppImage` 时用那一个（Ubuntu 运行器）
 - **macOS**：`.app` 应用（macOS 运行器）
-- **Windows**：`.msi` 或 `.exe`（Windows 运行器）
+- **Windows**：`.msi` 安装包（Windows 运行器）
 
-每次运行只把找到的第一个安装包移到输出目录并写入 `package-path`，可结合 GitHub Actions 的 `matrix` 策略并发构建全平台安装包。
+每次运行把 CLI 本次写出的那个安装包移到输出目录并写入 `package-path`，同一格式出现两个包时直接报错而不是随便挑一个，可结合 GitHub Actions 的 `matrix` 策略并发构建全平台安装包。
 
 ## 相关文档
 

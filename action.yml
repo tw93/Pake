@@ -113,7 +113,7 @@ runs:
         case "$RUNNER_OS" in
           Windows) PACKAGE_EXTS=(msi) ;;
           Linux) PACKAGE_EXTS=(deb rpm AppImage) ;;
-          macOS) PACKAGE_EXTS=(app dmg) ;;
+          macOS) PACKAGE_EXTS=(app) ;;
           *)
             echo "❌ Unsupported runner OS: $RUNNER_OS" >&2
             exit 1
