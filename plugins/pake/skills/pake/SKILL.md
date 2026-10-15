@@ -9,7 +9,7 @@ allowed-tools:
 
 # Pake - Website to Desktop App
 
-Pake wraps any webpage or local web build into a native desktop app via Tauri (Rust + system WebView). Output is ~5MB (vs Electron's ~150MB).
+Pake wraps any webpage or local web build into a native desktop app via Tauri (Rust + system WebView).
 
 ## Pick the right command first
 
