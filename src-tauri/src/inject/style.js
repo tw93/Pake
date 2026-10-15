@@ -428,6 +428,10 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       padding-top: 10px;
     }
 
+    body:not(.rtl) ._5a20a69 {
+      margin-left: 84px;
+    }
+
     #page .main_header, .cb-layout-basic--navbar,
     #app .splitpanes.splitpanes--horizontal.no-splitter header,
     .fui-FluentProvider .fui-Button[data-testid="HomeButton"],
