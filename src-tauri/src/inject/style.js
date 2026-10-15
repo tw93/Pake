@@ -33,6 +33,14 @@ window.addEventListener("DOMContentLoaded", (_event) => {
   // hidden title bar, where the traffic lights overlap the page.
   const siteStyles = [
     {
+      hosts: ["chatgpt.com", "chat.openai.com"],
+      immersive: `
+        #app-shell-sidebar > div {
+          padding-top: 24px;
+        }
+      `,
+    },
+    {
       hosts: ["x.com", "twitter.com"],
       content: `
         #react-root [data-testid="placementTracking"] article,
@@ -194,6 +202,10 @@ window.addEventListener("DOMContentLoaded", (_event) => {
         .flex.w-full.h-full.overflow-hidden{
           padding-top:20px;
         }
+
+        #grok-app-root [data-sidebar="sidebar"] {
+          padding-top: 24px;
+        }
       `,
     },
     {
@@ -201,6 +213,18 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       immersive: `
         body:not(.rtl) ._5a20a69 {
           margin-left: 84px;
+        }
+
+        .b8812f16 {
+          padding-top: 16px;
+        }
+      `,
+    },
+    {
+      hosts: ["gemini.google.com"],
+      immersive: `
+        .side-nav-menu-button {
+          margin-left: 76px !important;
         }
       `,
     },
