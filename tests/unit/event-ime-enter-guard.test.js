@@ -202,6 +202,15 @@ describe("event Chinese input method Enter guard", () => {
     expect(pageReceived).toBe(true);
   });
 
+  it("lets other composing keys (keyCode 229) reach the page", () => {
+    const context = loadEventHelpers();
+    const event = createKeyEvent("a", { keyCode: 229, isComposing: true });
+
+    const { pageReceived } = dispatchToPage(context, event);
+
+    expect(pageReceived).toBe(true);
+  });
+
   it("keeps the existing Process guard", () => {
     const context = loadEventHelpers();
     const event = createKeyEvent("Process", {

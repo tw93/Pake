@@ -970,10 +970,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // Enter that confirms a candidate arrives after compositionend. keyCode 229
   // is needed here because isComposing can already be false on that keydown.
   // stopPropagation, not preventDefault, so the input method can still commit.
+  // Only Enter is held back; other composing keys still reach editors.
   document.addEventListener(
     "keydown",
     (e) => {
-      if (e.keyCode === 229 || e.key === "Process") e.stopPropagation();
+      const isImeEnter = e.key === "Enter" && e.keyCode === 229;
+      if (isImeEnter || e.key === "Process") e.stopPropagation();
     },
     true,
   );
