@@ -42,6 +42,10 @@ var keywords = [
 	"rust",
 	"tauri",
 	"no-electron",
+	"electron-alternative",
+	"desktop-app",
+	"webview",
+	"website-to-app",
 	"productivity"
 ];
 var files = [
