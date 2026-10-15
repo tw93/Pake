@@ -965,11 +965,17 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log(e);
   }
 
-  // Fix Chinese input method "Enter" on Safari
+  // Fix Chinese input method "Enter" on Safari.
+  // WebKit flags a keydown the input method consumed with keyCode 229, and the
+  // Enter that confirms a candidate arrives after compositionend. keyCode 229
+  // is needed here because isComposing can already be false on that keydown.
+  // stopPropagation, not preventDefault, so the input method can still commit.
+  // Only Enter is held back; other composing keys still reach editors.
   document.addEventListener(
     "keydown",
     (e) => {
-      if (e.key === "Process") e.stopPropagation();
+      const isImeEnter = e.key === "Enter" && e.keyCode === 229;
+      if (isImeEnter || e.key === "Process") e.stopPropagation();
     },
     true,
   );
