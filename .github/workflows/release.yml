@@ -142,7 +142,13 @@ jobs:
       matrix:
         config: ${{ fromJSON(needs.release-apps.outputs.apps_config) }}
     uses: ./.github/workflows/single-app.yaml
-    secrets: inherit
+    secrets:
+      PAKE_SIGNING_IDENTITY: ${{ secrets.PAKE_SIGNING_IDENTITY }}
+      PAKE_CERTIFICATE_P12: ${{ secrets.PAKE_CERTIFICATE_P12 }}
+      PAKE_CERTIFICATE_PASSWORD: ${{ secrets.PAKE_CERTIFICATE_PASSWORD }}
+      PAKE_NOTARIZE_APPLE_ID: ${{ secrets.PAKE_NOTARIZE_APPLE_ID }}
+      PAKE_NOTARIZE_TEAM_ID: ${{ secrets.PAKE_NOTARIZE_TEAM_ID }}
+      PAKE_NOTARIZE_PASSWORD: ${{ secrets.PAKE_NOTARIZE_PASSWORD }}
     with:
       name: ${{ matrix.config.name }}
       title: ${{ matrix.config.title }}
