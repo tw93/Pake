@@ -33,124 +33,13 @@ window.addEventListener("DOMContentLoaded", (_event) => {
   // hidden title bar, where the traffic lights overlap the page.
   const siteStyles = [
     {
-      hosts: ["chatgpt.com", "chat.openai.com"],
-      content: `
-        #__next > div.overflow-hidden.w-full.h-full  .min-h-\\[20px\\].items-start.gap-4.whitespace-pre-wrap.break-words {
-          word-break: break-all;
-        }
-
-        #__next > div.overflow-hidden.w-full.h-full.relative.flex.z-0 > div.relative.flex.h-full.max-w-full.flex-1.overflow-hidden > div > main > div.absolute.left-2.top-2.z-10.hidden.md\\:inline-block{
-          margin-top:20px;
-          margin-left: 10px;
-        }
-
-        #__next .overflow-hidden>.hidden.bg-gray-900 span.rounded-md.bg-yellow-200 {
-          display: none;
-        }
-
-        #__next .absolute .px-3.pt-2.pb-3.text-center {
-          visibility: hidden;
-          padding-bottom: 4px;
-        }
-
-        #__next .h-full.w-full .text-center.text-xs.text-gray-600>span {
-          visibility: hidden;
-          height: 15px;
-        }
-
-        #__next > div.overflow-hidden.w-full.h-full.relative.flex > div.dark.hidden.flex-shrink-0.bg-gray-900.md\\:flex.md\\:w-\\[260px\\].md\\:flex-col > div > div > nav {
-          width: 100%;
-        }
-
-        #__next > div.overflow-hidden.w-full.h-full .absolute.bottom-0.left-0.w-full > div.text-center.text-xs {
-          visibility: hidden !important;
-          height: 0px !important;
-        }
-
-        @media (min-width:1280px){
-          #__next .text-base.xl\\:max-w-3xl, #__next form.stretch.xl\\:max-w-3xl {
-            max-width: 48rem;
-          }
-        }
-
-        #__next .prose ol li p {
-          margin: 0;
-          display: inline;
-        }
-
-        .w-full #stage-slideover-sidebar {
-          padding-top: 16px;
-        }
-        .w-full #thread #page-header {
-          padding-top: 36px;
-        }
-      `,
-      immersive: `
-        #__next .overflow-hidden>.overflow-x-hidden .scrollbar-trigger > nav {
-          padding-top: 12px;
-        }
-
-        #__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden > main > div.flex.h-full.flex-col > div.flex-1.overflow-hidden > div > div.absolute.left-0.right-0 > div > div.flex.items-center.gap-2 > button{
-          margin-left: 60px;
-          margin-right: -10px;
-        }
-
-        #__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.dark.flex-shrink-0.overflow-x-hidden.bg-black > div > div > div > div > nav > div.flex.flex-col.pt-2.empty\\:hidden.dark\\:border-white\\/20 > a,
-        #__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden > main > div.group.fixed.bottom-3.right-3.z-10.hidden.gap-1.lg\\:flex > div,
-        #__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary > div > div > div > div > nav > div.flex.flex-col.pt-2.empty\\:hidden.dark\\:border-white\\/20 > a {
-          display: none;
-        }
-
-        #__next .md\\:px-\\[60px\\].text-token-text-secondary.text-xs.text-center.py-2.px-2.relative{
-          visibility:hidden;
-        }
-
-        #__next>div>div>.flex.h-screen.w-full.flex-col.items-center {
-          padding-top: 20px;
-        }
-
-        body > div.relative.flex.h-full.w-full.overflow-hidden.transition-colors.z-0 > div.z-\\[21\\].flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary.max-md\\:\\!w-0 > div > div > div > nav > div.flex.justify-between.h-\\[60px\\].items-center.md\\:h-header-height {
-          padding-top: 25px;
-        }
-
-        body > div.relative.flex.h-full.w-full.overflow-hidden.transition-colors.z-0 > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden > main > div.composer-parent.flex.h-full.flex-col.focus-visible\\:outline-0 > div.flex-1.overflow-hidden.\\@container\\/thread > div > div.absolute.left-0.right-0 > div{
-          padding-top: 35px;
-        }
-
-        #__next .sticky.left-0.right-0.top-0.z-20.bg-black{
-          padding-top: 0px;
-        }
-
-        #__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary > div > div > div > div > nav, #__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.relative.flex.h-full.max-w-full.flex-1.flex-col.overflow-hidden > main {
-          padding-top: 6px;
-        }
-
-        @media (max-width:767px){
-          #__next .overflow-hidden.w-full .max-w-full>.sticky.top-0 {
-            padding-top: 20px;
-          }
-
-          #__next > div.overflow-hidden.w-full.h-full  main.relative.h-full.w-full.flex-1 > .flex-1.overflow-hidden .h-32.md\\:h-48.flex-shrink-0{
-            height: 0px;
-          }
-        }
-      `,
-    },
-    {
       hosts: ["x.com", "twitter.com"],
       content: `
         #react-root [data-testid="placementTracking"] article,
-        #react-root a[href*="quick_promote_web"],
-        #react-root a[href*="/lists"][role="link"][aria-label],
-        #react-root a[href*="/i/communitynotes"][role="link"][aria-label],
-        #react-root a[role="link"][aria-label="Communities"],
-        #react-root a[role="link"][aria-label="Premium"],
-        #react-root a[role="link"][aria-label="SuperGrok"],
-        #react-root a[href*="/i/verified-orgs-signup"][role="link"][aria-label] {
+        #react-root a[href*="quick_promote_web"] {
           display: none !important;
         }
 
-        #react-root [data-testid="DMDrawer"],
         #react-root [data-testid="GrokDrawer"],
         #react-root [data-testid="chat-drawer-root"] {
           visibility: hidden !important;
@@ -213,24 +102,6 @@ window.addEventListener("DOMContentLoaded", (_event) => {
             padding-top: 4px !important;
           }
 
-          #react-root header[role="banner"]
-            nav[role="navigation"]
-            *
-            div[dir="auto"]:not([aria-label])
-            > span,
-          #react-root [data-testid="SideNav_AccountSwitcher_Button"] > div:not(:first-child) {
-            display: inline-block !important;
-            opacity: 0 !important;
-            transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-          }
-          #react-root header[role="banner"]
-            nav[role="navigation"]:hover
-            *
-            div[dir="auto"]:not([aria-label])
-            > span,
-          #react-root [data-testid="SideNav_AccountSwitcher_Button"]:hover > div:not(:first-child) {
-            opacity: 1 !important;
-          }
           #react-root header[role="banner"] nav[role="navigation"]:hover > * > div {
             backdrop-filter: blur(12px) !important;
           }
@@ -251,7 +122,7 @@ window.addEventListener("DOMContentLoaded", (_event) => {
             left: 1px !important;
           }
 
-          #react-root [data-testid="SideNav_NewTweet_Button"], #react-root [aria-label="Twitter Blue"]{
+          #react-root [data-testid="SideNav_NewTweet_Button"] {
             display: none;
           }
         }
@@ -320,45 +191,16 @@ window.addEventListener("DOMContentLoaded", (_event) => {
     {
       hosts: ["grok.com"],
       immersive: `
-        .h-dvh.flex-grow .bg-gradient-to-b.from-background.via-background {
-          padding-top: 40px;
-        }
-
         .flex.w-full.h-full.overflow-hidden{
           padding-top:20px;
-        }
-
-        .text-sidebar-foreground .bg-sidebar{
-          padding-top:30px;
         }
       `,
     },
     {
       hosts: ["chat.deepseek.com"],
-      content: `
-        .dc04ec1d .c7f51894 .a1e75851, .a7f3a288 .b91228e4, .efe408db .a24007f4{
-          display: none !important;
-        }
-
-        .a7f3a288.f0d4f23d {
-          padding-top: 34px;
-        }
-
-        .ec92d1d3 {
-          padding-top: 48px;
-        }
-      `,
       immersive: `
         body:not(.rtl) ._5a20a69 {
           margin-left: 84px;
-        }
-      `,
-    },
-    {
-      hosts: ["gemini.google.com"],
-      immersive: `
-        #app-root .mat-mdc-tooltip-trigger.main-menu-button.mdc-icon-button {
-          margin-top: 15px;
         }
       `,
     },
@@ -448,7 +290,6 @@ window.addEventListener("DOMContentLoaded", (_event) => {
         }
       `,
       immersive: `
-        .columns .column #header,
         .main > div > div.panel.give_me > div.header {
           padding-top: 30px;
         }
@@ -475,120 +316,6 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       content: `
         #root > div > div.fixed.top-0.left-0.w-64.h-screen.p-10.pb-0.flex.flex-col.justify-between > div > div.space-y-4 > a:nth-child(3) {
           display: none !important;
-        }
-      `,
-    },
-    {
-      hosts: ["poe.com"],
-      content: `
-        #__next > div.PageWithSidebarLayout_centeringDiv___L9br > aside > div > div > a.ChatPageFollowTwitterLink_followLink__Gl2tt,
-        #__next > div.PageWithSidebarLayout_centeringDiv___L9br > aside > div > div > a.Button_buttonBase__0QP_m.Button_primary__pIDjn.ChatPageDownloadLinks_downloadButton__amBRh,
-        #__next > div.PageWithSidebarLayout_centeringDiv___L9br > aside > div > div > section a[href*="/contact"] {
-          display: none !important;
-        }
-
-        #__next .ChatPageSidebar_menuFooter__E1KTY,#__next > div.PageWithSidebarLayout_centeringDiv___L9br > div > aside > div > menu > section:nth-child(6) {
-          display: none;
-        }
-
-        #__next .PageWithSidebarLayout_mainSection__i1yOg {
-          width: 100%;
-          max-width: 1000px;
-        }
-
-        #__next > div.PageWithSidebarLayout_centeringDiv___L9br > aside{
-          min-width: 260px;
-        }
-
-        .chakra-modal__content-container .chakra-modal__header > div > div,
-        #__next > div.PageWithSidebarLayout_centeringDiv___L9br > section > header {
-          padding-top: 10px;
-        }
-
-        #__next > div.AnnouncementWrapper_container__Z51yh > div > aside > div > div > menu > section:nth-child(4) > section, #__next > div.AnnouncementWrapper_container__Z51yh > div > aside > div > div > menu > section:nth-child(4){
-          display: none;
-        }
-      `,
-      immersive: `
-        #__next header.HeaderBar_header__jn5ju {
-          padding-top: 16px;
-        }
-
-        #__next > div.AnnouncementWrapper_container__Z51yh > div > aside.SidebarLayout_sidebar__SXeDJ.SidebarLayout_left__k163a > div > div > header{
-          padding-left: 84px;
-          padding-top: 10px;
-        }
-
-        #__next > div.PageWithSidebarLayout_centeringDiv___L9br > aside .ChatPageSidebar_logo__9PIXq {
-          padding-top: 20px;
-        }
-      `,
-    },
-    {
-      hosts: ["v2ex.com"],
-      content: `
-        .wwads-cn, .adsbygoogle,
-        #Bottom > div.content > div.inner,
-        #Rightbar .sep20:nth-of-type(5),
-        #Rightbar > div.box:nth-child(4),
-        #Main > div.box:nth-child(8) > div,
-        #Wrapper > div.sep20,
-        #Main > div.box:nth-child(8),
-        #Rightbar > div:nth-child(6) > div.sidebar_compliance {
-          display: none !important;
-        }
-
-        #Wrapper{
-          background-color: #F8F8F8 !important;
-          background-image:none !important;
-        }
-
-        #Top {
-          border-bottom: none;
-        }
-      `,
-    },
-    {
-      hosts: ["witeboard.com"],
-      content: `
-        .drawing-board .toolbar .toolbar-action {
-          display: none !important;
-        }
-      `,
-    },
-    {
-      hosts: ["github.com"],
-      content: `
-        .AppHeader .AppHeader-globalBar.js-global-bar {
-          padding-top: 35px;
-        }
-
-        .header-overlay .header-logged-out {
-          margin-top: 15px;
-        }
-      `,
-    },
-    {
-      hosts: ["vercel.com"],
-      immersive: `
-        .geist-page nav.dashboard_nav__PRmJv {
-          padding-top:10px;
-        }
-
-        .geist-page .submenu button{
-          margin-top:24px;
-        }
-      `,
-    },
-    {
-      hosts: ["feishu.cn", "larksuite.com"],
-      immersive: `
-        .lark > .dashboard-sidebar, .lark > .dashboard-sidebar > .sidebar-user-info , .lark > .dashboard-sidebar .index-module_wrapper_F-Wbq{
-          padding-top:15px;
-        }
-
-        .lark > .main-wrapper [data-testid="aside"] {
-          top: 15px;
         }
       `,
     },
