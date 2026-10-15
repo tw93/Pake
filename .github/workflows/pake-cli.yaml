@@ -93,7 +93,7 @@ jobs:
 
       - name: Setup mold linker
         if: runner.os == 'Linux'
-        uses: rui314/setup-mold@v1
+        uses: rui314/setup-mold@339e96b4ff1f3bd865856ba4cbbe8818a7acb038 # v1
 
       - name: Build App (Linux/macOS)
         if: runner.os != 'Windows'

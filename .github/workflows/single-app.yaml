@@ -147,7 +147,7 @@ jobs:
 
       - name: Setup mold linker
         if: matrix.build == 'linux'
-        uses: rui314/setup-mold@v1
+        uses: rui314/setup-mold@339e96b4ff1f3bd865856ba4cbbe8818a7acb038 # v1
 
       - name: Prepare macOS signing
         if: matrix.os == 'macos-latest'
@@ -428,7 +428,7 @@ jobs:
           retention-days: 3
 
       - name: Upload to release (Linux)
-        uses: ncipollo/release-action@v1 # cspell:disable-line
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
         if: matrix.build == 'linux' && startsWith(github.ref, 'refs/tags/')
         with:
           allowUpdates: true
@@ -438,7 +438,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload to release (macOS)
-        uses: ncipollo/release-action@v1 # cspell:disable-line
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
         if: matrix.os == 'macos-latest' && startsWith(github.ref, 'refs/tags/')
         with:
           allowUpdates: true
@@ -448,7 +448,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload to release (Windows)
-        uses: ncipollo/release-action@v1 # cspell:disable-line
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
         if: matrix.os == 'windows-latest' && startsWith(github.ref, 'refs/tags/')
         with:
           allowUpdates: true

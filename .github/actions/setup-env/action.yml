@@ -58,7 +58,7 @@ runs:
     # Node.js Environment Setup
     - name: Install pnpm
       if: env.SETUP_NODE == 'true'
-      uses: pnpm/action-setup@v4
+      uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
       with:
         version: "10.26.2"
         run_install: false
@@ -78,21 +78,21 @@ runs:
     # Rust Environment Setup
     - name: Setup Rust for Linux
       if: env.SETUP_RUST == 'true' && runner.os == 'Linux'
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f # master
       with:
         toolchain: stable
         target: x86_64-unknown-linux-gnu
 
     - name: Setup Rust for Windows
       if: env.SETUP_RUST == 'true' && runner.os == 'Windows'
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f # master
       with:
         toolchain: stable-x86_64-msvc
         target: x86_64-pc-windows-msvc
 
     - name: Setup Rust for macOS
       if: env.SETUP_RUST == 'true' && runner.os == 'macOS'
-      uses: dtolnay/rust-toolchain@stable
+      uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f # master
       with:
         toolchain: stable
 
@@ -106,7 +106,7 @@ runs:
     # System Dependencies
     - name: Install Ubuntu dependencies
       if: env.SETUP_SYSTEM == 'true' && runner.os == 'Linux'
-      uses: awalsh128/cache-apt-pkgs-action@v1.4.3
+      uses: awalsh128/cache-apt-pkgs-action@5902b33ae29014e6ca012c5d8025d4346556bd40 # v1.4.3
       with:
         packages: >
           libdbus-1-dev libsoup-3.0-dev libjavascriptcoregtk-4.1-dev libwebkit2gtk-4.1-dev
@@ -157,7 +157,7 @@ runs:
     # GitHub's cache rate limit (HTTP 429) when a release starts 48 jobs at once.
     - name: Setup Rust cache
       if: inputs.mode == 'build'
-      uses: swatinem/rust-cache@v2
+      uses: swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
       with:
         workspaces: "src-tauri -> target"
         shared-key: "pake-build-${{ runner.os }}"
