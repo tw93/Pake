@@ -171,6 +171,7 @@ Oracles per row live under `tests/unit/` (for example `event-link-guard.test.js`
 - Runtime depends on `libwebkit2gtk` and its companion libraries.
 - Icons: `.png`.
 - WebKit compositing is platform-sensitive on Wayland; see Current Risk Areas before changing defaults.
+- Maintainer agents verify Linux-only behavior (GNU tools, `cargo test` on Linux cfg paths, `.deb`/AppImage builds, Linux issue repros) on a real Debian x86_64 machine through the private `linux-devbox` skill rather than reasoning from macOS. Contributors without it use any Ubuntu 24.04 machine, matching CI.
 
 ## Branch Strategy
 
