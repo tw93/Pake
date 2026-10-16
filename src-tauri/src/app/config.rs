@@ -74,6 +74,7 @@ impl WindowConfig {
 
     /// The overlay title bar (`hide_title_bar`) keeps precedence, so existing
     /// configs behave exactly as before.
+    #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
     pub fn title_bar_follows_page(&self) -> bool {
         self.transparent_title_bar && !self.hide_title_bar
     }
