@@ -268,6 +268,20 @@ Terminal=false
 `;
 }
 
+// Tauri always writes its own desktop entry into deb and rpm payloads, so
+// shipping Pake's entry as an extra file left two launchers in the app menu.
+// Rendering Pake's content through that single entry keeps exactly one.
+export function applyLinuxDesktopTemplate(
+  linuxBundle: NonNullable<PakeTauriConfig['bundle']['linux']>,
+  templatePath: string,
+): void {
+  linuxBundle.deb.desktopTemplate = templatePath;
+  if (!linuxBundle.rpm) {
+    linuxBundle.rpm = {};
+  }
+  linuxBundle.rpm.desktopTemplate = templatePath;
+}
+
 async function mergeLinuxConfig(
   options: PakeAppOptions,
   name: string,
@@ -295,17 +309,7 @@ async function mergeLinuxConfig(
   await fsExtra.ensureDir(srcAssetsDir);
   await fsExtra.writeFile(srcDesktopFilePath, desktopContent);
 
-  const desktopInstallPath = `/usr/share/applications/${desktopFileName}`;
-  linuxBundle.deb.files = {
-    [desktopInstallPath]: `assets/${desktopFileName}`,
-  };
-
-  if (!linuxBundle.rpm) {
-    linuxBundle.rpm = {};
-  }
-  linuxBundle.rpm.files = {
-    [desktopInstallPath]: `assets/${desktopFileName}`,
-  };
+  applyLinuxDesktopTemplate(linuxBundle, `assets/${desktopFileName}`);
 
   // options.targets reaches here already stripped of any -arm64 suffix by the
   // LinuxBuilder constructor, and may carry several comma-separated formats

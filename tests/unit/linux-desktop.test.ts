@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildLinuxDesktopContent } from '../../bin/helpers/merge';
+import {
+  applyLinuxDesktopTemplate,
+  buildLinuxDesktopContent,
+} from '../../bin/helpers/merge';
 
 describe('buildLinuxDesktopContent', () => {
   it('uses the Tauri main binary name for freedesktop icon lookup', () => {
@@ -34,5 +37,23 @@ describe('buildLinuxDesktopContent', () => {
 
     expect(desktopContent).toContain('Name=MiaoYan');
     expect(desktopContent).toContain('Name[zh_CN]=妙言');
+  });
+});
+
+describe('applyLinuxDesktopTemplate', () => {
+  it('renders the Pake entry through the bundler template instead of shipping a second file', () => {
+    const linuxBundle: Parameters<typeof applyLinuxDesktopTemplate>[0] = {
+      deb: {},
+    };
+    applyLinuxDesktopTemplate(linuxBundle, 'assets/com.pake.example.desktop');
+
+    expect(linuxBundle.deb.desktopTemplate).toBe(
+      'assets/com.pake.example.desktop',
+    );
+    expect(linuxBundle.rpm?.desktopTemplate).toBe(
+      'assets/com.pake.example.desktop',
+    );
+    expect(linuxBundle.deb.files).toBeUndefined();
+    expect(linuxBundle.rpm?.files).toBeUndefined();
   });
 });

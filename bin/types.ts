@@ -238,8 +238,8 @@ export interface PakeTauriConfig {
     resources?: string[];
     targets?: string[];
     linux?: {
-      deb: { files?: Record<string, string> };
-      rpm?: { files?: Record<string, string> };
+      deb: { files?: Record<string, string>; desktopTemplate?: string };
+      rpm?: { files?: Record<string, string>; desktopTemplate?: string };
       [key: string]: unknown;
     };
     windows?: {
