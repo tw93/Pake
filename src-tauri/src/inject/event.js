@@ -1469,7 +1469,7 @@ document.addEventListener("DOMContentLoaded", () => {
       pendingFocusClick = null;
 
       invoke("send_notification", {
-        params: { id, title: this.title, body: this.body, icon: this.icon },
+        params: { id, title: this.title, body: this.body, icon: this.icon, silent: this.silent },
       })
         .then((outcome) => {
           if (liveNotifications.get(id) !== this) {
