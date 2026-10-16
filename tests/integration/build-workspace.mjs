@@ -7,8 +7,11 @@ import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
-if (process.platform !== "darwin")
-  throw new Error("This artifact fixture uses macOS .app paths.");
+if (!["darwin", "linux"].includes(process.platform))
+  throw new Error(
+    "This artifact fixture covers macOS .app and Linux .deb paths.",
+  );
+const isMac = process.platform === "darwin";
 const exec = promisify(execFile);
 const repo = process.cwd();
 const root = await fs.mkdtemp(
@@ -22,23 +25,27 @@ const path = require('node:path');
 const { spawn } = require('node:child_process');
 const config = JSON.parse(fs.readFileSync('src-tauri/.pake/tauri.conf.json'));
 const name = config.productName;
+const id = name.toLowerCase();
 const snapshot = {
   name, directory: process.cwd(),
   html: fs.readFileSync('dist/index.html', 'utf8'),
   custom: fs.readFileSync('src-tauri/src/inject/custom.js', 'utf8'),
 };
-if (name === 'Fail') process.exit(9);
-if (name.startsWith('Cancel')) {
-  const writes = path.join(process.env.PAKE_FIXTURE_ROOT, name + '-writes');
+if (id === 'fail') process.exit(9);
+if (id.startsWith('cancel')) {
+  const writes = path.join(process.env.PAKE_FIXTURE_ROOT, id + '-writes');
   const child = spawn(process.execPath, ['-e', 'process.on("SIGTERM",()=>{});setInterval(()=>require("fs").appendFileSync(process.argv[1],"x"),10)', writes], {stdio:'ignore'});
   process.on('SIGTERM', () => {});
-  fs.writeFileSync(path.join(process.env.PAKE_FIXTURE_ROOT, name + '-ready.json'), JSON.stringify({directory:process.cwd(),pid:process.pid,child:child.pid}));
+  fs.writeFileSync(path.join(process.env.PAKE_FIXTURE_ROOT, id + '-ready.json'), JSON.stringify({directory:process.cwd(),pid:process.pid,child:child.pid}));
   setInterval(() => {}, 10000);
 } else setTimeout(() => {
-  const arch = process.arch === 'arm64' ? 'aarch64' : 'x86_64';
-  const output = path.join(process.env.CARGO_TARGET_DIR, arch + '-apple-darwin', 'release', 'bundle', 'macos', name + '.app');
-  fs.mkdirSync(output, {recursive:true});
-  fs.writeFileSync(path.join(output, 'snapshot.json'), JSON.stringify(snapshot));
+  const target = process.env.CARGO_TARGET_DIR;
+  const arm = process.arch === 'arm64';
+  const output = process.platform === 'darwin'
+    ? path.join(target, (arm ? 'aarch64' : 'x86_64') + '-apple-darwin', 'release', 'bundle', 'macos', name + '.app', 'snapshot.json')
+    : path.join(target, ...(arm ? ['aarch64-unknown-linux-gnu'] : []), 'release', 'bundle', 'deb', name + '_' + config.version + '_' + (arm ? 'arm64' : 'amd64') + '.deb');
+  fs.mkdirSync(path.dirname(output), {recursive:true});
+  fs.writeFileSync(output, JSON.stringify(snapshot));
 }, 100);
 `;
 
@@ -90,10 +97,13 @@ try {
         "--name",
         name,
         "--targets",
-        "app",
+        isMac ? "app" : "deb",
         "--json",
         "--icon",
-        path.join(repo, "src-tauri/icons/icon.icns"),
+        path.join(
+          repo,
+          isMac ? "src-tauri/icons/icon.icns" : "src-tauri/icons/icon.png",
+        ),
         "--inject",
         path.join(input, "custom.js"),
       ],
@@ -122,7 +132,7 @@ try {
       running.child.kill("SIGINT");
     } else if (signal) {
       running.catch(() => {});
-      const ready = path.join(root, name + "-ready.json");
+      const ready = path.join(root, name.toLowerCase() + "-ready.json");
       const started = Date.now();
       for (;;) {
         try {
@@ -134,7 +144,7 @@ try {
         await new Promise((resolve) => setTimeout(resolve, 25));
       }
       // Wait until the descendant has installed its TERM handler and written.
-      const writes = path.join(root, name + "-writes");
+      const writes = path.join(root, name.toLowerCase() + "-writes");
       for (;;) {
         try {
           await fs.access(writes);
@@ -168,9 +178,16 @@ try {
   for (const [index, name] of ["Alpha", "Beta"].entries()) {
     const result = JSON.parse(outcomes[index].stdout);
     assert.equal(result.ok, true);
+    const artifact = isMac
+      ? path.join(root, `${name}.app`)
+      : path.join(root, `${name.toLowerCase()}.deb`);
+    assert.equal(
+      await fs.realpath(result.outputs[0].path),
+      await fs.realpath(artifact),
+    );
     const snapshot = JSON.parse(
       await fs.readFile(
-        path.join(root, `${name}.app`, "snapshot.json"),
+        isMac ? path.join(artifact, "snapshot.json") : artifact,
         "utf8",
       ),
     );
@@ -199,11 +216,14 @@ try {
       return true;
     });
     const ready = JSON.parse(
-      await fs.readFile(path.join(root, name + "-ready.json"), "utf8"),
+      await fs.readFile(
+        path.join(root, name.toLowerCase() + "-ready.json"),
+        "utf8",
+      ),
     );
     await assert.rejects(fs.access(ready.directory));
     await assert.rejects(fs.access(path.join(cache, ".pake-build.lock")));
-    const writes = path.join(root, name + "-writes");
+    const writes = path.join(root, name.toLowerCase() + "-writes");
     const size = (await fs.stat(writes)).size;
     await new Promise((resolve) => setTimeout(resolve, 100));
     assert.equal(
@@ -231,7 +251,10 @@ try {
   for (const name of ["CancelInt", "CancelTerm"]) {
     try {
       const ready = JSON.parse(
-        await fs.readFile(path.join(root, name + "-ready.json"), "utf8"),
+        await fs.readFile(
+          path.join(root, name.toLowerCase() + "-ready.json"),
+          "utf8",
+        ),
       );
       for (const pid of [ready.pid, ready.child]) {
         try {

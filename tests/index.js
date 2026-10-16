@@ -715,9 +715,9 @@ class PakeTestRunner {
   }
 
   async runLocalFileTest() {
-    if (process.platform !== "darwin") {
+    if (!["darwin", "linux"].includes(process.platform)) {
       console.log(
-        "Local artifact fixture skipped: currently uses macOS .app paths; staging is covered by Vitest.",
+        "Local artifact fixture skipped: covers macOS .app and Linux .deb paths; staging is covered by Vitest.",
       );
       return;
     }
