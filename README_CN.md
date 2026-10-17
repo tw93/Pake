@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/tw93/Pake/main/assets/logo.png" width="138" />
+  <img src="https://raw.githubusercontent.com/tw93/Pake/23bd253908a9b67be433faca0c84d3f857586d85/assets/logo.png" width="138" />
   <h1>Pake</h1>
   <p><b>一条命令把任意网页打包成桌面应用，支持 macOS、Windows 和 Linux</b></p>
   <p><a href="README.md">English</a> · 中文 · <a href="README_TW.md">繁體</a> · <a href="README_JA.md">日本語</a> · <a href="README_KR.md">한국어</a> · <a href="README_DE.md">Deutsch</a> · <a href="README_FR.md">Français</a></p>
