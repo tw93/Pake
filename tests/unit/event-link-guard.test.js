@@ -846,6 +846,7 @@ describe("event link guard", () => {
             title: "Hello",
             body: "World",
             icon: "https://example.com/icon.png",
+            silent: false,
           },
         },
       ],
