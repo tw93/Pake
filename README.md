@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/tw93/Pake/main/assets/logo.png" width="138" />
   <h1>Pake</h1>
-  <p><b>Turn any webpage into a desktop app with one command. Supports macOS, Windows, and Linux.</b></p>
+  <p><b>Turn any website into a lightweight desktop app with one command. Supports macOS, Windows, and Linux.</b></p>
   <p>English · <a href="README_CN.md">中文</a> · <a href="README_TW.md">繁體</a> · <a href="README_JA.md">日本語</a> · <a href="README_KR.md">한국어</a> · <a href="README_DE.md">Deutsch</a> · <a href="README_FR.md">Français</a></p>
   <a href="https://twitter.com/HiTw93" target="_blank"><img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
   <a href="https://t.me/+9f9gf4ZrFSQ2OWVl" target="_blank"><img alt="telegram" src="https://img.shields.io/badge/chat-telegram-blueviolet?style=flat-square&logo=Telegram"></a>
@@ -12,7 +12,7 @@
 
 ## Features
 
-- 🎐 **Lightweight**: Installer is nearly 20 times smaller than Electron packages, typically under 10 MB on disk
+- 🎐 **Lightweight**: Installer is nearly 20 times smaller than Electron packages, typically under 10 MB on disk, a lighter alternative to Nativefier and other Electron wrappers
 - 🚀 **Fast**: Built with Rust Tauri, much faster than traditional JS frameworks with lower memory usage
 - ⚡ **Easy to use**: One-command packaging via CLI or online building, no complex configuration needed
 - 📦 **Feature-rich**: Supports shortcuts, immersive windows, drag & drop, style customization, ad removal

@@ -12,7 +12,7 @@
 
 ## Funktionen
 
-- 🎐 **Leichtgewichtig**: Das Installationspaket ist fast 20-mal kleiner als bei Electron-Apps, meist unter 10 MB auf der Festplatte
+- 🎐 **Leichtgewichtig**: Das Installationspaket ist fast 20-mal kleiner als bei Electron-Apps, meist unter 10 MB auf der Festplatte, eine schlankere Alternative zu Nativefier und anderen Electron-Wrappern
 - 🚀 **Schnell**: Entwickelt mit Rust Tauri, deutlich schneller als herkömmliche JS-Frameworks bei geringerem Arbeitsspeicherbedarf
 - ⚡ **Einfach zu bedienen**: Paketierung mit einem einzigen CLI-Befehl oder per Online-Build ohne aufwendige Konfiguration
 - 📦 **Umfangreich**: Unterstützt Tastenkombinationen, immersive Fenster, Drag & Drop, CSS-Anpassung und Werbeblocker

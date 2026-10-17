@@ -12,7 +12,7 @@
 
 ## Fonctionnalités
 
-- 🎐 **Léger** : Paquet d'installation près de 20 fois plus petit qu'Electron, généralement moins de 10 Mo sur le disque
+- 🎐 **Léger** : Paquet d'installation près de 20 fois plus petit qu'Electron, généralement moins de 10 Mo sur le disque, une alternative plus légère à Nativefier et aux autres wrappers Electron
 - 🚀 **Rapide** : Conçu avec Rust Tauri, bien plus performant que les frameworks JS classiques avec une empreinte mémoire réduite
 - ⚡ **Simple** : Une seule commande CLI ou compilation en ligne, sans configuration complexe
 - 📦 **Complet** : Prise en charge des raccourcis, fenêtres immersives, glisser-déposer, personnalisation de styles et blocage de publicités

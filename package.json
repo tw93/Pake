@@ -1,7 +1,7 @@
 {
   "name": "pake-cli",
   "version": "3.17.6",
-  "description": "🤱🏻 Turn any webpage into a desktop app with one command. 🤱🏻 一键打包网页生成轻量桌面应用。",
+  "description": "Turn any website into a lightweight desktop app with one command. 一键把网站打包成轻量桌面应用。",
   "engines": {
     "node": ">=20.9.0"
   },
