@@ -457,6 +457,8 @@ This is usually due to web compatibility issues. Try:
 
    On macOS, Pake keeps **Sign in with Apple** popup flows (e.g. Yelp, Upwork) on the native popup path so Apple's callback can return to the opener page. Other auth popups may still be navigated in the current window to avoid WebKit crashes.
 
+   Passkeys and Touch ID sign-in are not available in Pake apps on macOS, because the system only offers them to browsers and to apps tied to the site's domain. Sign in with a password and a two-factor code instead.
+
 5. **WeChat Web login environment error**
 
    WeChat detects the WebView and writes a flag cookie that blocks subsequent logins. Add `--incognito` when packaging to bypass it, at the cost of requiring a QR scan on every launch:
