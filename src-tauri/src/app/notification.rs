@@ -92,6 +92,9 @@ pub struct NotificationParams {
     title: String,
     body: String,
     icon: String,
+    #[serde(default)]
+    #[cfg_attr(not(target_os = "windows"), allow(dead_code))]
+    silent: bool,
 }
 
 #[derive(serde::Serialize)]
@@ -166,11 +169,24 @@ pub fn send(
     }
 
     use tauri_plugin_notification::NotificationExt;
-    app.notification()
+    let notification = app
+        .notification()
         .builder()
         .title(&params.title)
         .body(&params.body)
-        .icon(&params.icon)
+        .icon(&params.icon);
+
+    // On Windows, omitting sound makes notify-rust emit a silent toast.
+    // "Default" selects the OS notification sound while honoring Web
+    // Notification's silent option. Other platforms keep existing behavior.
+    #[cfg(target_os = "windows")]
+    let notification = if params.silent {
+        notification
+    } else {
+        notification.sound("Default")
+    };
+
+    notification
         .show()
         .map_err(|e| format!("Failed to show notification: {e}"))?;
 
