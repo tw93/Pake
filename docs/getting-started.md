@@ -8,7 +8,7 @@
 
 This tutorial takes you from an empty terminal to a desktop app you can open from the Dock or Start menu, then covers the options most people change next. If you would rather not install anything, download a [ready-made app](https://github.com/tw93/Pake/releases/latest) or use the [GitHub Actions online build](github-actions-usage.md) instead.
 
-## 1. Prepare your machine
+## Prepare your machine
 
 Pake needs Node.js 20.9 or later and Rust 1.85 or later. Check what you already have:
 
@@ -23,7 +23,7 @@ If Rust is missing, Pake asks whether to install it on the first build, so you c
 - **Windows**: Visual Studio Build Tools with the C++ workload. Follow the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) if you have not set them up before.
 - **Linux**: the WebKitGTK development packages listed in [Advanced Usage](advanced-usage.md#prerequisites).
 
-## 2. Install the CLI
+## Install the CLI
 
 ```bash
 pnpm install -g pake-cli
@@ -31,7 +31,7 @@ pnpm install -g pake-cli
 
 `npm install -g pake-cli` works too. If a global install fails with a permission error, run it without installing through `npx pake-cli`, or see the [FAQ](faq.md#permission-denied-when-installing-globally).
 
-## 3. Package your first app
+## Package your first app
 
 Pass a URL and a name:
 
@@ -43,7 +43,7 @@ Pake fetches the site icon, sets up the Rust toolchain if this is the first buil
 
 Open the installer as you would any other app. On macOS you can skip the DMG and install straight into `/Applications` with `--install`.
 
-## 4. Adjust the window
+## Adjust the window
 
 Most apps need only a few more options:
 
@@ -58,7 +58,7 @@ pake https://excalidraw.com --name Excalidraw --width 1400 --height 900 --hide-t
 
 Every option, with examples, is in the [CLI reference](cli-usage.md).
 
-## 5. Keep logins and links working
+## Keep logins and links working
 
 Sites that sign you in through another domain, or open links in new windows, may need one more flag:
 
@@ -68,7 +68,7 @@ Sites that sign you in through another domain, or open links in new windows, may
 
 Google and a few other providers block sign-in inside embedded WebViews whatever flags you use. The [FAQ](faq.md#website-features-not-working-login-upload-etc) explains what still works.
 
-## 6. Package a local web build
+## Package a local web build
 
 Pake also packages your own front-end output, so a static site or a tool you built can ship as a desktop app:
 
@@ -78,7 +78,7 @@ pake ./dist --name MyTool
 
 The folder needs an `index.html` at its root. Hash-based routing works; history-mode routing does not.
 
-## 7. Automate it
+## Automate it
 
 For scripts and AI agents, add `--json` so stdout carries a single JSON result with stable exit codes, and describe the app in a file with `--config app.json` instead of a long command. The [config](cli-usage.md#config) and [JSON output](cli-usage.md#json) sections cover both, and [llms.txt](../llms.txt) is the contract agents read first.
 
