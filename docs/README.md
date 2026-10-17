@@ -10,6 +10,7 @@ Guides and reference documentation for building lightweight desktop apps with Pa
 
 ## User Guides
 
+- **[Getting Started](getting-started.md)**: Package your first app step by step
 - **[CLI Command Reference](cli-usage.md)**: Full command-line options and examples
 - **[GitHub Actions Online Build](github-actions-usage.md)**: Build apps online without a local toolchain
 - **[Pake Action Integration](pake-action.md)**: Use Pake as a GitHub Action in CI workflows
