@@ -146,8 +146,14 @@ describe("notification bridge", () => {
     new bridge.Notification("Audible", { silent: false });
     new bridge.Notification("Quiet", { silent: true });
     await bridge.settle();
-    const notifications = bridge.invokeCalls.filter((call) => call.command === "send_notification");
-    expect(notifications.map((call) => call.payload.params.silent)).toEqual([false, false, true]);
+    const notifications = bridge.invokeCalls.filter(
+      (call) => call.command === "send_notification",
+    );
+    expect(notifications.map((call) => call.payload.params.silent)).toEqual([
+      false,
+      false,
+      true,
+    ]);
   });
 
   it("preserves native event identity when EventTarget is not constructible", async () => {

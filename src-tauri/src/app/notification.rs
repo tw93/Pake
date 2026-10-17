@@ -93,6 +93,7 @@ pub struct NotificationParams {
     body: String,
     icon: String,
     #[serde(default)]
+    #[cfg_attr(not(target_os = "windows"), allow(dead_code))]
     silent: bool,
 }
 
@@ -168,7 +169,8 @@ pub fn send(
     }
 
     use tauri_plugin_notification::NotificationExt;
-    let mut notification = app.notification()
+    let notification = app
+        .notification()
         .builder()
         .title(&params.title)
         .body(&params.body)
@@ -178,9 +180,11 @@ pub fn send(
     // "Default" selects the OS notification sound while honoring Web
     // Notification's silent option. Other platforms keep existing behavior.
     #[cfg(target_os = "windows")]
-    if !params.silent {
-        notification = notification.sound("Default");
-    }
+    let notification = if params.silent {
+        notification
+    } else {
+        notification.sound("Default")
+    };
 
     notification
         .show()
