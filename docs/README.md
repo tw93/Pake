@@ -14,11 +14,13 @@ Guides and reference documentation for building lightweight desktop apps with Pa
 - **[CLI Command Reference](cli-usage.md)**: Full command-line options and examples
 - **[GitHub Actions Online Build](github-actions-usage.md)**: Build apps online without a local toolchain
 - **[Pake Action Integration](pake-action.md)**: Use Pake as a GitHub Action in CI workflows
+- **[Scripts and AI Agents](ai-agents.md)**: JSON output, config files and the official skill
+- **[Keyboard Shortcuts](shortcuts.md)**: Shortcuts in every app Pake builds
 
 ## Developer Guides
 
 - **[Advanced Usage & Development](advanced-usage.md)**: Code customization, project structure, build environments, and testing
-- **[Contributing Guide](../CONTRIBUTING.md)**: How to develop and contribute to Pake
+- **[Contributing](contributing.md)**: Pull requests, gallery recipes and the trademark policy
 
 ## Resources
 
