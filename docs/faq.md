@@ -67,7 +67,7 @@ A development environment needs:
 - Rust ≥1.85.0 (check with `rustc --version`)
 - Node.js ≥20.9.0 (check with `node --version`)
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for complete prerequisites.
+See [Prerequisites](advanced-usage.md#prerequisites) for the full list.
 
 ### Linux: Build Error "Can't detect any appindicator library"
 
