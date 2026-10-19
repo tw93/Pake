@@ -130,17 +130,17 @@ macOS 会在首次使用时向用户弹出权限确认对话框，所以只给�
 
 ## 同一站点生成多个独立应用
 
-如果你需要为同一个站点生成多个彼此独立的应用，例如两个不同登录态的 Gmail，可以直接使用不同的应用名称进行构建：
+如果你需要为同一个站点生成多个彼此独立的应用，例如两个不同登录态的 GitHub，可以直接使用不同的应用名称进行构建：
 
 ```bash
-pake https://mail.google.com --name "Gmail Work"
-pake https://mail.google.com --name "Gmail Personal"
+pake https://github.com --name "GitHub Work"
+pake https://github.com --name "GitHub Personal"
 ```
 
 Pake 会基于 `URL + name` 生成不同的应用标识，因此这两个应用会被当作两个独立桌面应用安装，而不是落到同一个应用上，需要固定 bundle identifier 的高级场景，还可以用隐藏参数 `--identifier`：
 
 ```bash
-pake https://mail.google.com --name "Gmail Work" --identifier com.example.gmail.work
+pake https://github.com --name "GitHub Work" --identifier com.example.github.work
 ```
 
 `--multi-instance` 和这个能力不同，它只是允许同一个已打包应用启动多个进程，并不会创建多个独立应用身份。

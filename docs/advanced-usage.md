@@ -130,17 +130,17 @@ macOS prompts the user for permission on first use, so add these flags only for 
 
 ## Multiple Apps For The Same Site
 
-If you need separate apps for the same site, for example two Gmail accounts with different login state, build them with different app names:
+If you need separate apps for the same site, for example two GitHub accounts with different login state, build them with different app names:
 
 ```bash
-pake https://mail.google.com --name "Gmail Work"
-pake https://mail.google.com --name "Gmail Personal"
+pake https://github.com --name "GitHub Work"
+pake https://github.com --name "GitHub Personal"
 ```
 
 Pake generates a different app identifier for each `URL + name` pair, so these apps install as separate desktop apps instead of resolving to the same app. To pin the bundle identifier explicitly, use the hidden `--identifier` option:
 
 ```bash
-pake https://mail.google.com --name "Gmail Work" --identifier com.example.gmail.work
+pake https://github.com --name "GitHub Work" --identifier com.example.github.work
 ```
 
 `--multi-instance` is different. It only allows multiple processes for the same packaged app, it does not create separate app identities.

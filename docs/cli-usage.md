@@ -117,7 +117,7 @@ Specify the application name. If not provided, you will be prompted to enter it.
 Set the bundle identifier explicitly. By default Pake derives `com.pake.a<hash>` from the URL and `--name`, so two apps wrapping the same URL under different names install separately. The value must start with a letter, contain only letters, digits, hyphens and dots, and end with a letter or digit.
 
 ```shell
---identifier com.example.gmail.work
+--identifier com.example.github.work
 ```
 
 #### [icon]

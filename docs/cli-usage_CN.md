@@ -117,7 +117,7 @@ pake ./dist --name MyTool
 手动指定 bundle identifier，不传时 Pake 会根据 URL 和 `--name` 生成 `com.pake.a<hash>`，所以同一个网址用不同名字打包会装成两个应用。取值必须以字母开头，只含字母、数字、连字符和点，并以字母或数字结尾。
 
 ```shell
---identifier com.example.gmail.work
+--identifier com.example.github.work
 ```
 
 #### [icon]
