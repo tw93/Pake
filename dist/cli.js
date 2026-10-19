@@ -1088,8 +1088,13 @@ async function handleLocalFile(url, useLocalFile, tauriConf) {
     const fileName = path.basename(url);
     const distDir = path.join(npmDirectory, 'dist');
     if (!useLocalFile) {
-        const urlPath = path.join(distDir, fileName);
-        await fsExtra.copy(url, urlPath);
+        // Back up the original dist first, as stageLocalTree does, so
+        // restoreLocalTree can take this file out again after the run.
+        const distBakDir = path.join(npmDirectory, 'dist_bak');
+        if (!(await fsExtra.pathExists(distBakDir))) {
+            await fsExtra.copy(distDir, distBakDir);
+        }
+        await fsExtra.copy(url, path.join(distDir, fileName));
     }
     else {
         await stageLocalTree(path.dirname(url));

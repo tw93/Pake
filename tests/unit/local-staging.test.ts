@@ -95,6 +95,28 @@ describe('stageLocalTree via handleLocalFile', () => {
     );
   });
 
+  it('restoreLocalTree also removes a single local file copied into dist', async () => {
+    const userDir = await makeUserDir('single');
+    const conf = makeTauriConf();
+    await handleLocalFile(path.join(userDir, 'index.html'), false, conf);
+
+    const dist = path.join(fakePkg, 'dist');
+    expect(await fsExtra.pathExists(path.join(dist, 'index.html'))).toBe(true);
+    expect(conf.pake.windows[0].url).toBe('index.html');
+
+    restoreLocalTree();
+
+    // Without a backup the copied file stayed in dist and leaked into the
+    // next app built from the same checkout.
+    expect(await fsExtra.pathExists(path.join(dist, 'index.html'))).toBe(false);
+    expect(await fsExtra.readFile(path.join(dist, 'dev.js'), 'utf8')).toBe(
+      'dev',
+    );
+    expect(await fsExtra.pathExists(path.join(fakePkg, 'dist_bak'))).toBe(
+      false,
+    );
+  });
+
   it('restores the original dist when staging fails midway', async () => {
     const userDir = await makeUserDir('broken');
     // Dangling symlink: copySync with dereference follows it and throws.
