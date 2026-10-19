@@ -218,7 +218,7 @@ Determine whether the application launches with a maximized window. Default is `
 
 #### [activation-shortcut]
 
-Set the activation shortcut for the application. Default is empty, so it does not take effect. You can customize the activation shortcut with the following commands, e.g. `CmdOrControl+Shift+P`. Usage can refer to [available-modifiers](https://www.electronjs.org/docs/latest/api/accelerator#available-modifiers).
+Set the activation shortcut for the application. Default is empty, so it does not take effect. Write it as modifiers and one key joined by `+`, e.g. `CmdOrControl+Shift+P`. Modifiers are `CmdOrControl` (Cmd on macOS, Ctrl elsewhere), `Cmd` or `Super`, `Ctrl`, `Alt` or `Option`, and `Shift`; the key is a letter, a digit, `F1` to `F24`, or a name such as `Space`, `Enter`, `Escape` or `Up`.
 
 ```shell
 --activation-shortcut <string>

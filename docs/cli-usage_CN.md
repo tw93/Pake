@@ -218,7 +218,7 @@ pake https://github.com --name GitHub
 
 #### [activation-shortcut]
 
-设置应用程序的全局激活快捷键，默认为空，可自定义快捷键，如 `CmdOrControl+Shift+P`，格式参考 [available-modifiers](https://www.electronjs.org/docs/latest/api/accelerator#available-modifiers)。
+设置应用程序的全局激活快捷键，默认为空，格式是修饰键加一个按键，用 `+` 连接，如 `CmdOrControl+Shift+P`。修饰键可用 `CmdOrControl`（macOS 上是 Cmd，其他平台是 Ctrl）、`Cmd` 或 `Super`、`Ctrl`、`Alt` 或 `Option`、`Shift`，按键可以是字母、数字、`F1` 到 `F24`，或 `Space`、`Enter`、`Escape`、`Up` 这类按键名。
 
 ```shell
 --activation-shortcut <string>

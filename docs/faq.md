@@ -455,7 +455,7 @@ This is usually due to web compatibility issues. Try:
 
    Some authentication providers, especially Google, may block sign-in inside embedded webviews. Because Pake packages sites into a desktop webview, Google properties or sites that rely on Google OAuth may still fail to sign in even when `--new-window` or `--multi-window` is enabled. This is provider policy, not a packaging bug, so use the normal browser, a browser-installed app, or a native desktop client for those sites.
 
-   On macOS, Pake keeps **Sign in with Apple** popup flows (e.g. Yelp, Upwork) on the native popup path so Apple's callback can return to the opener page. Other auth popups may still be navigated in the current window to avoid WebKit crashes.
+   Pake keeps **Sign in with Apple** popup flows (e.g. Yelp, Upwork) on the native popup path so Apple's callback can return to the opener page. On macOS and Linux, other sign-in popups open in the current window instead, because the WebKit webview there can crash on them or drop them silently; on Windows they stay popups.
 
    Passkeys and Touch ID sign-in are not available in Pake apps on macOS, because the system only offers them to browsers and to apps tied to the site's domain. Sign in with a password and a two-factor code instead.
 
