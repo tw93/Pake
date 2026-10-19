@@ -438,7 +438,7 @@ pake https://github.com --name GitHub --no-bundle
 pake https://github.com --name GitHub --show-system-tray --start-to-tray
 ```
 
-双击托盘图标可显示或隐藏窗口，未配置 `--show-system-tray` 时此选项被忽略。
+通过托盘菜单里的显示和隐藏找回或收起窗口，Windows 上左键单击托盘图标也能切换显示，未配置 `--show-system-tray` 时此选项被忽略。
 
 #### [title]
 

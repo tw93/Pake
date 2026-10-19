@@ -438,7 +438,7 @@ Start the application minimized to system tray instead of showing the window. Mu
 pake https://github.com --name GitHub --show-system-tray --start-to-tray
 ```
 
-Double-click the tray icon to show or hide the window. Without `--show-system-tray`, this option is ignored.
+Bring the window back or hide it again with Show and Hide in the tray menu. On Windows, a left click on the tray icon also shows or hides it. Without `--show-system-tray`, this option is ignored.
 
 #### [title]
 
