@@ -1,4 +1,4 @@
-# Pake Documentation
+# Pake CLI Documentation
 
 <div align="center">
 

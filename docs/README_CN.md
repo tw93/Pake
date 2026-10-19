@@ -1,4 +1,4 @@
-# Pake 文档
+# Pake CLI 文档
 
 <div align="center">
 
