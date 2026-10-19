@@ -1,0 +1,34 @@
+# Plumber overlay: inherits every control from the CLI's built-in
+# baseline, only the differences for this repository are written here.
+# Run 'plumber config resolve' to see the full effective config.
+extends: plumber:default
+version: '2.0'
+
+github:
+  controls:
+    githubActionMustComeFromAuthorizedSources:
+      # Keep the curated default list and trust the build, toolchain and
+      # release tooling this repository uses on top of it, in the
+      # workflows and in the setup-env action, all pinned by commit.
+      includePlumberDefaults: true
+      trustedGithubActions:
+        - awalsh128/cache-apt-pkgs-action
+        - dtolnay/rust-toolchain
+        - ncipollo/release-action
+        - rui314/setup-mold
+        - stefanzweifel/git-auto-commit-action
+        - swatinem/rust-cache
+        - taiki-e/install-action
+
+    # dtolnay/rust-toolchain installs Rust through rustup's own
+    # installer, which the control flags as an unverified download.
+    # It is the standard way to get a toolchain in CI, pinned by commit
+    # in the setup-env action, so the check is off here.
+    actionsMustNotExecuteMutableRemoteCode:
+      enabled: false
+
+    # Off for now: protecting main is a repository setting only an
+    # admin can change, nothing in the tree can fix it. Worth turning
+    # back on once a protection rule is in place.
+    branchMustBeProtected:
+      enabled: false
