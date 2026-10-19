@@ -322,6 +322,71 @@ pub fn get_download_message_with_lang(
     .to_string()
 }
 
+/// Language of the user's system interface, for native strings such as the
+/// tray menu that the page's `navigator.language` cannot reach.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum UiLanguage {
+    English,
+    SimplifiedChinese,
+    TraditionalChinese,
+}
+
+impl UiLanguage {
+    /// Classifies a BCP 47 tag (`zh-Hant-TW`) or a POSIX locale (`zh_TW.UTF-8`).
+    pub fn from_tag(tag: &str) -> Self {
+        let tag = tag.to_ascii_lowercase();
+        let mut parts = tag.split(['-', '_', '.', '@']);
+        if parts.next() != Some("zh") {
+            return UiLanguage::English;
+        }
+        if parts.any(|part| matches!(part, "hant" | "tw" | "hk" | "mo")) {
+            UiLanguage::TraditionalChinese
+        } else {
+            UiLanguage::SimplifiedChinese
+        }
+    }
+
+    /// Classifies a Windows LANGID from `GetUserDefaultUILanguage`.
+    #[cfg(any(windows, test))]
+    fn from_windows_langid(langid: u16) -> Self {
+        const LANG_CHINESE: u16 = 0x04;
+        if langid & 0x3ff != LANG_CHINESE {
+            return UiLanguage::English;
+        }
+        // Sublanguages 1, 3 and 5 are Taiwan, Hong Kong and Macao.
+        match langid >> 10 {
+            0x01 | 0x03 | 0x05 => UiLanguage::TraditionalChinese,
+            _ => UiLanguage::SimplifiedChinese,
+        }
+    }
+
+    /// Apps launched from Finder or Explorer carry no `LANG`, so macOS and
+    /// Windows ask the system for the preferred interface language.
+    pub fn system() -> Self {
+        #[cfg(target_os = "macos")]
+        {
+            objc2_foundation::NSLocale::preferredLanguages()
+                .firstObject()
+                .map(|tag| UiLanguage::from_tag(&tag.to_string()))
+                .unwrap_or(UiLanguage::English)
+        }
+        #[cfg(windows)]
+        {
+            use windows_sys::Win32::Globalization::GetUserDefaultUILanguage;
+            UiLanguage::from_windows_langid(unsafe { GetUserDefaultUILanguage() })
+        }
+        #[cfg(not(any(target_os = "macos", windows)))]
+        {
+            ["LC_ALL", "LC_MESSAGES", "LANG"]
+                .iter()
+                .filter_map(|var| env::var(var).ok())
+                .find(|value| !value.is_empty())
+                .map(|value| UiLanguage::from_tag(&value))
+                .unwrap_or(UiLanguage::English)
+        }
+    }
+}
+
 pub fn sanitize_download_filename(filename: &str) -> String {
     let Some(candidate) = filename
         .rsplit(['/', '\\'])
@@ -597,6 +662,53 @@ mod tests {
             assert_eq!(
                 msg, "下载成功，已保存到下载目录~",
                 "expected Chinese for {tag}"
+            );
+        }
+    }
+
+    #[test]
+    fn ui_language_reads_bcp47_and_posix_tags() {
+        for tag in ["en", "en-US", "fr_FR.UTF-8", "zhx", ""] {
+            assert_eq!(UiLanguage::from_tag(tag), UiLanguage::English, "{tag}");
+        }
+        for tag in ["zh", "zh-Hans", "zh-Hans-CN", "zh_CN.UTF-8", "zh-SG"] {
+            assert_eq!(
+                UiLanguage::from_tag(tag),
+                UiLanguage::SimplifiedChinese,
+                "{tag}"
+            );
+        }
+        for tag in [
+            "zh-Hant",
+            "zh-Hant-HK",
+            "zh-TW",
+            "zh_TW.UTF-8",
+            "zh_HK",
+            "zh-MO",
+        ] {
+            assert_eq!(
+                UiLanguage::from_tag(tag),
+                UiLanguage::TraditionalChinese,
+                "{tag}"
+            );
+        }
+    }
+
+    #[test]
+    fn ui_language_reads_windows_langids() {
+        assert_eq!(UiLanguage::from_windows_langid(0x0409), UiLanguage::English);
+        assert_eq!(
+            UiLanguage::from_windows_langid(0x0804),
+            UiLanguage::SimplifiedChinese
+        );
+        assert_eq!(
+            UiLanguage::from_windows_langid(0x1004),
+            UiLanguage::SimplifiedChinese
+        );
+        for traditional in [0x0404, 0x0C04, 0x1404] {
+            assert_eq!(
+                UiLanguage::from_windows_langid(traditional),
+                UiLanguage::TraditionalChinese
             );
         }
     }

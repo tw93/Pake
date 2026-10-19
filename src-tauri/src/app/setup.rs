@@ -2,6 +2,7 @@ use crate::app::window::{
     hide_all_app_windows, open_additional_window_safe, show_all_app_windows, toggle_all_app_windows,
 };
 use crate::cancel_startup_reveal;
+use crate::util::UiLanguage;
 use std::str::FromStr;
 use std::sync::{atomic::AtomicBool, Arc, Mutex};
 use std::time::{Duration, Instant};
@@ -12,6 +13,38 @@ use tauri::{
 };
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
+
+struct TrayLabels {
+    new_window: &'static str,
+    hide: &'static str,
+    show: &'static str,
+    quit: &'static str,
+}
+
+impl TrayLabels {
+    fn for_language(language: UiLanguage) -> Self {
+        match language {
+            UiLanguage::English => TrayLabels {
+                new_window: "New Window",
+                hide: "Hide",
+                show: "Show",
+                quit: "Quit",
+            },
+            UiLanguage::SimplifiedChinese => TrayLabels {
+                new_window: "新建窗口",
+                hide: "隐藏",
+                show: "显示",
+                quit: "退出",
+            },
+            UiLanguage::TraditionalChinese => TrayLabels {
+                new_window: "新增視窗",
+                hide: "隱藏",
+                show: "顯示",
+                quit: "結束",
+            },
+        }
+    }
+}
 
 pub fn set_system_tray(
     app: &AppHandle,
@@ -29,10 +62,11 @@ pub fn set_system_tray(
     // Menu events are broadcast to every handler in Tauri v2, so the tray item
     // must not share the "new_window" id with the app menu accelerator
     // (Cmd/Ctrl+N), or one click opens two windows.
-    let new_window = MenuItemBuilder::with_id("tray_new_window", "New Window").build(app)?;
-    let hide_app = MenuItemBuilder::with_id("hide_app", "Hide").build(app)?;
-    let show_app = MenuItemBuilder::with_id("show_app", "Show").build(app)?;
-    let quit = MenuItemBuilder::with_id("quit", "Quit").build(app)?;
+    let labels = TrayLabels::for_language(UiLanguage::system());
+    let new_window = MenuItemBuilder::with_id("tray_new_window", labels.new_window).build(app)?;
+    let hide_app = MenuItemBuilder::with_id("hide_app", labels.hide).build(app)?;
+    let show_app = MenuItemBuilder::with_id("show_app", labels.show).build(app)?;
+    let quit = MenuItemBuilder::with_id("quit", labels.quit).build(app)?;
 
     let menu = if allow_multi_window {
         MenuBuilder::new(app)
