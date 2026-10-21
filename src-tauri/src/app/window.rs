@@ -60,7 +60,7 @@ fn prepare_macos_new_window_configuration(features: &NewWindowFeatures) -> tauri
 fn build_proxy_browser_arg(url: &Url) -> Option<String> {
     let host = url.host_str()?;
     let scheme = url.scheme();
-    let port = url.port().or_else(|| match scheme {
+    let port = url.port().or(match scheme {
         "http" => Some(80),
         "socks5" => Some(1080),
         _ => None,

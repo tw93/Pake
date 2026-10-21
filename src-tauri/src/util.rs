@@ -333,6 +333,7 @@ pub enum UiLanguage {
 
 impl UiLanguage {
     /// Classifies a BCP 47 tag (`zh-Hant-TW`) or a POSIX locale (`zh_TW.UTF-8`).
+    #[cfg_attr(windows, allow(dead_code))]
     pub fn from_tag(tag: &str) -> Self {
         let tag = tag.to_ascii_lowercase();
         let mut parts = tag.split(['-', '_', '.', '@']);
