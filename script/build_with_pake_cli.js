@@ -20,7 +20,7 @@ console.log('targets type? only for Linux: ', process.env.TARGETS);
 console.log('===========================\n');
 
 cd('node_modules/pake-cli');
-let params = `node cli.js ${process.env.URL} --name ${process.env.NAME} --height ${process.env.HEIGHT} --width ${process.env.WIDTH}`;
+let params = `node dist/cli.js ${process.env.URL} --name ${process.env.NAME} --height ${process.env.HEIGHT} --width ${process.env.WIDTH}`;
 
 if (process.env.HIDE_TITLE_BAR === 'true') {
   params = `${params} --hide-title-bar`;
@@ -71,14 +71,18 @@ const main = async () => {
         process.exit(1);
     }
 
-    params = await downloadIcon(iconFile);
+    params = `${params} --icon ${process.env.ICON}`;
   } else {
     console.log("Won't download the icon as ICON environment variable is not defined!");
   }
 
   console.log('Pake parameters is: ', params);
   console.log('Compile....');
-  exec(params);
+  const result = exec(params);
+  if (result.code !== 0) {
+    console.error(`Pake build failed with exit code ${result.code}`);
+    process.exit(result.code);
+  }
 
   if (!fs.existsSync('output')) {
     fs.mkdirSync('output');
