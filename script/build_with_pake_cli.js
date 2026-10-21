@@ -79,6 +79,12 @@ const main = async () => {
   console.log('Pake parameters is: ', params);
   console.log('Compile....');
   const result = exec(params);
+  const buildLog = `${result.stdout}\n${result.stderr}`;
+  if (/No favicon found|default icon will be used|Using default/i.test(buildLog)) {
+    console.log(`::warning title=Icon::${process.env.NAME}: default Pake icon used`);
+  } else if (/Icon found|Icon fetched|Using existing local icon/i.test(buildLog) || process.env.ICON) {
+    console.log(`::notice title=Icon::${process.env.NAME}: site icon applied`);
+  }
   if (result.code !== 0) {
     console.error(`Pake build failed with exit code ${result.code}`);
     process.exit(result.code);
