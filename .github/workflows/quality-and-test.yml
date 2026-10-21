@@ -95,6 +95,37 @@ jobs:
       - name: Run Rust unit tests
         run: cargo test --lib
 
+  # Windows-only cfg arms (WebView2 downloads, password autosave, proxy args)
+  # never compile on the Linux job, so lint and test them on a Windows host.
+  rust-quality-windows:
+    name: Rust Code Quality (windows-latest)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: src-tauri
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Setup Rust Environment
+        uses: ./.github/actions/setup-env
+        with:
+          mode: build
+          rust-cache-save: false
+
+      - name: Install Rust components
+        run: rustup component add clippy
+
+      - name: Run Clippy lints
+        run: |
+          cargo clippy --all-targets -- -D warnings
+          cargo clippy --all-targets --features runtime-template,native-download-probe -- -D warnings
+
+      - name: Run Rust unit tests
+        run: cargo test --lib
+
   # Fast lane: runs on every PR and push. Skips the heavy real Tauri build
   # (kept under tests/index.js) but still covers Vitest + integration suites
   # so feedback stays under ~5 minutes per OS instead of 20+.
@@ -202,7 +233,7 @@ jobs:
   summary:
     name: Quality Summary
     runs-on: ubuntu-latest
-    needs: [auto-format, rust-quality, validation-fast, validation-full, docker-validation]
+    needs: [auto-format, rust-quality, rust-quality-windows, validation-fast, validation-full, docker-validation]
     if: always()
     steps:
       - name: Generate Summary
@@ -214,6 +245,7 @@ jobs:
             echo "|-------|--------|"
             echo "| Auto Formatting | ${{ needs.auto-format.result == 'success' && 'PASSED' || needs.auto-format.result == 'skipped' && 'SKIPPED' || 'FAILED' }} |"
             echo "| Rust Quality | ${{ needs.rust-quality.result == 'success' && 'PASSED' || 'FAILED' }} |"
+            echo "| Rust Quality (Windows) | ${{ needs.rust-quality-windows.result == 'success' && 'PASSED' || 'FAILED' }} |"
             echo "| CLI Fast Validation | ${{ needs.validation-fast.result == 'success' && 'PASSED' || 'FAILED' }} |"
             echo "| Full Tauri Build | ${{ needs.validation-full.result == 'success' && 'PASSED' || needs.validation-full.result == 'skipped' && 'SKIPPED (PR fast lane)' || 'FAILED' }} |"
             echo "| Docker Packaging | ${{ needs.docker-validation.result == 'success' && 'PASSED' || needs.docker-validation.result == 'skipped' && 'SKIPPED (PR fast lane)' || 'FAILED' }} |"
