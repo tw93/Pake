@@ -97,3 +97,8 @@ codegen-units = 1
 lto = "thin"
 opt-level = "z"
 strip = true
+
+# Debug info only for the pake crate: a clean debug build drops from 3.5G to 2.4G,
+# backtraces and breakpoints in pake code are unchanged.
+[profile.dev.package."*"]
+debug = false
