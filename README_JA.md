@@ -236,11 +236,9 @@ Pake の成長は多くのコントリビューターに支えられています
 - Pake が気に入ったら、GitHub で Star を付けたり、[周りの開発者仲間におすすめ](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20あらゆるウェブページをコマンド一つでデスクトップアプリに変換。macOS、Windows、Linux%20に対応) したりしていただけると嬉しいです、問題やデスクトップアプリ化にぴったりのサイトがあれば、issue や PR で教えてください
 - TangYuan と Coke という 2 匹の猫を飼っています。Pake で日々の作業が快適になったら、彼女たちに <a href="https://cats.tw93.fun?name=Pake" target="_blank">おやつ 🥩</a> をごちそうしていただけると嬉しいです
 
-<details>
-<summary>支援してくださった方々 🐱</summary>
-<br/>
+支援してくださった方々 🐱
+
 <a href="https://cats.tw93.fun?name=Pake"><img src="https://cdn.jsdelivr.net/gh/tw93/sponsors@main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
-</details>
 
 ## オープンソースライセンス
 

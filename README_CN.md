@@ -236,11 +236,9 @@ Pake 的发展离不开这些优秀的贡献者 ❤️
 - 如果你喜欢 Pake，可以在 GitHub 点个 Star，[推荐](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20一键打包网页生成轻量桌面应用，比%20Electron%20小%2020%20倍，支持%20macOS%20Windows%20Linux) 给志同道合的朋友，遇到问题或发现适合做成桌面 App 的网页，也欢迎提 issue 和 PR
 - 我有两只猫，一只叫汤圆，一只叫可乐，假如 Pake 让你的生活更美好，可以给她们<a href="https://cats.tw93.fun?name=Pake" target="_blank">喂罐头 🥩</a>
 
-<details>
-<summary>这些可爱的朋友已经喂过了 🐱</summary>
-<br/>
+这些可爱的朋友已经喂过了 🐱
+
 <a href="https://cats.tw93.fun?name=Pake"><img src="https://cdn.jsdelivr.net/gh/tw93/sponsors@main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
-</details>
 
 ## 开源协议
 

@@ -236,11 +236,9 @@ Pake의 성장은 훌륭한 오픈소스 기여자분들과 함께 만들어갑�
 - Pake가 유용했다면 GitHub Star를 눌러주시고, [주변 개발자 동료들에게 추천](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20명령어%20하나로%20모든%20웹페이지를%20데스크톱%20앱으로%20변환.%20macOS,%20Windows,%20Linux%20지원)해 주시면 큰 힘이 되며, 문제나 데스크톱 앱으로 만들면 좋은 웹사이트가 있다면 issue나 PR로 알려 주세요
 - TangYuan과 Coke라는 두 마리의 고양이를 키우고 있는데, Pake가 유용하셨다면 그 아이들에게 <a href="https://cats.tw93.fun?name=Pake" target="_blank">캔 간식 🥩</a>을 선물해 주셔도 좋습니다
 
-<details>
-<summary>따뜻한 응원을 보내주신 분들 🐱</summary>
-<br/>
+따뜻한 응원을 보내주신 분들 🐱
+
 <a href="https://cats.tw93.fun?name=Pake"><img src="https://cdn.jsdelivr.net/gh/tw93/sponsors@main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
-</details>
 
 ## 오픈소스 라이선스
 

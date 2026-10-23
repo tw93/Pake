@@ -236,11 +236,9 @@ Pake wäre ohne diese großartigen Mitwirkenden nicht möglich ❤️
 - Wenn Pake Ihnen geholfen hat, geben Sie dem Projekt einen Stern auf GitHub, [empfehlen Sie es weiter](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20Verwandeln%20Sie%20jede%20Webseite%20mit%20einem%20einzigen%20Befehl%20in%20eine%20Desktop-App.%20Unterst%C3%BCtzt%20macOS,%20Windows%20und%20Linux) oder öffnen Sie ein Issue oder einen PR, auch für Websites, die sich gut als Desktop-App eignen
 - Ich habe zwei Katzen, TangYuan und Coke, und wenn Pake Ihren Alltag bereichert hat, spendieren Sie ihnen gerne eine <a href="https://cats.tw93.fun?name=Pake" target="_blank">Dose Futter 🥩</a>
 
-<details>
-<summary>Diese freundlichen Menschen haben bereits gespendet 🐱</summary>
-<br/>
+Diese freundlichen Menschen haben bereits gespendet 🐱
+
 <a href="https://cats.tw93.fun?name=Pake"><img src="https://cdn.jsdelivr.net/gh/tw93/sponsors@main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
-</details>
 
 ## Open-Source-Lizenz
 
