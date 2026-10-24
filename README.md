@@ -237,7 +237,7 @@ Pake wouldn't be possible without these incredible contributors. ❤️
 
 These lovely people already did 🐱
 
-<a href="https://cats.tw93.fun?name=Pake"><img src="https://cdn.jsdelivr.net/gh/tw93/sponsors@main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
+<a href="https://cats.tw93.fun?name=Pake"><img src="https://raw.githubusercontent.com/tw93/sponsors/main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
 
 ## License
 

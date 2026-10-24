@@ -238,7 +238,7 @@ Pake 的发展离不开这些优秀的贡献者 ❤️
 
 这些可爱的朋友已经喂过了 🐱
 
-<a href="https://cats.tw93.fun?name=Pake"><img src="https://cdn.jsdelivr.net/gh/tw93/sponsors@main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
+<a href="https://cats.tw93.fun?name=Pake"><img src="https://raw.githubusercontent.com/tw93/sponsors/main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
 
 ## 开源协议
 

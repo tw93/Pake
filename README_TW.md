@@ -238,7 +238,7 @@ Pake 的發展離不開這些優秀的貢獻者 ❤️
 
 這些可愛的朋友已經贊助過 🐱
 
-<a href="https://cats.tw93.fun?name=Pake"><img src="https://cdn.jsdelivr.net/gh/tw93/sponsors@main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
+<a href="https://cats.tw93.fun?name=Pake"><img src="https://raw.githubusercontent.com/tw93/sponsors/main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
 
 ## 開源授權
 

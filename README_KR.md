@@ -238,7 +238,7 @@ Pake의 성장은 훌륭한 오픈소스 기여자분들과 함께 만들어갑�
 
 따뜻한 응원을 보내주신 분들 🐱
 
-<a href="https://cats.tw93.fun?name=Pake"><img src="https://cdn.jsdelivr.net/gh/tw93/sponsors@main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
+<a href="https://cats.tw93.fun?name=Pake"><img src="https://raw.githubusercontent.com/tw93/sponsors/main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
 
 ## 오픈소스 라이선스
 
