@@ -97,7 +97,6 @@ var devDependencies = {
 	"@rollup/plugin-commonjs": "^29.0.0",
 	"@rollup/plugin-json": "^6.1.0",
 	"@rollup/plugin-replace": "^6.0.3",
-	"@rollup/plugin-terser": "^0.4.4",
 	"@types/fs-extra": "^11.0.4",
 	"@types/node": "^25.3.2",
 	"@types/prompts": "^2.4.9",
@@ -106,10 +105,11 @@ var devDependencies = {
 	"cross-env": "^10.1.0",
 	prettier: "^3.8.1",
 	rollup: "^4.59.0",
-	"rollup-plugin-typescript2": "^0.36.0",
+	"rollup-plugin-typescript2": "^0.37.0",
 	tslib: "^2.8.1",
 	typescript: "^5.9.3",
-	vitest: "^4.0.18"
+	vite: "^7.3.7",
+	vitest: "^4.1.12"
 };
 var pnpm = {
 	overrides: {
