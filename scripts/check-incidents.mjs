@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // Every row of docs/incidents.md names real commits, a known layer and a
 // catcher the code defines.
 //

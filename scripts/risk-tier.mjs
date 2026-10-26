@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // Name the verification a change needs from the paths it touches, not from
 // who wrote it.
 //

@@ -140,3 +140,32 @@ describe('incident ledger', () => {
     );
   });
 });
+
+describe('scripts imported by tests', () => {
+  // Windows checks out CRLF, and Vitest fails to parse an imported module whose
+  // first line is a hashbang ending in \r ("Invalid or unexpected token").
+  it('do not start with a hashbang', () => {
+    const testsDir = path.join(process.cwd(), 'tests');
+    const imported = new Set<string>();
+    const walk = (dir: string) => {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) walk(full);
+        else if (/\.test\.[cm]?[jt]s$/.test(entry.name)) {
+          const text = fs.readFileSync(full, 'utf8');
+          for (const m of text.matchAll(
+            /from '((?:\.\.\/)+scripts\/[^']+\.mjs)'/g,
+          )) {
+            imported.add(path.resolve(dir, m[1]));
+          }
+        }
+      }
+    };
+    walk(testsDir);
+    expect(imported.size).toBeGreaterThan(0);
+    const withHashbang = [...imported].filter((file) =>
+      fs.readFileSync(file, 'utf8').startsWith('#!'),
+    );
+    expect(withHashbang).toEqual([]);
+  });
+});
