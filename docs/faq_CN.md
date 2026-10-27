@@ -19,8 +19,8 @@
   - [Linux：AppImage 打开后按钮或键盘在 Wayland 下不可用](#linuxappimage-打开后按钮或键盘在-wayland-下不可用)
   - [Linux："cargo: command not found" 即使已安装 Rust](#linuxcargo-command-not-found-即使已安装-rust)
   - [Windows：首次构建时安装超时](#windows首次构建时安装超时)
-  - [Windows：缺少 Visual Studio 构建工具](#windows缺少-visual-studio-构建工具)
-  - [macOS：构建失败，出现模块编译错误](#macos构建失败出现模块编译错误)
+  - [Windows：缺少 VS 构建工具](#windows缺少-vs-构建工具)
+  - [macOS：构建时模块编译出错](#macos构建时模块编译出错)
 - [运行时问题](#运行时问题)
   - [应用窗口太小/太大](#应用窗口太小太大)
   - [应用图标显示不正确](#应用图标显示不正确)
@@ -343,7 +343,7 @@ pake https://github.com --name GitHub
 - 首次安装：Windows 上需要 10-15 分钟
 - 后续构建：依赖已缓存，速度会快很多
 
-### Windows：缺少 Visual Studio 构建工具
+### Windows：缺少 VS 构建工具
 
 构建失败，提示缺少 MSVC 或 Windows SDK。
 
@@ -353,7 +353,7 @@ pake https://github.com --name GitHub
 2. 安装时选择"使用 C++ 的桌面开发"
 3. ARM64 支持：在"单个组件"下额外选择"MSVC v143 - VS 2022 C++ ARM64 构建工具"
 
-### macOS：构建失败，出现模块编译错误
+### macOS：构建时模块编译出错
 
 在 macOS 26 Beta 或更新版本上，可能看到与 `CoreFoundation` 或 `_Builtin_float` 模块相关的错误。
 
