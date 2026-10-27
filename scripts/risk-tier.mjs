@@ -17,6 +17,7 @@
 // tests/unit/risk-tier.test.ts runs it.
 
 import { spawnSync } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -153,6 +154,75 @@ export function deadPatterns(
   );
 }
 
+// Circuit breaker: once users met BREAKER_ROWS defects within BREAKER_DAYS (docs/incidents.md, by Reported
+// date), every change that reaches a tier also needs the full gate, and the layers those defects slipped past are
+// named so they are tightened first. It clears on its own as the rows age out; a future date is never counted.
+export const BREAKER_DAYS = 7;
+export const BREAKER_ROWS = 5;
+export const BREAKER_GATE =
+  "the whole `pnpm run release:check` and `cargo test --lib` instead of single tests, and the maintainer reading each listed fix before the next release";
+
+const DAY = 86_400_000;
+const utcDay = (iso) =>
+  /^\d{4}-\d{2}-\d{2}$/.test(iso) ? Date.parse(`${iso}T00:00:00Z`) : NaN;
+
+export function recentIncidents({
+  today = new Date().toLocaleDateString("sv"),
+  ledger = path.join(ROOT, "docs", "incidents.md"),
+} = {}) {
+  let text;
+  try {
+    text = fs.readFileSync(ledger, "utf8");
+  } catch {
+    return [];
+  }
+  const now = utcDay(today);
+  let header = null;
+  const found = [];
+  for (const line of (text.split("\n## Incidents")[1] ?? text).split("\n")) {
+    if (!line.startsWith("|")) continue;
+    const cells = line
+      .trim()
+      .replace(/^\||\|$/g, "")
+      .split("|")
+      .map((cell) => cell.trim());
+    if (!header) {
+      header = cells;
+      continue;
+    }
+    if (/^[-: ]*$/.test(cells.join(""))) continue;
+    const row = Object.fromEntries(header.map((name, i) => [name, cells[i]]));
+    const age = (now - utcDay(row.Reported ?? "")) / DAY;
+    if (age >= 0 && age < BREAKER_DAYS) found.push([row.ID, row.Layer]);
+  }
+  return found;
+}
+
+export function breakerLine(recent) {
+  if (recent.length < BREAKER_ROWS) return null;
+  const counts = new Map();
+  for (const [, layer] of recent)
+    counts.set(layer, (counts.get(layer) ?? 0) + 1);
+  const layers = [...counts]
+    .sort((a, b) => b[1] - a[1])
+    .map(([layer, count]) => `${layer} ${count}`)
+    .join(", ");
+  const ids = recent.map(([id]) => id).join(", ");
+  return `risk: breaker (${recent.length} incidents in the last ${BREAKER_DAYS} days: ${ids}): until the rate drops every tiered change needs ${BREAKER_GATE}; tighten first the layers they slipped past (${layers})`;
+}
+
+export function report(paths, recent = recentIncidents()) {
+  const hits = tiersFor(paths);
+  const lines = hits.map((tier) => {
+    const more =
+      tier.matched.length > 1 ? ` and ${tier.matched.length - 1} more` : "";
+    return `risk: ${tier.name} (${tier.matched[0]}${more}) needs ${tier.gates}`;
+  });
+  const breaker = breakerLine(recent);
+  if (hits.length && breaker) lines.push(breaker);
+  return lines;
+}
+
 if (
   process.argv[1] &&
   path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
@@ -164,11 +234,5 @@ if (
     process.exit(dead.length ? 1 : 0);
   }
   const paths = args.length ? args : pendingPaths();
-  for (const tier of tiersFor(paths)) {
-    const more =
-      tier.matched.length > 1 ? ` and ${tier.matched.length - 1} more` : "";
-    console.log(
-      `risk: ${tier.name} (${tier.matched[0]}${more}) needs ${tier.gates}`,
-    );
-  }
+  for (const line of report(paths)) console.log(line);
 }
