@@ -10,10 +10,22 @@ vi.mock('execa', async (importOriginal) => {
   return { ...actual, execa: vi.fn(actual.execa) };
 });
 
+vi.mock('@/utils/build-workspace', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/utils/build-workspace')>();
+  return {
+    ...actual,
+    preventBuildWorkspaceCleanup: vi.fn(actual.preventBuildWorkspaceCleanup),
+  };
+});
+
 import { execa } from 'execa';
 import { isMachineMode } from '@/utils/output';
 import { shellExec } from '@/utils/shell';
-import { beginBuildCancellation } from '@/utils/build-workspace';
+import {
+  beginBuildCancellation,
+  preventBuildWorkspaceCleanup,
+} from '@/utils/build-workspace';
 
 const tempDirs: string[] = [];
 afterEach(async () => {
@@ -97,6 +109,43 @@ describe('structured process execution', () => {
       ),
     ).rejects.toThrow('Command timed out after 50ms');
   });
+
+  it.each([
+    [128, 0],
+    [1, 1],
+  ])(
+    'a failed Windows build whose taskkill exits %i keeps the workspace %i times',
+    async (taskkillExit, kept) => {
+      const actual = await vi.importActual<typeof import('execa')>('execa');
+      vi.mocked(execa).mockImplementation(((file: string, ...rest: any[]) =>
+        file === 'taskkill'
+          ? Promise.reject(
+              Object.assign(new Error('taskkill failed'), {
+                exitCode: taskkillExit,
+              }),
+            )
+          : (actual.execa as any)(file, ...rest)) as any);
+      const platform = Object.getOwnPropertyDescriptor(process, 'platform')!;
+      Object.defineProperty(process, 'platform', { value: 'win32' });
+      const endCancellation = beginBuildCancellation();
+      try {
+        await expect(
+          shellExec({
+            executable: process.execPath,
+            args: ['-e', 'process.exit(7)'],
+          }),
+        ).rejects.toThrow('Exit code: 7');
+        expect(vi.mocked(execa).mock.calls.map((call) => call[0])).toContain(
+          'taskkill',
+        );
+        expect(preventBuildWorkspaceCleanup).toHaveBeenCalledTimes(kept);
+      } finally {
+        endCancellation();
+        Object.defineProperty(process, 'platform', platform);
+        vi.mocked(execa).mockImplementation(actual.execa as any);
+      }
+    },
+  );
 
   it.skipIf(process.platform === 'win32')(
     'stops compiler descendants before rejecting a timed-out build',

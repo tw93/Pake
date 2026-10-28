@@ -15,10 +15,17 @@ export interface ShellCommand {
 
 async function terminateBuildTree(pid: number): Promise<void> {
   if (process.platform === 'win32') {
-    await execa('taskkill', ['/pid', String(pid), '/T', '/F'], {
-      timeout: 5000,
-      windowsHide: true,
-    });
+    try {
+      await execa('taskkill', ['/pid', String(pid), '/T', '/F'], {
+        timeout: 5000,
+        windowsHide: true,
+      });
+    } catch (error) {
+      // 128 is "process not found": a failed build has usually exited before
+      // it rejects. Treating that as unconfirmed kept the cache lock, and
+      // every later build refused to start until it was deleted by hand.
+      if ((error as { exitCode?: number }).exitCode !== 128) throw error;
+    }
     return;
   }
 
