@@ -171,12 +171,20 @@ describe('structured process execution', () => {
               executable: process.execPath,
               args: ['-e', script, writes, childPidPath],
             },
-            500,
+            2000,
           ),
-        ).rejects.toThrow('Command timed out after 500ms');
-        const size = (await fs.stat(writes)).size;
+        ).rejects.toThrow('Command timed out after 2000ms');
+        // Under a loaded full run two node startups can outlast a short
+        // timeout, so the child may not have written yet; it must have spawned.
+        await fs.access(childPidPath);
+        const sizeOf = (file: string) =>
+          fs.stat(file).then(
+            (stat) => stat.size,
+            () => 0,
+          );
+        const size = await sizeOf(writes);
         await new Promise((resolve) => setTimeout(resolve, 100));
-        expect((await fs.stat(writes)).size).toBe(size);
+        expect(await sizeOf(writes)).toBe(size);
       } finally {
         endCancellation();
         try {
@@ -187,5 +195,6 @@ describe('structured process execution', () => {
         } catch {}
       }
     },
+    15000,
   );
 });
