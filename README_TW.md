@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/tw93/Pake/23bd253908a9b67be433faca0c84d3f857586d85/assets/logo.png" width="138" />
+  <img src="https://raw.githubusercontent.com/tw93/Pake/36acc2bc6b7d522ff24da7f3af3f9581d4d973f6/assets/logo.png" width="138" />
   <h1>Pake</h1>
   <p><b>一個指令把任意網頁打包成桌面應用，支援 macOS、Windows 與 Linux</b></p>
   <p><a href="https://pake.run">pake.run</a></p>
