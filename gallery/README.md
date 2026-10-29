@@ -28,7 +28,7 @@ Pake is not affiliated with any of these sites. Names, logos and icons belong to
 - `version`: starts at 1. Bump it only when a change affects the built app, that is `url`, `window` or the inject files, so installed apps offer the update. Name, description and icon fixes need no bump, because installed apps keep their own name and icon.
 - `category`: one of `ai`, `productivity`, `social`, `media`, `reading`, `developer`.
 - `name` and `description`: both `en` and `zh-Hans`. The description is one short line on what the site does, without a trailing period.
-- `icon`: the site's own apple-touch-icon or largest app icon over https, ideally 512 px. It is downloaded once when the apps are built, not at runtime.
+- `icon`: the site's own apple-touch-icon or largest app icon over https, or its official app's App Store icon when that reads better, ideally 512 px. It is downloaded once when the apps are built, not at runtime.
 - `window`: only options that differ from Pake's defaults, using the window option names of `src-tauri/pake.json` (`width`, `height`, `hide_title_bar`, `incognito` and the others listed in the schema). `user_agent` is a single string used on every platform. Options a platform cannot apply are ignored there.
 - `platforms`: set to `["mac"]` or `["windows"]` only when the site is known not to work on the other one.
 
