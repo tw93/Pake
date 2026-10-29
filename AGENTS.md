@@ -59,7 +59,7 @@ Pake/
 | `pnpm test -- --no-build`                  | Full suite minus the multi-arch real build                              |
 | `pnpm test`                                | Full suite including release workflow                                   |
 
-Keep shared project facts in this file so Codex, Claude Code, and other agents use the same source of truth. `CLAUDE.md` is a symlink to this file, so edit `AGENTS.md` only. Local-only overrides (`CLAUDE.local.md`, `AGENTS.override.md`, `.claude/settings.local.json`) stay ignored.
+Keep shared project facts in this file so Codex, Claude Code, and other agents use the same source of truth. Local-only overrides (`CLAUDE.local.md`, `AGENTS.override.md`, `.claude/settings.local.json`) stay ignored.
 
 ## Code Conventions
 
