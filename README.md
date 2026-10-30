@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/tw93/Pake/36acc2bc6b7d522ff24da7f3af3f9581d4d973f6/assets/logo.png" width="138" />
+  <img src="https://raw.githubusercontent.com/tw93/Pake/ac5508cf519064684c4214fe3f263c58ad7aaf5f/assets/logo.png" width="138" />
   <h1>Pake</h1>
   <p><b>Turn any website into a lightweight desktop app with one command. Supports macOS, Windows, and Linux.</b></p>
   <p><a href="https://pake.run">pake.run</a></p>
