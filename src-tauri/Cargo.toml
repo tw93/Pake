@@ -98,7 +98,13 @@ lto = "thin"
 opt-level = "z"
 strip = true
 
-# Debug info only for the pake crate: a clean debug build drops from 3.5G to 2.4G,
-# backtraces and breakpoints in pake code are unchanged.
+[profile.dev]
+# Line tables only for the pake crate: backtraces and breakpoints keep file and
+# line, lldb loses local variables. A clean `cargo test --no-run` went from 2.0G
+# to 1.7G at the same build time. Set CARGO_PROFILE_DEV_DEBUG=true for full
+# variable inspection.
+debug = "line-tables-only"
+
+# No debug info for third-party crates: a clean debug build drops from 3.5G to 2.4G.
 [profile.dev.package."*"]
 debug = false
