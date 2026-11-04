@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/tw93/Pake/ac5508cf519064684c4214fe3f263c58ad7aaf5f/assets/logo.png" width="138" />
   <h1>Pake</h1>
-  <p><b>Transformez n'importe quelle page web en application de bureau en une seule commande. Compatible macOS, Windows et Linux.</b></p>
+  <p><b>Transformez n'importe quelle page web en application de bureau en une seule commande. Compatible macOS, Windows et Linux. CLI libre et gratuite, plus une application de bureau.</b></p>
   <p>Le seul site officiel est <a href="https://pake.run">pake.run</a>, les autres domaines au nom de Pake sont des faux</p>
   <p><a href="README.md">English</a> · <a href="README_CN.md">中文</a> · <a href="README_TW.md">繁體</a> · <a href="README_JA.md">日本語</a> · <a href="README_KR.md">한국어</a> · <a href="README_DE.md">Deutsch</a> · Français</p>
   <a href="https://x.com/HiTw93" target="_blank"><img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=x"></a>
@@ -11,7 +11,7 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-> 💡 Ce dépôt est la CLI Pake, open source et gratuite, et les méthodes de packaging et applications populaires ci-dessous restent gratuites. Vous préférez une application au terminal ? L'[application de bureau Pake](https://pake.run/) se télécharge séparément, crée des apps sur macOS, Windows et Linux sans installer Node.js ni Rust.
+> 💡 Ce dépôt est la CLI Pake, open source et gratuite, et les applications populaires, les builds en ligne et le développement local ci-dessous restent gratuits. Vous préférez une interface graphique ? L'[application de bureau Pake](https://pake.run/) se télécharge séparément : choisissez une app de la galerie ou collez une URL sans installer Node.js ni Rust, modifiez les réglages et mettez à jour vos apps dans une seule fenêtre, et créez des apps distinctes pour d'autres comptes. `pnpm install -g pake-cli` n'installe que la CLI.
 
 ## Fonctionnalités
 
@@ -234,7 +234,7 @@ Pake ne serait pas possible sans ces précieux contributeurs ❤️
 
 ## Soutien
 
-- La façon la plus directe de me soutenir est d'acheter [Mole for Mac](https://mole.fit), mon application de nettoyage pour Mac
+- La façon la plus directe de soutenir le développement de Pake est d'acheter l'[application de bureau Pake](https://pake.run/)
 - Si Pake vous est utile, n'hésitez pas à lui attribuer une étoile sur GitHub, à le [recommander](https://x.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20Transformez%20n'importe%20quelle%20page%20web%20en%20application%20de%20bureau%20en%20une%20seule%20commande.%20Compatible%20macOS,%20Windows%20et%20Linux) autour de vous ou à ouvrir une issue ou une PR, y compris pour suggérer des sites qui feraient de bonnes applications de bureau
 - J'ai deux chattes, TangYuan et Coke, et si Pake vous rend service, vous pouvez leur offrir <a href="https://cats.tw93.fun?name=Pake" target="_blank">une friandise 🥩</a>
 
@@ -244,4 +244,4 @@ Ceux qui ont déjà contribué 🐱
 
 ## Licence open source
 
-Pake est distribué sous licence GPL-3.0, voir [LICENSE](./LICENSE) et [Pake Output Exception](./LICENSE-EXCEPTION). Les applications créées avec Pake vous appartiennent entièrement et peuvent être utilisées ou distribuées librement. Si vous créez un fork pour un produit dérivé, merci de choisir un nom distinct et de citer Pake comme source.
+Pake est distribué sous licence GPL-3.0, voir [LICENSE](./LICENSE) et [Pake Output Exception](./LICENSE-EXCEPTION). Les applications créées avec Pake vous appartiennent entièrement et peuvent être utilisées ou distribuées librement. Si vous créez un fork pour un produit dérivé, merci de choisir un nom distinct et de citer Pake comme source. L'application de bureau Pake est une application payante distincte, et la CLI Pake reste open source sur le long terme.

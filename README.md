@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/tw93/Pake/ac5508cf519064684c4214fe3f263c58ad7aaf5f/assets/logo.png" width="138" />
   <h1>Pake</h1>
-  <p><b>Turn any website into a lightweight desktop app with one command. Supports macOS, Windows, and Linux.</b></p>
+  <p><b>Turn any website into a lightweight desktop app with one command. Supports macOS, Windows, and Linux. Free open-source CLI, plus a desktop app.</b></p>
   <p>The only official site is <a href="https://pake.run">pake.run</a>, and other domains using the Pake name are fake</p>
   <p>English · <a href="README_CN.md">中文</a> · <a href="README_TW.md">繁體</a> · <a href="README_JA.md">日本語</a> · <a href="README_KR.md">한국어</a> · <a href="README_DE.md">Deutsch</a> · <a href="README_FR.md">Français</a></p>
   <a href="https://x.com/HiTw93" target="_blank"><img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=x"></a>
@@ -11,7 +11,7 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-> 💡 This repo is the free open-source Pake CLI, and the packaging options and popular apps below stay free. Prefer an app to the terminal? The [Pake desktop app](https://pake.run/) is a separate download that makes apps on macOS, Windows and Linux with no Node.js or Rust to install.
+> 💡 This repo is the free open-source Pake CLI, and the popular apps, online builds and local development below stay free. Prefer a graphical app? The [Pake desktop app](https://pake.run/) is a separate download: pick a gallery app or paste a URL with no Node.js or Rust to install, change settings and update apps in one window, and make separate apps for other accounts. `pnpm install -g pake-cli` installs the CLI only.
 
 ## Features
 
@@ -233,7 +233,7 @@ Pake wouldn't be possible without these incredible contributors. ❤️
 
 ## Support
 
-- The most direct way to support me is getting [Mole for Mac](https://mole.fit), my paid Mac cleanup app
+- Getting the [Pake desktop app](https://pake.run/) is the most direct way to support Pake's development
 - If Pake helped you, give it a star, [share it](https://x.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20Turn%20any%20webpage%20into%20a%20desktop%20app%20with%20one%20command.%20Nearly%2020x%20smaller%20than%20Electron%20packages,%20supports%20macOS%20Windows%20Linux), or open an issue or PR, including sites that would make good desktop apps
 - I have two cats, TangYuan and Coke, and if Pake makes your life a little easier, feel free to treat them to <a href="https://cats.tw93.fun?name=Pake" target="_blank">canned food 🥩</a>
 
@@ -243,4 +243,4 @@ These lovely people already did 🐱
 
 ## License
 
-Pake is open source under GPL-3.0, see [LICENSE](./LICENSE) and [Pake Output Exception](./LICENSE-EXCEPTION); apps you build with Pake are entirely yours to use and distribute. If you fork Pake into your own product, to avoid confusion please give it a different name and credit Pake as the source.
+Pake is open source under GPL-3.0, see [LICENSE](./LICENSE) and [Pake Output Exception](./LICENSE-EXCEPTION); apps you build with Pake are entirely yours to use and distribute. If you fork Pake into your own product, to avoid confusion please give it a different name and credit Pake as the source. The [Pake desktop app](https://pake.run/) is a separate paid app, and Pake CLI stays open source for the long run.

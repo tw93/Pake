@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/tw93/Pake/ac5508cf519064684c4214fe3f263c58ad7aaf5f/assets/logo.png" width="138" />
   <h1>Pake</h1>
-  <p><b>あらゆるウェブページをコマンド一つでデスクトップアプリに変換。macOS、Windows、Linux に対応。</b></p>
+  <p><b>あらゆるウェブページをコマンド一つでデスクトップアプリに変換。macOS、Windows、Linux に対応。無料のオープンソース CLI に加え、デスクトップ版もあります。</b></p>
   <p>公式サイトは <a href="https://pake.run">pake.run</a> だけで、Pake を名乗るほかのドメインは偽物です</p>
   <p><a href="README.md">English</a> · <a href="README_CN.md">中文</a> · <a href="README_TW.md">繁體</a> · 日本語 · <a href="README_KR.md">한국어</a> · <a href="README_DE.md">Deutsch</a> · <a href="README_FR.md">Français</a></p>
   <a href="https://x.com/HiTw93" target="_blank"><img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=x"></a>
@@ -11,7 +11,7 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-> 💡 このリポジトリは無料のオープンソース版 Pake CLI で、以下のパッケージ方法と人気アプリはずっと無料です。ターミナルよりアプリで使いたい場合は、別途ダウンロードの [Pake デスクトップ版](https://pake.run/) があり、Node.js や Rust をインストールせずに macOS、Windows、Linux でアプリを作れます。
+> 💡 このリポジトリは無料のオープンソース版 Pake CLI で、以下の人気アプリ、オンラインビルド、ローカル開発はずっと無料です。GUI で使いたい場合は、別途ダウンロードの [Pake デスクトップ版](https://pake.run/) があり、Node.js や Rust をインストールせずに、ギャラリーから選ぶか URL を貼り付けるだけでアプリを作れます。設定の変更とアプリの更新は一つのウィンドウで行え、アカウントごとに別のアプリも作れます。`pnpm install -g pake-cli` でインストールされるのは CLI だけです。
 
 ## 特徴
 
@@ -234,7 +234,7 @@ Pake の成長は多くのコントリビューターに支えられています
 
 ## サポート
 
-- 最も直接的な支援は、個人開発の Mac クリーナーアプリ [Mole for Mac](https://mole.fit) を購入していただくことです
+- 最も直接的な支援は、[Pake デスクトップ版](https://pake.run/) を購入していただくことです
 - Pake が気に入ったら、GitHub で Star を付けたり、[周りの開発者仲間におすすめ](https://x.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20あらゆるウェブページをコマンド一つでデスクトップアプリに変換。macOS、Windows、Linux%20に対応) したりしていただけると嬉しいです、問題やデスクトップアプリ化にぴったりのサイトがあれば、issue や PR で教えてください
 - TangYuan と Coke という 2 匹の猫を飼っています。Pake で日々の作業が快適になったら、彼女たちに <a href="https://cats.tw93.fun?name=Pake" target="_blank">おやつ 🥩</a> をごちそうしていただけると嬉しいです
 
@@ -244,4 +244,4 @@ Pake の成長は多くのコントリビューターに支えられています
 
 ## オープンソースライセンス
 
-Pake は GPL-3.0 ライセンスの下で公開されています。詳細は [LICENSE](./LICENSE) および [Pake Output Exception](./LICENSE-EXCEPTION) を参照してください。Pake で作成したアプリの所有権はすべてあなたに帰属し、自由に使用および配布できます。フォークして独立した製品を作成する場合は、混同を避けるため別の名前を付け、出典を明記してください。
+Pake は GPL-3.0 ライセンスの下で公開されています。詳細は [LICENSE](./LICENSE) および [Pake Output Exception](./LICENSE-EXCEPTION) を参照してください。Pake で作成したアプリの所有権はすべてあなたに帰属し、自由に使用および配布できます。フォークして独立した製品を作成する場合は、混同を避けるため別の名前を付け、出典を明記してください。Pake デスクトップ版は別の有料アプリで、Pake CLI はこれからもオープンソースで開発を続けます。

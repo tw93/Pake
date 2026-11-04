@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/tw93/Pake/ac5508cf519064684c4214fe3f263c58ad7aaf5f/assets/logo.png" width="138" />
   <h1>Pake</h1>
-  <p><b>一条命令把任意网页打包成桌面应用，支持 macOS、Windows 和 Linux</b></p>
+  <p><b>一条命令把任意网页打包成桌面应用，支持 macOS、Windows 和 Linux，免费开源命令行，另有桌面版</b></p>
   <p>官网只有 <a href="https://pake.run">pake.run</a>，其他打着 Pake 名义的域名都是假的</p>
   <p><a href="README.md">English</a> · 中文 · <a href="README_TW.md">繁體</a> · <a href="README_JA.md">日本語</a> · <a href="README_KR.md">한국어</a> · <a href="README_DE.md">Deutsch</a> · <a href="README_FR.md">Français</a></p>
   <a href="https://x.com/HiTw93" target="_blank"><img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=x"></a>
@@ -11,7 +11,7 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-> 💡 这个仓库是免费开源的 Pake CLI，下面这些打包方式和热门应用都一直免费，想用带界面的版本可以单独下载 [Pake 桌面版](https://pake.run/zh)，不用装 Node.js 和 Rust，在 macOS、Windows 和 Linux 上都能直接做应用。
+> 💡 这个仓库是免费开源的 Pake CLI，下面的热门应用、在线打包和本地开发都一直免费，喜欢图形界面的话可以单独下载 [Pake 桌面版](https://pake.run/zh)，从精选里选一个或者粘贴网址就能做好应用，不用装 Node.js 和 Rust，在同一个窗口改设置、更新应用，还能为不同账号做独立应用，`pnpm install -g pake-cli` 只会安装命令行工具。
 
 ## 特性
 
@@ -234,7 +234,7 @@ Pake 的发展离不开这些优秀的贡献者 ❤️
 
 ## 支持
 
-- 购买我做的 Mac 清理应用 [Mole for Mac](https://mole.fit)，是对我最直接的支持
+- 购买 [Pake 桌面版](https://pake.run/zh)，是对 Pake 开发最直接的支持
 - 如果你喜欢 Pake，可以在 GitHub 点个 Star，[推荐](https://x.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20一键打包网页生成轻量桌面应用，比%20Electron%20小%2020%20倍，支持%20macOS%20Windows%20Linux) 给志同道合的朋友，遇到问题或发现适合做成桌面 App 的网页，也欢迎提 issue 和 PR
 - 我有两只猫，一只叫汤圆，一只叫可乐，假如 Pake 让你的生活更美好，可以给她们<a href="https://cats.tw93.fun?name=Pake" target="_blank">喂罐头 🥩</a>
 
@@ -244,4 +244,4 @@ Pake 的发展离不开这些优秀的贡献者 ❤️
 
 ## 开源协议
 
-Pake 使用 GPL-3.0 协议开源，详见 [LICENSE](./LICENSE) 和 [Pake Output Exception](./LICENSE-EXCEPTION)，用 Pake 打包生成的应用所有权完全归你，可以自由使用和分发；假如你想基于 fork 重新做一个 Pake 产品，为了避免误解，辛苦换一个名字，并注明来源。
+Pake 使用 GPL-3.0 协议开源，详见 [LICENSE](./LICENSE) 和 [Pake Output Exception](./LICENSE-EXCEPTION)，用 Pake 打包生成的应用所有权完全归你，可以自由使用和分发；假如你想基于 fork 重新做一个 Pake 产品，为了避免误解，辛苦换一个名字，并注明来源。Pake 桌面版是单独的付费应用，Pake CLI 会一直开源维护下去。
