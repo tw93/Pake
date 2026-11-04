@@ -11,7 +11,7 @@
 ## 快速步骤
 
 1. [Fork 此项目](https://github.com/tw93/Pake/fork)
-2. 在你 Fork 的仓库里打开 Actions 页面，选择 `Build App With Pake CLI`，按 [CLI 选项](cli-usage_CN.md) 填写表单后点击 `Run Workflow`
+2. 在你 Fork 的仓库里打开 Actions 页面，选择 `Build App With Pake CLI`，按下面的[表单字段](#表单字段)填写表单后点击 `Run Workflow`
 
    ![Actions 界面](https://raw.githubusercontent.com/tw93/static/main/pake/action.png)
 
