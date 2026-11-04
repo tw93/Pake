@@ -11,7 +11,7 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-> 💡 Ce dépôt est la CLI Pake, open source et gratuite, et les méthodes de packaging et applications populaires ci-dessous restent gratuites. Vous préférez une application au terminal ? L'[application de bureau Pake](https://pake.run/) se télécharge séparément, crée des apps sur macOS, Windows et Linux sans installer Node.js ni Rust, et les 2 premières apps sont gratuites.
+> 💡 Ce dépôt est la CLI Pake, open source et gratuite, et les méthodes de packaging et applications populaires ci-dessous restent gratuites. Vous préférez une application au terminal ? L'[application de bureau Pake](https://pake.run/) se télécharge séparément, crée des apps sur macOS, Windows et Linux sans installer Node.js ni Rust.
 
 ## Fonctionnalités
 

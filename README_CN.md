@@ -11,7 +11,7 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-> 💡 这个仓库是免费开源的 Pake CLI，下面这些打包方式和热门应用都一直免费，想用带界面的版本可以单独下载 [Pake 桌面版](https://pake.run/zh)，不用装 Node.js 和 Rust，在 macOS、Windows 和 Linux 上都能直接做应用，可以先免费做 2 个。
+> 💡 这个仓库是免费开源的 Pake CLI，下面这些打包方式和热门应用都一直免费，想用带界面的版本可以单独下载 [Pake 桌面版](https://pake.run/zh)，不用装 Node.js 和 Rust，在 macOS、Windows 和 Linux 上都能直接做应用。
 
 ## 特性
 
