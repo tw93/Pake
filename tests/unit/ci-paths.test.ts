@@ -84,7 +84,8 @@ function makeFilter(patterns: string[]) {
   };
 }
 
-const text = fs.readFileSync(WORKFLOW, 'utf8');
+// Windows checkouts convert line endings to CRLF; the patterns below expect LF.
+const text = fs.readFileSync(WORKFLOW, 'utf8').replace(/\r\n/g, '\n');
 const push = eventPaths(text, 'push');
 const included = makeFilter(push);
 const files = execSync('git ls-files', { cwd: ROOT, encoding: 'utf8' })
