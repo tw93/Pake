@@ -1,0 +1,15 @@
+{
+  "id": "gmail",
+  "version": 1,
+  "name": {
+    "en": "Gmail",
+    "zh-Hans": "Gmail"
+  },
+  "url": "https://mail.google.com/",
+  "category": "productivity",
+  "description": {
+    "en": "Google's email",
+    "zh-Hans": "谷歌邮箱"
+  },
+  "icon": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/83/a9/eb/83a9eb0a-ab2b-da1f-41a9-8357822787a8/gmail_2026_ios-0-0-1x_U007epad-0-0-0-1-0-0-0-0-85-220.png/512x512bb.jpg"
+}

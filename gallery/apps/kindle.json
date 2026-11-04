@@ -1,0 +1,15 @@
+{
+  "id": "kindle",
+  "version": 1,
+  "name": {
+    "en": "Kindle",
+    "zh-Hans": "Kindle"
+  },
+  "url": "https://read.amazon.com/",
+  "category": "reading",
+  "description": {
+    "en": "Read your Kindle books",
+    "zh-Hans": "读你的 Kindle 书"
+  },
+  "icon": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/62/5d/45/625d453c-1265-3332-d5bd-66f04e528323/AppIcon-0-0-1x_U007emarketing-0-7-0-sRGB-0-0-85-220.png/512x512bb.jpg"
+}

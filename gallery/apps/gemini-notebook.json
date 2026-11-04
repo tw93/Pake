@@ -1,0 +1,15 @@
+{
+  "id": "gemini-notebook",
+  "version": 1,
+  "name": {
+    "en": "Gemini Notebook",
+    "zh-Hans": "Gemini Notebook"
+  },
+  "url": "https://notebook.google.com/",
+  "category": "ai",
+  "description": {
+    "en": "Ask questions about your own sources",
+    "zh-Hans": "基于你自己的资料提问和整理"
+  },
+  "icon": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/90/80/7b/90807ba9-0714-a5af-2cf4-c09d5e5488c9/gemini_notebook_ios-0-0-1x_U007epad-0-0-0-1-0-0-sRGB-0-0-85-220.png/512x512bb.jpg"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "instagram",
+  "version": 1,
+  "name": {
+    "en": "Instagram",
+    "zh-Hans": "Instagram"
+  },
+  "url": "https://www.instagram.com/",
+  "category": "social",
+  "description": {
+    "en": "Photos, reels and messages",
+    "zh-Hans": "照片、短视频和私信"
+  },
+  "icon": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/65/b4/b1/65b4b1e1-9891-0b84-4d9a-6370410bfbf4/Prod-0-0-1x_U007epad-0-1-0-sRGB-85-220.png/512x512bb.jpg"
+}

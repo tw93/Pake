@@ -1,0 +1,15 @@
+{
+  "id": "discord",
+  "version": 1,
+  "name": {
+    "en": "Discord",
+    "zh-Hans": "Discord"
+  },
+  "url": "https://discord.com/app",
+  "category": "social",
+  "description": {
+    "en": "Voice, video and text communities",
+    "zh-Hans": "语音、视频和文字社区"
+  },
+  "icon": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/65/9c/e0/659ce065-5dd8-eb35-378f-217d9658f6d9/AppIcon-0-0-1x_U007epad-0-1-0-85-220.png/512x512bb.jpg"
+}

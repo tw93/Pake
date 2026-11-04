@@ -1,0 +1,15 @@
+{
+  "id": "google-calendar",
+  "version": 1,
+  "name": {
+    "en": "Google Calendar",
+    "zh-Hans": "Google 日历"
+  },
+  "url": "https://calendar.google.com/",
+  "category": "productivity",
+  "description": {
+    "en": "Plan events and share calendars",
+    "zh-Hans": "安排日程，共享日历"
+  },
+  "icon": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/69/d3/40/69d34020-b001-6856-bdde-cce3ebe93803/calendar_2026_ios-0-0-1x_U007epad-0-0-0-1-0-0-sRGB-0-0-85-220.png/512x512bb.jpg"
+}
