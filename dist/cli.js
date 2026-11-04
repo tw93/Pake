@@ -3737,7 +3737,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .addOption(new Option('--wasm', 'Enable WebAssembly support (Flutter Web, etc.)')
         .default(DEFAULT_PAKE_OPTIONS.wasm)
         .hideHelp())
-        .addOption(new Option('--enable-drag-drop', 'Enable drag and drop functionality')
+        .addOption(new Option('--enable-drag-drop', "Use Tauri's file-drop handler (pages stop receiving file drops)")
         .default(DEFAULT_PAKE_OPTIONS.enableDragDrop)
         .hideHelp())
         .addOption(new Option('--keep-binary', 'Keep raw binary file alongside installer')

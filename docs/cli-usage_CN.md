@@ -489,13 +489,10 @@ pake https://flutter.dev --name FlutterApp --wasm
 
 #### [enable-drag-drop]
 
-启用原生拖拽支持，默认为 `false`，支持网页内元素拖拽排序及文件拖入上传等交互。
+打开 Tauri 自己的文件拖放处理，默认为 `false`。网页里的拖拽不需要它，默认情况下拖动元素排序、把文件拖进来上传都由网页自己处理，和在浏览器里一样；加上这个参数后，Tauri 会先截下拖进来的文件，拖到上传区域或文件输入框上没有反应，Windows 上网页的 HTML5 拖拽也会失效。Pake 应用不使用这个处理发出的事件，没有特别需要就不要加。
 
 ```shell
 --enable-drag-drop
-
-# 示例：打包需要拖拽交互的应用
-pake https://planka.example.com --name PlankApp --enable-drag-drop
 ```
 
 #### [keep-binary]

@@ -491,13 +491,10 @@ pake https://flutter.dev --name FlutterApp --wasm
 
 #### [enable-drag-drop]
 
-Enable native drag and drop functionality within the application. Default is `false`. When enabled, allows drag and drop operations like reordering items, file uploads, and other interactive drag behaviors that work in regular browsers.
+Turn on Tauri's own file-drop handler for the window. Default is `false`. You do not need it for a site's drag and drop: with the default, the page itself handles dragging items to reorder them and dragging files in to upload, as it does in a browser. With the flag, Tauri takes file drops before the page sees them, so dropping a file onto an upload area or file input does nothing, and on Windows the page's HTML5 drag and drop stops working as well. Pake apps do not use the events this handler sends, so leave it off unless you have a specific reason to test it.
 
 ```shell
 --enable-drag-drop
-
-# Example: Package an app that requires drag-drop functionality
-pake https://planka.example.com --name PlankApp --enable-drag-drop
 ```
 
 #### [keep-binary]
