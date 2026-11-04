@@ -290,7 +290,7 @@ Set a regex pattern to determine which URLs should be considered internal (opene
 
 #### [safe-domain]
 
-A simpler way to keep trusted domains and their subdomains inside the app. This is useful for workspace callbacks and enterprise SSO flows, for example Slack plus Okta. Pake compiles this list into `internal_url_regex`; if `--internal-url-regex` is also set, the explicit regex wins.
+A simpler way to keep trusted domains and their subdomains inside the app. This is useful for workspace callbacks and enterprise SSO flows, for example Slack plus Okta. Pake compiles this list into `internal_url_regex`; if `--internal-url-regex` is also set, the explicit regex wins. The list replaces the default rule that keeps the app's own domain inside, so include that domain too: with only `okta.com`, links on the app's own site would open in the browser.
 
 `--safe-domain` matches URL hosts only, not arbitrary path or query text.
 
@@ -392,7 +392,7 @@ The raw executable is copied to the current directory as `<name>-binary`. On pla
 
 #### [user-agent]
 
-Customize the browser user agent. Default is empty.
+Customize the browser user agent. When omitted, the app sends its platform default: a Safari string on macOS and Linux and a Chrome string on Windows.
 
 ```shell
 --user-agent <string>
@@ -710,7 +710,7 @@ Ignore TLS certificate validation errors when loading the target URL. Useful for
 
 #### [new-window]
 
-Allow sites to open new windows, such as authentication popups, extra tabs, or branch views.
+Allow sites to open new windows, such as authentication popups, extra tabs, or branch views. Without it, a link or `window.open` call that asks for a new window opens in the current window instead.
 
 This can help sites that rely on popup auth windows, but it does not guarantee in-app sign-in. Some providers, especially Google, may block authentication inside embedded webviews regardless of this option.
 

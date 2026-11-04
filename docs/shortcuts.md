@@ -15,14 +15,14 @@ Every app Pake builds has these shortcuts, on top of the ones the website itself
 | `⌘ ↑`     | `Ctrl ↑`          | Scroll to the top of the page       |
 | `⌘ ↓`     | `Ctrl ↓`          | Scroll to the bottom of the page    |
 | `⌘ R`     | `Ctrl R`          | Reload the page                     |
-| `⌘ W`     | `Ctrl W`          | Hide the window without quitting    |
+| `⌘ W`     | Mac only          | Hide the window without quitting    |
 | `⌘ -`     | `Ctrl -`          | Zoom out                            |
 | `⌘ =`     | `Ctrl =`          | Zoom in                             |
 | `⌘ 0`     | `Ctrl 0`          | Reset zoom                          |
-| `⌘ L`     | `Ctrl L`          | Copy the current page URL           |
-| `⌘ ⇧ ⌥ V` | `Ctrl Shift V`    | Paste and match style               |
-| `⌘ ⇧ H`   | `Ctrl Shift H`    | Go to the home page                 |
-| `⌘ ⇧ ⌫`   | `Ctrl Shift Del`  | Clear the cache and restart         |
+| `⌘ L`     | Mac only          | Copy the current page URL           |
+| `⌘ ⇧ ⌥ V` | Mac only          | Paste and match style               |
+| `⌘ ⇧ H`   | Mac only          | Go to the home page                 |
+| `⌘ ⇧ ⌫`   | Mac only          | Clear the cache and restart         |
 | `⌃ ⌘ F`   | `F11`             | Toggle fullscreen                   |
 | `⌘ ⌥ I`   | `Ctrl Shift I`    | Toggle developer tools (debug only) |
 
