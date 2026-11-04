@@ -2,8 +2,8 @@
   "id": "gemini-notebook",
   "version": 1,
   "name": {
-    "en": "Gemini Notebook",
-    "zh-Hans": "Gemini Notebook"
+    "en": "NotebookLM",
+    "zh-Hans": "NotebookLM"
   },
   "url": "https://notebook.google.com/",
   "category": "ai",

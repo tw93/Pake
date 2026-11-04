@@ -2,8 +2,8 @@
   "id": "readwise-reader",
   "version": 1,
   "name": {
-    "en": "Readwise Reader",
-    "zh-Hans": "Readwise Reader"
+    "en": "Readwise",
+    "zh-Hans": "Readwise"
   },
   "url": "https://read.readwise.io/",
   "category": "reading",
