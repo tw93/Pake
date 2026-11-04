@@ -1,13 +1,12 @@
 ---
 name: release
-description: Prepare, validate, and publish a Pake release. Not for version bumps without release intent.
+description: Prepare, validate, and publish a Pake release once the maintainer asks for one in the current turn. Not for version bumps without release intent.
 version: 1.7.0
 allowed-tools:
   - Bash
   - Read
   - Grep
   - Glob
-disable-model-invocation: true
 ---
 
 # Release Skill
