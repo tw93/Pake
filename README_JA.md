@@ -11,6 +11,8 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
+> 💡 このリポジトリは無料のオープンソース版 Pake CLI で、以下のパッケージ方法と人気アプリはずっと無料です。ターミナルよりアプリで使いたい場合は、別途ダウンロードの [Pake デスクトップ版](https://pake.run/) があり、Node.js や Rust をインストールせずに macOS、Windows、Linux でアプリを作れて、最初の 2 個は無料です。
+
 ## 特徴
 
 - 🎐 **軽量**：Electron アプリと比べて約 20 分の 1 のサイズ、通常 10 MB 未満。Nativefier など Electron ベースのラッパーより軽い代替

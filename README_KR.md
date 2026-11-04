@@ -11,6 +11,8 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
+> 💡 이 저장소는 무료 오픈소스 Pake CLI이며, 아래의 패키징 방법과 인기 앱은 계속 무료입니다. 터미널 대신 앱을 쓰고 싶다면 별도로 내려받는 [Pake 데스크톱 앱](https://pake.run/)이 있으며, Node.js나 Rust 설치 없이 macOS, Windows, Linux에서 바로 앱을 만들 수 있고 처음 2개는 무료입니다.
+
 ## 특징
 
 - 🎐 **가벼운 용량**: Electron 패키지 대비 약 20배 작으며, 일반적으로 10 MB 미만, Nativefier 같은 Electron 래퍼의 가벼운 대안

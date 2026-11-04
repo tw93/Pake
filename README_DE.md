@@ -11,6 +11,8 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
+> 💡 Dieses Repository ist die kostenlose Open-Source-Pake-CLI, und die Packaging-Wege und beliebten Apps unten bleiben kostenlos. Lieber eine App statt des Terminals? Die [Pake-Desktop-App](https://pake.run/) ist ein separater Download, erstellt Apps auf macOS, Windows und Linux ohne Node.js oder Rust, und die ersten 2 Apps sind kostenlos.
+
 ## Funktionen
 
 - 🎐 **Leichtgewichtig**: Das Installationspaket ist fast 20-mal kleiner als bei Electron-Apps, meist unter 10 MB auf der Festplatte, eine schlankere Alternative zu Nativefier und anderen Electron-Wrappern

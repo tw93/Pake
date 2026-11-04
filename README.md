@@ -11,6 +11,8 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
+> 💡 This repo is the free open-source Pake CLI, and the packaging options and popular apps below stay free. Prefer an app to the terminal? The [Pake desktop app](https://pake.run/) is a separate download that makes apps on macOS, Windows and Linux with no Node.js or Rust to install, and your first 2 apps are free.
+
 ## Features
 
 - 🎐 **Lightweight**: Installer is nearly 20 times smaller than Electron packages, typically under 10 MB on disk, a lighter alternative to Nativefier and other Electron wrappers

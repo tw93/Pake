@@ -11,6 +11,8 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
+> 💡 這個倉庫是免費開源的 Pake CLI，下面這些打包方式和熱門應用都一直免費，想用帶介面的版本可以另外下載 [Pake 桌面版](https://pake.run/zh)，不用裝 Node.js 和 Rust，在 macOS、Windows 和 Linux 上都能直接做應用，可以先免費做 2 個。
+
 ## 特性
 
 - 🎐 **體積小巧**：安裝包比 Electron 應用小近 20 倍，通常小於 10 MB，是 Nativefier 這類 Electron 套殼工具更輕的替代
