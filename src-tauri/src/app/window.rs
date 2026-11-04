@@ -570,9 +570,9 @@ fn build_window(
         window_builder = window_builder.min_inner_size(min_w, min_h);
     }
 
-    if !window_config.enable_drag_drop {
-        window_builder = window_builder.disable_drag_drop_handler();
-    }
+    // Tauri's drag-drop handler takes file drops before the page and breaks
+    // HTML5 drag and drop on Windows; nothing in Pake consumes its events.
+    window_builder = window_builder.disable_drag_drop_handler();
 
     {
         let allow_new_window = window_config.new_window;

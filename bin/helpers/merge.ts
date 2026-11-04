@@ -58,7 +58,6 @@ export function buildWindowConfigOverrides(
     password_autosave: options.passwordAutosave,
     title: options.title,
     enable_wasm: options.wasm,
-    enable_drag_drop: options.enableDragDrop,
     start_to_tray: options.startToTray && options.showSystemTray,
     force_internal_navigation: options.forceInternalNavigation,
     internal_url_regex: options.internalUrlRegex,

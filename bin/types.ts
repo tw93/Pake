@@ -202,7 +202,6 @@ export interface WindowConfig {
   password_autosave: boolean;
   title?: string;
   enable_wasm: boolean;
-  enable_drag_drop: boolean;
   start_to_tray: boolean;
   force_internal_navigation: boolean;
   internal_url_regex: string;

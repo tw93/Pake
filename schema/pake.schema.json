@@ -176,7 +176,7 @@
     },
     "enableDragDrop": {
       "type": "boolean",
-      "description": "Use Tauri's file-drop handler instead of the page's own drag and drop. Off by default; when on, files dropped on the page do not reach it.",
+      "description": "Deprecated and ignored. Pages handle drag and drop and file drops by default.",
       "default": false
     },
     "keepBinary": {

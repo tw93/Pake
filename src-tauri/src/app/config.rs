@@ -32,7 +32,6 @@ pub struct WindowConfig {
     pub password_autosave: bool,
     pub title: Option<String>,
     pub enable_wasm: bool,
-    pub enable_drag_drop: bool,
     #[serde(default)]
     pub new_window: bool,
     pub start_to_tray: bool,

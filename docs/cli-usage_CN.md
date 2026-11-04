@@ -487,14 +487,6 @@ pake https://www.rememberthemilk.com --name RememberTheMilk --no-restore-last-ur
 pake https://flutter.dev --name FlutterApp --wasm
 ```
 
-#### [enable-drag-drop]
-
-打开 Tauri 自己的文件拖放处理，默认为 `false`。网页里的拖拽不需要它，默认情况下拖动元素排序、把文件拖进来上传都由网页自己处理，和在浏览器里一样；加上这个参数后，Tauri 会先截下拖进来的文件，拖到上传区域或文件输入框上没有反应，Windows 上网页的 HTML5 拖拽也会失效。Pake 应用不使用这个处理发出的事件，没有特别需要就不要加。
-
-```shell
---enable-drag-drop
-```
-
 #### [keep-binary]
 
 构建后保留免安装的独立运行文件，默认为 `false`，除各平台标准安装包外，还会在当前目录额外输出二进制（Unix 为 `AppName-binary`，Windows 为 `AppName.exe`），使用 `--windows-toolchain gnu` 时同步输出 `WebView2Loader.dll`。

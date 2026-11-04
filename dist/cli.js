@@ -963,7 +963,6 @@ function buildWindowConfigOverrides(options, platform = asSupportedPlatform(proc
         password_autosave: options.passwordAutosave,
         title: options.title,
         enable_wasm: options.wasm,
-        enable_drag_drop: options.enableDragDrop,
         start_to_tray: options.startToTray && options.showSystemTray,
         force_internal_navigation: options.forceInternalNavigation,
         internal_url_regex: options.internalUrlRegex,
@@ -3737,7 +3736,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .addOption(new Option('--wasm', 'Enable WebAssembly support (Flutter Web, etc.)')
         .default(DEFAULT_PAKE_OPTIONS.wasm)
         .hideHelp())
-        .addOption(new Option('--enable-drag-drop', "Use Tauri's file-drop handler (pages stop receiving file drops)")
+        .addOption(new Option('--enable-drag-drop', 'Deprecated and ignored: pages handle drag and drop by default')
         .default(DEFAULT_PAKE_OPTIONS.enableDragDrop)
         .hideHelp())
         .addOption(new Option('--keep-binary', 'Keep raw binary file alongside installer')

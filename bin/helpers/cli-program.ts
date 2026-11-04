@@ -209,7 +209,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
     .addOption(
       new Option(
         '--enable-drag-drop',
-        "Use Tauri's file-drop handler (pages stop receiving file drops)",
+        'Deprecated and ignored: pages handle drag and drop by default',
       )
         .default(DEFAULT.enableDragDrop)
         .hideHelp(),

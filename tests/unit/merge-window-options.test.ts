@@ -162,12 +162,13 @@ describe('buildWindowConfigOverrides', () => {
       min_width: 800,
       min_height: 600,
       enable_wasm: true,
-      enable_drag_drop: true,
       ignore_certificate_errors: true,
       new_window: true,
       enable_find: true,
       force_internal_navigation: true,
       internal_url_regex: '^https://example\\.com',
     });
+    // --enable-drag-drop is still accepted but no longer reaches the window.
+    expect(result).not.toHaveProperty('enable_drag_drop');
   });
 });
