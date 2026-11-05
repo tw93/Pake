@@ -6,7 +6,7 @@
 
 </div>
 
-Guides and reference documentation for building lightweight desktop apps with Pake.
+Guides and reference for Pake CLI, which packages a website, a local HTML file or a static build into a desktop app for macOS, Windows and Linux with one command.
 
 ## User Guides
 

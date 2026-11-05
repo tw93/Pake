@@ -6,7 +6,7 @@
 
 </div>
 
-Pake 应用打包与开发的参考指南。
+Pake CLI 的使用指南和参考文档，一条命令把网站、本地 HTML 文件或静态构建打包成 macOS、Windows 和 Linux 桌面应用。
 
 ## 使用指南
 
