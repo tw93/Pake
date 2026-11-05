@@ -10,14 +10,14 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-> 💡 这个仓库是免费开源的 Pake CLI，下面的内容都一直免费。喜欢图形界面的话，Pake 桌面版要从唯一的官网 [pake.run](https://pake.run/zh) 单独下载。桌面版不用装 Node.js 和 Rust，从精选里选一个或者粘贴网址就能做好应用，改设置、更新应用和给不同账号做独立应用都在同一个窗口里。`pnpm install -g pake-cli` 只会安装命令行工具。
+> 这个仓库是免费开源的 Pake CLI，下面的内容都一直免费。喜欢图形界面的话，Pake 桌面版要从唯一的官网 [pake.run](https://pake.run/zh) 单独下载。桌面版不用装 Node.js 和 Rust，从精选里选一个或者粘贴网址就能做好应用，改设置、更新应用和给不同账号做独立应用都在同一个窗口里。`pnpm install -g pake-cli` 只会安装命令行工具。
 
 ## 特性
 
-- 🎐 **体积小巧**：安装包通常小于 10 MB，比 Electron 应用小近 20 倍，是 Nativefier 这类 Electron 套壳工具更轻的替代
-- 🚀 **性能优异**：基于 Rust Tauri，用系统自带的 WebView 而不是打包一份 Chromium，内存占用比 Electron 应用更少
-- ⚡ **使用简单**：命令行一键打包，或在线构建，无需复杂配置
-- 📦 **功能丰富**：支持快捷键透传、沉浸式窗口、拖拽、样式定制、去广告
+- **体积小巧**：安装包通常小于 10 MB，比 Electron 应用小近 20 倍，是 Nativefier 这类 Electron 套壳工具更轻的替代
+- **性能优异**：基于 Rust Tauri，用系统自带的 WebView 而不是打包一份 Chromium，内存占用比 Electron 应用更少
+- **使用简单**：命令行一键打包，或在线构建，无需复杂配置
+- **功能丰富**：支持快捷键透传、沉浸式窗口、拖拽、样式定制、去广告
 
 ## 快速开始
 
@@ -147,7 +147,7 @@
 
 <details>
 
-<summary>🏂 <b>快捷键说明</b></summary>
+<summary><b>快捷键说明</b></summary>
 
 <br/>
 
@@ -227,7 +227,7 @@ pnpm run build
 
 ## 贡献者
 
-Pake 的发展离不开这些优秀的贡献者 ❤️
+Pake 的发展离不开这些优秀的贡献者
 
 <a href="https://github.com/tw93/Pake/graphs/contributors">
   <img src="./CONTRIBUTORS.svg?v=2" alt="Contributors" width="1000" />
@@ -237,9 +237,9 @@ Pake 的发展离不开这些优秀的贡献者 ❤️
 
 - 购买 [Pake 桌面版](https://pake.run/zh)，是对 Pake 开发最直接的支持
 - 如果你喜欢 Pake，可以在 GitHub 点个 Star，[推荐](https://x.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20一键打包网页生成轻量桌面应用，比%20Electron%20小%2020%20倍，支持%20macOS%20Windows%20Linux) 给志同道合的朋友，遇到问题或发现适合做成桌面 App 的网页，也欢迎提 issue 和 PR
-- 我有两只猫，一只叫汤圆，一只叫可乐，假如 Pake 让你的生活更美好，可以给她们<a href="https://cats.tw93.fun?name=Pake" target="_blank">喂罐头 🥩</a>
+- 我有两只猫，一只叫汤圆，一只叫可乐，假如 Pake 让你的生活更美好，可以给她们<a href="https://cats.tw93.fun?name=Pake" target="_blank">喂罐头</a>
 
-这些可爱的朋友已经喂过了 🐱
+这些可爱的朋友已经喂过了
 
 <a href="https://cats.tw93.fun?name=Pake"><img src="https://raw.githubusercontent.com/tw93/sponsors/main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
 

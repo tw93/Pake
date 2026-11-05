@@ -10,14 +10,14 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-> 💡 This repo is the free open-source Pake CLI, and everything below stays free. Prefer a graphical app? The Pake desktop app is a separate download from [pake.run](https://pake.run/), its only official site. It makes apps from a ready-made gallery or any URL without Node.js or Rust, with settings, updates and separate apps for other accounts in one window. `pnpm install -g pake-cli` installs the CLI only.
+> This repo is the free open-source Pake CLI, and everything below stays free. Prefer a graphical app? The Pake desktop app is a separate download from [pake.run](https://pake.run/), its only official site. It makes apps from a ready-made gallery or any URL without Node.js or Rust, with settings, updates and separate apps for other accounts in one window. `pnpm install -g pake-cli` installs the CLI only.
 
 ## Features
 
-- 🎐 **Lightweight**: Installers are typically under 10 MB, nearly 20 times smaller than Electron packages, a lighter alternative to Nativefier and other Electron wrappers
-- 🚀 **Fast**: Built with Rust Tauri on the system WebView instead of a bundled Chromium, so apps use less memory than Electron ones
-- ⚡ **Easy to use**: One-command packaging via CLI or online building, no complex configuration needed
-- 📦 **Feature-rich**: Supports shortcuts, immersive windows, drag & drop, style customization, ad removal
+- **Lightweight**: Installers are typically under 10 MB, nearly 20 times smaller than Electron packages, a lighter alternative to Nativefier and other Electron wrappers
+- **Fast**: Built with Rust Tauri on the system WebView instead of a bundled Chromium, so apps use less memory than Electron ones
+- **Easy to use**: One-command packaging via CLI or online building, no complex configuration needed
+- **Feature-rich**: Supports shortcuts, immersive windows, drag & drop, style customization, ad removal
 
 ## Getting Started
 
@@ -146,7 +146,7 @@
 More apps are on the [Releases](https://github.com/tw93/Pake/releases) page.
 
 <details>
-<summary>🏂 <b>Keyboard shortcuts</b></summary>
+<summary><b>Keyboard shortcuts</b></summary>
 
 <br/>
 
@@ -226,7 +226,7 @@ For style customization, feature enhancement, container communication and other 
 
 ## Contributors
 
-Pake wouldn't be possible without these incredible contributors. ❤️
+Pake wouldn't be possible without these incredible contributors.
 
 <a href="https://github.com/tw93/Pake/graphs/contributors">
   <img src="./CONTRIBUTORS.svg?v=2" alt="Contributors" width="1000" />
@@ -236,9 +236,9 @@ Pake wouldn't be possible without these incredible contributors. ❤️
 
 - Getting the [Pake desktop app](https://pake.run/) is the most direct way to support Pake's development
 - If Pake helped you, give it a star, [share it](https://x.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20Turn%20any%20webpage%20into%20a%20desktop%20app%20with%20one%20command.%20Nearly%2020x%20smaller%20than%20Electron%20packages,%20supports%20macOS%20Windows%20Linux), or open an issue or PR, including sites that would make good desktop apps
-- I have two cats, TangYuan and Coke, and if Pake makes your life a little easier, feel free to treat them to <a href="https://cats.tw93.fun?name=Pake" target="_blank">canned food 🥩</a>
+- I have two cats, TangYuan and Coke, and if Pake makes your life a little easier, feel free to treat them to <a href="https://cats.tw93.fun?name=Pake" target="_blank">canned food</a>
 
-These lovely people already did 🐱
+These lovely people already did
 
 <a href="https://cats.tw93.fun?name=Pake"><img src="https://raw.githubusercontent.com/tw93/sponsors/main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
 

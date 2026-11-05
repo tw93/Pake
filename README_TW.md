@@ -10,14 +10,14 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-> 💡 這個倉庫是免費開源的 Pake CLI，下面的內容都一直免費。喜歡圖形介面的話，Pake 桌面版要從唯一的官網 [pake.run](https://pake.run/zh) 另外下載。桌面版不用裝 Node.js 和 Rust，從精選裡選一個或者貼上網址就能做好應用，改設定、更新應用和為不同帳號做獨立應用都在同一個視窗裡。`pnpm install -g pake-cli` 只會安裝命令列工具。
+> 這個倉庫是免費開源的 Pake CLI，下面的內容都一直免費。喜歡圖形介面的話，Pake 桌面版要從唯一的官網 [pake.run](https://pake.run/zh) 另外下載。桌面版不用裝 Node.js 和 Rust，從精選裡選一個或者貼上網址就能做好應用，改設定、更新應用和為不同帳號做獨立應用都在同一個視窗裡。`pnpm install -g pake-cli` 只會安裝命令列工具。
 
 ## 特性
 
-- 🎐 **體積小巧**：安裝包通常小於 10 MB，比 Electron 應用小近 20 倍，是 Nativefier 這類 Electron 套殼工具更輕的替代
-- 🚀 **效能優異**：基於 Rust Tauri，用系統內建的 WebView 而不是打包一份 Chromium，記憶體占用比 Electron 應用更少
-- ⚡ **使用簡單**：命令列一行打包，或線上建置，無需繁瑣設定
-- 📦 **功能豐富**：支援快捷鍵透傳、沉浸式視窗、拖曳、樣式自訂、去除廣告
+- **體積小巧**：安裝包通常小於 10 MB，比 Electron 應用小近 20 倍，是 Nativefier 這類 Electron 套殼工具更輕的替代
+- **效能優異**：基於 Rust Tauri，用系統內建的 WebView 而不是打包一份 Chromium，記憶體占用比 Electron 應用更少
+- **使用簡單**：命令列一行打包，或線上建置，無需繁瑣設定
+- **功能豐富**：支援快捷鍵透傳、沉浸式視窗、拖曳、樣式自訂、去除廣告
 
 ## 快速開始
 
@@ -147,7 +147,7 @@
 
 <details>
 
-<summary>🏂 <b>快捷鍵說明</b></summary>
+<summary><b>快捷鍵說明</b></summary>
 
 <br/>
 
@@ -227,7 +227,7 @@ pnpm run build
 
 ## 貢獻者
 
-Pake 的發展離不開這些優秀的貢獻者 ❤️
+Pake 的發展離不開這些優秀的貢獻者
 
 <a href="https://github.com/tw93/Pake/graphs/contributors">
   <img src="./CONTRIBUTORS.svg?v=2" alt="Contributors" width="1000" />
@@ -237,9 +237,9 @@ Pake 的發展離不開這些優秀的貢獻者 ❤️
 
 - 購買 [Pake 桌面版](https://pake.run/zh)，是對 Pake 開發最直接的支持
 - 如果你喜歡 Pake，可以在 GitHub 給一顆 Star，[推薦](https://x.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20一個指令把任意網頁打包成桌面應用，支援%20macOS、Windows%20與%20Linux) 給志同道合的朋友，遇到問題或發現適合做成桌面 App 的網頁，也歡迎提 issue 和 PR
-- 我養了兩隻貓，一隻叫湯圓，一隻叫可樂，如果 Pake 讓你的生活更美好，可以給她們<a href="https://cats.tw93.fun?name=Pake" target="_blank">餵罐頭 🥩</a>
+- 我養了兩隻貓，一隻叫湯圓，一隻叫可樂，如果 Pake 讓你的生活更美好，可以給她們<a href="https://cats.tw93.fun?name=Pake" target="_blank">餵罐頭</a>
 
-這些可愛的朋友已經贊助過 🐱
+這些可愛的朋友已經贊助過
 
 <a href="https://cats.tw93.fun?name=Pake"><img src="https://raw.githubusercontent.com/tw93/sponsors/main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
 

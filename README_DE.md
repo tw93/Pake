@@ -10,14 +10,14 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-> 💡 Dieses Repository ist die kostenlose Open-Source-Pake-CLI, und alles unten bleibt kostenlos. Lieber eine grafische App? Die Pake-Desktop-App gibt es separat auf [pake.run](https://pake.run/), der einzigen offiziellen Website. Sie erstellt Apps aus einer fertigen Galerie oder aus jeder URL, ohne Node.js oder Rust, mit Einstellungen, Updates und eigenen Apps für weitere Konten in einem Fenster. `pnpm install -g pake-cli` installiert nur die CLI.
+> Dieses Repository ist die kostenlose Open-Source-Pake-CLI, und alles unten bleibt kostenlos. Lieber eine grafische App? Die Pake-Desktop-App gibt es separat auf [pake.run](https://pake.run/), der einzigen offiziellen Website. Sie erstellt Apps aus einer fertigen Galerie oder aus jeder URL, ohne Node.js oder Rust, mit Einstellungen, Updates und eigenen Apps für weitere Konten in einem Fenster. `pnpm install -g pake-cli` installiert nur die CLI.
 
 ## Funktionen
 
-- 🎐 **Leichtgewichtig**: Installationspakete sind meist kleiner als 10 MB, fast 20-mal kleiner als bei Electron-Apps, eine schlankere Alternative zu Nativefier und anderen Electron-Wrappern
-- 🚀 **Schnell**: Entwickelt mit Rust Tauri auf der WebView des Systems statt eines mitgelieferten Chromium, daher brauchen die Apps weniger Arbeitsspeicher als Electron-Apps
-- ⚡ **Einfach zu bedienen**: Paketierung mit einem einzigen CLI-Befehl oder per Online-Build ohne aufwendige Konfiguration
-- 📦 **Umfangreich**: Unterstützt Tastenkombinationen, immersive Fenster, Drag & Drop, CSS-Anpassung und Werbeblocker
+- **Leichtgewichtig**: Installationspakete sind meist kleiner als 10 MB, fast 20-mal kleiner als bei Electron-Apps, eine schlankere Alternative zu Nativefier und anderen Electron-Wrappern
+- **Schnell**: Entwickelt mit Rust Tauri auf der WebView des Systems statt eines mitgelieferten Chromium, daher brauchen die Apps weniger Arbeitsspeicher als Electron-Apps
+- **Einfach zu bedienen**: Paketierung mit einem einzigen CLI-Befehl oder per Online-Build ohne aufwendige Konfiguration
+- **Umfangreich**: Unterstützt Tastenkombinationen, immersive Fenster, Drag & Drop, CSS-Anpassung und Werbeblocker
 
 ## Erste Schritte
 
@@ -147,7 +147,7 @@ Weitere Apps gibt es unter [Releases](https://github.com/tw93/Pake/releases).
 
 <details>
 
-<summary>🏂 <b>Tastenkombinationen</b></summary>
+<summary><b>Tastenkombinationen</b></summary>
 
 <br/>
 
@@ -227,7 +227,7 @@ Stilanpassungen, Funktionserweiterungen und Container-Kommunikation finden Sie i
 
 ## Mitwirkende
 
-Pake wäre ohne diese großartigen Mitwirkenden nicht möglich ❤️
+Pake wäre ohne diese großartigen Mitwirkenden nicht möglich
 
 <a href="https://github.com/tw93/Pake/graphs/contributors">
   <img src="./CONTRIBUTORS.svg?v=2" alt="Contributors" width="1000" />
@@ -237,9 +237,9 @@ Pake wäre ohne diese großartigen Mitwirkenden nicht möglich ❤️
 
 - Die direkteste Unterstützung für die Entwicklung von Pake ist der Kauf der [Pake-Desktop-App](https://pake.run/)
 - Wenn Pake Ihnen geholfen hat, geben Sie dem Projekt einen Stern auf GitHub, [empfehlen Sie es weiter](https://x.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20Verwandeln%20Sie%20jede%20Webseite%20mit%20einem%20einzigen%20Befehl%20in%20eine%20Desktop-App.%20Unterst%C3%BCtzt%20macOS,%20Windows%20und%20Linux) oder öffnen Sie ein Issue oder einen PR, auch für Websites, die sich gut als Desktop-App eignen
-- Ich habe zwei Katzen, TangYuan und Coke, und wenn Pake Ihren Alltag bereichert hat, spendieren Sie ihnen gerne eine <a href="https://cats.tw93.fun?name=Pake" target="_blank">Dose Futter 🥩</a>
+- Ich habe zwei Katzen, TangYuan und Coke, und wenn Pake Ihren Alltag bereichert hat, spendieren Sie ihnen gerne eine <a href="https://cats.tw93.fun?name=Pake" target="_blank">Dose Futter</a>
 
-Diese freundlichen Menschen haben bereits gespendet 🐱
+Diese freundlichen Menschen haben bereits gespendet
 
 <a href="https://cats.tw93.fun?name=Pake"><img src="https://raw.githubusercontent.com/tw93/sponsors/main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
 

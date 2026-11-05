@@ -10,14 +10,14 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-> 💡 このリポジトリは無料のオープンソース版 Pake CLI で、以下の内容はずっと無料です。GUI で使いたい場合は、Pake デスクトップ版を唯一の公式サイト [pake.run](https://pake.run/) から別途ダウンロードできます。Node.js や Rust をインストールせずに、ギャラリーから選ぶか URL を貼り付けるだけでアプリを作れ、設定の変更、アプリの更新、アカウントごとの別アプリ作成も一つのウィンドウで行えます。`pnpm install -g pake-cli` でインストールされるのは CLI だけです。
+> このリポジトリは無料のオープンソース版 Pake CLI で、以下の内容はずっと無料です。GUI で使いたい場合は、Pake デスクトップ版を唯一の公式サイト [pake.run](https://pake.run/) から別途ダウンロードできます。Node.js や Rust をインストールせずに、ギャラリーから選ぶか URL を貼り付けるだけでアプリを作れ、設定の変更、アプリの更新、アカウントごとの別アプリ作成も一つのウィンドウで行えます。`pnpm install -g pake-cli` でインストールされるのは CLI だけです。
 
 ## 特徴
 
-- 🎐 **軽量**：インストーラーは通常 10 MB 未満で、Electron アプリの約 20 分の 1。Nativefier など Electron ベースのラッパーより軽い代替
-- 🚀 **高速**：Rust Tauri を採用し、Chromium を同梱せずシステムの WebView を使うため、Electron アプリよりメモリ消費が少ない
-- ⚡ **簡単**：CLI コマンド 1 つ、またはオンラインビルドで、複雑な設定なしですぐにパッケージ化
-- 📦 **高機能**：ショートカット透過、イマーシブウィンドウ、ドラッグ＆ドロップ、CSS カスタマイズ、広告非表示に対応
+- **軽量**：インストーラーは通常 10 MB 未満で、Electron アプリの約 20 分の 1。Nativefier など Electron ベースのラッパーより軽い代替
+- **高速**：Rust Tauri を採用し、Chromium を同梱せずシステムの WebView を使うため、Electron アプリよりメモリ消費が少ない
+- **簡単**：CLI コマンド 1 つ、またはオンラインビルドで、複雑な設定なしですぐにパッケージ化
+- **高機能**：ショートカット透過、イマーシブウィンドウ、ドラッグ＆ドロップ、CSS カスタマイズ、広告非表示に対応
 
 ## はじめに
 
@@ -147,7 +147,7 @@
 
 <details>
 
-<summary>🏂 <b>ショートカット一覧</b></summary>
+<summary><b>ショートカット一覧</b></summary>
 
 <br/>
 
@@ -227,7 +227,7 @@ pnpm run build
 
 ## コントリビューター
 
-Pake の成長は多くのコントリビューターに支えられています ❤️
+Pake の成長は多くのコントリビューターに支えられています
 
 <a href="https://github.com/tw93/Pake/graphs/contributors">
   <img src="./CONTRIBUTORS.svg?v=2" alt="Contributors" width="1000" />
@@ -237,9 +237,9 @@ Pake の成長は多くのコントリビューターに支えられています
 
 - 最も直接的な支援は、[Pake デスクトップ版](https://pake.run/) を購入していただくことです
 - Pake が気に入ったら、GitHub で Star を付けたり、[周りの開発者仲間におすすめ](https://x.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20あらゆるウェブページをコマンド一つでデスクトップアプリに変換。macOS、Windows、Linux%20に対応) したりしていただけると嬉しいです、問題やデスクトップアプリ化にぴったりのサイトがあれば、issue や PR で教えてください
-- TangYuan と Coke という 2 匹の猫を飼っています。Pake で日々の作業が快適になったら、彼女たちに <a href="https://cats.tw93.fun?name=Pake" target="_blank">おやつ 🥩</a> をごちそうしていただけると嬉しいです
+- TangYuan と Coke という 2 匹の猫を飼っています。Pake で日々の作業が快適になったら、彼女たちに <a href="https://cats.tw93.fun?name=Pake" target="_blank">おやつ</a> をごちそうしていただけると嬉しいです
 
-支援してくださった方々 🐱
+支援してくださった方々
 
 <a href="https://cats.tw93.fun?name=Pake"><img src="https://raw.githubusercontent.com/tw93/sponsors/main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
 

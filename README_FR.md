@@ -10,14 +10,14 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-> 💡 Ce dépôt est la CLI Pake, open source et gratuite, et tout ce qui suit reste gratuit. Vous préférez une interface graphique ? L'application de bureau Pake se télécharge séparément sur [pake.run](https://pake.run/), son seul site officiel. Elle crée des apps depuis une galerie prête à l'emploi ou n'importe quelle URL, sans Node.js ni Rust, avec les réglages, les mises à jour et des apps distinctes pour d'autres comptes dans une seule fenêtre. `pnpm install -g pake-cli` n'installe que la CLI.
+> Ce dépôt est la CLI Pake, open source et gratuite, et tout ce qui suit reste gratuit. Vous préférez une interface graphique ? L'application de bureau Pake se télécharge séparément sur [pake.run](https://pake.run/), son seul site officiel. Elle crée des apps depuis une galerie prête à l'emploi ou n'importe quelle URL, sans Node.js ni Rust, avec les réglages, les mises à jour et des apps distinctes pour d'autres comptes dans une seule fenêtre. `pnpm install -g pake-cli` n'installe que la CLI.
 
 ## Fonctionnalités
 
-- 🎐 **Léger** : Paquets d'installation généralement sous 10 Mo, près de 20 fois plus petits qu'avec Electron, une alternative plus légère à Nativefier et aux autres wrappers Electron
-- 🚀 **Rapide** : Conçu avec Rust Tauri sur la WebView du système plutôt qu'un Chromium embarqué, les apps consomment moins de mémoire que celles d'Electron
-- ⚡ **Simple** : Une seule commande CLI ou compilation en ligne, sans configuration complexe
-- 📦 **Complet** : Prise en charge des raccourcis, fenêtres immersives, glisser-déposer, personnalisation de styles et blocage de publicités
+- **Léger** : Paquets d'installation généralement sous 10 Mo, près de 20 fois plus petits qu'avec Electron, une alternative plus légère à Nativefier et aux autres wrappers Electron
+- **Rapide** : Conçu avec Rust Tauri sur la WebView du système plutôt qu'un Chromium embarqué, les apps consomment moins de mémoire que celles d'Electron
+- **Simple** : Une seule commande CLI ou compilation en ligne, sans configuration complexe
+- **Complet** : Prise en charge des raccourcis, fenêtres immersives, glisser-déposer, personnalisation de styles et blocage de publicités
 
 ## Démarrage rapide
 
@@ -147,7 +147,7 @@ D'autres applications sont disponibles dans les [Releases](https://github.com/tw
 
 <details>
 
-<summary>🏂 <b>Raccourcis clavier</b></summary>
+<summary><b>Raccourcis clavier</b></summary>
 
 <br/>
 
@@ -227,7 +227,7 @@ Pour la personnalisation de styles, l'ajout de fonctionnalités et la communicat
 
 ## Contributeurs
 
-Pake ne serait pas possible sans ces précieux contributeurs ❤️
+Pake ne serait pas possible sans ces précieux contributeurs
 
 <a href="https://github.com/tw93/Pake/graphs/contributors">
   <img src="./CONTRIBUTORS.svg?v=2" alt="Contributors" width="1000" />
@@ -237,9 +237,9 @@ Pake ne serait pas possible sans ces précieux contributeurs ❤️
 
 - La façon la plus directe de soutenir le développement de Pake est d'acheter l'[application de bureau Pake](https://pake.run/)
 - Si Pake vous est utile, n'hésitez pas à lui attribuer une étoile sur GitHub, à le [recommander](https://x.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20Transformez%20n'importe%20quelle%20page%20web%20en%20application%20de%20bureau%20en%20une%20seule%20commande.%20Compatible%20macOS,%20Windows%20et%20Linux) autour de vous ou à ouvrir une issue ou une PR, y compris pour suggérer des sites qui feraient de bonnes applications de bureau
-- J'ai deux chattes, TangYuan et Coke, et si Pake vous rend service, vous pouvez leur offrir <a href="https://cats.tw93.fun?name=Pake" target="_blank">une friandise 🥩</a>
+- J'ai deux chattes, TangYuan et Coke, et si Pake vous rend service, vous pouvez leur offrir <a href="https://cats.tw93.fun?name=Pake" target="_blank">une friandise</a>
 
-Ceux qui ont déjà contribué 🐱
+Ceux qui ont déjà contribué
 
 <a href="https://cats.tw93.fun?name=Pake"><img src="https://raw.githubusercontent.com/tw93/sponsors/main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
 

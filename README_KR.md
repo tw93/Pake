@@ -10,14 +10,14 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-> 💡 이 저장소는 무료 오픈소스 Pake CLI이며, 아래 내용은 계속 무료입니다. 그래픽 인터페이스를 원한다면 Pake 데스크톱 앱을 유일한 공식 사이트 [pake.run](https://pake.run/)에서 별도로 내려받을 수 있습니다. Node.js나 Rust 설치 없이 갤러리에서 고르거나 URL을 붙여 넣어 앱을 만들 수 있고, 설정 변경, 앱 업데이트, 계정별 별도 앱 만들기를 한 창에서 할 수 있습니다. `pnpm install -g pake-cli`는 CLI만 설치합니다.
+> 이 저장소는 무료 오픈소스 Pake CLI이며, 아래 내용은 계속 무료입니다. 그래픽 인터페이스를 원한다면 Pake 데스크톱 앱을 유일한 공식 사이트 [pake.run](https://pake.run/)에서 별도로 내려받을 수 있습니다. Node.js나 Rust 설치 없이 갤러리에서 고르거나 URL을 붙여 넣어 앱을 만들 수 있고, 설정 변경, 앱 업데이트, 계정별 별도 앱 만들기를 한 창에서 할 수 있습니다. `pnpm install -g pake-cli`는 CLI만 설치합니다.
 
 ## 특징
 
-- 🎐 **가벼운 용량**: 설치 파일은 보통 10 MB 미만으로 Electron 패키지보다 약 20배 작으며, Nativefier 같은 Electron 래퍼의 가벼운 대안
-- 🚀 **빠른 성능**: Rust Tauri 기반으로 Chromium을 포함하지 않고 시스템 WebView를 사용해 Electron 앱보다 메모리를 적게 사용
-- ⚡ **쉬운 사용**: CLI 명령어 한 줄 또는 온라인 빌드로 복잡한 설정 없이 패키징
-- 📦 **풍부한 기능**: 단축키 전달, 몰입형 창, 드래그 앤 드롭, 커스텀 스타일, 광고 차단 지원
+- **가벼운 용량**: 설치 파일은 보통 10 MB 미만으로 Electron 패키지보다 약 20배 작으며, Nativefier 같은 Electron 래퍼의 가벼운 대안
+- **빠른 성능**: Rust Tauri 기반으로 Chromium을 포함하지 않고 시스템 WebView를 사용해 Electron 앱보다 메모리를 적게 사용
+- **쉬운 사용**: CLI 명령어 한 줄 또는 온라인 빌드로 복잡한 설정 없이 패키징
+- **풍부한 기능**: 단축키 전달, 몰입형 창, 드래그 앤 드롭, 커스텀 스타일, 광고 차단 지원
 
 ## 시작하기
 
@@ -147,7 +147,7 @@
 
 <details>
 
-<summary>🏂 <b>단축키 안내</b></summary>
+<summary><b>단축키 안내</b></summary>
 
 <br/>
 
@@ -227,7 +227,7 @@ pnpm run build
 
 ## 기여자
 
-Pake의 성장은 훌륭한 오픈소스 기여자분들과 함께 만들어갑니다 ❤️
+Pake의 성장은 훌륭한 오픈소스 기여자분들과 함께 만들어갑니다
 
 <a href="https://github.com/tw93/Pake/graphs/contributors">
   <img src="./CONTRIBUTORS.svg?v=2" alt="Contributors" width="1000" />
@@ -237,9 +237,9 @@ Pake의 성장은 훌륭한 오픈소스 기여자분들과 함께 만들어갑�
 
 - 가장 직접적인 후원 방법은 [Pake 데스크톱 앱](https://pake.run/)을 이용해 주시는 것입니다
 - Pake가 유용했다면 GitHub Star를 눌러주시고, [주변 개발자 동료들에게 추천](https://x.com/intent/tweet?url=https://github.com/tw93/Pake&text=Pake%20-%20명령어%20하나로%20모든%20웹페이지를%20데스크톱%20앱으로%20변환.%20macOS,%20Windows,%20Linux%20지원)해 주시면 큰 힘이 되며, 문제나 데스크톱 앱으로 만들면 좋은 웹사이트가 있다면 issue나 PR로 알려 주세요
-- TangYuan과 Coke라는 두 마리의 고양이를 키우고 있는데, Pake가 유용하셨다면 그 아이들에게 <a href="https://cats.tw93.fun?name=Pake" target="_blank">캔 간식 🥩</a>을 선물해 주셔도 좋습니다
+- TangYuan과 Coke라는 두 마리의 고양이를 키우고 있는데, Pake가 유용하셨다면 그 아이들에게 <a href="https://cats.tw93.fun?name=Pake" target="_blank">캔 간식</a>을 선물해 주셔도 좋습니다
 
-따뜻한 응원을 보내주신 분들 🐱
+따뜻한 응원을 보내주신 분들
 
 <a href="https://cats.tw93.fun?name=Pake"><img src="https://raw.githubusercontent.com/tw93/sponsors/main/assets/sponsors.svg" width="1000" loading="lazy" /></a>
 
