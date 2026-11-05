@@ -6,7 +6,7 @@
 
 </div>
 
-Guides and reference for Pake CLI, which packages a website, a local HTML file or a static build into a desktop app for macOS, Windows and Linux with one command.
+Guides and reference for Pake CLI, which packages a website, local HTML or a static build into a desktop app for macOS, Windows and Linux with one command.
 
 ## User Guides
 
