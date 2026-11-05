@@ -2,7 +2,6 @@
   <img src="https://raw.githubusercontent.com/tw93/Pake/ac5508cf519064684c4214fe3f263c58ad7aaf5f/assets/logo.png" width="138" />
   <h1>Pake</h1>
   <p><b>명령어 하나로 모든 웹페이지를 데스크톱 앱으로 변환. macOS, Windows, Linux 지원. 무료 오픈소스 CLI이며, 데스크톱 앱도 있습니다.</b></p>
-  <p>공식 사이트는 <a href="https://pake.run">pake.run</a> 하나뿐이며, Pake를 사칭하는 다른 도메인은 가짜입니다</p>
   <p><a href="README.md">English</a> · <a href="README_CN.md">中文</a> · <a href="README_TW.md">繁體</a> · <a href="README_JA.md">日本語</a> · 한국어 · <a href="README_DE.md">Deutsch</a> · <a href="README_FR.md">Français</a></p>
   <a href="https://x.com/HiTw93" target="_blank"><img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=x"></a>
   <a href="https://t.me/+9f9gf4ZrFSQ2OWVl" target="_blank"><img alt="telegram" src="https://img.shields.io/badge/chat-telegram-blueviolet?style=flat-square&logo=Telegram"></a>
@@ -11,18 +10,18 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-> 💡 이 저장소는 무료 오픈소스 Pake CLI이며, 아래의 인기 앱, 온라인 빌드, 로컬 개발은 계속 무료입니다. 그래픽 인터페이스를 원한다면 별도로 내려받는 [Pake 데스크톱 앱](https://pake.run/)이 있습니다. Node.js나 Rust 설치 없이 갤러리에서 고르거나 URL을 붙여 넣어 앱을 만들 수 있고, 한 창에서 설정을 바꾸고 앱을 업데이트하며, 계정별로 별도의 앱도 만들 수 있습니다. `pnpm install -g pake-cli`는 CLI만 설치합니다.
+> 💡 이 저장소는 무료 오픈소스 Pake CLI이며, 아래 내용은 계속 무료입니다. 그래픽 인터페이스를 원한다면 Pake 데스크톱 앱을 유일한 공식 사이트 [pake.run](https://pake.run/)에서 별도로 내려받을 수 있습니다. Node.js나 Rust 설치 없이 갤러리에서 고르거나 URL을 붙여 넣어 앱을 만들 수 있고, 설정 변경, 앱 업데이트, 계정별 별도 앱 만들기를 한 창에서 할 수 있습니다. `pnpm install -g pake-cli`는 CLI만 설치합니다.
 
 ## 특징
 
-- 🎐 **가벼운 용량**: Electron 패키지 대비 약 20배 작으며, 일반적으로 10 MB 미만, Nativefier 같은 Electron 래퍼의 가벼운 대안
-- 🚀 **빠른 성능**: Rust Tauri 기반으로 기존 JS 프레임워크보다 가볍고 적은 메모리 사용
+- 🎐 **가벼운 용량**: 설치 파일은 보통 10 MB 미만으로 Electron 패키지보다 약 20배 작으며, Nativefier 같은 Electron 래퍼의 가벼운 대안
+- 🚀 **빠른 성능**: Rust Tauri 기반으로 Chromium을 포함하지 않고 시스템 WebView를 사용해 Electron 앱보다 메모리를 적게 사용
 - ⚡ **쉬운 사용**: CLI 명령어 한 줄 또는 온라인 빌드로 복잡한 설정 없이 패키징
 - 📦 **풍부한 기능**: 단축키 전달, 몰입형 창, 드래그 앤 드롭, 커스텀 스타일, 광고 차단 지원
 
 ## 시작하기
 
-- **일반 사용자**: 빌드된 [추천 패키지](#추천-패키지-다운로드)를 사용하거나, 환경 설정이 필요 없는 [GitHub Actions 온라인 빌드](docs/github-actions-usage.md) 활용
+- **일반 사용자**: [Pake 데스크톱 앱](https://pake.run/)으로 명령어 없이 앱을 만들거나, 빌드된 [추천 패키지](#추천-패키지-다운로드)를 사용하거나, 환경 설정이 필요 없는 [GitHub Actions 온라인 빌드](docs/github-actions-usage.md) 활용
 - **개발자**: [CLI 도구](docs/cli-usage.md) 설치 후 명령어 한 줄로 아이콘과 창 설정이 포함된 앱 패키징
 - **고급 사용자**: 로컬에서 저장소를 클론하여 [커스텀 개발](#개발)을 진행하거나, [고급 사용 가이드](docs/advanced-usage.md)에서 스타일 커스텀 및 기능 확장 확인
 - **문제 해결**: [FAQ](docs/faq.md)에서 자주 묻는 질문 및 문제 해결 방법 확인
@@ -36,7 +35,7 @@
             <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead_x86_64.deb">Linux</a>
         </td>
-        <td>Twitter
+        <td>X
             <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter_x86_64.deb">Linux</a>
@@ -144,9 +143,11 @@
     </tr>
 </table>
 
+더 많은 앱은 [Releases](https://github.com/tw93/Pake/releases)에서 내려받을 수 있습니다.
+
 <details>
 
-<summary>🏂 더 많은 애플리케이션은 <a href="https://github.com/tw93/Pake/releases">Releases</a>에서 다운로드할 수 있습니다. <b>클릭하여 단축키 안내 펼치기</b></summary>
+<summary>🏂 <b>단축키 안내</b></summary>
 
 <br/>
 
@@ -215,7 +216,7 @@ Rust `>=1.85` 및 Node `>=22`(LTS 권장, `>=20.9`도 지원)가 필요합니다
 # 의존성 설치
 pnpm i
 
-# 로컬 개발 [우클릭으로 디버그 모드 실행]
+# 로컬 개발, 우클릭으로 디버그 도구 열기
 pnpm run dev
 
 # 애플리케이션 빌드
@@ -244,4 +245,4 @@ Pake의 성장은 훌륭한 오픈소스 기여자분들과 함께 만들어갑�
 
 ## 오픈소스 라이선스
 
-Pake는 GPL-3.0 라이선스로 배포됩니다. 자세한 내용은 [LICENSE](./LICENSE) 및 [Pake Output Exception](./LICENSE-EXCEPTION)을 확인하세요. Pake로 패키징한 앱의 소유권은 온전히 사용자에게 있으며, 자유롭게 사용 및 배포할 수 있습니다. Pake를 포크하여 독립된 제품을 만들 경우, 오해를 방지하기 위해 다른 이름을 사용하고 출처를 명시해 주시기 바랍니다. Pake 데스크톱 앱은 별도의 유료 앱이며, Pake CLI는 앞으로도 계속 오픈소스로 유지됩니다.
+Pake는 GPL-3.0 라이선스로 배포됩니다. 자세한 내용은 [LICENSE](./LICENSE) 및 [Pake Output Exception](./LICENSE-EXCEPTION)을 확인하세요. Pake로 패키징한 앱의 소유권은 온전히 사용자에게 있으며, 자유롭게 사용 및 배포할 수 있습니다. Pake를 포크하여 독립된 제품을 만들 경우, 오해를 방지하기 위해 다른 이름을 사용하고 출처를 명시해 주시기 바랍니다. Pake CLI는 앞으로도 계속 오픈소스로 유지됩니다.

@@ -2,7 +2,6 @@
   <img src="https://raw.githubusercontent.com/tw93/Pake/ac5508cf519064684c4214fe3f263c58ad7aaf5f/assets/logo.png" width="138" />
   <h1>Pake</h1>
   <p><b>Verwandeln Sie jede Webseite mit einem einzigen Befehl in eine Desktop-App. Unterstützt macOS, Windows und Linux. Kostenlose Open-Source-CLI, dazu eine Desktop-App.</b></p>
-  <p>Die einzige offizielle Website ist <a href="https://pake.run">pake.run</a>, andere Domains unter dem Namen Pake sind Fälschungen</p>
   <p><a href="README.md">English</a> · <a href="README_CN.md">中文</a> · <a href="README_TW.md">繁體</a> · <a href="README_JA.md">日本語</a> · <a href="README_KR.md">한국어</a> · Deutsch · <a href="README_FR.md">Français</a></p>
   <a href="https://x.com/HiTw93" target="_blank"><img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=x"></a>
   <a href="https://t.me/+9f9gf4ZrFSQ2OWVl" target="_blank"><img alt="telegram" src="https://img.shields.io/badge/chat-telegram-blueviolet?style=flat-square&logo=Telegram"></a>
@@ -11,18 +10,18 @@
   <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
 </div>
 
-> 💡 Dieses Repository ist die kostenlose Open-Source-Pake-CLI, und die beliebten Apps, Online-Builds und die lokale Entwicklung unten bleiben kostenlos. Lieber eine grafische App? Die [Pake-Desktop-App](https://pake.run/) ist ein separater Download: Wählen Sie eine App aus der Galerie oder fügen Sie eine URL ein, ohne Node.js oder Rust zu installieren, ändern Sie Einstellungen und aktualisieren Sie Apps in einem Fenster, und erstellen Sie eigene Apps für weitere Konten. `pnpm install -g pake-cli` installiert nur die CLI.
+> 💡 Dieses Repository ist die kostenlose Open-Source-Pake-CLI, und alles unten bleibt kostenlos. Lieber eine grafische App? Die Pake-Desktop-App gibt es separat auf [pake.run](https://pake.run/), der einzigen offiziellen Website. Sie erstellt Apps aus einer fertigen Galerie oder aus jeder URL, ohne Node.js oder Rust, mit Einstellungen, Updates und eigenen Apps für weitere Konten in einem Fenster. `pnpm install -g pake-cli` installiert nur die CLI.
 
 ## Funktionen
 
-- 🎐 **Leichtgewichtig**: Das Installationspaket ist fast 20-mal kleiner als bei Electron-Apps, meist unter 10 MB auf der Festplatte, eine schlankere Alternative zu Nativefier und anderen Electron-Wrappern
-- 🚀 **Schnell**: Entwickelt mit Rust Tauri, deutlich schneller als herkömmliche JS-Frameworks bei geringerem Arbeitsspeicherbedarf
+- 🎐 **Leichtgewichtig**: Installationspakete sind meist kleiner als 10 MB, fast 20-mal kleiner als bei Electron-Apps, eine schlankere Alternative zu Nativefier und anderen Electron-Wrappern
+- 🚀 **Schnell**: Entwickelt mit Rust Tauri auf der WebView des Systems statt eines mitgelieferten Chromium, daher brauchen die Apps weniger Arbeitsspeicher als Electron-Apps
 - ⚡ **Einfach zu bedienen**: Paketierung mit einem einzigen CLI-Befehl oder per Online-Build ohne aufwendige Konfiguration
 - 📦 **Umfangreich**: Unterstützt Tastenkombinationen, immersive Fenster, Drag & Drop, CSS-Anpassung und Werbeblocker
 
 ## Erste Schritte
 
-- **Einsteiger**: Laden Sie fertige [Beliebte Pakete](#beliebte-pakete-herunterladen) herunter oder nutzen Sie den [GitHub Actions Online-Build](docs/github-actions-usage.md) ohne lokale Einrichtung
+- **Einsteiger**: Erstellen Sie Apps ohne Kommandozeile mit der [Pake-Desktop-App](https://pake.run/), laden Sie fertige [Beliebte Pakete](#beliebte-pakete-herunterladen) herunter oder nutzen Sie den [GitHub Actions Online-Build](docs/github-actions-usage.md) ohne lokale Einrichtung
 - **Entwickler**: Installieren Sie das [CLI-Tool](docs/cli-usage.md) für die Ein-Befehl-Paketierung jeder Website mit anpassbaren Icons und Fenstereinstellungen
 - **Fortgeschrittene**: Klonen Sie das Projekt für [Eigene Entwicklung](#entwicklung) oder lesen Sie die [Erweiterte Dokumentation](docs/advanced-usage.md) für individuelle Anpassungen
 - **Fehlerbehebung**: Häufige Fragen und Lösungen finden Sie in den [FAQ](docs/faq.md)
@@ -36,7 +35,7 @@
             <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead_x86_64.deb">Linux</a>
         </td>
-        <td>Twitter
+        <td>X
             <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter.dmg">Mac</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter_x64.msi">Windows</a>
             <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter_x86_64.deb">Linux</a>
@@ -144,9 +143,11 @@
     </tr>
 </table>
 
+Weitere Apps gibt es unter [Releases](https://github.com/tw93/Pake/releases).
+
 <details>
 
-<summary>🏂 Weitere Anwendungen können unter <a href="https://github.com/tw93/Pake/releases">Releases</a> heruntergeladen werden. <b>Klicken Sie hier für die Tastenkombinationen</b></summary>
+<summary>🏂 <b>Tastenkombinationen</b></summary>
 
 <br/>
 
@@ -215,7 +216,7 @@ Erfordert Rust `>=1.85` und Node `>=22` (empfohlenes LTS; `>=20.9` ebenfalls lau
 # Abhängigkeiten installieren
 pnpm i
 
-# Lokale Entwicklung [Rechtsklick öffnet Debug-Modus]
+# Lokale Entwicklung, Rechtsklick öffnet die Debug-Werkzeuge
 pnpm run dev
 
 # Anwendung paketieren
@@ -244,4 +245,4 @@ Diese freundlichen Menschen haben bereits gespendet 🐱
 
 ## Open-Source-Lizenz
 
-Pake ist unter GPL-3.0 lizenziert, siehe [LICENSE](./LICENSE) und [Pake Output Exception](./LICENSE-EXCEPTION). Mit Pake erstellte Apps gehören vollständig Ihnen und können frei verwendet und weitergegeben werden. Wenn Sie Pake forken und ein eigenständiges Produkt veröffentlichen, wählen Sie bitte einen anderen Namen und geben Sie Pake als Quelle an. Die Pake-Desktop-App ist eine separate kostenpflichtige App, und die Pake-CLI bleibt dauerhaft Open Source.
+Pake ist unter GPL-3.0 lizenziert, siehe [LICENSE](./LICENSE) und [Pake Output Exception](./LICENSE-EXCEPTION). Mit Pake erstellte Apps gehören vollständig Ihnen und können frei verwendet und weitergegeben werden. Wenn Sie Pake forken und ein eigenständiges Produkt veröffentlichen, wählen Sie bitte einen anderen Namen und geben Sie Pake als Quelle an. Die Pake-CLI bleibt dauerhaft Open Source.
