@@ -698,14 +698,19 @@
     return "";
   }
 
+  // The page gets the shortcut first: listening on window in the bubble phase runs after the
+  // page's own element and document handlers, and a page with its own find (Notion, Google
+  // Docs) calls preventDefault, so Pake's panel stays out of its way. Propagation is left alone.
   function handleFindShortcut(event) {
+    if (event.defaultPrevented) {
+      return;
+    }
     const action = getFindShortcutAction(event);
     if (!action) {
       return;
     }
 
     event.preventDefault();
-    event.stopPropagation();
     window.pakeFind[action]();
   }
 
@@ -720,6 +725,6 @@
   };
 
   if (state.enabled) {
-    document.addEventListener("keydown", handleFindShortcut, true);
+    window.addEventListener("keydown", handleFindShortcut);
   }
 })();

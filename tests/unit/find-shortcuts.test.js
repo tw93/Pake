@@ -208,6 +208,11 @@ function loadFindScript({
       FILTER_REJECT: 2,
     },
     window: {
+      listeners: {},
+      addEventListener(type, handler, options) {
+        this.listeners[type] = this.listeners[type] || [];
+        this.listeners[type].push({ handler, options });
+      },
       pakeConfig: { enable_find: enabled },
       CSSStyleSheet: class CSSStyleSheet {
         replaceSync(css) {
@@ -248,7 +253,7 @@ describe("Find injection", () => {
       nodes: [createTextNode("Alpha alpha", paragraph)],
     });
 
-    expect(context.document.listeners.keydown).toBeUndefined();
+    expect(context.window.listeners.keydown).toBeUndefined();
     expect(context.window.pakeFind.getState().enabled).toBe(false);
     expect(
       context.window.pakeFind.getFindShortcutAction(
@@ -271,7 +276,7 @@ describe("Find injection", () => {
     context.window.pakeFind.next = () => calls.push("next");
     context.window.pakeFind.previous = () => calls.push("previous");
 
-    const [listener] = context.document.listeners.keydown;
+    const [listener] = context.window.listeners.keydown;
 
     const findEvent = createKeyboardEvent("f", { ctrlKey: true });
     listener.handler(findEvent);
@@ -285,7 +290,22 @@ describe("Find injection", () => {
 
     expect(calls).toEqual(["open", "next", "previous"]);
     expect(findEvent.defaultPrevented).toBe(true);
-    expect(previousEvent.propagationStopped).toBe(true);
+    expect(previousEvent.propagationStopped).toBeFalsy();
+  });
+
+  it("lets a page with its own find keep the shortcut", () => {
+    const context = loadFindScript({ enabled: true });
+    const calls = [];
+    context.window.pakeFind.open = () => calls.push("open");
+
+    const [listener] = context.window.listeners.keydown;
+    expect(listener.options).toBeUndefined();
+
+    const handled = createKeyboardEvent("f", { ctrlKey: true });
+    handled.preventDefault();
+    listener.handler(handled);
+
+    expect(calls).toEqual([]);
   });
 
   it("uses the shared style injector for the find panel", () => {
@@ -304,7 +324,7 @@ describe("Find injection", () => {
     const calls = [];
     context.window.pakeFind.open = () => calls.push("open");
 
-    const [listener] = context.document.listeners.keydown;
+    const [listener] = context.window.listeners.keydown;
     listener.handler(createKeyboardEvent("f", { ctrlKey: true }));
     listener.handler(createKeyboardEvent("f", { metaKey: true }));
 
