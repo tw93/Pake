@@ -46,6 +46,8 @@ document.addEventListener("keydown", (e) => {
 
 ### Download Error Notifications
 
+Downloads also report in the window itself: a short message at the bottom right says when a download starts, when it is saved to the download folder, when it fails, and when the download folder cannot be used, then fades after about three seconds. The language follows the system, Chinese or English. Downloads that end on a non-2xx response are reported as failed, not saved.
+
 When a download fails, Pake shows a notification in Chinese or English based on the browser language. It covers regular HTTP(S), Data URI (base64 encoded files), Blob URL (dynamically generated files) and context menu downloads, uses native OS notifications once permission is granted, and falls back to console logging otherwise. To enable notifications, request permission in your injected JavaScript:
 
 ```javascript
