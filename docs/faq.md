@@ -199,7 +199,7 @@ docker run --rm --privileged \
   https://example.com --name MyApp --targets appimage
 ```
 
-> **Tip:** The generated AppImage may be owned by root. Run `sudo chown $(id -nu):$(id -ng) ./output/MyApp.AppImage` afterwards.
+> **Tip:** The generated AppImage may be owned by root. Run `sudo chown $(id -nu):$(id -ng) ./output/myapp.AppImage` afterwards.
 
 **Why This Happens:**
 
@@ -229,7 +229,7 @@ This is an upstream Tauri bundler limitation ([tauri-apps/tauri#5292](https://gi
 pake https://example.com --name MyApp --targets zst
 ```
 
-This produces a pacman package (`*.pkg.tar.zst`) that installs to system paths, so WebKit resolves its helper processes natively and there is no relocation problem. Install it with `sudo pacman -U MyApp-*.pkg.tar.zst`.
+This produces a pacman package (`*.pkg.tar.zst`) that installs to system paths, so WebKit resolves its helper processes natively and there is no relocation problem. Install it with `sudo pacman -U myapp-*.pkg.tar.zst`.
 
 **Solution 2: Build the AppImage in Docker (Debian-based)**
 
@@ -248,7 +248,7 @@ docker run --rm --privileged \
 Extract it, add the missing symlink, then launch the inner `AppRun`:
 
 ```bash
-./MyApp.AppImage --appimage-extract
+./myapp.AppImage --appimage-extract
 cd squashfs-root
 mkdir -p lib && ln -s ../usr/lib/webkit2gtk-4.1 lib/webkit2gtk-4.1
 ./AppRun
@@ -261,13 +261,13 @@ On some pure Wayland compositors, especially niri, the AppImage can open but pag
 Pake automatically avoids the conservative WebKit rendering flags in niri sessions. To force the same native WebKit path manually, launch the app with:
 
 ```bash
-PAKE_LINUX_WEBKIT_SAFE_MODE=0 ./MyApp.AppImage
+PAKE_LINUX_WEBKIT_SAFE_MODE=0 ./myapp.AppImage
 ```
 
 If your system shows a blank window instead, re-enable the conservative WebKit workaround:
 
 ```bash
-PAKE_LINUX_WEBKIT_SAFE_MODE=1 ./MyApp.AppImage
+PAKE_LINUX_WEBKIT_SAFE_MODE=1 ./myapp.AppImage
 ```
 
 **Why This Happens:**

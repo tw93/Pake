@@ -21,7 +21,7 @@ If Rust is missing, Pake asks whether to install it on the first build, so you c
 
 - **macOS**: Xcode Command Line Tools, installed with `xcode-select --install`.
 - **Windows**: Visual Studio Build Tools with the C++ workload. Follow the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) if you have not set them up before.
-- **Linux**: the WebKitGTK development packages listed in [Advanced Usage](advanced-usage.md#prerequisites).
+- **Linux**: the WebKitGTK 2.40 or later development packages listed in [Advanced Usage](advanced-usage.md#prerequisites).
 
 ## Install the CLI
 

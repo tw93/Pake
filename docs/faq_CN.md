@@ -199,7 +199,7 @@ docker run --rm --privileged \
   https://example.com --name MyApp --targets appimage
 ```
 
-> **提示：** 生成的 AppImage 可能属于 root，需要执行 `sudo chown $(id -nu):$(id -ng) ./output/MyApp.AppImage` 调整所有权。
+> **提示：** 生成的 AppImage 可能属于 root，需要执行 `sudo chown $(id -nu):$(id -ng) ./output/myapp.AppImage` 调整所有权。
 
 **原因：**
 
@@ -229,7 +229,7 @@ AppImage 构建成功，但启动时立即崩溃：
 pake https://example.com --name MyApp --targets zst
 ```
 
-这会生成 pacman 包（`*.pkg.tar.zst`），安装到系统路径，WebKit 按系统原生路径解析辅助进程，不存在重定位问题。用 `sudo pacman -U MyApp-*.pkg.tar.zst` 安装。
+这会生成 pacman 包（`*.pkg.tar.zst`），安装到系统路径，WebKit 按系统原生路径解析辅助进程，不存在重定位问题。用 `sudo pacman -U myapp-*.pkg.tar.zst` 安装。
 
 **解决方案 2：在 Docker（基于 Debian）中构建 AppImage**
 
@@ -248,7 +248,7 @@ docker run --rm --privileged \
 解压后补上缺失的软链接，再运行内部的 `AppRun`：
 
 ```bash
-./MyApp.AppImage --appimage-extract
+./myapp.AppImage --appimage-extract
 cd squashfs-root
 mkdir -p lib && ln -s ../usr/lib/webkit2gtk-4.1 lib/webkit2gtk-4.1
 ./AppRun
@@ -261,13 +261,13 @@ mkdir -p lib && ln -s ../usr/lib/webkit2gtk-4.1 lib/webkit2gtk-4.1
 Pake 会在 niri 会话中自动避开保守的 WebKit 渲染参数。也可以手动强制使用原生 WebKit 渲染路径：
 
 ```bash
-PAKE_LINUX_WEBKIT_SAFE_MODE=0 ./MyApp.AppImage
+PAKE_LINUX_WEBKIT_SAFE_MODE=0 ./myapp.AppImage
 ```
 
 如果你的系统反而出现白屏，可以重新启用保守 WebKit workaround：
 
 ```bash
-PAKE_LINUX_WEBKIT_SAFE_MODE=1 ./MyApp.AppImage
+PAKE_LINUX_WEBKIT_SAFE_MODE=1 ./myapp.AppImage
 ```
 
 **原因：**

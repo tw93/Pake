@@ -21,7 +21,7 @@ rustc --version
 
 - **macOS**：Xcode 命令行工具，用 `xcode-select --install` 安装。
 - **Windows**：带 C++ 工作负载的 Visual Studio Build Tools，之前没配过的话照着 [Tauri 前置条件](https://v2.tauri.app/start/prerequisites/)装一遍。
-- **Linux**：[进阶用法](advanced-usage_CN.md#前置条件)里列出的 WebKitGTK 开发包。
+- **Linux**：[进阶用法](advanced-usage_CN.md#前置条件)里列出的 WebKitGTK 开发包，版本要 2.40 或更高。
 
 ## 安装命令行工具
 

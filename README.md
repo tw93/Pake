@@ -15,7 +15,7 @@
 ## Features
 
 - **Lightweight**: Installers are typically under 10 MB, nearly 20 times smaller than Electron packages, a lighter alternative to Nativefier and other Electron wrappers
-- **Fast**: Built with Rust Tauri on the system WebView instead of a bundled Chromium, so apps use less memory than Electron ones
+- **Fast**: Built with Rust Tauri on the system WebView instead of a bundled Chromium, so each app carries no browser engine of its own
 - **Easy to use**: One-command packaging via CLI or online building, no complex configuration needed
 - **Feature-rich**: Supports shortcuts, immersive windows, drag & drop, style customization, ad removal
 
