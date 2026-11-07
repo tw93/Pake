@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/tw93/Pake/ac5508cf519064684c4214fe3f263c58ad7aaf5f/assets/logo.png" width="138" />
   <h1>Pake</h1>
-  <p><b>一個指令把任意網頁打包成桌面應用，支援 macOS、Windows 與 Linux，免費開源命令列，另有桌面版</b></p>
+  <p><b>一個指令把任意網頁打包成輕量的桌面應用，支援 macOS、Windows 與 Linux，免費開源命令列，另有桌面版</b></p>
   <p><a href="README.md">English</a> · <a href="README_CN.md">中文</a> · 繁體 · <a href="README_JA.md">日本語</a> · <a href="README_KR.md">한국어</a> · <a href="README_DE.md">Deutsch</a> · <a href="README_FR.md">Français</a></p>
   <a href="https://x.com/HiTw93" target="_blank"><img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=x"></a>
   <a href="https://t.me/+9f9gf4ZrFSQ2OWVl" target="_blank"><img alt="telegram" src="https://img.shields.io/badge/chat-telegram-blueviolet?style=flat-square&logo=Telegram"></a>
