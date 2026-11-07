@@ -126,7 +126,7 @@ fn is_niri_session(niri_socket: Option<&str>, desktop_values: &[Option<&str>]) -
 /// stability in general, three months before anything Wayland-specific, and
 /// upstream still reports the blank window it prevents on X11 with the NVIDIA
 /// proprietary driver (tauri-apps/tauri#9394). This is the legacy policy;
-/// apply_linux_webkit_runtime_flags substitutes SHM on WebKitGTK 2.52+ X11.
+/// apply_linux_webkit_runtime_flags substitutes SHM on WebKitGTK 2.52+.
 ///
 /// niri is excepted because #1226 was fixed by dropping both variables, and on
 /// WebKitGTK 2.52 either one alone is enough to undo that: disabling the dmabuf
