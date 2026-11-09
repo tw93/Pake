@@ -7,7 +7,7 @@ on:
     # which the vitest ledger check reads), images, contributors and agent or
     # plugin files. Formatting runs in update-contributors.yml on every push,
     # docs included. A release or npm publish that targets a docs-only commit
-    # dispatches this workflow, which ignores paths (see AGENTS.md).
+    # dispatches this workflow, which ignores paths (see .claude/rules/ci.md).
     paths: ["**", "!**.md", "docs/incidents.md", "!CONTRIBUTORS.svg", "!assets/**", "!LICENSE*", "!.agents/**", "!.claude/**", "!.claude-plugin/**", "!plugins/**"]
   pull_request:
     branches: [main, dev]
