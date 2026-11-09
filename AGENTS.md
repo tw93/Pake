@@ -13,34 +13,9 @@
 
 ## Repository Structure
 
-```
-Pake/
-├── bin/                   # CLI source code (TypeScript)
-│   └── cli.ts            # Main CLI entry (Commander.js)
-├── src-tauri/             # Tauri Rust application
-│   ├── src/              # Rust source code
-│   ├── src/app/          # window creation, setup, menu, config, and invokes
-│   ├── src/inject/       # injected JS/CSS behavior
-│   ├── Cargo.toml        # Rust dependencies and version
-│   ├── tauri.conf.json   # Tauri configuration and version
-│   └── .cargo/           # Cargo configuration (gitignored)
-├── .agents/skills/        # Agent skills (/release); .claude/skills/* symlinks here
-├── dist/                 # Compiled CLI output
-├── docs/                 # Documentation
-│   ├── cli-usage.md      # CLI parameters
-│   ├── advanced-usage.md # Customization guide
-│   └── faq.md           # Troubleshooting
-├── gallery/              # Site recipes for the Pake apps' gallery (schema.json, tests/unit/gallery.test.ts)
-├── schema/               # pake.schema.json: --config JSON schema (public contract)
-├── plugins/              # Claude Code and Codex plugin source (shared user-facing pake skill)
-├── llms.txt              # Agent-facing contract summary (--json, --config, exit codes)
-├── scripts/              # Utility scripts
-├── tests/                # Unit, integration, and release-flow tests
-├── .github/workflows/     # quality/test and release automation
-├── default_app_list.json # Popular apps config for release builds
-├── package.json          # Node.js dependencies and version
-└── rollup.config.js      # CLI build configuration
-```
+`bin/` is the TypeScript CLI (`bin/cli.ts`), `src-tauri/` the Tauri app (`src/app/` window, setup, menu and config; `src/inject/` injected JS and CSS), and `dist/` the compiled CLI.
+`gallery/` holds site recipes for the Pake apps' gallery, `schema/pake.schema.json` the `--config` schema, `plugins/` the Claude Code and Codex plugin source, and `llms.txt` the agent-facing contract.
+`default_app_list.json` lists the popular apps for release builds; `docs/` has `cli-usage.md`, `advanced-usage.md` and `faq.md`.
 
 ## Development Commands
 
@@ -59,17 +34,12 @@ Pake/
 | `pnpm test -- --no-build`                  | Full suite minus the multi-arch real build                              |
 | `pnpm test`                                | Full suite including release workflow                                   |
 
-Keep shared project facts in this file so Codex, Claude Code, and other agents use the same source of truth. Local-only overrides (`CLAUDE.local.md`, `AGENTS.override.md`, `.claude/settings.local.json`) stay ignored.
-
 ## Code Conventions
 
 - No Chinese comments in any source (Rust / TypeScript / any file). Comments and identifiers in English; follow the existing language of surrounding prose.
 
 ## Working Principles
 
-Goals and project facts only; trust the agent to find its own path.
-
-- Deliver the smallest correct diff and prove it with the narrowest real verification; expand only when evidence demands it. If key context is missing, make one reasonable assumption and proceed.
 - Generated areas (`dist/`, `node_modules/`, `src-tauri/target/`, `.app/`, `src-tauri/icons/`, `src-tauri/png/`) are not source. Exception: `dist/cli.js` is the shipped CLI build artifact (see `package.json` `files`); rebuild it via `pnpm run cli:build` and commit the regenerated file alongside the source change. Two things trigger a rebuild, not one: any change under `bin/`, and **any** change to `package.json`. Rollup inlines the whole manifest, so a dependency bump, a `pnpm.overrides` edit, an `engines` change, or a reworded `description` all leave `dist/cli.js` stale with no `bin/` diff to hint at it. Dependency-only PRs are the usual place this is missed.
 - Release status, issue closeout, npm delivery, and GitHub assets are separate truth surfaces. Verify each one live (source commit/tag, workflow run, npm registry, GitHub Release/assets, issue state); never let one passing surface imply another.
 
@@ -101,130 +71,30 @@ Oracles per row live under `tests/unit/` (for example `event-link-guard.test.js`
 
 ## Current Risk Areas
 
-- Native IPC is gated by the application command manifest in `src-tauri/build.rs`. Keep every registered app command in that manifest and grant only its required permissions. The packaged capability is local-only; `PakeConfig::remote_capability` grants the same permission set to exact configured entry origins (scheme, host, and port) before webviews load. Navigation flags, login redirects, subdomains, and restored URLs must not expand that grant. Keep local pages, secondary windows, loopback/IPv6 URLs, and literal hostname handling covered. ACL-denied downloads may fall back to browser attachments, but transient download anchors must bypass the IPC click interceptor to avoid recursion. Fullscreen must acquire native permission before mutating the player DOM; untrusted frame messages must never gain a top-level navigation fallback. Run `cargo test --lib` and `node tests/integration/ipc-security.mjs` (real macOS WebView); hiding `window.__TAURI__` or narrowing plugin capabilities alone does not gate application commands.
-
-- Injected CSS uses `src-tauri/src/inject/styles.js`: preserve DOM stylesheet order on ordinary pages; use constructable sheets only when CSP blocks the style element. `replaceSync` silently drops `@import`, so keep import-bearing CSS on its original DOM path, including escaped/case-insensitive at-keywords. Strict CSP plus imports remains unsupported. Run `node tests/browser/style-injection.mjs` with an installed Playwright runtime; mock CSSStyleSheet tests do not validate CSP or cascade behavior.
-
-- CLI options are user-facing and must stay synchronized across `bin/helpers/cli-program.ts`, `bin/types.ts`, `bin/defaults.ts`, `bin/helpers/merge.ts`, generated `dist/cli.js`, `schema/pake.schema.json`, and `docs/cli-usage*.md`. Schema-to-CLI sync is enforced by `tests/unit/config-file.test.ts`; the rest is manual discipline.
-- The `--json` machine contract is public API for agents: stdout carries exactly one JSON result (nothing else may write to stdout in machine mode), and the exit codes (0/2/3/4/1) plus error codes (`INVALID_INPUT`, `ENV_MISSING`, `BUILD_FAILED`, `UNEXPECTED`, plus `NETWORK` which is reserved and currently unused, since network failures report under the phase code) must stay stable. `logger.warn` feeds the JSON `warnings` array, so warn is for real warnings only, not status lines. Owners: `bin/utils/output.ts`, `bin/cli.ts`, `bin/utils/shell.ts`.
-- Packaging CLI builds use a private temporary workspace for configs, injected code, icons, entitlements, and local content. The installed package is the template, not a writable staging area. Complete installed Tauri dependencies are reused without reinstalling; incomplete dependencies are installed only in the private workspace. Owners: `bin/utils/build-workspace.ts`, `bin/utils/dir.ts`, and `bin/helpers/merge.ts`. `restoreLocalTree()` at CLI startup remains only to recover a `dist_bak` left by the published 3.15.7 implementation. The repository's `bin/dev.ts` intentionally retains source-based Tauri development/watch behavior.
-- The `runtime-template` Cargo feature builds a prebuilt runtime that a separate builder customizes without a compiler: at launch it reads `pake-runtime/{pake.json, app.json, custom.js?, tray.png?}` from `Contents/Resources` on macOS or next to the executable elsewhere, and applies app.json's `identifier` and `productName` to the Tauri context before build. The CLI never enables the feature, so CLI-built apps keep their compiled configuration even if such a folder appears. A present but invalid override exits with a `[Pake]` message instead of falling back to the template's identity. A runtime app keys its WebView profile folder under the config dir (`%APPDATA%\<identifier>\EBWebView` on Windows) by identifier instead of product name (`data_dir_name`), so a rename keeps logins and a generated name cannot share another program's folder; CLI apps keep the product-name folder. On Windows a runtime app also sets the process AppUserModelID to its identifier before any window exists, so shortcuts carrying that ID group with the running window and toasts are attributed to it. Logic and tests live in `src-tauri/src/util.rs` (`apply_runtime_override`, `data_dir_name`, `set_app_user_model_id`); `PakeConfig::runtime_app` is the single runtime-app flag, and `run_app` copies the overridden identity from the returned Tauri config into the context; keep `cargo clippy` and `cargo test --lib` green both with and without `--features runtime-template`.
-- `transparent_title_bar` is a runtime-only macOS window field (no CLI flag; the paid apps set it): Tauri's `Transparent` title bar keeps the page below the bar, and `src-tauri/src/inject/title_bar.js` paints the window background with the page's top-edge color through `set_title_bar_color`. `hide_title_bar` keeps precedence and its overlay behavior. The color is the majority of three top-edge samples, resolved through a canvas so `oklch()`/`color()` values work; do not skip sampling for `document.hidden`, or windows revealed after load stay uncolored. Cover it with `tests/unit/title-bar-color.test.js`; when checking a real bundle, window captures carry the display profile, so convert the sRGB page color before comparing pixels.
-- Linux multi-format builds compile once with `--no-bundle`, then use `tauri bundle` for each format with the same config, features, target, and debug profile. Keep per-format failure isolation and AppImage `NO_STRIP` retries on bundling only. Single-format builds retain the combined build path.
-- Build preparation uses private workspaces before acquiring the shared compilation cache lock. Cancellation while waiting must clean only that workspace and leave the active owner's lock intact.
-- Native build gates use a fresh output directory, require exit code zero and the CLI JSON's exact output path, and verify macOS executable architectures from `CFBundleExecutable`. Compare existing artifact paths with `realpath`, since macOS `/var` and `/private/var` can identify the same file; retain a negative test for genuinely different files. Old bundles, empty directories, or timeout artifacts never prove a successful build.
-- Platform test mocks must preserve unrelated exports with a partial mock. `defaults.ts` calls `getDefaultLinuxTargets` on Linux during import, so a mock containing only platform booleans can pass on macOS but prevent the suite from loading on Linux. See `tests/unit/linux-multi-target.test.ts`.
-- Shared Cargo caches are locked until artifact copying finishes; Cargo's own compilation lock alone does not protect that interval. Never reclaim a stale PID lock with read-then-delete, which can delete a new owner's lock. An abandoned lock fails with a recovery hint rather than risking concurrent artifacts. Cancellation and failed subprocesses must stop the compiler tree before releasing the lock; preserve the workspace and lock if termination cannot be confirmed. Ordinary success and failure discard the workspace, with cleanup warnings included before the JSON result. Verify with `node tests/integration/build-workspace.mjs` on macOS or Linux and the cross-platform workspace unit tests.
-- Build workspaces preserve an existing root `rust-toolchain.toml` or legacy `rust-toolchain`; otherwise rustup may select a different default without the installed cross-compilation targets. Keep full stderr in real-build tests so compilation success cannot conceal a later target or bundling failure. GNU build flags must respect Cargo precedence: append required arguments to `CARGO_ENCODED_RUSTFLAGS` when present (including empty), otherwise to `RUSTFLAGS`; preserve user arguments and keep the override local to the build subprocess.
-- New user-visible CLI surface (a new flag, alias, subcommand, or extra help variant) needs a stated justification before implementation: name the user problem and why an existing flag, config key, or default cannot cover it, then get maintainer sign-off. Prefer quieter defaults over new options; never split help output into parallel variants.
-- Window/runtime options with platform-sensitive behavior include `--incognito`, `--new-window`, `--min-width`, `--min-height`, `--maximize`, multi-window behavior, notification click handling, and Linux/Wayland WebKit compositing defaults.
-- `--incognito` intentionally trades persistence for clean private sessions; be careful around login, cookies, local storage, and WeChat-style WebView detection.
-- Web apps restore the main window's last URL by default. `--no-restore-last-url` / config `restoreLastUrl: false` disables both reading and saving that URL without changing cookie or local-storage persistence. Legacy native configs missing `restore_last_url` default to true. Startup and close/exit persistence share `WindowConfig::remembers_last_url`, which excludes incognito sessions and local pages. Verify with `cargo test --lib` and `node tests/integration/last-url.mjs` (real macOS WebView).
-- Windows `--password-autosave` is opt-in and disabled in private windows. Every window creation must apply both true and false through `ICoreWebView2Settings4::SetIsPasswordAutosaveEnabled`; do not treat the false case as a no-op. Legacy configs default to false. This controls new save/update prompts, not existing password autofill or general autofill, and does not share an Edge or Chrome profile. Keep the native bool, CLI/config surface, and both language docs consistent; cover all four requested/private combinations and the missing-field default in the `config.rs` Rust tests, and keep `tests/unit/password-autosave.test.ts` asserting that both values reach the native call.
-- `--new-window` and `--multi-window` do not bypass every provider policy. Google OAuth and similar embedded-WebView restrictions may still require a normal browser or native client.
-- macOS Basic Auth keeps only an enablement boolean in CLI/config. Usernames and passwords are runtime-only input for the target host and session; never put them in CLI arguments, config, generated artifacts, logs, or persistence. Native dialog changes need a real macOS smoke covering the icon, button alignment, label/input baselines, field width, and outer margins; compile and unit tests do not prove the layout.
-- macOS auth-popup behavior is fragile. Auth and sign-in URLs that trigger WebKit's native auth-popup path should stay in the current window when that path can abort the app. URL matching lives in `src-tauri/src/inject/auth.js` (`matchesAuthUrl`, injected from `src-tauri/src/app/window.rs`) and is covered by `tests/unit/auth-sso-patterns.test.js`; main-page `window.open` interception lives in `event.js`, and the lightweight subframe interception lives in `frame_links.js`. Changes need the corresponding routing tests. Apple Sign-In (`appleid.apple.com` / `AppleAuthentication` named windows) is the exception and must keep the native `window.open` popup.
-- Auth routing matches provider hostnames and endpoint-shaped paths separately, never query strings or fragments. Tracking links carrying a login URL must still open externally. Cover main-page and subframe clicks in `tests/browser/popup-routing.mjs`; classifier-only tests do not prove routing.
-- Blank/two-stage popups need a real WindowProxy, not the main window. Normalize omitted/empty URLs to `about:blank` in both JS entry points: Tauri rejects WebKit's empty URL before calling `on_new_window`. The default native handler must create a managed blank popup with Pake's download delegate even without `--new-window`; `NewWindowResponse::Allow` does not provide that delegate. Verify actual macOS attachment bytes and preservation of the main URL, not only Chromium popup creation.
-- `--download-dir` / `downloadDir` is embedded as trusted `pake.download_dir`, shared by native and IPC downloads through `get_download_dir`. Empty means system Downloads; quoted `~/path` expands against the runtime user home. Reject relative paths and absolute tilde suffixes, create missing directories on download, and surface directory creation plus file open/write failures without redirecting to another folder. Do not accept a directory from remote-page IPC arguments.
-- Do not open a synchronous native save dialog inside `on_download(Requested)`. Wry 0.54.2 holds a `RefCell` mutable borrow across that callback; a modal panel allows another download callback to reenter and panic. A native two-download probe reproduced this with 100 ms and 500 ms spacing. The macOS completion event also omits the destination path, so URL-only bookkeeping cannot safely identify concurrent downloads of the same URL.
-- WebKit subframes need `initialization_script_for_all_frames` for the lightweight config/auth/link bridge. Keep page UI and clipboard injection separate. `link_policy.js` owns internal URL matching for the main page and `frame_links.js`; the receiver must recheck descendant source, protocol, internal/auth classification, and force policy before calling the external opener. Never route frame messages through top-level internal navigation: sandboxed content can forge them. Preserve native blank/two-stage, named-frame, auth, and download behavior; known external iframe links are the repaired surface. Cover pre-DOMContentLoaded messages and discard queued messages when the document leaves.
-- Find's DOM-mark fallback must not observe its own highlighter mutations. Pause observation while rescanning/updating marks, then resume only while Find is open; real page edits must still refresh results. A mock without MutationObserver cannot prove this path. Icon download deadlines likewise cover response bodies, not just response headers.
-- Safe clipboard shortcuts (Ctrl+C/X/V/A) on Linux/Windows are bridged in `src-tauri/src/inject/event.js`. Copy/cut/select-all stay in the trusted `handleClipboardShortcut` keydown path; Ctrl+V must leave keydown unhandled so the native WebView paste event preserves images, files, and rich formats, with text-only `navigator.clipboard.readText()` fallback allowed only from a trusted keyup when no native paste event fired. The bridge is gated on `isNonMacDesktop()` and `event.isTrusted`, only acts on editable/selected targets, and must never fire on macOS (native shortcuts already work). Locked by `event-clipboard-shortcuts.test.js` tests `lets native paste preserve non-text clipboard data` and `falls back to clipboard text only when native paste does not fire`.
-- Notification flows cross injected JS, Tauri invokes, capabilities, and native notification plugins. Verify the Rust capability and JS caller together. macOS clicks and withdrawals use the originating window label plus a validated notification id; closed or tag-replaced objects must remain closed when IPC replies arrive late. Queue `close` events as tasks so handlers cannot mutate a live Map during replacement. Safari before 14 exposes an `EventTarget` interface without a usable constructor; retain a native DOM event target fallback for the macOS 10.13 deployment floor, and cover both paths with `node --test tests/browser/notification-bridge.mjs`. Windows/Linux retain a limited focus heuristic, not a native click callback. Cover deferred replies and close-handler reentry in `tests/unit/notification-bridge.test.js`, and verify macOS click routing, hidden-window reveal, and withdrawal with a real bundled app.
-- WebKit compositing behavior is platform-sensitive on Linux/Wayland. Runtime flag decisions live in `src-tauri/src/lib.rs`; keep the default conservative, cover compositor exceptions with unit tests, and document user-facing fallbacks in `docs/faq*.md`. WebKitGTK 2.52+ uses SHM instead of disabling the renderer on both X11 and Wayland (#1374, #1386): either legacy flag turns hardware acceleration off and crashes video. Use the loaded library version, preserve explicit variables, and keep older WebKit on its existing path. Keep the niri exception in both legacy gates and test the combined mode, including safe-mode overrides.
-- Linux AppImage reports often include harmless GTK, appindicator, or GStreamer warnings. Separate optional runtime warnings from the actual symptom before changing code; input/click failures on pure Wayland compositors are not the same class as blank-window failures.
-- Stable `V*` Docker publication updates both the version tag and `latest`; verify matching registry manifest digests and the image's source revision. Quality validates the actual image CLI and both DEB/AppImage artifacts before a release tag is pushed. AppImage bundling requires `xdg-open` from `xdg-utils` in the image: a successful image build or DEB alone does not cover that dependency. Require both requested artifacts because the CLI intentionally allows partial success across formats.
 - Release state can be split. npm Trusted Publishing can succeed before the popular-app release workflow finishes, and GitHub Release assets can exist while a workflow run still shows queued or in progress. Report each surface explicitly.
 - Local app builds and test runs mutate tracked files as build state: `src-tauri/pake.json`, `src-tauri/tauri.conf.json`, `src-tauri/tauri.macos.conf.json`, and regenerated icons under `src-tauri/png/` and `src-tauri/icons/`. Record `git status --short` for these paths before running the command. Afterwards, restore only paths that were clean in that baseline and whose new diff is provably generated by this run. If a path was already dirty or ownership is ambiguous, leave it untouched and rerun verification in an isolated worktree; never let a feature or release commit absorb this churn.
-- Per-app optional fields in `default_app_list.json` currently take their defaults in Actions expressions in `release.yml` (`matrix.config.x || false` and the numeric ones), which works because every field so far is default-false or numeric. The first default-true field cannot use that path and must move its default into the jq read step: GitHub expressions cast both `null` and `false` to `0`, so `matrix.config.x != false` cannot express "default true" and would silently flip every app missing the field.
-- Windows taskbar icons can register blank when an autostarted app launches before Explorer's icon cache is ready (#1323). Every hidden-to-visible `window.show()` path (main or secondary: tray show/click, activation shortcut, single-instance activation, startup/page-load reveal, multi-window Cmd+N reveal) must call `reapply_window_icon` from `src-tauri/src/app/window.rs` (or go through `reveal_built_window` / `reveal_startup_window`, which already do). The helper reasserts both the small window icon and the large taskbar icon; a new show path without it regresses the bug.
-- Multi-window home clones (`open_additional_window_safe`, labels `pake-N`) are built hidden and revealed via `reveal_built_window` on the first real page load (or a 3s fallback), matching the main-window blank-shell guard. OAuth/pop-up windows from `--new-window` stay immediately visible by design. Tray Hide/Show, tray left-click, and the activation shortcut must act on **every** webview via `hide_all_app_windows` / `show_all_app_windows` / `toggle_all_app_windows` (not only label `"pake"`). Two Windows-specific constraints hold that toggle together (#1343): the tray click handler must match `button_state == MouseButtonState::Up`, because Windows emits `TrayIconEvent::Click` twice per physical click and reacting to both runs the toggle twice; and `any_app_window_visible` must exclude minimized windows, because `hide_on_close` minimizes before hiding and Windows keeps `IsWindowVisible` true while a window is iconic. Locked by `tests/unit/tray-toggle-visibility.test.ts`.
-- Windows uses WebView2 native DOM fullscreen; Tauri already synchronizes its `ContainsFullScreenElementChanged` event with the native window. Do not inject `fullscreen.js` on Windows: its media extraction separates video from player controls (#1373). F11 must exit an active DOM fullscreen session through `document.exitFullscreen()` before toggling the native window. Verify the platform gate and `node --test tests/browser/fullscreen.mjs`; macOS/Linux retain the polyfill, which must preserve the requested subtree even for `html`/`body` fullscreen. Never extract a video from its player controls; verify document/player entry and repeated exit with `node --test tests/browser/fullscreen.mjs`.
-- Injected Linux/Windows shortcuts (Ctrl+R / [ / ]) call the `webview_navigate` IPC so reload and history use the platform webview API on blank error pages; do not route those shortcuts only through page `history` / `location`.
-- Download and toast paths must not hardcode `get_webview_window("pake")` when the action originates from a secondary window: IPC commands take the calling `WebviewWindow`, and `on_download` resolves toast by the event webview's label. Authenticated downloads should attach webview session cookies when available. Link-download heuristics prefer real file extensions, the `download` attribute, and `?download` / `?attachment` query hints; Cmd/Ctrl+click is navigation, not "save as"; do not re-add broad SPA roots such as `/assets/`, `/dist/`, `/files/`, or `/releases/` (see #1337, #1339).
-- The shared download HTTP client pools connections without a cookie jar. Redirects must re-read the calling window's cookies for each HTTP(S) target, progressively narrow Referer, and never restore it after an HTTPS downgrade. Accept page context only from the calling window's actual origin, strip URL credentials, and flush asynchronous file writes before reporting success. Wry 0.54.2 misses macOS literal-IP cookies; only that branch reads the window's full cookie store, with exact IP, Path, Secure and expiry filtering. Keep normal hostnames and other platforms on `cookies_for_url`. Validate the real WebView's User-Agent, Referer, HttpOnly session cookie and wrong-Path exclusion in `tests/integration/ipc-security.mjs`.
-- macOS menu navigation must keep working on blank error pages: Reload uses native `WebviewWindow::reload`, Go Home uses `navigate` + `resolve_home_url`, Back/Forward use the platform WKWebView history API rather than page `eval`. Copy URL reads `window.url()` so it does not depend on a live JS document.
-- Not every green CI step is evidence. The old `Test CLI Integration (smoke)` step ended with `|| true` and, because `timeout` took `PAKE_CREATE_APP=1` as the program name, never ran the CLI on any OS; it was removed rather than repaired. The steps that actually fail on regressions are `Run Fast Test Suite` (all three platforms) and `Full Tauri Build` (real `pnpm test` with a build, push and dispatch only). Cite those when claiming a change is verified, and check for `|| true` and `continue-on-error` before treating any other step as proof. `Rust Code Quality` also runs `cargo test --lib`, the only CI gate for the Rust unit tests; its Linux job runs clippy without `-D warnings`, so only the Windows job (`-D warnings`, default features plus `runtime-template,native-download-probe`) fails on lint warnings, and only for Windows cfg arms.
 - Incidents are the review eval set. A fix for a defect that reached users through a published npm version or a released app adds its `docs/incidents.md` row in the same commit: the fix commit, the introducing commit when confirmed, the earliest layer that should have caught it, and the test that catches it now. `scripts/check-incidents.mjs` fails a row whose commit does not resolve, whose layer is unknown, or whose catcher is not a test or file in the repository; `tests/unit/check-incidents.test.ts` runs it, so `npx vitest run` in `release:check` and the CI fast suite gate it, and the fast suite's Linux leg checks out full history so commits resolve, while the other legs only shape-check them. Verification follows the paths a change touches, not its author: `node scripts/risk-tier.mjs [paths]` prints, as advice, the extra gates for the publish, public workflow, CI, IPC permission, bundle and CLI artifact tiers, and `--self-check` (locked by `tests/unit/risk-tier.test.ts`) fails when a rename leaves a tier pattern matching no file.
-- `setup-env` in build mode shares one rust-cache key per OS, and the first job to save wins it: every later restore is a full match and never saves again. A job that installs Rust but does not compile the app (fast lane, clippy) must pass `rust-cache-save: false`, or it seeds an empty target and every release recompiles from scratch. A healthy `v0-rust-pake-build-*` entry is about 1.1 GB and a poisoned one about 109 MB; check `gh cache list --key v0-rust-pake-build` before trusting release timings. Release builds reuse it because the CLI keeps `CARGO_TARGET_DIR` at `src-tauri/target` even inside its private workspace.
-- `.github/workflows/pake-cli.yaml` and `single-app.yaml` are public build surfaces that external users trigger from their own forks (see `docs/github-actions-usage*.md`). Changes there ship to outside users on push to `main`, independent of `V*` releases; treat them like public API, not internal CI. Their `run:` scripts take inputs through `env:`, never `${{ inputs.* }}` interpolated into bash or pwsh (gated by `tests/integration/workflow-paths.test.js`); on Windows an empty variable is unset, so test it with `IsNullOrEmpty`.
-- Jobs that compile the app on Linux pin `ubuntu-24.04` instead of `ubuntu-latest` (moving to Ubuntu 26 from 2026-10-19): release `.deb`/`.AppImage` link against the runner's glibc and WebKitGTK, so a runner bump raises the minimum distro for users. Move the pin deliberately, and keep the `matrix.build == 'linux'` conditions in `single-app.yaml` rather than matching the runner label.
-- `action.yml` is public too, but reaches `uses: tw93/Pake@v3` users only when the release workflow's `Move Major Action Tag` job moves `v3` to the newest `V3.*` release; an action fix on `main` is not live until then. Do not move `v3` by hand unless that job failed. The action exports `PAKE_CREATE_APP=1` and takes only the package the CLI wrote into the working directory during that run; keep `docs/pake-action*.md` output notes in step with it.
+
+## Where the detail lives
+
+Claude Code loads each `.claude/rules/*.md` when a file matching its `paths:` is read. On another runtime, read the matching file before working there. These stay out of `src-tauri/` because that folder ships in the npm package.
+
+- `.claude/rules/tauri-runtime.md`: native IPC, windows, auth, downloads, WebKit, notifications, shortcuts.
+- `.claude/rules/cli.md`: CLI surface, `--json`, build workspaces, caches.
+- `.claude/rules/ci.md`: workflows, and which green CI steps are not evidence.
+- `.claude/rules/release.md`: read before any release, version bump or tag.
 
 ## Platform-Specific Development
-
-### macOS
-
-- Universal builds via `--multi-arch` (Intel + Apple Silicon).
-- Icons: `.icns`.
-- Title bar can be customized via Tauri window options.
-
-### Windows
-
-- Requires Visual Studio Build Tools to compile.
-- Icons: `.ico`.
-- MSI installer supported via Tauri bundler.
 
 ### Linux
 
 - Multiple package formats: `.deb`, `.AppImage`, `.rpm`.
 - Runtime depends on `libwebkit2gtk` and its companion libraries.
 - Icons: `.png`.
-- WebKit compositing is platform-sensitive on Wayland; see Current Risk Areas before changing defaults.
+- WebKit compositing is platform-sensitive on Wayland; see `.claude/rules/tauri-runtime.md` before changing defaults.
 - Maintainer agents verify Linux-only behavior (GNU tools, `cargo test` on Linux cfg paths, `.deb`/AppImage builds, Linux issue repros) on a real Debian x86_64 machine through the private `linux-devbox` skill rather than reasoning from macOS. Contributors without it use any Ubuntu 24.04 machine, matching CI.
 
-## Branch Strategy
-
-- `main` - Only branch. All development and releases happen here directly.
-
-## Version Management
-
-Four files must be updated in sync for every release:
-
-| File                        | Field                        |
-| --------------------------- | ---------------------------- |
-| `package.json`              | `"version"`                  |
-| `src-tauri/Cargo.toml`      | `version` under `[package]`  |
-| `src-tauri/Cargo.lock`      | `version` for package `pake` |
-| `src-tauri/tauri.conf.json` | `"version"`                  |
-
-A version bump must also rebuild and commit `dist/cli.js` (it embeds the package version); see Troubleshooting.
-
-Tag format: `V<major.minor.patch>` with uppercase `V` (e.g. `V3.13.1`). Current version: check `package.json`.
-
-Find the previous release tag with `git tag --list 'V*' --sort=-version:refname | head -1`. A bare `git tag --sort` is polluted by stray non-version tags (`list`, `continuous`, `0.1.0`) and silently picks the wrong log range.
-
-Filter those tags out; do not delete them without checking each one first. `continuous` is not junk: it carries a real 2023 prerelease ("Continuous build") with 40 assets and roughly 700 downloads, so removing the tag breaks every historical download link. `list` and `0.1.0` point at old commits with no release attached. Any tag deletion here is a public, irreversible action and needs maintainer authorization in the current turn.
-
 ## Release Workflow (CI)
-
-Pushing a `V*` tag triggers `.github/workflows/release.yml`:
-
-1. **release-apps** - reads `default_app_list.json` for app list
-2. **create-release** - creates the GitHub Release placeholder
-3. **build-cli** - builds and uploads the `dist/` CLI artifact
-4. **build-popular-apps** - builds all apps in parallel across macOS/Windows/Linux
-5. **publish-docker** - builds and pushes Docker image to GHCR
-
-The workflow can also be triggered manually via `workflow_dispatch` with options to build popular apps or publish Docker independently.
-
-Pushing the same `V*` tag also triggers `.github/workflows/npm-publish.yml`, which publishes `pake-cli` to npm through Trusted Publishing. Configure the npm package's Trusted Publisher as GitHub Actions, `tw93/Pake`, workflow file `npm-publish.yml`, with no environment. Local `npm publish` is only a fallback when CI or npm registry state blocks the trusted path.
-
-`npm-publish.yml` also supports `workflow_dispatch` from `main` for npm-only CLI hotfixes: bump the version files on `main`, wait for a successful `quality-and-test.yml` run for the exact commit, then pass that commit as `expected_sha` and the successful run as `quality_run_id`. The publish workflow verifies both before publishing without a `V*` tag or app release. npm publish and `git tag` are therefore independent actions; never infer one from the other. At the start of any release task, restate which surfaces this round touches (npm package, GitHub Release + app assets, Docker, git tag) and let the maintainer confirm. Each publish, tag, or issue-close action needs maintainer authorization in the current turn.
-
-Before treating an npm release as shipped, verify both `gh workflow list --all | grep "Publish npm Package"` and `npm view pake-cli@X.Y.Z version`. Prefer `npm view pake-cli@X.Y.Z version gitHead dist.tarball --json` so the published package can be tied back to the intended commit. Do not reply to or close GitHub issues as released until the public registry returns the expected version.
-
-For release follow-through, keep these boundaries explicit:
-
-- `workflow_dispatch` runs on a branch. Bind npm-only publishing to the exact `main` commit with `expected_sha` and a successful Quality run for that same SHA; do not infer a release tag or source commit from the branch name, run title, or compare UI.
-- For CLI/npm issue closeout, the npm registry is the decisive public surface. Install the exact public version in a temporary directory, compare its shipped files with the intended source commit (or release tag when present), build an app, and verify the installed template remains unchanged. Check `rustup show` in that temporary context before a universal macOS probe: the repository's toolchain override may have both targets while the default toolchain has only the host target. GitHub app release assets and quality workflows remain separate surfaces.
-- For app-release claims, inspect the GitHub Release directly with `gh release view <tag> --json assets`. Derive the expected filenames from the tagged `default_app_list.json` and workflow formats, then require the complete name set, uploaded state, and nonzero sizes; do not hardcode a historical asset count. Download representative platform installers, inspect actual payloads, and validate a macOS DMG's stapled notarization ticket. Asset presence and workflow completion must both be reported accurately.
-- The contributors bot can push `chore: update contributors and formatting [skip ci]` at any moment, usually a minute or two after each push now that it also runs Prettier and `cargo fmt`, including between local commits and the bump push. On a rejected push, `git pull --rebase` onto it and push again before tagging. After release, fast-forward local `main`; do not move an already pushed release tag to include it. Never tag that bot commit itself: GitHub evaluates `[skip ci]` against the head commit for tag pushes too, so a `V*` tag landing on it silently produces no workflow run, no release, and no assets, with no error anywhere. Before pushing a release tag, confirm the target commit's subject has no `[skip ci]` and that the commit has its own green Quality run; point the tag at the last real commit when the bot is on top.
-
-`.github/workflows/quality-and-test.yml` runs Rust quality checks and CLI/build validation across Linux, Windows, and macOS; a push or PR that changes only files no job reads (Markdown other than `docs/incidents.md`, `assets/`, `CONTRIBUTORS.svg`, agent and plugin files) starts no run. Such a commit has no Quality run of its own, and neither has the `[skip ci]` bot commit that usually sits on top of `main`; before tagging or npm-publishing a head without its own green run, run `gh workflow run quality-and-test.yml --ref main` and wait for that run; dispatch ignores the path filter. Auto-format moved into `update-contributors.yml`, which commits Prettier and `cargo fmt` fixes together with the contributors image as one `[skip ci]` bot commit, so the never-tag-a-`[skip ci]`-commit rule covers formatting commits too.
-
-Deployment-surface note: the Claude Code and Codex plugins (`.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`, and `plugins/pake`) ship from `main` via git, independent of `V*` releases. Skill and manifest edits reach new installs as soon as they land on `main`; npm and app assets still wait for their release workflows.
 
 ### Network Mirror Behavior
 
@@ -268,10 +138,6 @@ This file is already in `.gitignore`.
 ### `dist/cli.js` out of sync with its sources
 
 Symptom: tests or release builds use stale CLI behavior after a `bin/` or `package.json` edit. Fix with `pnpm run cli:build` and commit the regenerated `dist/cli.js`. Note `dist/` is gitignored while `dist/cli.js` is tracked, so stage it with `git add -f dist/cli.js`. `quality-and-test.yml` catches this on Linux by failing when `git diff -- dist/` is non-empty after a rebuild, so an unrebuilt artifact fails CI rather than shipping quietly.
-
-### First Tauri build is slow
-
-The first `cargo build` on a fresh clone takes 10+ minutes as Cargo compiles every Tauri dependency from source. Subsequent builds reuse the `src-tauri/target/` cache. This is expected, not a bug.
 
 ## Documentation Guidelines
 

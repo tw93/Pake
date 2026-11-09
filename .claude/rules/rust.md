@@ -1,3 +1,8 @@
+---
+paths:
+  - "src-tauri/**"
+---
+
 # Pake Rust + Tauri Rules
 
 > Pake-specific Rust + Tauri rules. Standard Rust hygiene is assumed: `?` over `unwrap()`, `cargo clippy` clean, `cargo fmt` before commit. The `dist/cli.js` rebuild rule, CN mirror policy, and platform-sensitivity rules (Linux/Wayland WebKit compositing, AppImage warning noise, `--incognito`, embedded-WebView OAuth) live in AGENTS.md (Current Risk Areas / Network Mirror Behavior) and are not repeated here.

@@ -11,12 +11,12 @@ allowed-tools:
 
 # Release Skill
 
-Use this skill when preparing or executing a Pake release. Shared facts live in `AGENTS.md` and are not repeated here: the four version files and tag format (Version Management), CI jobs, Trusted Publishing, surface separation, and the contributors bot (Release Workflow), and issue closeout (Issue Closeout After a Fix).
+Use this skill when preparing or executing a Pake release. Shared facts live in `.claude/rules/release.md` and are not repeated here: the four version files and tag format (Version Management), CI jobs, Trusted Publishing, surface separation, and the contributors bot (Release Workflow), and issue closeout (Issue Closeout After a Fix).
 
 ## Pre-Release
 
 1. [ ] Before changing files or running any formatter/build, freeze the full baseline with `git status --short --branch -uall`, `git diff`, and `git diff --cached`. If the checkout contains unrelated or ambiguously owned changes, prepare the release in an isolated worktree.
-2. [ ] Confirm the new version (`jq .version package.json`; previous tag per AGENTS.md Version Management) and that `npm view pake-cli@X.Y.Z version` returns 404.
+2. [ ] Confirm the new version (`jq .version package.json`; previous tag per `.claude/rules/release.md`) and that `npm view pake-cli@X.Y.Z version` returns 404.
 3. [ ] Update all four version files.
 4. [ ] `pnpm run format`, then `pnpm test`. If `pnpm test` fails at the suite's `pnpm install pake-cli@latest` (run in `/tmp`) against a mirror, re-run once; two consecutive failures are real.
 5. [ ] `pnpm run cli:build`, then `pnpm run release:check` (version sync, format, vitest, package contents, npm dry-run).
@@ -30,7 +30,7 @@ git tag -a VX.Y.Z -m "Release VX.Y.Z"
 git push origin VX.Y.Z
 ```
 
-If the bump push is rejected, rebase onto the contributors bot commit as AGENTS.md describes, push, then tag the last real commit. Never force-push.
+If the bump push is rejected, rebase onto the contributors bot commit as `.claude/rules/release.md` describes, push, then tag the last real commit. Never force-push.
 
 1. [ ] `gh run list --workflow=release.yml`, then poll `gh run view <run-id> --json status,conclusion`.
 2. [ ] `gh release view VX.Y.Z --json tagName,url,assets`, then fill the title and body per **GitHub Release Notes** below; CI leaves a bare placeholder.
