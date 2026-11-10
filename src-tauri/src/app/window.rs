@@ -802,6 +802,9 @@ fn build_window(
     #[cfg(not(target_os = "windows"))]
     {
         let download_handle = app.clone();
+        // WKWebView reports no path when a download finishes, so remember where each was sent.
+        let destinations: std::sync::Mutex<std::collections::HashMap<String, PathBuf>> =
+            std::sync::Mutex::new(std::collections::HashMap::new());
         window_builder = window_builder.on_download(move |webview, event| match event {
             DownloadEvent::Requested { url, destination } => {
                 match get_download_dir(&download_handle) {
@@ -821,6 +824,9 @@ fn build_window(
                         let target = download_dir.join(sanitize_download_filename(&filename));
                         if let Some(path_str) = target.to_str() {
                             *destination = PathBuf::from(check_file_or_append(path_str));
+                            if let Ok(mut sent) = destinations.lock() {
+                                sent.insert(url.to_string(), destination.clone());
+                            }
                         } else {
                             eprintln!("[Pake] Download destination is not valid UTF-8");
                             return false;
@@ -842,23 +848,26 @@ fn build_window(
                 }
                 true
             }
-            DownloadEvent::Finished {
-                url: _,
-                path: _,
-                success,
-            } => {
+            DownloadEvent::Finished { url, path, success } => {
+                let saved = destinations
+                    .lock()
+                    .ok()
+                    .and_then(|mut sent| sent.remove(url.as_str()))
+                    .or(path);
                 // Toast on the window that started the download (including
                 // secondary multi-window labels), not a hard-coded "pake".
                 let toast_window = download_handle
                     .get_webview_window(webview.label())
                     .or_else(|| download_handle.get_webview_window("pake"));
                 if let Some(window) = toast_window {
-                    let message_type = if success {
-                        MessageType::Success
+                    if success {
+                        crate::util::show_download_finished(&window, saved, None);
                     } else {
-                        MessageType::Failure
-                    };
-                    show_toast(&window, &get_download_message_with_lang(message_type, None));
+                        show_toast(
+                            &window,
+                            &get_download_message_with_lang(MessageType::Failure, None),
+                        );
+                    }
                 }
                 true
             }

@@ -105,7 +105,7 @@ describe('download HTTP status handling', () => {
     const downloadFn = downloadFunction();
     const flush = downloadFn.search(/file\.flush\(\)\s*\.await/);
     expect(flush).toBeGreaterThan(downloadFn.indexOf('file.write_all(&chunk)'));
-    expect(flush).toBeLessThan(downloadFn.indexOf('MessageType::Success'));
+    expect(flush).toBeLessThan(downloadFn.indexOf('show_download_finished('));
     expect(downloadFn.slice(flush, flush + 200)).toMatch(
       /\.map_err\(\|e\| \(true,/,
     );

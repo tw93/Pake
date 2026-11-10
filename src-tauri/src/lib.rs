@@ -29,9 +29,9 @@ const GDK_BACKEND: &str = "GDK_BACKEND";
 
 use app::{
     invoke::{
-        clear_dock_badge, close_notification, download_file, increment_dock_badge,
-        send_notification, set_dock_badge, set_dock_badge_label, set_title_bar_color, set_zoom,
-        update_theme_mode, webview_navigate,
+        clear_dock_badge, close_notification, download_file, increment_dock_badge, quit_app,
+        reveal_download, send_notification, set_dock_badge, set_dock_badge_label,
+        set_title_bar_color, set_zoom, update_theme_mode, webview_navigate,
     },
     setup::{set_global_shortcut, set_system_tray},
     window::{
@@ -413,6 +413,8 @@ pub fn run_app() {
             set_zoom,
             webview_navigate,
             set_title_bar_color,
+            quit_app,
+            reveal_download,
         ])
         .setup(move |app| {
             // Grant remote IPC only to the immutable, packaged entry origins,
@@ -420,6 +422,7 @@ pub fn run_app() {
             if let Some(capability) = pake_config.remote_capability()? {
                 app.add_capability(capability)?;
             }
+            app.manage(crate::util::LastDownload::default());
             app.manage(MultiWindowState::new(
                 pake_config.clone(),
                 tauri_config.clone(),

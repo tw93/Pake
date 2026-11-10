@@ -396,9 +396,10 @@ pub async fn download_file(
                 return Err(error);
             }
 
-            show_toast(
+            crate::util::show_download_finished(
                 &window,
-                &get_download_message_with_lang(MessageType::Success, params.language.clone()),
+                Some(std::path::PathBuf::from(&file_path)),
+                params.language.clone(),
             );
             Ok(())
         }
@@ -527,6 +528,34 @@ pub fn webview_navigate(window: WebviewWindow, action: String) -> Result<(), Str
             "Unknown webview_navigate action '{other}' (expected reload|back|forward)"
         )),
     }
+}
+
+/// Shows the last finished download in the file manager, for a click on its toast.
+#[command]
+pub fn reveal_download(app: AppHandle) -> Result<(), String> {
+    let path = app
+        .try_state::<crate::util::LastDownload>()
+        .and_then(|last| last.0.lock().ok().and_then(|slot| slot.clone()))
+        .ok_or_else(|| "No finished download to show".to_string())?;
+    tauri_plugin_opener::reveal_item_in_dir(path).map_err(|error| error.to_string())
+}
+
+/// Quit for the injected Ctrl+Q on Windows and Linux, which have no app menu to carry it.
+/// Saves the window state with the same flags as the tray's Quit.
+#[command]
+pub fn quit_app(app: AppHandle) {
+    use tauri_plugin_window_state::{AppHandleExt, StateFlags};
+
+    let fullscreen = app
+        .try_state::<crate::app::window::MultiWindowState>()
+        .is_some_and(|state| state.pake_config.windows[0].fullscreen);
+    let flags = if fullscreen {
+        StateFlags::all()
+    } else {
+        StateFlags::all() & !StateFlags::FULLSCREEN
+    };
+    let _ = app.save_window_state(flags);
+    app.exit(0);
 }
 
 #[cfg(test)]

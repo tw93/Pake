@@ -84,9 +84,72 @@ function handleShortcut(event) {
   }
 }
 
+// What the macOS app menu carries and Windows and Linux, with no menu, lacked:
+// close the window, quit, copy the page address, as a browser's Ctrl+W, Ctrl+Q
+// and Ctrl+L. A browser keeps all three for itself, so no page relies on them.
+function closeCurrentWindow() {
+  // close() raises the window's close request, so hide-on-close still applies.
+  window.__TAURI__?.window?.getCurrentWindow?.()?.close?.();
+}
+
+function quitApp() {
+  window.__TAURI__?.core?.invoke?.("quit_app")?.catch?.(() => {});
+}
+
+function copyPageAddress() {
+  const address = window.location.href;
+  const write = navigator.clipboard?.writeText?.(address);
+  if (write?.catch) {
+    write.catch(() => copyTextWithSelection(address));
+  } else if (!write) {
+    copyTextWithSelection(address);
+  }
+}
+
+function copyTextWithSelection(text) {
+  const field = document.createElement("textarea");
+  field.value = text;
+  field.setAttribute("readonly", "");
+  field.style.cssText = "position:fixed;top:0;left:0;opacity:0;";
+  document.body.appendChild(field);
+  field.select();
+  document.execCommand("copy");
+  field.remove();
+}
+
+const windowShortcuts = {
+  w: closeCurrentWindow,
+  q: quitApp,
+  l: copyPageAddress,
+};
+
+const altShortcuts = {
+  ArrowLeft: () => nativeNavigate("back"),
+  ArrowRight: () => nativeNavigate("forward"),
+};
+
 function handleWebShortcut(event) {
   if (isNonMacDesktop() && event.ctrlKey) {
+    const plain = !event.shiftKey && !event.altKey && !event.metaKey;
+    const windowShortcut = plain && windowShortcuts[event.key?.toLowerCase?.()];
+    if (windowShortcut) {
+      event.preventDefault();
+      windowShortcut();
+      return;
+    }
     handleShortcut(event);
+    return;
+  }
+
+  if (
+    isNonMacDesktop() &&
+    event.altKey &&
+    !event.shiftKey &&
+    !event.metaKey &&
+    altShortcuts[event.key]
+  ) {
+    event.preventDefault();
+    altShortcuts[event.key]();
     return;
   }
 

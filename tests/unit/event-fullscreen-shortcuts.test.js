@@ -48,6 +48,9 @@ function loadEventHelpers({
   const fullscreenCalls = [];
   const reloadCalls = [];
   const navigateCalls = [];
+  const invokeCalls = [];
+  const closeCalls = [];
+  const clipboardWrites = [];
   const body = createElement("body");
   body.appendChild = (child) => {
     body.children.push(child);
@@ -112,6 +115,7 @@ function loadEventHelpers({
       __TAURI__: {
         core: {
           invoke: (command, payload) => {
+            invokeCalls.push(command);
             if (command === "webview_navigate") {
               navigateCalls.push(payload?.action);
             }
@@ -121,6 +125,7 @@ function loadEventHelpers({
         window: {
           getCurrentWindow: () => ({
             startDragging: () => {},
+            close: () => closeCalls.push("close"),
             isFullscreen: () => Promise.resolve(isFullscreen),
             setFullscreen: (value) => {
               fullscreenCalls.push(value);
@@ -159,6 +164,9 @@ function loadEventHelpers({
     fullscreenCalls,
     reloadCalls,
     navigateCalls,
+    invokeCalls,
+    closeCalls,
+    clipboardWrites,
     get isFullscreen() {
       return isFullscreen;
     },
@@ -226,6 +234,57 @@ describe("event fullscreen shortcuts", () => {
     // Native webview_navigate so blank error pages still reload.
     expect(context.navigateCalls).toEqual(["reload"]);
     expect(event.preventDefault).toHaveBeenCalled();
+  });
+
+  it("closes, quits and copies the address on Windows and Linux as the macOS menu does", () => {
+    const context = loadEventHelpers();
+    context.navigator.clipboard = {
+      writeText: (text) => {
+        context.clipboardWrites.push(text);
+        return Promise.resolve();
+      },
+    };
+    context.window.location = { href: "https://example.com/page" };
+    const handler = getWebShortcutHandler(context);
+
+    handler(createKeyEvent("w", { ctrlKey: true }));
+    expect(context.closeCalls).toEqual(["close"]);
+
+    handler(createKeyEvent("q", { ctrlKey: true }));
+    expect(context.invokeCalls).toContain("quit_app");
+
+    handler(createKeyEvent("L", { ctrlKey: true }));
+    expect(context.clipboardWrites).toEqual(["https://example.com/page"]);
+
+    // Ctrl+Shift+W and friends belong to the page.
+    handler(createKeyEvent("w", { ctrlKey: true, shiftKey: true }));
+    expect(context.closeCalls).toEqual(["close"]);
+  });
+
+  it("goes back and forward on Alt+Left and Alt+Right on Windows and Linux", () => {
+    const context = loadEventHelpers();
+    const handler = getWebShortcutHandler(context);
+
+    handler(createKeyEvent("ArrowLeft", { altKey: true }));
+    handler(createKeyEvent("ArrowRight", { altKey: true }));
+    handler(createKeyEvent("ArrowLeft", { altKey: true, shiftKey: true }));
+
+    expect(context.navigateCalls).toEqual(["back", "forward"]);
+  });
+
+  it("leaves the window shortcuts to the macOS menu", () => {
+    const context = loadEventHelpers({
+      userAgent:
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15",
+      platform: "MacIntel",
+    });
+    const handler = getWebShortcutHandler(context);
+
+    handler(createKeyEvent("w", { ctrlKey: true }));
+    handler(createKeyEvent("ArrowLeft", { altKey: true }));
+
+    expect(context.closeCalls).toEqual([]);
+    expect(context.navigateCalls).toEqual([]);
   });
 
   it("keeps macOS scroll-to-edge shortcuts in the webview", () => {

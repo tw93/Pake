@@ -262,9 +262,41 @@ pub fn show_toast(window: &WebviewWindow, message: &str) {
     }
 }
 
+/// The file the last finished download wrote, so its toast can show it in the file manager.
+/// The page only asks for "the last download"; it never names a path itself.
+#[derive(Default)]
+pub struct LastDownload(pub std::sync::Mutex<Option<PathBuf>>);
+
+/// The success toast for a download that knows where its file went: a click on it shows the
+/// file in the file manager. Without a known path it is the plain success toast.
+pub fn show_download_finished(
+    window: &WebviewWindow,
+    path: Option<PathBuf>,
+    language: Option<String>,
+) {
+    let Some(path) = path else {
+        show_toast(
+            window,
+            &get_download_message_with_lang(MessageType::Success, language),
+        );
+        return;
+    };
+    if let Some(last) = window.app_handle().try_state::<LastDownload>() {
+        if let Ok(mut slot) = last.0.lock() {
+            *slot = Some(path);
+        }
+    }
+    let message = get_download_message_with_lang(MessageType::SuccessReveal, language);
+    let script = format!(r#"pakeToast("{message}", "reveal_download");"#);
+    if let Err(error) = window.eval(&script) {
+        eprintln!("[Pake] Failed to show toast: {error}");
+    }
+}
+
 pub enum MessageType {
     Start,
     Success,
+    SuccessReveal,
     Failure,
     DirectoryFailure,
 }
@@ -308,6 +340,7 @@ pub fn get_download_message_with_lang(
         match message_type {
             MessageType::Start => chinese_start_message,
             MessageType::Success => chinese_success_message,
+            MessageType::SuccessReveal => "下载成功，点击在文件夹中显示~",
             MessageType::Failure => chinese_failure_message,
             MessageType::DirectoryFailure => "无法保存到下载目录~",
         }
@@ -315,6 +348,7 @@ pub fn get_download_message_with_lang(
         match message_type {
             MessageType::Start => default_start_message,
             MessageType::Success => default_success_message,
+            MessageType::SuccessReveal => "Download successful, click to show in folder~",
             MessageType::Failure => default_failure_message,
             MessageType::DirectoryFailure => "Cannot save to the download directory~",
         }
