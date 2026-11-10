@@ -123,6 +123,10 @@ Sort every community PR into one of three outcomes; never rewrite a contribution
 
 See `docs/faq.md` for common issues and solutions.
 
+### First Tauri build is slow
+
+The first `cargo build` on a fresh clone takes 10+ minutes as Cargo compiles every Tauri dependency from source. Subsequent builds reuse the `src-tauri/target/` cache. This is expected, not a bug.
+
 ### macOS SDK / Compile Errors
 
 If compilation errors occur (e.g. on macOS beta), create `src-tauri/.cargo/config.toml`:
