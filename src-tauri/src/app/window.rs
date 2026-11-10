@@ -883,6 +883,22 @@ fn build_window(
     #[cfg(target_os = "windows")]
     crate::app::download::install(&window, download_target)?;
 
+    // Every webview is built here, so every one can be asked for the camera and microphone.
+    #[cfg(target_os = "linux")]
+    if let Err(error) = window.with_webview(|webview| {
+        crate::app::media_permission::install(&webview);
+        crate::app::recovery::install(&webview);
+    }) {
+        eprintln!("[Pake] Failed to access WebKitGTK for media permissions and recovery: {error}");
+    }
+
+    #[cfg(target_os = "windows")]
+    if let Err(error) = window.with_webview(|webview| {
+        crate::app::recovery::install(&webview);
+    }) {
+        eprintln!("[Pake] Failed to access WebView2 for crash recovery: {error}");
+    }
+
     // Every webview is built here (main window, Cmd+N clones, --new-window and
     // blank two-stage popups), so trackpad history swipes match in all of them.
     #[cfg(target_os = "macos")]

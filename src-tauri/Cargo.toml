@@ -57,6 +57,9 @@ objc2-web-kit = { version = "0.3", default-features = false, features = [
 # Version and features must match what wry resolves, or PlatformWebview::inner
 # hands back a WebView from a different crate instance.
 webkit2gtk = { version = "=2.0.2", features = ["v2_40"] }
+# The camera and microphone question (media_permission.rs). The version wry and
+# tao already lock, so its Window is the one WebView::toplevel hands back.
+gtk = "0.18"
 # Reads the freedesktop color-scheme from the settings portal. Same version
 # and features that tauri-plugin-opener and single-instance already lock.
 zbus = "5.14"
