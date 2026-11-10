@@ -30,7 +30,7 @@ use tauri::{
 #[cfg(target_os = "windows")]
 use windows_sys::Win32::UI::{
     Shell::ExtractIconExW,
-    WindowsAndMessaging::{SendMessageW, ICON_BIG, WM_SETICON},
+    WindowsAndMessaging::{SendMessageW, ICON_BIG, ICON_SMALL, WM_SETICON},
 };
 
 use tauri::Theme;
@@ -134,17 +134,18 @@ pub fn open_additional_window(app: &AppHandle) -> tauri::Result<WebviewWindow> {
     build_window_with_label(app, &state.pake_config, &state.tauri_config, &label)
 }
 
+/// The executable's own icon as (large, small) handles. A runtime template is one binary
+/// that a builder turns into many apps by patching the icon resource, so the icon compiled
+/// in as Tauri's default window icon is the template's, not the app's.
 #[cfg(target_os = "windows")]
-fn taskbar_icon_handle() -> Option<isize> {
-    static TASKBAR_ICON: OnceLock<Option<isize>> = OnceLock::new();
+fn executable_icon_handles() -> Option<(isize, isize)> {
+    static EXECUTABLE_ICONS: OnceLock<Option<(isize, isize)>> = OnceLock::new();
 
-    *TASKBAR_ICON.get_or_init(|| {
+    *EXECUTABLE_ICONS.get_or_init(|| {
         let executable = match std::env::current_exe() {
             Ok(path) => path,
             Err(error) => {
-                eprintln!(
-                    "[Pake] Failed to resolve the app executable for its taskbar icon: {error}"
-                );
+                eprintln!("[Pake] Failed to resolve the app executable for its icon: {error}");
                 return None;
             }
         };
@@ -154,33 +155,36 @@ fn taskbar_icon_handle() -> Option<isize> {
             .chain(std::iter::once(0))
             .collect();
         let mut large_icon = ptr::null_mut();
+        let mut small_icon = ptr::null_mut();
         let extracted = unsafe {
             ExtractIconExW(
                 executable_wide.as_ptr(),
                 0,
                 &mut large_icon,
-                ptr::null_mut(),
+                &mut small_icon,
                 1,
             )
         };
         if extracted == 0 || large_icon.is_null() {
             eprintln!(
-                "[Pake] Failed to extract the taskbar icon from {}.",
+                "[Pake] Failed to extract the app icon from {}.",
                 executable.display()
             );
             return None;
         }
 
-        // WM_SETICON keeps this handle rather than copying it. Cache the single
-        // extracted icon for the process lifetime so repeated tray restores do
+        // WM_SETICON keeps these handles rather than copying them. Cache the one
+        // extracted pair for the process lifetime so repeated tray restores do
         // not leak a new HICON or leave the window with a dangling handle.
-        Some(large_icon as isize)
+        Some((large_icon as isize, small_icon as isize))
     })
 }
 
 // Apps autostarted at Windows logon can register their icons before Explorer's
 // icon cache is ready (#1323). Re-assert both the small/title-bar icon and the
-// large taskbar icon whenever a window becomes visible.
+// large taskbar icon whenever a window becomes visible. Both come from the
+// executable: the default window icon alone left a runtime-template app with
+// the template's icon in its title bar while the taskbar showed the app's own.
 #[cfg(target_os = "windows")]
 pub fn reapply_window_icon(window: &WebviewWindow) {
     if let Some(icon) = window.app_handle().default_window_icon().cloned() {
@@ -189,15 +193,18 @@ pub fn reapply_window_icon(window: &WebviewWindow) {
         }
     }
 
-    let Some(taskbar_icon) = taskbar_icon_handle() else {
+    let Some((large_icon, small_icon)) = executable_icon_handles() else {
         return;
     };
     match window.hwnd() {
         Ok(hwnd) => unsafe {
-            SendMessageW(hwnd.0, WM_SETICON, ICON_BIG as usize, taskbar_icon);
+            SendMessageW(hwnd.0, WM_SETICON, ICON_BIG as usize, large_icon);
+            if small_icon != 0 {
+                SendMessageW(hwnd.0, WM_SETICON, ICON_SMALL as usize, small_icon);
+            }
         },
         Err(error) => {
-            eprintln!("[Pake] Failed to resolve the window handle for its taskbar icon: {error}");
+            eprintln!("[Pake] Failed to resolve the window handle for its icon: {error}");
         }
     }
 }
