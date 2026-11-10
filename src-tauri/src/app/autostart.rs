@@ -77,11 +77,25 @@ pub(crate) fn launch_agent(identifier: &str, executable: &Path) -> String {
     )
 }
 
-/// An XDG autostart entry. Exec quotes the path and doubles `%`, which the
-/// desktop entry format reads as a field code.
+/// A desktop-entry string value: the format unescapes backslash sequences before anything else.
 #[cfg(any(target_os = "linux", test))]
-pub(crate) fn autostart_entry(name: &str, executable: &Path) -> String {
+fn entry_value(text: &str) -> String {
+    text.replace('\\', "\\\\")
+        .replace('\n', "\\n")
+        .replace('\r', "\\r")
+        .replace('\t', "\\t")
+}
+
+/// An XDG autostart entry, or None for a path the Exec key cannot carry (`=`, a control
+/// character). The argument is quoted first (a backslash before `"`, a backtick, `$` and `\`,
+/// `%` doubled) and then escaped as a string value, since unescaping happens before unquoting.
+/// GLib checks argv[0] before it expands `%%`, so a path with `%` is passed to env instead.
+#[cfg(any(target_os = "linux", test))]
+pub(crate) fn autostart_entry(name: &str, executable: &Path) -> Option<String> {
     let path = executable.to_string_lossy();
+    if path.contains('=') || path.chars().any(char::is_control) {
+        return None;
+    }
     let mut quoted = String::with_capacity(path.len() + 2);
     quoted.push('"');
     for character in path.chars() {
@@ -95,10 +109,16 @@ pub(crate) fn autostart_entry(name: &str, executable: &Path) -> String {
         }
     }
     quoted.push('"');
+    let command = if path.contains('%') {
+        format!("/usr/bin/env -- {}", entry_value(&quoted))
+    } else {
+        entry_value(&quoted)
+    };
     let name: String = name.chars().filter(|c| !c.is_control()).collect();
-    format!(
-        "[Desktop Entry]\nType=Application\nName={name}\nExec={quoted}\nTerminal=false\nX-GNOME-Autostart-enabled=true\n"
-    )
+    Some(format!(
+        "[Desktop Entry]\nType=Application\nName={}\nExec={command}\nTerminal=false\nX-GNOME-Autostart-enabled=true\n",
+        entry_value(&name)
+    ))
 }
 
 #[cfg(target_os = "macos")]
@@ -142,7 +162,12 @@ mod platform {
         let path = config
             .join("autostart")
             .join(format!("{identifier}.desktop"));
-        let content = enabled.then(|| autostart_entry(name, executable));
+        // A path the entry cannot carry gets no login item rather than a broken one.
+        let content = if enabled {
+            autostart_entry(name, executable)
+        } else {
+            None
+        };
         sync_file(&path, content.as_deref())
     }
 }
@@ -233,11 +258,22 @@ mod tests {
     }
 
     #[test]
-    fn the_autostart_entry_quotes_the_path_and_doubles_percent() {
-        let entry = autostart_entry("Hacker\nNews", Path::new("/home/a b/50%/com.pake.a1"));
+    fn the_autostart_entry_quotes_then_escapes_the_path() {
+        let entry = autostart_entry("Hacker\nNews", Path::new("/home/a b/com.pake.a1")).unwrap();
         assert!(entry.contains("Name=HackerNews\n"));
-        assert!(entry.contains("Exec=\"/home/a b/50%%/com.pake.a1\"\n"));
+        assert!(entry.contains("Exec=\"/home/a b/com.pake.a1\"\n"));
         assert!(entry.starts_with("[Desktop Entry]\nType=Application\n"));
+
+        // Quoted first, then escaped as a string value: a `$` gets one backslash, doubled.
+        let odd = autostart_entry("A", Path::new("/home/a$b/x")).unwrap();
+        assert!(odd.contains("Exec=\"/home/a\\\\$b/x\"\n"), "{odd}");
+        // GLib checks argv[0] before expanding %%, so env carries such a path.
+        let percent = autostart_entry("A", Path::new("/home/50%/x")).unwrap();
+        assert!(
+            percent.contains("Exec=/usr/bin/env -- \"/home/50%%/x\"\n"),
+            "{percent}"
+        );
+        assert!(autostart_entry("A", Path::new("/home/a=b/x")).is_none());
     }
 
     #[test]

@@ -128,28 +128,37 @@ const altShortcuts = {
   ArrowRight: () => nativeNavigate("forward"),
 };
 
-function handleWebShortcut(event) {
-  if (isNonMacDesktop() && event.ctrlKey) {
-    const plain = !event.shiftKey && !event.altKey && !event.metaKey;
-    const windowShortcut = plain && windowShortcuts[event.key?.toLowerCase?.()];
-    if (windowShortcut) {
-      event.preventDefault();
-      windowShortcut();
-      return;
-    }
-    handleShortcut(event);
+// The page gets these keys first: this listens on window for keydown in the
+// bubble phase, after the page's own handlers, and leaves alone a key the page
+// prevented. A web terminal or editor that takes Ctrl+W (delete a word), Ctrl+L
+// (clear) or Alt+Left (word left) on keydown keeps it, as find.js does for Ctrl+F.
+function handleWindowShortcut(event) {
+  if (!isNonMacDesktop() || event.defaultPrevented || event.repeat) {
     return;
   }
 
-  if (
-    isNonMacDesktop() &&
+  let action;
+  if (event.ctrlKey && !event.shiftKey && !event.altKey && !event.metaKey) {
+    action = windowShortcuts[event.key?.toLowerCase?.()];
+  } else if (
     event.altKey &&
+    !event.ctrlKey &&
     !event.shiftKey &&
-    !event.metaKey &&
-    altShortcuts[event.key]
+    !event.metaKey
   ) {
-    event.preventDefault();
-    altShortcuts[event.key]();
+    action = altShortcuts[event.key];
+  }
+  if (!action) {
+    return;
+  }
+
+  event.preventDefault();
+  action();
+}
+
+function handleWebShortcut(event) {
+  if (isNonMacDesktop() && event.ctrlKey) {
+    handleShortcut(event);
     return;
   }
 
@@ -742,6 +751,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window["pakeConfig"]?.disabled_web_shortcuts !== true) {
     document.addEventListener("keydown", handleWindowFullscreenShortcut, true);
     document.addEventListener("keyup", handleWebShortcut);
+    window.addEventListener("keydown", handleWindowShortcut);
   }
 
   document.addEventListener("keydown", handleClipboardShortcut, true);

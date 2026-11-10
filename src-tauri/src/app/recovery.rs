@@ -5,6 +5,30 @@
 //! blank view after a renderer crash. Neither had a way back short of knowing
 //! Ctrl+R. macOS is not covered: Tauri 2.10 exposes neither hook for WKWebView.
 
+/// A page that takes its renderer down on every load must not be reloaded for ever: after
+/// `MAX_RELOADS` in `RELOAD_WINDOW` the view is left as it is.
+const MAX_RELOADS: usize = 2;
+const RELOAD_WINDOW: std::time::Duration = std::time::Duration::from_secs(60);
+
+/// True when one more automatic reload is within the limit, and counts it.
+pub(crate) fn may_reload(recent: &mut Vec<std::time::Instant>, now: std::time::Instant) -> bool {
+    recent.retain(|at| now.duration_since(*at) < RELOAD_WINDOW);
+    if recent.len() >= MAX_RELOADS {
+        return false;
+    }
+    recent.push(now);
+    true
+}
+
+#[cfg(any(target_os = "linux", target_os = "windows"))]
+fn reload_allowed() -> bool {
+    use std::cell::RefCell;
+    thread_local! {
+        static RECENT: RefCell<Vec<std::time::Instant>> = const { RefCell::new(Vec::new()) };
+    }
+    RECENT.with(|recent| may_reload(&mut recent.borrow_mut(), std::time::Instant::now()))
+}
+
 #[cfg(target_os = "linux")]
 pub fn install(webview: &tauri::webview::PlatformWebview) {
     use webkit2gtk::{NetworkError, PluginError, PolicyError, WebViewExt};
@@ -29,7 +53,18 @@ pub fn install(webview: &tauri::webview::PlatformWebview) {
         true
     });
     gtk_webview.connect_web_process_terminated(|webview, _reason| {
-        webview.reload();
+        if reload_allowed() {
+            webview.reload();
+            return;
+        }
+        // Past the limit the page gets the same way back as a failed load, and no more reloads.
+        let uri = webview.uri().map(|uri| uri.to_string()).unwrap_or_default();
+        let host = tauri::Url::parse(&uri)
+            .ok()
+            .and_then(|url| url.host_str().map(str::to_owned))
+            .unwrap_or_default();
+        let chinese = crate::util::UiLanguage::system() != crate::util::UiLanguage::English;
+        webview.load_alternate_html(&error_page(&host, chinese), &uri, None);
     });
 }
 
@@ -55,7 +90,9 @@ pub fn install(webview: &tauri::webview::PlatformWebview) {
                     let mut kind = COREWEBVIEW2_PROCESS_FAILED_KIND(0);
                     args.ProcessFailedKind(&mut kind)?;
                     // Only a dead renderer leaves a view that a reload brings back.
-                    if kind == COREWEBVIEW2_PROCESS_FAILED_KIND_RENDER_PROCESS_EXITED {
+                    if kind == COREWEBVIEW2_PROCESS_FAILED_KIND_RENDER_PROCESS_EXITED
+                        && reload_allowed()
+                    {
                         core.Reload()?;
                     }
                     Ok(())
@@ -111,6 +148,30 @@ mod tests {
         assert_eq!(page.matches("<button").count(), 1);
         assert!(page.contains("location.reload()"));
         assert!(error_page("example.com", true).contains("无法打开此页面"));
+    }
+
+    #[test]
+    fn a_page_that_keeps_crashing_is_reloaded_twice_a_minute_at_most() {
+        let start = std::time::Instant::now();
+        let mut recent = Vec::new();
+        assert!(may_reload(&mut recent, start));
+        assert!(may_reload(
+            &mut recent,
+            start + std::time::Duration::from_secs(1)
+        ));
+        assert!(!may_reload(
+            &mut recent,
+            start + std::time::Duration::from_secs(2)
+        ));
+        assert!(!may_reload(
+            &mut recent,
+            start + std::time::Duration::from_secs(59)
+        ));
+        // Once the first reload is a minute old there is room for one more.
+        assert!(may_reload(
+            &mut recent,
+            start + std::time::Duration::from_secs(61)
+        ));
     }
 
     #[test]

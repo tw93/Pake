@@ -179,6 +179,12 @@ function getFullscreenShortcutHandler(context) {
   ).handler;
 }
 
+function getWindowShortcutHandler(context) {
+  return context.eventListeners.keydown.find(
+    ({ handler }) => handler.name === "handleWindowShortcut",
+  ).handler;
+}
+
 function getWebShortcutHandler(context) {
   return context.eventListeners.keyup.find(
     ({ handler }) => handler.name === "handleWebShortcut",
@@ -245,7 +251,7 @@ describe("event fullscreen shortcuts", () => {
       },
     };
     context.window.location = { href: "https://example.com/page" };
-    const handler = getWebShortcutHandler(context);
+    const handler = getWindowShortcutHandler(context);
 
     handler(createKeyEvent("w", { ctrlKey: true }));
     expect(context.closeCalls).toEqual(["close"]);
@@ -263,7 +269,7 @@ describe("event fullscreen shortcuts", () => {
 
   it("goes back and forward on Alt+Left and Alt+Right on Windows and Linux", () => {
     const context = loadEventHelpers();
-    const handler = getWebShortcutHandler(context);
+    const handler = getWindowShortcutHandler(context);
 
     handler(createKeyEvent("ArrowLeft", { altKey: true }));
     handler(createKeyEvent("ArrowRight", { altKey: true }));
@@ -278,13 +284,31 @@ describe("event fullscreen shortcuts", () => {
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15",
       platform: "MacIntel",
     });
-    const handler = getWebShortcutHandler(context);
+    const handler = getWindowShortcutHandler(context);
 
     handler(createKeyEvent("w", { ctrlKey: true }));
     handler(createKeyEvent("ArrowLeft", { altKey: true }));
 
     expect(context.closeCalls).toEqual([]);
     expect(context.navigateCalls).toEqual([]);
+  });
+
+  it("leaves a window shortcut to a page that handled the key itself", () => {
+    const context = loadEventHelpers();
+    const handler = getWindowShortcutHandler(context);
+
+    // A web terminal takes Ctrl+W on keydown and prevents the default.
+    handler(createKeyEvent("w", { ctrlKey: true, defaultPrevented: true }));
+    handler(
+      createKeyEvent("ArrowLeft", { altKey: true, defaultPrevented: true }),
+    );
+    handler(createKeyEvent("w", { ctrlKey: true, repeat: true }));
+    // AltGr on European layouts reports Ctrl and Alt together.
+    handler(createKeyEvent("q", { ctrlKey: true, altKey: true }));
+
+    expect(context.closeCalls).toEqual([]);
+    expect(context.navigateCalls).toEqual([]);
+    expect(context.invokeCalls).not.toContain("quit_app");
   });
 
   it("keeps macOS scroll-to-edge shortcuts in the webview", () => {

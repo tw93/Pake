@@ -64,7 +64,7 @@ pub fn install(webview: &tauri::webview::PlatformWebview) {
         );
         let dialog = gtk::MessageDialog::new(
             parent.as_ref(),
-            gtk::DialogFlags::MODAL,
+            gtk::DialogFlags::MODAL | gtk::DialogFlags::DESTROY_WITH_PARENT,
             gtk::MessageType::Question,
             gtk::ButtonsType::None,
             &question,
@@ -72,7 +72,13 @@ pub fn install(webview: &tauri::webview::PlatformWebview) {
         dialog.add_button(deny, gtk::ResponseType::Reject);
         dialog.add_button(allow, gtk::ResponseType::Accept);
         let request = request.clone();
+        // The request is answered once: destroying the dialog raises no second response, where
+        // close() would send a delete-event and with it another one.
+        let answered = std::cell::Cell::new(false);
         dialog.connect_response(move |dialog, response| {
+            if answered.replace(true) {
+                return;
+            }
             // Closing the dialog without choosing is a refusal that is asked again next time.
             if matches!(
                 response,
@@ -84,7 +90,7 @@ pub fn install(webview: &tauri::webview::PlatformWebview) {
             } else {
                 request.deny();
             }
-            dialog.close();
+            unsafe { dialog.destroy() };
         });
         dialog.show();
         true
