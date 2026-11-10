@@ -68,6 +68,7 @@ zbus = "5.14"
 windows-sys = { version = "0.61.2", features = [
   "Win32_Foundation",
   "Win32_Globalization",
+  "Win32_System_Registry",
   "Win32_UI_Shell",
   "Win32_UI_WindowsAndMessaging",
 ] }

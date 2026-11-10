@@ -1,5 +1,6 @@
 #[cfg(target_os = "macos")]
 pub mod auth;
+pub mod autostart;
 #[cfg(any(target_os = "linux", test))]
 pub mod color_scheme;
 pub mod config;

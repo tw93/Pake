@@ -296,6 +296,14 @@ pub fn run_app() {
     if pake_config.runtime_app {
         util::set_app_user_model_id(&tauri_config.identifier);
     }
+    // A runtime app's login item follows its own setting; a CLI build has none to keep.
+    if pake_config.runtime_app {
+        app::autostart::reconcile(
+            pake_config.launch_at_login,
+            &tauri_config.identifier,
+            tauri_config.product_name.as_deref().unwrap_or("Pake"),
+        );
+    }
     let mut context = tauri::generate_context!();
     // Paths, app data and the macOS menu derive from the context, so a runtime
     // app must not share the template's identity.

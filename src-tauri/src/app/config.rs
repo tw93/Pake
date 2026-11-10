@@ -129,6 +129,10 @@ pub struct PakeConfig {
     pub multi_instance: bool,
     #[serde(default)]
     pub multi_window: bool,
+    /// Open at login. Read only from a runtime override: the app then keeps its own
+    /// login item in step at every start (see `autostart.rs`).
+    #[serde(default)]
+    pub launch_at_login: bool,
     /// Replaces the compiled custom.js when a runtime override supplies one.
     #[serde(skip)]
     pub runtime_custom_js: Option<String>,
