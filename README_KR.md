@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/tw93/Pake/ac5508cf519064684c4214fe3f263c58ad7aaf5f/assets/logo.png" width="138" />
+  <img src="https://raw.githubusercontent.com/tw93/Pake/52b662606332cbbe53760d4e5a5cec2f87769190/assets/logo.png" width="138" />
   <h1>Pake</h1>
   <p><b>명령어 하나로 모든 웹페이지를 가벼운 데스크톱 앱으로 변환. macOS, Windows, Linux 지원. 무료 오픈소스 CLI이며, 데스크톱 앱도 있습니다.</b></p>
   <p><a href="README.md">English</a> · <a href="README_CN.md">中文</a> · <a href="README_TW.md">繁體</a> · <a href="README_JA.md">日本語</a> · 한국어 · <a href="README_DE.md">Deutsch</a> · <a href="README_FR.md">Français</a></p>

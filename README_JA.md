@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/tw93/Pake/ac5508cf519064684c4214fe3f263c58ad7aaf5f/assets/logo.png" width="138" />
+  <img src="https://raw.githubusercontent.com/tw93/Pake/52b662606332cbbe53760d4e5a5cec2f87769190/assets/logo.png" width="138" />
   <h1>Pake</h1>
   <p><b>あらゆるウェブページをコマンド一つで軽量なデスクトップアプリに変換。macOS、Windows、Linux に対応。無料のオープンソース CLI に加え、デスクトップ版もあります。</b></p>
   <p><a href="README.md">English</a> · <a href="README_CN.md">中文</a> · <a href="README_TW.md">繁體</a> · 日本語 · <a href="README_KR.md">한국어</a> · <a href="README_DE.md">Deutsch</a> · <a href="README_FR.md">Français</a></p>
