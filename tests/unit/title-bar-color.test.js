@@ -21,7 +21,7 @@ function element(background, parentElement = null) {
   return { background, parentElement };
 }
 
-function loadTitleBar({ columns, width = 1000 }) {
+function loadTitleBar({ columns, width = 1000, metas = [], matching = [] }) {
   const calls = [];
   let current = columns;
   let timer = null;
@@ -58,6 +58,12 @@ function loadTitleBar({ columns, width = 1000 }) {
           }),
         };
       },
+      querySelectorAll: (selector) =>
+        selector === 'meta[name="theme-color"]'
+          ? metas.map((attributes) => ({
+              getAttribute: (name) => attributes[name] ?? null,
+            }))
+          : [],
       elementFromPoint(x) {
         const column = Math.min(2, Math.floor((x / width) * 3));
         return current[column];
@@ -66,6 +72,7 @@ function loadTitleBar({ columns, width = 1000 }) {
     window: {
       innerWidth: width,
       addEventListener() {},
+      matchMedia: (query) => ({ matches: matching.includes(query) }),
       getComputedStyle: (node) => ({ backgroundColor: node.background }),
       __TAURI__: {
         core: {
@@ -131,6 +138,28 @@ describe("macOS transparent title bar color", () => {
     const dark = element("30,30,30,255");
     repaint([dark, dark, dark]);
     expect(calls.map((call) => call.args.red)).toEqual([255, 30]);
+  });
+
+  it("falls back to the theme-color whose media query matches", () => {
+    const clear = element("0,0,0,0");
+    const { calls } = loadTitleBar({
+      columns: [clear, clear, clear],
+      metas: [
+        { content: "250,250,250,255", media: "(prefers-color-scheme: light)" },
+        { content: "18,18,20,255", media: "(prefers-color-scheme: dark)" },
+      ],
+      matching: ["(prefers-color-scheme: dark)"],
+    });
+    expect(calls[0].args).toEqual({ red: 18, green: 18, blue: 20 });
+  });
+
+  it("prefers the painted top edge over the theme-color", () => {
+    const page = element("40,40,40,255");
+    const { calls } = loadTitleBar({
+      columns: [page, page, page],
+      metas: [{ content: "250,250,250,255" }],
+    });
+    expect(calls[0].args).toEqual({ red: 40, green: 40, blue: 40 });
   });
 
   it("leaves the native color alone when nothing on top is painted", () => {

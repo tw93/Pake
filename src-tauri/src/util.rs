@@ -206,6 +206,55 @@ pub fn write_last_url(path: &Path, url: &tauri::Url) -> std::io::Result<()> {
     Ok(())
 }
 
+/// The title bar color last painted on macOS, stored as `r,g,b`, so the next
+/// launch opens in it instead of flashing the default bar first.
+#[cfg(any(target_os = "macos", test))]
+pub fn parse_title_bar_color(value: &str) -> Option<(u8, u8, u8)> {
+    let mut parts = value
+        .trim()
+        .split(',')
+        .map(|part| part.trim().parse::<u8>());
+    let color = (
+        parts.next()?.ok()?,
+        parts.next()?.ok()?,
+        parts.next()?.ok()?,
+    );
+    parts.next().is_none().then_some(color)
+}
+
+#[cfg(any(target_os = "macos", test))]
+pub fn read_title_bar_color(path: &Path) -> Option<(u8, u8, u8)> {
+    std::fs::read_to_string(path)
+        .ok()
+        .and_then(|value| parse_title_bar_color(&value))
+}
+
+#[cfg(any(target_os = "macos", test))]
+pub fn write_title_bar_color(path: &Path, (red, green, blue): (u8, u8, u8)) -> std::io::Result<()> {
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    std::fs::write(path, format!("{red},{green},{blue}"))
+}
+
+/// Fits a configured window into the monitor's work area, leaving room for
+/// the title bar, so a tall preset never opens past the bottom of the screen.
+/// All values share one unit: logical points on macOS and Linux, physical
+/// pixels on Windows, where the config size is read as physical.
+pub fn fit_to_work_area(
+    width: f64,
+    height: f64,
+    area: Option<(f64, f64)>,
+    chrome: f64,
+) -> (f64, f64) {
+    match area {
+        Some((area_width, area_height)) if area_width > 0.0 && area_height > chrome => {
+            (width.min(area_width), height.min(area_height - chrome))
+        }
+        _ => (width, height),
+    }
+}
+
 /// Both native and IPC downloads use the trusted, packaged configuration.
 pub fn get_download_dir(app: &AppHandle) -> Result<PathBuf, String> {
     let state = app
@@ -518,6 +567,41 @@ mod tests {
         fs::create_dir_all(&dir).unwrap();
         dir.push(name);
         dir
+    }
+
+    #[test]
+    fn title_bar_color_round_trips_and_rejects_anything_else() {
+        let path = temp_path("state/title-bar-color.txt");
+        assert_eq!(read_title_bar_color(&path), None);
+        write_title_bar_color(&path, (17, 24, 39)).unwrap();
+        assert_eq!(read_title_bar_color(&path), Some((17, 24, 39)));
+        assert_eq!(parse_title_bar_color(" 255, 0 ,8\n"), Some((255, 0, 8)));
+        for value in ["", "1,2", "1,2,3,4", "256,0,0", "-1,0,0", "a,b,c", "1,,3"] {
+            assert_eq!(parse_title_bar_color(value), None, "{value:?}");
+        }
+        fs::remove_dir_all(path.parent().unwrap().parent().unwrap()).unwrap();
+    }
+
+    #[test]
+    fn a_window_taller_than_the_work_area_fits_inside_it() {
+        // The tablet preset on a 1440x900 MacBook Air with the Dock shown.
+        assert_eq!(
+            fit_to_work_area(820.0, 1180.0, Some((1440.0, 875.0)), 32.0),
+            (820.0, 843.0)
+        );
+        assert_eq!(
+            fit_to_work_area(1200.0, 780.0, Some((1440.0, 875.0)), 32.0),
+            (1200.0, 780.0)
+        );
+        assert_eq!(
+            fit_to_work_area(3000.0, 780.0, Some((1440.0, 875.0)), 32.0),
+            (1440.0, 780.0)
+        );
+        assert_eq!(fit_to_work_area(820.0, 1180.0, None, 32.0), (820.0, 1180.0));
+        assert_eq!(
+            fit_to_work_area(820.0, 1180.0, Some((0.0, 0.0)), 32.0),
+            (820.0, 1180.0)
+        );
     }
 
     #[test]

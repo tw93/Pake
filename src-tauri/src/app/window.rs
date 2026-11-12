@@ -38,6 +38,13 @@ use tauri::Theme;
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
 
+/// Logical points kept free above a fitted window for its title bar.
+const TITLE_BAR_ALLOWANCE: f64 = 40.0;
+
+/// Where the main window's last title bar color is remembered on macOS.
+#[cfg(target_os = "macos")]
+pub const TITLE_BAR_COLOR_FILE: &str = "title-bar-color.txt";
+
 #[cfg(target_os = "macos")]
 fn prepare_macos_new_window_configuration(features: &NewWindowFeatures) -> tauri::Result<()> {
     let mtm = MainThreadMarker::new().ok_or_else(|| {
@@ -536,22 +543,37 @@ fn build_window(
         .resizable(window_config.resizable)
         .maximized(window_config.maximize);
 
+    // A size preset can be taller than the screen (the tablet one is 820x1180),
+    // so the first window fits the primary monitor's work area; a size the
+    // window-state plugin restores later is left as the user made it.
+    let monitor = app.primary_monitor().ok().flatten();
+    let scale_factor = monitor.as_ref().map(|m| m.scale_factor()).unwrap_or(1.0);
+    let work_area = monitor.as_ref().map(|m| {
+        let size = m.work_area().size;
+        (f64::from(size.width), f64::from(size.height))
+    });
+
     #[cfg(target_os = "windows")]
     {
-        let scale_factor = app
-            .primary_monitor()
-            .ok()
-            .flatten()
-            .map(|m| m.scale_factor())
-            .unwrap_or(1.0);
-        let logical_width = window_config.width / scale_factor;
-        let logical_height = window_config.height / scale_factor;
-        window_builder = window_builder.inner_size(logical_width, logical_height);
+        // The config size is read as physical pixels here, as before.
+        let (width, height) = crate::util::fit_to_work_area(
+            window_config.width,
+            window_config.height,
+            work_area,
+            TITLE_BAR_ALLOWANCE * scale_factor,
+        );
+        window_builder = window_builder.inner_size(width / scale_factor, height / scale_factor);
     }
 
     #[cfg(not(target_os = "windows"))]
     {
-        window_builder = window_builder.inner_size(window_config.width, window_config.height);
+        let (width, height) = crate::util::fit_to_work_area(
+            window_config.width,
+            window_config.height,
+            work_area.map(|(width, height)| (width / scale_factor, height / scale_factor)),
+            TITLE_BAR_ALLOWANCE,
+        );
+        window_builder = window_builder.inner_size(width, height);
     }
 
     window_builder = window_builder
@@ -719,6 +741,18 @@ fn build_window(
         window_builder = window_builder.title_bar_style(title_bar_style);
         if window_config.title_bar_follows_page() {
             window_builder = window_builder.hidden_title(true);
+            // Open in the color title_bar.js last painted, so the bar does not
+            // flash the default white before the page reports its own.
+            if label == "pake" {
+                if let Some((red, green, blue)) =
+                    app.path().app_data_dir().ok().and_then(|directory| {
+                        crate::util::read_title_bar_color(&directory.join(TITLE_BAR_COLOR_FILE))
+                    })
+                {
+                    window_builder = window_builder
+                        .background_color(tauri::window::Color(red, green, blue, 255));
+                }
+            }
         }
         window_builder = window_builder.theme(theme);
 

@@ -55,9 +55,23 @@
     return samples[majority === -1 ? 1 : majority];
   }
 
+  // Before the page paints its top edge (or when it is see-through there),
+  // the page's own theme-color still says what the bar should be. A tag with
+  // a media query counts only while that query matches.
+  function themeColor() {
+    const tags = document.querySelectorAll?.('meta[name="theme-color"]') || [];
+    for (const tag of tags) {
+      const media = tag.getAttribute("media");
+      if (media && !window.matchMedia?.(media)?.matches) continue;
+      const color = toRgb(tag.getAttribute("content"));
+      if (color) return color;
+    }
+    return null;
+  }
+
   function update() {
     pending = 0;
-    const color = pageTopColor();
+    const color = pageTopColor() || themeColor();
     if (!color) return;
     const key = `${color.red},${color.green},${color.blue}`;
     if (key === lastSent) return;

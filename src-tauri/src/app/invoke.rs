@@ -485,7 +485,27 @@ pub fn set_title_bar_color(
             .as_ref()
             .window()
             .set_background_color(Some(tauri::window::Color(red, green, blue, 255)))
-            .map_err(|e| format!("Failed to set the title bar color: {}", e))
+            .map_err(|e| format!("Failed to set the title bar color: {}", e))?;
+        // Remember the main window's color for the next launch; failing to
+        // save it costs only that first frame, so it never fails the call.
+        if window.label() == "pake" {
+            let saved = window
+                .app_handle()
+                .path()
+                .app_data_dir()
+                .map_err(|e| e.to_string())
+                .and_then(|directory| {
+                    crate::util::write_title_bar_color(
+                        &directory.join(crate::app::window::TITLE_BAR_COLOR_FILE),
+                        (red, green, blue),
+                    )
+                    .map_err(|e| e.to_string())
+                });
+            if let Err(error) = saved {
+                eprintln!("[Pake] Could not remember the title bar color: {error}");
+            }
+        }
+        Ok(())
     }
     #[cfg(not(target_os = "macos"))]
     {
