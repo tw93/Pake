@@ -53,7 +53,7 @@ pake https://excalidraw.com --name Excalidraw --width 1400 --height 900 --hide-t
 
 - `--width` and `--height` set the starting window size, 1200 by 780 by default.
 - `--hide-title-bar` gives an immersive window on macOS, with the page running up to the top edge.
-- `--icon` takes a local or remote image when the site icon looks poor; [macOSicons](https://macosicons.com/#/) is a good source.
+- `--icon` takes a local or remote image when the site icon looks poor; [macOSicons](https://macosicons.com/#/) is a good source. On macOS it also accepts a local Icon Composer `.icon` package; see the [CLI reference](cli-usage.md#icon).
 - `--show-system-tray` keeps the app in the menu bar or system tray.
 
 Every option, with examples, is in the [CLI reference](cli-usage.md).

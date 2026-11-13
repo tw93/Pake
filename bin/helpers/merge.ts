@@ -23,6 +23,11 @@ import {
 } from '@/utils/dir';
 import { PakeError } from '@/utils/error';
 import { LINUX_TARGET_TYPES, resolveLinuxBundleTargets } from '@/utils/targets';
+import {
+  applyDarwinIconComposerPackage,
+  iconPathExtension,
+  isMacOSIconComposerPackage,
+} from '@/helpers/icon-composer';
 
 /**
  * Pure transform from CLI options to the window-config slice that gets
@@ -372,7 +377,7 @@ export async function resolveSystemTrayIconPath(
   }
 }
 
-async function mergeIcons(
+export async function mergeIcons(
   options: PakeAppOptions,
   name: string,
   tauriConf: PakeTauriConfig,
@@ -396,7 +401,7 @@ async function mergeIcons(
       fileExt: '.icns',
       path: `icons/${safeAppName}.icns`,
       defaultIcon: 'icons/icon.icns',
-      message: 'macOS icon must be .icns type.',
+      message: 'macOS icon must be .icns or an Icon Composer .icon package.',
     },
   };
 
@@ -407,9 +412,34 @@ async function mergeIcons(
 
   if (exists) {
     let updateIconPath = true;
-    const customIconExt = path.extname(resolvedIconPath).toLowerCase();
+    let composerIconApplied = false;
+    const customIconExt = iconPathExtension(resolvedIconPath);
 
-    if (customIconExt !== iconInfo.fileExt) {
+    if (platform === 'darwin' && customIconExt === '.icon') {
+      if (!(await isMacOSIconComposerPackage(resolvedIconPath))) {
+        updateIconPath = false;
+        logger.warn(
+          `✼ macOS .icon must be an Icon Composer package (a directory containing icon.json), but you gave ${resolvedIconPath}`,
+        );
+        tauriConf.bundle.icon = [iconInfo.defaultIcon];
+      } else {
+        const destIconsDir = path.join(npmDirectory, 'src-tauri/icons');
+        const defaultIcnsPath = path.join(
+          npmDirectory,
+          'src-tauri',
+          iconInfo.defaultIcon,
+        );
+        const { bundleIcon } = await applyDarwinIconComposerPackage({
+          sourceIconPath: resolvedIconPath,
+          destIconsDir,
+          safeAppName,
+          defaultIcnsPath,
+        });
+        tauriConf.bundle.icon = bundleIcon;
+        tauriConf.bundle.resources = bundleIcon;
+        composerIconApplied = true;
+      }
+    } else if (customIconExt !== iconInfo.fileExt) {
       updateIconPath = false;
       logger.warn(`✼ ${iconInfo.message}, but you give ${customIconExt}`);
       tauriConf.bundle.icon = [iconInfo.defaultIcon];
@@ -436,10 +466,12 @@ async function mergeIcons(
       }
     }
 
-    if (updateIconPath) {
-      tauriConf.bundle.icon = [iconInfo.path];
-    } else {
-      logger.warn(`✼ Icon will remain as default.`);
+    if (!composerIconApplied) {
+      if (updateIconPath) {
+        tauriConf.bundle.icon = [iconInfo.path];
+      } else {
+        logger.warn(`✼ Icon will remain as default.`);
+      }
     }
   } else {
     logger.warn(

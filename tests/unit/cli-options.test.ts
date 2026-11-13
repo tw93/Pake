@@ -22,6 +22,15 @@ describe('CLI options', () => {
     },
   );
 
+  it('describes --icon platform formats including Icon Composer packages', () => {
+    const option = program.options.find((item) => item.long === '--icon');
+    expect(option).toBeDefined();
+    expect(option?.description).toContain('.icon');
+    expect(option?.description).toContain('.icns');
+    expect(option?.description).toContain('.ico');
+    expect(option?.description).toContain('.png');
+  });
+
   it('shows meta options in help', () => {
     const help = program.helpInformation();
 

@@ -26,7 +26,11 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         'Application identifier / bundle ID',
       ).hideHelp(),
     )
-    .option('--icon <string>', 'Application icon', DEFAULT.icon)
+    .option(
+      '--icon <string>',
+      'Application icon (.icns / .icon on macOS, .ico on Windows, .png on Linux)',
+      DEFAULT.icon,
+    )
     .option(
       '--width <number>',
       'Window width',

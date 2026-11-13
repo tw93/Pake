@@ -161,7 +161,7 @@ pake https://github.com --name "GitHub Work" --identifier com.example.github.wor
 │   │   ├── app/           # 核心模块（窗口、菜单、快捷键等）
 │   │   ├── inject/        # 网页注入脚本（CSS、JS、事件监听）
 │   │   └── lib.rs         # 应用入口
-│   ├── icons/             # macOS 图标 (.icns)
+│   ├── icons/             # macOS 图标 (.icns、Icon Composer .icon)
 │   ├── png/               # Windows/Linux 图标 (.ico, .png)
 │   ├── pake.json          # 运行时配置模板
 │   └── tauri.*.conf.json  # 平台特定配置

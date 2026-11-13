@@ -161,7 +161,7 @@ pake https://github.com --name "GitHub Work" --identifier com.example.github.wor
 │   │   ├── app/           # Core modules (window, menu, shortcuts, etc.)
 │   │   ├── inject/        # Injected scripts (CSS, JS, event listeners)
 │   │   └── lib.rs         # Application entry point
-│   ├── icons/             # macOS icons (.icns)
+│   ├── icons/             # macOS icons (.icns, Icon Composer .icon)
 │   ├── png/               # Windows/Linux icons (.ico, .png)
 │   ├── pake.json          # Runtime configuration template
 │   └── tauri.*.conf.json  # Platform-specific configs
