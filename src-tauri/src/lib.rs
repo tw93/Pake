@@ -27,6 +27,8 @@ const WEBKIT_DMABUF_RENDERER_FORCE_SHM: &str = "WEBKIT_DMABUF_RENDERER_FORCE_SHM
 #[cfg(target_os = "linux")]
 const GDK_BACKEND: &str = "GDK_BACKEND";
 
+#[cfg(target_os = "macos")]
+use app::window::enter_configured_fullscreen;
 use app::{
     invoke::{
         clear_dock_badge, close_notification, download_file, increment_dock_badge, quit_app,
@@ -84,6 +86,9 @@ fn reveal_startup_window(window: WebviewWindow, init_fullscreen: bool, revealed:
                 let _ = window.set_focus();
             }
         }
+
+        #[cfg(target_os = "macos")]
+        enter_configured_fullscreen(&window);
 
         #[cfg(not(target_os = "linux"))]
         let _ = init_fullscreen;
@@ -359,6 +364,8 @@ pub fn run_app() {
                     let _ = window.unminimize();
                     let _ = window.show();
                     reapply_window_icon(&window);
+                    #[cfg(target_os = "macos")]
+                    enter_configured_fullscreen(&window);
                     let _ = window.set_focus();
                 }
             },
@@ -552,6 +559,8 @@ pub fn run_app() {
                         cancel_startup_reveal(&reopen_revealed);
                         let _ = window.show();
                         reapply_window_icon(&window);
+                        #[cfg(target_os = "macos")]
+                        enter_configured_fullscreen(&window);
                         let _ = window.set_focus();
                     }
                 }

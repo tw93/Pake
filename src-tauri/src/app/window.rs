@@ -319,7 +319,36 @@ pub fn reveal_built_window(window: &WebviewWindow) {
     }
     let _ = window.show();
     reapply_window_icon(window);
+    #[cfg(target_os = "macos")]
+    enter_configured_fullscreen(window);
     let _ = window.set_focus();
+}
+
+/// Puts a window into full screen the first time it is shown when the app is set to
+/// start in full screen. Once per window, so a window the user took out of full
+/// screen stays out when it is hidden and shown again.
+#[cfg(target_os = "macos")]
+pub fn enter_configured_fullscreen(window: &WebviewWindow) {
+    static ENTERED: std::sync::Mutex<Vec<String>> = std::sync::Mutex::new(Vec::new());
+    let configured = window
+        .app_handle()
+        .try_state::<MultiWindowState>()
+        .is_some_and(|state| state.pake_config.windows[0].fullscreen);
+    let Ok(mut entered) = ENTERED.lock() else {
+        return;
+    };
+    let label = window.label().to_string();
+    let first_show = !entered.contains(&label);
+    if crate::util::enters_fullscreen_on_show(
+        configured,
+        first_show,
+        window.is_fullscreen().unwrap_or(false),
+    ) {
+        let _ = window.set_fullscreen(true);
+    }
+    if configured && first_show {
+        entered.push(label);
+    }
 }
 
 /// True when any Pake webview window is currently on screen.
@@ -353,6 +382,8 @@ pub fn show_all_app_windows(app: &AppHandle, init_fullscreen: bool) {
         if init_fullscreen && !window.is_fullscreen().unwrap_or(false) {
             let _ = window.set_fullscreen(true);
         }
+        #[cfg(target_os = "macos")]
+        enter_configured_fullscreen(window);
     }
     #[cfg(not(target_os = "linux"))]
     let _ = init_fullscreen;
@@ -580,7 +611,10 @@ fn build_window(
         .always_on_top(window_config.always_on_top)
         .incognito(window_config.incognito);
 
-    #[cfg(any(target_os = "windows", target_os = "macos"))]
+    // macOS enters full screen once the window is shown (`enter_configured_fullscreen`):
+    // tao gives a window built full screen the screen's frame as its own size, so
+    // leaving full screen kept the screen's size instead of the configured one.
+    #[cfg(target_os = "windows")]
     {
         window_builder = window_builder.fullscreen(window_config.fullscreen);
     }
@@ -912,6 +946,13 @@ fn build_window(
     window_builder = window_builder.on_navigation(|_| true);
 
     let window = window_builder.build()?;
+
+    // A popup is built visible, so it can enter full screen now; a hidden window
+    // enters when it is first shown.
+    #[cfg(target_os = "macos")]
+    if visible {
+        enter_configured_fullscreen(&window);
+    }
 
     #[cfg(target_os = "windows")]
     {

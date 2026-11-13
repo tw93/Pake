@@ -542,6 +542,13 @@ pub fn check_file_or_append(file_path: &str) -> String {
     new_path.to_string_lossy().into_owned()
 }
 
+/// Whether a window enters full screen as it is shown: only when the app is set to
+/// start in full screen, only on the window's first show, and not when it already is.
+#[cfg(any(target_os = "macos", test))]
+pub fn enters_fullscreen_on_show(configured: bool, first_show: bool, fullscreen_now: bool) -> bool {
+    configured && first_show && !fullscreen_now
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -580,6 +587,16 @@ mod tests {
             assert_eq!(parse_title_bar_color(value), None, "{value:?}");
         }
         fs::remove_dir_all(path.parent().unwrap().parent().unwrap()).unwrap();
+    }
+
+    #[test]
+    fn a_window_enters_configured_full_screen_only_on_its_first_show() {
+        assert!(enters_fullscreen_on_show(true, true, false));
+        // Hidden and shown again after the user left full screen: stays out.
+        assert!(!enters_fullscreen_on_show(true, false, false));
+        // Restored full screen by the window state plugin: nothing to do.
+        assert!(!enters_fullscreen_on_show(true, true, true));
+        assert!(!enters_fullscreen_on_show(false, true, false));
     }
 
     #[test]
