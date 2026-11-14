@@ -792,6 +792,13 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // WebView2 runs this script in subframes too, where IPC is denied for the
+    // frame's own origin. Hand the link to the top page like frame_links.js.
+    if (window.top !== window) {
+      window.top.postMessage({ type: "pake:frame-external-link", url }, "*");
+      return;
+    }
+
     invoke("plugin:shell|open", {
       path: url,
     }).catch((error) => {
