@@ -202,21 +202,8 @@ export async function precompileIconComposerAssets(
     return dest;
   }
 
-  // Xcode 27.1+ sometimes leaves ibtoold in a bad state (tauri-apps/tauri#16386).
   logger.warn(
-    '✼ actool failed to compile the .icon package; retrying after stopping ibtoold (tauri-apps/tauri#16386).',
-  );
-  await execa('pkill', ['-x', 'ibtoold'], {
-    stdin: 'ignore',
-    reject: false,
-  });
-
-  if (await compileAssetsCar(iconPackagePath, dest)) {
-    return dest;
-  }
-
-  logger.warn(
-    '✼ Could not precompile Assets.car. The .icon will be passed to Tauri, which may hit the same actool issue (tauri-apps/tauri#15315, #16386). The .icns fallback stays in bundle.icon.',
+    '✼ actool could not compile the .icon package (tauri-apps/tauri#15315, #16386). The app will use the .icns icon instead.',
   );
   return null;
 }
@@ -281,15 +268,19 @@ export async function applyDarwinIconComposerPackage(options: {
     destIconsDir,
   );
 
+  // Tauri runs actool itself for a .icon in bundle.icon and fails the whole
+  // build when actool errors, so only a precompiled Assets.car goes in; when
+  // that could not be built, the app ships with the .icns alone.
   const bundleIcon: string[] = [];
   if (compiledCar) {
     logger.info('✼ Precompiled Assets.car from the Icon Composer package.');
     bundleIcon.push('icons/Assets.car');
-  } else {
-    bundleIcon.push(`icons/${safeAppName}.icon`);
   }
   if (hasIcns) {
     bundleIcon.push(`icons/${safeAppName}.icns`);
+  }
+  if (bundleIcon.length === 0) {
+    bundleIcon.push(`icons/${safeAppName}.icon`);
   }
   return { bundleIcon };
 }

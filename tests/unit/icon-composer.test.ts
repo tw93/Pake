@@ -44,7 +44,10 @@ async function makeIconPackage(
     fill: 'automatic',
     groups: [],
   });
-  await fsExtra.writeFile(path.join(pkg, 'Assets', 'icon.png'), Buffer.from([1, 2, 3, 4]));
+  await fsExtra.writeFile(
+    path.join(pkg, 'Assets', 'icon.png'),
+    Buffer.from([1, 2, 3, 4]),
+  );
   return pkg;
 }
 
@@ -137,7 +140,7 @@ describe('parseActoolVersion', () => {
 });
 
 describe('applyDarwinIconComposerPackage', () => {
-  it('sets bundle.icon to the .icon package and a sibling .icns', async () => {
+  it('ships only a sibling .icns when Assets.car could not be precompiled', async () => {
     const root = await makeTempDir();
     const pkg = await makeIconPackage(root);
     await fsExtra.writeFile(path.join(root, 'AppIcon.icns'), 'sibling-icns');
@@ -152,16 +155,15 @@ describe('applyDarwinIconComposerPackage', () => {
       defaultIcnsPath: defaultIcns,
     });
 
-    expect(bundleIcon).toEqual([
-      'icons/weekly.icon',
-      'icons/weekly.icns',
-    ]);
-    expect(await fsExtra.pathExists(path.join(destIconsDir, 'weekly.icon', 'icon.json'))).toBe(
-      true,
-    );
-    expect(await fsExtra.readFile(path.join(destIconsDir, 'weekly.icns'), 'utf8')).toBe(
-      'sibling-icns',
-    );
+    expect(bundleIcon).toEqual(['icons/weekly.icns']);
+    expect(
+      await fsExtra.pathExists(
+        path.join(destIconsDir, 'weekly.icon', 'icon.json'),
+      ),
+    ).toBe(true);
+    expect(
+      await fsExtra.readFile(path.join(destIconsDir, 'weekly.icns'), 'utf8'),
+    ).toBe('sibling-icns');
   });
 
   it('uses the default .icns when there is no sibling file', async () => {
@@ -178,13 +180,10 @@ describe('applyDarwinIconComposerPackage', () => {
       defaultIcnsPath: defaultIcns,
     });
 
-    expect(bundleIcon).toEqual([
-      'icons/weekly.icon',
-      'icons/weekly.icns',
-    ]);
-    expect(await fsExtra.readFile(path.join(destIconsDir, 'weekly.icns'), 'utf8')).toBe(
-      'default-icns',
-    );
+    expect(bundleIcon).toEqual(['icons/weekly.icns']);
+    expect(
+      await fsExtra.readFile(path.join(destIconsDir, 'weekly.icns'), 'utf8'),
+    ).toBe('default-icns');
   });
 });
 
@@ -207,10 +206,16 @@ describe('precompileIconComposerAssets', () => {
       if (compileAt >= 0) {
         const outputPath = args[compileAt + 1];
         await fsExtra.ensureDir(outputPath);
-        await fsExtra.writeFile(path.join(outputPath, 'Assets.car'), 'compiled-car');
+        await fsExtra.writeFile(
+          path.join(outputPath, 'Assets.car'),
+          'compiled-car',
+        );
         return { exitCode: 0, stdout: '', stderr: '' };
       }
-      if (args.includes('--version') || args.includes('--output-format=human-readable-text')) {
+      if (
+        args.includes('--version') ||
+        args.includes('--output-format=human-readable-text')
+      ) {
         return actoolVersionResult('26.1');
       }
       return { exitCode: 0, stdout: '', stderr: '' };
@@ -244,36 +249,57 @@ describe('precompileIconComposerAssets', () => {
     expect(compiled).toBe(false);
   });
 
-  it('retries once after pkill ibtoold when the first compile fails', async () => {
+  it('gives up after one failed compile without stopping other processes', async () => {
+    const root = await makeTempDir();
+    const pkg = await makeIconPackage(root);
+    let compileAttempts = 0;
+
+    execaMock.mockImplementation(async (_file: string, args: string[] = []) => {
+      if (args.includes('--compile')) {
+        compileAttempts += 1;
+        return { exitCode: 1, stdout: '', stderr: 'failed to run actool' };
+      }
+      return actoolVersionResult('27.2');
+    });
+
+    await expect(
+      precompileIconComposerAssets(pkg, path.join(root, 'dest')),
+    ).resolves.toBeNull();
+    expect(compileAttempts).toBe(1);
+    expect(execaMock.mock.calls.some((call) => call[0] === 'pkill')).toBe(
+      false,
+    );
+  });
+
+  it('puts the precompiled Assets.car and the .icns in bundle.icon, never the .icon', async () => {
     const root = await makeTempDir();
     const pkg = await makeIconPackage(root);
     const destIconsDir = path.join(root, 'dest');
-    let compileAttempts = 0;
+    const defaultIcns = path.join(root, 'icon.icns');
+    await fsExtra.writeFile(defaultIcns, 'default-icns');
 
-    execaMock.mockImplementation(async (file: string, args: string[] = []) => {
-      if (file === 'pkill') {
-        return { exitCode: 0, stdout: '', stderr: '' };
-      }
+    execaMock.mockImplementation(async (_file: string, args: string[] = []) => {
       const compileAt = args.indexOf('--compile');
       if (compileAt >= 0) {
-        compileAttempts += 1;
-        if (compileAttempts === 1) {
-          return { exitCode: 1, stdout: '', stderr: 'failed to run actool' };
-        }
         const outputPath = args[compileAt + 1];
         await fsExtra.ensureDir(outputPath);
-        await fsExtra.writeFile(path.join(outputPath, 'Assets.car'), 'retry-car');
+        await fsExtra.writeFile(
+          path.join(outputPath, 'Assets.car'),
+          'compiled-car',
+        );
         return { exitCode: 0, stdout: '', stderr: '' };
       }
-      return actoolVersionResult('27.1');
+      return actoolVersionResult('27.2');
     });
 
-    const dest = await precompileIconComposerAssets(pkg, destIconsDir);
+    const { bundleIcon } = await applyDarwinIconComposerPackage({
+      sourceIconPath: pkg,
+      destIconsDir,
+      safeAppName: 'weekly',
+      defaultIcnsPath: defaultIcns,
+    });
 
-    expect(compileAttempts).toBe(2);
-    expect(execaMock.mock.calls.some((call) => call[0] === 'pkill')).toBe(true);
-    expect(dest).toBe(path.join(destIconsDir, 'Assets.car'));
-    expect(await fsExtra.readFile(dest!, 'utf8')).toBe('retry-car');
+    expect(bundleIcon).toEqual(['icons/Assets.car', 'icons/weekly.icns']);
   });
 });
 
@@ -283,11 +309,14 @@ describe('mergeIcons on darwin', () => {
     setBuildDirectory(root);
     await fsExtra.ensureDir(path.join(root, 'src-tauri/icons'));
     await fsExtra.ensureDir(path.join(root, 'src-tauri/png'));
-    await fsExtra.writeFile(path.join(root, 'src-tauri/icons/icon.icns'), 'default-icns');
+    await fsExtra.writeFile(
+      path.join(root, 'src-tauri/icons/icon.icns'),
+      'default-icns',
+    );
     return root;
   }
 
-  it('passes both the .icon package and a sibling .icns', async () => {
+  it('passes a sibling .icns when Assets.car is not available', async () => {
     const root = await setupNpmDir();
     const pkg = await makeIconPackage(root);
     await fsExtra.writeFile(path.join(root, 'AppIcon.icns'), 'sibling-icns');
@@ -297,12 +326,13 @@ describe('mergeIcons on darwin', () => {
 
     await mergeIcons(makeOptions(pkg, name), name, tauriConf, 'darwin', safe);
 
-    expect(tauriConf.bundle.icon).toEqual([
-      `icons/${safe}.icon`,
-      `icons/${safe}.icns`,
-    ]);
+    expect(tauriConf.bundle.icon).toEqual([`icons/${safe}.icns`]);
+    expect(tauriConf.bundle.resources).toEqual([`icons/${safe}.icns`]);
     expect(
-      await fsExtra.readFile(path.join(root, 'src-tauri/icons', `${safe}.icns`), 'utf8'),
+      await fsExtra.readFile(
+        path.join(root, 'src-tauri/icons', `${safe}.icns`),
+        'utf8',
+      ),
     ).toBe('sibling-icns');
   });
 
@@ -315,13 +345,47 @@ describe('mergeIcons on darwin', () => {
 
     await mergeIcons(makeOptions(pkg, name), name, tauriConf, 'darwin', safe);
 
+    expect(tauriConf.bundle.icon).toEqual([`icons/${safe}.icns`]);
+    expect(tauriConf.bundle.resources).toEqual([`icons/${safe}.icns`]);
+    expect(
+      await fsExtra.readFile(
+        path.join(root, 'src-tauri/icons', `${safe}.icns`),
+        'utf8',
+      ),
+    ).toBe('default-icns');
+  });
+
+  it('keeps a precompiled Assets.car out of bundle.resources', async () => {
+    const root = await setupNpmDir();
+    const pkg = await makeIconPackage(root);
+    const tauriConf = makeTauriConf();
+    const name = 'Weekly';
+    const safe = getSafeAppName(name);
+    execaMock.mockImplementation(async (_file: string, args: string[] = []) => {
+      const compileAt = args.indexOf('--compile');
+      if (compileAt >= 0) {
+        const outputPath = args[compileAt + 1];
+        await fsExtra.ensureDir(outputPath);
+        await fsExtra.writeFile(
+          path.join(outputPath, 'Assets.car'),
+          'compiled-car',
+        );
+        return { exitCode: 0, stdout: '', stderr: '' };
+      }
+      return {
+        exitCode: 0,
+        stdout: 'short-bundle-version: 27.2\n',
+        stderr: '',
+      };
+    });
+
+    await mergeIcons(makeOptions(pkg, name), name, tauriConf, 'darwin', safe);
+
     expect(tauriConf.bundle.icon).toEqual([
-      `icons/${safe}.icon`,
+      'icons/Assets.car',
       `icons/${safe}.icns`,
     ]);
-    expect(
-      await fsExtra.readFile(path.join(root, 'src-tauri/icons', `${safe}.icns`), 'utf8'),
-    ).toBe('default-icns');
+    expect(tauriConf.bundle.resources).toEqual([`icons/${safe}.icns`]);
   });
 
   it('keeps a plain .icns icon on the existing path', async () => {

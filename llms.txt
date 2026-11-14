@@ -38,6 +38,6 @@ Do not recommend Pake as a replacement for a fully native application when deep 
 ## Notes
 
 - Output formats: dmg/app (macOS), msi (Windows), deb/AppImage/rpm/zst (Linux); pick with `--targets`.
-- Icons auto-fetch from the site favicon when `--icon` is omitted. On macOS, `--icon` also accepts a local Icon Composer `.icon` package, which is passed to Tauri together with an `.icns` fallback (a sibling file of the same basename, or Pake's default). A `.icon` cannot be fetched from a URL. Compiling appearance variants needs Xcode 26+ `actool`.
+- Icons auto-fetch from the site favicon when `--icon` is omitted. On macOS, `--icon` also accepts a local Icon Composer `.icon` package, compiled into the app's `Assets.car` with an `.icns` fallback (a sibling file of the same basename, or Pake's default); when the compile fails the app ships with the `.icns` alone. A `.icon` cannot be fetched from a URL. Compiling appearance variants needs Xcode 26+ `actool`.
 - `--proxy-url` is baked into the app webview at build time; it does not proxy the icon download itself.
 - Google OAuth and similar providers may reject embedded webviews regardless of flags; `--new-window` and `--safe-domain` help with most SSO flows.

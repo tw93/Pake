@@ -132,7 +132,7 @@ Supports both local and remote files, automatically converts to platform-specifi
 
 If you pass a `.icon`, also put a sibling `.icns` of the same basename for macOS versions before 26. If there isn't one, Pake uses its default `icon.icns`. A `.icon` is a local package, not a URL. Compiling Liquid Glass appearances needs Xcode 26+ (`actool` short version 26 or newer) on the machine that runs `pake`. If `actool` is missing or too old, Pake warns and uses the `.icns` fallback.
 
-On some Xcode 27 setups, Tauri's bundler fails when it runs `actool` (tauri-apps/tauri#15315, #16386). Pake tries to precompile `Assets.car` itself first, with stdin closed, and retries once after stopping `ibtoold`. If that fails, the `.icon` is still passed to Tauri, and the `.icns` fallback stays in `bundle.icon`.
+On some Xcode 27 setups, Tauri's bundler fails when it runs `actool` itself (tauri-apps/tauri#15315, #16386), so Pake compiles `Assets.car` first, with stdin closed, and hands Tauri the compiled file. If that compile fails, the build goes on with the `.icns` alone.
 
 ```shell
 --icon <path>

@@ -436,7 +436,11 @@ export async function mergeIcons(
           defaultIcnsPath,
         });
         tauriConf.bundle.icon = bundleIcon;
-        tauriConf.bundle.resources = bundleIcon;
+        // Assets.car is read from bundle.icon; copying it into resources too
+        // would store it twice. Keep the .icns resource the plain path ships.
+        tauriConf.bundle.resources = bundleIcon.filter((icon) =>
+          icon.endsWith('.icns'),
+        );
         composerIconApplied = true;
       }
     } else if (customIconExt !== iconInfo.fileExt) {
