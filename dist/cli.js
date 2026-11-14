@@ -3291,6 +3291,7 @@ async function tryResolveIconSource(source, domain, appName, downloadTimeout) {
             }
         }
         catch (error) {
+            throwIfBuildCancelled();
             if (error instanceof Error) {
                 const label = source === 'dashboard' ? 'Dashboard icon' : 'Icon service';
                 logger.debug(`${label} ${iconUrl} failed: ${error.message}`);
@@ -3303,9 +3304,10 @@ async function tryResolveIconSource(source, domain, appName, downloadTimeout) {
  * Attempts to fetch favicon from website
  */
 async function tryGetFavicon(url, appName) {
+    let spinner;
     try {
         const domain = new URL(url).hostname;
-        const spinner = getSpinner(`Fetching icon from ${domain}...`);
+        spinner = getSpinner(`Fetching icon from ${domain}...`);
         const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
         const downloadTimeout = isCI
             ? ICON_CONFIG.downloadTimeout.ci
@@ -3325,23 +3327,31 @@ async function tryGetFavicon(url, appName) {
         return null;
     }
     catch (error) {
+        throwIfBuildCancelled();
         if (error instanceof Error) {
             logger.warn(`Failed to fetch favicon: ${error.message}`);
         }
         return null;
+    }
+    finally {
+        spinner?.stop();
     }
 }
 /**
  * Downloads icon from URL
  */
 async function downloadIcon(iconUrl, showSpinner = true, customTimeout) {
+    throwIfBuildCancelled();
+    const buildSignal = getBuildCancellationSignal();
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
         controller.abort();
     }, customTimeout || 10000);
     try {
         const response = await fetch(iconUrl, {
-            signal: controller.signal,
+            signal: buildSignal
+                ? AbortSignal.any([controller.signal, buildSignal])
+                : controller.signal,
         });
         if (!response.ok) {
             if (response.status === 404 && !showSpinner) {
@@ -3359,6 +3369,7 @@ async function downloadIcon(iconUrl, showSpinner = true, customTimeout) {
         return await saveIconFile(arrayBuffer, extension);
     }
     catch (error) {
+        throwIfBuildCancelled();
         if (showSpinner) {
             if (error instanceof Error && error.name === 'AbortError') {
                 logger.error('Icon download timed out!');

@@ -17,6 +17,10 @@ import {
 import { generateLinuxPackageName, getSafeAppName } from '@/utils/name';
 import { PakeAppOptions } from '@/types';
 import {
+  getBuildCancellationSignal,
+  throwIfBuildCancelled,
+} from '@/utils/build-workspace';
+import {
   ensureMultiResolutionIco,
   writeIcoWithPreferredSize,
   buildIcoFromPngBuffers,
@@ -609,6 +613,7 @@ async function tryResolveIconSource(
         return resolvedPath;
       }
     } catch (error: unknown) {
+      throwIfBuildCancelled();
       if (error instanceof Error) {
         const label =
           source === 'dashboard' ? 'Dashboard icon' : 'Icon service';
@@ -627,9 +632,10 @@ async function tryGetFavicon(
   url: string,
   appName: string,
 ): Promise<string | null> {
+  let spinner: ReturnType<typeof getSpinner> | undefined;
   try {
     const domain = new URL(url).hostname;
-    const spinner = getSpinner(`Fetching icon from ${domain}...`);
+    spinner = getSpinner(`Fetching icon from ${domain}...`);
 
     const isCI =
       process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
@@ -662,10 +668,13 @@ async function tryGetFavicon(
     spinner.warn(`No favicon found for ${domain}. Using default.`);
     return null;
   } catch (error) {
+    throwIfBuildCancelled();
     if (error instanceof Error) {
       logger.warn(`Failed to fetch favicon: ${error.message}`);
     }
     return null;
+  } finally {
+    spinner?.stop();
   }
 }
 
@@ -677,6 +686,8 @@ export async function downloadIcon(
   showSpinner = true,
   customTimeout?: number,
 ): Promise<string | null> {
+  throwIfBuildCancelled();
+  const buildSignal = getBuildCancellationSignal();
   const controller = new AbortController();
   const timeoutId = setTimeout(() => {
     controller.abort();
@@ -684,7 +695,9 @@ export async function downloadIcon(
 
   try {
     const response = await fetch(iconUrl, {
-      signal: controller.signal,
+      signal: buildSignal
+        ? AbortSignal.any([controller.signal, buildSignal])
+        : controller.signal,
     });
 
     if (!response.ok) {
@@ -710,6 +723,7 @@ export async function downloadIcon(
 
     return await saveIconFile(arrayBuffer, extension);
   } catch (error: unknown) {
+    throwIfBuildCancelled();
     if (showSpinner) {
       if (error instanceof Error && error.name === 'AbortError') {
         logger.error('Icon download timed out!');
