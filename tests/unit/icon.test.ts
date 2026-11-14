@@ -11,8 +11,10 @@ vi.mock('execa', () => ({
   execa: execaMock,
 }));
 
-import { downloadIcon, generateMacOSIcns } from '@/options/icon';
+import { downloadIcon, generateMacOSIcns, handleIcon } from '@/options/icon';
 import { getIconSourcePriority } from '@/utils/icon-source';
+import { beginBuildCancellation } from '@/utils/build-workspace';
+import { DEFAULT_PAKE_OPTIONS } from '@/defaults';
 
 const downloadedIconPaths: string[] = [];
 const generatedIconDirs: string[] = [];
@@ -38,6 +40,69 @@ it('keeps the download deadline active until the response body completes', async
   } finally {
     server.closeAllConnections();
     await new Promise<void>((resolve) => server.close(() => resolve()));
+  }
+});
+
+it.each(['SIGINT', 'SIGTERM'] as const)(
+  'cancels an in-flight icon response on %s',
+  async (signal) => {
+    let requestStarted!: () => void;
+    const started = new Promise<void>((resolve) => {
+      requestStarted = resolve;
+    });
+    const server = http.createServer((_request, response) => {
+      response.writeHead(200, { 'content-type': 'image/png' });
+      response.flushHeaders();
+      requestStarted();
+    });
+    await new Promise<void>((resolve) =>
+      server.listen(0, '127.0.0.1', resolve),
+    );
+    const endCancellation = beginBuildCancellation();
+    try {
+      const port = (server.address() as import('net').AddressInfo).port;
+      const download = downloadIcon(
+        `http://127.0.0.1:${port}/icon`,
+        false,
+        2000,
+      );
+      const cancelled = expect(download).rejects.toThrow(
+        `Build cancelled (${signal}).`,
+      );
+      await started;
+      const cancelledAt = performance.now();
+      process.emit(signal, signal);
+      await cancelled;
+      expect(performance.now() - cancelledAt).toBeLessThan(1000);
+    } finally {
+      endCancellation();
+      server.closeAllConnections();
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
+  },
+);
+
+it('does not try another favicon source after the build is cancelled', async () => {
+  const endCancellation = beginBuildCancellation();
+  const fetchMock = vi.fn(async () => {
+    process.emit('SIGINT', 'SIGINT');
+    throw new Error('Request interrupted');
+  });
+  vi.stubGlobal('fetch', fetchMock);
+  try {
+    await expect(
+      handleIcon(
+        {
+          ...DEFAULT_PAKE_OPTIONS,
+          name: 'CancelProbe',
+          identifier: 'com.pake.cancelprobe',
+        },
+        'https://example.com',
+      ),
+    ).rejects.toThrow('Build cancelled (SIGINT).');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  } finally {
+    endCancellation();
   }
 });
 

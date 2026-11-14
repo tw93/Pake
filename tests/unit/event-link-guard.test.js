@@ -9,6 +9,7 @@ function loadEventHelpers({
   initialZoom = null,
   downloadError = null,
   nativeDownloads = false,
+  topWindow = null,
 } = {}) {
   const source = ["link_policy.js", "event.js"]
     .map((file) =>
@@ -121,6 +122,7 @@ function loadEventHelpers({
     },
   };
   context.window.navigator = context.navigator;
+  context.window.top = topWindow || context.window;
   if (withTauri) {
     context.window.__TAURI__ = {
       core: { invoke },
@@ -860,6 +862,36 @@ describe("event link guard", () => {
       "plugin:shell|open",
       { path: "https://other.example.org/page" },
     ]);
+  });
+
+  it("hands external links from a subframe to the top page instead of IPC", () => {
+    // WebView2 injects event.js into subframes, whose origin has no IPC grant.
+    const messages = [];
+    const context = loadEventHelpers({
+      withTauri: true,
+      topWindow: { postMessage: (message) => messages.push(message) },
+    });
+    runDomReady(context);
+
+    expect(context.window.open("https://outside.example/launch")).toBeNull();
+    const event = makeClickEvent(
+      makeAnchor("https://outside.example/page", "_new"),
+    );
+    getClickGuard(context)(event);
+
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(messages).toEqual([
+      {
+        type: "pake:frame-external-link",
+        url: "https://outside.example/launch",
+      },
+      { type: "pake:frame-external-link", url: "https://outside.example/page" },
+    ]);
+    expect(
+      context.invokeCalls.filter(
+        ([command]) => command === "plugin:shell|open",
+      ),
+    ).toEqual([]);
   });
 
   it("bridges Web Badging API calls to explicit badge commands", async () => {
