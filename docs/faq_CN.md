@@ -385,13 +385,14 @@ pake https://example.com --width 1200 --height 800
 
 确保为你的平台使用正确的图标格式：
 
-- **macOS**：`.icns` 格式
+- **macOS**：`.icns` 格式，或本地的 Icon Composer `.icon` 包。传入 `.icon` 时，请同时提供同名的 `.icns`，给 macOS 26 以下的系统做回退。编译外观变体需要 Xcode 26+（`actool`）。如果 `actool` 不存在、版本过低，或在 Xcode 27 上失败（见 tauri-apps/tauri#15315、#16386），会使用 `.icns` 回退。
 - **Windows**：`.ico` 格式
 - **Linux**：`.png` 格式
 
 ```bash
 # macOS
 pake https://example.com --icon ./icon.icns
+pake https://example.com --icon ./AppIcon.icon
 
 # Windows
 pake https://example.com --icon ./icon.ico
@@ -400,7 +401,7 @@ pake https://example.com --icon ./icon.ico
 pake https://example.com --icon ./icon.png
 ```
 
-Pake 可以自动转换图标，但提供正确的格式更可靠。
+Pake 可以自动转换普通图片，但提供正确的格式更可靠。Icon Composer 的 `.icon` 不能从 PNG 生成，也不能通过 URL 下载。
 
 ### 网站功能不工作（登录、上传等）
 

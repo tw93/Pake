@@ -126,9 +126,13 @@ pake ./dist --name MyTool
 
 支持本地或远程文件，自动转换为平台所需格式：
 
-- macOS：`.icns` 格式
+- macOS：`.icns` 格式，或本地的 Icon Composer `.icon` 包（目录内需有 `icon.json`）
 - Windows：`.ico` 格式
 - Linux：`.png` 格式
+
+传入 `.icon` 时，请在同目录放一个同名的 `.icns`，给 macOS 26 以下的系统做回退；没有的话会用 Pake 自带的默认 `icon.icns`。`.icon` 只能是本地包，不能通过 URL 下载。编译 Liquid Glass 外观需要打包机器上有 Xcode 26+（`actool` 主版本不低于 26）；找不到或版本过低时，会给出警告并使用 `.icns` 回退。
+
+在部分 Xcode 27 环境里，Tauri 打包时自己调用 `actool` 可能失败（tauri-apps/tauri#15315、#16386），所以 Pake 会先自行编译 `Assets.car`（关闭 stdin），再把编译好的文件交给 Tauri，编译失败时只用 `.icns` 继续打包。
 
 ```shell
 --icon <path>
@@ -140,6 +144,7 @@ pake https://github.com --name GitHub
 # 使用自定义图标
 --icon ./my-icon.png
 --icon https://cdn.tw93.fun/pake/weekly.icns  # 远程图标（.icns 适用于 macOS）
+--icon ./AppIcon.icon                         # 本地 Icon Composer 包（macOS）
 ```
 
 #### [width]

@@ -126,9 +126,13 @@ Set the bundle identifier explicitly. By default Pake derives `com.pake.a<hash>`
 
 Supports both local and remote files, automatically converts to platform-specific formats:
 
-- macOS: `.icns` format
+- macOS: `.icns`, or a local Icon Composer `.icon` package (a directory containing `icon.json`)
 - Windows: `.ico` format
 - Linux: `.png` format
+
+If you pass a `.icon`, also put a sibling `.icns` of the same basename for macOS versions before 26. If there isn't one, Pake uses its default `icon.icns`. A `.icon` is a local package, not a URL. Compiling Liquid Glass appearances needs Xcode 26+ (`actool` short version 26 or newer) on the machine that runs `pake`. If `actool` is missing or too old, Pake warns and uses the `.icns` fallback.
+
+On some Xcode 27 setups, Tauri's bundler fails when it runs `actool` itself (tauri-apps/tauri#15315, #16386), so Pake compiles `Assets.car` first, with stdin closed, and hands Tauri the compiled file. If that compile fails, the build goes on with the `.icns` alone.
 
 ```shell
 --icon <path>
@@ -140,6 +144,7 @@ pake https://github.com --name GitHub
 # With custom icons
 --icon ./my-icon.png
 --icon https://cdn.tw93.fun/pake/weekly.icns  # Remote icon (.icns for macOS)
+--icon ./AppIcon.icon                         # Local Icon Composer package (macOS)
 ```
 
 #### [width]

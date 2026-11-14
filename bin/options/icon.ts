@@ -26,6 +26,11 @@ import {
   buildIcoFromPngBuffers,
   WIN_STANDARD_ICO_SIZES,
 } from '@/utils/ico';
+import {
+  iconPathExtension,
+  isIconComposerUrl,
+  isMacOSIconComposerPackage,
+} from '@/helpers/icon-composer';
 
 type PlatformIconConfig = {
   format: string;
@@ -48,6 +53,7 @@ const ICON_CONFIG = {
     'jpg',
     'webp',
     'icns',
+    'icon',
     'svg',
   ] as const,
   transparentBackground: { r: 255, g: 255, b: 255, alpha: 0 },
@@ -364,14 +370,30 @@ async function isLinuxBundleIconReady(iconPath: string): Promise<boolean> {
 /**
  * Processes downloaded or local icon for platform-specific format
  */
-async function processIcon(
+export async function processIcon(
   iconPath: string,
   appName: string,
 ): Promise<string | null> {
   if (!iconPath || !appName) return iconPath;
 
+  const ext = iconPathExtension(iconPath);
+  if (ext === '.icon') {
+    if (!IS_WIN && !IS_LINUX) {
+      if (await isMacOSIconComposerPackage(iconPath)) {
+        return iconPath;
+      }
+      logger.warn(
+        '✼ --icon .icon must be an Icon Composer package (a directory containing icon.json).',
+      );
+      return null;
+    }
+    logger.warn(
+      '✼ Icon Composer .icon packages are only used on macOS. This platform will use a converted or default icon.',
+    );
+    return null;
+  }
+
   // Check if already in correct platform format
-  const ext = path.extname(iconPath).toLowerCase();
   const isCorrectFormat =
     (IS_WIN && ext === '.ico') ||
     (IS_LINUX && (await isLinuxBundleIconReady(iconPath))) ||
@@ -450,6 +472,12 @@ export async function handleIcon(
   // Handle custom icon (local file or remote URL)
   if (options.icon) {
     if (options.icon.startsWith('http')) {
+      if (isIconComposerUrl(options.icon)) {
+        logger.warn(
+          '✼ Icon Composer .icon packages cannot be downloaded from a URL; pass a local path. HTTP --icon is for ordinary images and .icns files.',
+        );
+        return '';
+      }
       const downloadedPath = await downloadIcon(options.icon);
       if (downloadedPath) {
         const result = await processIcon(downloadedPath, options.name || '');
@@ -460,6 +488,9 @@ export async function handleIcon(
     // Local file path
     const resolvedPath = path.resolve(options.icon);
     const result = await processIcon(resolvedPath, options.name || '');
+    if (iconPathExtension(resolvedPath) === '.icon' && !result) {
+      return '';
+    }
     return result || resolvedPath;
   }
 
@@ -686,6 +717,15 @@ export async function downloadIcon(
   showSpinner = true,
   customTimeout?: number,
 ): Promise<string | null> {
+  if (isIconComposerUrl(iconUrl)) {
+    if (showSpinner) {
+      logger.warn(
+        '✼ Icon Composer .icon packages cannot be downloaded from a URL; pass a local path.',
+      );
+    }
+    return null;
+  }
+
   throwIfBuildCancelled();
   const buildSignal = getBuildCancellationSignal();
   const controller = new AbortController();

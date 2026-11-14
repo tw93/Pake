@@ -53,7 +53,7 @@ pake https://excalidraw.com --name Excalidraw --width 1400 --height 900 --hide-t
 
 - `--width` 和 `--height` 设置初始窗口大小，默认是 1200 乘 780。
 - `--hide-title-bar` 在 macOS 上隐藏标题栏，页面一直铺到窗口顶部。
-- 网站自带的图标不好看时，用 `--icon` 指定本地或远程图片，[macOSicons](https://macosicons.com/#/) 上能找到不少。
+- 网站自带的图标不好看时，用 `--icon` 指定本地或远程图片，[macOSicons](https://macosicons.com/#/) 上能找到不少。在 macOS 上也可以传入本地的 Icon Composer `.icon` 包，细节见[命令行参数说明](cli-usage_CN.md#icon)。
 - `--show-system-tray` 让应用常驻菜单栏或系统托盘。
 
 全部参数和示例都在[命令行参数说明](cli-usage_CN.md)里。

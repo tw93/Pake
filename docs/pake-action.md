@@ -20,15 +20,15 @@ Call Pake from your own GitHub Actions workflow to turn any webpage into a light
 
 ## Inputs
 
-| Parameter    | Description              | Required | Default |
-| ------------ | ------------------------ | -------- | ------- |
-| `url`        | Target URL to package    | ✅       |         |
-| `name`       | Application name         | ✅       |         |
-| `output-dir` | Output directory         |          | `dist`  |
-| `icon`       | Custom app icon URL/path |          |         |
-| `width`      | Window width             |          | `1200`  |
-| `height`     | Window height            |          | `780`   |
-| `debug`      | Enable debug mode        |          | `false` |
+| Parameter    | Description                                                                                    | Required | Default |
+| ------------ | ---------------------------------------------------------------------------------------------- | -------- | ------- |
+| `url`        | Target URL to package                                                                          | ✅       |         |
+| `name`       | Application name                                                                               | ✅       |         |
+| `output-dir` | Output directory                                                                               |          | `dist`  |
+| `icon`       | Custom app icon URL or path. An Icon Composer `.icon` package must be a local path, not a URL. |          |         |
+| `width`      | Window width                                                                                   |          | `1200`  |
+| `height`     | Window height                                                                                  |          | `780`   |
+| `debug`      | Enable debug mode                                                                              |          | `false` |
 
 ## Outputs
 

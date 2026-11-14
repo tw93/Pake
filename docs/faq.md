@@ -387,13 +387,14 @@ Custom icon doesn't appear or shows default icon.
 
 Ensure you're using the correct icon format for your platform:
 
-- **macOS**: `.icns` format
+- **macOS**: `.icns`, or a local Icon Composer `.icon` package. If you pass a `.icon`, include a sibling `.icns` of the same basename for macOS versions before 26. Compiling the appearance variants needs Xcode 26+ (`actool`). If `actool` is missing, too old, or fails (see tauri-apps/tauri#15315 and #16386 on Xcode 27), the `.icns` fallback is used.
 - **Windows**: `.ico` format
 - **Linux**: `.png` format
 
 ```bash
 # macOS
 pake https://example.com --icon ./icon.icns
+pake https://example.com --icon ./AppIcon.icon
 
 # Windows
 pake https://example.com --icon ./icon.ico
@@ -402,7 +403,7 @@ pake https://example.com --icon ./icon.ico
 pake https://example.com --icon ./icon.png
 ```
 
-Pake can automatically convert icons, but providing the correct format is more reliable.
+Pake can automatically convert ordinary image files, but providing the correct format is more reliable. An Icon Composer `.icon` cannot be converted from a PNG and cannot be downloaded from a URL.
 
 ### Website Features Not Working (Login, Upload, etc.)
 

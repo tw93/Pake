@@ -78,7 +78,7 @@ var exports$1 = "./dist/cli.js";
 var license = "GPL-3.0-or-later";
 var dependencies = {
 	"@tauri-apps/api": "~2.10.1",
-	"@tauri-apps/cli": "^2.10.0",
+	"@tauri-apps/cli": "^2.12.4",
 	chalk: "^5.6.2",
 	commander: "^14.0.3",
 	execa: "^9.6.1",
@@ -934,6 +934,227 @@ function resolveLinuxBundleTargets(targets) {
     return { bundleTargets, hasValidTarget: requested.length > 0 };
 }
 
+const ACTOOL_VERSION_ARGS = [
+    '--version',
+    '--output-format=human-readable-text',
+];
+const ACTOOL_TIMEOUT_MS = {
+    version: 20000,
+    compile: 120000,
+};
+function iconPathExtension(iconPath) {
+    return path.extname(iconPath.replace(/[/\\]+$/, '')).toLowerCase();
+}
+function isIconComposerUrl(iconUrl) {
+    try {
+        const pathname = new URL(iconUrl).pathname
+            .replace(/\/+$/, '')
+            .toLowerCase();
+        return pathname.endsWith('.icon');
+    }
+    catch {
+        return iconUrl.replace(/\/+$/, '').toLowerCase().endsWith('.icon');
+    }
+}
+async function isMacOSIconComposerPackage(iconPath) {
+    try {
+        const stat = await fsExtra.stat(iconPath);
+        if (!stat.isDirectory()) {
+            return false;
+        }
+        return await fsExtra.pathExists(path.join(iconPath, 'icon.json'));
+    }
+    catch {
+        return false;
+    }
+}
+/** Parse `actool --version --output-format=human-readable-text`, matching Tauri. */
+function parseActoolVersion(output) {
+    for (const rawLine of output.split('\n')) {
+        const line = rawLine.trim();
+        if (line.startsWith('short-bundle-version:')) {
+            const version = line.slice('short-bundle-version:'.length).trim();
+            return version || null;
+        }
+    }
+    return null;
+}
+function actoolMajorVersion(version) {
+    const major = Number.parseInt(version.split('.')[0] ?? '', 10);
+    return Number.isFinite(major) ? major : null;
+}
+function isCommandMissing(error) {
+    if (!error || typeof error !== 'object') {
+        return false;
+    }
+    const execaError = error;
+    return (execaError.code === 'ENOENT' ||
+        execaError.exitCode === 127 ||
+        (typeof execaError.stderr === 'string' &&
+            /not found|No such file/i.test(execaError.stderr)));
+}
+async function runActool(args, timeout) {
+    const options = { stdin: 'ignore', reject: false, timeout };
+    const attempts = [
+        { file: 'xcrun', argv: ['actool', ...args] },
+        { file: 'actool', argv: args },
+    ];
+    for (const attempt of attempts) {
+        try {
+            const result = await execa(attempt.file, attempt.argv, options);
+            if (isCommandMissing(result)) {
+                continue;
+            }
+            return result;
+        }
+        catch (error) {
+            if (isCommandMissing(error)) {
+                continue;
+            }
+            throw error;
+        }
+    }
+    return null;
+}
+async function getActoolMajorVersion() {
+    const result = await runActool(ACTOOL_VERSION_ARGS, ACTOOL_TIMEOUT_MS.version);
+    if (!result) {
+        return null;
+    }
+    const version = parseActoolVersion(`${result.stdout}\n${result.stderr}`);
+    return version ? actoolMajorVersion(version) : null;
+}
+async function warnIfActoolUnavailable() {
+    const major = await getActoolMajorVersion();
+    if (major === null) {
+        logger.warn('✼ Could not find actool (needs Xcode 26+). Liquid Glass icons will not be compiled; the .icns fallback will be used.');
+        return null;
+    }
+    if (major < 26) {
+        logger.warn(`✼ actool ${major} is too old for Icon Composer .icon packages (need 26+ / Xcode 26). The .icns fallback will be used.`);
+    }
+    return major;
+}
+async function compileAssetsCar(iconPackagePath, destPath) {
+    const { path: tempRoot, cleanup } = await dir({ unsafeCleanup: true });
+    try {
+        const iconDest = path.join(tempRoot, 'Icon.icon');
+        const outputPath = path.join(tempRoot, 'out');
+        await fsExtra.copy(iconPackagePath, iconDest);
+        await fsExtra.ensureDir(outputPath);
+        // Flags match tauri-bundler 2.12.4 (crates/tauri-bundler/src/bundle/macos/icon.rs).
+        // stdin is closed so we do not inherit Node's fd 0 (tauri-apps/tauri#15315, #15991).
+        const args = [
+            iconDest,
+            '--compile',
+            outputPath,
+            '--output-format',
+            'human-readable-text',
+            '--notices',
+            '--warnings',
+            '--output-partial-info-plist',
+            path.join(outputPath, 'assetcatalog_generated_info.plist'),
+            '--app-icon',
+            'Icon',
+            '--include-all-app-icons',
+            '--accent-color',
+            'AccentColor',
+            '--enable-on-demand-resources',
+            'NO',
+            '--development-region',
+            'en',
+            '--target-device',
+            'mac',
+            '--minimum-deployment-target',
+            '26.0',
+            '--platform',
+            'macosx',
+        ];
+        await runActool(args, ACTOOL_TIMEOUT_MS.compile);
+        const assetsCar = path.join(outputPath, 'Assets.car');
+        if (!(await fsExtra.pathExists(assetsCar))) {
+            return false;
+        }
+        // Copy out before the temp directory is removed in `finally`.
+        await fsExtra.ensureDir(path.dirname(destPath));
+        await fsExtra.copy(assetsCar, destPath);
+        return true;
+    }
+    finally {
+        await cleanup();
+    }
+}
+/**
+ * Precompile an Icon Composer package to Assets.car so Tauri's bundler
+ * does not have to spawn actool itself (a known hang/crash on Xcode 27).
+ * Returns the destination path of Assets.car, or null if compilation failed.
+ */
+async function precompileIconComposerAssets(iconPackagePath, destIconsDir) {
+    const major = await getActoolMajorVersion();
+    if (major === null || major < 26) {
+        return null;
+    }
+    await fsExtra.ensureDir(destIconsDir);
+    const dest = path.join(destIconsDir, 'Assets.car');
+    if (await compileAssetsCar(iconPackagePath, dest)) {
+        return dest;
+    }
+    logger.warn('✼ actool could not compile the .icon package (tauri-apps/tauri#15315, #16386). The app will use the .icns icon instead.');
+    return null;
+}
+/**
+ * Copy a valid .icon package (and an .icns fallback) into src-tauri/icons
+ * and return the paths to set on tauriConf.bundle.icon.
+ */
+async function applyDarwinIconComposerPackage(options) {
+    const { sourceIconPath, destIconsDir, safeAppName, defaultIcnsPath } = options;
+    await fsExtra.ensureDir(destIconsDir);
+    const destIconPackage = path.join(destIconsDir, `${safeAppName}.icon`);
+    if (path.resolve(sourceIconPath) !== path.resolve(destIconPackage)) {
+        await fsExtra.copy(sourceIconPath, destIconPackage);
+    }
+    const normalizedSource = sourceIconPath.replace(/[/\\]+$/, '');
+    const siblingIcns = path.join(path.dirname(normalizedSource), `${path.parse(normalizedSource).name}.icns`);
+    const destIcns = path.join(destIconsDir, `${safeAppName}.icns`);
+    let fallbackSource = null;
+    if (await fsExtra.pathExists(siblingIcns)) {
+        const stat = await fsExtra.stat(siblingIcns);
+        if (stat.isFile()) {
+            fallbackSource = siblingIcns;
+        }
+    }
+    if (!fallbackSource && (await fsExtra.pathExists(defaultIcnsPath))) {
+        fallbackSource = defaultIcnsPath;
+    }
+    let hasIcns = false;
+    if (fallbackSource) {
+        if (path.resolve(fallbackSource) !== path.resolve(destIcns)) {
+            await fsExtra.copy(fallbackSource, destIcns);
+        }
+        hasIcns = await fsExtra.pathExists(destIcns);
+    }
+    if (!hasIcns) {
+        logger.warn('✼ No .icns fallback found next to the .icon package, and Pake default icon.icns is missing. Older macOS will not have a static icon.');
+    }
+    await warnIfActoolUnavailable();
+    const compiledCar = await precompileIconComposerAssets(destIconPackage, destIconsDir);
+    // Tauri runs actool itself for a .icon in bundle.icon and fails the whole
+    // build when actool errors, so only a precompiled Assets.car goes in; when
+    // that could not be built, the app ships with the .icns alone.
+    const bundleIcon = [];
+    if (compiledCar) {
+        logger.info('✼ Precompiled Assets.car from the Icon Composer package.');
+        bundleIcon.push('icons/Assets.car');
+    }
+    if (hasIcns) {
+        bundleIcon.push(`icons/${safeAppName}.icns`);
+    }
+    if (bundleIcon.length === 0) {
+        bundleIcon.push(`icons/${safeAppName}.icon`);
+    }
+    return { bundleIcon };
+}
+
 /**
  * Pure transform from CLI options to the window-config slice that gets
  * merged into pake.json. Exposed for snapshot testing so option drift
@@ -1209,7 +1430,7 @@ async function mergeIcons(options, name, tauriConf, platform, safeAppName) {
             fileExt: '.icns',
             path: `icons/${safeAppName}.icns`,
             defaultIcon: 'icons/icon.icns',
-            message: 'macOS icon must be .icns type.',
+            message: 'macOS icon must be .icns or an Icon Composer .icon package.',
         },
     };
     const iconInfo = platformIconMap[platform];
@@ -1217,8 +1438,31 @@ async function mergeIcons(options, name, tauriConf, platform, safeAppName) {
     const exists = resolvedIconPath && (await fsExtra.pathExists(resolvedIconPath));
     if (exists) {
         let updateIconPath = true;
-        const customIconExt = path.extname(resolvedIconPath).toLowerCase();
-        if (customIconExt !== iconInfo.fileExt) {
+        let composerIconApplied = false;
+        const customIconExt = iconPathExtension(resolvedIconPath);
+        if (platform === 'darwin' && customIconExt === '.icon') {
+            if (!(await isMacOSIconComposerPackage(resolvedIconPath))) {
+                updateIconPath = false;
+                logger.warn(`✼ macOS .icon must be an Icon Composer package (a directory containing icon.json), but you gave ${resolvedIconPath}`);
+                tauriConf.bundle.icon = [iconInfo.defaultIcon];
+            }
+            else {
+                const destIconsDir = path.join(npmDirectory, 'src-tauri/icons');
+                const defaultIcnsPath = path.join(npmDirectory, 'src-tauri', iconInfo.defaultIcon);
+                const { bundleIcon } = await applyDarwinIconComposerPackage({
+                    sourceIconPath: resolvedIconPath,
+                    destIconsDir,
+                    safeAppName,
+                    defaultIcnsPath,
+                });
+                tauriConf.bundle.icon = bundleIcon;
+                // Assets.car is read from bundle.icon; copying it into resources too
+                // would store it twice. Keep the .icns resource the plain path ships.
+                tauriConf.bundle.resources = bundleIcon.filter((icon) => icon.endsWith('.icns'));
+                composerIconApplied = true;
+            }
+        }
+        else if (customIconExt !== iconInfo.fileExt) {
             updateIconPath = false;
             logger.warn(`✼ ${iconInfo.message}, but you give ${customIconExt}`);
             tauriConf.bundle.icon = [iconInfo.defaultIcon];
@@ -1239,11 +1483,13 @@ async function mergeIcons(options, name, tauriConf, platform, safeAppName) {
                 }
             }
         }
-        if (updateIconPath) {
-            tauriConf.bundle.icon = [iconInfo.path];
-        }
-        else {
-            logger.warn(`✼ Icon will remain as default.`);
+        if (!composerIconApplied) {
+            if (updateIconPath) {
+                tauriConf.bundle.icon = [iconInfo.path];
+            }
+            else {
+                logger.warn(`✼ Icon will remain as default.`);
+            }
         }
     }
     else {
@@ -2863,6 +3109,7 @@ const ICON_CONFIG = {
         'jpg',
         'webp',
         'icns',
+        'icon',
         'svg',
     ],
     transparentBackground: { r: 255, g: 255, b: 255, alpha: 0 },
@@ -3112,8 +3359,19 @@ async function isLinuxBundleIconReady(iconPath) {
 async function processIcon(iconPath, appName) {
     if (!iconPath || !appName)
         return iconPath;
+    const ext = iconPathExtension(iconPath);
+    if (ext === '.icon') {
+        if (!IS_WIN && !IS_LINUX) {
+            if (await isMacOSIconComposerPackage(iconPath)) {
+                return iconPath;
+            }
+            logger.warn('✼ --icon .icon must be an Icon Composer package (a directory containing icon.json).');
+            return null;
+        }
+        logger.warn('✼ Icon Composer .icon packages are only used on macOS. This platform will use a converted or default icon.');
+        return null;
+    }
     // Check if already in correct platform format
-    const ext = path.extname(iconPath).toLowerCase();
     const isCorrectFormat = (IS_WIN && ext === '.ico') ||
         (IS_LINUX && (await isLinuxBundleIconReady(iconPath))) ||
         (!IS_WIN && !IS_LINUX && ext === '.icns');
@@ -3173,6 +3431,10 @@ async function handleIcon(options, url) {
     // Handle custom icon (local file or remote URL)
     if (options.icon) {
         if (options.icon.startsWith('http')) {
+            if (isIconComposerUrl(options.icon)) {
+                logger.warn('✼ Icon Composer .icon packages cannot be downloaded from a URL; pass a local path. HTTP --icon is for ordinary images and .icns files.');
+                return '';
+            }
             const downloadedPath = await downloadIcon(options.icon);
             if (downloadedPath) {
                 const result = await processIcon(downloadedPath, options.name || '');
@@ -3184,6 +3446,9 @@ async function handleIcon(options, url) {
         // Local file path
         const resolvedPath = path.resolve(options.icon);
         const result = await processIcon(resolvedPath, options.name || '');
+        if (iconPathExtension(resolvedPath) === '.icon' && !result) {
+            return '';
+        }
         return result || resolvedPath;
     }
     // Check for existing local icon before downloading
@@ -3341,6 +3606,12 @@ async function tryGetFavicon(url, appName) {
  * Downloads icon from URL
  */
 async function downloadIcon(iconUrl, showSpinner = true, customTimeout) {
+    if (isIconComposerUrl(iconUrl)) {
+        if (showSpinner) {
+            logger.warn('✼ Icon Composer .icon packages cannot be downloaded from a URL; pass a local path.');
+        }
+        return null;
+    }
     throwIfBuildCancelled();
     const buildSignal = getBuildCancellationSignal();
     const controller = new AbortController();
@@ -3664,7 +3935,7 @@ ${green('|_|   \\__,_|_|\\_\\___|  can turn any webpage into a desktop app with 
         .argument('[url]', 'The web URL you want to package', validateUrlInput)
         .option('--name <string>', 'Application name')
         .addOption(new Option('--identifier <string>', 'Application identifier / bundle ID').hideHelp())
-        .option('--icon <string>', 'Application icon', DEFAULT_PAKE_OPTIONS.icon)
+        .option('--icon <string>', 'Application icon (.icns / .icon on macOS, .ico on Windows, .png on Linux)', DEFAULT_PAKE_OPTIONS.icon)
         .option('--width <number>', 'Window width', validateNumberInput, DEFAULT_PAKE_OPTIONS.width)
         .option('--height <number>', 'Window height', validateNumberInput, DEFAULT_PAKE_OPTIONS.height)
         .option('--use-local-file', 'Use local file packaging', DEFAULT_PAKE_OPTIONS.useLocalFile)
