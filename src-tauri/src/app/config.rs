@@ -133,6 +133,10 @@ pub struct PakeConfig {
     /// login item in step at every start (see `autostart.rs`).
     #[serde(default)]
     pub launch_at_login: bool,
+    /// Built-in filter lists to block with: `ads`, `trackers`, `cookies`,
+    /// `china`. Only builds with the `content-blocking` feature read it.
+    #[serde(default)]
+    pub content_blocking: Vec<String>,
     /// Replaces the compiled custom.js when a runtime override supplies one.
     #[serde(skip)]
     pub runtime_custom_js: Option<String>,

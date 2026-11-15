@@ -548,6 +548,27 @@ fn build_window(
         url
     };
 
+    // With content blocking the main window starts blank, like the auth
+    // delegate above, and opens its page once the rule lists are in place.
+    #[cfg(all(
+        any(target_os = "macos", target_os = "linux"),
+        feature = "content-blocking"
+    ))]
+    let blocking_groups = crate::app::content_blocking::selected_groups(&config.content_blocking);
+    #[cfg(all(
+        any(target_os = "macos", target_os = "linux"),
+        feature = "content-blocking"
+    ))]
+    let (url, blocked_target) = match web_target(&url) {
+        Some(target) if label == "pake" && !blocking_groups.is_empty() => (
+            WebviewUrl::CustomProtocol(
+                Url::parse("about:blank").expect("about:blank must be a valid URL"),
+            ),
+            Some(target),
+        ),
+        _ => (url, None),
+    };
+
     let user_agent = config.user_agent.get();
 
     let config_script = format!(
@@ -964,6 +985,18 @@ fn build_window(
         }
     }
 
+    // Before download::install navigates: WebView2 only raises request events
+    // for filters added ahead of the first navigation.
+    #[cfg(all(target_os = "windows", feature = "content-blocking"))]
+    if !config.content_blocking.is_empty() {
+        let names = config.content_blocking.clone();
+        if let Err(error) = window.with_webview(move |webview| {
+            crate::app::content_blocking::install(&webview, &names);
+        }) {
+            eprintln!("[Pake] Failed to access WebView2 for content blocking: {error}");
+        }
+    }
+
     #[cfg(target_os = "windows")]
     crate::app::download::install(&window, download_target)?;
 
@@ -974,6 +1007,33 @@ fn build_window(
         crate::app::recovery::install(&webview);
     }) {
         eprintln!("[Pake] Failed to access WebKitGTK for media permissions and recovery: {error}");
+    }
+
+    // Every webview passes here, popups included, whose content controller
+    // macOS replaces (prepare_macos_new_window_configuration), so each gets the lists.
+    #[cfg(all(
+        any(target_os = "macos", target_os = "linux"),
+        feature = "content-blocking"
+    ))]
+    if !blocking_groups.is_empty() {
+        #[cfg(target_os = "linux")]
+        if let Ok(directory) = app.path().app_data_dir() {
+            crate::app::content_blocking::set_store_dir(directory);
+        }
+        let groups = blocking_groups.clone();
+        let opener = window.clone();
+        if let Err(error) = window.with_webview(move |webview| {
+            crate::app::content_blocking::install(&webview, groups);
+            if let Some(target) = blocked_target {
+                crate::app::content_blocking::when_ready(Box::new(move || {
+                    if let Err(error) = opener.navigate(target) {
+                        eprintln!("[Pake] Failed to open the page: {error}");
+                    }
+                }));
+            }
+        }) {
+            eprintln!("[Pake] Failed to access the webview for content blocking: {error}");
+        }
     }
 
     #[cfg(target_os = "windows")]
@@ -1035,7 +1095,11 @@ fn build_window(
         let prompt_for_basic_auth = config.basic_auth;
         let allow_invalid_certificates = window_config.ignore_certificate_errors;
         let auth_window = window.clone();
-        Queue::main().exec_async(move || {
+        #[cfg(feature = "content-blocking")]
+        let wait_for_lists = !blocking_groups.is_empty();
+        #[cfg(not(feature = "content-blocking"))]
+        let wait_for_lists = false;
+        let navigate = move || {
             if let Err(error) = auth_window.with_webview(move |webview| {
                 if !crate::app::auth::install_auth_delegate_and_navigate(
                     webview.inner(),
@@ -1049,10 +1113,33 @@ fn build_window(
             }) {
                 eprintln!("[Pake] Failed to access the macOS webview: {error}");
             }
+        };
+        Queue::main().exec_async(move || {
+            #[cfg(feature = "content-blocking")]
+            if wait_for_lists {
+                crate::app::content_blocking::when_ready(Box::new(navigate));
+                return;
+            }
+            let _ = wait_for_lists;
+            navigate();
         });
     }
 
     Ok(window)
+}
+
+/// The http or https page a window opens, whichever way its URL is held.
+#[cfg(all(
+    any(target_os = "macos", target_os = "linux"),
+    feature = "content-blocking"
+))]
+fn web_target(url: &WebviewUrl) -> Option<Url> {
+    let target = match url {
+        WebviewUrl::External(target) => Some(target.clone()),
+        WebviewUrl::App(path) => path.to_str().and_then(|path| Url::parse(path).ok()),
+        _ => None,
+    }?;
+    matches!(target.scheme(), "http" | "https").then_some(target)
 }
 
 pub fn save_last_url(app: &AppHandle) {

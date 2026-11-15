@@ -4,6 +4,8 @@ pub mod autostart;
 #[cfg(any(target_os = "linux", test))]
 pub mod color_scheme;
 pub mod config;
+#[cfg(feature = "content-blocking")]
+pub mod content_blocking;
 #[cfg(target_os = "windows")]
 pub mod download;
 pub mod invoke;

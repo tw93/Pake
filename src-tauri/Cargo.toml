@@ -21,6 +21,14 @@ tauri-build = { version = "2.5.5", features = [] }
 serde_json = "1.0.149"
 serde = { version = "1.0.228", features = ["derive"] }
 tokio = { version = "1.49.0", features = ["time", "fs"] }
+# Content blocking (feature `content-blocking`): Brave's filter engine, MPL-2.0.
+# Without single-thread its Engine is Send + Sync for the WebView2 handler.
+adblock = { version = "0.13.5", default-features = false, features = [
+  "content-blocking",
+  "embedded-domain-resolver",
+  "full-regex-handling",
+], optional = true }
+flate2 = { version = "1.1", optional = true }
 tauri = { version = "2.10.2", features = [
   "tray-icon",
   "image-ico",
@@ -42,12 +50,17 @@ objc2 = "0.6"
 objc2-app-kit = { version = "0.3", features = ["NSApplication", "NSDockTile", "NSWindow"] }
 objc2-foundation = { version = "0.3", features = [
   "NSArray",
+  "NSEnumerator",
+  "NSError",
   "NSLocale",
   "NSString",
   "NSUserNotification",
 ] }
 objc2-web-kit = { version = "0.3", default-features = false, features = [
   "std",
+  "block2",
+  "WKContentRuleList",
+  "WKContentRuleListStore",
   "WKUserContentController",
   "WKWebViewConfiguration",
 ] }
@@ -63,6 +76,8 @@ gtk = "0.18"
 # Reads the freedesktop color-scheme from the settings portal. Same version
 # and features that tauri-plugin-opener and single-instance already lock.
 zbus = "5.14"
+# WebKitGTK's content filter store, which the safe webkit2gtk crate leaves out.
+webkit2gtk-sys = { version = "=2.0.2", features = ["v2_40"], optional = true }
 
 [target.'cfg(windows)'.dependencies]
 windows-sys = { version = "0.61.2", features = [
@@ -84,7 +99,10 @@ native-download-probe = []
 cli-build = []
 # Prebuilt template that reads a pake-runtime folder at launch: Contents/Resources
 # on macOS, next to the executable elsewhere. The CLI never enables it.
-runtime-template = []
+runtime-template = ["content-blocking"]
+# Ad, tracker and cookie-notice blocking with the lists in ../filters, which the
+# npm package does not ship; the CLI never enables it.
+content-blocking = ["dep:adblock", "dep:flate2", "dep:webkit2gtk-sys"]
 # Tauri's macOS proxy APIs require macOS 14 or later. The CLI enables this
 # feature only after checking the host Darwin version.
 macos-proxy = ["tauri/macos-proxy"]
