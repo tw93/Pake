@@ -1,0 +1,33 @@
+name: App Feature
+description: Suggest an improvement for the paid Pake app for Mac, Windows or Linux.
+title: "[App Feature] "
+labels: ["app", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement for the Pake app.
+
+        The Pake app is a paid native app. Its source code is not public. This repository hosts the open-source Pake CLI and public feedback for the app.
+
+        Please keep requests concrete: what is hard today, what you expected Pake to do, and why it matters.
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      placeholder: "Mac, Windows or Linux"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      placeholder: "When I use Pake, I want to..."
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like Pake to do?
+    validations:
+      required: true

@@ -1,0 +1,84 @@
+name: App Bug
+description: Report a bug in the paid Pake app for Mac, Windows or Linux.
+title: "[App Bug] "
+labels: ["app", "bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a Pake app bug.
+
+        First update to the latest release from https://pake.run, quit and reopen Pake, and reproduce the problem.
+
+        The Pake app is a paid native app. Its source code is not public. This repository hosts the open-source Pake CLI and public feedback for the app.
+
+        Do not include license keys, order numbers, private paths, or logs with personal data. For payment, refund or license issues, email hi@pake.run instead.
+  - type: input
+    id: app_version
+    attributes:
+      label: Pake app version
+      description: Filled in when you come from the app's Help menu. Otherwise the platform and version, such as Mac 1.8.0.
+      placeholder: "Mac 1.8.0 (19)"
+    validations:
+      required: true
+  - type: input
+    id: system_version
+    attributes:
+      label: System version
+      placeholder: "macOS 15.5, Windows 11 24H2, Omarchy 3.1"
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      placeholder: "MacBook Pro M3 Pro, ThinkPad X1, etc."
+    validations:
+      required: false
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Creating an app
+        - A created app (the website inside it)
+        - My Apps (open, edit, update, remove)
+        - Gallery / search
+        - Activation / license
+        - Download / update of Pake itself
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: If it is about one website, include its address.
+      placeholder: "Pake did..."
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open Pake
+        2. Type ...
+        3. Click ...
+        4. See ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: "I expected Pake to..."
+    validations:
+      required: true
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Screenshots
+      description: Attach screenshots only after removing license keys and order details.
+    validations:
+      required: false
