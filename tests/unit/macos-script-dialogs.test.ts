@@ -4,7 +4,8 @@ import { describe, expect, it } from 'vitest';
 
 const rustRoot = path.join(process.cwd(), 'src-tauri', 'src');
 const read = (relative: string) =>
-  fs.readFileSync(path.join(rustRoot, relative), 'utf8');
+  // A Windows checkout has CRLF line endings; the patterns below are written for LF.
+  fs.readFileSync(path.join(rustRoot, relative), 'utf8').replace(/\r\n/g, '\n');
 
 describe('macOS alert(), confirm() and prompt()', () => {
   it('is installed on every webview the one window builder makes', () => {
