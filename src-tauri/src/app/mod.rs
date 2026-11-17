@@ -19,6 +19,8 @@ pub mod navigation;
 pub mod notification;
 #[cfg(any(target_os = "linux", target_os = "windows", test))]
 pub mod recovery;
+#[cfg(target_os = "macos")]
+pub mod script_dialogs;
 pub mod setup;
 #[cfg(target_os = "macos")]
 pub mod tab_bar;

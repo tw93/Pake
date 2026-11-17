@@ -1052,6 +1052,15 @@ fn build_window(
         eprintln!("[Pake] Failed to access WKWebView for history swipe gestures: {error}");
     }
 
+    // A page's alert(), confirm() and prompt() show nothing in a WKWebView
+    // unless its UI delegate answers, and Wry's does not: every window's does.
+    #[cfg(target_os = "macos")]
+    if let Err(error) = window.with_webview(|webview| {
+        crate::app::script_dialogs::install(&webview);
+    }) {
+        eprintln!("[Pake] Failed to access WKWebView for its script dialogs: {error}");
+    }
+
     // The tab bar's + button exists only while some window class answers
     // `newWindowForTab:`. Install it for every tabbing window, the main one
     // included: its tab bar is the one the user sees first.
