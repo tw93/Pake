@@ -118,6 +118,7 @@ Sort every community PR into one of three outcomes; never rewrite a contribution
 - **Merge as-is**: implementation is sound. Verify locally (build + relevant tests), merge, thank the author.
 - **Right direction, implementation needs work**: push fixes directly onto the contributor's branch so their authorship is preserved, then merge and reply summarizing what was changed and why.
 - **Out of scope**: close as not planned with a one-line apology and the boundary reason (what Pake deliberately does not do). Keep it friendly and leave room for discussion.
+- **Fork automation noise**: a PR from a fork's `main` whose only change is a file our own workflows regenerate (`CONTRIBUTORS.svg`, the `chore: update contributors and formatting [skip ci]` commits) is that workflow running in the fork. Close it directly with a short note, no need to ask the maintainer first (maintainer 2026-11-17).
 
 ## Troubleshooting
 
