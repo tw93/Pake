@@ -18,18 +18,33 @@ use block2::{Block, RcBlock};
 use objc2::ffi::class_addMethod;
 use objc2::rc::Retained;
 use objc2::runtime::{AnyClass, AnyObject, Bool, Imp, Sel};
-use objc2::{msg_send, sel, MainThreadMarker};
+use objc2::{msg_send, MainThreadMarker};
 use objc2_app_kit::{NSAlert, NSAlertFirstButtonReturn, NSTextField};
 use objc2_foundation::{NSPoint, NSRect, NSSize, NSString};
 use std::cell::Cell;
-use std::ffi::c_char;
+use std::ffi::CStr;
 
 use crate::util::UiLanguage;
 
 /// `void (id webView, NSString *message, WKFrameInfo *frame, block)`.
-const MESSAGE_PANEL_TYPES: &[u8] = b"v@:@@@@?\0";
+const MESSAGE_PANEL_TYPES: &CStr = c"v@:@@@@?";
 /// The text panel carries the default text before the frame.
-const TEXT_PANEL_TYPES: &[u8] = b"v@:@@@@@?\0";
+const TEXT_PANEL_TYPES: &CStr = c"v@:@@@@@?";
+/// The three WKUIDelegate methods, each with the encoding its handler is
+/// installed under. A selector takes one argument per colon, and an encoding
+/// that disagrees makes the runtime read the wrong registers.
+const ALERT_PANEL: (&CStr, &CStr) = (
+    c"webView:runJavaScriptAlertPanelWithMessage:initiatedByFrame:completionHandler:",
+    MESSAGE_PANEL_TYPES,
+);
+const CONFIRM_PANEL: (&CStr, &CStr) = (
+    c"webView:runJavaScriptConfirmPanelWithMessage:initiatedByFrame:completionHandler:",
+    MESSAGE_PANEL_TYPES,
+);
+const TEXT_PANEL: (&CStr, &CStr) = (
+    c"webView:runJavaScriptTextInputPanelWithPrompt:defaultText:initiatedByFrame:completionHandler:",
+    TEXT_PANEL_TYPES,
+);
 const PROMPT_FIELD_WIDTH: f64 = 260.0;
 const PROMPT_FIELD_HEIGHT: f64 = 24.0;
 
@@ -259,23 +274,12 @@ pub fn install(webview: &tauri::webview::PlatformWebview) {
             ),
             Imp,
         >(run_prompt);
-        for (selector, imp, types) in [
-            (
-                sel!(webView:runJavaScriptAlertPanelWithMessage:initiatedByFrame:completionHandler:),
-                alert,
-                MESSAGE_PANEL_TYPES,
-            ),
-            (
-                sel!(webView:runJavaScriptConfirmPanelWithMessage:initiatedByFrame:completionHandler:),
-                confirm,
-                MESSAGE_PANEL_TYPES,
-            ),
-            (
-                sel!(webView:runJavaScriptTextInputPanelWithPrompt:defaultText:initiatedByFrame:completionHandler:),
-                prompt,
-                TEXT_PANEL_TYPES,
-            ),
+        for ((selector, types), imp) in [
+            (ALERT_PANEL, alert),
+            (CONFIRM_PANEL, confirm),
+            (TEXT_PANEL, prompt),
         ] {
+            let selector = Sel::register(selector);
             if class.instance_method(selector).is_some() {
                 continue;
             }
@@ -283,7 +287,7 @@ pub fn install(webview: &tauri::webview::PlatformWebview) {
                 class as *const AnyClass as *mut AnyClass,
                 selector,
                 imp,
-                types.as_ptr() as *const c_char,
+                types.as_ptr(),
             );
             if !added.as_bool() {
                 eprintln!("[Pake] Failed to install a script dialog on the UI delegate.");
@@ -297,5 +301,41 @@ pub fn install(webview: &tauri::webview::PlatformWebview) {
         let none: *mut AnyObject = std::ptr::null_mut();
         let _: () = msg_send![view, setUIDelegate: none];
         let _: () = msg_send![view, setUIDelegate: &*delegate];
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The arguments an encoding declares after `self` and `_cmd`; a block is
+    /// written `@?` and counts once.
+    fn declared_arguments(types: &CStr) -> usize {
+        let types = types.to_str().unwrap();
+        let arguments = types.strip_prefix("v@:").expect("void, self, _cmd");
+        arguments.replace("@?", "B").chars().count()
+    }
+
+    #[test]
+    fn script_panel_encodings_match_their_selectors() {
+        for (selector, types) in [ALERT_PANEL, CONFIRM_PANEL, TEXT_PANEL] {
+            let selector = selector.to_str().unwrap();
+            let colons = selector.matches(':').count();
+            assert_eq!(declared_arguments(types), colons, "{selector}");
+            // WebKit's last argument is always the completion handler block.
+            assert!(types.to_str().unwrap().ends_with("@?"), "{selector}");
+            assert!(selector.ends_with("completionHandler:"), "{selector}");
+        }
+        // The text panel is the one with a default text before the frame.
+        assert_eq!(
+            declared_arguments(TEXT_PANEL.1),
+            declared_arguments(ALERT_PANEL.1) + 1
+        );
+    }
+
+    #[test]
+    fn cancel_and_accept_are_named_in_every_language() {
+        let (accept, cancel) = button_titles();
+        assert!(!accept.is_empty() && !cancel.is_empty() && accept != cancel);
     }
 }

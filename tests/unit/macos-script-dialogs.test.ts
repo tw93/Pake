@@ -28,8 +28,9 @@ describe('macOS alert(), confirm() and prompt()', () => {
       'webView:runJavaScriptConfirmPanelWithMessage:initiatedByFrame:completionHandler:',
       'webView:runJavaScriptTextInputPanelWithPrompt:defaultText:initiatedByFrame:completionHandler:',
     ]) {
-      expect(dialogs).toContain(`sel!(${selector})`);
+      expect(dialogs).toContain(`c"${selector}"`);
     }
+    expect(dialogs).toContain('let selector = Sel::register(selector);');
     // Added only where the delegate's class has no answer of its own.
     expect(dialogs).toContain('if class.instance_method(selector).is_some() {');
   });
