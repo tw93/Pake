@@ -41,6 +41,10 @@ pub struct WindowConfig {
     pub internal_url_regex: String,
     #[serde(default)]
     pub enable_find: bool,
+    /// macOS only: Back and Forward buttons in the title bar, beside the
+    /// traffic lights. Off unless the app asks for them.
+    #[serde(default)]
+    pub navigation_buttons: bool,
     #[serde(default = "default_zoom")]
     pub zoom: u32,
     #[serde(default)]
@@ -262,6 +266,19 @@ mod tests {
         let legacy: WindowConfig = serde_json::from_value(legacy).unwrap();
         assert!(!legacy.password_autosave);
         assert!(!legacy.password_autosave_enabled());
+    }
+
+    #[test]
+    fn navigation_buttons_are_opt_in() {
+        let window = config_for("https://example.com").windows.remove(0);
+        let mut window = serde_json::to_value(window).unwrap();
+        window.as_object_mut().unwrap().remove("navigation_buttons");
+        let legacy: WindowConfig = serde_json::from_value(window.clone()).unwrap();
+        assert!(!legacy.navigation_buttons);
+
+        window["navigation_buttons"] = true.into();
+        let asked: WindowConfig = serde_json::from_value(window).unwrap();
+        assert!(asked.navigation_buttons);
     }
 
     #[test]

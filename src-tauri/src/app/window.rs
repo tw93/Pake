@@ -1060,6 +1060,11 @@ fn build_window(
         crate::app::tab_bar::install_new_tab_action(app, &window);
     }
 
+    #[cfg(target_os = "macos")]
+    if window_config.navigation_buttons {
+        crate::app::nav_buttons::install(app, &window);
+    }
+
     // A shared identifier alone leaves each NSWindow in automatic mode.
     // Prefer tabs only for Cmd+N clones so they join the main window's tab
     // group. The main window stays bar-less until another tab exists, while

@@ -13,6 +13,8 @@ pub mod invoke;
 pub mod media_permission;
 #[cfg(target_os = "macos")]
 pub mod menu;
+#[cfg(target_os = "macos")]
+pub mod nav_buttons;
 pub mod navigation;
 pub mod notification;
 #[cfg(any(target_os = "linux", target_os = "windows", test))]
