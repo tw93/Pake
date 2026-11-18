@@ -1369,9 +1369,11 @@ fn web_target(url: &WebviewUrl) -> Option<Url> {
 
 /// The address a window is showing, or `None` when it shows none. On macOS a
 /// WKWebView whose web content process has died has no URL, and Wry's getter
-/// unwraps it: `window.url()` there is a panic, which the release profile
-/// turns into the app aborting (a user quit an app whose page had gone white
-/// and got a crash report, 2026-11-18). So the web view is asked first.
+/// unwrapped it through 0.54.2: `window.url()` there was a panic, which the
+/// release profile turned into the app aborting (a user quit an app whose page
+/// had gone white and got a crash report, 2026-11-18). Wry 0.57 returns an
+/// error instead; the web view is still asked first, so this stays the one
+/// reader whatever Wry does.
 pub fn page_url(window: &WebviewWindow) -> Option<Url> {
     #[cfg(target_os = "macos")]
     {

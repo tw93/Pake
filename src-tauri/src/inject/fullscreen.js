@@ -1,5 +1,6 @@
-// Polyfill for HTML5 Fullscreen API where the webview has none of its own
-// (Linux, and a macOS too old for WebKit's).
+// Polyfill for HTML5 Fullscreen API where the webview has none of its own:
+// Linux, and a Mac only if its engine reports none (Wry turns WebKit's on for
+// every macOS it supports).
 // Bridges the standard requestFullscreen / exitFullscreen DOM API to Tauri's
 // native window fullscreen so a player's own button works.
 //

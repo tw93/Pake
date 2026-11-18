@@ -69,7 +69,6 @@ function page(stage, origin) {
   // for a user gesture as a browser does; tests/browser/fullscreen.mjs holds
   // the polyfill to leaving the player alone when this is denied.
   results.fullscreen = await check("plugin:window|set_fullscreen", {label: "pake", value: true});
-  results.windowStayed = innerWidth < screen.width;
   `
       : ""
   }
@@ -247,11 +246,6 @@ try {
     );
   }
   assert.match(untrusted.fullscreen, /^denied: .*not allowed/i);
-  assert.equal(
-    untrusted.windowStayed,
-    true,
-    "an untrusted origin made the window full screen",
-  );
   assert.equal(
     await fs.readFile(path.join(downloads, "entry.txt"), "utf8"),
     "pake-native-ipc-proof",

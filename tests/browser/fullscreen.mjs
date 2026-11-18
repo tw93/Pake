@@ -92,7 +92,7 @@ test("native fullscreen preserves the player subtree and F11 exits its top layer
   }
 });
 
-// The Linux/macOS polyfill must keep video and controls in the same subtree,
+// The polyfill (Linux) must keep video and controls in the same subtree,
 // including sites that request fullscreen on the document instead of the player.
 for (const target of ["html", "body", "#player"]) {
   test(`polyfill preserves player controls when ${target} requests fullscreen`, async () => {
