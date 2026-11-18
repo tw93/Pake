@@ -9,21 +9,19 @@ const read = (relative: string) =>
 
 describe('a page whose web content process died on macOS', () => {
   it('is reloaded, within the same limit as on Windows and Linux', () => {
+    // Tauri 2.12 reloads without a limit unless the app sets this hook, and
+    // a second reload of its own would follow the one made here.
     const recovery = read('app/recovery.rs');
-    expect(recovery).toContain('c"webViewWebContentProcessDidTerminate:"');
-    // Wry's delegate already has the method, so it is replaced, not added.
-    expect(recovery).toContain('objc2::ffi::method_setImplementation(');
-    const start = recovery.indexOf('extern "C" fn did_terminate(');
+    const start = recovery.indexOf('pub fn on_web_process_terminated<');
     const body = recovery.slice(start, recovery.indexOf('\n}\n', start));
     const limited = body.indexOf('!reload_allowed()');
-    const reloaded = body.indexOf('objc2::msg_send![webview, reload]');
+    const reloaded = body.indexOf('webview.reload()');
     expect(limited).toBeGreaterThan(-1);
     expect(reloaded).toBeGreaterThan(limited);
+    expect(recovery).not.toContain('method_setImplementation');
 
-    const window = read('app/window.rs');
-    const build = window.slice(window.indexOf('fn build_window('));
-    expect(build).toMatch(
-      /#\[cfg\(any\(target_os = "windows", target_os = "macos"\)\)\]\s+if let Err\(error\) = window\.with_webview\(\|webview\| \{\s+crate::app::recovery::install\(&webview\);/,
+    expect(read('lib.rs')).toMatch(
+      /#\[cfg\(target_os = "macos"\)\]\s+let tauri_app = tauri_app\.on_web_content_process_terminate\(\|webview\| \{\s+app::recovery::on_web_process_terminated\(webview\);/,
     );
   });
 

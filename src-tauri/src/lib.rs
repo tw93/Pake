@@ -320,6 +320,10 @@ pub fn run_app() {
         }
     }
     let tauri_app = tauri::Builder::default();
+    #[cfg(target_os = "macos")]
+    let tauri_app = tauri_app.on_web_content_process_terminate(|webview| {
+        app::recovery::on_web_process_terminated(webview);
+    });
 
     let show_system_tray = pake_config.show_system_tray();
     let hide_on_close = pake_config.windows[0].hide_on_close;

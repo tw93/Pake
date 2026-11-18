@@ -4,8 +4,8 @@
 //! after its web process exits; WebView2 has its own error page but leaves a
 //! blank view after a renderer crash. Neither had a way back short of knowing
 //! Ctrl+R. WKWebView is left blank as well when its web content process dies,
-//! and Wry's navigation delegate hears of it but Tauri 2.10 passes no handler
-//! down, so the macOS arm replaces that delegate method and reloads there. A
+//! and Tauri reloads it without a limit unless the app sets its own handler,
+//! so the macOS arm is that handler, with the limit the other two have. A
 //! failed load on macOS is still not covered.
 
 /// A page that takes its renderer down on every load must not be reloaded for ever: after
@@ -109,76 +109,19 @@ pub fn install(webview: &tauri::webview::PlatformWebview) {
     }
 }
 
-/// `void webViewWebContentProcessDidTerminate:(WKWebView *)webView`.
-#[cfg(target_os = "macos")]
-const DID_TERMINATE: &std::ffi::CStr = c"webViewWebContentProcessDidTerminate:";
-
-/// Wry's own implementation, kept so its handler still runs first.
-#[cfg(target_os = "macos")]
-static WRY_DID_TERMINATE: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
-
-#[cfg(target_os = "macos")]
-type DidTerminate =
-    extern "C" fn(&objc2::runtime::AnyObject, objc2::runtime::Sel, *mut objc2::runtime::AnyObject);
-
-#[cfg(target_os = "macos")]
-extern "C" fn did_terminate(
-    this: &objc2::runtime::AnyObject,
-    cmd: objc2::runtime::Sel,
-    webview: *mut objc2::runtime::AnyObject,
-) {
-    let original = WRY_DID_TERMINATE.load(std::sync::atomic::Ordering::Relaxed);
-    if original != 0 && original != did_terminate as *const () as usize {
-        // SAFETY: the value is the method's previous implementation, which
-        // has this signature.
-        let original: DidTerminate = unsafe { std::mem::transmute(original) };
-        original(this, cmd, webview);
-    }
-    if webview.is_null() || !reload_allowed() {
-        return;
-    }
-    // SAFETY: WebKit calls this on the main thread with the live web view.
-    // Reload returns the page the dead process was showing.
-    let _: *mut objc2::runtime::AnyObject = unsafe { objc2::msg_send![webview, reload] };
-}
-
 /// Bring a page back when its web content process dies: the window went
 /// white and stayed white, and a user who then quit got a crash report on top
-/// (a user's report, 2026-11-18). Idempotent: the method is replaced once on
-/// the delegate's class, which every web view shares.
+/// (a user's report, 2026-11-18). This is Tauri's own hook for it. Without a
+/// handler Tauri 2.12 reloads every time, so a page that takes its process
+/// down on each load would reload for ever.
 #[cfg(target_os = "macos")]
-pub fn install(webview: &tauri::webview::PlatformWebview) {
-    use objc2::runtime::{AnyClass, AnyObject, Imp, Sel};
-    use std::sync::atomic::Ordering;
-
-    let view = webview.inner() as *mut AnyObject;
-    if view.is_null() {
-        eprintln!("[Pake] Failed to access WKWebView for its crash recovery");
+pub fn on_web_process_terminated<R: tauri::Runtime>(webview: &tauri::Webview<R>) {
+    if !reload_allowed() {
         return;
     }
-    // SAFETY: Tauri runs this on the main thread with the live WKWebView.
-    unsafe {
-        let delegate: *mut AnyObject = objc2::msg_send![view, navigationDelegate];
-        if delegate.is_null() {
-            eprintln!("[Pake] The WKWebView has no navigation delegate for its crash recovery");
-            return;
-        }
-        let class: *const AnyClass = objc2::msg_send![delegate, class];
-        let selector = Sel::register(DID_TERMINATE);
-        let method = objc2::ffi::class_getInstanceMethod(class, selector);
-        if method.is_null() {
-            eprintln!("[Pake] The navigation delegate does not hear of a dead web process");
-            return;
-        }
-        let replacement: Imp = std::mem::transmute::<DidTerminate, Imp>(did_terminate);
-        let current = objc2::ffi::method_getImplementation(method);
-        if current.map(|imp| imp as usize) == Some(replacement as usize) {
-            return;
-        }
-        let previous = objc2::ffi::method_setImplementation(method as *mut _, replacement);
-        if let Some(previous) = previous {
-            WRY_DID_TERMINATE.store(previous as usize, Ordering::Relaxed);
-        }
+    // Reload returns the page the dead process was showing.
+    if let Err(error) = webview.reload() {
+        eprintln!("[Pake] Failed to reload after the web process died: {error}");
     }
 }
 

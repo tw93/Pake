@@ -90,7 +90,7 @@ pub struct DownloadFileParams {
 /// match what the page itself would request. Best-effort: missing cookies
 /// fall through to an anonymous request.
 fn cookie_header_for_url(window: &WebviewWindow, url: &Url) -> Option<HeaderValue> {
-    // Wry 0.54 compares Cookie.domain to Url.domain, which is None for IPs
+    // Wry (through 0.57) compares Cookie.domain to Url.domain, which is None for IPs
     // on macOS. Read this window's store only for that broken branch.
     #[cfg(target_os = "macos")]
     let cookies = if url.host_str().is_some_and(|host| {

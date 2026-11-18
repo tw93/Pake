@@ -1201,7 +1201,7 @@ fn build_window(
         }
     }
 
-    #[cfg(any(target_os = "windows", target_os = "macos"))]
+    #[cfg(target_os = "windows")]
     if let Err(error) = window.with_webview(|webview| {
         crate::app::recovery::install(&webview);
     }) {
