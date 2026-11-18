@@ -272,6 +272,28 @@ mod popup_tests {
     use tauri::Url;
 
     #[test]
+    fn an_internal_new_tab_link_never_bubbles_as_blank() {
+        // tauri-plugin-shell's own click listener opens every target="_blank"
+        // link in the system browser, handled by the page or not. The click
+        // guard must retarget before it asks about --new-window, and the
+        // in-app window must wait for the end of the bubble.
+        let script = include_str!("../inject/event.js");
+        let retarget = script
+            .find(
+                "anchorElement.target = \"_self\";\n          if (window.pakeConfig?.new_window) {",
+            )
+            .expect("the link is retargeted under every setting");
+        let pending = script[retarget..]
+            .find("pendingBlankLink = {")
+            .expect("--new-window leaves the open to the end of the bubble");
+        assert!(pending < 200);
+        assert!(
+            script.contains("if (!pending || pending.event !== e || e.defaultPrevented) return;")
+        );
+        assert!(script.contains("window.addEventListener(\"click\", openUnhandledBlankLink);"));
+    }
+
+    #[test]
     fn a_popup_web_view_is_built_blank_so_the_engine_loads_its_address_once() {
         let google = Url::parse("https://accounts.google.com/gsi/select?client_id=1").unwrap();
         let built = popup_build_url(&google);
