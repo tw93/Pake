@@ -879,6 +879,39 @@ document.addEventListener("DOMContentLoaded", () => {
     originalWindowOpen.call(window, pending.url, "_blank");
   };
 
+  // An internal link that asks for a new tab (target _blank or _new).
+  //
+  // With --new-window the Rust on_new_window handler opens an in-app window.
+  // Without it, leaving the target untouched lets the native webview
+  // escalate the click to a system-browser "new window".
+  //
+  // Many SPAs (e.g. Plane) tag in-app links with target="_blank" but route
+  // the click themselves via a React onClick that calls preventDefault +
+  // client-side navigation. Forcing a full window.location reload here (and
+  // stopping propagation) would defeat that handler and reload the whole app
+  // on every click. Instead, retarget the link to "_self" so the webview
+  // never opens a browser window, then let the page's own handler run. If
+  // nothing intercepts the click, the default _self navigation keeps it
+  // inside the app.
+  //
+  // With --new-window the link is retargeted for this click as well: left
+  // as _blank, Tauri's shell plugin, whose own click listener on body opens
+  // every target="_blank" link in the system browser without asking whether
+  // the page handled the click, sent the link there even after the page had
+  // (Douyin's episode list: each switch opened douyin.com/undefined in the
+  // browser, a user's report, 2026-11-18). openUnhandledBlankLink, last in
+  // the bubble, opens the in-app window when nobody prevented the click.
+  const keepInternalNewTabLinkInApp = (e, anchorElement, absoluteUrl) => {
+    const askedFor = anchorElement.target;
+    anchorElement.target = "_self";
+    if (window.pakeConfig?.new_window) {
+      pendingBlankLink = { event: e, anchor: anchorElement, url: absoluteUrl };
+      setTimeout(() => {
+        anchorElement.target = askedFor;
+      }, 0);
+    }
+  };
+
   const detectAnchorElementClick = (e) => {
     // Safety check: ensure e.target exists and is an Element with closest method
     if (!e.target || typeof e.target.closest !== "function") {
@@ -932,38 +965,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (isInternalUrl(absoluteUrl)) {
-          // With --new-window the Rust on_new_window handler opens an in-app
-          // window. Without it, leaving target="_blank" untouched lets the
-          // native webview escalate the click to a system-browser "new window".
-          //
-          // Many SPAs (e.g. Plane) tag in-app links with target="_blank" but
-          // route the click themselves via a React onClick that calls
-          // preventDefault + client-side navigation. Forcing a full
-          // window.location reload here (and stopping propagation) would defeat
-          // that handler and reload the whole app on every click. Instead,
-          // retarget the link to "_self" so the webview never opens a browser
-          // window, then let the page's own handler run. If nothing intercepts
-          // the click, the default _self navigation keeps it inside the app.
-          //
-          // With --new-window the link is retargeted for this click as well:
-          // left as _blank, Tauri's shell plugin, whose own click listener
-          // on body opens every target="_blank" link in the system browser
-          // without asking whether the page handled the click, sent the
-          // link there even after the page had (Douyin's episode list:
-          // each switch opened douyin.com/undefined in the browser, a
-          // user's report, 2026-11-18). openUnhandledBlankLink, last in the
-          // bubble, opens the in-app window when nobody prevented the click.
-          anchorElement.target = "_self";
-          if (window.pakeConfig?.new_window) {
-            pendingBlankLink = {
-              event: e,
-              anchor: anchorElement,
-              url: absoluteUrl,
-            };
-            setTimeout(() => {
-              anchorElement.target = "_blank";
-            }, 0);
-          }
+          keepInternalNewTabLinkInApp(e, anchorElement, absoluteUrl);
           return;
         }
 
@@ -978,6 +980,14 @@ document.addEventListener("DOMContentLoaded", () => {
           e.preventDefault();
           e.stopImmediatePropagation();
           window.location.href = absoluteUrl;
+          return;
+        }
+
+        // "_new" is one more name for a new tab: a link to the app's own
+        // site stays in the app as a _blank one does, instead of leaving
+        // for the system browser.
+        if (isInternalUrl(absoluteUrl)) {
+          keepInternalNewTabLinkInApp(e, anchorElement, absoluteUrl);
           return;
         }
 

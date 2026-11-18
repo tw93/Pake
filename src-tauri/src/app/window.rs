@@ -279,14 +279,19 @@ mod popup_tests {
         // in-app window must wait for the end of the bubble.
         let script = include_str!("../inject/event.js").replace("\r\n", "\n");
         let retarget = script
-            .find(
-                "anchorElement.target = \"_self\";\n          if (window.pakeConfig?.new_window) {",
-            )
+            .find("anchorElement.target = \"_self\";\n    if (window.pakeConfig?.new_window) {")
             .expect("the link is retargeted under every setting");
         let pending = script[retarget..]
             .find("pendingBlankLink = {")
             .expect("--new-window leaves the open to the end of the bubble");
         assert!(pending < 200);
+        // Both new-tab targets go through it.
+        assert_eq!(
+            script
+                .matches("keepInternalNewTabLinkInApp(e, anchorElement, absoluteUrl);")
+                .count(),
+            2
+        );
         assert!(
             script.contains("if (!pending || pending.event !== e || e.defaultPrevented) return;")
         );

@@ -1107,6 +1107,20 @@ describe("event link guard", () => {
     }
   });
 
+  it("keeps an internal _new link in the app instead of the system browser", () => {
+    const context = loadEventHelpers({ withTauri: true });
+    context.window.pakeConfig = { new_window: false };
+    runDomReady(context);
+    const anchor = makeAnchor("https://example.com/video/1", "_new");
+    const event = makeClickEvent(anchor);
+    getClickGuard(context)(event);
+    expect(anchor.target).toBe("_self");
+    expect(event.preventDefault).not.toHaveBeenCalled();
+    expect(
+      context.invokeCalls.filter(([cmd]) => cmd === "plugin:shell|open"),
+    ).toEqual([]);
+  });
+
   it("opens a new-window link nobody handled in an in-app window", () => {
     try {
       const { context, nativeOpen, lastInBubble } = loadNewWindowPage();
