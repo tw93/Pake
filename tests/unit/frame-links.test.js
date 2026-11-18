@@ -3,14 +3,15 @@ import path from "node:path";
 import { runInNewContext } from "node:vm";
 import { describe, expect, it, vi } from "vitest";
 
-function loadFrame(config = {}) {
+function loadFrame(config = {}, navigator = undefined) {
   const messages = [];
-  const nativeWindow = {};
+  const nativeWindow = { location: { href: "about:blank" }, close: vi.fn() };
   const nativeOpen = vi.fn(() => nativeWindow);
   const listeners = {};
   const context = {
     URL,
     console,
+    ...(navigator ? { navigator } : {}),
     window: {
       location: { href: "https://mail.example.com/app" },
       pakeConfig: { url: "https://mail.example.com/app", ...config },
@@ -93,13 +94,11 @@ describe("subframe external links", () => {
     ["https://outside.example/article", "_self", {}],
     ["https://outside.example/article", "_parent", {}],
     ["https://outside.example/article", "_top", {}],
-    ["/message/42", "_blank", {}],
+    ["/message/42", "_blank", { new_window: true }],
     ["about:blank", "_blank", {}],
     ["", "_blank", {}],
     ["  #message", "_blank", {}],
-    ["https://appleid.apple.com/auth/authorize", "AppleAuthentication", {}],
     ["about:blank", "AppleAuthentication", {}],
-    ["https://accounts.google.com/o/oauth2/auth", "oauth", {}],
     [
       "https://outside.example/article",
       "_blank",
@@ -108,7 +107,7 @@ describe("subframe external links", () => {
     [
       "https://outside.example/article",
       "_blank",
-      { internal_url_regex: "outside\\.example" },
+      { internal_url_regex: "outside\\.example", new_window: true },
     ],
     ["file:///tmp/article", "_blank", {}],
     ["javascript:void(0)", "_blank", {}],
@@ -121,6 +120,102 @@ describe("subframe external links", () => {
       "width=400",
     );
     expect(frame.messages).toEqual([]);
+  });
+
+  it.each([
+    [
+      "https://accounts.google.com/o/oauth2/v2/auth?client_id=1",
+      "g_auth_token_window",
+      "toolbar=no,width=590,height=830,top=143.5,left=569",
+      {},
+    ],
+    [
+      "https://appleid.apple.com/auth/authorize",
+      "AppleAuthentication",
+      "width=400",
+      {},
+    ],
+    ["https://accounts.google.com/o/oauth2/auth", "oauth", "popup", {}],
+    ["/message/42", "_blank", "width=400", {}],
+    [
+      "https://accounts.google.com/o/oauth2/auth",
+      "oauth",
+      "width=400",
+      { new_window: true },
+    ],
+  ])(
+    "opens the sized popup %s (%s) blank and sends it to its address",
+    (url, name, specs, config) => {
+      const frame = loadFrame(config);
+      expect(frame.window.open(url, name, specs)).toBe(frame.nativeWindow);
+      expect(frame.nativeOpen).toHaveBeenCalledOnce();
+      expect(frame.nativeOpen).toHaveBeenCalledWith("about:blank", name, specs);
+      expect(frame.nativeWindow.location.href).toBe(
+        new URL(url, "https://mail.example.com/app").href,
+      );
+      expect(frame.messages).toEqual([]);
+    },
+  );
+
+  it.each([
+    ["https://accounts.google.com/o/oauth2/auth", "oauth", undefined],
+    [
+      "https://accounts.google.com/o/oauth2/auth",
+      "oauth",
+      "noopener,width=400",
+    ],
+    [
+      "https://accounts.google.com/o/oauth2/auth",
+      "oauth",
+      "width=400 noopener",
+    ],
+    ["https://accounts.google.com/o/oauth2/auth", "_top", "width=400"],
+    ["https://accounts.google.com/o/oauth2/auth", "oauth", "width=0"],
+    [
+      "https://accounts.google.com/o/oauth2/auth",
+      "oauth",
+      "popup=no,width=400",
+    ],
+  ])(
+    "leaves %s (%s, %s) on the native route when it asks for no popup window",
+    (url, name, specs) => {
+      const frame = loadFrame();
+      frame.window.open(url, name, specs);
+      expect(frame.nativeOpen).toHaveBeenCalledOnce();
+      expect(frame.nativeOpen).toHaveBeenCalledWith(url, name, specs);
+    },
+  );
+
+  it("opens a sized sign-in popup given as a URL object", () => {
+    const frame = loadFrame();
+    const url = new URL("https://accounts.google.com/o/oauth2/auth?x=1");
+    expect(frame.window.open(url, "oauth", "width = 400")).toBe(
+      frame.nativeWindow,
+    );
+    expect(frame.nativeOpen.mock.calls).toEqual([
+      ["about:blank", "oauth", "width = 400"],
+    ]);
+    expect(frame.nativeWindow.location.href).toBe(url.href);
+  });
+
+  it("keeps a Linux frame on the native route", () => {
+    const frame = loadFrame({}, { platform: "Linux x86_64" });
+    const url = "https://accounts.google.com/o/oauth2/auth";
+    frame.window.open(url, "oauth", "width=400");
+    expect(frame.nativeOpen.mock.calls).toEqual([[url, "oauth", "width=400"]]);
+  });
+
+  it("falls back to the native route when the blank popup is refused", () => {
+    const frame = loadFrame();
+    frame.nativeOpen.mockReturnValueOnce(null);
+    const url = "https://accounts.google.com/o/oauth2/auth";
+    expect(frame.window.open(url, "oauth", "width=400")).toBe(
+      frame.nativeWindow,
+    );
+    expect(frame.nativeOpen.mock.calls).toEqual([
+      ["about:blank", "oauth", "width=400"],
+      [url, "oauth", "width=400"],
+    ]);
   });
 
   it("forwards external anchors while preserving downloads and named frames", () => {

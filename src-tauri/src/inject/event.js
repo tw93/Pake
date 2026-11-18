@@ -673,6 +673,33 @@ function openAuthNavigation(originalWindowOpen, url, name, specs) {
   return authWindow;
 }
 
+// A popup's page closes itself the moment it has answered its opener, often
+// in its first script, while an IPC call of that page load is still out:
+// Tauri's notification plugin asks for its permission in every document.
+// WebKit cancels a closing page's requests, and on macOS the answer to a
+// cancelled IPC request ends the whole app, because the release profile
+// cannot catch the exception WebKit raises for it (measured: every sign-in
+// popup that closed itself took the app with it). The answer takes a couple
+// of milliseconds, so the close waits them out. WebKit runs the same cancel
+// for any window a script may close, a first page in the main window
+// included, so every top-level page gets the wait, not only popups.
+const WINDOW_CLOSE_DELAY_MS = 150;
+function deferWindowClose() {
+  if (window !== window.top) return;
+  if (!/mac/i.test(getDesktopPlatform())) return;
+  const nativeClose = window.close.bind(window);
+  let pending = false;
+  window.close = function () {
+    if (pending) return;
+    pending = true;
+    setTimeout(() => {
+      pending = false;
+      nativeClose();
+    }, WINDOW_CLOSE_DELAY_MS);
+  };
+}
+deferWindowClose();
+
 // Install the receiver at document start: a subframe can open a link before
 // the main page's DOMContentLoaded routing setup has run.
 let openFrameLink = null;
@@ -993,7 +1020,43 @@ document.addEventListener("DOMContentLoaded", () => {
       return originalWindowOpen.call(window, url, name, specs);
     }
 
-    // Avoid macOS WebKit auth-popup crashes by navigating auth URLs in-place.
+    // A sized sign-in popup, or a sized popup of the app's own site, answers
+    // its opener and closes; it gets a real window on macOS and Windows.
+    if (opensSignInPopups() && requestsPopupWindow(name, specs)) {
+      let popupUrl = "";
+      try {
+        popupUrl = new URL(url, window.location.href).href;
+      } catch (error) {
+        popupUrl = "";
+      }
+      // WebView2 runs this script in subframes too, where the app's own site
+      // is the configured one, not the frame's address.
+      const ownSite =
+        window === window.top
+          ? isInternalUrl(popupUrl)
+          : matchesInternalUrl(
+              popupUrl,
+              window.pakeConfig?.url || window.location.href,
+            );
+      if (
+        /^https?:/i.test(popupUrl) &&
+        (window.isAuthPopup(popupUrl, name) ||
+          (!window.pakeConfig?.new_window && ownSite))
+      ) {
+        const popup = openPopupThroughBlank(
+          originalWindowOpen,
+          window,
+          popupUrl,
+          name,
+          specs,
+        );
+        if (popup) return popup;
+      }
+    }
+
+    // Every other sign-in window.open: no size, noopener, a _self target, a
+    // popup the engine refused, and all of them on Linux. macOS and Linux
+    // continue in the current window, Windows asks for a native popup first.
     if (window.isAuthPopup(url, name)) {
       try {
         const baseUrl = window.location.origin + window.location.pathname;

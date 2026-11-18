@@ -341,6 +341,8 @@ pub fn run_app() {
             // doesn't force fullscreen on a rebuild without --fullscreen.
             StateFlags::all() & !StateFlags::VISIBLE & !StateFlags::FULLSCREEN
         })
+        // A popup a page opened is sized by that page, every time.
+        .with_filter(|label| !label.starts_with(app::window::POPUP_WINDOW_LABEL_PREFIX))
         .build();
 
     #[allow(deprecated)]

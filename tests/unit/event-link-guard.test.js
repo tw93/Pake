@@ -10,6 +10,8 @@ function loadEventHelpers({
   downloadError = null,
   nativeDownloads = false,
   topWindow = null,
+  opener = null,
+  nativeClose = () => {},
 } = {}) {
   const source = ["link_policy.js", "event.js"]
     .map((file) =>
@@ -107,6 +109,8 @@ function loadEventHelpers({
       addEventListener: registerListener,
       dispatchEvent: () => {},
       open: () => ({}),
+      opener,
+      close: nativeClose,
       isAuthLink: () => false,
       isAuthPopup: () => false,
       pakeConfig: {},
@@ -283,6 +287,226 @@ describe("event link guard", () => {
       ).toEqual([]);
     },
   );
+
+  const GOOGLE_POPUP =
+    "https://accounts.google.com/o/oauth2/v2/auth?gsiwebsdk=gis_attributes&client_id=1";
+  const GOOGLE_SPECS =
+    "toolbar=no,location=no,menubar=no,resizable=no,width=590,height=830,top=143.5,left=569";
+  const loadPopupPage = (userAgent, config = {}) => {
+    const context = loadEventHelpers({ withTauri: true, userAgent });
+    context.window.pakeConfig = config;
+    context.window.isAuthPopup = (url) => url.includes("accounts.google.com");
+    const popup = { location: { href: "about:blank" }, close: vi.fn() };
+    const nativeOpen = vi.fn(() => popup);
+    context.window.open = nativeOpen;
+    runDomReady(context);
+    return { context, popup, nativeOpen };
+  };
+  const MAC = "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_5)";
+
+  const WINDOWS = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)";
+  const LINUX = "Mozilla/5.0 (X11; Linux x86_64)";
+
+  it.each([
+    ["macOS", MAC],
+    ["Windows", WINDOWS],
+  ])(
+    "gives a sized sign-in popup its own window and opener on %s",
+    (_platform, userAgent) => {
+      // TikTok's Google button: the page waits for this popup to answer it.
+      const { context, popup, nativeOpen } = loadPopupPage(userAgent);
+      const result = context.window.open(
+        GOOGLE_POPUP,
+        "g_auth_token_window",
+        GOOGLE_SPECS,
+      );
+      expect(result).toBe(popup);
+      expect(nativeOpen.mock.calls).toEqual([
+        ["about:blank", "g_auth_token_window", GOOGLE_SPECS],
+      ]);
+      expect(popup.location.href).toBe(GOOGLE_POPUP);
+      expect(context.window.location.href).toBe("https://example.com/app");
+    },
+  );
+
+  it("keeps Linux on its previous sign-in route until popups are checked there", () => {
+    const { context, nativeOpen } = loadPopupPage(LINUX);
+    expect(
+      context.window.open(GOOGLE_POPUP, "g_auth_token_window", GOOGLE_SPECS),
+    ).toBe(context.window);
+    expect(nativeOpen).not.toHaveBeenCalled();
+    expect(context.window.location.href).toBe(GOOGLE_POPUP);
+  });
+
+  it("judges the app's own site by its configured address in a Windows subframe", () => {
+    // WebView2 runs event.js in frames; a widget's own address is not the app.
+    const load = () => {
+      const context = loadEventHelpers({
+        withTauri: true,
+        userAgent: WINDOWS,
+        topWindow: { postMessage: () => {} },
+      });
+      context.window.pakeConfig = { url: "https://app.example.net/" };
+      const popup = { location: { href: "about:blank" }, close: vi.fn() };
+      const nativeOpen = vi.fn(() => popup);
+      context.window.open = nativeOpen;
+      runDomReady(context);
+      return { context, popup, nativeOpen };
+    };
+
+    const widget = load();
+    widget.context.window.open(
+      "https://example.com/share",
+      "share",
+      "width=600,height=400",
+    );
+    expect(widget.nativeOpen).not.toHaveBeenCalledWith(
+      "about:blank",
+      "share",
+      "width=600,height=400",
+    );
+
+    const app = load();
+    expect(
+      app.context.window.open(
+        "https://app.example.net/popup",
+        "flow",
+        "width=600,height=400",
+      ),
+    ).toBe(app.popup);
+    expect(app.nativeOpen.mock.calls).toEqual([
+      ["about:blank", "flow", "width=600,height=400"],
+    ]);
+    expect(app.popup.location.href).toBe("https://app.example.net/popup");
+  });
+
+  it("gives a sized popup of the app's own site its own window", () => {
+    // Notion's Google button opens a page of its own that redirects to Google.
+    const { context, popup, nativeOpen } = loadPopupPage(MAC);
+    const specs = "toolbar=0,menubar=0,location=0,width=610,height=700";
+    const result = context.window.open(
+      "/verifyNoPopupBlockerHtmlAndRedirect?redirectUri=x",
+      " Google",
+      specs,
+    );
+    expect(result).toBe(popup);
+    expect(nativeOpen.mock.calls).toEqual([["about:blank", " Google", specs]]);
+    expect(popup.location.href).toBe(
+      "https://example.com/verifyNoPopupBlockerHtmlAndRedirect?redirectUri=x",
+    );
+    expect(context.window.location.href).toBe("https://example.com/app");
+  });
+
+  it("leaves a sized own-site popup on the native route with new_window", () => {
+    const { context, popup, nativeOpen } = loadPopupPage(MAC, {
+      new_window: true,
+    });
+    expect(context.window.open("/compose", "compose", "width=600")).toBe(popup);
+    expect(nativeOpen.mock.calls).toEqual([
+      ["https://example.com/compose", "compose", "width=600"],
+    ]);
+  });
+
+  it.each([
+    ["no features", "oauth", undefined],
+    ["noopener", "oauth", "noopener,width=590,height=830"],
+    ["noopener after a space", "oauth", "width=590 height=830 noopener"],
+    ["a _self target", "_self", "width=590,height=830"],
+    ["a zero size", "oauth", "width=0,height=0"],
+    ["popup=no beside a size", "oauth", "popup=no,width=590,height=830"],
+  ])(
+    "keeps a macOS sign-in with %s in the current window",
+    (_case, name, specs) => {
+      const { context, nativeOpen } = loadPopupPage(MAC);
+      expect(context.window.open(GOOGLE_POPUP, name, specs)).toBe(
+        context.window,
+      );
+      expect(nativeOpen).not.toHaveBeenCalled();
+      expect(context.window.location.href).toBe(GOOGLE_POPUP);
+    },
+  );
+
+  it("falls back to the current window when the blank popup is refused", () => {
+    const { context, nativeOpen } = loadPopupPage(MAC);
+    nativeOpen.mockReturnValue(null);
+    expect(context.window.open(GOOGLE_POPUP, "oauth", GOOGLE_SPECS)).toBe(
+      context.window,
+    );
+    expect(nativeOpen.mock.calls).toEqual([
+      ["about:blank", "oauth", GOOGLE_SPECS],
+    ]);
+    expect(context.window.location.href).toBe(GOOGLE_POPUP);
+  });
+
+  it.each([
+    ["a popup", {}],
+    ["the main window", null],
+  ])(
+    "waits out the page load's IPC before %s closes itself on macOS",
+    (_case, opener) => {
+      vi.useFakeTimers();
+      try {
+        const nativeClose = vi.fn();
+        const { window } = loadEventHelpers({
+          userAgent: MAC,
+          opener,
+          nativeClose,
+        });
+        // A callback page answers its opener and closes in its first script.
+        window.close();
+        window.close();
+        expect(nativeClose).not.toHaveBeenCalled();
+        vi.advanceTimersByTime(149);
+        expect(nativeClose).not.toHaveBeenCalled();
+        vi.advanceTimersByTime(1);
+        expect(nativeClose).toHaveBeenCalledOnce();
+        // A close the engine refused does not swallow the next one.
+        window.close();
+        vi.advanceTimersByTime(150);
+        expect(nativeClose).toHaveBeenCalledTimes(2);
+      } finally {
+        vi.useRealTimers();
+      }
+    },
+  );
+
+  it.each([
+    ["Windows", WINDOWS],
+    ["Linux", LINUX],
+  ])("leaves window.close alone on %s", (_platform, userAgent) => {
+    const nativeClose = vi.fn();
+    const { window } = loadEventHelpers({ userAgent, opener: {}, nativeClose });
+    window.close();
+    expect(nativeClose).toHaveBeenCalledOnce();
+  });
+
+  it("leaves a frame's window.close alone on macOS", () => {
+    const nativeClose = vi.fn();
+    const { window } = loadEventHelpers({
+      userAgent: MAC,
+      nativeClose,
+      topWindow: { postMessage: () => {} },
+    });
+    window.close();
+    expect(nativeClose).toHaveBeenCalledOnce();
+  });
+
+  it("still sends a sized popup of another site to the system browser", () => {
+    const { context, nativeOpen } = loadPopupPage(MAC);
+    expect(
+      context.window.open(
+        "https://outside.example/share",
+        "share",
+        "width=600,height=400",
+      ),
+    ).toBeNull();
+    expect(nativeOpen).not.toHaveBeenCalled();
+    expect(context.invokeCalls).toContainEqual([
+      "plugin:shell|open",
+      { path: "https://outside.example/share" },
+    ]);
+    expect(context.window.location.href).toBe("https://example.com/app");
+  });
 
   it.each(["https://outside.example/report", "https://example.com/report"])(
     "retains the default route for a new named context: %s",

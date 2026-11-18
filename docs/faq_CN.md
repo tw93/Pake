@@ -454,7 +454,7 @@ Pake 可以自动转换普通图片，但提供正确的格式更可靠。Icon C
 
    某些认证提供方，尤其是 Google，可能会阻止在嵌入式 WebView 中完成登录。由于 Pake 是把网站包装进桌面 WebView，Google 自家站点或依赖 Google OAuth 的网站，即使启用了 `--new-window` 或 `--multi-window`，也仍然可能无法在应用内完成登录。这属于提供方策略限制，不是打包逻辑错误，这类站点改用普通浏览器、浏览器安装版站点应用或官方原生桌面客户端。
 
-   Pake 会让 **Sign in with Apple**（弹窗模式，例如 Yelp、Upwork）继续走原生弹窗路径，确保 Apple 的回调可以返回原页面。在 macOS 和 Linux 上，其他登录弹窗会改在当前窗口内跳转，因为这两个平台的 WebKit 内核可能因弹窗崩溃或悄悄丢掉弹窗，Windows 上仍保持弹窗。
+   网站用自带尺寸的弹窗登录时（TikTok、Notion、X 上的 Google 登录，Yelp、Upwork 上的 Sign in with Apple），macOS 和 Windows 上的 Pake 会把这个弹窗开成独立窗口，登录完由它把结果交回原页面并自己关闭，开没开 `--new-window` 都一样。网站用普通链接或不带尺寸的 `window.open` 发起的登录，在 macOS 和 Linux 上仍在当前窗口内跳转，Linux 上的登录弹窗目前也都还是这样。
 
    macOS 上的 Pake 应用用不了通行密钥和指纹登录，系统只把这项能力开放给浏览器和与网站域名绑定的应用，登录时改用密码加两步验证码。
 

@@ -120,6 +120,46 @@ for (const frame of [false, true]) {
   }
 }
 
+for (const frame of [false, true]) {
+  for (const [label, destination] of [
+    ["provider", "https://accounts.google.com/o/oauth2/v2/auth?client_id=1"],
+    ["own-site", "https://mail.example.com/googlepopupredirect?flow=popup"],
+  ]) {
+    // TikTok, Notion and X sign in with Google through a sized popup that
+    // answers window.opener; navigating the app there left a blank window.
+    test(`${frame ? "frame" : "main"} sized ${label} sign-in popup keeps its opener and the app's page`, async () => {
+      await fixture(frame, async (page, target, context) => {
+        await target.evaluate((destination) => {
+          window.answers = [];
+          addEventListener("message", (event) =>
+            window.answers.push(event.data),
+          );
+          document.querySelector("#go").onclick = () => {
+            const popup = window.open(
+              destination,
+              "g_auth_token_window",
+              "toolbar=no,location=no,width=590,height=830,top=143.5,left=569",
+            );
+            window.popupIsSelf = popup === window || popup === window.top;
+          };
+        }, destination);
+        const popupReady = context.waitForEvent("page", { timeout: 3000 });
+        await target.locator("#go").click();
+        const popup = await popupReady;
+        await popup.waitForURL(destination);
+        assert.equal(page.url(), "https://mail.example.com/");
+        assert.equal(await target.evaluate(() => window.popupIsSelf), false);
+        await popup.evaluate(() => window.opener.postMessage("signed-in", "*"));
+        await target.waitForFunction(() =>
+          window.answers.includes("signed-in"),
+        );
+        assert.deepEqual(await page.evaluate(() => window.opened), []);
+        await popup.close();
+      });
+    });
+  }
+}
+
 for (const destination of [
   "https://slack.com/openid/connect/authorize?client_id=123",
   "https://identity.example/connect/authorize",

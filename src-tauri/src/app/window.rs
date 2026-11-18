@@ -98,10 +98,22 @@ impl MultiWindowState {
         let index = self.next_window_index.fetch_add(1, Ordering::Relaxed) + 1;
         format!("{SECONDARY_WINDOW_LABEL_PREFIX}{index}")
     }
+
+    fn next_popup_label(&self) -> String {
+        let index = self.next_window_index.fetch_add(1, Ordering::Relaxed) + 1;
+        format!("{POPUP_WINDOW_LABEL_PREFIX}{index}")
+    }
 }
 
-/// Secondary windows (Cmd+N clones, `--new-window` popups, blank two-stage
-/// popups) take `pake-N` labels. `capabilities/default.json` must cover them
+/// Windows a page opened take `pake-popup-N` labels: still under the
+/// `pake-*` capability glob, and apart from the Cmd+N clones' `pake-N`, so
+/// the window-state plugin can leave them out. A sign-in popup's size is the
+/// page's to choose every time, and a clone that later takes the same label
+/// must not open at the size of a sign-in popup.
+pub const POPUP_WINDOW_LABEL_PREFIX: &str = "pake-popup-";
+
+/// Secondary windows take labels under `pake-`: Cmd+N clones `pake-N`, and
+/// windows a page opened `pake-popup-N`. `capabilities/default.json` must cover them
 /// with a matching glob: an uncovered label has every IPC call denied, so
 /// external links, downloads and toasts silently stop working there.
 const SECONDARY_WINDOW_LABEL_PREFIX: &str = "pake-";
@@ -124,6 +136,8 @@ mod capability_tests {
 
         assert!(webviews.contains(&"pake"));
         assert!(webviews.contains(&format!("{SECONDARY_WINDOW_LABEL_PREFIX}*").as_str()));
+        // The one glob covers page-opened popups as well.
+        assert!(super::POPUP_WINDOW_LABEL_PREFIX.starts_with(SECONDARY_WINDOW_LABEL_PREFIX));
     }
 }
 
@@ -259,7 +273,7 @@ fn open_requested_window(
     features: NewWindowFeatures,
 ) -> tauri::Result<WebviewWindow> {
     let state = app.state::<MultiWindowState>();
-    let label = state.next_window_label();
+    let label = state.next_popup_label();
     let window = build_window(
         app,
         config,
@@ -272,8 +286,10 @@ fn open_requested_window(
         },
     )?;
 
-    let title = target_url.host_str().unwrap_or(target_url.as_str());
-    let _ = window.set_title(title);
+    // A blank popup keeps the app's title until its page has one.
+    if let Some(host) = target_url.host_str() {
+        let _ = window.set_title(host);
+    }
     reapply_window_icon(&window);
     let _ = window.set_focus();
 
@@ -465,6 +481,9 @@ fn build_window(
         visible,
         new_window_features,
     } = opts;
+    // A window a page opened: a sign-in popup, a blank two-stage one.
+    #[cfg(target_os = "macos")]
+    let page_popup = new_window_features.is_some();
     #[cfg(target_os = "macos")]
     let use_native_window_tabbing = config.multi_window && new_window_features.is_none();
     #[cfg(target_os = "macos")]
@@ -879,6 +898,15 @@ fn build_window(
         prepare_macos_new_window_configuration(&features)?;
 
         window_builder = window_builder.window_features(features).focused(true);
+        // A popup that starts blank and is then sent to its address has no
+        // title of its own; it takes its page's, as a browser's popup does.
+        window_builder = window_builder.on_document_title_changed(|window, title| {
+            if !title.trim().is_empty() {
+                if let Err(error) = window.set_title(&title) {
+                    eprintln!("[Pake] Failed to update the popup title: {error}");
+                }
+            }
+        });
     }
 
     // Capture webview-initiated downloads (blob:, data:, Content-Disposition,
@@ -1050,6 +1078,19 @@ fn build_window(
         crate::app::navigation::enable_back_forward_gestures(&webview);
     }) {
         eprintln!("[Pake] Failed to access WKWebView for history swipe gestures: {error}");
+    }
+
+    // A popup's page closes it with window.close() once it has answered its
+    // opener, and WKWebView closes nothing unless its UI delegate does.
+    #[cfg(target_os = "macos")]
+    if page_popup {
+        let popup_app = app.clone();
+        let popup_label = label.to_string();
+        if let Err(error) = window.with_webview(move |webview| {
+            crate::app::popup_close::install(&popup_app, &popup_label, &webview);
+        }) {
+            eprintln!("[Pake] Failed to access WKWebView for its popup close: {error}");
+        }
     }
 
     // A page's alert(), confirm() and prompt() show nothing in a WKWebView

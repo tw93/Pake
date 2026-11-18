@@ -61,7 +61,7 @@ For proactive latent-bug sweeps, pick one row and go deep; do not invent a whole
 | Download success semantics | `invoke.rs`, `window.rs` `on_download` | Non-2xx toasted as success; toast/IPC hardcoded to `"pake"`; request drops session cookies |
 | Menu / focused window      | `menu.rs`                              | Commands hit the main window, not the focused one; eval dead on error pages                |
 | Startup visibility         | `lib.rs`, `setup.rs`                   | Blank shell, `about:blank` false ready, user hide racing fallback reveal                   |
-| Auth / popup               | `auth.js`, `event.js`                  | macOS auth crash, SSO in system browser, Apple popup exception                             |
+| Auth / popup               | `auth.js`, `event.js`                  | Sign-in popup loses its opener or stays open, abort on its close, SSO in system browser    |
 | Clipboard                  | `event.js`                             | keydown steals native paste; double-paste fallback                                         |
 | Multi-window / icon        | `window.rs`, `setup.rs`                | Missing `reapply_window_icon` on show; secondary window toast/target; Cmd+N blank flash    |
 | Platform capability        | `auth.rs`, proxy, WebKit flags         | Flag name present, platform no-op                                                          |
