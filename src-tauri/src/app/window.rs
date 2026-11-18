@@ -351,6 +351,28 @@ mod popup_tests {
     }
 
     #[test]
+    fn macos_keeps_webkits_own_fullscreen_instead_of_the_polyfill() {
+        // Under the polyfill YouTube's button made the window full screen and
+        // left the video a small box. The script must read the engine's answer
+        // and leave before it marks itself installed or replaces anything.
+        let script = include_str!("../inject/fullscreen.js").replace("\r\n", "\n");
+        let asks = script
+            .find("function engineHasFullscreen() {")
+            .expect("the script asks the engine first");
+        let mac_only = script[asks..]
+            .find("if (!/^Mac/.test(navigator.platform || \"\")) return false;")
+            .expect("only a Mac's engine is trusted with it");
+        let leaves = script
+            .find("if (engineHasFullscreen()) return;")
+            .expect("the polyfill stays out where the engine has fullscreen");
+        let installs = script
+            .find("window.__PAKE_FULLSCREEN_POLYFILL__ = true;")
+            .expect("the polyfill marks itself installed");
+        assert!(mac_only < 200);
+        assert!(asks < leaves && leaves < installs);
+    }
+
+    #[test]
     fn a_popup_web_view_is_built_blank_so_the_engine_loads_its_address_once() {
         let google = Url::parse("https://accounts.google.com/gsi/select?client_id=1").unwrap();
         let built = popup_build_url(&google);
