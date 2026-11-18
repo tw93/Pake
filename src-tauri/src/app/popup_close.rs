@@ -13,10 +13,12 @@
 //! The window is hidden at once and closed a moment later. A callback page
 //! closes itself while it is still loading, when Pake's own scripts have IPC
 //! calls in flight; destroying the web view stops those requests, WebKit
-//! raises on an answer to a stopped request, and the release profile's
-//! `panic = "abort"` turns that exception into the whole app quitting (Wry's
-//! `objc2::exception::catch` around the answer cannot hold under it). Measured
-//! on macOS 26.7: closing at once aborted the app on every sign-in.
+//! raises on an answer to a stopped request, and under the release profile's
+//! old `panic = "abort"` that exception was the whole app quitting (Wry's
+//! `objc2::exception::catch` around the answer could not hold under it).
+//! Measured on macOS 26.7: closing at once aborted the app on every sign-in.
+//! The profile unwinds since 2026-11-19, which holds the exception by itself;
+//! the wait stays, so the popup's last calls still get their answers.
 
 use objc2::ffi::class_addMethod;
 use objc2::msg_send;

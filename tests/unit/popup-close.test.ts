@@ -36,6 +36,19 @@ describe('a popup its page closes', () => {
     expect(restored).toBeGreaterThan(reset);
   });
 
+  it('builds releases that unwind, so an exception from WebKit cannot end the app', () => {
+    // Under panic = "abort" Wry cannot catch the Objective-C exception WebKit
+    // raises for an answer to a request a closing page had out, and the app
+    // quit on every sign-in popup. Unwinding costs about 1.9 MB a build.
+    const manifest = fs
+      .readFileSync(path.join(process.cwd(), 'src-tauri', 'Cargo.toml'), 'utf8')
+      .replace(/\r\n/g, '\n');
+    const profile = manifest.slice(manifest.indexOf('[profile.release]'));
+    const release = profile.slice(0, profile.indexOf('\n['));
+    expect(release).toMatch(/^panic = "unwind"$/m);
+    expect(release).not.toMatch(/^panic = "abort"$/m);
+  });
+
   it('leaves the main window and Cmd+N windows open on macOS', () => {
     const close = read('app/popup_close.rs');
     // WebKit sends webViewDidClose: for any page that calls window.close();

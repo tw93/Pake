@@ -114,7 +114,12 @@ default = ["custom-protocol"]
 custom-protocol = ["tauri/custom-protocol"]
 
 [profile.release]
-panic = "abort"
+# Unwind, not abort: under abort Wry's objc2::exception::catch cannot hold, so
+# an Objective-C exception that crosses a Rust frame ends the whole app. WebKit
+# raises one when an answer arrives for a request a closing or leaving page had
+# out, and a sign-in popup closing itself ended the app that way. Costs about
+# 1.9 MB per architecture (12.8 to 14.7 MB on arm64 macOS, 2026-11-19).
+panic = "unwind"
 codegen-units = 1
 lto = "thin"
 opt-level = "z"
