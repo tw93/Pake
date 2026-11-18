@@ -118,7 +118,11 @@ custom-protocol = ["tauri/custom-protocol"]
 # an Objective-C exception that crosses a Rust frame ends the whole app. WebKit
 # raises one when an answer arrives for a request a closing or leaving page had
 # out, and a sign-in popup closing itself ended the app that way. Costs about
-# 1.9 MB per architecture (12.8 to 14.7 MB on arm64 macOS, 2026-11-19).
+# 1.9 MB per architecture on macOS (12.8 to 14.7 MB on arm64, 2026-11-19).
+# Windows and Linux have no such exception and pay more for it (4.5 MB on
+# Windows x64), so the CLI builds them with CARGO_PROFILE_RELEASE_PANIC=abort
+# (bin/builders/env.ts); a plain `tauri build` there unwinds, which is only
+# larger.
 panic = "unwind"
 codegen-units = 1
 lto = "thin"

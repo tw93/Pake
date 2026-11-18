@@ -32,6 +32,23 @@ export function getBuildEnvironment(): Record<string, string> | undefined {
 }
 
 /**
+ * The release profile unwinds for macOS's sake: there Wry has to catch an
+ * exception WebKit raises for an answer to a request a closing or leaving page
+ * still had out, and it cannot under `panic = "abort"`, so the app quit.
+ * Windows and Linux have no such exception to hold, and unwinding made the
+ * Windows x64 binary 4.5 MB larger (11.9 to 16.4 MB), so their release builds
+ * keep abort. A value the user already set wins.
+ */
+export function getPanicStrategyEnvironment(
+  platform: NodeJS.Platform = process.platform,
+): Record<string, string> {
+  if (platform === 'darwin' || process.env.CARGO_PROFILE_RELEASE_PANIC) {
+    return {};
+  }
+  return { CARGO_PROFILE_RELEASE_PANIC: 'abort' };
+}
+
+/**
  * Build scripts and proc-macros compile for the rustup *host* toolchain, not
  * the `--target` triple, even when cross-compiling. Pake's own
  * rust-toolchain.toml pins a bare channel (no host), which rustup resolves

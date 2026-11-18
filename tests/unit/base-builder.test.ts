@@ -22,6 +22,7 @@ import {
   detectPackageManager,
   getBuildEnvironment,
   getInstallCommand,
+  getPanicStrategyEnvironment,
 } from '@/builders/env';
 import logger from '@/options/logger';
 import { CN_MIRROR_ENV, isCnMirrorEnabled } from '@/utils/mirror';
@@ -104,6 +105,27 @@ describe('BaseBuilder guards', () => {
     }
 
     await Promise.all(tempDirs.splice(0).map((dir) => fsExtra.remove(dir)));
+  });
+
+  it('keeps abort for Windows and Linux release builds, and unwind for macOS', () => {
+    const original = process.env.CARGO_PROFILE_RELEASE_PANIC;
+    delete process.env.CARGO_PROFILE_RELEASE_PANIC;
+    try {
+      // macOS needs the profile's unwind to hold an exception from WebKit.
+      expect(getPanicStrategyEnvironment('darwin')).toEqual({});
+      for (const platform of ['win32', 'linux'] as const) {
+        expect(getPanicStrategyEnvironment(platform)).toEqual({
+          CARGO_PROFILE_RELEASE_PANIC: 'abort',
+        });
+      }
+      // A value the user set is theirs to keep.
+      process.env.CARGO_PROFILE_RELEASE_PANIC = 'unwind';
+      expect(getPanicStrategyEnvironment('win32')).toEqual({});
+    } finally {
+      if (original === undefined)
+        delete process.env.CARGO_PROFILE_RELEASE_PANIC;
+      else process.env.CARGO_PROFILE_RELEASE_PANIC = original;
+    }
   });
 
   it('prepends /usr/bin to PATH for macOS build environment', () => {

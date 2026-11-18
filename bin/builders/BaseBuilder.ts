@@ -30,6 +30,7 @@ import {
   configureCargoRegistry,
   detectPackageManager,
   getBuildEnvironment,
+  getPanicStrategyEnvironment,
   getBuildTimeout,
   getInstallCommand,
   getInstallTimeout,
@@ -291,6 +292,7 @@ export default abstract class BaseBuilder {
       process.platform === 'win32' && this.options.windowsToolchain === 'gnu';
     let buildEnv: Record<string, string> = {
       ...(baseEnv ?? {}),
+      ...getPanicStrategyEnvironment(),
       ...(isWindowsGnuBuild ? getWindowsGnuBuildEnvironment() : {}),
       ...(process.env.NO_STRIP ? { NO_STRIP: process.env.NO_STRIP } : {}),
     };
