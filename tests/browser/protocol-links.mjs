@@ -38,7 +38,7 @@ for (const frame of [false, true]) {
             ({ source }) => {
               window.opened = [];
               window.pakeConfig = { url: "https://mail.example.com/" };
-              window.__TAURI__ = {
+              window.__PAKE_NATIVE__ = {
                 core: {
                   invoke: (cmd, args) => {
                     if (cmd === "plugin:shell|open")

@@ -72,6 +72,8 @@ window.__TAURI__.core.invoke("handle_scroll", {
 });
 ```
 
+`window.__TAURI__` exists only for your own code, a bundled local page or a script you inject with `--inject` that names it, and carries what a page is allowed to call: `core.invoke`, `shell.open` and `window.getCurrentWindow()` with `close`, `minimize`, `maximize`, `toggleMaximize`, `setResizable`, `startDragging`, `isFullscreen`, `setFullscreen` and `theme`. A packaged website sees no such object, because some sites, DeepSeek among them, treat it as an unofficial client and show a warning.
+
 **Container Side (Rust):**
 
 ```rust

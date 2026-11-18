@@ -32,7 +32,7 @@ test("native fullscreen preserves the player subtree and F11 exits its top layer
           value: { platform: "Windows" },
         });
         window.pakeConfig = { url: "https://video.example.com/" };
-        window.__TAURI__ = {
+        window.__PAKE_NATIVE__ = {
           core: { invoke: () => Promise.resolve() },
           window: {
             getCurrentWindow: () => ({
@@ -112,7 +112,7 @@ for (const target of ["html", "body", "#player"]) {
         <section id="player"><video></video><button id="controls">Pause</button></section><video id="preview"></video>`);
       await page.evaluate(() => {
         let fullscreen = false;
-        window.__TAURI__ = {
+        window.__PAKE_NATIVE__ = {
           window: {
             getCurrentWindow: () => ({
               setFullscreen: async (value) => {
@@ -193,7 +193,7 @@ test("denied polyfill fullscreen leaves the player in its original layout", asyn
       '<main><section id="player"><video></video><button>Pause</button></section></main>',
     );
     await page.evaluate(() => {
-      window.__TAURI__ = {
+      window.__PAKE_NATIVE__ = {
         window: {
           getCurrentWindow: () => ({
             setFullscreen: async () => {

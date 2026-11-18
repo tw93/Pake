@@ -35,7 +35,7 @@ async function fixture(frame, run, config = {}) {
       ({ source, config }) => {
         window.opened = [];
         window.pakeConfig = { url: "https://mail.example.com/", ...config };
-        window.__TAURI__ = {
+        window.__PAKE_NATIVE__ = {
           core: {
             invoke: (cmd, args) => {
               if (cmd === "plugin:shell|open") window.opened.push(args.path);
@@ -62,7 +62,7 @@ async function fixture(frame, run, config = {}) {
                     /^https?:\/\//.test(node.href) &&
                     node.target === "_blank"
                   ) {
-                    window.__TAURI__.core.invoke("plugin:shell|open", {
+                    window.__PAKE_NATIVE__.core.invoke("plugin:shell|open", {
                       path: node.href,
                     });
                     event.preventDefault();

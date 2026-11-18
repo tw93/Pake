@@ -53,7 +53,7 @@ const server = http.createServer(async (request, response) => {
         cookie:document.cookie
       })});
       await new Promise(resolve => setTimeout(resolve, 300));
-      await window.__TAURI__.core.invoke("plugin:window|close", {label:"pake"});
+      await window.__PAKE_NATIVE__.core.invoke("plugin:window|close", {label:"pake"});
     })();
   </script>`);
 });

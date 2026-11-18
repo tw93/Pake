@@ -45,7 +45,7 @@ for (const legacy of [false, true]) {
               }
             };
           }
-          window.__TAURI__ = {
+          window.__PAKE_NATIVE__ = {
             core: { invoke: () => Promise.resolve({ nativeClick: true }) },
           };
           for (const script of source) (0, eval)(script);

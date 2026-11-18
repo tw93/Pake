@@ -80,7 +80,7 @@ function loadNotificationBridge({
       isAuthLink: () => false,
       isAuthPopup: () => false,
       pakeConfig: {},
-      __TAURI__: {
+      __PAKE_NATIVE__: {
         core: {
           invoke: (command, payload) => {
             invokeCalls.push({ command, payload });

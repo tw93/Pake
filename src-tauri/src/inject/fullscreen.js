@@ -10,12 +10,12 @@
   window.__PAKE_FULLSCREEN_POLYFILL__ = true;
 
   function initFullscreenPolyfill() {
-    if (!window.__TAURI__ || !document.head) {
+    if (!window.__PAKE_NATIVE__ || !document.head) {
       setTimeout(initFullscreenPolyfill, 100);
       return;
     }
 
-    const appWindow = window.__TAURI__.window.getCurrentWindow();
+    const appWindow = window.__PAKE_NATIVE__.window.getCurrentWindow();
     let fullscreenElement = null;
     let actualFullscreenElement = null;
     let originalStyles = null;

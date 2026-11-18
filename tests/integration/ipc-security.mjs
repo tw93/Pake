@@ -25,7 +25,7 @@ function page(stage, origin) {
   return `<!doctype html><meta charset="utf-8"><title>Pake IPC security probe</title>
 <body>Testing ${stage} origin permissions<main><section id="player"><video></video><button>Pause</button></section></main><script>
 (async () => {
-  const invoke = window.__TAURI__.core.invoke;
+  const invoke = window.__PAKE_NATIVE__.core.invoke;
   const check = async (command, args) => {
     try { await invoke(command, args); return "allowed"; }
     catch (error) { return "denied: " + String(error); }

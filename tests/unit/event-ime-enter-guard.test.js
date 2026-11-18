@@ -97,7 +97,7 @@ function loadEventHelpers({
       isAuthLink: () => false,
       isAuthPopup: () => false,
       pakeConfig: {},
-      __TAURI__: {
+      __PAKE_NATIVE__: {
         core: { invoke: () => Promise.resolve() },
         window: {
           getCurrentWindow: () => ({

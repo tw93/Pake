@@ -112,7 +112,7 @@ function loadEventHelpers({
         hide_title_bar: hideTitleBar,
         hide_window_decorations: hideWindowDecorations,
       },
-      __TAURI__: {
+      __PAKE_NATIVE__: {
         core: {
           invoke: (command, payload) => {
             invokeCalls.push(command);

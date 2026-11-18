@@ -2,7 +2,7 @@
 // on blank error shells (no JS context). Falls back to history/location when
 // the IPC bridge is unavailable.
 function nativeNavigate(action) {
-  const invoke = window.__TAURI__?.core?.invoke;
+  const invoke = window.__PAKE_NATIVE__?.core?.invoke;
   if (invoke) {
     invoke("webview_navigate", { action }).catch(() => {
       fallbackNavigate(action);
@@ -41,7 +41,7 @@ function setZoom(zoom) {
   // on macOS. Native zoom recalculates layout exactly like a browser does.
   const zoomPercent = normalizeZoomPercent(zoom);
   const normalizedZoom = `${zoomPercent}%`;
-  const invoke = window.__TAURI__?.core?.invoke;
+  const invoke = window.__PAKE_NATIVE__?.core?.invoke;
   if (invoke) {
     invoke("set_zoom", { percent: zoomPercent }).catch(() => {});
   }
@@ -89,11 +89,11 @@ function handleShortcut(event) {
 // and Ctrl+L. A browser keeps all three for itself, so no page relies on them.
 function closeCurrentWindow() {
   // close() raises the window's close request, so hide-on-close still applies.
-  window.__TAURI__?.window?.getCurrentWindow?.()?.close?.();
+  window.__PAKE_NATIVE__?.window?.getCurrentWindow?.()?.close?.();
 }
 
 function quitApp() {
-  window.__TAURI__?.core?.invoke?.("quit_app")?.catch?.(() => {});
+  window.__PAKE_NATIVE__?.core?.invoke?.("quit_app")?.catch?.(() => {});
 }
 
 function copyPageAddress() {
@@ -194,7 +194,7 @@ function handleWindowFullscreenShortcut(event) {
     return;
   }
 
-  const appWindow = window.__TAURI__?.window?.getCurrentWindow?.();
+  const appWindow = window.__PAKE_NATIVE__?.window?.getCurrentWindow?.();
   if (!appWindow) {
     return;
   }
@@ -742,7 +742,7 @@ window.addEventListener("pagehide", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  const tauri = window.__TAURI__;
+  const tauri = window.__PAKE_NATIVE__;
   const appWindow = tauri.window.getCurrentWindow();
   const invoke = tauri.core.invoke;
   const pakeConfig = window["pakeConfig"] || {};
@@ -1504,7 +1504,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // for DOMContentLoaded so feature-detection on Notification/setAppBadge
 // returns the polyfill before site scripts run.
 (function () {
-  const invoke = window.__TAURI__?.core?.invoke;
+  const invoke = window.__PAKE_NATIVE__?.core?.invoke;
   if (!invoke) return;
   if (typeof EventTarget !== "function" || typeof Event !== "function") return;
 

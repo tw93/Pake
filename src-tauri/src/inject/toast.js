@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (action) {
       m.style.cursor = "pointer";
       m.addEventListener("click", function () {
-        const invoke = window.__TAURI__?.core?.invoke;
+        const invoke = window.__PAKE_NATIVE__?.core?.invoke;
         if (invoke) invoke(action).catch(function () {});
       });
     }

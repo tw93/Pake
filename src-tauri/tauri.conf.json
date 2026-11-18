@@ -3,7 +3,7 @@
   "identifier": "com.pake.weekly",
   "version": "3.19.4",
   "app": {
-    "withGlobalTauri": true,
+    "withGlobalTauri": false,
     "trayIcon": {
       "iconPath": "png/weekly_512.png",
       "iconAsTemplate": false,

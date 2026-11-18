@@ -75,7 +75,7 @@
     if (!color) return;
     const key = `${color.red},${color.green},${color.blue}`;
     if (key === lastSent) return;
-    const invoke = window.__TAURI__?.core?.invoke;
+    const invoke = window.__PAKE_NATIVE__?.core?.invoke;
     if (!invoke) return;
     lastSent = key;
     // Pages outside the configured origin have no IPC grant; warn once and

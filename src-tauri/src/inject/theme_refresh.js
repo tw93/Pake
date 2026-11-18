@@ -31,8 +31,8 @@ document.addEventListener("DOMContentLoaded", () => {
     else if (isLight) mode = "light";
 
     // Only invoke Rust command if an explicit theme override is detected
-    if (mode && window.__TAURI__?.core) {
-      window.__TAURI__.core.invoke("update_theme_mode", { mode });
+    if (mode && window.__PAKE_NATIVE__?.core) {
+      window.__PAKE_NATIVE__.core.invoke("update_theme_mode", { mode });
     }
   };
 

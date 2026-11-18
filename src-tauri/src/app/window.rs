@@ -259,6 +259,26 @@ fn popup_build_url(target_url: &Url) -> Url {
     }
 }
 
+/// The app carries no Tauri global API object, since a site can see it and
+/// some treat it as an unofficial client. The user's own code may still call
+/// it, as the docs showed for years: a bundled local page, or an injected
+/// script that names it. Those get the name back, pointing at Pake's bridge
+/// (`core.invoke` and the current window).
+const GLOBAL_API_NAME: &str =
+    "if (!window.__TAURI__) { window.__TAURI__ = window.__PAKE_NATIVE__; }";
+/// A local app's own pages only: a site it links out to stays without the name.
+const GLOBAL_API_NAME_ON_LOCAL_PAGES: &str = "if (!window.__TAURI__ && (location.protocol === 'tauri:' || location.hostname === 'tauri.localhost')) { window.__TAURI__ = window.__PAKE_NATIVE__; }";
+
+fn global_api_name_script(url_type: &str, custom_js: &str) -> Option<&'static str> {
+    if custom_js.contains("__TAURI__") {
+        Some(GLOBAL_API_NAME)
+    } else if url_type == "local" {
+        Some(GLOBAL_API_NAME_ON_LOCAL_PAGES)
+    } else {
+        None
+    }
+}
+
 /// Whether a page's new-window request gets a window of its own: always with
 /// `--new-window`, and without it for a blank popup and for one that asks for
 /// a size.
@@ -268,7 +288,10 @@ fn builds_requested_popup(allow_new_window: bool, target_url: &Url, sized: bool)
 
 #[cfg(test)]
 mod popup_tests {
-    use super::{builds_requested_popup, is_blank_popup_url, popup_build_url};
+    use super::{
+        builds_requested_popup, global_api_name_script, is_blank_popup_url, popup_build_url,
+        GLOBAL_API_NAME, GLOBAL_API_NAME_ON_LOCAL_PAGES,
+    };
     use tauri::Url;
 
     #[test]
@@ -296,6 +319,35 @@ mod popup_tests {
             script.contains("if (!pending || pending.event !== e || e.defaultPrevented) return;")
         );
         assert!(script.contains("window.addEventListener(\"click\", openUnhandledBlankLink);"));
+    }
+
+    #[test]
+    fn a_site_sees_no_tauri_global_api_and_the_users_own_code_keeps_the_name() {
+        // DeepSeek reads `"__TAURI__" in window` and warns of an abnormal
+        // environment, so Tauri must not define it; Pake's own scripts are
+        // held to that in tests/unit/native-bridge.test.js.
+        let conf: serde_json::Value =
+            serde_json::from_str(include_str!("../../tauri.conf.json")).unwrap();
+        assert_eq!(conf["app"]["withGlobalTauri"], serde_json::json!(false));
+        assert_eq!(global_api_name_script("web", ""), None);
+        assert_eq!(global_api_name_script("web", "document.title = 'x';"), None);
+        let calls_it = "window.__TAURI__.core.invoke('set_zoom', { percent: 90 });";
+        assert_eq!(
+            global_api_name_script("web", calls_it),
+            Some(GLOBAL_API_NAME)
+        );
+        assert_eq!(
+            global_api_name_script("local", calls_it),
+            Some(GLOBAL_API_NAME)
+        );
+        // A bundled local page is the user's own code, with no site to object;
+        // a site that page links out to is still a site.
+        assert_eq!(
+            global_api_name_script("local", ""),
+            Some(GLOBAL_API_NAME_ON_LOCAL_PAGES)
+        );
+        assert!(GLOBAL_API_NAME_ON_LOCAL_PAGES.contains("location.protocol === 'tauri:'"));
+        assert!(GLOBAL_API_NAME.contains("window.__TAURI__ = window.__PAKE_NATIVE__"));
     }
 
     #[test]
@@ -798,7 +850,9 @@ fn build_window(
     // so only inject its ~700 lines when the feature is on. Avoids parsing the
     // find UI on every page load in the common (find-off) case. Matches the
     // enable_find gating already applied to the Find menu item.
-    window_builder = window_builder.initialization_script(include_str!("../inject/styles.js"));
+    window_builder = window_builder
+        .initialization_script(include_str!("../inject/bridge.js"))
+        .initialization_script(include_str!("../inject/styles.js"));
 
     if window_config.enable_find {
         window_builder = window_builder.initialization_script(include_str!("../inject/find.js"));
@@ -825,12 +879,14 @@ fn build_window(
             window_builder.initialization_script(include_str!("../inject/title_bar.js"));
     }
 
-    window_builder = window_builder.initialization_script(
-        config
-            .runtime_custom_js
-            .as_deref()
-            .unwrap_or(include_str!("../inject/custom.js")),
-    );
+    let custom_js = config
+        .runtime_custom_js
+        .as_deref()
+        .unwrap_or(include_str!("../inject/custom.js"));
+    if let Some(script) = global_api_name_script(&window_config.url_type, custom_js) {
+        window_builder = window_builder.initialization_script(script);
+    }
+    window_builder = window_builder.initialization_script(custom_js);
 
     #[cfg(target_os = "windows")]
     let mut windows_browser_args = String::from("--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --disable-blink-features=AutomationControlled");

@@ -128,7 +128,7 @@ function loadEventHelpers({
   context.window.navigator = context.navigator;
   context.window.top = topWindow || context.window;
   if (withTauri) {
-    context.window.__TAURI__ = {
+    context.window.__PAKE_NATIVE__ = {
       core: { invoke },
       window: {
         getCurrentWindow: () => ({

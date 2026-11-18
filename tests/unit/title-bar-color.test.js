@@ -74,7 +74,7 @@ function loadTitleBar({ columns, width = 1000, metas = [], matching = [] }) {
       addEventListener() {},
       matchMedia: (query) => ({ matches: matching.includes(query) }),
       getComputedStyle: (node) => ({ backgroundColor: node.background }),
-      __TAURI__: {
+      __PAKE_NATIVE__: {
         core: {
           invoke(command, args) {
             calls.push({ command, args });

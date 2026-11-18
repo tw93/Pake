@@ -72,6 +72,8 @@ window.__TAURI__.core.invoke("handle_scroll", {
 });
 ```
 
+`window.__TAURI__` 只留给你自己的代码，打包的本地页面里一直有，用 `--inject` 注入的脚本里写到它时也有，提供页面有权限调用的那部分，`core.invoke`、`shell.open` 和 `window.getCurrentWindow()` 的 `close`、`minimize`、`maximize`、`toggleMaximize`、`setResizable`、`startDragging`、`isFullscreen`、`setFullscreen`、`theme`。打包的网站看不到这个对象，因为 DeepSeek 等网站会把它当成非官方客户端并弹出提示。
+
 **容器端（Rust）：**
 
 ```rust
