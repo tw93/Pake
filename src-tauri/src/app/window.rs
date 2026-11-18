@@ -1118,11 +1118,11 @@ fn build_window(
         }
     }
 
-    #[cfg(target_os = "windows")]
+    #[cfg(any(target_os = "windows", target_os = "macos"))]
     if let Err(error) = window.with_webview(|webview| {
         crate::app::recovery::install(&webview);
     }) {
-        eprintln!("[Pake] Failed to access WebView2 for crash recovery: {error}");
+        eprintln!("[Pake] Failed to access the web view for crash recovery: {error}");
     }
 
     // Every webview is built here (main window, Cmd+N clones, --new-window and
@@ -1284,13 +1284,46 @@ fn web_target(url: &WebviewUrl) -> Option<Url> {
     matches!(target.scheme(), "http" | "https").then_some(target)
 }
 
+/// The address a window is showing, or `None` when it shows none. On macOS a
+/// WKWebView whose web content process has died has no URL, and Wry's getter
+/// unwraps it: `window.url()` there is a panic, which the release profile
+/// turns into the app aborting (a user quit an app whose page had gone white
+/// and got a crash report, 2026-11-18). So the web view is asked first.
+pub fn page_url(window: &WebviewWindow) -> Option<Url> {
+    #[cfg(target_os = "macos")]
+    {
+        let (answer, has_url) = std::sync::mpsc::channel();
+        let asked = window.with_webview(move |webview| {
+            let view = webview.inner() as *mut objc2::runtime::AnyObject;
+            let url: *mut objc2::runtime::AnyObject = if view.is_null() {
+                std::ptr::null_mut()
+            } else {
+                // SAFETY: Tauri runs this on the main thread with the live WKWebView.
+                unsafe { objc2::msg_send![view, URL] }
+            };
+            let _ = answer.send(!url.is_null());
+        });
+        let shows_a_page = asked.is_ok()
+            && has_url
+                .recv_timeout(std::time::Duration::from_millis(500))
+                .unwrap_or(false);
+        if !shows_a_page {
+            return None;
+        }
+    }
+    window.url().ok()
+}
+
 pub fn save_last_url(app: &AppHandle) {
     let Some(window) = app.get_webview_window("pake") else {
         return;
     };
+    let Some(url) = page_url(&window) else {
+        return;
+    };
     let result = (|| -> Result<(), Box<dyn std::error::Error>> {
         let path = app.path().app_data_dir()?.join("last-url.txt");
-        crate::util::write_last_url(&path, &window.url()?)?;
+        crate::util::write_last_url(&path, &url)?;
         Ok(())
     })();
     if let Err(error) = result {

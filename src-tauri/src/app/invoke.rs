@@ -319,7 +319,10 @@ pub async fn download_file(
     let path_str = output_path.to_str().ok_or("Invalid output path")?;
 
     let url = Url::from_str(&params.url).map_err(|e| format!("Invalid URL: {}", e))?;
-    let page_url = trusted_page_url(params.page_url.as_deref(), window.url().ok().as_ref());
+    let page_url = trusted_page_url(
+        params.page_url.as_deref(),
+        crate::app::window::page_url(&window).as_ref(),
+    );
 
     let response = match download_client() {
         Ok(client) => {

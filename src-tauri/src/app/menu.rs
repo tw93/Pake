@@ -339,7 +339,7 @@ pub fn handle_menu_click(app_handle: &AppHandle, id: &str) {
             if let Some(window) = focused_webview_window(app_handle) {
                 // Prefer the native webview URL so copy still works on error
                 // pages that have no document.location / clipboard API.
-                if let Ok(url) = window.url() {
+                if let Some(url) = crate::app::window::page_url(&window) {
                     copy_text_to_pasteboard(url.as_str());
                 }
             }

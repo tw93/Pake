@@ -3,7 +3,10 @@
 //! WebKitGTK shows a bare engine message for a failed load and a dead grey view
 //! after its web process exits; WebView2 has its own error page but leaves a
 //! blank view after a renderer crash. Neither had a way back short of knowing
-//! Ctrl+R. macOS is not covered: Tauri 2.10 exposes neither hook for WKWebView.
+//! Ctrl+R. WKWebView is left blank as well when its web content process dies,
+//! and Wry's navigation delegate hears of it but Tauri 2.10 passes no handler
+//! down, so the macOS arm replaces that delegate method and reloads there. A
+//! failed load on macOS is still not covered.
 
 /// A page that takes its renderer down on every load must not be reloaded for ever: after
 /// `MAX_RELOADS` in `RELOAD_WINDOW` the view is left as it is.
@@ -20,7 +23,7 @@ pub(crate) fn may_reload(recent: &mut Vec<std::time::Instant>, now: std::time::I
     true
 }
 
-#[cfg(any(target_os = "linux", target_os = "windows"))]
+#[cfg(any(target_os = "linux", target_os = "windows", target_os = "macos"))]
 fn reload_allowed() -> bool {
     use std::cell::RefCell;
     thread_local! {
@@ -103,6 +106,79 @@ pub fn install(webview: &tauri::webview::PlatformWebview) {
     };
     if let Err(error) = result {
         eprintln!("[Pake] Failed to watch for a WebView2 renderer crash: {error}");
+    }
+}
+
+/// `void webViewWebContentProcessDidTerminate:(WKWebView *)webView`.
+#[cfg(target_os = "macos")]
+const DID_TERMINATE: &std::ffi::CStr = c"webViewWebContentProcessDidTerminate:";
+
+/// Wry's own implementation, kept so its handler still runs first.
+#[cfg(target_os = "macos")]
+static WRY_DID_TERMINATE: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
+
+#[cfg(target_os = "macos")]
+type DidTerminate =
+    extern "C" fn(&objc2::runtime::AnyObject, objc2::runtime::Sel, *mut objc2::runtime::AnyObject);
+
+#[cfg(target_os = "macos")]
+extern "C" fn did_terminate(
+    this: &objc2::runtime::AnyObject,
+    cmd: objc2::runtime::Sel,
+    webview: *mut objc2::runtime::AnyObject,
+) {
+    let original = WRY_DID_TERMINATE.load(std::sync::atomic::Ordering::Relaxed);
+    if original != 0 && original != did_terminate as *const () as usize {
+        // SAFETY: the value is the method's previous implementation, which
+        // has this signature.
+        let original: DidTerminate = unsafe { std::mem::transmute(original) };
+        original(this, cmd, webview);
+    }
+    if webview.is_null() || !reload_allowed() {
+        return;
+    }
+    // SAFETY: WebKit calls this on the main thread with the live web view.
+    // Reload returns the page the dead process was showing.
+    let _: *mut objc2::runtime::AnyObject = unsafe { objc2::msg_send![webview, reload] };
+}
+
+/// Bring a page back when its web content process dies: the window went
+/// white and stayed white, and a user who then quit got a crash report on top
+/// (a user's report, 2026-11-18). Idempotent: the method is replaced once on
+/// the delegate's class, which every web view shares.
+#[cfg(target_os = "macos")]
+pub fn install(webview: &tauri::webview::PlatformWebview) {
+    use objc2::runtime::{AnyClass, AnyObject, Imp, Sel};
+    use std::sync::atomic::Ordering;
+
+    let view = webview.inner() as *mut AnyObject;
+    if view.is_null() {
+        eprintln!("[Pake] Failed to access WKWebView for its crash recovery");
+        return;
+    }
+    // SAFETY: Tauri runs this on the main thread with the live WKWebView.
+    unsafe {
+        let delegate: *mut AnyObject = objc2::msg_send![view, navigationDelegate];
+        if delegate.is_null() {
+            eprintln!("[Pake] The WKWebView has no navigation delegate for its crash recovery");
+            return;
+        }
+        let class: *const AnyClass = objc2::msg_send![delegate, class];
+        let selector = Sel::register(DID_TERMINATE);
+        let method = objc2::ffi::class_getInstanceMethod(class, selector);
+        if method.is_null() {
+            eprintln!("[Pake] The navigation delegate does not hear of a dead web process");
+            return;
+        }
+        let replacement: Imp = std::mem::transmute::<DidTerminate, Imp>(did_terminate);
+        let current = objc2::ffi::method_getImplementation(method);
+        if current.map(|imp| imp as usize) == Some(replacement as usize) {
+            return;
+        }
+        let previous = objc2::ffi::method_setImplementation(method as *mut _, replacement);
+        if let Some(previous) = previous {
+            WRY_DID_TERMINATE.store(previous as usize, Ordering::Relaxed);
+        }
     }
 }
 
