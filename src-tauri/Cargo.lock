@@ -2649,7 +2649,7 @@ dependencies = [
 
 [[package]]
 name = "pake"
-version = "3.19.3"
+version = "3.19.4"
 dependencies = [
  "adblock",
  "block2",
