@@ -868,6 +868,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const isInternalUrl = (url) => matchesInternalUrl(url, window.location.href);
 
+  // An internal target="_blank" link clicked with --new-window, waiting for
+  // the page's own handlers to have their say.
+  let pendingBlankLink = null;
+  const openUnhandledBlankLink = (e) => {
+    const pending = pendingBlankLink;
+    pendingBlankLink = null;
+    if (!pending || pending.event !== e || e.defaultPrevented) return;
+    e.preventDefault();
+    originalWindowOpen.call(window, pending.url, "_blank");
+  };
+
   const detectAnchorElementClick = (e) => {
     // Safety check: ensure e.target exists and is an Element with closest method
     if (!e.target || typeof e.target.closest !== "function") {
@@ -933,8 +944,25 @@ document.addEventListener("DOMContentLoaded", () => {
           // retarget the link to "_self" so the webview never opens a browser
           // window, then let the page's own handler run. If nothing intercepts
           // the click, the default _self navigation keeps it inside the app.
-          if (!window.pakeConfig?.new_window) {
-            anchorElement.target = "_self";
+          //
+          // With --new-window the link is retargeted for this click as well:
+          // left as _blank, Tauri's shell plugin, whose own click listener
+          // on body opens every target="_blank" link in the system browser
+          // without asking whether the page handled the click, sent the
+          // link there even after the page had (Douyin's episode list:
+          // each switch opened douyin.com/undefined in the browser, a
+          // user's report, 2026-11-18). openUnhandledBlankLink, last in the
+          // bubble, opens the in-app window when nobody prevented the click.
+          anchorElement.target = "_self";
+          if (window.pakeConfig?.new_window) {
+            pendingBlankLink = {
+              event: e,
+              anchor: anchorElement,
+              url: absoluteUrl,
+            };
+            setTimeout(() => {
+              anchorElement.target = "_blank";
+            }, 0);
           }
           return;
         }
@@ -998,6 +1026,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("click", (event) =>
     handleProtocolLinkClick(event, handleExternalLink),
   );
+  window.addEventListener("click", openUnhandledBlankLink);
 
   // Capture web links before site popup handlers route them into the app.
   document.addEventListener("click", detectAnchorElementClick, true);

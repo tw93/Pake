@@ -16,7 +16,7 @@ const source = await Promise.all(
     ),
   ),
 );
-async function fixture(frame, run) {
+async function fixture(frame, run, config = {}) {
   const browser = await chromium.launch({
     headless: true,
     ...(process.env.PAKE_BROWSER_EXECUTABLE
@@ -32,9 +32,9 @@ async function fixture(frame, run) {
       }),
     );
     await context.addInitScript(
-      ({ source }) => {
+      ({ source, config }) => {
         window.opened = [];
-        window.pakeConfig = { url: "https://mail.example.com/" };
+        window.pakeConfig = { url: "https://mail.example.com/", ...config };
         window.__TAURI__ = {
           core: {
             invoke: (cmd, args) => {
@@ -48,8 +48,33 @@ async function fixture(frame, run) {
           ? source
           : source.slice(0, 3))
           (0, eval)(script);
+        // tauri-plugin-shell 2.3.5 ships this listener in every app: any
+        // target="_blank" link goes to the system browser, whether or not
+        // the page prevented the click.
+        if (window === window.top)
+          document.addEventListener("DOMContentLoaded", () => {
+            document.body.addEventListener("click", (event) => {
+              let node = event.target;
+              while (node) {
+                if (node.matches("a")) {
+                  if (
+                    node.href !== "" &&
+                    /^https?:\/\//.test(node.href) &&
+                    node.target === "_blank"
+                  ) {
+                    window.__TAURI__.core.invoke("plugin:shell|open", {
+                      path: node.href,
+                    });
+                    event.preventDefault();
+                  }
+                  break;
+                }
+                node = node.parentElement;
+              }
+            });
+          });
       },
-      { source },
+      { source, config },
     );
     const page = await context.newPage();
     await page.goto("https://mail.example.com/");
@@ -159,6 +184,57 @@ for (const frame of [false, true]) {
     });
   }
 }
+
+test("a new-window link the page handled itself opens nothing", async () => {
+  // Douyin's episode list with "new windows in the app" on.
+  await fixture(
+    false,
+    async (page, target, context) => {
+      await page.evaluate(() => {
+        document.body.innerHTML =
+          '<div id="root"><a id="episode" href="undefined" target="_blank"><span>Episode 2</span></a></div>';
+        window.switched = 0;
+        document.querySelector("#root").addEventListener("click", (event) => {
+          event.preventDefault();
+          window.switched += 1;
+        });
+      });
+      let popups = 0;
+      context.on("page", () => (popups += 1));
+      await page.locator("#episode span").click();
+      await page.waitForTimeout(300);
+      assert.equal(await page.evaluate(() => window.switched), 1);
+      assert.deepEqual(await page.evaluate(() => window.opened), []);
+      assert.equal(popups, 0);
+      assert.equal(page.url(), "https://mail.example.com/");
+      assert.equal(
+        await page.evaluate(() => document.querySelector("#episode").target),
+        "_blank",
+      );
+    },
+    { new_window: true },
+  );
+});
+
+test("a new-window link nobody handled opens in the app, not the browser", async () => {
+  await fixture(
+    false,
+    async (page, target, context) => {
+      await page.evaluate(() => {
+        document.body.innerHTML =
+          '<a id="note" href="/note/2" target="_blank"><span>Note</span></a>';
+      });
+      const popupReady = context.waitForEvent("page", { timeout: 3000 });
+      await page.locator("#note span").click();
+      const popup = await popupReady;
+      await popup.waitForURL("https://mail.example.com/note/2");
+      assert.deepEqual(await page.evaluate(() => window.opened), []);
+      assert.equal(page.url(), "https://mail.example.com/");
+      await popup.close();
+    },
+    { new_window: true },
+  );
+});
 
 for (const destination of [
   "https://slack.com/openid/connect/authorize?client_id=123",

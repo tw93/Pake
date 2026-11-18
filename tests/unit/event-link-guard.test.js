@@ -1070,6 +1070,64 @@ describe("event link guard", () => {
     expect(context.window.location.href).toBe("https://example.com/app");
   });
 
+  const loadNewWindowPage = () => {
+    vi.useFakeTimers();
+    const context = loadEventHelpers({ withTauri: true });
+    context.window.pakeConfig = { new_window: true };
+    const nativeOpen = vi.fn(() => ({}));
+    context.window.open = nativeOpen;
+    runDomReady(context);
+    const lastInBubble = context.eventListeners.click.find(
+      ({ handler }) => handler.name === "openUnhandledBlankLink",
+    ).handler;
+    return { context, nativeOpen, lastInBubble };
+  };
+
+  it("leaves a new-window link the page handled itself alone", () => {
+    // Douyin's episode list: target="_blank", href "undefined", and a click
+    // handler that switches the video. Left as _blank it reached the shell
+    // plugin's own listener, which opened it in the system browser.
+    try {
+      const { context, nativeOpen, lastInBubble } = loadNewWindowPage();
+      const anchor = makeAnchor("https://example.com/undefined", "_blank");
+      const event = { ...makeClickEvent(anchor), defaultPrevented: false };
+      getClickGuard(context)(event);
+      expect(anchor.target).toBe("_self");
+      event.defaultPrevented = true; // the page's handler ran
+      lastInBubble(event);
+      expect(nativeOpen).not.toHaveBeenCalled();
+      expect(event.preventDefault).not.toHaveBeenCalled();
+      expect(
+        context.invokeCalls.filter(([cmd]) => cmd === "plugin:shell|open"),
+      ).toEqual([]);
+      vi.runAllTimers();
+      expect(anchor.target).toBe("_blank");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("opens a new-window link nobody handled in an in-app window", () => {
+    try {
+      const { context, nativeOpen, lastInBubble } = loadNewWindowPage();
+      const anchor = makeAnchor("https://example.com/video/1", "_blank");
+      const event = { ...makeClickEvent(anchor), defaultPrevented: false };
+      getClickGuard(context)(event);
+      lastInBubble(event);
+      expect(event.preventDefault).toHaveBeenCalledOnce();
+      expect(nativeOpen.mock.calls).toEqual([
+        ["https://example.com/video/1", "_blank"],
+      ]);
+      // A later, unrelated click finds nothing pending.
+      lastInBubble({ defaultPrevented: false, preventDefault: vi.fn() });
+      expect(nativeOpen).toHaveBeenCalledOnce();
+      vi.runAllTimers();
+      expect(anchor.target).toBe("_blank");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("still opens external target=_blank links in the system browser", () => {
     const context = loadEventHelpers({ withTauri: true });
     context.window.pakeConfig = { new_window: false };
