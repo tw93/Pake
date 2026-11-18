@@ -111,6 +111,8 @@ for (const target of ["html", "body", "#player"]) {
         video{width:100%;height:100%}#preview{width:80px;height:45px;position:fixed;top:0;right:0}#controls{position:absolute;bottom:20px;left:20px;z-index:10}</style>
         <section id="player"><video></video><button id="controls">Pause</button></section><video id="preview"></video>`);
       await page.evaluate(() => {
+        // The polyfill is for Linux; on macOS the engine's own is kept.
+        Object.defineProperty(navigator, "platform", { value: "Linux x86_64" });
         let fullscreen = false;
         window.__PAKE_NATIVE__ = {
           window: {
@@ -193,6 +195,7 @@ test("denied polyfill fullscreen leaves the player in its original layout", asyn
       '<main><section id="player"><video></video><button>Pause</button></section></main>',
     );
     await page.evaluate(() => {
+      Object.defineProperty(navigator, "platform", { value: "Linux x86_64" });
       window.__PAKE_NATIVE__ = {
         window: {
           getCurrentWindow: () => ({
@@ -233,6 +236,69 @@ test("denied polyfill fullscreen leaves the player in its original layout", asyn
       }),
       { denied: true, sameParent: true, fullscreen: true, styled: false },
     );
+  } finally {
+    await browser.close();
+  }
+});
+
+test("macOS keeps the engine's own fullscreen instead of the polyfill", async () => {
+  const browser = await chromium.launch({
+    headless: true,
+    ...(process.env.PAKE_BROWSER_EXECUTABLE
+      ? { executablePath: process.env.PAKE_BROWSER_EXECUTABLE }
+      : {}),
+  });
+  try {
+    const page = await browser.newPage();
+    await page.setContent('<section id="player"><video></video></section>');
+    const result = await page.evaluate(
+      async (source) => {
+        const load = (platform) => {
+          const frame = document.createElement("iframe");
+          frame.allowFullscreen = true;
+          document.body.appendChild(frame);
+          const view = frame.contentWindow;
+          Object.defineProperty(view.navigator, "platform", {
+            value: platform,
+          });
+          const native = view.Element.prototype.requestFullscreen;
+          view.__PAKE_NATIVE__ = {
+            window: { getCurrentWindow: () => ({}) },
+          };
+          view.eval(source);
+          return new Promise((resolve) =>
+            setTimeout(
+              () =>
+                resolve({
+                  engineEnabled: view.document.fullscreenEnabled,
+                  replaced: view.Element.prototype.requestFullscreen !== native,
+                  marked: view.__PAKE_FULLSCREEN_POLYFILL__ === true,
+                }),
+              300,
+            ),
+          );
+        };
+        return {
+          mac: await load("MacIntel"),
+          linux: await load("Linux x86_64"),
+        };
+      },
+      await fs.readFile(
+        `${process.env.PAKE_INJECT_ROOT || "src-tauri/src/inject"}/fullscreen.js`,
+        "utf8",
+      ),
+    );
+    // YouTube's player only fills the screen under the engine's fullscreen.
+    assert.deepEqual(result.mac, {
+      engineEnabled: true,
+      replaced: false,
+      marked: false,
+    });
+    assert.deepEqual(result.linux, {
+      engineEnabled: true,
+      replaced: true,
+      marked: true,
+    });
   } finally {
     await browser.close();
   }
