@@ -244,10 +244,60 @@ fn is_blank_popup_url(url: &Url) -> bool {
     url.scheme() == "about" && url.path() == "blank"
 }
 
+/// The address a popup's web view is built with. WKWebView and WebView2 load
+/// a popup's address themselves into the web view they are handed, as the
+/// popup's first navigation; given the address as well, Wry loads it a second
+/// time as the app's own navigation, which moves the page to another process
+/// and drops `window.opener` (measured on macOS 26.7: a sign-in popup opened
+/// at its address reported no opener). `about:blank` is the one address
+/// Tauri does not load. Linux keeps its address: not measured there.
+fn popup_build_url(target_url: &Url) -> Url {
+    if cfg!(any(target_os = "macos", target_os = "windows")) {
+        Url::parse("about:blank").expect("about:blank must be a valid URL")
+    } else {
+        target_url.clone()
+    }
+}
+
+/// Whether a page's new-window request gets a window of its own: always with
+/// `--new-window`, and without it for a blank popup and for one that asks for
+/// a size.
+fn builds_requested_popup(allow_new_window: bool, target_url: &Url, sized: bool) -> bool {
+    allow_new_window || is_blank_popup_url(target_url) || sized
+}
+
 #[cfg(test)]
 mod popup_tests {
-    use super::is_blank_popup_url;
+    use super::{builds_requested_popup, is_blank_popup_url, popup_build_url};
     use tauri::Url;
+
+    #[test]
+    fn a_popup_web_view_is_built_blank_so_the_engine_loads_its_address_once() {
+        let google = Url::parse("https://accounts.google.com/gsi/select?client_id=1").unwrap();
+        let built = popup_build_url(&google);
+        if cfg!(any(target_os = "macos", target_os = "windows")) {
+            // A second, app-made load of the address drops window.opener.
+            assert_eq!(built.as_str(), "about:blank");
+        } else {
+            assert_eq!(built, google);
+        }
+    }
+
+    #[test]
+    fn a_sized_popup_is_built_at_its_address_without_new_window() {
+        // X signs in with Google through a sized popup. Built blank and sent
+        // to its address afterwards, it lost its opener to X's
+        // Cross-Origin-Opener-Policy and ended on a blank page.
+        let google = Url::parse("https://accounts.google.com/gsi/select?client_id=1").unwrap();
+        assert!(builds_requested_popup(false, &google, true));
+        assert!(!builds_requested_popup(false, &google, false));
+        assert!(builds_requested_popup(true, &google, false));
+        assert!(builds_requested_popup(
+            false,
+            &Url::parse("about:blank").unwrap(),
+            false
+        ));
+    }
 
     #[test]
     fn only_blank_documents_get_the_default_popup_exception() {
@@ -280,7 +330,7 @@ fn open_requested_window(
         tauri_config,
         WindowBuildOptions {
             label: &label,
-            url: WebviewUrl::External(target_url.clone()),
+            url: WebviewUrl::External(popup_build_url(&target_url)),
             visible: true,
             new_window_features: Some(features),
         },
@@ -685,7 +735,11 @@ fn build_window(
         window_builder = window_builder.on_new_window(move |target_url, features| {
             // Even without --new-window, two-stage popups need a real webview
             // with our download delegate, never a proxy for the main window.
-            if !allow_new_window && !is_blank_popup_url(&target_url) {
+            // So does a popup that asks for a size: the injected scripts send
+            // only a sign-in popup or one of the app's own site here sized,
+            // and it must start at its address to keep its opener (WebKitGTK
+            // reports no size, so Linux is unchanged).
+            if !builds_requested_popup(allow_new_window, &target_url, features.size().is_some()) {
                 return NewWindowResponse::Deny;
             }
             match open_requested_window(

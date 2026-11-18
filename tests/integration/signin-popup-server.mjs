@@ -66,6 +66,13 @@ f.onclick=()=>{const p=window.open('/o/oauth2/v2/auth?mode=frame','g_frame_windo
  if(p){const t=setInterval(()=>{if(p.closed){parent.postMessage({frameClosed:true},'*');clearInterval(t)}},300)}};
 </script>`;
 
+// The app's page carries the opener policy x.com sends. A popup keeps its
+// opener across it only when its first navigation is the popup's address, so
+// a runtime that opens the popup blank and sends it there afterwards, or that
+// loads the address a second time itself, ends G and F with "provider
+// opener=no" and no answer. The callback page sends no policy: a popup that
+// comes back from the provider to a page with one loses its opener in any
+// browser, so sites that sign in this way do not send it there.
 function send(response, body, status = 200, headers = {}) {
   response.writeHead(status, {
     "Content-Type": "text/html; charset=utf-8",
@@ -74,6 +81,9 @@ function send(response, body, status = 200, headers = {}) {
   });
   response.end(body);
 }
+const appHeaders = {
+  "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+};
 
 const selfClosePage = `<!doctype html><meta charset=utf-8><title>S closing</title><script>
 window.close();
@@ -82,7 +92,7 @@ setTimeout(()=>{document.title='S still here'},1500);
 
 const routes = {
   [APP]: {
-    "/": (response) => send(response, appPage),
+    "/": (response) => send(response, appPage, 200, appHeaders),
     "/popup-start": (response) =>
       send(response, "", 302, {
         Location: `http://127.0.0.1:${PROVIDER}/o/oauth2/v2/auth?redirect_uri=${encodeURIComponent(`http://localhost:${APP}/callback?via=n`)}`,

@@ -49,27 +49,6 @@ function opensSignInPopups() {
   return !/linux/i.test(platform);
 }
 
-// The native handler builds a blank popup under every setting and on every
-// platform, with its opener and Pake's download delegate; a popup that starts
-// at its address exists only with --new-window. So a sign-in popup starts
-// blank and is sent to its address, the two-stage form sites use themselves.
-function openPopupThroughBlank(nativeOpen, opener, url, name, specs) {
-  const popup = nativeOpen.call(opener, "about:blank", name, specs);
-  if (!popup) return null;
-  try {
-    popup.location.href = url;
-  } catch (error) {
-    console.error("[Pake] Failed to send a popup to its address:", error);
-    try {
-      popup.close();
-    } catch (closeError) {
-      // The caller falls back to its previous route either way.
-    }
-    return null;
-  }
-  return popup;
-}
-
 // This list intentionally preserves Pake's existing domain routing policy.
 const MULTI_PART_PUBLIC_SUFFIXES = [
   "co.uk",

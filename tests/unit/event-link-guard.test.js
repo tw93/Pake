@@ -321,10 +321,11 @@ describe("event link guard", () => {
         GOOGLE_SPECS,
       );
       expect(result).toBe(popup);
+      // Straight to its address: a popup opened blank and sent there
+      // afterwards loses its opener on a site with an opener policy.
       expect(nativeOpen.mock.calls).toEqual([
-        ["about:blank", "g_auth_token_window", GOOGLE_SPECS],
+        [GOOGLE_POPUP, "g_auth_token_window", GOOGLE_SPECS],
       ]);
-      expect(popup.location.href).toBe(GOOGLE_POPUP);
       expect(context.window.location.href).toBe("https://example.com/app");
     },
   );
@@ -360,11 +361,7 @@ describe("event link guard", () => {
       "share",
       "width=600,height=400",
     );
-    expect(widget.nativeOpen).not.toHaveBeenCalledWith(
-      "about:blank",
-      "share",
-      "width=600,height=400",
-    );
+    expect(widget.nativeOpen).not.toHaveBeenCalled();
 
     const app = load();
     expect(
@@ -375,9 +372,8 @@ describe("event link guard", () => {
       ),
     ).toBe(app.popup);
     expect(app.nativeOpen.mock.calls).toEqual([
-      ["about:blank", "flow", "width=600,height=400"],
+      ["https://app.example.net/popup", "flow", "width=600,height=400"],
     ]);
-    expect(app.popup.location.href).toBe("https://app.example.net/popup");
   });
 
   it("gives a sized popup of the app's own site its own window", () => {
@@ -390,10 +386,13 @@ describe("event link guard", () => {
       specs,
     );
     expect(result).toBe(popup);
-    expect(nativeOpen.mock.calls).toEqual([["about:blank", " Google", specs]]);
-    expect(popup.location.href).toBe(
-      "https://example.com/verifyNoPopupBlockerHtmlAndRedirect?redirectUri=x",
-    );
+    expect(nativeOpen.mock.calls).toEqual([
+      [
+        "https://example.com/verifyNoPopupBlockerHtmlAndRedirect?redirectUri=x",
+        " Google",
+        specs,
+      ],
+    ]);
     expect(context.window.location.href).toBe("https://example.com/app");
   });
 
@@ -426,14 +425,14 @@ describe("event link guard", () => {
     },
   );
 
-  it("falls back to the current window when the blank popup is refused", () => {
+  it("falls back to the current window when the popup is refused", () => {
     const { context, nativeOpen } = loadPopupPage(MAC);
     nativeOpen.mockReturnValue(null);
     expect(context.window.open(GOOGLE_POPUP, "oauth", GOOGLE_SPECS)).toBe(
       context.window,
     );
     expect(nativeOpen.mock.calls).toEqual([
-      ["about:blank", "oauth", GOOGLE_SPECS],
+      [GOOGLE_POPUP, "oauth", GOOGLE_SPECS],
     ]);
     expect(context.window.location.href).toBe(GOOGLE_POPUP);
   });

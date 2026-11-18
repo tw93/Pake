@@ -54,17 +54,18 @@
     url = normalizePopupUrl(url);
     const popupUrl = popupDestination(url, name, specs);
     if (popupUrl) {
-      const popup = openPopupThroughBlank(
-        originalOpen,
-        window,
-        popupUrl,
-        name,
-        specs,
-      );
+      // Straight to its address: see the main page's route in event.js.
+      const popup = originalOpen.call(window, popupUrl, name, specs);
       if (popup) return popup;
     }
     // Named targets can navigate an existing frame and must retain its proxy.
-    if (name && String(name).toLowerCase() !== "_blank") {
+    // A sized one is a popup instead, and the native handler now builds every
+    // sized popup, so one to another site takes the external route below.
+    if (
+      name &&
+      String(name).toLowerCase() !== "_blank" &&
+      !(opensSignInPopups() && requestsPopupWindow(name, specs))
+    ) {
       return originalOpen.call(window, url, name, specs);
     }
     const external = externalDestination(url, name);

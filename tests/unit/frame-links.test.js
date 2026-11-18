@@ -90,7 +90,6 @@ describe("subframe external links", () => {
   );
 
   it.each([
-    ["https://outside.example/article", "details", {}],
     ["https://outside.example/article", "_self", {}],
     ["https://outside.example/article", "_parent", {}],
     ["https://outside.example/article", "_top", {}],
@@ -144,15 +143,14 @@ describe("subframe external links", () => {
       { new_window: true },
     ],
   ])(
-    "opens the sized popup %s (%s) blank and sends it to its address",
+    "opens the sized popup %s (%s) at its address",
     (url, name, specs, config) => {
       const frame = loadFrame(config);
       expect(frame.window.open(url, name, specs)).toBe(frame.nativeWindow);
-      expect(frame.nativeOpen).toHaveBeenCalledOnce();
-      expect(frame.nativeOpen).toHaveBeenCalledWith("about:blank", name, specs);
-      expect(frame.nativeWindow.location.href).toBe(
-        new URL(url, "https://mail.example.com/app").href,
-      );
+      // Not blank first: that lost the opener on a site with an opener policy.
+      expect(frame.nativeOpen.mock.calls).toEqual([
+        [new URL(url, "https://mail.example.com/app").href, name, specs],
+      ]);
       expect(frame.messages).toEqual([]);
     },
   );
@@ -193,9 +191,8 @@ describe("subframe external links", () => {
       frame.nativeWindow,
     );
     expect(frame.nativeOpen.mock.calls).toEqual([
-      ["about:blank", "oauth", "width = 400"],
+      [url.href, "oauth", "width = 400"],
     ]);
-    expect(frame.nativeWindow.location.href).toBe(url.href);
   });
 
   it("keeps a Linux frame on the native route", () => {
@@ -205,17 +202,32 @@ describe("subframe external links", () => {
     expect(frame.nativeOpen.mock.calls).toEqual([[url, "oauth", "width=400"]]);
   });
 
-  it("falls back to the native route when the blank popup is refused", () => {
+  it("sends a sized named popup of another site to the system browser", () => {
+    // The native handler builds every sized popup, so this one must not reach it.
     const frame = loadFrame();
-    frame.nativeOpen.mockReturnValueOnce(null);
-    const url = "https://accounts.google.com/o/oauth2/auth";
-    expect(frame.window.open(url, "oauth", "width=400")).toBe(
-      frame.nativeWindow,
-    );
-    expect(frame.nativeOpen.mock.calls).toEqual([
-      ["about:blank", "oauth", "width=400"],
-      [url, "oauth", "width=400"],
+    expect(
+      frame.window.open(
+        "https://outside.example/article",
+        "details",
+        "width=400",
+      ),
+    ).toBeNull();
+    expect(frame.nativeOpen).not.toHaveBeenCalled();
+    expect(frame.messages).toEqual([
+      {
+        type: "pake:frame-external-link",
+        url: "https://outside.example/article",
+      },
     ]);
+  });
+
+  it("keeps an unsized named target on the native route", () => {
+    const frame = loadFrame();
+    frame.window.open("https://outside.example/article", "details");
+    expect(frame.nativeOpen.mock.calls).toEqual([
+      ["https://outside.example/article", "details", undefined],
+    ]);
+    expect(frame.messages).toEqual([]);
   });
 
   it("forwards external anchors while preserving downloads and named frames", () => {

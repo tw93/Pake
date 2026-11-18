@@ -25,7 +25,10 @@ describe("macOS new-window handling (regression: #1194)", () => {
     // WKWebView that does not have Pake's runtime state.
     expect(newWindowBlock).toContain("open_requested_window");
     expect(newWindowBlock).toContain(
-      "!allow_new_window && !is_blank_popup_url(&target_url)",
+      "!builds_requested_popup(allow_new_window, &target_url, features.size().is_some())",
+    );
+    expect(source).toContain(
+      "allow_new_window || is_blank_popup_url(target_url) || sized",
     );
     expect(newWindowBlock).toContain("NewWindowResponse::Create");
     expect(newWindowBlock).not.toMatch(/NewWindowResponse::Allow\b/);

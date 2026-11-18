@@ -1044,13 +1044,12 @@ document.addEventListener("DOMContentLoaded", () => {
         (window.isAuthPopup(popupUrl, name) ||
           (!window.pakeConfig?.new_window && ownSite))
       ) {
-        const popup = openPopupThroughBlank(
-          originalWindowOpen,
-          window,
-          popupUrl,
-          name,
-          specs,
-        );
+        // Straight to its address, as a browser opens it: the native handler
+        // builds a sized popup under every setting. Opening it blank first
+        // and then sending it there lost the opener on sites that set
+        // Cross-Origin-Opener-Policy (X does): WebKit keeps a popup with its
+        // opener across that policy only on the popup's first navigation.
+        const popup = originalWindowOpen.call(window, popupUrl, name, specs);
         if (popup) return popup;
       }
     }
