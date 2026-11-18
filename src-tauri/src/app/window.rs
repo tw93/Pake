@@ -277,7 +277,7 @@ mod popup_tests {
         // link in the system browser, handled by the page or not. The click
         // guard must retarget before it asks about --new-window, and the
         // in-app window must wait for the end of the bubble.
-        let script = include_str!("../inject/event.js");
+        let script = include_str!("../inject/event.js").replace("\r\n", "\n");
         let retarget = script
             .find(
                 "anchorElement.target = \"_self\";\n          if (window.pakeConfig?.new_window) {",

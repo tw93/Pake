@@ -25,3 +25,9 @@ src-tauri/.cargo/**/*     linguist-vendored
 
 # Exclude injection system (since it's mostly JS/CSS)
 src-tauri/src/inject/**/* linguist-vendored
+
+# Source is checked out with LF on every system. Tests read these files as
+# text, from Vitest and from Rust's include_str!, and a pattern that spans a
+# line break did not match the CRLF a Windows checkout gave them.
+src-tauri/src/**          text eol=lf
+tests/**                  text eol=lf
