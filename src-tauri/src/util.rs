@@ -1051,4 +1051,28 @@ mod tests {
             assert!(!is_valid_identifier(id), "{id}");
         }
     }
+
+    #[test]
+    fn macos_keeps_webkits_own_fullscreen_instead_of_the_polyfill() {
+        // Under the polyfill YouTube's button made the window full screen and
+        // left the video a small box. The script must read the engine's answer
+        // and leave before it marks itself installed or replaces anything. It
+        // is read here, not in window.rs, which a source test holds to naming
+        // the script once, where it is injected.
+        let script = include_str!("inject/fullscreen.js").replace("\r\n", "\n");
+        let asks = script
+            .find("function engineHasFullscreen() {")
+            .expect("the script asks the engine first");
+        let mac_only = script[asks..]
+            .find("if (!/^Mac/.test(navigator.platform || \"\")) return false;")
+            .expect("only a Mac's engine is trusted with it");
+        let leaves = script
+            .find("if (engineHasFullscreen()) return;")
+            .expect("the polyfill stays out where the engine has fullscreen");
+        let installs = script
+            .find("window.__PAKE_FULLSCREEN_POLYFILL__ = true;")
+            .expect("the polyfill marks itself installed");
+        assert!(mac_only < 200);
+        assert!(asks < leaves && leaves < installs);
+    }
 }
