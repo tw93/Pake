@@ -482,7 +482,7 @@ fn build_window(
         new_window_features,
     } = opts;
     // A window a page opened: a sign-in popup, a blank two-stage one.
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", target_os = "windows"))]
     let page_popup = new_window_features.is_some();
     #[cfg(target_os = "macos")]
     let use_native_window_tabbing = config.multi_window && new_window_features.is_none();
@@ -1090,6 +1090,39 @@ fn build_window(
             crate::app::popup_close::install(&popup_app, &popup_label, &webview);
         }) {
             eprintln!("[Pake] Failed to access WKWebView for its popup close: {error}");
+        }
+    }
+
+    // WebView2 raises WindowCloseRequested for the same call, and Wry answers
+    // by destroying the web view's own container, which left the popup's frame
+    // on screen with nothing in it (measured in a Windows 11 VM).
+    #[cfg(target_os = "windows")]
+    if page_popup {
+        let popup = window.clone();
+        if let Err(error) = window.with_webview(move |webview| {
+            use webview2_com::WindowCloseRequestedEventHandler;
+            let result = unsafe {
+                (move || -> windows_core::Result<()> {
+                    let core = webview.controller().CoreWebView2()?;
+                    let mut token = 0;
+                    core.add_WindowCloseRequested(
+                        &WindowCloseRequestedEventHandler::create(Box::new(move |_, _| {
+                            if let Err(error) = popup.close() {
+                                eprintln!(
+                                    "[Pake] Failed to close the popup its page closed: {error}"
+                                );
+                            }
+                            Ok(())
+                        })),
+                        &mut token,
+                    )
+                })()
+            };
+            if let Err(error) = result {
+                eprintln!("[Pake] Failed to watch for a popup closing itself: {error}");
+            }
+        }) {
+            eprintln!("[Pake] Failed to access WebView2 for its popup close: {error}");
         }
     }
 

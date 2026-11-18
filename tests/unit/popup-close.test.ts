@@ -59,7 +59,14 @@ describe('a popup its page closes', () => {
     expect(waited).toBeGreaterThan(hidden);
     expect(closed).toBeGreaterThan(waited);
     expect(buildWindow()).toMatch(
-      /#\[cfg\(target_os = "macos"\)\]\s+let page_popup = new_window_features\.is_some\(\);/,
+      /#\[cfg\(any\(target_os = "macos", target_os = "windows"\)\)\]\s+let page_popup = new_window_features\.is_some\(\);/,
+    );
+  });
+
+  it('closes the window on Windows, where Wry destroys only the web view', () => {
+    // The popup had answered its opener and stayed on screen, empty.
+    expect(buildWindow()).toMatch(
+      /#\[cfg\(target_os = "windows"\)\]\s+if page_popup \{[\s\S]+?core\.add_WindowCloseRequested\([\s\S]+?if let Err\(error\) = popup\.close\(\)/,
     );
   });
 

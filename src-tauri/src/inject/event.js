@@ -680,9 +680,10 @@ function openAuthNavigation(originalWindowOpen, url, name, specs) {
 // cancelled IPC request ends the whole app, because the release profile
 // cannot catch the exception WebKit raises for it (measured: every sign-in
 // popup that closed itself took the app with it). The answer takes a couple
-// of milliseconds, so the close waits them out. WebKit runs the same cancel
-// for any window a script may close, a first page in the main window
-// included, so every top-level page gets the wait, not only popups.
+// of milliseconds, so the close waits them out. Every top-level page gets
+// the wait: a popup opened with noopener has no window.opener to tell it by.
+// In the main window it is a precaution only; a first page that closed
+// itself there did not end the app in three runs without it.
 const WINDOW_CLOSE_DELAY_MS = 150;
 function deferWindowClose() {
   if (window !== window.top) return;
