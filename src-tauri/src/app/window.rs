@@ -824,7 +824,8 @@ fn build_window(
 
     let mut window_builder = WebviewWindowBuilder::new(app, label, url)
         .title(effective_title)
-        .visible(visible)
+        // Linux builds every window hidden and shows it once its title bar is in.
+        .visible(visible && !cfg!(target_os = "linux"))
         .user_agent(user_agent)
         .resizable(window_config.resizable)
         .maximized(window_config.maximize);
@@ -1236,6 +1237,16 @@ fn build_window(
     window_builder = window_builder.on_navigation(|_| true);
 
     let window = window_builder.build()?;
+
+    #[cfg(target_os = "linux")]
+    {
+        if !window_config.hide_window_decorations {
+            crate::app::header_bar::install(&window);
+        }
+        if visible {
+            window.show()?;
+        }
+    }
 
     // A popup is built visible, so it can enter full screen now; a hidden window
     // enters when it is first shown.
