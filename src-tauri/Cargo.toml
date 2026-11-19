@@ -53,7 +53,11 @@ objc2-foundation = { version = "0.3", features = [
   "NSEnumerator",
   "NSError",
   "NSLocale",
+  "NSDate",
+  "NSSet",
   "NSString",
+  "NSURL",
+  "NSUUID",
   "NSUserNotification",
 ] }
 objc2-web-kit = { version = "0.3", default-features = false, features = [
@@ -62,7 +66,18 @@ objc2-web-kit = { version = "0.3", default-features = false, features = [
   "WKContentRuleList",
   "WKContentRuleListStore",
   "WKUserContentController",
+  "WKWebExtension",
+  "WKWebExtensionContext",
+  "WKWebExtensionController",
+  "WKWebExtensionControllerConfiguration",
+  "WKWebExtensionControllerDelegate",
+  "WKWebExtensionMatchPattern",
+  "WKWebExtensionPermission",
+  "WKWebExtensionTab",
+  "WKWebExtensionTabConfiguration",
+  "WKWebExtensionWindow",
   "WKWebViewConfiguration",
+  "WKWebsiteDataStore",
 ] }
 
 [target.'cfg(target_os = "linux")'.dependencies]

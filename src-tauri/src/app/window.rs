@@ -575,6 +575,45 @@ pub fn toggle_all_app_windows(app: &AppHandle, init_fullscreen: bool) {
     }
 }
 
+/// The one window that shows an extension's own page. It is built like every
+/// other window of the app, since WebView2 wants the same settings for all
+/// webviews that share a data folder.
+#[cfg(target_os = "windows")]
+pub fn open_extension_window(app: &AppHandle, url: Url, title: &str) -> tauri::Result<()> {
+    const LABEL: &str = "extension-settings";
+    let window = match app.get_webview_window(LABEL) {
+        Some(window) => {
+            window.navigate(url)?;
+            window
+        }
+        None => {
+            let state = app.state::<MultiWindowState>();
+            build_window(
+                app,
+                &state.pake_config,
+                &state.tauri_config,
+                WindowBuildOptions {
+                    label: LABEL,
+                    url: WebviewUrl::External(url),
+                    visible: true,
+                    new_window_features: None,
+                },
+            )?
+        }
+    };
+    // A small plain window whatever the app's own window is set to be.
+    window.set_fullscreen(false)?;
+    window.unmaximize()?;
+    window.set_decorations(true)?;
+    window.set_always_on_top(false)?;
+    window.set_min_size(None::<tauri::LogicalSize<f64>>)?;
+    window.set_title(title)?;
+    window.set_size(tauri::LogicalSize::new(440.0, 640.0))?;
+    window.unminimize()?;
+    window.show()?;
+    window.set_focus()
+}
+
 fn build_window_with_label(
     app: &AppHandle,
     config: &PakeConfig,
@@ -733,6 +772,29 @@ fn build_window(
     ))]
     let (url, blocked_target) = match web_target(&url) {
         Some(target) if label == "pake" && !blocking_groups.is_empty() => (
+            WebviewUrl::CustomProtocol(
+                Url::parse("about:blank").expect("about:blank must be a valid URL"),
+            ),
+            Some(target),
+        ),
+        _ => (url, None),
+    };
+
+    // Extensions ride on the webview's configuration, which has to exist
+    // before the webview does. A page's popup takes the configuration WebKit
+    // made from its opener's, controller included.
+    #[cfg(target_os = "macos")]
+    let extension_configuration = match (&config.runtime_extensions, &new_window_features) {
+        (Some(directory), None) => {
+            crate::app::extensions::configuration(directory, window_config.incognito)
+        }
+        _ => None,
+    };
+    // The main window waits blank for them too, so its first page gets their
+    // content scripts. Already blank for content blocking, it leaves there.
+    #[cfg(target_os = "macos")]
+    let (url, extension_target) = match web_target(&url) {
+        Some(target) if label == "pake" && extension_configuration.is_some() => (
             WebviewUrl::CustomProtocol(
                 Url::parse("about:blank").expect("about:blank must be a valid URL"),
             ),
@@ -1054,6 +1116,18 @@ fn build_window(
         println!("Proxy configured: {}", config.proxy_url);
     }
 
+    #[cfg(target_os = "macos")]
+    if let Some(configuration) = extension_configuration {
+        window_builder = window_builder.with_webview_configuration(configuration);
+    }
+
+    // WebView2 keeps one setting per data folder, so every window of the app
+    // turns extensions on, a page's popup included.
+    #[cfg(target_os = "windows")]
+    if config.runtime_extensions.is_some() {
+        window_builder = window_builder.browser_extensions_enabled(true);
+    }
+
     if let Some(features) = new_window_features {
         #[cfg(target_os = "macos")]
         prepare_macos_new_window_configuration(&features)?;
@@ -1186,8 +1260,23 @@ fn build_window(
         }
     }
 
+    // The first window adds the extensions to the profile and opens its page
+    // once they are in; a later window finds them there already.
+    #[cfg(target_os = "windows")]
+    let (download_target, extension_target) = match &config.runtime_extensions {
+        Some(_) if label == "pake" => (None, download_target),
+        _ => (download_target, None),
+    };
+
     #[cfg(target_os = "windows")]
     crate::app::download::install(&window, download_target)?;
+
+    #[cfg(target_os = "windows")]
+    if let Some(directory) = &config.runtime_extensions {
+        if label == "pake" {
+            crate::app::extensions::install(&window, directory.clone(), extension_target)?;
+        }
+    }
 
     // Every webview is built here, so every one can be asked for the camera and microphone.
     #[cfg(target_os = "linux")]
@@ -1215,13 +1304,39 @@ fn build_window(
             crate::app::content_blocking::install(&webview, groups);
             if let Some(target) = blocked_target {
                 crate::app::content_blocking::when_ready(Box::new(move || {
+                    let open = move || {
+                        if let Err(error) = opener.navigate(target) {
+                            eprintln!("[Pake] Failed to open the page: {error}");
+                        }
+                    };
+                    #[cfg(target_os = "macos")]
+                    crate::app::extensions::when_ready(Box::new(open));
+                    #[cfg(not(target_os = "macos"))]
+                    open();
+                }));
+            }
+        }) {
+            eprintln!("[Pake] Failed to access the webview for content blocking: {error}");
+        }
+    }
+
+    #[cfg(target_os = "macos")]
+    if config.runtime_extensions.is_some() {
+        let opener = window.clone();
+        if let Err(error) = window.with_webview(move |webview| {
+            // SAFETY: with_webview runs on the main thread with a live WKWebView.
+            crate::app::extensions::register(unsafe {
+                &*(webview.inner() as *const objc2::runtime::AnyObject)
+            });
+            if let Some(target) = extension_target {
+                crate::app::extensions::when_ready(Box::new(move || {
                     if let Err(error) = opener.navigate(target) {
                         eprintln!("[Pake] Failed to open the page: {error}");
                     }
                 }));
             }
         }) {
-            eprintln!("[Pake] Failed to access the webview for content blocking: {error}");
+            eprintln!("[Pake] Failed to access the webview for extensions: {error}");
         }
     }
 
@@ -1364,6 +1479,8 @@ fn build_window(
             }
         };
         Queue::main().exec_async(move || {
+            // Runs at once when the app has no extensions.
+            let navigate = move || crate::app::extensions::when_ready(Box::new(navigate));
             #[cfg(feature = "content-blocking")]
             if wait_for_lists {
                 crate::app::content_blocking::when_ready(Box::new(navigate));
@@ -1378,9 +1495,9 @@ fn build_window(
 }
 
 /// The http or https page a window opens, whichever way its URL is held.
-#[cfg(all(
-    any(target_os = "macos", target_os = "linux"),
-    feature = "content-blocking"
+#[cfg(any(
+    target_os = "macos",
+    all(target_os = "linux", feature = "content-blocking")
 ))]
 fn web_target(url: &WebviewUrl) -> Option<Url> {
     let target = match url {

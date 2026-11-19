@@ -8,6 +8,8 @@ pub mod config;
 pub mod content_blocking;
 #[cfg(target_os = "windows")]
 pub mod download;
+#[cfg(any(target_os = "macos", target_os = "windows"))]
+pub mod extensions;
 pub mod invoke;
 #[cfg(target_os = "linux")]
 pub mod media_permission;

@@ -7,10 +7,14 @@ use tauri::menu::{AboutMetadata, Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::{AppHandle, Manager, WebviewWindow, Wry};
 use tauri_plugin_opener::OpenerExt;
 
+/// Menu ids of the Extensions menu start with this; the rest is the folder name.
+const EXTENSION_ITEM_PREFIX: &str = "extension_settings:";
+
 pub fn set_app_menu(
     app: &AppHandle<Wry>,
     allow_multi_window: bool,
     enable_find: bool,
+    extensions: &[crate::app::extensions::Installed],
 ) -> tauri::Result<()> {
     let pake_version = env!("CARGO_PKG_VERSION");
     let pake_menu_item_title = format!("Built with Pake V{}", pake_version);
@@ -25,10 +29,14 @@ pub fn set_app_menu(
             &edit_menu(app, enable_find)?,
             &view_menu(app)?,
             &navigation_menu(app)?,
-            &window_submenu,
-            &help_menu(app, &pake_menu_item_title)?,
         ],
     )?;
+    // Only an app with an extension that has settings to show gets the menu.
+    if extensions.iter().any(|extension| extension.page.is_some()) {
+        menu.append(&extensions_menu(app, extensions)?)?;
+    }
+    menu.append(&window_submenu)?;
+    menu.append(&help_menu(app, &pake_menu_item_title)?)?;
 
     app.set_menu(menu)?;
 
@@ -203,6 +211,27 @@ fn navigation_menu(app: &AppHandle<Wry>) -> tauri::Result<Submenu<Wry>> {
     Ok(navigation_menu)
 }
 
+/// One item per extension, opening the page where its settings are.
+fn extensions_menu(
+    app: &AppHandle<Wry>,
+    extensions: &[crate::app::extensions::Installed],
+) -> tauri::Result<Submenu<Wry>> {
+    let menu = Submenu::new(app, "Extensions", true)?;
+    for extension in extensions
+        .iter()
+        .filter(|extension| extension.page.is_some())
+    {
+        menu.append(&MenuItem::with_id(
+            app,
+            format!("{EXTENSION_ITEM_PREFIX}{}", extension.id),
+            &extension.name,
+            true,
+            None::<&str>,
+        )?)?;
+    }
+    Ok(menu)
+}
+
 fn window_menu(app: &AppHandle<Wry>) -> tauri::Result<Submenu<Wry>> {
     let window_menu = Submenu::new(app, "Window", true)?;
     window_menu.append(&PredefinedMenuItem::minimize(app, None)?)?;
@@ -270,6 +299,10 @@ fn copy_text_to_pasteboard(text: &str) {
 }
 
 pub fn handle_menu_click(app_handle: &AppHandle, id: &str) {
+    if let Some(extension) = id.strip_prefix(EXTENSION_ITEM_PREFIX) {
+        crate::app::extensions::open_page(extension);
+        return;
+    }
     match id {
         "new_window" => {
             open_additional_window_safe(app_handle);

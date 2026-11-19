@@ -363,6 +363,12 @@ pub fn run_app() {
         let instance_revealed = startup_window_revealed.clone();
         app_builder = app_builder.plugin(tauri_plugin_single_instance::init(
             move |app, _args, _cwd| {
+                // A second launch that only asks for an extension's page.
+                #[cfg(target_os = "windows")]
+                if let Some(id) = app::extensions::requested_settings(&_args) {
+                    app::extensions::open_page(app, &id);
+                    return;
+                }
                 if multi_window {
                     open_additional_window_safe(app);
                 } else if let Some(window) = app.get_webview_window("pake") {
@@ -456,7 +462,14 @@ pub fn run_app() {
             // --- Menu Construction Start ---
             #[cfg(target_os = "macos")]
             {
-                app::menu::set_app_menu(app.app_handle(), multi_window, _enable_find)?;
+                // No menu where WebKit cannot run them (before macOS 15.4).
+                let extensions = pake_config
+                    .runtime_extensions
+                    .as_deref()
+                    .filter(|_| app::extensions::supported())
+                    .map(app::extensions::installed)
+                    .unwrap_or_default();
+                app::menu::set_app_menu(app.app_handle(), multi_window, _enable_find, &extensions)?;
 
                 // Event Handling for Custom Menu Item
                 app.on_menu_event(move |app_handle, event| {
