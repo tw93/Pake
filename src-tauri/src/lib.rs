@@ -478,6 +478,10 @@ pub fn run_app() {
             }
             // --- Menu Construction End ---
 
+            // Before the first window, which reads the theme as it is built.
+            #[cfg(target_os = "linux")]
+            app::color_scheme::keep_missing_dark_theme_dark();
+
             let window = set_window(app.app_handle(), &pake_config, &tauri_config)?;
 
             // An explicit --dark-mode wins over the desktop preference.

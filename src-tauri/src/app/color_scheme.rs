@@ -35,6 +35,82 @@ pub fn color_scheme_action(value: u32, at_startup: bool) -> ColorSchemeAction {
     }
 }
 
+/// The installed theme to use in place of `name`, when GTK cannot load
+/// `name` itself and it is a `-dark` name of a theme that is installed.
+///
+/// GTK 3 falls back to plain Adwaita when its theme is missing, and that
+/// fallback drops the dark variant, so `prefer-dark` changes nothing.
+/// Omarchy sets `gtk-theme` to `Adwaita-dark`, which only the separate
+/// gnome-themes-extra package installs: every Pake app there drew a light
+/// header bar over a dark page, `--dark-mode` included (2026-11-19).
+pub fn dark_theme_base(name: &str, installed: impl Fn(&str) -> bool) -> Option<&str> {
+    if installed(name) {
+        return None;
+    }
+    let base = name
+        .strip_suffix("-dark")
+        .or_else(|| name.strip_suffix("-Dark"))?;
+    (!base.is_empty() && installed(base)).then_some(base)
+}
+
+#[cfg(target_os = "linux")]
+mod gtk_theme {
+    use super::dark_theme_base;
+    use gtk::gio::{resources_get_info, ResourceLookupFlags};
+    use gtk::glib;
+    use gtk::prelude::*;
+    use std::path::{Path, PathBuf};
+
+    /// Where GTK 3 looks for a theme by name, after its built-in ones.
+    fn theme_dirs() -> Vec<PathBuf> {
+        let mut dirs = vec![
+            glib::user_data_dir().join("themes"),
+            glib::home_dir().join(".themes"),
+        ];
+        dirs.extend(
+            glib::system_data_dirs()
+                .iter()
+                .map(|dir| dir.join("themes")),
+        );
+        dirs.push(PathBuf::from("/usr/share/themes"));
+        dirs
+    }
+
+    fn has_gtk3_css(theme: &Path) -> bool {
+        std::fs::read_dir(theme).is_ok_and(|entries| {
+            entries.flatten().any(|entry| {
+                entry.file_name().to_string_lossy().starts_with("gtk-3.")
+                    && entry.path().join("gtk.css").is_file()
+            })
+        })
+    }
+
+    fn installed(name: &str) -> bool {
+        let builtin = format!("/org/gtk/libgtk/theme/{name}/gtk.css");
+        resources_get_info(&builtin, ResourceLookupFlags::NONE).is_ok()
+            || theme_dirs().iter().any(|dir| has_gtk3_css(&dir.join(name)))
+    }
+
+    /// Keeps a missing `-dark` theme dark: its installed base theme with
+    /// GTK's dark variant. The desktop's color scheme, read after this, and
+    /// `--dark-mode` still decide the variant.
+    pub fn keep_missing_dark_theme_dark() {
+        let Some(settings) = gtk::Settings::default() else {
+            return;
+        };
+        let Some(name) = settings.gtk_theme_name() else {
+            return;
+        };
+        if let Some(base) = dark_theme_base(name.as_str(), installed) {
+            settings.set_gtk_theme_name(Some(base));
+            settings.set_gtk_application_prefer_dark_theme(true);
+        }
+    }
+}
+
+#[cfg(target_os = "linux")]
+pub use gtk_theme::keep_missing_dark_theme_dark;
+
 #[cfg(target_os = "linux")]
 mod portal {
     use super::{color_scheme_action, ColorSchemeAction};
@@ -129,6 +205,23 @@ pub use portal::follow_desktop_color_scheme;
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_missing_dark_theme_uses_its_installed_base() {
+        let installed = |name: &str| matches!(name, "Adwaita" | "Yaru");
+        assert_eq!(dark_theme_base("Adwaita-dark", installed), Some("Adwaita"));
+        assert_eq!(dark_theme_base("Yaru-Dark", installed), Some("Yaru"));
+    }
+
+    #[test]
+    fn an_installed_or_unrelated_theme_is_left_alone() {
+        let installed = |name: &str| matches!(name, "Adwaita" | "Adwaita-dark");
+        assert_eq!(dark_theme_base("Adwaita-dark", installed), None);
+        assert_eq!(dark_theme_base("Missing", installed), None);
+        assert_eq!(dark_theme_base("Missing-dark", installed), None);
+        assert_eq!(dark_theme_base("-dark", |_| true), None);
+        assert_eq!(dark_theme_base("-dark", |name| name.is_empty()), None);
+    }
 
     #[test]
     fn prefer_dark_applies_dark() {
