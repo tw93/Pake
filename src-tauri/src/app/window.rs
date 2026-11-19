@@ -965,6 +965,12 @@ fn build_window(
             window_builder.initialization_script(include_str!("../inject/title_bar.js"));
     }
 
+    // A private window keeps nothing between runs, so it makes no passkeys either.
+    #[cfg(target_os = "macos")]
+    if !window_config.incognito {
+        window_builder = window_builder.initialization_script(include_str!("../inject/passkey.js"));
+    }
+
     let custom_js = config
         .runtime_custom_js
         .as_deref()
@@ -1409,6 +1415,19 @@ fn build_window(
         crate::app::script_dialogs::install(&webview);
     }) {
         eprintln!("[Pake] Failed to access WKWebView for its script dialogs: {error}");
+    }
+
+    // WKWebView refuses WebAuthn in this app, so the runtime answers passkey.js itself.
+    #[cfg(target_os = "macos")]
+    if !window_config.incognito {
+        if let Ok(directory) = app.path().app_data_dir() {
+            let store = directory.join(crate::app::passkey::STORE_FILE);
+            if let Err(error) = window.with_webview(move |webview| {
+                crate::app::passkey::install(&webview, store);
+            }) {
+                eprintln!("[Pake] Failed to access WKWebView for passkeys: {error}");
+            }
+        }
     }
 
     // The tab bar's + button exists only while some window class answers

@@ -19,6 +19,7 @@ pub mod menu;
 pub mod nav_buttons;
 pub mod navigation;
 pub mod notification;
+pub mod passkey;
 #[cfg(target_os = "macos")]
 pub mod popup_close;
 pub mod recovery;

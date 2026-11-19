@@ -456,7 +456,7 @@ Pake 可以自动转换普通图片，但提供正确的格式更可靠。Icon C
 
    网站用自带尺寸的弹窗登录时（TikTok、Notion、X 上的 Google 登录，Yelp、Upwork 上的 Sign in with Apple），macOS 和 Windows 上的 Pake 会把这个弹窗开成独立窗口，登录完由它把结果交回原页面并自己关闭，开没开 `--new-window` 都一样。网站用普通链接或不带尺寸的 `window.open` 发起的登录，在 macOS 和 Linux 上仍在当前窗口内跳转，Linux 上的登录弹窗目前也都还是这样。
 
-   macOS 上的 Pake 应用用不了通行密钥和指纹登录，系统只把这项能力开放给浏览器和与网站域名绑定的应用，登录时改用密码加两步验证码。
+   macOS 上的 Pake 应用会把自己的通行密钥存在这台 Mac 的安全芯片里，登录时按一下指纹就行，没有 Touch ID 的 Mac 输入登录密码。这些通行密钥只在这个应用里用，iCloud 钥匙串和 iPhone 上已有的用不了，第一次先用其他方式登录，再到网站设置里添加一个通行密钥。`--incognito` 打包的应用不保存通行密钥，用手机扫码登录暂时还不支持。
 
 5. **微信 Web 版登录环境异常**
 
