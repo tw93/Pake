@@ -1,4 +1,4 @@
-use crate::app::config::PakeConfig;
+use crate::app::config::{PakeConfig, WindowConfig};
 #[cfg(target_os = "windows")]
 use crate::app::navigation::set_password_autosave;
 #[cfg(not(target_os = "windows"))]
@@ -807,7 +807,7 @@ fn build_window(
 
     let config_script = format!(
         "window.pakeConfig = {}",
-        serde_json::to_string(&window_config).unwrap_or_else(|_| "{}".to_string())
+        page_config(window_config, extensions_run(config))
     );
     // A host-provided marker avoids relying on a site's overridden user agent.
     #[cfg(target_os = "windows")]
@@ -1595,3 +1595,47 @@ mod proxy_arg_tests {
 #[cfg(feature = "native-download-probe")]
 #[path = "native_download_smoke.rs"]
 mod native_download_smoke;
+
+/// Whether the app's extensions load in this webview: on Windows whenever the
+/// app carries one, on macOS only from 15.4, where WebKit runs them.
+fn extensions_run(config: &PakeConfig) -> bool {
+    if config.runtime_extensions.is_none() {
+        return false;
+    }
+    #[cfg(target_os = "macos")]
+    return crate::app::extensions::supported();
+    #[cfg(target_os = "windows")]
+    return true;
+    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
+    return false;
+}
+
+/// `window.pakeConfig` for the page. An extension that restyles the site turns
+/// the runtime's own tweaks off (`site_styles`), but where it does not run they
+/// stay, so the site never ends up with neither.
+fn page_config(window_config: &WindowConfig, extensions_run: bool) -> String {
+    let mut value = serde_json::to_value(window_config).unwrap_or_default();
+    if !extensions_run {
+        if let Some(object) = value.as_object_mut() {
+            object.insert("site_styles".into(), true.into());
+        }
+    }
+    serde_json::to_string(&value).unwrap_or_else(|_| "{}".to_string())
+}
+
+#[cfg(test)]
+mod site_style_tests {
+    use super::page_config;
+    use crate::app::config::PakeConfig;
+
+    #[test]
+    fn site_styles_turn_off_only_where_extensions_run() {
+        let config: PakeConfig = serde_json::from_str(include_str!("../../pake.json")).unwrap();
+        let mut window = config.windows[0].clone();
+        window.site_styles = false;
+        let page =
+            |run| serde_json::from_str::<serde_json::Value>(&page_config(&window, run)).unwrap();
+        assert_eq!(page(true)["site_styles"], false);
+        assert_eq!(page(false)["site_styles"], true);
+    }
+}

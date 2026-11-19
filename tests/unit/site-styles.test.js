@@ -10,7 +10,10 @@ const source = fs.readFileSync(
   "utf-8",
 );
 
-function injectedStyles(hostname, { mac = true, immersive = true } = {}) {
+function injectedStyles(
+  hostname,
+  { mac = true, immersive = true, pakeConfig = {} } = {},
+) {
   const styles = {};
   let onReady;
   runInNewContext(source, {
@@ -18,7 +21,7 @@ function injectedStyles(hostname, { mac = true, immersive = true } = {}) {
     hasImmersiveHeader: () => immersive,
     window: {
       location: { hostname },
-      pakeConfig: {},
+      pakeConfig,
       __PAKE_INJECT_STYLE__: (css, id) => {
         styles[id] = css;
       },
@@ -72,5 +75,21 @@ describe("site styles", () => {
     expect(
       injectedStyles("chat.deepseek.com", { immersive: false }).immersive,
     ).toBe("");
+  });
+
+  it("leaves a site's content rules to an extension that restyles it", () => {
+    const off = injectedStyles("x.com", { pakeConfig: { site_styles: false } });
+    expect(off.content).toContain("html::-webkit-scrollbar");
+    expect(off.content).not.toContain("#react-root");
+    // The window's own rules stay: the drag strip and the traffic-light room.
+    expect(off.immersive).toContain("#pake-top-dom");
+    expect(
+      injectedStyles("chat.deepseek.com", {
+        pakeConfig: { site_styles: false },
+      }).immersive,
+    ).toContain("._5a20a69");
+    expect(
+      injectedStyles("x.com", { pakeConfig: { site_styles: true } }).content,
+    ).toContain("#react-root");
   });
 });

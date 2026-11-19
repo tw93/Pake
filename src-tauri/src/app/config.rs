@@ -45,6 +45,12 @@ pub struct WindowConfig {
     /// traffic lights. Off unless the app asks for them.
     #[serde(default)]
     pub navigation_buttons: bool,
+    /// The per-site tweaks `style.js` puts on a few sites, such as X's
+    /// centred column. Set by the runtime builder, not a CLI flag: an app
+    /// whose extension restyles its site turns them off so the two do not
+    /// fight, which takes effect only where the extensions run.
+    #[serde(default = "default_site_styles")]
+    pub site_styles: bool,
     #[serde(default = "default_zoom")]
     pub zoom: u32,
     #[serde(default)]
@@ -60,6 +66,10 @@ fn default_zoom() -> u32 {
 }
 
 fn default_restore_last_url() -> bool {
+    true
+}
+
+fn default_site_styles() -> bool {
     true
 }
 
@@ -283,6 +293,19 @@ mod tests {
         window["navigation_buttons"] = true.into();
         let asked: WindowConfig = serde_json::from_value(window).unwrap();
         assert!(asked.navigation_buttons);
+    }
+
+    #[test]
+    fn site_styles_stay_on_unless_the_builder_turns_them_off() {
+        let window = config_for("https://example.com").windows.remove(0);
+        let mut window = serde_json::to_value(window).unwrap();
+        window.as_object_mut().unwrap().remove("site_styles");
+        let legacy: WindowConfig = serde_json::from_value(window.clone()).unwrap();
+        assert!(legacy.site_styles);
+
+        window["site_styles"] = false.into();
+        let off: WindowConfig = serde_json::from_value(window).unwrap();
+        assert!(!off.site_styles);
     }
 
     #[test]
