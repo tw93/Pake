@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 export default async function combineFiles(files: string[], output: string) {
   const contents = await Promise.all(
     files.map(async (file) => {
-      if (file.endsWith('.css')) {
+      if (file.toLowerCase().endsWith('.css')) {
         const fileContent = await fs.readFile(file, 'utf-8');
         return `window.addEventListener('DOMContentLoaded', (_event) => {
         const css = ${JSON.stringify(fileContent)};

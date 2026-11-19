@@ -62,6 +62,18 @@ describe('combineFiles', () => {
     expect(injectedCss).toEqual(['body { color: red; }']);
   });
 
+  it('wraps an upper-case .CSS file as a style injection, not as script', async () => {
+    const cssFile = path.join(dir, 'THEME.CSS');
+    const out = path.join(dir, 'out-upper-css.js');
+    await fs.writeFile(cssFile, 'body { color: red; }');
+
+    await combineFiles([cssFile], out);
+    const result = await fs.readFile(out, 'utf-8');
+
+    expect(() => new Function(result)).not.toThrow();
+    expect(result).toContain(JSON.stringify('body { color: red; }'));
+  });
+
   it('returns the input file list', async () => {
     const jsFile = path.join(dir, 'ret.js');
     const out = path.join(dir, 'out-ret.js');

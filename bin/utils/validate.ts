@@ -69,3 +69,38 @@ export function validateDownloadDirInput(value: string): string {
   }
   return value;
 }
+
+const INJECT_EXTENSIONS = new Set(['.css', '.js']);
+
+// Shared by --inject and the config "inject" field, so a config entry is split
+// on commas like the flag and a bad file fails before anything is built.
+export function validateInjectInput(
+  inject: string[] | undefined,
+  cwd: string = process.cwd(),
+): string[] {
+  if (!Array.isArray(inject)) return [];
+  const files = inject
+    .flatMap((entry) => entry.split(','))
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+
+  for (const file of files) {
+    if (!INJECT_EXTENSIONS.has(path.extname(file).toLowerCase())) {
+      throw new PakeError(
+        `Injected file "${file}" is not a .css or .js file.`,
+        {
+          code: 'INVALID_INPUT',
+          hint: 'Pass local CSS or JS files to --inject, separated by commas.',
+        },
+      );
+    }
+    const resolved = path.isAbsolute(file) ? file : path.join(cwd, file);
+    if (!fs.statSync(resolved, { throwIfNoEntry: false })?.isFile()) {
+      throw new PakeError(`Injected file not found: ${file}`, {
+        code: 'INVALID_INPUT',
+        hint: 'Relative --inject paths resolve against the current directory.',
+      });
+    }
+  }
+  return files;
+}
