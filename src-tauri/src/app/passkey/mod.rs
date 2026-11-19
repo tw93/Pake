@@ -301,6 +301,14 @@ struct RelyingParty {
     id: Option<String>,
 }
 
+/// Whether a window gets passkeys. A private window keeps nothing between
+/// runs, and one that accepts any certificate cannot tell the site from a
+/// stand-in on the network, which would then get a Touch ID signature for
+/// the real origin; a browser refuses WebAuthn on a certificate error too.
+pub fn enabled(incognito: bool, ignores_certificate_errors: bool) -> bool {
+    !incognito && !ignores_certificate_errors
+}
+
 impl CreateOptions {
     /// The rpId the site asked for, before it is checked.
     pub fn rp_id(&self) -> Option<&str> {
@@ -994,5 +1002,12 @@ mod tests {
             let (title, button) = existing_text("x.com", language);
             assert!(title.contains("x.com") && !button.is_empty());
         }
+    }
+
+    #[test]
+    fn leaves_out_private_windows_and_ones_that_accept_any_certificate() {
+        assert!(enabled(false, false));
+        assert!(!enabled(true, false));
+        assert!(!enabled(false, true));
     }
 }

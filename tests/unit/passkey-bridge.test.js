@@ -43,7 +43,11 @@ function load({ reply, handler = true, top = true } = {}) {
     }
   }
   const posted = [];
+  const page = new EventTarget();
   const window = {
+    addEventListener: page.addEventListener.bind(page),
+    removeEventListener: page.removeEventListener.bind(page),
+    dispatchEvent: page.dispatchEvent.bind(page),
     PublicKeyCredential,
     CredentialsContainer,
     AuthenticatorAttestationResponse,
@@ -280,6 +284,18 @@ describe("passkey bridge", () => {
     controller.abort();
     await expect(pending).rejects.toMatchObject({ name: "AbortError" });
     expect(posted.map((request) => request.kind)).toEqual(["get", "cancel"]);
+    expect(posted[1].id).toBe(posted[0].id);
+  });
+
+  it("tells the native side to close its prompt when the page goes away", async () => {
+    const { window, credentials, posted } = load({
+      reply: (request) =>
+        request.kind === "cancel" ? {} : new Promise(() => {}),
+    });
+    const pending = credentials.create(createOptions);
+    window.dispatchEvent(new Event("pagehide"));
+    await expect(pending).rejects.toMatchObject({ name: "NotAllowedError" });
+    expect(posted.map((request) => request.kind)).toEqual(["create", "cancel"]);
     expect(posted[1].id).toBe(posted[0].id);
   });
 

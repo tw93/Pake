@@ -966,9 +966,11 @@ fn build_window(
             window_builder.initialization_script(include_str!("../inject/title_bar.js"));
     }
 
-    // A private window keeps nothing between runs, so it makes no passkeys either.
     #[cfg(target_os = "macos")]
-    if !window_config.incognito {
+    if crate::app::passkey::enabled(
+        window_config.incognito,
+        window_config.ignore_certificate_errors,
+    ) {
         window_builder = window_builder.initialization_script(include_str!("../inject/passkey.js"));
     }
 
@@ -1430,7 +1432,10 @@ fn build_window(
 
     // WKWebView refuses WebAuthn in this app, so the runtime answers passkey.js itself.
     #[cfg(target_os = "macos")]
-    if !window_config.incognito {
+    if crate::app::passkey::enabled(
+        window_config.incognito,
+        window_config.ignore_certificate_errors,
+    ) {
         if let Ok(directory) = app.path().app_data_dir() {
             let store = directory.join(crate::app::passkey::STORE_FILE);
             if let Err(error) = window.with_webview(move |webview| {

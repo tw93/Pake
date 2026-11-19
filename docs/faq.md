@@ -458,7 +458,7 @@ This is usually due to web compatibility issues. Try:
 
    When a site signs in through a popup with a size of its own (the Google button on TikTok, Notion and X, or Sign in with Apple on Yelp and Upwork), Pake on macOS and Windows opens that popup as a separate window, so it can hand the result back to the page that opened it and close itself, with or without `--new-window`. A sign-in the site opens as a link, or as a `window.open` with no size, continues in the current window on macOS and Linux, and so does every sign-in popup on Linux for now.
 
-   On macOS a Pake app keeps its own passkeys in the Mac's Secure Enclave and signs in with Touch ID, or with the login password on a Mac without it. They stay in that app on that Mac, so a passkey saved in iCloud Keychain or on an iPhone is not offered: sign in another way once, then add a passkey in the site's settings. An `--incognito` app keeps none, and signing in by scanning a QR code with a phone is not supported yet.
+   On macOS a Pake app keeps its own passkeys in the Mac's Secure Enclave and signs in with Touch ID, or with the login password on a Mac without it. They stay in that app on that Mac, so a passkey saved in iCloud Keychain or on an iPhone is not offered: sign in another way once, then add a passkey in the site's settings. This needs Apple silicon or an Intel Mac with a T2 chip. An app made with `--incognito` or `--ignore-certificate-errors` keeps none, and signing in by scanning a QR code with a phone is not supported yet.
 
 5. **WeChat Web login environment error**
 

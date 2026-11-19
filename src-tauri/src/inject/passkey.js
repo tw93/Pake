@@ -246,6 +246,7 @@
       let timer = 0;
       const settle = () => {
         if (signal) signal.removeEventListener("abort", onAbort);
+        window.removeEventListener("pagehide", onHide);
         clearTimeout(timer);
       };
       const stop = (error) => {
@@ -258,7 +259,10 @@
         reject(error);
       };
       const onAbort = () => stop(abortReason(signal));
+      // A page that goes away mid-prompt never learns a key made after it.
+      const onHide = () => stop(notAllowed());
       if (signal) signal.addEventListener("abort", onAbort, { once: true });
+      window.addEventListener("pagehide", onHide, { once: true });
       timer = setTimeout(() => stop(notAllowed()), timeoutOf(timeout));
       call(request).then(
         (reply) => {

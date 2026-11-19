@@ -307,7 +307,14 @@ fn save(path: &Path, store: &Store) -> std::io::Result<()> {
         .open(&temporary)?;
     file.write_all(store.to_json().as_bytes())?;
     file.sync_all()?;
-    std::fs::rename(&temporary, path)
+    std::fs::rename(&temporary, path)?;
+    // The rename itself is in the folder, so a power loss right after a site
+    // learned the key does not bring the old file back. Best effort: not every
+    // volume flushes a folder.
+    if let Some(directory) = path.parent() {
+        let _ = std::fs::File::open(directory).and_then(|folder| folder.sync_all());
+    }
+    Ok(())
 }
 
 fn now() -> u64 {
@@ -775,10 +782,36 @@ fn receive(
         }
         Request::Create { .. } | Request::Get { .. } => {}
     }
+    // A Mac without an enclave makes no passkeys, so it offers none and
+    // tells nobody to add one: the page goes on to its other sign-in.
+    if !available() {
+        return reply.fail(Failure::NotAllowed);
+    }
+    let window: Option<Retained<AnyObject>> = unsafe {
+        let webview = webview as *mut AnyObject;
+        if webview.is_null() {
+            None
+        } else {
+            let window: *mut AnyObject = msg_send![webview, window];
+            Retained::retain(window)
+        }
+    };
+    // Only the page in front may ask, as in a browser: a hidden window or one
+    // behind another app would raise Touch ID, or pull itself on screen with a
+    // sheet, for a sign-in the user never started.
+    let app = NSApplication::sharedApplication(mtm);
+    let active: Bool = unsafe { msg_send![&*app, isActive] };
+    let in_front = window.as_ref().is_some_and(|window| {
+        let key: Bool = unsafe { msg_send![&**window, isKeyWindow] };
+        key.as_bool()
+    });
+    if !active.as_bool() || !in_front {
+        return reply.fail(Failure::NotAllowed);
+    }
     // A sheet on a window that was closed (with its popup, or hidden by the
     // close button) would hold every later request as busy, so it gives way.
     // A minimized window, or any while the app is hidden, still has its sheet.
-    let app_hidden: Bool = unsafe { msg_send![&*NSApplication::sharedApplication(mtm), isHidden] };
+    let app_hidden: Bool = unsafe { msg_send![&*app, isHidden] };
     if !app_hidden.as_bool() {
         cancel(|ceremony| {
             ceremony.sheet.as_ref().is_some_and(|(_, window)| {
@@ -805,15 +838,6 @@ fn receive(
             sheet: None,
         })
     });
-    let window: Option<Retained<AnyObject>> = unsafe {
-        let webview = webview as *mut AnyObject;
-        if webview.is_null() {
-            None
-        } else {
-            let window: *mut AnyObject = msg_send![webview, window];
-            Retained::retain(window)
-        }
-    };
     match request {
         Request::Create { options } => create(mtm, window, store_path, origin, options, reply),
         Request::Get { options } => get(mtm, window, store_path, origin, options, reply),
