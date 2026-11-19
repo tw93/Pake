@@ -1121,6 +1121,98 @@ describe("event link guard", () => {
     ).toEqual([]);
   });
 
+  const loadPageWithBubble = (newWindow) => {
+    vi.useFakeTimers();
+    const context = loadEventHelpers({ withTauri: true });
+    context.window.pakeConfig = { new_window: newWindow };
+    const nativeOpen = vi.fn(() => ({}));
+    context.window.open = nativeOpen;
+    runDomReady(context);
+    const lastInBubble = context.eventListeners.click.find(
+      ({ handler }) => handler.name === "openUnhandledBlankLink",
+    ).handler;
+    return { context, nativeOpen, lastInBubble };
+  };
+  const shellOpens = (context) =>
+    context.invokeCalls.filter(([cmd]) => cmd === "plugin:shell|open");
+
+  for (const newWindow of [false, true]) {
+    it(`takes the new-tab target off a link with no address for the click (new_window ${newWindow})`, () => {
+      // Douyin's episode covers: <a target="_blank"> with no href. Their own
+      // handler sets href to "undefined" during the click, switches the video
+      // and prevents the default. Left as _blank the link reached the shell
+      // plugin's listener, which opened douyin.com/undefined in the browser.
+      try {
+        const { context, nativeOpen, lastInBubble } =
+          loadPageWithBubble(newWindow);
+        const anchor = makeAnchor("", "_blank");
+        const event = { ...makeClickEvent(anchor), defaultPrevented: false };
+        getClickGuard(context)(event);
+        // What the shell plugin's listener would read in the bubble.
+        expect(anchor.target).toBe("_self");
+        expect(event.preventDefault).not.toHaveBeenCalled();
+        // The page's handler: an address appears and the click is handled.
+        anchor.href = "https://example.com/undefined";
+        event.defaultPrevented = true;
+        lastInBubble(event);
+        expect(event.preventDefault).not.toHaveBeenCalled();
+        expect(nativeOpen).not.toHaveBeenCalled();
+        expect(shellOpens(context)).toEqual([]);
+        vi.runAllTimers();
+        expect(anchor.target).toBe("_blank");
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  }
+
+  it("routes a link that got an external address during the click, once", () => {
+    try {
+      const { context, nativeOpen, lastInBubble } = loadPageWithBubble(false);
+      const anchor = makeAnchor("", "_blank");
+      const event = { ...makeClickEvent(anchor), defaultPrevented: false };
+      getClickGuard(context)(event);
+      anchor.href = "https://other.example.org/page";
+      lastInBubble(event);
+      expect(event.preventDefault).toHaveBeenCalledOnce();
+      expect(shellOpens(context)).toHaveLength(1);
+      expect(nativeOpen).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("keeps a link that got an internal address during the click in the app", () => {
+    try {
+      // Without --new-window the default action follows the _self target.
+      const off = loadPageWithBubble(false);
+      const stay = makeAnchor("", "_blank");
+      const first = { ...makeClickEvent(stay), defaultPrevented: false };
+      getClickGuard(off.context)(first);
+      stay.href = "https://example.com/video/2";
+      off.lastInBubble(first);
+      expect(first.preventDefault).not.toHaveBeenCalled();
+      expect(shellOpens(off.context)).toEqual([]);
+      expect(off.nativeOpen).not.toHaveBeenCalled();
+      vi.useRealTimers();
+
+      // With it the link opens in an app window.
+      const on = loadPageWithBubble(true);
+      const open = makeAnchor("", "_blank");
+      const second = { ...makeClickEvent(open), defaultPrevented: false };
+      getClickGuard(on.context)(second);
+      open.href = "https://example.com/video/2";
+      on.lastInBubble(second);
+      expect(second.preventDefault).toHaveBeenCalledOnce();
+      expect(on.nativeOpen.mock.calls).toEqual([
+        ["https://example.com/video/2", "_blank"],
+      ]);
+      expect(shellOpens(on.context)).toEqual([]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("opens a new-window link nobody handled in an in-app window", () => {
     try {
       const { context, nativeOpen, lastInBubble } = loadNewWindowPage();

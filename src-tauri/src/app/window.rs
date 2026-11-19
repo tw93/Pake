@@ -322,6 +322,30 @@ mod popup_tests {
     }
 
     #[test]
+    fn a_new_tab_link_without_an_address_never_bubbles_as_blank() {
+        // Douyin's episode covers have no href when the click begins and get
+        // "undefined" from the page's own handler during it. The click guard
+        // must take the _blank target away before it looks for an address, or
+        // tauri-plugin-shell's listener opens that address in the browser.
+        let script = include_str!("../inject/event.js").replace("\r\n", "\n");
+        let held = script
+            .find("!anchorElement.href &&\n      anchorElement.target === \"_blank\"")
+            .expect("a link with no address is looked at");
+        let with_address = script
+            .find("if (anchorElement && anchorElement.href) {")
+            .expect("links with an address follow");
+        assert!(held < with_address);
+        let hold = script
+            .find("const holdAddresslessNewTabLink = (e, anchorElement) => {")
+            .expect("the link is held for the click");
+        let retarget = script[hold..]
+            .find("anchorElement.target = \"_self\";")
+            .expect("its new-tab target is taken away");
+        assert!(retarget < 120);
+        assert!(script.contains("routeLateNewTabLink(e, pending.anchor);"));
+    }
+
+    #[test]
     fn a_site_sees_no_tauri_global_api_and_the_users_own_code_keeps_the_name() {
         // DeepSeek reads `"__TAURI__" in window` and warns of an abnormal
         // environment, so Tauri must not define it; Pake's own scripts are

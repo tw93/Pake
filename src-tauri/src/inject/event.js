@@ -875,8 +875,61 @@ document.addEventListener("DOMContentLoaded", () => {
     const pending = pendingBlankLink;
     pendingBlankLink = null;
     if (!pending || pending.event !== e || e.defaultPrevented) return;
+    if (pending.url) {
+      e.preventDefault();
+      originalWindowOpen.call(window, pending.url, "_blank");
+      return;
+    }
+    routeLateNewTabLink(e, pending.anchor);
+  };
+
+  // A held link got its address during the click and nobody handled it: route
+  // it now as the click guard would have at the start. An internal address
+  // without --new-window is left to the default action, which follows the
+  // link's _self target inside the app.
+  const routeLateNewTabLink = (e, anchorElement) => {
+    let lateUrl;
+    try {
+      lateUrl = new URL(anchorElement.href);
+    } catch (error) {
+      return;
+    }
+    if (!["http:", "https:"].includes(lateUrl.protocol)) return;
+    const absoluteUrl = lateUrl.href;
+    if (forceInternalNavigation || window.isAuthLink(absoluteUrl)) {
+      e.preventDefault();
+      window.location.href = absoluteUrl;
+      return;
+    }
+    if (isInternalUrl(absoluteUrl)) {
+      if (window.pakeConfig?.new_window) {
+        e.preventDefault();
+        originalWindowOpen.call(window, absoluteUrl, "_blank");
+      }
+      return;
+    }
     e.preventDefault();
-    originalWindowOpen.call(window, pending.url, "_blank");
+    handleExternalLink(absoluteUrl);
+  };
+
+  // A new-tab link with no address yet. Some pages give the link its address
+  // during the click and handle the click themselves: Douyin's episode covers
+  // are <a target="_blank"> with no href, their own handler sets the href to
+  // "undefined", switches the video and prevents the default. The click guard
+  // skipped a link with no address, so it kept its _blank target through the
+  // bubble, where Tauri's shell plugin opens whatever address the link has by
+  // then, handled or not: the browser came up at douyin.com/undefined on every
+  // switch, with or without --new-window (the same user's second report,
+  // 2026-11-19; the first fix only held links that had an address when the
+  // click began). The target is taken away for the click, and
+  // openUnhandledBlankLink routes the link if nobody handled it.
+  const holdAddresslessNewTabLink = (e, anchorElement) => {
+    const askedFor = anchorElement.target;
+    anchorElement.target = "_self";
+    pendingBlankLink = { event: e, anchor: anchorElement, url: null };
+    setTimeout(() => {
+      anchorElement.target = askedFor;
+    }, 0);
   };
 
   // An internal link that asks for a new tab (target _blank or _new).
@@ -920,6 +973,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const anchorElement = e.target.closest("a");
 
     if (anchorElement && nativeDownloadAnchors.has(anchorElement)) return;
+
+    if (
+      anchorElement &&
+      !anchorElement.href &&
+      anchorElement.target === "_blank"
+    ) {
+      holdAddresslessNewTabLink(e, anchorElement);
+      return;
+    }
 
     if (anchorElement && anchorElement.href) {
       const rawHref = anchorElement.getAttribute("href") || "";

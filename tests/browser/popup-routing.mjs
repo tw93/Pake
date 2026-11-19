@@ -216,6 +216,45 @@ test("a new-window link the page handled itself opens nothing", async () => {
   );
 });
 
+for (const newWindow of [false, true]) {
+  test(`a new-tab link that gets its address during a handled click opens nothing (new_window ${newWindow})`, async () => {
+    // Douyin's episode covers as they are on the page: no href when the click
+    // begins, "undefined" once their own handler has run and prevented it.
+    await fixture(
+      false,
+      async (page, target, context) => {
+        await page.evaluate(() => {
+          document.body.innerHTML =
+            '<div id="root"><a id="episode" target="_blank"><span>Episode 2</span></a></div>';
+          window.switched = 0;
+          document.querySelector("#root").addEventListener("click", (event) => {
+            document.querySelector("#episode").href = undefined;
+            event.preventDefault();
+            window.switched += 1;
+          });
+        });
+        let popups = 0;
+        context.on("page", () => (popups += 1));
+        await page.locator("#episode span").click();
+        await page.waitForTimeout(300);
+        assert.equal(await page.evaluate(() => window.switched), 1);
+        assert.equal(
+          await page.evaluate(() => document.querySelector("#episode").href),
+          "https://mail.example.com/undefined",
+        );
+        assert.deepEqual(await page.evaluate(() => window.opened), []);
+        assert.equal(popups, 0);
+        assert.equal(page.url(), "https://mail.example.com/");
+        assert.equal(
+          await page.evaluate(() => document.querySelector("#episode").target),
+          "_blank",
+        );
+      },
+      { new_window: newWindow },
+    );
+  });
+}
+
 test("a new-window link nobody handled opens in the app, not the browser", async () => {
   await fixture(
     false,
