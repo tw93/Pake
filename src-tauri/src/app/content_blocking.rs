@@ -58,6 +58,7 @@ fn gunzip(bytes: &[u8]) -> Option<String> {
     Some(text)
 }
 
+#[cfg(target_os = "windows")]
 fn filter_set(groups: &[&str], rule_types: RuleTypes, debug: bool) -> FilterSet {
     let mut set = FilterSet::new(debug);
     for bytes in list_bytes(groups) {
@@ -77,6 +78,12 @@ fn filter_set(groups: &[&str], rule_types: RuleTypes, debug: bool) -> FilterSet 
     set
 }
 
+/// Names how the lists become WebKit rules. WebKit keeps a compiled list by
+/// its identifier, so a change to the conversion has to change this, or apps
+/// go on using the list the old conversion made.
+#[cfg(any(target_os = "macos", target_os = "linux", test))]
+const CONVERSION: &str = "unhide-2";
+
 /// FNV-1a, enough to tell one selection of embedded lists from another.
 #[cfg(any(target_os = "macos", target_os = "linux", test))]
 fn fingerprint(groups: &[&str]) -> u64 {
@@ -88,6 +95,7 @@ fn fingerprint(groups: &[&str]) -> u64 {
         }
     };
     feed(env!("CARGO_PKG_VERSION").as_bytes());
+    feed(CONVERSION.as_bytes());
     for group in groups {
         feed(group.as_bytes());
     }
@@ -122,10 +130,160 @@ fn webkit_identifier(groups: &[&str], unit: &str) -> String {
 /// The rules of one WebKit unit, ready to serialize.
 #[cfg(any(target_os = "macos", target_os = "linux", test))]
 fn webkit_rules(groups: &[&str], rule_types: RuleTypes) -> Vec<adblock::content_blocking::CbRule> {
-    filter_set(groups, rule_types, true)
+    let mut set = FilterSet::new(true);
+    let mut unhide = Unhide::default();
+    for bytes in list_bytes(groups) {
+        let Some(text) = gunzip(bytes) else {
+            eprintln!("[Pake] A built-in filter list could not be read");
+            continue;
+        };
+        set.add_filter_list(
+            unhide.take_from(&text),
+            ParseOptions {
+                rule_types,
+                ..ParseOptions::default()
+            },
+        );
+    }
+    let rules = set
         .into_content_blocking()
         .map(|(rules, _)| rules)
-        .unwrap_or_default()
+        .unwrap_or_default();
+    unhide.apply(rules)
+}
+
+/// The lists' hiding exceptions (`example.com#@#.ad`: do not hide `.ad` on
+/// example.com), kept away from adblock's conversion and applied here. The
+/// conversion writes each one as "hide the selector on every site but that
+/// one", which hid every `svg`, Google's logo and icons among them, on all
+/// sites for the sake of one site's exception.
+#[cfg(any(target_os = "macos", target_os = "linux", test))]
+#[derive(Default)]
+struct Unhide {
+    /// Selector to the sites that keep it; an empty list is every site.
+    sites: std::collections::HashMap<String, Vec<String>>,
+}
+
+/// Where a hiding exception holds.
+#[cfg(any(target_os = "macos", target_os = "linux", test))]
+enum Sites {
+    Every,
+    Named(Vec<String>),
+}
+
+#[cfg(any(target_os = "macos", target_os = "linux", test))]
+impl Unhide {
+    /// `text` without its hiding exceptions, which are remembered.
+    fn take_from(&mut self, text: &str) -> String {
+        let mut kept = String::with_capacity(text.len());
+        for line in text.lines() {
+            match Self::exception(line) {
+                Some((Sites::Every, selector)) => {
+                    self.sites.insert(selector.to_owned(), vec![String::new()]);
+                }
+                Some((Sites::Named(sites), selector)) => {
+                    if sites.is_empty() {
+                        continue;
+                    }
+                    let entry = self.sites.entry(selector.to_owned()).or_default();
+                    if entry.first().is_none_or(|site| !site.is_empty()) {
+                        entry.extend(sites);
+                    }
+                }
+                None => {
+                    kept.push_str(line);
+                    kept.push('\n');
+                }
+            }
+        }
+        kept
+    }
+
+    /// The sites and selector of a hiding exception, or `None` for any other
+    /// line. An exception whose sites cannot be told to WebKit (`~site`,
+    /// `site.*`, a non-ASCII name) is still taken, with those sites left out.
+    fn exception(line: &str) -> Option<(Sites, &str)> {
+        let line = line.trim();
+        if line.starts_with('!') {
+            return None;
+        }
+        let (at, mark) = ["#@#", "#@?#"]
+            .iter()
+            .filter_map(|mark| line.find(mark).map(|at| (at, *mark)))
+            .min()?;
+        if line[..at].contains('#') {
+            return None;
+        }
+        let selector = line[at + mark.len()..].trim();
+        if selector.is_empty() || selector.starts_with("+js(") {
+            return None;
+        }
+        let named = line[..at]
+            .split(',')
+            .map(str::trim)
+            .filter(|s| !s.is_empty());
+        if named.clone().count() == 0 {
+            return Some((Sites::Every, selector));
+        }
+        let sites = named
+            .filter(|site| site.is_ascii() && !site.starts_with('~') && !site.ends_with(".*"))
+            .map(str::to_ascii_lowercase)
+            .collect();
+        Some((Sites::Named(sites), selector))
+    }
+
+    /// A rule for certain sites loses the excepted ones, and a rule for every
+    /// site gets them as `unless-domain`, subdomains included.
+    fn apply(
+        &self,
+        rules: Vec<adblock::content_blocking::CbRule>,
+    ) -> Vec<adblock::content_blocking::CbRule> {
+        rules
+            .into_iter()
+            .filter_map(|mut rule| {
+                let Some(sites) = rule
+                    .action
+                    .selector
+                    .as_ref()
+                    .and_then(|selector| self.sites.get(selector))
+                else {
+                    return Some(rule);
+                };
+                if sites.first().is_some_and(String::is_empty) {
+                    return None;
+                }
+                let excepted = |host: &str| {
+                    let host = host.trim_start_matches('*');
+                    sites.iter().any(|site| {
+                        host == site
+                            || host
+                                .strip_suffix(site.as_str())
+                                .is_some_and(|rest| rest.ends_with('.'))
+                    })
+                };
+                match rule.trigger.if_domain.take() {
+                    Some(hosts) => {
+                        let left: Vec<String> =
+                            hosts.into_iter().filter(|host| !excepted(host)).collect();
+                        if left.is_empty() {
+                            return None;
+                        }
+                        rule.trigger.if_domain = Some(left);
+                    }
+                    None => {
+                        let unless = rule.trigger.unless_domain.get_or_insert_with(Vec::new);
+                        for site in sites {
+                            let entry = format!("*{site}");
+                            if !unless.contains(&entry) {
+                                unless.push(entry);
+                            }
+                        }
+                    }
+                }
+                Some(rule)
+            })
+            .collect()
+    }
 }
 
 /// The JSON of one WebKit unit, or `None` when it has no rules or is too large.
@@ -870,6 +1028,79 @@ mod tests {
                 "{unit} has {count} rules, too close to WebKit's {WEBKIT_MAX_RULES}"
             );
         }
+    }
+
+    /// The lists except single sites from hiding rules. Each exception once
+    /// came out as a rule hiding its selector on every other site: `svg`,
+    /// `iframe[style]` and a hundred more that no list hides everywhere.
+    #[test]
+    fn an_exception_for_one_site_hides_nothing_on_the_others() {
+        let all: Vec<&str> = GROUPS.iter().map(|(group, _)| *group).collect();
+        let mut everywhere = std::collections::HashSet::new();
+        for bytes in list_bytes(&all) {
+            let text = gunzip(bytes).expect("list unpacks");
+            for line in text.lines() {
+                let Some(at) = line.find("##") else { continue };
+                let sites = &line[..at];
+                if sites.contains('#') || line.starts_with('!') {
+                    continue;
+                }
+                if sites
+                    .split(',')
+                    .all(|site| site.is_empty() || site.starts_with('~'))
+                {
+                    everywhere.insert(line[at + 2..].trim().to_owned());
+                }
+            }
+        }
+        let rules = webkit_rules(&all, RuleTypes::CosmeticOnly);
+        let stray: Vec<&str> = rules
+            .iter()
+            .filter(|rule| rule.trigger.if_domain.is_none())
+            .filter_map(|rule| rule.action.selector.as_deref())
+            .filter(|selector| !everywhere.contains(*selector))
+            .collect();
+        assert!(
+            stray.is_empty(),
+            "hidden on every site by no list: {stray:?}"
+        );
+        assert!(!rules
+            .iter()
+            .any(|rule| rule.action.selector.as_deref() == Some("svg")));
+    }
+
+    #[test]
+    fn exceptions_narrow_the_rules_they_name() {
+        let mut unhide = Unhide::default();
+        let kept = unhide.take_from(
+            "##.ad\nfoo.com,bar.com##.box\nfoo.com##.only\n##.gone\n\
+             keep.com#@#.ad\nFoo.com#@#.box\nfoo.com#@#.only\n#@#.gone\n\
+             other.com#@#svg\nx.com#@#+js(nowebrtc)\n~y.com#@#.ad\n",
+        );
+        assert_eq!(
+            kept,
+            "##.ad\nfoo.com,bar.com##.box\nfoo.com##.only\n##.gone\nx.com#@#+js(nowebrtc)\n"
+        );
+        let mut set = FilterSet::new(true);
+        set.add_filter_list(
+            kept,
+            ParseOptions {
+                rule_types: RuleTypes::CosmeticOnly,
+                ..ParseOptions::default()
+            },
+        );
+        let (rules, _) = set.into_content_blocking().expect("rules convert");
+        let rules = unhide.apply(rules);
+        let of = |selector: &str| {
+            rules
+                .iter()
+                .find(|rule| rule.action.selector.as_deref() == Some(selector))
+        };
+        let ad = of(".ad").expect("the generic rule stays");
+        assert_eq!(ad.trigger.unless_domain, Some(vec!["*keep.com".to_owned()]));
+        let boxed = of(".box").expect("the rule keeps its other site");
+        assert_eq!(boxed.trigger.if_domain, Some(vec!["bar.com".to_owned()]));
+        assert!(of(".only").is_none() && of(".gone").is_none() && of("svg").is_none());
     }
 
     #[test]
