@@ -392,6 +392,13 @@ impl Unhide {
     }
 }
 
+/// Puts the style `s` in the document. A script WebView2 runs when a document
+/// is created finds neither a head nor a root element yet, where a plain
+/// `appendChild` threw and no generic hiding ever reached a Windows page; it
+/// waits for the first element instead.
+#[cfg(any(target_os = "windows", test))]
+const ATTACH_STYLE: &str = "const a=()=>{const r=document.head||document.documentElement;if(!r)return false;r.appendChild(s);return true};if(!a()){const o=new MutationObserver(()=>{if(a())o.disconnect()});o.observe(document,{childList:true,subtree:true});}";
+
 /// A script for every document on Windows: the hiding rules for every site,
 /// each without the sites its exceptions name, and none at all on a site the
 /// lists keep generic or all hiding off. One rule per selector, so a selector
@@ -437,7 +444,8 @@ fn generic_script(groups: &[&str]) -> String {
         "(()=>{{const h=location.hostname,on=d=>h===d||h.endsWith('.'+d);if({off}.some(on))return;\
          let c={plain};for(const [s,d] of {excepted})if(!d.some(on))c+=s+'{{display:none!important}}\\n';\
          const s=document.createElement('style');s.setAttribute('data-pake-blocking','');s.textContent=c;\
-         (document.head||document.documentElement).appendChild(s);}})();",
+         {attach}}})();",
+        attach = ATTACH_STYLE,
         off = json(&off),
         plain = json(&plain),
         excepted = json(&excepted),
@@ -995,7 +1003,8 @@ mod windows {
     fn style_script(css: &str) -> String {
         let css = serde_json::to_string(css).unwrap_or_else(|_| "\"\"".into());
         format!(
-            "(()=>{{const s=document.createElement('style');s.setAttribute('data-pake-blocking','');s.textContent={css};(document.head||document.documentElement).appendChild(s);}})();"
+            "(()=>{{const s=document.createElement('style');s.setAttribute('data-pake-blocking','');s.textContent={css};{attach}}})();",
+            attach = super::ATTACH_STYLE,
         )
     }
 
@@ -1298,6 +1307,9 @@ mod tests {
         );
         assert!(!script.contains("\"*"), "hosts are compared bare");
         assert!(!script.contains("svg{display"));
+        // At document creation there is no element to hold the style yet.
+        assert!(script.contains("MutationObserver"));
+        assert!(!script.contains("(document.head||document.documentElement).appendChild"));
     }
 
     #[test]
