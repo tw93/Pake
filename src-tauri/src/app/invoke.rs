@@ -1,4 +1,4 @@
-use crate::app::navigation::{history_step, reload_window};
+use crate::app::navigation::{history_step, navigate_home, reload_window};
 use crate::app::notification::{self, NotificationOutcome, NotificationParams};
 use crate::util::{
     check_file_or_append, get_download_dir, get_download_message_with_lang,
@@ -547,8 +547,12 @@ pub fn webview_navigate(window: WebviewWindow, action: String) -> Result<(), Str
             history_step(&window, false);
             Ok(())
         }
+        "home" => {
+            navigate_home(&window);
+            Ok(())
+        }
         other => Err(format!(
-            "Unknown webview_navigate action '{other}' (expected reload|back|forward)"
+            "Unknown webview_navigate action '{other}' (expected reload|back|forward|home)"
         )),
     }
 }

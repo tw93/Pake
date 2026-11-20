@@ -1,5 +1,6 @@
 // Menu functionality is only used on macOS; the module is gated in app/mod.rs.
-use crate::app::navigation::{history_step, reload_window};
+use crate::app::navigation::{history_step, navigate_home, reload_window};
+pub use crate::app::navigation::{home_url, resolve_home_url};
 use crate::app::window::{open_additional_window_safe, MultiWindowState};
 use std::io::Write;
 use std::process::{Command, Stdio};
@@ -256,27 +257,6 @@ fn help_menu(app: &AppHandle<Wry>, title: &str) -> tauri::Result<Submenu<Wry>> {
     Ok(help_menu)
 }
 
-// Resolve the app's real home URL from its window config. Split out from
-// `home_url` so the mapping can be unit-tested without an AppHandle.
-fn resolve_home_url(url_type: &str, url: &str) -> Option<tauri::Url> {
-    match url_type {
-        // A web app's configured url is already absolute.
-        "web" => tauri::Url::parse(url).ok(),
-        // A local-file app's url is only a basename; Tauri serves bundled assets
-        // from tauri://localhost on macOS (this menu is macOS-only). Resolving it
-        // against the currently loaded remote origin (as the old eval path did)
-        // would point at the wrong server.
-        "local" => tauri::Url::parse(&format!("tauri://localhost/{url}")).ok(),
-        _ => None,
-    }
-}
-
-fn home_url(app: &AppHandle) -> Option<tauri::Url> {
-    let state = app.try_state::<MultiWindowState>()?;
-    let window_config = state.pake_config.windows.first()?;
-    resolve_home_url(&window_config.url_type, &window_config.url)
-}
-
 fn focused_webview_window(app_handle: &AppHandle) -> Option<WebviewWindow> {
     let windows = app_handle.webview_windows();
     windows
@@ -358,14 +338,7 @@ pub fn handle_menu_click(app_handle: &AppHandle, id: &str) {
                 // Native navigation works even from a blank error page (where
                 // eval cannot run) and resolves local-file apps to the correct
                 // bundled asset instead of a path on the current origin.
-                match home_url(app_handle) {
-                    Some(url) => {
-                        let _ = window.navigate(url);
-                    }
-                    None => {
-                        let _ = window.eval("window.location.href = window.pakeConfig.url");
-                    }
-                }
+                navigate_home(&window);
             }
         }
         "copy_url" => {

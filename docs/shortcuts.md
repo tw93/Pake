@@ -22,7 +22,7 @@ Every app Pake builds has these shortcuts, on top of the ones the website itself
 | `⌘ 0`     | `Ctrl 0`            | Reset zoom                          |
 | `⌘ L`     | `Ctrl L`            | Copy the current page URL           |
 | `⌘ ⇧ ⌥ V` | Mac only            | Paste and match style               |
-| `⌘ ⇧ H`   | Mac only            | Go to the home page                 |
+| `⌘ ⇧ H`   | `Ctrl Shift H`      | Go to the home page                 |
 | `⌘ ⇧ ⌫`   | Mac only            | Clear the cache and restart         |
 | `⌃ ⌘ F`   | `F11`               | Toggle fullscreen                   |
 | `⌘ ⌥ I`   | `Ctrl Shift I`      | Toggle developer tools (debug only) |

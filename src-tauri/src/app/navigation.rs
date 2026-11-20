@@ -2,12 +2,69 @@
 //! Blank error shells have no JS context, so `eval("history.back()")` and
 //! `location.reload()` are dead exactly when the user is stuck.
 
-use tauri::WebviewWindow;
+use crate::app::window::MultiWindowState;
+use tauri::{Manager, WebviewWindow};
 
 /// Reload the current document via the native webview API.
 pub fn reload_window(window: &WebviewWindow) {
     if let Err(error) = window.reload() {
         eprintln!("[Pake] Failed to reload webview: {error}");
+    }
+}
+
+/// Resolve the app's real home URL from its window config. Split out from
+/// `home_url` so the mapping can be unit-tested without an AppHandle.
+pub fn resolve_home_url(url_type: &str, url: &str) -> Option<tauri::Url> {
+    match url_type {
+        // A web app's configured url is already absolute.
+        "web" => tauri::Url::parse(url).ok(),
+        // A local-file app's url is only a basename; Tauri serves bundled assets
+        // from tauri://localhost on macOS/Linux and http://tauri.localhost on Windows.
+        // Resolving it against the currently loaded remote origin (as the old eval path did)
+        // would point at the wrong server.
+        "local" => {
+            #[cfg(windows)]
+            let base = "http://tauri.localhost";
+            #[cfg(not(windows))]
+            let base = "tauri://localhost";
+            tauri::Url::parse(&format!("{base}/{url}")).ok()
+        }
+        _ => None,
+    }
+}
+
+pub fn home_url(app: &tauri::AppHandle) -> Option<tauri::Url> {
+    let state = app.try_state::<MultiWindowState>()?;
+    let window_config = state.pake_config.windows.first()?;
+    resolve_home_url(&window_config.url_type, &window_config.url)
+}
+
+/// Navigate the webview to the original packaged home URL.
+///
+/// Native navigation works even from a blank error page (where eval cannot run)
+/// and resolves local-file apps to the correct bundled asset instead of a path
+/// on the current origin.
+pub fn navigate_home(window: &WebviewWindow) {
+    let home = home_url(&window.app_handle());
+    let url_str = home.as_ref().map(|u| u.to_string());
+
+    let navigated = window.with_webview(move |webview| {
+        if let Some(ref target) = url_str {
+            navigate_url_platform(&webview, target);
+        }
+    });
+
+    if navigated.is_err() || home.is_none() {
+        match home {
+            Some(url) => {
+                if let Err(error) = window.navigate(url) {
+                    eprintln!("[Pake] Failed to navigate to home URL: {error}");
+                }
+            }
+            None => {
+                let _ = window.eval("window.location.href = window.pakeConfig.url");
+            }
+        }
     }
 }
 
@@ -121,3 +178,71 @@ fn history_step_platform(webview: &tauri::webview::PlatformWebview, back: bool) 
 
 #[cfg(not(any(target_os = "macos", target_os = "linux", windows)))]
 fn history_step_platform(_webview: &tauri::webview::PlatformWebview, _back: bool) {}
+
+#[cfg(target_os = "macos")]
+fn navigate_url_platform(webview: &tauri::webview::PlatformWebview, url: &str) {
+    use objc2::msg_send;
+    use objc2::runtime::AnyObject;
+    use objc2_foundation::{NSString, NSURLRequest, NSURL};
+
+    let ptr = webview.inner() as *mut AnyObject;
+    if ptr.is_null() {
+        return;
+    }
+    unsafe {
+        let ns_str = NSString::from_str(url);
+        if let Some(ns_url) = NSURL::URLWithString(&ns_str) {
+            let request = NSURLRequest::requestWithURL(&ns_url);
+            let _: () = msg_send![ptr, loadRequest: &*request];
+        }
+    }
+}
+
+#[cfg(target_os = "linux")]
+fn navigate_url_platform(webview: &tauri::webview::PlatformWebview, url: &str) {
+    use webkit2gtk::WebViewExt;
+
+    let gtk_webview = webview.inner();
+    gtk_webview.load_uri(url);
+}
+
+#[cfg(windows)]
+fn navigate_url_platform(webview: &tauri::webview::PlatformWebview, url: &str) {
+    use windows_core::HSTRING;
+
+    let controller = webview.controller();
+    unsafe {
+        let Ok(core) = controller.CoreWebView2() else {
+            return;
+        };
+        let hurl = HSTRING::from(url);
+        let _ = core.Navigate(&hurl);
+    }
+}
+
+#[cfg(not(any(target_os = "macos", target_os = "linux", windows)))]
+fn navigate_url_platform(_webview: &tauri::webview::PlatformWebview, _url: &str) {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn home_url_resolution() {
+        assert_eq!(
+            resolve_home_url("web", "https://github.com").map(|u| u.to_string()),
+            Some("https://github.com/".to_string())
+        );
+        #[cfg(not(windows))]
+        assert_eq!(
+            resolve_home_url("local", "launcher.html").map(|u| u.to_string()),
+            Some("tauri://localhost/launcher.html".to_string())
+        );
+        #[cfg(windows)]
+        assert_eq!(
+            resolve_home_url("local", "launcher.html").map(|u| u.to_string()),
+            Some("http://tauri.localhost/launcher.html".to_string())
+        );
+        assert!(resolve_home_url("bogus", "whatever").is_none());
+    }
+}

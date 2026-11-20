@@ -19,6 +19,11 @@ function fallbackNavigate(action) {
     window.history.back();
   } else if (action === "forward") {
     window.history.forward();
+  } else if (action === "home") {
+    const homeUrl = window.pakeConfig?.url;
+    if (homeUrl) {
+      window.location.href = homeUrl;
+    }
   }
 }
 
@@ -123,6 +128,25 @@ const windowShortcuts = {
   l: copyPageAddress,
 };
 
+let lastHomeNavigationTime = 0;
+
+function navigateHome() {
+  const now = Date.now();
+  if (now - lastHomeNavigationTime < 500) {
+    return;
+  }
+  lastHomeNavigationTime = now;
+  nativeNavigate("home");
+}
+
+function isHomeShortcut(event) {
+  if (!event.ctrlKey || !event.shiftKey || event.altKey || event.metaKey) {
+    return false;
+  }
+  const key = event.key?.toLowerCase?.();
+  return key === "h" || event.code === "KeyH";
+}
+
 const altShortcuts = {
   ArrowLeft: () => nativeNavigate("back"),
   ArrowRight: () => nativeNavigate("forward"),
@@ -133,7 +157,19 @@ const altShortcuts = {
 // prevented. A web terminal or editor that takes Ctrl+W (delete a word), Ctrl+L
 // (clear) or Alt+Left (word left) on keydown keeps it, as find.js does for Ctrl+F.
 function handleWindowShortcut(event) {
-  if (!isNonMacDesktop() || event.defaultPrevented || event.repeat) {
+  if (!isNonMacDesktop() || event.repeat) {
+    return;
+  }
+
+  // Ctrl+Shift+H is a navigation shortcut (like Back/Forward). It must work
+  // even if a web page or focused input has defaultPrevented or intercepts keydown.
+  if (isHomeShortcut(event)) {
+    event.preventDefault();
+    navigateHome();
+    return;
+  }
+
+  if (event.defaultPrevented) {
     return;
   }
 
@@ -158,6 +194,11 @@ function handleWindowShortcut(event) {
 
 function handleWebShortcut(event) {
   if (isNonMacDesktop() && event.ctrlKey) {
+    if (isHomeShortcut(event)) {
+      event.preventDefault();
+      navigateHome();
+      return;
+    }
     handleShortcut(event);
     return;
   }
