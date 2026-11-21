@@ -1,45 +1,45 @@
 {
-  "fetched": "2026-11-15",
+  "fetched": "2026-11-21",
   "lists": [
     {
       "group": "ads",
       "title": "EasyList",
-      "version": "202611150427",
+      "version": "202611210107",
       "url": "https://easylist.to/easylist/easylist.txt",
       "license": "https://easylist.to/pages/licence.html",
-      "lines": 78503
+      "lines": 78770
     },
     {
       "group": "trackers",
       "title": "EasyPrivacy",
-      "version": "202611150427",
+      "version": "202611210107",
       "url": "https://easylist.to/easylist/easyprivacy.txt",
       "license": "https://easylist.to/pages/licence.html",
-      "lines": 57428
+      "lines": 57545
     },
     {
       "group": "cookies",
       "title": "AdGuard Cookie Notices filter",
-      "version": "2.0.99.53",
+      "version": "2.1.0.12",
       "url": "https://filters.adtidy.org/extension/ublock/filters/18.txt",
       "license": "https://github.com/AdguardTeam/AdguardFilters/blob/master/LICENSE",
-      "lines": 23869
+      "lines": 23954
     },
     {
       "group": "china",
       "title": "EasyList China",
-      "version": "202611150422",
+      "version": "202611210112",
       "url": "https://easylist-downloads.adblockplus.org/easylistchina.txt",
       "license": "https://easylist.to/pages/licence.html",
-      "lines": 17961
+      "lines": 18014
     },
     {
       "group": "unbreak",
       "title": "uBlock filters – Unbreak",
-      "version": "Sat, 14 Nov 2026 04:57:45 +0000",
+      "version": "Fri, 20 Nov 2026 11:05:13 +0000",
       "url": "https://ublockorigin.github.io/uAssets/filters/unbreak.txt",
       "license": "https://github.com/uBlockOrigin/uAssets/blob/master/LICENSE",
-      "lines": 6116
+      "lines": 6088
     }
   ]
 }
