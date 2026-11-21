@@ -19,6 +19,11 @@ function fallbackNavigate(action) {
     window.history.back();
   } else if (action === "forward") {
     window.history.forward();
+  } else if (action === "home") {
+    const homeUrl = window.pakeConfig?.url;
+    if (homeUrl) {
+      window.location.href = homeUrl;
+    }
   }
 }
 
@@ -123,6 +128,10 @@ const windowShortcuts = {
   l: copyPageAddress,
 };
 
+const shiftShortcuts = {
+  h: () => nativeNavigate("home"),
+};
+
 const altShortcuts = {
   ArrowLeft: () => nativeNavigate("back"),
   ArrowRight: () => nativeNavigate("forward"),
@@ -140,6 +149,13 @@ function handleWindowShortcut(event) {
   let action;
   if (event.ctrlKey && !event.shiftKey && !event.altKey && !event.metaKey) {
     action = windowShortcuts[event.key?.toLowerCase?.()];
+  } else if (
+    event.ctrlKey &&
+    event.shiftKey &&
+    !event.altKey &&
+    !event.metaKey
+  ) {
+    action = shiftShortcuts[event.key?.toLowerCase?.()];
   } else if (
     event.altKey &&
     !event.ctrlKey &&

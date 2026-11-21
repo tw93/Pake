@@ -52,20 +52,22 @@ describe('multi-window visibility control', () => {
 });
 
 describe('native webview navigation IPC', () => {
-  it('registers webview_navigate for reload/back/forward', () => {
+  it('registers webview_navigate for reload/back/forward/home', () => {
     expect(invokeSource).toContain('pub fn webview_navigate');
     expect(invokeSource).toContain('reload_window(&window)');
     expect(invokeSource).toContain('history_step(&window, true)');
     expect(invokeSource).toContain('history_step(&window, false)');
+    expect(invokeSource).toContain('navigate_home(&window)');
     expect(libSource).toContain('webview_navigate');
   });
 
-  it('routes Ctrl shortcut reload/back/forward through native navigate', () => {
+  it('routes Ctrl shortcut reload/back/forward/home through native navigate', () => {
     expect(eventSource).toContain('function nativeNavigate(action)');
     expect(eventSource).toContain('invoke("webview_navigate", { action })');
     expect(eventSource).toContain('nativeNavigate("reload")');
     expect(eventSource).toContain('nativeNavigate("back")');
     expect(eventSource).toContain('nativeNavigate("forward")');
+    expect(eventSource).toContain('nativeNavigate("home")');
     // Top-level shortcuts must not call page APIs directly.
     expect(eventSource).not.toMatch(
       /const shortcuts = \{[\s\S]*?window\.location\.reload\(\)/,

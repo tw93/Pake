@@ -278,6 +278,72 @@ describe("event fullscreen shortcuts", () => {
     expect(context.navigateCalls).toEqual(["back", "forward"]);
   });
 
+  it("navigates home on Ctrl+Shift+H on Windows and Linux", () => {
+    const context = loadEventHelpers();
+    const handler = getWindowShortcutHandler(context);
+    const event = createKeyEvent("h", { ctrlKey: true, shiftKey: true });
+
+    handler(event);
+
+    expect(context.navigateCalls).toEqual(["home"]);
+    expect(event.preventDefault).toHaveBeenCalled();
+  });
+
+  it("navigates home on Ctrl+Shift+H even when uppercase H is reported", () => {
+    const context = loadEventHelpers();
+    const handler = getWindowShortcutHandler(context);
+    const event = createKeyEvent("H", { ctrlKey: true, shiftKey: true });
+
+    handler(event);
+
+    expect(context.navigateCalls).toEqual(["home"]);
+    expect(event.preventDefault).toHaveBeenCalled();
+  });
+
+  it("navigates home on Ctrl+Shift+H when an input element has focus", () => {
+    const context = loadEventHelpers();
+    const input = createElement("input");
+    context.document.activeElement = input;
+    const handler = getWindowShortcutHandler(context);
+    const event = createKeyEvent("h", {
+      ctrlKey: true,
+      shiftKey: true,
+      target: input,
+    });
+
+    handler(event);
+
+    expect(context.navigateCalls).toEqual(["home"]);
+    expect(event.preventDefault).toHaveBeenCalled();
+  });
+
+  it("leaves Ctrl+Shift+H to a page that took it", () => {
+    const context = loadEventHelpers();
+    const handler = getWindowShortcutHandler(context);
+    const event = createKeyEvent("h", {
+      ctrlKey: true,
+      shiftKey: true,
+      defaultPrevented: true,
+    });
+
+    handler(event);
+
+    expect(context.navigateCalls).toEqual([]);
+    expect(event.preventDefault).not.toHaveBeenCalled();
+  });
+
+  it("does not go home on Ctrl+H or Ctrl+Shift+Alt+H", () => {
+    const context = loadEventHelpers();
+    const handler = getWindowShortcutHandler(context);
+
+    handler(createKeyEvent("h", { ctrlKey: true }));
+    handler(
+      createKeyEvent("h", { ctrlKey: true, shiftKey: true, altKey: true }),
+    );
+
+    expect(context.navigateCalls).toEqual([]);
+  });
+
   it("leaves the window shortcuts to the macOS menu", () => {
     const context = loadEventHelpers({
       userAgent:
