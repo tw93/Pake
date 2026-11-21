@@ -1294,9 +1294,6 @@ mod tests {
     #[test]
     fn the_windows_script_carries_the_exceptions() {
         let script = generic_script(&["ads"]);
-        if let Ok(path) = std::env::var("PAKE_DUMP_SCRIPT") {
-            std::fs::write(path, &script).expect("script written");
-        }
         assert!(
             script.contains("\"bing.com\""),
             "a site with generic hiding off"
@@ -1310,6 +1307,22 @@ mod tests {
         // At document creation there is no element to hold the style yet.
         assert!(script.contains("MutationObserver"));
         assert!(!script.contains("(document.head||document.documentElement).appendChild"));
+    }
+
+    /// Writes what an app with every group on loads, for
+    /// `tests/blocking/run.mjs` to try on real pages: the two WebKit lists of
+    /// a Mac or Linux app and the hiding script of a Windows one.
+    #[test]
+    #[ignore = "writes files for tests/blocking/run.mjs"]
+    fn dump_for_real_pages() {
+        let dir = std::env::var("PAKE_DUMP_BLOCKING").expect("PAKE_DUMP_BLOCKING names a folder");
+        let dir = std::path::Path::new(&dir);
+        let all: Vec<&str> = GROUPS.iter().map(|(group, _)| *group).collect();
+        for (unit, rule_types) in WEBKIT_UNITS {
+            let json = serde_json::to_string(&webkit_rules(&all, rule_types)).expect("rules");
+            std::fs::write(dir.join(format!("{unit}.json")), json).expect("list written");
+        }
+        std::fs::write(dir.join("windows.js"), generic_script(&all)).expect("script written");
     }
 
     #[test]
