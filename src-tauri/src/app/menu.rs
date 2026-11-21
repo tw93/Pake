@@ -1,6 +1,6 @@
 // Menu functionality is only used on macOS; the module is gated in app/mod.rs.
 use crate::app::navigation::{history_step, navigate_home, reload_window};
-use crate::app::window::{open_additional_window_safe, MultiWindowState};
+use crate::app::window::open_additional_window_safe;
 use std::io::Write;
 use std::process::{Command, Stdio};
 use tauri::menu::{AboutMetadata, Menu, MenuItem, PredefinedMenuItem, Submenu};
