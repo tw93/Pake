@@ -2813,9 +2813,10 @@ dependencies = [
 
 [[package]]
 name = "pake"
-version = "3.19.5"
+version = "3.19.6"
 dependencies = [
  "adblock",
+ "base64 0.22.1",
  "block2",
  "dispatch",
  "flate2",
@@ -2824,8 +2825,10 @@ dependencies = [
  "objc2-app-kit",
  "objc2-foundation",
  "objc2-web-kit",
+ "psl",
  "serde",
  "serde_json",
+ "sha2 0.10.9",
  "tauri",
  "tauri-build",
  "tauri-plugin-global-shortcut",

@@ -1,0 +1,15 @@
+{
+  "id": "whatsapp",
+  "version": 1,
+  "name": {
+    "en": "WhatsApp",
+    "zh-Hans": "WhatsApp"
+  },
+  "url": "https://web.whatsapp.com/",
+  "category": "social",
+  "description": {
+    "en": "Messages and calls",
+    "zh-Hans": "消息和通话"
+  },
+  "icon": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/b1/34/08/b1340868-af8b-86b9-5192-9ace445bf893/Placeholder.mill/512x512bb.png"
+}

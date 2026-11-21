@@ -349,6 +349,10 @@ window.addEventListener("DOMContentLoaded", (_event) => {
   const matchedSites = siteStyles.filter(({ hosts }) =>
     hosts.some((host) => hostname === host || hostname.endsWith(`.${host}`)),
   );
+  // An app whose extension restyles the site (`site_styles: false`, set by
+  // the runtime builder) keeps only the window rules: the content tweaks
+  // would fight the extension's own layout.
+  const siteStylesOn = window["pakeConfig"]?.site_styles !== false;
   const siteCSS = (key) =>
     matchedSites.map((site) => site[key] || "").join("\n");
 
@@ -363,7 +367,10 @@ window.addEventListener("DOMContentLoaded", (_event) => {
     }
   };
 
-  injectStyle(globalContentCSS + siteCSS("content"), "pake-content-style");
+  injectStyle(
+    globalContentCSS + (siteStylesOn ? siteCSS("content") : ""),
+    "pake-content-style",
+  );
 
   // Top spacing adapts to head-hiding scenarios
   const isMac = /Mac/i.test(navigator.userAgent);
