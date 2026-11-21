@@ -23,6 +23,7 @@ import {
 } from '@/utils/dir';
 import { PakeError } from '@/utils/error';
 import { LINUX_TARGET_TYPES, resolveLinuxBundleTargets } from '@/utils/targets';
+import { validateInjectInput } from '@/utils/validate';
 import {
   applyDarwinIconComposerPackage,
   iconPathExtension,
@@ -509,15 +510,9 @@ async function injectCustomCode(
   );
 
   if (inject?.length > 0) {
-    const injectArray = Array.isArray(inject) ? inject : [inject];
-    if (
-      !injectArray.every(
-        (item) => item.endsWith('.css') || item.endsWith('.js'),
-      )
-    ) {
-      logger.error('The injected file must be in either CSS or JS format.');
-      return;
-    }
+    const injectArray = validateInjectInput(
+      Array.isArray(inject) ? inject : [inject],
+    );
     const files = injectArray.map((filepath) =>
       path.isAbsolute(filepath) ? filepath : path.join(process.cwd(), filepath),
     );

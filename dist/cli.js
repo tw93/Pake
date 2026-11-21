@@ -13,10 +13,10 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { setTimeout as setTimeout$1 } from 'timers/promises';
 import fs$1 from 'fs/promises';
+import { InvalidArgumentError, program as program$1, Option } from 'commander';
+import * as psl from 'psl';
 import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
-import * as psl from 'psl';
-import { InvalidArgumentError, program as program$1, Option } from 'commander';
 
 var name = "pake-cli";
 var version = "3.19.6";
@@ -848,7 +848,7 @@ function hasWindowsGnuToolchain() {
 
 async function combineFiles(files, output) {
     const contents = await Promise.all(files.map(async (file) => {
-        if (file.endsWith('.css')) {
+        if (file.toLowerCase().endsWith('.css')) {
             const fileContent = await fs$1.readFile(file, 'utf-8');
             return `window.addEventListener('DOMContentLoaded', (_event) => {
         const css = ${JSON.stringify(fileContent)};
@@ -932,6 +932,145 @@ function resolveLinuxBundleTargets(targets) {
         ...new Set(requested.map((target) => (target === 'zst' ? 'deb' : target))),
     ];
     return { bundleTargets, hasValidTarget: requested.length > 0 };
+}
+
+// Extracts the domain from a given URL.
+function getDomain(inputUrl) {
+    try {
+        const url = new URL(inputUrl);
+        // Use PSL to parse domain names.
+        const parsed = psl.parse(url.hostname);
+        // If domain is available, split it and return the SLD.
+        if ('domain' in parsed && parsed.domain) {
+            return parsed.domain.split('.')[0];
+        }
+        else {
+            return null;
+        }
+    }
+    catch (error) {
+        return null;
+    }
+}
+// Appends 'https://' protocol to the URL if not present.
+function appendProtocol(inputUrl) {
+    try {
+        new URL(inputUrl);
+        return inputUrl;
+    }
+    catch {
+        return `https://${inputUrl}`;
+    }
+}
+// Normalizes the URL by ensuring it has a protocol and is valid.
+function normalizeUrl(urlToNormalize) {
+    const urlWithProtocol = appendProtocol(urlToNormalize);
+    try {
+        new URL(urlWithProtocol);
+        return urlWithProtocol;
+    }
+    catch (err) {
+        throw new Error(`Your url "${urlWithProtocol}" is invalid: ${err.message}`);
+    }
+}
+// Compiles a comma-separated domain list into a regex source for
+// internal_url_regex. Each domain is escaped and matched against the URL host
+// and its subdomains so path or query text cannot accidentally opt a link in.
+// Returns '' for empty input.
+function safeDomainsToRegex(domains) {
+    const escaped = domains
+        .split(',')
+        .map((domain) => domain.trim().toLowerCase())
+        .filter(Boolean)
+        .map((domain) => domain.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    return escaped.length
+        ? `^https?:\\/\\/(?:[^/?#@]+\\.)*(?:${escaped.join('|')})(?::\\d+)?(?:[/?#]|$)`
+        : '';
+}
+
+function validateNumberInput(value) {
+    if (value.trim() === '') {
+        throw new InvalidArgumentError('Not a number.');
+    }
+    const parsedValue = Number(value);
+    if (!Number.isFinite(parsedValue)) {
+        throw new InvalidArgumentError('Not a number.');
+    }
+    if (parsedValue < 0) {
+        throw new InvalidArgumentError('Must not be negative.');
+    }
+    return parsedValue;
+}
+// Path-shaped input (./x, ../x, /x, ~/x, C:\x). A missing path must fail
+// loudly: appending https:// to "./typo" would otherwise produce a valid URL
+// like https://./typo and a silently broken app (worst case for agents).
+const PATH_LIKE_PATTERN = /^(\.{1,2}[\\/]|[\\/]|~[\\/]|[a-zA-Z]:[\\/])/;
+function validateUrlInput(url) {
+    const isFile = fs.existsSync(url);
+    if (!isFile) {
+        if (PATH_LIKE_PATTERN.test(url)) {
+            throw new InvalidArgumentError(`Local path "${url}" does not exist. Check the path, or pass a web URL instead.`);
+        }
+        try {
+            return normalizeUrl(url);
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                throw new InvalidArgumentError(error.message);
+            }
+            throw error;
+        }
+    }
+    return url;
+}
+function validateDownloadDirInput(value) {
+    if (value === '')
+        return value;
+    const homeRelative = value.startsWith('~/') ? value.slice(2) : null;
+    const invalidHomePath = homeRelative !== null &&
+        (path.isAbsolute(homeRelative) ||
+            (process.platform === 'win32' &&
+                /^(?:[a-zA-Z]:|[\\/])/.test(homeRelative)));
+    if (invalidHomePath ||
+        value.includes('\0') ||
+        !(path.isAbsolute(value) || value === '~' || value.startsWith('~/')) ||
+        (process.platform === 'win32' &&
+            value !== '~' &&
+            !value.startsWith('~/') &&
+            !/^(?:[a-zA-Z]:[\\/]|[\\/]{2}[^\\/]+[\\/][^\\/]+)/.test(value))) {
+        throw new PakeError('Invalid download directory.', {
+            code: 'INVALID_INPUT',
+            hint: 'Use an absolute path or a quoted ~/path; relative paths are not supported.',
+        });
+    }
+    return value;
+}
+const INJECT_EXTENSIONS = new Set(['.css', '.js']);
+// Shared by --inject and the config "inject" field, so a config entry is split
+// on commas like the flag and a bad file fails before anything is built.
+function validateInjectInput(inject, cwd = process.cwd()) {
+    if (!Array.isArray(inject))
+        return [];
+    const files = inject
+        .flatMap((entry) => entry.split(','))
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0);
+    for (const file of files) {
+        if (!INJECT_EXTENSIONS.has(path.extname(file).toLowerCase())) {
+            throw new PakeError(`Injected file "${file}" is not a .css or .js file.`, {
+                code: 'INVALID_INPUT',
+                hint: 'Pass local CSS or JS files to --inject, separated by commas.',
+            });
+        }
+        const resolved = path.isAbsolute(file) ? file : path.join(cwd, file);
+        if (!fs.statSync(resolved, { throwIfNoEntry: false })?.isFile()) {
+            throw new PakeError(`Injected file not found: ${file}`, {
+                code: 'INVALID_INPUT',
+                hint: 'Relative --inject paths resolve against the current directory.',
+            });
+        }
+    }
+    return files;
 }
 
 const ACTOOL_VERSION_ARGS = [
@@ -1506,11 +1645,7 @@ async function injectCustomCode(options, tauriConf) {
     const { inject, proxyUrl, basicAuth, multiInstance, multiWindow, wasm } = options;
     const injectFilePath = path.join(npmDirectory, 'src-tauri/src/inject/custom.js');
     if (inject?.length > 0) {
-        const injectArray = Array.isArray(inject) ? inject : [inject];
-        if (!injectArray.every((item) => item.endsWith('.css') || item.endsWith('.js'))) {
-            logger.error('The injected file must be in either CSS or JS format.');
-            return;
-        }
+        const injectArray = validateInjectInput(Array.isArray(inject) ? inject : [inject]);
         const files = injectArray.map((filepath) => path.isAbsolute(filepath) ? filepath : path.join(process.cwd(), filepath));
         tauriConf.pake.inject = files;
         await combineFiles(files, injectFilePath);
@@ -3682,60 +3817,6 @@ async function saveIconFile(iconData, extension) {
     return originalIconPath;
 }
 
-// Extracts the domain from a given URL.
-function getDomain(inputUrl) {
-    try {
-        const url = new URL(inputUrl);
-        // Use PSL to parse domain names.
-        const parsed = psl.parse(url.hostname);
-        // If domain is available, split it and return the SLD.
-        if ('domain' in parsed && parsed.domain) {
-            return parsed.domain.split('.')[0];
-        }
-        else {
-            return null;
-        }
-    }
-    catch (error) {
-        return null;
-    }
-}
-// Appends 'https://' protocol to the URL if not present.
-function appendProtocol(inputUrl) {
-    try {
-        new URL(inputUrl);
-        return inputUrl;
-    }
-    catch {
-        return `https://${inputUrl}`;
-    }
-}
-// Normalizes the URL by ensuring it has a protocol and is valid.
-function normalizeUrl(urlToNormalize) {
-    const urlWithProtocol = appendProtocol(urlToNormalize);
-    try {
-        new URL(urlWithProtocol);
-        return urlWithProtocol;
-    }
-    catch (err) {
-        throw new Error(`Your url "${urlWithProtocol}" is invalid: ${err.message}`);
-    }
-}
-// Compiles a comma-separated domain list into a regex source for
-// internal_url_regex. Each domain is escaped and matched against the URL host
-// and its subdomains so path or query text cannot accidentally opt a link in.
-// Returns '' for empty input.
-function safeDomainsToRegex(domains) {
-    const escaped = domains
-        .split(',')
-        .map((domain) => domain.trim().toLowerCase())
-        .filter(Boolean)
-        .map((domain) => domain.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-    return escaped.length
-        ? `^https?:\\/\\/(?:[^/?#@]+\\.)*(?:${escaped.join('|')})(?::\\d+)?(?:[/?#]|$)`
-        : '';
-}
-
 function resolveAppName(name, platform) {
     const domain = getDomain(name) || 'pake';
     return platform !== 'linux' ? capitalizeFirstLetter(domain) : domain;
@@ -3875,64 +3956,6 @@ const DEFAULT_PAKE_OPTIONS = {
     camera: false,
     microphone: false,
 };
-
-function validateNumberInput(value) {
-    if (value.trim() === '') {
-        throw new InvalidArgumentError('Not a number.');
-    }
-    const parsedValue = Number(value);
-    if (!Number.isFinite(parsedValue)) {
-        throw new InvalidArgumentError('Not a number.');
-    }
-    if (parsedValue < 0) {
-        throw new InvalidArgumentError('Must not be negative.');
-    }
-    return parsedValue;
-}
-// Path-shaped input (./x, ../x, /x, ~/x, C:\x). A missing path must fail
-// loudly: appending https:// to "./typo" would otherwise produce a valid URL
-// like https://./typo and a silently broken app (worst case for agents).
-const PATH_LIKE_PATTERN = /^(\.{1,2}[\\/]|[\\/]|~[\\/]|[a-zA-Z]:[\\/])/;
-function validateUrlInput(url) {
-    const isFile = fs.existsSync(url);
-    if (!isFile) {
-        if (PATH_LIKE_PATTERN.test(url)) {
-            throw new InvalidArgumentError(`Local path "${url}" does not exist. Check the path, or pass a web URL instead.`);
-        }
-        try {
-            return normalizeUrl(url);
-        }
-        catch (error) {
-            if (error instanceof Error) {
-                throw new InvalidArgumentError(error.message);
-            }
-            throw error;
-        }
-    }
-    return url;
-}
-function validateDownloadDirInput(value) {
-    if (value === '')
-        return value;
-    const homeRelative = value.startsWith('~/') ? value.slice(2) : null;
-    const invalidHomePath = homeRelative !== null &&
-        (path.isAbsolute(homeRelative) ||
-            (process.platform === 'win32' &&
-                /^(?:[a-zA-Z]:|[\\/])/.test(homeRelative)));
-    if (invalidHomePath ||
-        value.includes('\0') ||
-        !(path.isAbsolute(value) || value === '~' || value.startsWith('~/')) ||
-        (process.platform === 'win32' &&
-            value !== '~' &&
-            !value.startsWith('~/') &&
-            !/^(?:[a-zA-Z]:[\\/]|[\\/]{2}[^\\/]+[\\/][^\\/]+)/.test(value))) {
-        throw new PakeError('Invalid download directory.', {
-            code: 'INVALID_INPUT',
-            hint: 'Use an absolute path or a quoted ~/path; relative paths are not supported.',
-        });
-    }
-    return value;
-}
 
 function getCliProgram() {
     const { green, yellow } = chalk;
@@ -4330,6 +4353,7 @@ program.action(async (urlArg, options) => {
             }
         }
         validateDownloadDirInput(options.downloadDir);
+        options.inject = validateInjectInput(options.inject);
         if (!url) {
             if (jsonMode) {
                 throw new PakeError('No URL or local path to package.', {
