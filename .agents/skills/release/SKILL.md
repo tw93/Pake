@@ -76,7 +76,13 @@ Before writing notes, `gh release view <previous release>` and treat its structu
 
 Special thanks to @user for the reports and PRs behind this release. If Pake helps you, please consider giving it a star and recommending it to your friends.
 
+### Pake App
+
+If you would rather click than type commands, [Pake App](https://pake.run/) makes apps from a ready-made gallery or any URL on Mac, Windows and Linux, with no Node.js or Rust to install, and adds ad blocking and updates for the apps you made. You can [download it here](https://pake.run/). The CLI stays free and open source.
+
 > https://github.com/tw93/Pake
 ```
+
+The Pake App section goes in every release, in English only and without a price (maintainer 2026-11-21, V3.20.0, after Mole's releases). Name only what the app does on all three platforms. A regression that appeared and was fixed between two `V*` tags is not a changelog item, even when an npm-only version carried it: V3.20.0 left out the Linux title bar that 3.19.5 lost and 3.19.6 gave back.
 
 Apply with `gh release edit VX.Y.Z --title "VX.Y.Z Codename" --notes-file notes.md`.
