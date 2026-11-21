@@ -36,11 +36,12 @@ describe('validateInjectInput', () => {
     expect(validateInjectInput(['THEME.CSS'], dir)).toEqual(['THEME.CSS']);
   });
 
-  it('splits a comma-separated config entry the way the flag does', () => {
-    expect(validateInjectInput(['style.css, hotkey.js', ' '], dir)).toEqual([
-      'style.css',
-      'hotkey.js',
-    ]);
+  it('keeps a path with a comma whole and drops blank entries', () => {
+    fs.mkdirSync(path.join(dir, 'My, Styles'), { recursive: true });
+    fs.writeFileSync(path.join(dir, 'My, Styles', 'x.css'), '');
+    expect(
+      validateInjectInput([' My, Styles/x.css ', ' ', 'hotkey.js'], dir),
+    ).toEqual(['My, Styles/x.css', 'hotkey.js']);
   });
 
   it('rejects a file that is neither CSS nor JS', () => {

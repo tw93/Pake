@@ -344,6 +344,32 @@ describe("event fullscreen shortcuts", () => {
     expect(context.navigateCalls).toEqual([]);
   });
 
+  it("goes home by address from a page that has no IPC", async () => {
+    const press = async (config, platform) => {
+      const context = loadEventHelpers(platform ? { platform } : {});
+      Object.assign(context.window.pakeConfig, config);
+      context.window.location.href = "https://elsewhere.example/page";
+      context.window.__PAKE_NATIVE__.core.invoke = () =>
+        Promise.reject(new Error("not allowed"));
+      getWindowShortcutHandler(context)(
+        createKeyEvent("h", { ctrlKey: true, shiftKey: true }),
+      );
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      return context.window.location.href;
+    };
+
+    expect(await press({ url: "https://example.com/", url_type: "web" })).toBe(
+      "https://example.com/",
+    );
+    // A local app's url is a file name: it must not resolve against the site.
+    expect(await press({ url: "launcher.html", url_type: "local" })).toMatch(
+      /^(http:\/\/tauri\.localhost|tauri:\/\/localhost)\/launcher\.html$/,
+    );
+    expect(
+      await press({ url: "launcher.html", url_type: "local" }, "Linux x86_64"),
+    ).toBe("tauri://localhost/launcher.html");
+  });
+
   it("leaves the window shortcuts to the macOS menu", () => {
     const context = loadEventHelpers({
       userAgent:

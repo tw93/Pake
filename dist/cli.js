@@ -1046,13 +1046,13 @@ function validateDownloadDirInput(value) {
     return value;
 }
 const INJECT_EXTENSIONS = new Set(['.css', '.js']);
-// Shared by --inject and the config "inject" field, so a config entry is split
-// on commas like the flag and a bad file fails before anything is built.
+// Shared by --inject and the config "inject" field, so a bad file fails before
+// anything is built. The flag has split its value on commas already; a config
+// entry is one path and may hold a comma.
 function validateInjectInput(inject, cwd = process.cwd()) {
     if (!Array.isArray(inject))
         return [];
     const files = inject
-        .flatMap((entry) => entry.split(','))
         .map((item) => item.trim())
         .filter((item) => item.length > 0);
     for (const file of files) {

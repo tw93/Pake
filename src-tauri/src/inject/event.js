@@ -20,11 +20,25 @@ function fallbackNavigate(action) {
   } else if (action === "forward") {
     window.history.forward();
   } else if (action === "home") {
-    const homeUrl = window.pakeConfig?.url;
+    const homeUrl = packagedHomeUrl();
     if (homeUrl) {
       window.location.href = homeUrl;
     }
   }
+}
+
+// A page on another origin has no IPC, so it goes home by address. A local
+// app's url is only a file name, which would resolve against the site the
+// window is on; its bundled page lives where navigation.rs says it does.
+function packagedHomeUrl() {
+  const url = window.pakeConfig?.url;
+  if (!url || window.pakeConfig?.url_type !== "local") {
+    return url;
+  }
+  const base = /win/i.test(getDesktopPlatform())
+    ? "http://tauri.localhost/"
+    : "tauri://localhost/";
+  return base + url;
 }
 
 const shortcuts = {
