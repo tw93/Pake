@@ -169,7 +169,10 @@ function handleWindowShortcut(event) {
     !event.altKey &&
     !event.metaKey
   ) {
-    action = shiftShortcuts[event.key?.toLowerCase?.()];
+    // A window the page opened, such as a sign-in popup, is not the app's.
+    action = window.pakeConfig?.page_popup
+      ? undefined
+      : shiftShortcuts[event.key?.toLowerCase?.()];
   } else if (
     event.altKey &&
     !event.ctrlKey &&

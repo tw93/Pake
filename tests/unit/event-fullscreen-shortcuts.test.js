@@ -344,6 +344,17 @@ describe("event fullscreen shortcuts", () => {
     expect(context.navigateCalls).toEqual([]);
   });
 
+  it("leaves Ctrl+Shift+H alone in a window the page opened", () => {
+    const context = loadEventHelpers();
+    context.window.pakeConfig.page_popup = true;
+    const event = createKeyEvent("h", { ctrlKey: true, shiftKey: true });
+
+    getWindowShortcutHandler(context)(event);
+
+    expect(context.navigateCalls).toEqual([]);
+    expect(event.preventDefault).not.toHaveBeenCalled();
+  });
+
   it("goes home by address from a page that has no IPC", async () => {
     const press = async (config, platform) => {
       const context = loadEventHelpers(platform ? { platform } : {});

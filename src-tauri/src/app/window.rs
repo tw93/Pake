@@ -807,7 +807,11 @@ fn build_window(
 
     let config_script = format!(
         "window.pakeConfig = {}",
-        page_config(window_config, extensions_run(config))
+        page_config(
+            window_config,
+            extensions_run(config),
+            new_window_features.is_some()
+        )
     );
     // A host-provided marker avoids relying on a site's overridden user agent.
     #[cfg(target_os = "windows")]
@@ -1648,11 +1652,17 @@ fn extensions_run(config: &PakeConfig) -> bool {
 /// `window.pakeConfig` for the page. An extension that restyles the site turns
 /// the runtime's own tweaks off (`site_styles`), but where it does not run they
 /// stay, so the site never ends up with neither.
-fn page_config(window_config: &WindowConfig, extensions_run: bool) -> String {
+///
+/// `page_popup` marks a window a page opened, such as a sign-in popup: it is
+/// not the app's window, so the shortcut that goes home leaves it alone.
+fn page_config(window_config: &WindowConfig, extensions_run: bool, page_popup: bool) -> String {
     let mut value = serde_json::to_value(window_config).unwrap_or_default();
-    if !extensions_run {
-        if let Some(object) = value.as_object_mut() {
+    if let Some(object) = value.as_object_mut() {
+        if !extensions_run {
             object.insert("site_styles".into(), true.into());
+        }
+        if page_popup {
+            object.insert("page_popup".into(), true.into());
         }
     }
     serde_json::to_string(&value).unwrap_or_else(|_| "{}".to_string())
@@ -1668,9 +1678,14 @@ mod site_style_tests {
         let config: PakeConfig = serde_json::from_str(include_str!("../../pake.json")).unwrap();
         let mut window = config.windows[0].clone();
         window.site_styles = false;
-        let page =
-            |run| serde_json::from_str::<serde_json::Value>(&page_config(&window, run)).unwrap();
+        let page = |run| {
+            serde_json::from_str::<serde_json::Value>(&page_config(&window, run, false)).unwrap()
+        };
         assert_eq!(page(true)["site_styles"], false);
         assert_eq!(page(false)["site_styles"], true);
+        assert!(page(true).get("page_popup").is_none());
+        let popup: serde_json::Value =
+            serde_json::from_str(&page_config(&window, true, true)).unwrap();
+        assert_eq!(popup["page_popup"], true);
     }
 }
