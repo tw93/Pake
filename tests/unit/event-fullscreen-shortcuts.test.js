@@ -317,7 +317,7 @@ describe("event fullscreen shortcuts", () => {
     expect(event.preventDefault).toHaveBeenCalled();
   });
 
-  it("navigates home on Ctrl+Shift+H even if a website listener set defaultPrevented", () => {
+  it("leaves Ctrl+Shift+H to a page that took it", () => {
     const context = loadEventHelpers();
     const handler = getWindowShortcutHandler(context);
     const event = createKeyEvent("h", {
@@ -328,33 +328,20 @@ describe("event fullscreen shortcuts", () => {
 
     handler(event);
 
-    expect(context.navigateCalls).toEqual(["home"]);
-    expect(event.preventDefault).toHaveBeenCalled();
+    expect(context.navigateCalls).toEqual([]);
+    expect(event.preventDefault).not.toHaveBeenCalled();
   });
 
-  it("navigates home on keyup via handleWebShortcut and debounces keydown+keyup", () => {
+  it("does not go home on Ctrl+H or Ctrl+Shift+Alt+H", () => {
     const context = loadEventHelpers();
-    const webHandler = getWebShortcutHandler(context);
-    const keyupEvent = createKeyEvent("H", {
-      ctrlKey: true,
-      shiftKey: true,
-      code: "KeyH",
-    });
+    const handler = getWindowShortcutHandler(context);
 
-    webHandler(keyupEvent);
-
-    expect(context.navigateCalls).toEqual(["home"]);
-    expect(keyupEvent.preventDefault).toHaveBeenCalled();
-
-    // If a keydown or keyup occurs immediately after, debounce prevents double-navigation
-    webHandler(
-      createKeyEvent("H", {
-        ctrlKey: true,
-        shiftKey: true,
-        code: "KeyH",
-      }),
+    handler(createKeyEvent("h", { ctrlKey: true }));
+    handler(
+      createKeyEvent("h", { ctrlKey: true, shiftKey: true, altKey: true }),
     );
-    expect(context.navigateCalls).toEqual(["home"]);
+
+    expect(context.navigateCalls).toEqual([]);
   });
 
   it("leaves the window shortcuts to the macOS menu", () => {

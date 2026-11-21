@@ -1,6 +1,5 @@
 // Menu functionality is only used on macOS; the module is gated in app/mod.rs.
 use crate::app::navigation::{history_step, navigate_home, reload_window};
-pub use crate::app::navigation::{home_url, resolve_home_url};
 use crate::app::window::{open_additional_window_safe, MultiWindowState};
 use std::io::Write;
 use std::process::{Command, Stdio};
@@ -384,33 +383,5 @@ pub fn handle_menu_click(app_handle: &AppHandle, id: &str) {
             }
         }
         _ => {}
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::resolve_home_url;
-
-    #[test]
-    fn web_url_passes_through_unchanged() {
-        assert_eq!(
-            resolve_home_url("web", "https://github.com").map(|u| u.to_string()),
-            Some("https://github.com/".to_string())
-        );
-    }
-
-    #[test]
-    fn local_basename_resolves_to_bundled_asset_url() {
-        // The fix: a local app's basename must become the bundled asset URL,
-        // not a path resolved against whatever origin is currently loaded.
-        assert_eq!(
-            resolve_home_url("local", "launcher.html").map(|u| u.to_string()),
-            Some("tauri://localhost/launcher.html".to_string())
-        );
-    }
-
-    #[test]
-    fn unknown_url_type_is_none() {
-        assert!(resolve_home_url("bogus", "whatever").is_none());
     }
 }
