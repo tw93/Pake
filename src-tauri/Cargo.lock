@@ -2813,7 +2813,7 @@ dependencies = [
 
 [[package]]
 name = "pake"
-version = "3.19.6"
+version = "3.20.0"
 dependencies = [
  "adblock",
  "base64 0.22.1",

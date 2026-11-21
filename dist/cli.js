@@ -19,7 +19,7 @@ import { dir } from 'tmp-promise';
 import { fileTypeFromBuffer } from 'file-type';
 
 var name = "pake-cli";
-var version = "3.19.6";
+var version = "3.20.0";
 var description = "Turn any website into a lightweight desktop app with one command. 一键把网站打包成轻量桌面应用。";
 var homepage = "https://pake.run";
 var engines = {
