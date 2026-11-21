@@ -1,0 +1,15 @@
+{
+  "id": "linkedin",
+  "version": 1,
+  "name": {
+    "en": "LinkedIn",
+    "zh-Hans": "领英"
+  },
+  "url": "https://www.linkedin.com/",
+  "category": "social",
+  "description": {
+    "en": "Work profiles, jobs and news",
+    "zh-Hans": "职业档案、招聘和行业动态"
+  },
+  "icon": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/f1/bb/91/f1bb91ff-6346-da9f-d7a3-b8eb4d0fd110/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/512x512bb.jpg"
+}

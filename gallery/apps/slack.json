@@ -1,0 +1,15 @@
+{
+  "id": "slack",
+  "version": 1,
+  "name": {
+    "en": "Slack",
+    "zh-Hans": "Slack"
+  },
+  "url": "https://app.slack.com/client",
+  "category": "productivity",
+  "description": {
+    "en": "Team chat and channels",
+    "zh-Hans": "团队聊天和频道"
+  },
+  "icon": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/ad/19/d2/ad19d29c-62c5-eadc-158c-2dc96f2228b2/slack_icon_prod-0-0-1x_U007epad-0-1-85-220.png/512x512bb.jpg"
+}

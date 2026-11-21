@@ -1,0 +1,15 @@
+{
+  "id": "reddit",
+  "version": 1,
+  "name": {
+    "en": "Reddit",
+    "zh-Hans": "Reddit"
+  },
+  "url": "https://www.reddit.com/",
+  "category": "social",
+  "description": {
+    "en": "Communities on every topic",
+    "zh-Hans": "各种话题的社区"
+  },
+  "icon": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/07/5d/4f/075d4fc3-9818-1565-cbf4-75c49455eb45/AppIcon-0-0-1x_U007epad-0-1-0-85-220.png/512x512bb.jpg"
+}

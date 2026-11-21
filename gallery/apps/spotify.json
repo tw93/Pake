@@ -1,0 +1,15 @@
+{
+  "id": "spotify",
+  "version": 1,
+  "name": {
+    "en": "Spotify",
+    "zh-Hans": "Spotify"
+  },
+  "url": "https://open.spotify.com/",
+  "category": "media",
+  "description": {
+    "en": "Music and podcasts",
+    "zh-Hans": "音乐和播客"
+  },
+  "icon": "https://cdn.tw93.fun/pake/icons/spotify.png"
+}
