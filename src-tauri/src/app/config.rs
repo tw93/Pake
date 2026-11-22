@@ -45,6 +45,12 @@ pub struct WindowConfig {
     /// traffic lights. Off unless the app asks for them.
     #[serde(default)]
     pub navigation_buttons: bool,
+    /// macOS only: no Dock icon, the app lives in its menu bar icon, as a
+    /// music player left playing does (a user's request, 2026-11-22). It
+    /// needs that icon to come back, so it holds only with the tray on.
+    /// Set by the runtime builder, not a CLI flag.
+    #[serde(default)]
+    pub hide_dock_icon: bool,
     /// The per-site tweaks `style.js` puts on a few sites, such as X's
     /// centred column. Set by the runtime builder, not a CLI flag: an app
     /// whose extension restyles its site turns them off so the two do not
@@ -167,6 +173,11 @@ pub struct PakeConfig {
 impl PakeConfig {
     pub fn show_system_tray(&self) -> bool {
         self.system_tray.copied()
+    }
+
+    /// The Dock icon goes only when the menu bar icon is there to open the app.
+    pub fn hides_dock_icon(&self) -> bool {
+        self.windows[0].hide_dock_icon && self.show_system_tray()
     }
 
     pub fn remote_capability(
@@ -293,6 +304,29 @@ mod tests {
         window["navigation_buttons"] = true.into();
         let asked: WindowConfig = serde_json::from_value(window).unwrap();
         assert!(asked.navigation_buttons);
+    }
+
+    #[test]
+    fn the_dock_icon_goes_only_when_asked_and_the_tray_is_on() {
+        let mut config = config_for("https://example.com");
+        let mut window = serde_json::to_value(config.windows[0].clone()).unwrap();
+        window.as_object_mut().unwrap().remove("hide_dock_icon");
+        config.windows[0] = serde_json::from_value(window).unwrap();
+        assert!(!config.windows[0].hide_dock_icon);
+
+        config.windows[0].hide_dock_icon = true;
+        config.system_tray = FunctionON {
+            macos: false,
+            linux: false,
+            windows: false,
+        };
+        assert!(!config.hides_dock_icon());
+        config.system_tray = FunctionON {
+            macos: true,
+            linux: true,
+            windows: true,
+        };
+        assert!(config.hides_dock_icon());
     }
 
     #[test]
