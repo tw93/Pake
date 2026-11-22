@@ -788,7 +788,7 @@ describe("event link guard", () => {
     expect(isDownloadableFile("https://example.com/dist/app")).toBe(false);
   });
 
-  it("does not force-download ordinary links on Cmd/Ctrl+click", () => {
+  it("opens a Cmd/Ctrl-clicked link in the default browser, not as a download", () => {
     const context = loadEventHelpers({ withTauri: true });
     runDomReady(context);
 
@@ -799,9 +799,88 @@ describe("event link guard", () => {
     event.ctrlKey = true;
     getClickGuard(context)(event);
 
+    expect(event.preventDefault).toHaveBeenCalledOnce();
+    expect(context.invokeCalls).toEqual([
+      ["plugin:shell|open", { path: "https://example.com/app/settings" }],
+    ]);
+  });
+
+  // A user's request (2026-11-22): Cmd-click on macOS and Ctrl-click on
+  // Windows and Linux open any link, the app's own site included, in the
+  // default browser, as a browser opens it in a new tab; a middle click too.
+  it.each([
+    ["macOS", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", "metaKey"],
+    ["Windows", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", "ctrlKey"],
+    ["Linux", "Mozilla/5.0 (X11; Linux x86_64)", "ctrlKey"],
+  ])(
+    "opens a modifier-clicked link in the browser on %s",
+    (_, userAgent, key) => {
+      for (const href of [
+        "https://example.com/app/next",
+        "https://other.example/page",
+      ]) {
+        const context = loadEventHelpers({ withTauri: true, userAgent });
+        runDomReady(context);
+        const event = makeClickEvent(makeAnchor(href, "_self"));
+        event[key] = true;
+        getClickGuard(context)(event);
+        expect(event.preventDefault).toHaveBeenCalledOnce();
+        expect(context.invokeCalls).toEqual([
+          ["plugin:shell|open", { path: href }],
+        ]);
+      }
+    },
+  );
+
+  it("leaves Ctrl-click alone on macOS, where it is a secondary click", () => {
+    const context = loadEventHelpers({
+      withTauri: true,
+      userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+    });
+    runDomReady(context);
+    const event = makeClickEvent(
+      makeAnchor("https://example.com/app/next", "_self"),
+    );
+    event.ctrlKey = true;
+    getClickGuard(context)(event);
     expect(event.preventDefault).not.toHaveBeenCalled();
+    expect(context.invokeCalls).toEqual([]);
+  });
+
+  it("opens a middle-clicked link in the browser", () => {
+    const context = loadEventHelpers({ withTauri: true });
+    runDomReady(context);
+    const middle = context.eventListeners.auxclick.find(
+      ({ handler }) => handler.name === "openMiddleClickedLink",
+    ).handler;
+    const event = makeClickEvent(
+      makeAnchor("https://example.com/app/next", "_self"),
+    );
+    event.button = 1;
+    middle(event);
+    expect(event.preventDefault).toHaveBeenCalledOnce();
+    expect(context.invokeCalls).toEqual([
+      ["plugin:shell|open", { path: "https://example.com/app/next" }],
+    ]);
+
+    const right = makeClickEvent(
+      makeAnchor("https://example.com/app/next", "_self"),
+    );
+    right.button = 2;
+    middle(right);
+    expect(right.preventDefault).not.toHaveBeenCalled();
+  });
+
+  it("keeps downloading a Cmd-clicked download link", () => {
+    const context = loadEventHelpers({ withTauri: true });
+    runDomReady(context);
+    const anchor = makeAnchor("https://example.com/report.pdf", "_self");
+    anchor.download = "report.pdf";
+    const event = makeClickEvent(anchor);
+    event.metaKey = true;
+    getClickGuard(context)(event);
     expect(context.invokeCalls).not.toContainEqual([
-      "download_file",
+      "plugin:shell|open",
       expect.anything(),
     ]);
   });
