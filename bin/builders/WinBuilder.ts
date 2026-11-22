@@ -133,7 +133,7 @@ export default class WinBuilder extends BaseBuilder {
     await this.recordArtifact(this.keptLoaderDllPath, 'dll');
     if (logSuccess) {
       logger.success(
-        `✔ ${WEBVIEW2_LOADER_DLL} copied beside it — keep them together`,
+        `✔ ${WEBVIEW2_LOADER_DLL} copied beside it, keep them together`,
       );
     }
   }

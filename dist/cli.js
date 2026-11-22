@@ -2618,7 +2618,7 @@ class WinBuilder extends BaseBuilder {
             return;
         await this.recordArtifact(this.keptLoaderDllPath, 'dll');
         if (logSuccess) {
-            logger.success(`✔ ${WEBVIEW2_LOADER_DLL} copied beside it — keep them together`);
+            logger.success(`✔ ${WEBVIEW2_LOADER_DLL} copied beside it, keep them together`);
         }
     }
 }
