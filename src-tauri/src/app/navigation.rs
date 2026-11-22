@@ -2,7 +2,7 @@
 //! Blank error shells have no JS context, so `eval("history.back()")` and
 //! `location.reload()` are dead exactly when the user is stuck.
 
-use crate::app::window::MultiWindowState;
+use crate::app::window::{MultiWindowState, POPUP_WINDOW_LABEL_PREFIX};
 use tauri::{Manager, WebviewWindow};
 
 /// Reload the current document via the native webview API.
@@ -39,10 +39,21 @@ pub fn home_url(app: &tauri::AppHandle) -> Option<tauri::Url> {
     resolve_home_url(&window_config.url_type, &window_config.url)
 }
 
+/// A window a page opened, such as a sign-in popup, is not the app's: going
+/// home there would throw the sign-in away. Every way home (the macOS menu's
+/// Cmd+Shift+H, Ctrl+Shift+H on Windows and Linux, the IPC command) ends in
+/// `navigate_home`, so it is checked here once.
+pub fn goes_home(label: &str) -> bool {
+    !label.starts_with(POPUP_WINDOW_LABEL_PREFIX)
+}
+
 /// Navigate the webview to the packaged home URL. Native navigation works
 /// from a blank error page, where eval cannot run, and sends a local-file app
 /// to its bundled asset instead of a path on the current origin.
 pub fn navigate_home(window: &WebviewWindow) {
+    if !goes_home(window.label()) {
+        return;
+    }
     match home_url(window.app_handle()) {
         Some(url) => {
             if let Err(error) = window.navigate(url) {
@@ -187,6 +198,13 @@ mod tests {
             Some("http://tauri.localhost/launcher.html".to_string())
         );
         assert!(resolve_home_url("bogus", "whatever").is_none());
+    }
+
+    #[test]
+    fn a_window_the_page_opened_never_goes_home() {
+        assert!(goes_home("pake"));
+        assert!(goes_home("pake-2"), "a Cmd+N clone is the app's own window");
+        assert!(!goes_home("pake-popup-3"), "a sign-in popup keeps its page");
     }
 
     #[test]
