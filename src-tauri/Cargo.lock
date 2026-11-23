@@ -2865,7 +2865,7 @@ dependencies = [
 
 [[package]]
 name = "pake"
-version = "3.20.0"
+version = "3.21.0"
 dependencies = [
  "adblock",
  "base64 0.23.1",
