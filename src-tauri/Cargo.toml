@@ -100,7 +100,7 @@ webkit2gtk = { version = "=2.0.2", features = ["v2_40"] }
 gtk = "0.18"
 # Reads the freedesktop color-scheme from the settings portal. Same version
 # and features that tauri-plugin-opener and single-instance already lock.
-zbus = "6.5"
+zbus = "5.19"
 # WebKitGTK's content filter store, which the safe webkit2gtk crate leaves out.
 webkit2gtk-sys = { version = "=2.0.2", features = ["v2_40"], optional = true }
 
