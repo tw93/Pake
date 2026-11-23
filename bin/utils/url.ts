@@ -20,6 +20,15 @@ export function getDomain(inputUrl: string): string | null {
 
 // Appends 'https://' protocol to the URL if not present.
 export function appendProtocol(inputUrl: string): string {
+  // URL accepts a bare host:port as an opaque scheme. Recognize dotted
+  // hosts and localhost without reinterpreting other schemes like tel:.
+  if (
+    /^(?:localhost|[a-z0-9-]+(?:\.[a-z0-9-]+)+\.?):\d+(?:[/?#]|$)/i.test(
+      inputUrl,
+    )
+  ) {
+    return `https://${inputUrl}`;
+  }
   try {
     new URL(inputUrl);
     return inputUrl;

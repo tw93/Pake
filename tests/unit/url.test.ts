@@ -38,17 +38,28 @@ describe('getDomain', () => {
 describe('appendProtocol', () => {
   it('leaves an already-schemed URL unchanged', () => {
     expect(appendProtocol('https://github.com')).toBe('https://github.com');
-    expect(appendProtocol('http://localhost')).toBe('http://localhost');
+    expect(appendProtocol('http://localhost:3000')).toBe(
+      'http://localhost:3000',
+    );
+    expect(appendProtocol('example.com://8443')).toBe('example.com://8443');
+    expect(appendProtocol('tel:1234')).toBe('tel:1234');
+    expect(appendProtocol('file:///tmp/index.html')).toBe(
+      'file:///tmp/index.html',
+    );
   });
 
   it('prepends https:// to a bare host', () => {
     expect(appendProtocol('github.com')).toBe('https://github.com');
   });
 
-  it('leaves a bare host:port unchanged (WHATWG parses "localhost:" as a scheme)', () => {
-    // Documents a known parser quirk: new URL('localhost:3000') succeeds with
-    // scheme "localhost:", so the input is treated as already-schemed.
-    expect(appendProtocol('localhost:3000')).toBe('localhost:3000');
+  it.each([
+    'localhost:3000',
+    'example.com:8443/dashboard',
+    'example.com.:8443/dashboard',
+    'localhost:3000?view=summary',
+    'example.com:8443#section',
+  ])('prepends https:// to a bare host with a port: %s', (input) => {
+    expect(appendProtocol(input)).toBe(`https://${input}`);
   });
 });
 
@@ -64,5 +75,9 @@ describe('normalizeUrl', () => {
   it('throws for input that yields an unparseable URL', () => {
     // appendProtocol('') -> 'https://', which new URL() rejects.
     expect(() => normalizeUrl('')).toThrow('is invalid');
+  });
+
+  it('rejects an out-of-range port on a bare host', () => {
+    expect(() => normalizeUrl('example.com:65536')).toThrow('is invalid');
   });
 });
