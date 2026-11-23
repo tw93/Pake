@@ -1500,21 +1500,27 @@ describe("links in a web mail app", () => {
     return context;
   };
 
-  it.each([
-    ["macOS", "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_5)"],
-    ["Windows", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"],
-  ])("opens another site's sign-in page in the browser on %s", (_os, ua) => {
-    const fresh = loadOutlook(ua);
-    const result = fresh.window.open(
-      "https://github.com/login",
-      "_blank",
-      "noopener noreferrer",
-    );
-    expect(result).toBeNull();
-    expect(fresh.window.location.href).toBe("https://outlook.live.com/mail/0/");
-    expect(
-      fresh.invokeCalls.filter(([command]) => command === "plugin:shell|open"),
-    ).toEqual([["plugin:shell|open", { path: "https://github.com/login" }]]);
+  it("opens another site's sign-in page from a mail in the browser", () => {
+    for (const ua of [
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_5)",
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+    ]) {
+      const fresh = loadOutlook(ua);
+      const result = fresh.window.open(
+        "https://github.com/login",
+        "_blank",
+        "noopener noreferrer",
+      );
+      expect(result).toBeNull();
+      expect(fresh.window.location.href).toBe(
+        "https://outlook.live.com/mail/0/",
+      );
+      expect(
+        fresh.invokeCalls.filter(
+          ([command]) => command === "plugin:shell|open",
+        ),
+      ).toEqual([["plugin:shell|open", { path: "https://github.com/login" }]]);
+    }
   });
 
   it("keeps a sign-in request with an OAuth parameter in the app", () => {
