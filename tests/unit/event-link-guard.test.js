@@ -1479,3 +1479,53 @@ describe("getFilenameFromUrl percent-encoded path", () => {
     ]);
   });
 });
+
+// Outlook opens every link in a mail with window.open and noopener. A link to
+// another site's sign-in page replaced the mail page (2026-11-23).
+describe("links in a web mail app", () => {
+  const loadOutlook = (userAgent) => {
+    const context = loadEventHelpers({ withTauri: true, userAgent });
+    runInNewContext(
+      fs.readFileSync(
+        path.join(process.cwd(), "src-tauri/src/inject/auth.js"),
+        "utf-8",
+      ),
+      context,
+    );
+    context.window.location.href = "https://outlook.live.com/mail/0/";
+    context.window.location.origin = "https://outlook.live.com";
+    context.window.location.pathname = "/mail/0/";
+    context.window.pakeConfig = { url: "https://outlook.live.com/" };
+    runDomReady(context);
+    return context;
+  };
+
+  it.each([
+    ["macOS", "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_5)"],
+    ["Windows", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"],
+  ])("opens another site's sign-in page in the browser on %s", (_os, ua) => {
+    const fresh = loadOutlook(ua);
+    const result = fresh.window.open(
+      "https://github.com/login",
+      "_blank",
+      "noopener noreferrer",
+    );
+    expect(result).toBeNull();
+    expect(fresh.window.location.href).toBe("https://outlook.live.com/mail/0/");
+    expect(
+      fresh.invokeCalls.filter(([command]) => command === "plugin:shell|open"),
+    ).toEqual([["plugin:shell|open", { path: "https://github.com/login" }]]);
+  });
+
+  it("keeps a sign-in request with an OAuth parameter in the app", () => {
+    const context = loadOutlook("Mozilla/5.0 (Macintosh; Intel Mac OS X 15_5)");
+    const url = "https://github.com/login/oauth/authorize?client_id=1";
+    context.window.open(url, "_blank", "noopener noreferrer");
+    expect(context.window.location.href).toBe(url);
+    expect(
+      context.invokeCalls.filter(
+        ([command]) => command === "plugin:shell|open",
+      ),
+    ).toEqual([]);
+  });
+});
