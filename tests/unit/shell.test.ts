@@ -117,6 +117,18 @@ describe('structured process execution', () => {
     'a failed Windows build whose taskkill exits %i keeps the workspace %i times',
     async (taskkillExit, kept) => {
       const actual = await vi.importActual<typeof import('execa')>('execa');
+      const platform = Object.getOwnPropertyDescriptor(process, 'platform')!;
+      // execa resolves the executable for the platform it reads at spawn time,
+      // so the real child starts under the host's platform and only Pake's own
+      // code sees win32.
+      const spawnOnHost = (file: string, rest: any[]) => {
+        Object.defineProperty(process, 'platform', platform);
+        try {
+          return (actual.execa as any)(file, ...rest);
+        } finally {
+          Object.defineProperty(process, 'platform', { value: 'win32' });
+        }
+      };
       vi.mocked(execa).mockImplementation(((file: string, ...rest: any[]) =>
         file === 'taskkill'
           ? Promise.reject(
@@ -124,8 +136,7 @@ describe('structured process execution', () => {
                 exitCode: taskkillExit,
               }),
             )
-          : (actual.execa as any)(file, ...rest)) as any);
-      const platform = Object.getOwnPropertyDescriptor(process, 'platform')!;
+          : spawnOnHost(file, rest)) as any);
       Object.defineProperty(process, 'platform', { value: 'win32' });
       const endCancellation = beginBuildCancellation();
       try {

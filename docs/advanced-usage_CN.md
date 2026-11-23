@@ -175,7 +175,7 @@ pake https://github.com --name "GitHub Work" --identifier com.example.github.wor
 
 ### 前置条件
 
-- Node.js ≥22（推荐 LTS，最低 ≥20.9.0）
+- Node.js ≥22.12.0
 - Rust ≥1.85.0（推荐稳定版）
 
 #### 平台特定要求

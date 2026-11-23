@@ -457,14 +457,12 @@ export async function mergeIcons(
         try {
           await fsExtra.copy(resolvedIconPath, iconPath);
         } catch (error) {
-          if (
-            !(
-              error instanceof Error &&
-              error.message.includes(
-                'Source and destination must not be the same',
-              )
+          if (!(
+            error instanceof Error &&
+            error.message.includes(
+              'Source and destination must not be the same',
             )
-          ) {
+          )) {
             throw error;
           }
         }

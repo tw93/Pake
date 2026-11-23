@@ -65,7 +65,7 @@ rustc --version
 A development environment needs:
 
 - Rust ≥1.85.0 (check with `rustc --version`)
-- Node.js ≥20.9.0 (check with `node --version`)
+- Node.js ≥22.12.0 (check with `node --version`)
 
 See [Prerequisites](advanced-usage.md#prerequisites) for the full list.
 

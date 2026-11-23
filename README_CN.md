@@ -210,7 +210,7 @@ codex plugin add pake@pake
 
 ## 定制开发
 
-需要 Rust `>=1.85` 和 Node `>=22`（推荐 LTS，较旧的 `>=20.9` 也可使用），详细安装指南参考 [Tauri 文档](https://v2.tauri.app/start/prerequisites/)，不熟悉开发环境的话可以直接使用命令行工具。
+需要 Rust `>=1.85` 和 Node `>=22.12`，详细安装指南参考 [Tauri 文档](https://v2.tauri.app/start/prerequisites/)，不熟悉开发环境的话可以直接使用命令行工具。
 
 ```bash
 # 安装依赖

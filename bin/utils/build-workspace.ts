@@ -8,8 +8,7 @@ import { PakeError } from './error';
 import { hasReadyTauriCli } from './tauri-cli';
 
 let cancellation:
-  | { controller: AbortController; unsafeCleanup?: string }
-  | undefined;
+  { controller: AbortController; unsafeCleanup?: string } | undefined;
 
 export function beginBuildCancellation(): () => void {
   const scope = { controller: new AbortController() };

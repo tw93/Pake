@@ -10,12 +10,13 @@
     "strict": true,
     "skipLibCheck": true,
     "noImplicitAny": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "sourceMap": true,
     "outDir": "dist",
-    "baseUrl": ".",
+    "rootDir": ".",
     "paths": {
-      "@/*": ["bin/*"]
+      "@/*": ["./bin/*"],
+      "psl": ["./node_modules/psl/types/index.d.ts"]
     }
   },
   "include": ["bin/**/*"]

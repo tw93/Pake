@@ -209,7 +209,7 @@ Use Pake (npm i -g pake-cli) to package webpages as desktop apps. Read https://u
 
 ## Development
 
-Requires Rust `>=1.85` and Node `>=22` (recommended LTS; `>=20.9` also works), see the [Tauri documentation](https://v2.tauri.app/start/prerequisites/) for setup. If you are new to this toolchain, the CLI is the easier path.
+Requires Rust `>=1.85` and Node `>=22.12`, see the [Tauri documentation](https://v2.tauri.app/start/prerequisites/) for setup. If you are new to this toolchain, the CLI is the easier path.
 
 ```bash
 # Install dependencies

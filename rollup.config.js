@@ -54,7 +54,7 @@ export default {
       compilerOptions: {
         target: "es2020",
         module: "esnext",
-        moduleResolution: "node",
+        moduleResolution: "bundler",
         esModuleInterop: true,
         allowSyntheticDefaultImports: true,
       },

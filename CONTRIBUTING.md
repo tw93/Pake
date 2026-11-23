@@ -10,7 +10,7 @@ All development happens directly on `main`. Submit pull requests to `main`.
 
 ### Prerequisites
 
-- Node.js ≥22.0.0 (recommended LTS, older versions ≥20.9.0 may work)
+- Node.js ≥22.12.0
 - Rust ≥1.85.0 (required for edition2024 support in dependencies)
 - Platform-specific build tools:
   - **macOS**: Xcode Command Line Tools (`xcode-select --install`)

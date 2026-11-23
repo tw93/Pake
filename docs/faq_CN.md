@@ -65,7 +65,7 @@ rustc --version
 设置开发环境时需要：
 
 - Rust ≥1.85.0（使用 `rustc --version` 检查）
-- Node.js ≥20.9.0（使用 `node --version` 检查）
+- Node.js ≥22.12.0（使用 `node --version` 检查）
 
 完整的前置条件见[开发工作流](advanced-usage_CN.md#前置条件)。
 

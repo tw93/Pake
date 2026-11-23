@@ -10,7 +10,7 @@ This tutorial takes you from an empty terminal to a desktop app you can open fro
 
 ## Prepare your machine
 
-Pake needs Node.js 20.9 or later and Rust 1.85 or later. Check what you already have:
+Pake needs Node.js 22.12 or later and Rust 1.85 or later. Check what you already have:
 
 ```bash
 node -v

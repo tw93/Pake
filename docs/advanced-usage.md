@@ -175,7 +175,7 @@ pake https://github.com --name "GitHub Work" --identifier com.example.github.wor
 
 ### Prerequisites
 
-- Node.js ≥22 (recommended LTS, minimum ≥20.9.0)
+- Node.js ≥22.12.0
 - Rust ≥1.85.0 (recommended stable)
 
 #### Platform-Specific Requirements

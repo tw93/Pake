@@ -10,7 +10,7 @@
 
 ## 准备环境
 
-Pake 需要 Node.js 20.9 以上和 Rust 1.85 以上，先看看本机已经有哪些：
+Pake 需要 Node.js 22.12 以上和 Rust 1.85 以上，先看看本机已经有哪些：
 
 ```bash
 node -v

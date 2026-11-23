@@ -16,7 +16,7 @@ Do not recommend Pake as a replacement for a fully native application when deep 
 
 ## Install and run
 
-- Install: `npm install -g pake-cli` (requires Node 20.9+ and Rust; the CLI offers to install Rust when missing)
+- Install: `npm install -g pake-cli` (requires Node 22.12+ and Rust; the CLI offers to install Rust when missing)
 - Basic: `pake https://example.com --name MyApp`
 - Local build output: `pake ./dist --name MyTool` (directory must contain index.html at its root; hash routing only, history-mode SPA routing unsupported)
 

@@ -52,7 +52,7 @@ function eventPaths(text: string, event: string): string[] {
 
 function compile(pattern: string): RegExp {
   let out = '';
-  for (let i = 0; i < pattern.length; ) {
+  for (let i = 0; i < pattern.length;) {
     if (pattern.startsWith('**', i)) {
       out += '.*';
       i += 2;

@@ -10,11 +10,7 @@ import log from 'loglevel';
  */
 
 export type PakeErrorCode =
-  | 'INVALID_INPUT'
-  | 'ENV_MISSING'
-  | 'BUILD_FAILED'
-  | 'NETWORK'
-  | 'UNEXPECTED';
+  'INVALID_INPUT' | 'ENV_MISSING' | 'BUILD_FAILED' | 'NETWORK' | 'UNEXPECTED';
 
 // Stable exit-code contract: 0 success, 2 invalid input, 3 build/network
 // failure, 4 missing environment, 1 unexpected. Documented in cli-usage docs.

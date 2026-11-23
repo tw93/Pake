@@ -36,7 +36,7 @@ source ~/.bashrc
 
 **前置条件：**
 
-- Node.js ≥20.9.0
+- Node.js ≥22.12.0
 - Rust ≥1.85.0（缺失时会提示安装，非交互或 `--json` 模式下直接报 `ENV_MISSING` 错误）
 - **macOS/Linux**：`curl`、`wget`、`file` 和 `tar`（用于依赖管理）
 

@@ -36,7 +36,7 @@ source ~/.bashrc
 
 **Prerequisites:**
 
-- Node.js ≥20.9.0
+- Node.js ≥22.12.0
 - Rust ≥1.85.0 (prompts to install if missing; non-interactive and `--json` runs fail with `ENV_MISSING` instead)
 - **macOS/Linux**: `curl`, `wget`, `file` and `tar` used for dependency management
 
