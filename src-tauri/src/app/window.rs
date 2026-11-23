@@ -322,6 +322,29 @@ mod popup_tests {
     }
 
     #[test]
+    fn a_sign_in_path_on_another_site_needs_a_sign_in_request() {
+        // Outlook opens every link in a mail with window.open. A link to
+        // another site's /login replaced the mail page, because any sign-in
+        // path on any site counted as the app's own sign-in. The behaviour is
+        // tested in tests/unit/auth-sso-patterns.test.js; this keeps the gate.
+        let script = include_str!("../inject/auth.js").replace("\r\n", "\n");
+        assert!(script.contains(
+            "const isMatch = providerHost || (signInPath && signsInToThisSite(urlObj));"
+        ));
+        for param in [
+            "\"client_id\",",
+            "\"redirect_uri\",",
+            "\"samlrequest\",",
+            "\"wreply\",",
+        ] {
+            assert!(script.contains(param), "{param} marks a sign-in request");
+        }
+        // A vendor's own website is not a tenant's sign-in.
+        assert!(script.contains("/^(?!www\\.)[a-z0-9-]+\\.okta\\.com$/,"));
+        assert!(!script.contains("/(^|\\.)okta\\.com$/"));
+    }
+
+    #[test]
     fn a_new_tab_link_without_an_address_never_bubbles_as_blank() {
         // Douyin's episode covers have no href when the click begins and get
         // "undefined" from the page's own handler during it. The click guard
