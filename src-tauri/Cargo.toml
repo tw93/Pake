@@ -15,15 +15,15 @@ crate-type = ["staticlib", "cdylib", "lib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "2.7.5", features = [] }
+tauri-build = { version = "2.7.6", features = [] }
 
 [dependencies]
 serde_json = "1.0.154"
 serde = { version = "1.0.229", features = ["derive"] }
 # Passkeys (src/app/passkey): base64url, the client data hash, registrable domains.
-base64 = "0.22.1"
-sha2 = "0.10.9"
-psl = "2.1.257"
+base64 = "0.23.1"
+sha2 = "0.11.1"
+psl = "2.1.261"
 tokio = { version = "1.54.1", features = ["time", "fs"] }
 # Content blocking (feature `content-blocking`): Brave's filter engine, MPL-2.0.
 # Without single-thread its Engine is Send + Sync for the WebView2 handler.
@@ -33,7 +33,7 @@ adblock = { version = "0.13.6", default-features = false, features = [
   "full-regex-handling",
 ], optional = true }
 flate2 = { version = "1.1.11", optional = true }
-tauri = { version = "2.12.6", features = [
+tauri = { version = "2.12.7", features = [
   "tray-icon",
   "image-ico",
   "image-png",
@@ -100,7 +100,7 @@ webkit2gtk = { version = "=2.0.2", features = ["v2_40"] }
 gtk = "0.18"
 # Reads the freedesktop color-scheme from the settings portal. Same version
 # and features that tauri-plugin-opener and single-instance already lock.
-zbus = "5.14"
+zbus = "6.5"
 # WebKitGTK's content filter store, which the safe webkit2gtk crate leaves out.
 webkit2gtk-sys = { version = "=2.0.2", features = ["v2_40"], optional = true }
 
