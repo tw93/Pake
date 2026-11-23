@@ -1297,7 +1297,12 @@ fn build_window(
     #[cfg(target_os = "windows")]
     if let Some(directory) = &config.runtime_extensions {
         if label == "pake" {
-            crate::app::extensions::install(&window, directory.clone(), extension_target)?;
+            crate::app::extensions::install(
+                &window,
+                directory.clone(),
+                extension_target,
+                window_config.incognito,
+            )?;
         }
     }
 

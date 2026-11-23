@@ -4,6 +4,7 @@
 //! "Tab not found" when there are none. Pake has no tabs, so every webview it
 //! builds is reported as one tab of a single window.
 
+use super::settings::{self, Action, Mode};
 use super::{installed, unpacked, Installed};
 use block2::RcBlock;
 use objc2::rc::{Allocated, Retained, Weak};
@@ -21,7 +22,7 @@ use objc2_web_kit::{
 };
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::ptr::NonNull;
 use std::time::Duration;
 
@@ -49,6 +50,12 @@ struct Host {
     contexts: HashMap<String, Retained<WKWebExtensionContext>>,
     /// The windows showing an extension's pages, kept so a second ask raises one.
     pages: HashMap<String, Retained<AnyObject>>,
+    directory: PathBuf,
+    incognito: bool,
+    /// Pake's own page of each extension whose settings an app may carry,
+    /// open out of sight (settings.rs).
+    settings: HashMap<String, (Retained<AnyObject>, settings::Page)>,
+    settings_started: bool,
 }
 
 thread_local! {
@@ -427,6 +434,10 @@ fn start(mtm: MainThreadMarker, directory: &Path, incognito: bool) -> Option<Hos
         listed: installed(directory),
         contexts: HashMap::new(),
         pages: HashMap::new(),
+        directory: directory.to_path_buf(),
+        incognito,
+        settings: HashMap::new(),
+        settings_started: false,
     })
 }
 
@@ -445,10 +456,207 @@ fn loaded(name: &str, extension: Option<Retained<WKWebExtension>>, reason: &str)
         host.pending = host.pending.saturating_sub(1);
         (host.pending == 0).then(|| std::mem::take(&mut host.callbacks))
     });
+    let ready = callbacks.is_some();
     callbacks
         .into_iter()
         .flatten()
         .for_each(|callback| callback());
+    if ready {
+        start_settings();
+    }
+}
+
+/// Opens Pake's page of every loaded extension that has one, out of sight,
+/// and asks each one every `settings::INTERVAL` whether there is news.
+fn start_settings() {
+    let Some(mtm) = MainThreadMarker::new() else {
+        return;
+    };
+    let started = HOST.with_borrow_mut(|host| {
+        let host = host.as_mut()?;
+        if std::mem::replace(&mut host.settings_started, true) {
+            return None;
+        }
+        for (name, context) in &host.contexts {
+            let Some(mode) = settings::mode(&host.directory.join(name), host.incognito) else {
+                continue;
+            };
+            let Some(webview) = (unsafe { settings_webview(mtm, context, mode) }) else {
+                continue;
+            };
+            let page = settings::Page::new(name.clone(), mode, host.incognito);
+            host.settings.insert(name.clone(), (webview, page));
+        }
+        (!host.settings.is_empty()).then_some(())
+    });
+    if started.is_none() {
+        return;
+    }
+    std::thread::spawn(|| {
+        while settings::polling() {
+            std::thread::sleep(settings::INTERVAL);
+            dispatch::Queue::main().exec_async(poll_settings);
+        }
+    });
+}
+
+/// A webview of the extension's own, in no window, showing Pake's page.
+unsafe fn settings_webview(
+    mtm: MainThreadMarker,
+    context: &WKWebExtensionContext,
+    mode: Mode,
+) -> Option<Retained<AnyObject>> {
+    let _ = mtm;
+    let configuration = context.webViewConfiguration()?;
+    let frame = NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(1.0, 1.0));
+    let webview: Allocated<AnyObject> = msg_send![class!(WKWebView), alloc];
+    let webview: Retained<AnyObject> =
+        msg_send![webview, initWithFrame: frame, configuration: &*configuration];
+    load_settings_page(&webview, context, mode);
+    Some(webview)
+}
+
+unsafe fn load_settings_page(webview: &AnyObject, context: &WKWebExtensionContext, mode: Mode) {
+    let Some(url) = NSURL::URLWithString_relativeToURL(
+        &NSString::from_str(&settings::page_path(mode)),
+        Some(&context.baseURL()),
+    ) else {
+        return;
+    };
+    let request: Retained<AnyObject> = msg_send![class!(NSURLRequest), requestWithURL: &*url];
+    let _: *mut AnyObject = msg_send![webview, loadRequest: &*request];
+}
+
+/// Runs `script` in `webview` and hands its result, as text, to `done`.
+fn evaluate(webview: &AnyObject, script: &str, done: impl Fn(String) + 'static) {
+    let block = RcBlock::new(move |result: *mut AnyObject, _error: *mut NSError| {
+        let text = unsafe { result.as_ref() }
+            .and_then(|result| result.downcast_ref::<NSString>())
+            .map(|text| text.to_string())
+            .unwrap_or_default();
+        done(text);
+    });
+    unsafe {
+        let _: () = msg_send![
+            webview,
+            evaluateJavaScript: &*NSString::from_str(script),
+            completionHandler: &*block
+        ];
+    }
+}
+
+fn settings_webview_of(name: &str) -> Option<Retained<AnyObject>> {
+    HOST.with_borrow(|host| Some(host.as_ref()?.settings.get(name)?.0.clone()))
+}
+
+fn poll_settings() {
+    let names: Vec<String> = HOST.with_borrow(|host| {
+        host.as_ref()
+            .map(|host| host.settings.keys().cloned().collect())
+            .unwrap_or_default()
+    });
+    for name in names {
+        let Some(webview) = settings_webview_of(&name) else {
+            continue;
+        };
+        evaluate(&webview, settings::PROBE_SCRIPT, move |answer| {
+            settings_answered(&name, &answer)
+        });
+    }
+}
+
+fn settings_answered(name: &str, answer: &str) {
+    let action = HOST.with_borrow_mut(|host| {
+        let (_, page) = host.as_mut()?.settings.get_mut(name)?;
+        Some(page.next(answer))
+    });
+    let Some(webview) = settings_webview_of(name) else {
+        return;
+    };
+    match action {
+        Some(Action::ReadSnapshot) => {
+            let name = name.to_owned();
+            evaluate(&webview, settings::SNAPSHOT_SCRIPT, move |snapshot| {
+                HOST.with_borrow_mut(|host| {
+                    if let Some((_, page)) =
+                        host.as_mut().and_then(|host| host.settings.get_mut(&name))
+                    {
+                        page.save(&snapshot);
+                    }
+                });
+            });
+        }
+        Some(Action::Watch) => {
+            HOST.with_borrow(|host| {
+                if let Some(context) = host.as_ref().and_then(|host| host.contexts.get(name)) {
+                    unsafe { load_settings_page(&webview, context, Mode::Watch) };
+                }
+            });
+        }
+        Some(Action::Close) => HOST.with_borrow_mut(|host| {
+            if let Some(host) = host.as_mut() {
+                host.settings.remove(name);
+                if host.settings.is_empty() {
+                    settings::stop_polling();
+                }
+            }
+        }),
+        Some(Action::Restart) => {
+            evaluate(&webview, settings::RESTART_SCRIPT, |_| {});
+            let name = name.to_owned();
+            std::thread::spawn(move || {
+                std::thread::sleep(settings::RESTART_DELAY);
+                dispatch::Queue::main().exec_async(move || settings_restarted(&name));
+            });
+        }
+        _ => {}
+    }
+}
+
+/// The extension has its carried settings and has restarted: Pake's page
+/// loads again to follow it, and every page of the app loads again to get it.
+fn settings_restarted(name: &str) {
+    HOST.with_borrow_mut(|host| {
+        let Some(host) = host.as_mut() else {
+            return;
+        };
+        let watch = match host.settings.get_mut(name) {
+            Some((_, page)) => {
+                page.restarted();
+                page.mode == Mode::Watch
+            }
+            None => return,
+        };
+        match (watch, host.contexts.get(name), host.settings.get(name)) {
+            (true, Some(context), Some((webview, _))) => unsafe {
+                load_settings_page(webview, context, Mode::Watch)
+            },
+            _ => {
+                host.settings.remove(name);
+            }
+        }
+        if host.settings.is_empty() {
+            settings::stop_polling();
+        }
+    });
+    // WebKit says when a click's navigation is under way before its page shows, which the
+    // page itself cannot see: such a window gets the script that leaves it to arrive.
+    for (_, window) in settings::own_windows() {
+        let _ = window.with_webview(|webview| unsafe {
+            let view = webview.inner() as *const AnyObject;
+            if view.is_null() {
+                return;
+            }
+            let view = &*view;
+            let loading: bool = msg_send![view, isLoading];
+            let script = if loading {
+                settings::NAVIGATING_RELOAD_SCRIPT
+            } else {
+                settings::RELOAD_SCRIPT
+            };
+            evaluate(view, script, |_| {});
+        });
+    }
 }
 
 fn load(

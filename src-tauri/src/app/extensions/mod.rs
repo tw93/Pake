@@ -6,6 +6,9 @@
 
 use std::path::{Path, PathBuf};
 
+#[cfg_attr(not(any(target_os = "macos", target_os = "windows")), allow(dead_code))]
+pub mod settings;
+
 #[cfg(target_os = "macos")]
 mod macos;
 #[cfg(target_os = "macos")]

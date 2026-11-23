@@ -3,9 +3,10 @@
 //! So the first window waits blank until every folder has been added, then
 //! opens its page.
 
+use super::settings::{self, Action, Mode};
 use super::{installed, requested_settings, unpacked};
 use crate::app::window::MultiWindowState;
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -14,11 +15,14 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tauri::{AppHandle, Manager, Url, WebviewWindow};
 use webview2_com::Microsoft::Web::WebView2::Win32::{
-    ICoreWebView2, ICoreWebView2BrowserExtension, ICoreWebView2Profile7, ICoreWebView2_13,
+    ICoreWebView2, ICoreWebView2BrowserExtension, ICoreWebView2Controller,
+    ICoreWebView2Environment10, ICoreWebView2Profile, ICoreWebView2Profile7, ICoreWebView2_13,
+    ICoreWebView2_2,
 };
 use webview2_com::{
-    take_pwstr, BrowserExtensionRemoveCompletedHandler, ProfileAddBrowserExtensionCompletedHandler,
-    ProfileGetBrowserExtensionsCompletedHandler,
+    take_pwstr, BrowserExtensionRemoveCompletedHandler,
+    CreateCoreWebView2ControllerCompletedHandler, ExecuteScriptCompletedHandler,
+    ProfileAddBrowserExtensionCompletedHandler, ProfileGetBrowserExtensionsCompletedHandler,
 };
 use windows_core::{Interface, HSTRING, PWSTR};
 
@@ -27,6 +31,25 @@ static ADDED: Mutex<Option<HashMap<String, String>>> = Mutex::new(None);
 /// Set once every extension is settled; a page asked for earlier waits in `ASKED`.
 static READY: AtomicBool = AtomicBool::new(false);
 static ASKED: Mutex<Option<String>> = Mutex::new(None);
+
+/// Pake's own page of each extension whose settings an app may carry, in a
+/// webview of no window of its own (settings.rs). WebView2 objects stay on the
+/// thread that made them, the event loop's.
+struct StorePage {
+    controller: ICoreWebView2Controller,
+    core: ICoreWebView2,
+    /// Where the extension's pages live, `chrome-extension://<id>/`.
+    base: String,
+    page: settings::Page,
+}
+
+thread_local! {
+    /// A slot goes empty once its page is closed; the others keep their place, which the callbacks name.
+    static STORE_PAGES: RefCell<Vec<Option<StorePage>>> = const { RefCell::new(Vec::new()) };
+    /// Pages asked for whose creation has not answered yet, so polling does not stop before
+    /// they exist.
+    static PENDING_PAGES: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
+}
 
 /// A first page never waits longer than this for the extensions to be added.
 const READY_TIMEOUT: Duration = Duration::from_secs(5);
@@ -37,6 +60,7 @@ pub fn install(
     window: &WebviewWindow,
     directory: PathBuf,
     target: Option<Url>,
+    incognito: bool,
 ) -> tauri::Result<()> {
     let opened = Arc::new(AtomicBool::new(target.is_none()));
     if let Some(target) = target.clone() {
@@ -73,6 +97,8 @@ pub fn install(
             target,
             opened,
             app,
+            directory: directory.clone(),
+            incognito,
         });
         let profile = unsafe {
             core.cast::<ICoreWebView2_13>()
@@ -160,6 +186,8 @@ struct Done {
     target: Option<Url>,
     opened: Arc<AtomicBool>,
     app: AppHandle,
+    directory: PathBuf,
+    incognito: bool,
 }
 
 impl Done {
@@ -174,7 +202,258 @@ impl Done {
         if let Some(id) = asked {
             open_page(&self.app, &id);
         }
+        start_settings(&self.app, &self.core, &self.directory, self.incognito);
     }
+}
+
+/// Opens Pake's page of every added extension that has one, out of sight, and
+/// asks each one every `settings::INTERVAL` whether there is news.
+fn start_settings(
+    app: &AppHandle,
+    core: &ICoreWebView2,
+    directory: &std::path::Path,
+    incognito: bool,
+) {
+    // The pages need a parent window, never shown in it: the app's own.
+    let Some(Ok(hwnd)) = app.get_webview_window("pake").map(|window| window.hwnd()) else {
+        return;
+    };
+    let added: HashMap<String, String> = ADDED
+        .lock()
+        .ok()
+        .and_then(|added| added.clone())
+        .unwrap_or_default();
+    let wanted: Vec<(String, String, Mode)> = unpacked(directory)
+        .iter()
+        .filter_map(|folder| {
+            let name = settings::folder_name(folder);
+            let mode = settings::mode(folder, incognito)?;
+            let id = added.get(&name)?.clone();
+            Some((name, format!("chrome-extension://{id}/"), mode))
+        })
+        .collect();
+    if wanted.is_empty() {
+        return;
+    }
+    let made = (|| unsafe {
+        let environment = core
+            .cast::<ICoreWebView2_2>()?
+            .Environment()?
+            .cast::<ICoreWebView2Environment10>()?;
+        let profile: ICoreWebView2Profile = core.cast::<ICoreWebView2_13>()?.Profile()?;
+        let mut profile_name = PWSTR::null();
+        profile.ProfileName(&mut profile_name)?;
+        let mut private = windows_core::BOOL::default();
+        profile.IsInPrivateModeEnabled(&mut private)?;
+        let options = environment.CreateCoreWebView2ControllerOptions()?;
+        options.SetProfileName(&HSTRING::from(take_pwstr(profile_name)))?;
+        options.SetIsInPrivateModeEnabled(private.as_bool())?;
+        PENDING_PAGES.set(wanted.len());
+        for (name, base, mode) in wanted {
+            let incognito_page = incognito;
+            let label = name.clone();
+            let asked = environment.CreateCoreWebView2ControllerWithOptions(
+                hwnd,
+                &options,
+                &CreateCoreWebView2ControllerCompletedHandler::create(Box::new(
+                    move |result, controller| {
+                        PENDING_PAGES.set(PENDING_PAGES.get().saturating_sub(1));
+                        let Some(controller) = controller.filter(|_| result.is_ok()) else {
+                            eprintln!("[Pake] Could not open the settings page of {name}");
+                            stop_when_done();
+                            return Ok(());
+                        };
+                        let opened = (|| {
+                            controller.SetIsVisible(false)?;
+                            controller.SetBounds(Default::default())?;
+                            let core = controller.CoreWebView2()?;
+                            core.Navigate(&HSTRING::from(format!(
+                                "{base}{}",
+                                settings::page_path(mode)
+                            )))?;
+                            windows_core::Result::Ok(core)
+                        })();
+                        match opened {
+                            Ok(core) => {
+                                let page = settings::Page::new(name.clone(), mode, incognito_page);
+                                STORE_PAGES.with_borrow_mut(|pages| {
+                                    pages.push(Some(StorePage {
+                                        controller,
+                                        core,
+                                        base: base.clone(),
+                                        page,
+                                    }))
+                                });
+                            }
+                            Err(error) => {
+                                eprintln!(
+                                    "[Pake] Could not open the settings page of {name}: {error}"
+                                );
+                                let _ = controller.Close();
+                                stop_when_done();
+                            }
+                        }
+                        Ok(())
+                    },
+                )),
+            );
+            if let Err(error) = asked {
+                eprintln!("[Pake] Could not open the settings page of {label}: {error}");
+                PENDING_PAGES.set(PENDING_PAGES.get().saturating_sub(1));
+            }
+        }
+        windows_core::Result::Ok(())
+    })();
+    if let Err(error) = made {
+        eprintln!("[Pake] Could not open the extensions' settings pages: {error}");
+        PENDING_PAGES.set(0);
+        settings::stop_polling();
+        return;
+    }
+    stop_when_done();
+    if !settings::polling() {
+        return;
+    }
+    let app = app.clone();
+    std::thread::spawn(move || {
+        while settings::polling() {
+            std::thread::sleep(settings::INTERVAL);
+            let poller = app.clone();
+            if app
+                .run_on_main_thread(move || poll_settings(&poller))
+                .is_err()
+            {
+                return;
+            }
+        }
+    });
+}
+
+/// Runs `script` in `core` and hands its result, as text, to `done`.
+fn evaluate(core: &ICoreWebView2, script: &str, done: impl FnOnce(String) + 'static) {
+    let result = unsafe {
+        core.ExecuteScript(
+            &HSTRING::from(script),
+            &ExecuteScriptCompletedHandler::create(Box::new(move |result, json| {
+                let text = match (result, serde_json::from_str::<serde_json::Value>(&json)) {
+                    (Ok(()), Ok(serde_json::Value::String(text))) => text,
+                    _ => String::new(),
+                };
+                done(text);
+                Ok(())
+            })),
+        )
+    };
+    if let Err(error) = result {
+        eprintln!("[Pake] Could not ask a settings page: {error}");
+    }
+}
+
+fn poll_settings(app: &AppHandle) {
+    let cores: Vec<(usize, ICoreWebView2)> = STORE_PAGES.with_borrow(|pages| {
+        pages
+            .iter()
+            .enumerate()
+            .filter_map(|(index, page)| Some((index, page.as_ref()?.core.clone())))
+            .collect()
+    });
+    for (index, core) in cores {
+        let app = app.clone();
+        evaluate(&core, settings::PROBE_SCRIPT, move |answer| {
+            settings_answered(&app, index, &answer)
+        });
+    }
+}
+
+fn settings_answered(app: &AppHandle, index: usize, answer: &str) {
+    let Some((action, core)) = STORE_PAGES.with_borrow_mut(|pages| {
+        let page = pages.get_mut(index)?.as_mut()?;
+        Some((page.page.next(answer), page.core.clone()))
+    }) else {
+        return;
+    };
+    match action {
+        Action::ReadSnapshot => evaluate(&core, settings::SNAPSHOT_SCRIPT, move |snapshot| {
+            STORE_PAGES.with_borrow_mut(|pages| {
+                if let Some(Some(page)) = pages.get_mut(index) {
+                    page.page.save(&snapshot);
+                }
+            });
+        }),
+        Action::Restart => {
+            evaluate(&core, settings::RESTART_SCRIPT, |_| {});
+            let app = app.clone();
+            std::thread::spawn(move || {
+                std::thread::sleep(settings::RESTART_DELAY);
+                let _ = app.run_on_main_thread(move || settings_restarted(index));
+            });
+        }
+        Action::Close => {
+            // Taken out first: Close runs after the list is no longer borrowed.
+            let closed =
+                STORE_PAGES.with_borrow_mut(|pages| pages.get_mut(index).and_then(Option::take));
+            if let Some(page) = closed {
+                let _ = unsafe { page.controller.Close() };
+            }
+            stop_when_done();
+        }
+        Action::Watch => STORE_PAGES.with_borrow(|pages| {
+            if let Some(Some(page)) = pages.get(index) {
+                navigate(
+                    &page.core,
+                    &format!("{}{}", page.base, settings::page_path(Mode::Watch)),
+                );
+            }
+        }),
+        Action::Nothing => {}
+    }
+}
+
+/// Stops polling once no page is left and none is still being made.
+fn stop_when_done() {
+    let empty = STORE_PAGES.with_borrow(|pages| pages.iter().all(Option::is_none));
+    if empty && PENDING_PAGES.get() == 0 {
+        settings::stop_polling();
+    }
+}
+
+fn navigate(core: &ICoreWebView2, address: &str) {
+    if let Err(error) = unsafe { core.Navigate(&HSTRING::from(address)) } {
+        eprintln!("[Pake] Could not load a settings page: {error}");
+    }
+}
+
+/// The extension has its carried settings and has restarted: Pake's page
+/// loads again to follow it, and every page of the app loads again to get it.
+fn settings_restarted(index: usize) {
+    let closed = STORE_PAGES.with_borrow_mut(|pages| {
+        let slot = pages.get_mut(index)?;
+        let watching = match slot.as_mut() {
+            Some(page) => {
+                page.page.restarted();
+                page.page.mode == Mode::Watch
+            }
+            None => return None,
+        };
+        if watching {
+            if let Some(page) = slot.as_ref() {
+                navigate(
+                    &page.core,
+                    &format!("{}{}", page.base, settings::page_path(Mode::Watch)),
+                );
+            }
+            None
+        } else {
+            // A private window keeps nothing, so its page has nothing left to do.
+            slot.take()
+        }
+    });
+    // Closed after the list is no longer borrowed.
+    if let Some(page) = closed {
+        let _ = unsafe { page.controller.Close() };
+    }
+    stop_when_done();
+    settings::reload_windows();
 }
 
 fn open(core: &ICoreWebView2, target: Option<&Url>, opened: &AtomicBool) {
