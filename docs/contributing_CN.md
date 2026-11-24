@@ -22,7 +22,7 @@ pnpm test
 
 ## 推荐网站进精选
 
-Mac 和 Windows 版 Pake 里有一个精选，放的是适合做成桌面应用的网站。每个网站对应 [`gallery/apps`](https://github.com/tw93/Pake/tree/main/gallery/apps) 里一份很小的配方，谁都可以推荐：
+Mac、Windows 和 Linux 版 Pake 里有一个精选，放的是适合做成桌面应用的网站。每个网站对应 [`gallery/apps`](https://github.com/tw93/Pake/tree/main/gallery/apps) 里一份很小的配方，谁都可以推荐：
 
 1. 先用 Pake CLI 把网站打包出来用几天，登录一下，点开几个链接，下载一个文件，重启后看看是否还保持登录。
 2. 新增 `gallery/apps/<id>.json`，窗口参数只在确实解决了问题时才加，注入的 CSS 或 JavaScript 也只做最小的改动。

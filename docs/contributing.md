@@ -22,7 +22,7 @@ pnpm test
 
 ## Proposing a site for the gallery
 
-The Pake apps for Mac and Windows show a gallery of sites that work well as desktop apps. Each one is a small recipe in [`gallery/apps`](https://github.com/tw93/Pake/tree/main/gallery/apps), and anyone can propose one:
+The Pake apps for Mac, Windows and Linux show a gallery of sites that work well as desktop apps. Each one is a small recipe in [`gallery/apps`](https://github.com/tw93/Pake/tree/main/gallery/apps), and anyone can propose one:
 
 1. Package the site with the Pake CLI and use it for a few days: sign in, open links, download a file, and check that you are still signed in after a restart.
 2. Add `gallery/apps/<id>.json`. Leave the window options out unless one fixed a problem you saw, and keep injected CSS or JavaScript to the smallest change that fixes it.

@@ -572,7 +572,7 @@ This is different from `--multi-instance`:
 
 When enabled, relaunching an already running app opens a new window instead of only focusing the existing one.
 
-On macOS, additional windows opened with Cmd+N join the app's native tab group. `window.open` popups stay outside it. On macOS and Linux, sign-in popups other than Sign in with Apple open in the current window.
+On macOS, additional windows opened with Cmd+N join the app's native tab group. `window.open` popups stay outside it. On macOS and Windows, a sign-in popup with a size of its own, such as the Google button on TikTok, Notion and X or Sign in with Apple, opens as a separate window and closes once it has answered. A sign-in opened as a link, or as a `window.open` with no size, continues in the current window on macOS and Linux, and so does every sign-in popup on Linux.
 
 This can improve popup-based authentication flows, but it cannot bypass provider policy. Some providers, especially Google, may still reject sign-in inside embedded webviews.
 
@@ -606,7 +606,7 @@ pake ./my-app/index.html --name "my-app" --use-local-file
 
 #### [inject]
 
-Using `inject`, you can inject local absolute and relative path `css` and `js` files into the page you specify the `url` to customize it. For example, an adblock script that can be applied to any web page, or a `css` that optimizes the `UI` of a page, you can write it once to customize it. would only need to write the `app` once to generalize it to any other page.
+Using `inject`, you can inject local absolute and relative path `css` and `js` files into the page you specify the `url` to customize it. For example, an adblock script that works on any page, or `css` that tidies a page's UI: write it once and reuse it in every app you package.
 
 Supports both comma-separated and multiple option formats:
 
