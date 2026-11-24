@@ -176,7 +176,6 @@ impl PakeConfig {
     }
 
     /// The Dock icon goes only when the menu bar icon is there to open the app.
-    #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
     pub fn hides_dock_icon(&self) -> bool {
         self.windows[0].hide_dock_icon && self.show_system_tray()
     }

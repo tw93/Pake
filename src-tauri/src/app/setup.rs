@@ -53,6 +53,7 @@ pub fn set_system_tray(
     _init_fullscreen: bool,
     allow_multi_window: bool,
     startup_revealed: Arc<AtomicBool>,
+    left_click_toggles_window: bool,
 ) -> tauri::Result<()> {
     if !show_system_tray {
         app.remove_tray_by_id("pake-tray");
@@ -84,6 +85,10 @@ pub fn set_system_tray(
     let click_revealed = startup_revealed;
     let mut tray_builder = TrayIconBuilder::new()
         .menu(&menu)
+        // A menu-bar-only Mac app has no Dock icon, so its menu bar icon is the
+        // way back to the window: a left click toggles the window there, as it
+        // does on Windows, and the menu moves to a right click.
+        .show_menu_on_left_click(!left_click_toggles_window)
         .on_menu_event(move |app, event| match event.id().as_ref() {
             "tray_new_window" => {
                 open_additional_window_safe(app);

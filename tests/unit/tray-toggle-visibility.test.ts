@@ -24,6 +24,20 @@ describe('tray click toggle (#1343)', () => {
     expect(handler).toMatch(/button_state\s*==\s*MouseButtonState::Up/);
   });
 
+  it('gives a menu-bar-only Mac app the window on left click', () => {
+    // With no Dock icon the menu bar icon is the only way back to the window,
+    // so there the left click toggles it and the menu moves to a right click.
+    // Every other app keeps the menu on left click.
+    expect(setupSource).toMatch(
+      /\.show_menu_on_left_click\(!left_click_toggles_window\)/,
+    );
+    const libSource = fs.readFileSync(path.join(rustRoot, 'lib.rs'), 'utf8');
+    const call = libSource.slice(libSource.indexOf('set_system_tray('));
+    expect(call.slice(0, call.indexOf(')?;'))).toMatch(
+      /cfg!\(target_os = "macos"\) && pake_config\.hides_dock_icon\(\)/,
+    );
+  });
+
   it('treats a minimized window as not on screen', () => {
     // hide_on_close minimizes before hiding, and Windows keeps IsWindowVisible
     // true while a window is iconic. Without the is_minimized check the toggle

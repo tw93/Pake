@@ -510,6 +510,7 @@ pub fn run_app() {
                 init_fullscreen,
                 multi_window,
                 startup_window_revealed.clone(),
+                cfg!(target_os = "macos") && pake_config.hides_dock_icon(),
             )?;
             set_global_shortcut(
                 app.app_handle(),
