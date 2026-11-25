@@ -1,6 +1,6 @@
 {
   "id": "wechat",
-  "version": 2,
+  "version": 1,
   "name": {
     "en": "WeChat",
     "zh-Hans": "微信"
@@ -11,7 +11,6 @@
     "en": "WeChat on the web, signed in by scanning a QR code each time",
     "zh-Hans": "网页版微信，每次打开都要扫码登录"
   },
-  "inject_js": "wechat.js",
   "icon": "https://res.wx.qq.com/a/wx_fed/assets/res/OTE0YTAw.png",
   "window": {
     "width": 1000,
