@@ -662,7 +662,7 @@ fn build_window_with_label(
             })?;
             WebviewUrl::App(parsed)
         }
-        "local" => WebviewUrl::App(PathBuf::from(&window_config.url)),
+        "local" => WebviewUrl::App(crate::app::local_site::entry_path(&window_config.url)),
         other => {
             return Err(tauri::Error::Io(std::io::Error::new(
                 std::io::ErrorKind::InvalidInput,

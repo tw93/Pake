@@ -16,6 +16,18 @@ use tauri::{Assets, Runtime};
 /// `raw` as a path of plain names, or None when it is empty, absolute, or
 /// steps out with `..`. Asset keys arrive percent-decoded, so a request for
 /// `/%2e%2e/secret` reaches this as `../secret`.
+/// The entry page as the path a `WebviewUrl::App` joins onto the app's origin.
+/// That join reads `#` as the start of a fragment and `?` as a query, so
+/// `chart #1.html` would open `chart `; escaped here, they reach the asset
+/// key decoded, as a space does.
+pub fn entry_path(file: &str) -> PathBuf {
+    PathBuf::from(
+        file.replace('%', "%25")
+            .replace('#', "%23")
+            .replace('?', "%3F"),
+    )
+}
+
 pub fn relative_path(raw: &str) -> Option<PathBuf> {
     let mut path = PathBuf::new();
     for component in Path::new(raw.trim_start_matches(['/', '\\'])).components() {
@@ -120,6 +132,24 @@ mod tests {
             assert!(read(&site, "link.txt").is_none());
         }
         fs::remove_dir_all(base).unwrap();
+    }
+
+    #[test]
+    fn entry_path_escapes_what_a_url_join_would_cut() {
+        assert_eq!(entry_path("index.html"), PathBuf::from("index.html"));
+        assert_eq!(entry_path("a b/c.html"), PathBuf::from("a b/c.html"));
+        assert_eq!(
+            entry_path("chart #1?.html"),
+            PathBuf::from("chart %231%3F.html")
+        );
+        assert_eq!(entry_path("100%.html"), PathBuf::from("100%25.html"));
+        // The whole name stays in the path, each escape decoding back to its character.
+        let joined = tauri::Url::parse("tauri://localhost/")
+            .unwrap()
+            .join(entry_path("chart #1 100%.html").to_str().unwrap())
+            .unwrap();
+        assert_eq!(joined.fragment(), None);
+        assert_eq!(joined.path(), "/chart%20%231%20100%25.html");
     }
 
     #[test]
