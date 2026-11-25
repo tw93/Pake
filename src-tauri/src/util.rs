@@ -118,6 +118,7 @@ fn apply_runtime_override(
             .into_owned();
     }
     pake_config.runtime_extensions = runtime_extensions(dir);
+    pake_config.runtime_site = runtime_site(dir, &pake_config.windows[0])?;
     pake_config.runtime_app = true;
     tauri_config.identifier = app.identifier;
     tauri_config.product_name = Some(app.product_name);
@@ -136,6 +137,29 @@ fn runtime_extensions(dir: &Path) -> Option<PathBuf> {
         .filter_map(Result::ok)
         .any(|entry| entry.path().join("manifest.json").is_file())
         .then_some(directory)
+}
+
+/// `pake-runtime/site` for a window whose `url_type` is `local`, None for a
+/// web page. A local window's `url` names its entry file inside that folder, a
+/// plain relative path, and the folder must hold it.
+fn runtime_site(
+    dir: &Path,
+    window: &crate::app::config::WindowConfig,
+) -> Result<Option<PathBuf>, String> {
+    if window.url_type != "local" {
+        return Ok(None);
+    }
+    let site = dir.join("site");
+    let entry = crate::app::local_site::relative_path(&window.url).ok_or_else(|| {
+        format!(
+            "local url {:?} is not a path inside the site folder",
+            window.url
+        )
+    })?;
+    if !site.join(&entry).is_file() {
+        return Err(format!("{} has no {}", site.display(), entry.display()));
+    }
+    Ok(Some(site))
 }
 
 /// Same rule as the CLI's --identifier check, capped at the 128 characters an
@@ -938,6 +962,48 @@ mod tests {
         let (pake, tauri) = apply_runtime_override(pake, tauri, Some(&missing)).unwrap();
         assert!(!pake.runtime_app);
         assert_eq!(snapshot(&pake, &tauri), expected);
+        fs::remove_dir_all(dir.parent().unwrap()).unwrap();
+    }
+
+    #[test]
+    fn runtime_override_serves_a_local_window_from_its_site_folder() {
+        let mut runtime: serde_json::Value =
+            serde_json::from_str(include_str!("../pake.json")).unwrap();
+        runtime["windows"][0]["url_type"] = "local".into();
+        runtime["windows"][0]["url"] = "tool.html".into();
+        let dir = runtime_dir(&[
+            ("pake.json", &runtime.to_string()),
+            ("app.json", RUNTIME_APP),
+        ]);
+
+        // No site folder, or one without the entry file, is an error rather
+        // than a window showing the template's own assets.
+        let (pake, tauri) = compiled_configs();
+        let error = apply_runtime_override(pake, tauri, Some(&dir)).unwrap_err();
+        assert!(error.contains("tool.html"), "{error}");
+        fs::create_dir_all(dir.join("site")).unwrap();
+        let (pake, tauri) = compiled_configs();
+        assert!(apply_runtime_override(pake, tauri, Some(&dir)).is_err());
+
+        fs::write(dir.join("site/tool.html"), "<p>tool</p>").unwrap();
+        let (pake, tauri) = compiled_configs();
+        let (pake, _) = apply_runtime_override(pake, tauri, Some(&dir)).unwrap();
+        assert_eq!(pake.runtime_site, Some(dir.join("site")));
+        assert!(!pake.windows[0].remembers_last_url());
+
+        // The entry must stay inside the folder.
+        runtime["windows"][0]["url"] = "../app.json".into();
+        fs::write(dir.join("pake.json"), runtime.to_string()).unwrap();
+        let (pake, tauri) = compiled_configs();
+        assert!(apply_runtime_override(pake, tauri, Some(&dir)).is_err());
+
+        // A web window ignores a site folder.
+        runtime["windows"][0]["url_type"] = "web".into();
+        runtime["windows"][0]["url"] = "https://example.com".into();
+        fs::write(dir.join("pake.json"), runtime.to_string()).unwrap();
+        let (pake, tauri) = compiled_configs();
+        let (pake, _) = apply_runtime_override(pake, tauri, Some(&dir)).unwrap();
+        assert!(pake.runtime_site.is_none());
         fs::remove_dir_all(dir.parent().unwrap()).unwrap();
     }
 

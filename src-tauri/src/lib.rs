@@ -319,6 +319,10 @@ pub fn run_app() {
             context.package_info_mut().name = name.clone();
         }
     }
+    // A runtime app made from local files serves them from its own folder.
+    if let Some(site) = pake_config.runtime_site.clone() {
+        context.set_assets(Box::new(app::local_site::LocalSite::new(site)));
+    }
     let tauri_app = tauri::Builder::default();
     #[cfg(target_os = "macos")]
     let tauri_app = tauri_app.on_web_content_process_terminate(|webview| {

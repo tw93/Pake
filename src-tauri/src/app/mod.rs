@@ -13,6 +13,7 @@ pub mod extensions;
 #[cfg(target_os = "linux")]
 pub mod header_bar;
 pub mod invoke;
+pub mod local_site;
 #[cfg(target_os = "linux")]
 pub mod media_permission;
 #[cfg(target_os = "macos")]

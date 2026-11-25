@@ -164,6 +164,10 @@ pub struct PakeConfig {
     /// browser extension. macOS 15.4 and later and Windows load what is in it.
     #[serde(skip)]
     pub runtime_extensions: Option<std::path::PathBuf>,
+    /// The `site` folder of a runtime override whose window is `local`: the
+    /// app serves its pages from there instead of the template's own assets.
+    #[serde(skip)]
+    pub runtime_site: Option<std::path::PathBuf>,
     /// Set when a runtime override supplied the app identity, so per-app
     /// directories follow the identifier rather than the product name.
     #[serde(skip)]
