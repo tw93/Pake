@@ -49,7 +49,6 @@ describe("site styles", () => {
 
   it("loads a site's rules on its host and subdomains", () => {
     expect(injectedStyles("x.com").content).toContain("#react-root");
-    expect(injectedStyles("wx.qq.com").content).toContain(".copyright");
     expect(injectedStyles("music.youtube.com").immersive).toContain(
       "ytmusic-nav-bar",
     );

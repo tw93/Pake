@@ -458,13 +458,9 @@ Pake 可以自动转换普通图片，但提供正确的格式更可靠。Icon C
 
    macOS 上的 Pake 应用会把自己的通行密钥存在这台 Mac 的安全隔区里，登录时按一下指纹就行，没有 Touch ID 的 Mac 输入登录密码，需要 Apple 芯片或带 T2 芯片的 Intel Mac。这些通行密钥只在这个应用里用，iCloud 钥匙串和 iPhone 上已有的用不了，第一次先用其他方式登录，再到网站设置里添加一个通行密钥。用 `--incognito` 或 `--ignore-certificate-errors` 打包的应用不保存通行密钥，用手机扫码登录暂时还不支持。
 
-5. **微信 Web 版登录环境异常**
+5. **微信**
 
-   微信检测到 WebView 后会写入标记 Cookie，导致后续持续被拦截。打包时加 `--incognito` 可解决，代价是每次启动都需要重新扫码登录：
-
-   ```bash
-   pake https://wx.qq.com --name WeChat --incognito
-   ```
+   微信不允许用非官方客户端登录，用了可能被限制账号，比如几周内不能扫码登录新设备，所以 Pake 不再提供微信应用，也不要自己打包 wx.qq.com，用微信官方的电脑版就好。
 
 6. **Cloudflare 或人机验证一直循环**
 

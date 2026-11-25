@@ -460,13 +460,9 @@ This is usually due to web compatibility issues. Try:
 
    On macOS a Pake app keeps its own passkeys in the Mac's Secure Enclave and signs in with Touch ID, or with the login password on a Mac without it. They stay in that app on that Mac, so a passkey saved in iCloud Keychain or on an iPhone is not offered: sign in another way once, then add a passkey in the site's settings. This needs Apple silicon or an Intel Mac with a T2 chip. An app made with `--incognito` or `--ignore-certificate-errors` keeps none, and signing in by scanning a QR code with a phone is not supported yet.
 
-5. **WeChat Web login environment error**
+5. **WeChat**
 
-   WeChat detects the WebView and writes a flag cookie that blocks subsequent logins. Add `--incognito` when packaging to bypass it, at the cost of requiring a QR scan on every launch:
-
-   ```bash
-   pake https://wx.qq.com --name WeChat --incognito
-   ```
+   WeChat does not allow sign-in from unofficial clients and may restrict the account, for example blocking QR sign-in on new devices for weeks. Pake no longer ships a WeChat app; use the official WeChat desktop client rather than packaging wx.qq.com.
 
 6. **Cloudflare or bot-verification loops forever**
 

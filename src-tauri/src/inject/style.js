@@ -302,24 +302,6 @@ window.addEventListener("DOMContentLoaded", (_event) => {
       `,
     },
     {
-      hosts: ["wx.qq.com", "wx2.qq.com"],
-      content: `
-        .download_entry,
-        .lang, .copyright {
-          display: none !important;
-        }
-
-        .panel.give_me .nav_view {
-          top: 164px !important;
-        }
-      `,
-      immersive: `
-        .main > div > div.panel.give_me > div.header {
-          padding-top: 30px;
-        }
-      `,
-    },
-    {
       hosts: ["v.flomoapp.com"],
       content: `
         #page #footer-wrapper {

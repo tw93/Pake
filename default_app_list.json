@@ -1,14 +1,5 @@
 [
   {
-    "name": "wechat",
-    "title": "WeChat",
-    "name_zh": "微信",
-    "url": "https://wx.qq.com/",
-    "incognito": true,
-    "width": 1000,
-    "height": 720
-  },
-  {
     "name": "deepseek",
     "title": "DeepSeek",
     "name_zh": "DeepSeek",
