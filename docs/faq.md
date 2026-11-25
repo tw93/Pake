@@ -462,7 +462,7 @@ This is usually due to web compatibility issues. Try:
 
 5. **WeChat**
 
-   WeChat does not allow sign-in from unofficial clients and may restrict the account, for example blocking QR sign-in on new devices for weeks. Pake no longer ships a WeChat app; use the official WeChat desktop client rather than packaging wx.qq.com.
+   WeChat does not allow sign-in from unofficial clients and may restrict the account, for example blocking QR sign-in on new devices for about two weeks. Pake no longer ships a WeChat app; use the official WeChat desktop client rather than packaging wx.qq.com.
 
 6. **Cloudflare or bot-verification loops forever**
 
