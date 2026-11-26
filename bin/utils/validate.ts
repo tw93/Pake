@@ -70,6 +70,23 @@ export function validateDownloadDirInput(value: string): string {
   return value;
 }
 
+// The injected link policy compiles this with `new RegExp` and, when that
+// throws, only logs it and falls back to same-root-domain matching, so a typo
+// would ship an app that silently ignores the option.
+export function validateInternalUrlRegexInput(value: string): string {
+  if (value === '') return value;
+  try {
+    new RegExp(value);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new PakeError(`Invalid internal URL regex: ${detail}`, {
+      code: 'INVALID_INPUT',
+      hint: 'Pass a JavaScript regular expression to --internal-url-regex, or list domains with --safe-domain.',
+    });
+  }
+  return value;
+}
+
 const INJECT_EXTENSIONS = new Set(['.css', '.js']);
 
 // Shared by --inject and the config "inject" field, so a bad file fails before

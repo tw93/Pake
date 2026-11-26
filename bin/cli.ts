@@ -17,6 +17,7 @@ import {
   validateUrlInput,
   validateDownloadDirInput,
   validateInjectInput,
+  validateInternalUrlRegexInput,
 } from './utils/validate';
 import {
   ERROR_EXIT_CODES,
@@ -132,6 +133,7 @@ program.action(async (urlArg: string, options: PakeCliOptions) => {
     }
 
     validateDownloadDirInput(options.downloadDir);
+    validateInternalUrlRegexInput(options.internalUrlRegex);
     options.inject = validateInjectInput(options.inject);
 
     if (!url) {
